@@ -1,0 +1,118 @@
+/**
+ * App Layout
+ * Main application layout structure
+ */
+
+/* ============================================
+   App Container
+   ============================================ */
+
+#app-container {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr var(--toc-width);
+    grid-template-areas: "left-sidebar content right-sidebar";
+    min-height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+/* Ensure grid areas are properly defined */
+#left-sidebar {
+    grid-area: left-sidebar;
+}
+
+#content-area {
+    grid-area: content;
+}
+
+#right-sidebar {
+    grid-area: right-sidebar;
+}
+
+/* ============================================
+   Layout States
+   ============================================ */
+
+/* When left sidebar is hidden */
+#app-container.left-sidebar-hidden {
+    grid-template-columns: 0 1fr var(--toc-width);
+}
+
+/* When right sidebar is hidden */
+#app-container.right-sidebar-hidden {
+    grid-template-columns: var(--sidebar-width) 1fr 0;
+}
+
+/* When both sidebars are hidden */
+#app-container.left-sidebar-hidden.right-sidebar-hidden {
+    grid-template-columns: 0 1fr 0;
+}
+
+/* ============================================
+   Content Area
+   ============================================ */
+
+#content-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+/* ============================================
+   Responsive Grid
+   ============================================ */
+
+@media (max-width: 1280px) {
+    :root {
+        --sidebar-width: 280px;
+        --toc-width: 240px;
+    }
+}
+
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 250px;
+        --toc-width: 200px;
+    }
+    
+    #app-container {
+        grid-template-columns: var(--sidebar-width) 1fr var(--toc-width);
+    }
+}
+
+@media (max-width: 768px) {
+    #app-container {
+        grid-template-columns: 1fr;
+        grid-template-areas: "content";
+    }
+    
+    #left-sidebar,
+    #right-sidebar {
+        position: fixed;
+        top: var(--header-height);
+        bottom: 0;
+        z-index: var(--z-fixed);
+        width: 280px;
+        transform: translateX(0);
+        transition: transform var(--transition-normal);
+    }
+    
+    #left-sidebar {
+        left: 0;
+    }
+    
+    #right-sidebar {
+        right: 0;
+    }
+    
+    #left-sidebar.hidden {
+        transform: translateX(-100%);
+    }
+    
+    #right-sidebar.hidden {
+        transform: translateX(100%);
+    }
+}

@@ -1,0 +1,61 @@
+/**
+ * Scrollbar Styles
+ * Custom scrollbar appearance
+ */
+
+/* ============================================
+   Webkit Scrollbars
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 65, 0.4);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-green);
+    box-shadow: 0 0 10px var(--primary-green);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--bg-secondary);
+}
+
+/* ============================================
+   Firefox Scrollbars
+   ============================================ */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 65, 0.4) var(--bg-secondary);
+}
+
+/* ============================================
+   Custom Scrollbar Classes
+   ============================================ */
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

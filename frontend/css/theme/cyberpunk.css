@@ -1,0 +1,88 @@
+/**
+ * Cyberpunk Theme
+ * Neon green aesthetic with glitch effects and glass morphism
+ */
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes neon-pulse {
+    0%, 100% { 
+        text-shadow: 
+            0 0 5px var(--primary-green),
+            0 0 10px var(--primary-green),
+            0 0 20px var(--primary-green),
+            0 0 40px var(--primary-green);
+    }
+    50% { 
+        text-shadow: 
+            0 0 10px var(--primary-green),
+            0 0 20px var(--primary-green),
+            0 0 30px var(--primary-green),
+            0 0 50px var(--primary-green);
+    }
+}
+
+@keyframes neon-flicker {
+    0%, 100% { opacity: 1; }
+    33% { opacity: 0.8; }
+    66% { opacity: 0.9; }
+}
+
+@keyframes glitch {
+    0%, 100% {
+        transform: translate(0);
+        text-shadow: -2px 0 var(--error), 2px 0 var(--info);
+    }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Theme Effects
+   ============================================ */
+
+/* Neon text effects */
+.neon-text {
+    color: var(--primary-green);
+    text-shadow: 0 0 10px var(--primary-green);
+    animation: neon-pulse 2s ease-in-out infinite;
+}
+
+.neon-text-static {
+    color: var(--primary-green);
+    text-shadow: 0 0 10px var(--primary-green);
+}
+
+/* Glass morphism */
+.glass-panel {
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Glitch effect */
+.glitch-text {
+    animation: glitch 2s infinite;
+}
+
+.glitch-text:hover {
+    animation-duration: 0.5s;
+}
+
+/* Cyber grid background */
+.cyber-grid {
+    background-image: 
+        linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+}

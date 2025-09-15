@@ -1,0 +1,229 @@
+/**
+ * Topic Menu Styles
+ * Collapsible hierarchical topic navigation
+ */
+
+/* ============================================
+   Topic Menu Controls
+   ============================================ */
+
+.topic-menu-controls {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    gap: var(--spacing-sm);
+    background: var(--bg-tertiary);
+}
+
+.control-btn {
+    flex: 1;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: transparent;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+}
+
+.control-btn:hover {
+    background: rgba(0, 255, 65, 0.1);
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+/* ============================================
+   Topic Categories
+   ============================================ */
+
+.topic-category {
+    border-bottom: 2px solid var(--border-color);
+    transition: all var(--transition-normal);
+}
+
+.topic-category:last-child {
+    border-bottom: none;
+}
+
+.category-header {
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.category-header:hover {
+    background: rgba(0, 255, 65, 0.05);
+}
+
+.category-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--primary-green);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    flex: 1;
+}
+
+.collapse-icon {
+    color: var(--primary-green);
+    font-size: 0.9rem;
+    transition: transform var(--transition-fast);
+    display: inline-block;
+    width: 20px;
+}
+
+/* Category content animation */
+.category-content {
+    max-height: 2000px;
+    overflow: hidden;
+    transition: max-height var(--transition-normal) ease-out;
+}
+
+.topic-category.collapsed .category-content {
+    max-height: 0;
+}
+
+/* ============================================
+   Topic Ranges
+   ============================================ */
+
+.topic-range {
+    background: var(--bg-secondary);
+    margin: 0;
+    transition: all var(--transition-normal);
+}
+
+.range-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(0, 255, 65, 0.03);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    border-left: 3px solid transparent;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.range-header:hover {
+    background: rgba(0, 255, 65, 0.08);
+    border-left-color: var(--primary-green);
+}
+
+.range-title {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.range-count {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* Range content animation */
+.topic-range .topic-list {
+    max-height: 1500px;
+    overflow: hidden;
+    transition: max-height var(--transition-normal) ease-out;
+    padding: var(--spacing-xs) 0;
+}
+
+.topic-range.collapsed .topic-list {
+    max-height: 0;
+    padding: 0;
+}
+
+/* ============================================
+   Topic Items
+   ============================================ */
+
+.topic-item {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin: 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: var(--font-family);
+    position: relative;
+    padding-left: calc(var(--spacing-md) + var(--spacing-lg));
+}
+
+.topic-item:last-child {
+    border-bottom: none;
+}
+
+.topic-item:hover {
+    background: rgba(0, 255, 65, 0.05);
+    color: var(--primary-green);
+    padding-left: calc(var(--spacing-md) + var(--spacing-lg) + 5px);
+}
+
+.topic-item.active {
+    background: rgba(0, 255, 65, 0.15);
+    color: var(--primary-green);
+    box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.2);
+}
+
+.topic-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary-green);
+    box-shadow: 0 0 10px var(--primary-green);
+}
+
+.topic-number {
+    font-weight: 600;
+    margin-right: var(--spacing-xs);
+}
+
+/* Topic badges */
+.topic-badges {
+    position: absolute;
+    right: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.badge {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-summary {
+    background: rgba(0, 255, 65, 0.2);
+    color: var(--primary-green);
+    border: 1px solid rgba(0, 255, 65, 0.3);
+}
+
+.badge-images {
+    background: rgba(65, 255, 0, 0.2);
+    color: rgb(65, 255, 0);
+    border: 1px solid rgba(65, 255, 0, 0.3);
+}
