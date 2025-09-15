@@ -379,14 +379,16 @@ class MarkdownParser {
             return `<tr>${cellsHtml}</tr>`;
         }).join('\n');
         
-        return `<table>
+        return `<div class="table-wrapper">
+<table class="markdown-table">
 <thead>
 <tr>${headerHtml}</tr>
 </thead>
 <tbody>
 ${bodyHtml}
 </tbody>
-</table>`;
+</table>
+</div>`;
     }
     
     /**
