@@ -4,12 +4,20 @@
  */
 
 /* Ensure all text in topic content has consistent neon green styling */
-.topic-content {
-    color: var(--text-primary) !important;
+.topic-content,
+.topic-content * {
+    color: var(--text-secondary) !important;
+}
+
+/* Reset color for all nested elements */
+#content-display .topic-content,
+#content-display .topic-content * {
+    color: var(--text-secondary) !important;
 }
 
 /* Paragraphs */
-.topic-content p {
+.topic-content p,
+#content-display .topic-content p {
     color: var(--text-secondary) !important;
     line-height: 1.8;
     margin-bottom: var(--spacing-md);
@@ -17,11 +25,14 @@
 
 /* Lists */
 .topic-content ul,
-.topic-content ol {
+.topic-content ol,
+#content-display .topic-content ul,
+#content-display .topic-content ol {
     color: var(--text-secondary) !important;
 }
 
-.topic-content li {
+.topic-content li,
+#content-display .topic-content li {
     color: var(--text-secondary) !important;
     line-height: 1.8;
     margin-bottom: var(--spacing-xs);
@@ -31,7 +42,11 @@
 .topic-content ul ul li,
 .topic-content ol ol li,
 .topic-content ul ol li,
-.topic-content ol ul li {
+.topic-content ol ul li,
+#content-display .topic-content ul ul li,
+#content-display .topic-content ol ol li,
+#content-display .topic-content ul ol li,
+#content-display .topic-content ol ul li {
     color: var(--text-secondary) !important;
 }
 
@@ -41,7 +56,13 @@
 .topic-content h3,
 .topic-content h4,
 .topic-content h5,
-.topic-content h6 {
+.topic-content h6,
+#content-display .topic-content h1,
+#content-display .topic-content h2,
+#content-display .topic-content h3,
+#content-display .topic-content h4,
+#content-display .topic-content h5,
+#content-display .topic-content h6 {
     color: var(--primary-green) !important;
     text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
     margin-top: var(--spacing-xl);

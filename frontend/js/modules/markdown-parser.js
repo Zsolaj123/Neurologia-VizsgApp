@@ -172,13 +172,31 @@ class MarkdownParser {
             return placeholder;
         });
         
-        // Convert headers
-        html = html.replace(this.patterns.h6, '<h6>$1</h6>');
-        html = html.replace(this.patterns.h5, '<h5>$1</h5>');
-        html = html.replace(this.patterns.h4, '<h4>$1</h4>');
-        html = html.replace(this.patterns.h3, '<h3>$1</h3>');
-        html = html.replace(this.patterns.h2, '<h2>$1</h2>');
-        html = html.replace(this.patterns.h1, '<h1>$1</h1>');
+        // Convert headers with IDs for navigation
+        html = html.replace(this.patterns.h6, (match, text) => {
+            const id = this.generateId(text);
+            return `<h6 id="${id}">${text}</h6>`;
+        });
+        html = html.replace(this.patterns.h5, (match, text) => {
+            const id = this.generateId(text);
+            return `<h5 id="${id}">${text}</h5>`;
+        });
+        html = html.replace(this.patterns.h4, (match, text) => {
+            const id = this.generateId(text);
+            return `<h4 id="${id}">${text}</h4>`;
+        });
+        html = html.replace(this.patterns.h3, (match, text) => {
+            const id = this.generateId(text);
+            return `<h3 id="${id}">${text}</h3>`;
+        });
+        html = html.replace(this.patterns.h2, (match, text) => {
+            const id = this.generateId(text);
+            return `<h2 id="${id}">${text}</h2>`;
+        });
+        html = html.replace(this.patterns.h1, (match, text) => {
+            const id = this.generateId(text);
+            return `<h1 id="${id}">${text}</h1>`;
+        });
         
         // Convert text formatting (order matters!)
         html = html.replace(this.patterns.boldItalic, '<strong><em>$1</em></strong>');
@@ -187,10 +205,18 @@ class MarkdownParser {
         html = html.replace(this.patterns.strikethrough, '<del>$1</del>');
         
         // Convert links and images
-        html = html.replace(this.patterns.image, '<img src="$2" alt="$1" />');
+        html = html.replace(this.patterns.image, (match, alt, src) => {
+            // If it's a local image reference, try to load from képek folder
+            if (!src.startsWith('http') && !src.startsWith('data:')) {
+                // Extract just the filename from the path
+                const filename = src.split('/').pop();
+                src = `../template_reszvizsga_app/képek/${filename}`;
+            }
+            return `<img src="${src}" alt="${alt}" />`;
+        });
         html = html.replace(this.patterns.obsidianImage, (match, filename) => {
-            // Convert Obsidian-style image links
-            const imagePath = `content/neuroanat/images/${filename}`;
+            // Convert Obsidian-style image links to template képek folder
+            const imagePath = `../template_reszvizsga_app/képek/${filename}`;
             return `<img src="${imagePath}" alt="${filename}" />`;
         });
         html = html.replace(this.patterns.link, '<a href="$2">$1</a>');
@@ -364,6 +390,24 @@ ${bodyHtml}
     }
     
     /**
+     * Generate ID from text
+     * @private
+     */
+    generateId(text) {
+        // Convert to lowercase, replace spaces with hyphens, remove special chars
+        return text.toLowerCase()
+            .replace(/[áàäâ]/g, 'a')
+            .replace(/[éèëê]/g, 'e')
+            .replace(/[íìïî]/g, 'i')
+            .replace(/[óòöôő]/g, 'o')
+            .replace(/[úùüûű]/g, 'u')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+    }
+    
+    /**
      * Convert paragraphs
      * @private
      */
@@ -396,7 +440,7 @@ ${bodyHtml}
         while ((match = headerRegex.exec(markdown)) !== null) {
             const level = match[1].length;
             const text = match[2];
-            const id = `toc-${++idCounter}`;
+            const id = this.generateId(text);
             
             toc.push({
                 id,

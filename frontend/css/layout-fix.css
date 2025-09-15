@@ -140,6 +140,53 @@
     grid-template-columns: 0 1fr 0 !important;
 }
 
+/* Don't hide sidebars with .hidden class - just collapse them */
+#left-sidebar.hidden,
+#right-sidebar.hidden {
+    display: block !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+}
+
+/* Keep toggle buttons visible when sidebars are hidden */
+#left-sidebar.hidden .toggle-btn,
+#right-sidebar.hidden .toggle-btn {
+    position: fixed;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 100;
+}
+
+#left-sidebar.hidden #left-sidebar-toggle {
+    left: 10px;
+    top: calc(var(--header-height) + 20px);
+}
+
+#right-sidebar.hidden #right-sidebar-toggle {
+    right: 10px;
+    top: calc(var(--header-height) + 20px);
+}
+
+/* Hide everything except toggle button when collapsed */
+#left-sidebar.hidden > *:not(.toggle-btn):not(.sidebar-header),
+#right-sidebar.hidden > *:not(.toggle-btn):not(.sidebar-header) {
+    display: none !important;
+}
+
+#left-sidebar.hidden .sidebar-header,
+#right-sidebar.hidden .sidebar-header {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+#left-sidebar.hidden .sidebar-title,
+#right-sidebar.hidden .sidebar-title {
+    display: none !important;
+}
+
 /* Ensure proper scrolling in sidebars */
 .topic-menu,
 .toc-container {
