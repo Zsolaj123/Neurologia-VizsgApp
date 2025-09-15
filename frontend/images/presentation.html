@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sclerosis M™ - Befektetői Prezentáció</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrollbars on the body */
+        }
+        #presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden; /* Hide slides that are not active */
+            background: linear-gradient(135deg, #1e3a8a 0%, #065f46 50%, #047857 100%); /* Global gradient background */
+        }
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.7s ease-in-out;
+            pointer-events: none; /* Prevent interaction with hidden slides */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem; /* Adjusted padding for smaller screens */
+            box-sizing: border-box;
+        }
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto; /* Allow interaction with active slide */
+            z-index: 10;
+        }
+        .slide-content-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1280px; /* Max width to maintain design integrity somewhat */
+            max-height: 720px; /* Max height for 16:9 like ratio */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative; /* For absolutely positioned elements within slides */
+            overflow-y: auto; /* Allow scrolling if content overflows on small heights */
+            padding-bottom: 50px; /* Space for slide counter if needed, avoids overlap with content */
+        }
+
+        /* Common Animations */
+        .text-glow { text-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .fade-in { animation: fadeIn 1.5s ease-in forwards; }
+        .slide-up { animation: slideUp 1s ease-out 0.5s forwards; }
+        .fade-in-left { animation: fadeInLeft 1.2s ease-out forwards; }
+        .fade-in-right { animation: fadeInRight 1.2s ease-out 0.3s forwards; } /* Adjusted delay for general use */
+        .fade-in-center { animation: fadeInCenter 1.5s ease-out 0.8s forwards; }
+        .arrow-animation { animation: arrowPulse 2s ease-in-out infinite; }
+        .fade-in-up { animation: fadeInUp 1s ease-out forwards; }
+        .fade-in-up-delay { animation: fadeInUp 1s ease-out 0.3s forwards; }
+        .fade-in-up-delay-2 { animation: fadeInUp 1s ease-out 0.6s forwards; }
+        .fade-in-up-delay-3 { animation: fadeInUp 1s ease-out 0.9s forwards; }
+        .pulse-icon { animation: pulseIcon 2s ease-in-out infinite; }
+        .center-glow { box-shadow: 0 0 50px rgba(16, 185, 129, 0.3); }
+        .ai-glow {
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
+            animation: aiPulse 3s ease-in-out infinite;
+        }
+        .rotate-slow { animation: rotateSlow 20s linear infinite; }
+        .data-flow { animation: dataFlow 2s ease-in-out infinite; }
+        .stat-counter { animation: countUp 2s ease-out 1s forwards; }
+        .floating-icon { animation: floatAnim 3s ease-in-out infinite; } /* Renamed from float to avoid conflict */
+        .screen-glow {
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+            animation: screenPulse 4s ease-in-out infinite;
+        }
+        .workflow-arrow { animation: flowAnimation 2s ease-in-out infinite; }
+        .nfc-glow {
+            animation: nfcPulse 3s ease-in-out infinite;
+        }
+        .ai-spin { animation: aiRotate 8s linear infinite; }
+        .feature-icon {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+         .step-pulse-icon { /* Renamed from stepPulse to avoid conflict with potential class */
+            animation: stepPulseAnim 3s ease-in-out infinite;
+        }
+        .partner-glow {
+            animation: partnerGlow 4s ease-in-out infinite;
+        }
+        .cta-button-pulse { /* Renamed from ctaPulse to avoid conflict with potential class */
+            animation: ctaPulseAnim 3s ease-in-out infinite;
+        }
+        .logo-glow-anim { /* Renamed from logoGlow */
+             animation: logoGlowEffect 2s ease-in-out infinite alternate;
+        }
+        .contact-glow-anim { /* Renamed from contactGlow */
+            animation: contactGlowEffect 4s ease-in-out infinite;
+        }
+
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInCenter { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes arrowPulse { 0%, 100% { transform: translateX(0) scale(1); } 50% { transform: translateX(10px) scale(1.1); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseIcon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes aiPulse { 0%, 100% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.4); } 50% { box-shadow: 0 0 60px rgba(16, 185, 129, 0.6); } }
+        @keyframes rotateSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes dataFlow { 0%, 100% { opacity: 0.3; transform: translateX(0); } 50% { opacity: 1; transform: translateX(10px); } }
+        @keyframes countUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes floatAnim { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        @keyframes screenPulse { 0%, 100% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); } 50% { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5); } }
+        @keyframes flowAnimation { 0%, 100% { transform: translateX(0); opacity: 0.6; } 50% { transform: translateX(5px); opacity: 1; } }
+        @keyframes nfcPulse { 0%, 100% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); } 50% { box-shadow: 0 0 50px rgba(16, 185, 129, 0.7); } }
+        @keyframes aiRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes iconFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        @keyframes stepPulseAnim { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes partnerGlow { 0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); } 50% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.5); } }
+        @keyframes ctaPulseAnim { 0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); } 50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5); } }
+        @keyframes logoGlowEffect { 0% { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5)); } 100% { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5)); } }
+        @keyframes contactGlowEffect { 0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); } 50% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.5); } }
+
+
+        /* Navigation controls styling */
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #prev-slide { left: 20px; }
+        #next-slide { right: 20px; }
+        #slide-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            z-index: 100;
+        }
+         /* Ensure icons within slides are styled correctly */
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .tech-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .target-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+        .demo-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .future-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .business-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .implementation-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .closing-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .social-icon {
+            transition: all 0.3s ease;
+        }
+        .social-icon:hover {
+            transform: scale(1.2) rotate(360deg);
+        }
+        .module-button {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        .module-button:hover {
+            background: linear-gradient(135deg, #2563eb, #059669);
+            border-color: rgba(255,255,255,0.6);
+            transform: translateY(-2px);
+        }
+         .neuratos-logo { /* For slide 10 */
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .thank-you-text { /* For slide 10 */
+            background: linear-gradient(135deg, #ffffff, #e0f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .cta-button { /* For slide 10 */
+             background: linear-gradient(135deg, #10b981, #3b82f6);
+        }
+        .cta-button.cta-button-pulse {
+             animation: ctaPulseAnim 3s ease-in-out infinite;
+        }
+
+        /* Specific title adjustments for better fitting */
+        .slide .slide-content-wrapper h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem); /* Responsive font size for main titles */
+        }
+        .slide .slide-content-wrapper .py-6.md\:py-12 h1, /* Slide 2 */
+        .slide .slide-content-wrapper .py-4.md\:py-8 h1, /* Slide 3 */
+        .slide .slide-content-wrapper .py-4.md\:py-8 h1, /* Slide 4 */
+        .slide .slide-content-wrapper .py-2.md\:py-4 h1, /* Slide 5 */
+        .slide .slide-content-wrapper .py-2.md\:py-5 h1  /* Slides 6, 7, 8, 9, 10 */
+        {
+             margin-bottom: 0.5rem; /* Reduced margin for tighter fit */
+        }
+         .slide .slide-content-wrapper .pt-4.md\:pt-8 h1 { /* Slide 10 */
+            margin-bottom: 0.75rem; /* Specific adjustment for last slide title */
+         }
+
+
+    </style>
+</head>
+<body>
+    <div id="presentation-container">
+        <!-- Slides will be injected here by JavaScript -->
+    </div>
+
+    <button id="prev-slide" class="nav-button" title="Previous Slide"><i class="fas fa-chevron-left"></i></button>
+    <button id="next-slide" class="nav-button" title="Next Slide"><i class="fas fa-chevron-right"></i></button>
+    <div id="slide-counter"></div>
+
+    <script>
+        // Store slide HTML content here
+        const slidesHTML = [
+            // Slide 1: Title Slide
+            `
+            <div class="slide-content-wrapper">
+                <div class="absolute inset-0 opacity-10">
+                    <div class="absolute top-10 left-20 w-32 h-32 border border-white rounded-full"></div>
+                    <div class="absolute top-40 right-20 w-24 h-24 border border-white rounded-full"></div>
+                    <div class="absolute bottom-20 left-40 w-20 h-20 border border-white rounded-full"></div>
+                    <div class="absolute bottom-40 right-40 w-16 h-16 border border-white rounded-full"></div>
+                </div>
+                <div class="relative z-10 text-center text-white px-4 md:px-12">
+                    <div class="fade-in mb-6 md:mb-8">
+                        <i class="fas fa-brain text-4xl md:text-5xl lg:text-6xl text-emerald-300"></i>
+                    </div>
+                    <h1 class="font-bold mb-3 md:mb-4 text-glow fade-in">
+                        Sclerosis M<span class="text-emerald-300">™</span>
+                    </h1>
+                    <div class="slide-up mb-6 md:mb-8">
+                        <h2 class="text-lg md:text-xl lg:text-2xl font-medium mb-1 md:mb-2 text-blue-100">
+                            Átfogó Sclerosis Multiplex Kezelő Platform
+                        </h2>
+                        <p class="text-sm md:text-base lg:text-lg text-blue-200 max-w-3xl mx-auto leading-relaxed">
+                            Innovatív orvosi eszköz kalkulátorokkal, DMT/AHSCT értékelő rendszerrel és intelligens dokumentáció generátorral
+                        </p>                    
+                    </div>
+                    <div class="slide-up mb-8 md:mb-12">
+                        <div class="inline-flex items-center bg-white bg-opacity-20 backdrop-blur-sm rounded-full px-3 py-1.5 md:px-6 md:py-3">
+                            <i class="fas fa-cogs text-emerald-300 mr-1.5 md:mr-3"></i>
+                            <span class="text-sm md:text-base lg:text-lg font-semibold">Powered by Neuratos</span>
+                        </div>
+                    </div>
+                    <div class="slide-up flex flex-wrap justify-center space-x-4 md:space-x-12 mb-6 md:mb-8">
+                        <div class="text-center">
+                            <i class="fas fa-calculator text-xl md:text-2xl lg:text-3xl text-emerald-300 mb-1 md:mb-2"></i>
+                            <p class="text-xs md:text-sm text-blue-200">Kalkulátorok</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="fas fa-stethoscope text-xl md:text-2xl lg:text-3xl text-emerald-300 mb-1 md:mb-2"></i>
+                            <p class="text-xs md:text-sm text-blue-200">Értékelő Eszközök</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="fas fa-file-medical text-xl md:text-2xl lg:text-3xl text-emerald-300 mb-1 md:mb-2"></i>
+                            <p class="text-xs md:text-sm text-blue-200">Dokumentáció</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="fas fa-chart-line text-xl md:text-2xl lg:text-3xl text-emerald-300 mb-1 md:mb-2"></i>
+                            <p class="text-xs md:text-sm text-blue-200">Elemzések</p>
+                        </div>
+                    </div>
+                    <div class="slide-up">
+                        <div class="inline-block bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-1.5 md:px-8 md:py-3 rounded-full font-semibold text-sm md:text-base lg:text-lg shadow-2xl">
+                            <i class="fas fa-presentation mr-1.5 md:mr-2"></i>
+                            Befektetői Prezentáció
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 2: Probléma és Megoldás
+            `
+            <div class="slide-content-wrapper text-white">
+                <div class="text-center py-4 md:py-8 lg:py-12"> <!-- Adjusted padding -->
+                    <h1 class="font-bold fade-in-up"> <!-- mb-4 removed, handled by clamp -->
+                        A Kihívás és a <span class="text-emerald-300">Megoldás</span>
+                    </h1>
+                    <p class="text-md md:text-lg lg:text-xl text-blue-200 fade-in-up mt-1 md:mt-2" style="animation-delay: 0.2s;">Sclerosis Multiplex kezelés forradalmasítása</p>
+                </div>
+                <div class="flex flex-col md:flex-row justify-between items-center px-2 md:px-8 lg:px-16 py-2 md:py-4 lg:py-8 w-full">
+                    <div class="fade-in-left w-full md:w-5/12 mb-4 md:mb-0">
+                        <div class="bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-3 md:p-6 lg:p-8 border border-red-300">
+                            <div class="flex items-center mb-3 md:mb-4 lg:mb-6">
+                                <i class="fas fa-exclamation-triangle text-xl md:text-2xl lg:text-3xl text-red-300 mr-2 md:mr-3 lg:mr-4"></i>
+                                <h2 class="text-lg md:text-xl lg:text-3xl font-bold">Jelenlegi Kihívások</h2>
+                            </div>
+                            <div class="space-y-2 md:space-y-3 lg:space-y-4">
+                                <div class="flex items-start"><i class="fas fa-puzzle-piece text-red-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Fragmentált Eszközök</h3><p class="text-blue-200 text-xs md:text-sm">Különböző kalkulátorok és értékelő eszközök szétszórt használata</p></div></div>
+                                <div class="flex items-start"><i class="fas fa-clock text-red-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Időigényes Folyamatok</h3><p class="text-blue-200 text-xs md:text-sm">Manuális kalkulációk és dokumentáció készítés</p></div></div>
+                                <div class="flex items-start"><i class="fas fa-file-alt text-red-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Inkonzisztens Dokumentáció</h3><p class="text-blue-200 text-xs md:text-sm">Standardizált ambuláns lapok hiánya</p></div></div>
+                                <div class="flex items-start"><i class="fas fa-database text-red-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Adatok Szétszórtsága</h3><p class="text-blue-200 text-xs md:text-sm">Kezelési adatok különböző rendszerekben</p></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fade-in-center w-full md:w-2/12 text-center my-4 md:my-0">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-arrow-right text-2xl md:text-3xl lg:text-5xl text-emerald-300 arrow-animation mb-2 md:mb-3 lg:mb-4"></i>
+                            <div class="bg-emerald-500 bg-opacity-20 backdrop-blur-sm rounded-full p-2 md:p-3 lg:p-4 border border-emerald-300">
+                                <i class="fas fa-lightbulb text-xl md:text-2xl lg:text-3xl text-emerald-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fade-in-right w-full md:w-5/12" style="animation-delay: 0.5s;">
+                        <div class="bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-3 md:p-6 lg:p-8 border border-emerald-300">
+                            <div class="flex items-center mb-3 md:mb-4 lg:mb-6">
+                                <i class="fas fa-check-circle text-xl md:text-2xl lg:text-3xl text-emerald-300 mr-2 md:mr-3 lg:mr-4"></i>
+                                <h2 class="text-lg md:text-xl lg:text-3xl font-bold">Sclerosis M™ Megoldás</h2>
+                            </div>
+                            <div class="space-y-2 md:space-y-3 lg:space-y-4">
+                                <div class="flex items-start"><i class="fas fa-layer-group text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Integrált Platform</h3><p class="text-blue-200 text-xs md:text-sm">Minden eszköz egy helyen: MSFC, SDMT, DMT értékelés</p></div></div>
+                                <div class="flex items-start"><i class="fas fa-bolt text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Automatikus Kalkuláció</h3><p class="text-blue-200 text-xs md:text-sm">Gyors és pontos eredmények beépített algoritmusokkal</p></div></div>
+                                <div class="flex items-start"><i class="fas fa-file-medical text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Intelligens Dokumentáció</h3><p class="text-blue-200 text-xs md:text-sm">Automatikus ambuláns lap generálás</p></div></div>
+                                <div class="flex items-start"><i class="fas fa-chart-line text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3"></i><div><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Központosított Adatkezelés</h3><p class="text-blue-200 text-xs md:text-sm">Komplex elemzések és trend követés egy helyen</p></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fade-in-up absolute bottom-2 md:bottom-4 lg:bottom-8 left-1/2 transform -translate-x-1/2" style="animation-delay: 0.8s;">
+                    <div class="flex space-x-3 md:space-x-6 lg:space-x-8">
+                        <div class="text-center"><div class="text-xl md:text-2xl lg:text-3xl font-bold text-emerald-300">80%</div><div class="text-xs md:text-sm text-blue-200">Időmegtakarítás</div></div>
+                        <div class="text-center"><div class="text-xl md:text-2xl lg:text-3xl font-bold text-emerald-300">95%</div><div class="text-xs md:text-sm text-blue-200">Pontosság</div></div>
+                        <div class="text-center"><div class="text-xl md:text-2xl lg:text-3xl font-bold text-emerald-300">100%</div><div class="text-xs md:text-sm text-blue-200">Integráció</div></div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 3: Termék Áttekintés
+            `
+            <div class="slide-content-wrapper text-white">
+                <div class="text-center py-3 md:py-6 lg:py-8"> <!-- Adjusted padding -->
+                    <h1 class="font-bold fade-in-up"> <!-- mb-2 removed -->
+                        Sclerosis M<span class="text-emerald-300">™</span> Platform
+                    </h1>
+                    <p class="text-md md:text-lg lg:text-xl text-blue-200 fade-in-up mt-1 md:mt-2" style="animation-delay: 0.2s;">Átfogó Sclerosis Multiplex Kezelő Rendszer</p>
+                </div>
+                <div class="relative flex items-center justify-center w-full" style="height: clamp(300px, 55vh, 450px);"> <!-- Adjusted height -->
+                    <div class="fade-in-up absolute z-10 bg-white bg-opacity-15 backdrop-blur-lg rounded-full p-3 md:p-6 lg:p-8 center-glow" style="width: clamp(100px, 20vw, 180px); height: clamp(100px, 20vw, 180px);">
+                        <div class="flex flex-col items-center justify-center h-full text-center">
+                            <i class="fas fa-brain text-2xl md:text-4xl lg:text-5xl text-emerald-300 pulse-icon mb-1.5 md:mb-2 lg:mb-3"></i>
+                            <h3 class="text-xs md:text-sm lg:text-lg font-bold">Sclerosis M™</h3>
+                            <p class="text-xs text-blue-200">Core Platform</p>
+                        </div>
+                    </div>
+                    <div class="fade-in-up-delay absolute module-card bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-blue-300" style="top: 2%; left: 2%; width: clamp(150px, 30vw, 260px);">
+                        <div class="flex items-center mb-1.5 md:mb-2 lg:mb-4"><i class="fas fa-calculator text-lg md:text-xl lg:text-3xl text-blue-300 mr-1.5 md:mr-2 lg:mr-4"></i><h3 class="text-sm md:text-base lg:text-xl font-bold">Klinikai Kalkulátorok</h3></div>
+                        <div class="space-y-1 md:space-y-1.5 lg:space-y-2 text-xs lg:text-sm">
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>MSFC</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>SDMT</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>EDSS Kalkulátor</span></div>
+                        </div>
+                    </div>
+                    <div class="fade-in-up-delay absolute module-card bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-emerald-300" style="top: 2%; right: 2%; width: clamp(150px, 30vw, 260px);">
+                        <div class="flex items-center mb-1.5 md:mb-2 lg:mb-4"><i class="fas fa-pills text-lg md:text-xl lg:text-3xl text-emerald-300 mr-1.5 md:mr-2 lg:mr-4"></i><h3 class="text-sm md:text-base lg:text-xl font-bold">Kezelés Értékelő</h3></div>
+                        <div class="space-y-1 md:space-y-1.5 lg:space-y-2 text-xs lg:text-sm">
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>DMT Ajánlás</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>AHSCT Alkalmasság</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>Protokollok</span></div>
+                        </div>
+                    </div>
+                    <div class="fade-in-up-delay-2 absolute module-card bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-purple-300" style="bottom: 2%; left: 2%; width: clamp(150px, 30vw, 260px);">
+                        <div class="flex items-center mb-1.5 md:mb-2 lg:mb-4"><i class="fas fa-file-medical text-lg md:text-xl lg:text-3xl text-purple-300 mr-1.5 md:mr-2 lg:mr-4"></i><h3 class="text-sm md:text-base lg:text-xl font-bold">Ambuláns Lap</h3></div>
+                        <div class="space-y-1 md:space-y-1.5 lg:space-y-2 text-xs lg:text-sm">
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>Első Vizsgálat</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>Kontroll Lapok</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>Jelentés Generálás</span></div>
+                        </div>
+                    </div>
+                    <div class="fade-in-up-delay-2 absolute module-card bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-yellow-300" style="bottom: 2%; right: 2%; width: clamp(150px, 30vw, 260px);">
+                        <div class="flex items-center mb-1.5 md:mb-2 lg:mb-4"><i class="fas fa-chart-line text-lg md:text-xl lg:text-3xl text-yellow-300 mr-1.5 md:mr-2 lg:mr-4"></i><h3 class="text-sm md:text-base lg:text-xl font-bold">Elemzés & Követés</h3></div>
+                         <div class="space-y-1 md:space-y-1.5 lg:space-y-2 text-xs lg:text-sm">
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>Progress Tracking</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>Trend Analízis</span></div>
+                            <div class="flex items-center text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 text-xs"></i><span>Outcome Mérések</span></div>
+                        </div>
+                    </div>
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none fade-in-up-delay-3" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" style="z-index: 5;">
+                        <defs><linearGradient id="connectionGradientSlide3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#10b981;stop-opacity:0.8" /><stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.8" /></linearGradient></defs>
+                        <line x1="50%" y1="50%" x2="22%" y2="20%" stroke="url(#connectionGradientSlide3)" stroke-width="2" stroke-dasharray="5,5" opacity="0.6"/>
+                        <line x1="50%" y1="50%" x2="78%" y2="20%" stroke="url(#connectionGradientSlide3)" stroke-width="2" stroke-dasharray="5,5" opacity="0.6"/>
+                        <line x1="50%" y1="50%" x2="22%" y2="80%" stroke="url(#connectionGradientSlide3)" stroke-width="2" stroke-dasharray="5,5" opacity="0.6"/>
+                        <line x1="50%" y1="50%" x2="78%" y2="80%" stroke="url(#connectionGradientSlide3)" stroke-width="2" stroke-dasharray="5,5" opacity="0.6"/>
+                    </svg>
+                </div>
+                <div class="absolute bottom-4 md:bottom-8 lg:bottom-12 left-1/2 transform -translate-x-1/2 fade-in-up-delay-3">
+                    <div class="bg-white bg-opacity-10 backdrop-blur-sm rounded-full px-3 py-1.5 md:px-6 md:py-2 lg:px-8 lg:py-3 border border-emerald-300">
+                        <div class="flex items-center space-x-2 md:space-x-4 lg:space-x-8 text-xs md:text-sm lg:text-base">
+                            <div class="flex items-center"><i class="fas fa-layer-group text-emerald-300 mr-1 lg:mr-2"></i><span class="font-semibold">Integrált Rendszer</span></div>
+                            <div class="w-px h-3 md:h-4 lg:h-6 bg-white bg-opacity-30"></div>
+                            <div class="flex items-center"><i class="fas fa-bolt text-emerald-300 mr-1 lg:mr-2"></i><span class="font-semibold">Gyors Eredmények</span></div>
+                            <div class="w-px h-3 md:h-4 lg:h-6 bg-white bg-opacity-30"></div>
+                            <div class="flex items-center"><i class="fas fa-shield-alt text-emerald-300 mr-1 lg:mr-2"></i><span class="font-semibold">Biztonságos</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 4: Technológiai Előnyök
+            `
+            <div class="slide-content-wrapper text-white p-2 md:p-4 overflow-y-auto"> <!-- Added p-2 for smallest screens -->
+                <div class="text-center py-3 md:py-6 lg:py-8">
+                    <h1 class="font-bold fade-in-up">
+                        Technológiai <span class="text-emerald-300">Előnyök</span>
+                    </h1>
+                    <p class="text-md md:text-lg lg:text-xl text-blue-200 fade-in-up mt-1 md:mt-2" style="animation-delay: 0.2s;">Neuratos AI által működtetett intelligens orvosi rendszer</p>
+                </div>
+                <div class="px-1 md:px-6 lg:px-12 py-1 w-full">
+                    <div class="fade-in-up mb-3 md:mb-6 lg:mb-8">
+                        <div class="tech-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-2xl p-3 md:p-6 lg:p-8 border border-emerald-300 ai-glow mx-auto max-w-4xl">
+                            <div class="flex flex-col sm:flex-row items-center justify-center mb-3 md:mb-4 lg:mb-6">
+                                <div class="relative mb-2 sm:mb-0 sm:mr-4 lg:mr-6"><i class="fas fa-brain text-3xl md:text-4xl lg:text-6xl text-emerald-300"></i><div class="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 rotate-slow"><i class="fas fa-cog text-lg md:text-xl lg:text-2xl text-blue-300"></i></div></div>
+                                <div class="text-center sm:text-left"><h2 class="text-xl md:text-2xl lg:text-4xl font-bold mb-1 lg:mb-2">Neuratos AI Core</h2><p class="text-sm md:text-base lg:text-lg text-blue-200">Mesterséges intelligencia alapú döntéstámogatás</p></div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 lg:gap-6 text-xs md:text-sm">
+                                <div class="text-center"><i class="fas fa-robot text-xl md:text-2xl lg:text-3xl text-emerald-300 mb-1.5 md:mb-2 lg:mb-3"></i><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Gépi Tanulás</h3><p class="text-blue-200">Folyamatos tanulás betegadatokból</p></div>
+                                <div class="text-center"><i class="fas fa-network-wired text-xl md:text-2xl lg:text-3xl text-blue-300 mb-1.5 md:mb-2 lg:mb-3"></i><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Neurális Hálózat</h3><p class="text-blue-200">Komplex minták felismerése</p></div>
+                                <div class="text-center"><i class="fas fa-chart-bar text-xl md:text-2xl lg:text-3xl text-purple-300 mb-1.5 md:mb-2 lg:mb-3"></i><h3 class="text-sm md:text-base lg:text-lg font-semibold mb-0.5 md:mb-1">Prediktív Elemzés</h3><p class="text-blue-200">Kezelési eredmények előrejelzése</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 lg:gap-8 mb-3 md:mb-6 lg:mb-8">
+                        <div class="fade-in-left" style="animation-delay: 0.4s;">
+                            <div class="tech-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-blue-300 h-full">
+                                <div class="flex items-center mb-2 md:mb-3 lg:mb-4"><i class="fas fa-flask text-xl md:text-2xl lg:text-4xl text-blue-300 mr-2 md:mr-3 lg:mr-4"></i><h3 class="text-md md:text-lg lg:text-2xl font-bold">Bizonyítékalapú Algoritmusok</h3></div>
+                                <div class="space-y-1.5 md:space-y-2 lg:space-y-4 text-xs md:text-sm">
+                                    <div class="flex items-start"><i class="fas fa-check-circle text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3 data-flow"></i><div><h4 class="text-xs md:text-sm lg:text-lg font-semibold">Klinikai Irányelvek</h4><p class="text-blue-200">Nemzetközi MS kezelési protokollok</p></div></div>
+                                    <div class="flex items-start"><i class="fas fa-check-circle text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3 data-flow"></i><div><h4 class="text-xs md:text-sm lg:text-lg font-semibold">Validált Mérőeszközök</h4><p class="text-blue-200">MSFC, SDMT, EDSS kalkulációk</p></div></div>
+                                    <div class="flex items-start"><i class="fas fa-check-circle text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3 data-flow"></i><div><h4 class="text-xs md:text-sm lg:text-lg font-semibold">Real-World Evidence</h4><p class="text-blue-200">Valós adatokon alapuló ajánlások</p></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fade-in-right" style="animation-delay: 0.6s;">
+                             <div class="tech-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-purple-300 h-full">
+                                <div class="flex items-center mb-2 md:mb-3 lg:mb-4"><i class="fas fa-project-diagram text-xl md:text-2xl lg:text-4xl text-purple-300 mr-2 md:mr-3 lg:mr-4"></i><h3 class="text-md md:text-lg lg:text-2xl font-bold">Integrált Workflow</h3></div>
+                                <div class="space-y-1.5 md:space-y-2 lg:space-y-4 text-xs md:text-sm">
+                                    <div class="flex items-start"><i class="fas fa-arrow-right text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3 data-flow"></i><div><h4 class="text-xs md:text-sm lg:text-lg font-semibold">Seamless Integration</h4><p class="text-blue-200">Zökkenőmentes átmenet</p></div></div>
+                                    <div class="flex items-start"><i class="fas fa-arrow-right text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3 data-flow"></i><div><h4 class="text-xs md:text-sm lg:text-lg font-semibold">Automatizált Folyamatok</h4><p class="text-blue-200">Manuális lépések kiküszöbölése</p></div></div>
+                                    <div class="flex items-start"><i class="fas fa-arrow-right text-emerald-300 mt-1 mr-1.5 md:mr-2 lg:mr-3 data-flow"></i><div><h4 class="text-xs md:text-sm lg:text-lg font-semibold">Központi Adatkezelés</h4><p class="text-blue-200">Egységes betegadatok</p></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fade-in-up" style="animation-delay: 0.8s;">
+                        <div class="tech-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-3 md:p-4 lg:p-6 border border-emerald-300">
+                            <h3 class="text-md md:text-lg lg:text-2xl font-bold text-center mb-3 md:mb-4 lg:mb-6">Teljesítmény Mutatók</h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-4 lg:gap-8 text-xs md:text-sm">
+                                <div class="text-center"><div class="bg-emerald-500 bg-opacity-20 rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-tachometer-alt text-lg md:text-xl lg:text-2xl text-emerald-300"></i></div><div class="text-lg md:text-xl lg:text-3xl font-bold text-emerald-300 mb-0.5 md:mb-1">99.9%</div><div class="text-blue-200">Pontosság</div></div>
+                                <div class="text-center"><div class="bg-blue-500 bg-opacity-20 rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-clock text-lg md:text-xl lg:text-2xl text-blue-300"></i></div><div class="text-lg md:text-xl lg:text-3xl font-bold text-blue-300 mb-0.5 md:mb-1">&lt;3s</div><div class="text-blue-200">Válaszidő</div></div>
+                                <div class="text-center"><div class="bg-purple-500 bg-opacity-20 rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-shield-alt text-lg md:text-xl lg:text-2xl text-purple-300"></i></div><div class="text-lg md:text-xl lg:text-3xl font-bold text-purple-300 mb-0.5 md:mb-1">100%</div><div class="text-blue-200">Adatbiztonság</div></div>
+                                <div class="text-center"><div class="bg-yellow-500 bg-opacity-20 rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-sync-alt text-lg md:text-xl lg:text-2xl text-yellow-300"></i></div><div class="text-lg md:text-xl lg:text-3xl font-bold text-yellow-300 mb-0.5 md:mb-1">24/7</div><div class="text-blue-200">Elérhetőség</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 5: Célcsoport és Piac
+            `
+            <div class="slide-content-wrapper text-white p-2 md:p-3 lg:p-4 overflow-y-auto">
+                <div class="text-center py-1.5 md:py-3 lg:py-4">
+                    <h1 class="font-bold fade-in-up">
+                        Célcsoport és <span class="text-emerald-300">Piac</span>
+                    </h1>
+                    <p class="text-sm md:text-base lg:text-lg text-blue-200 fade-in-up mt-1 md:mt-1.5" style="animation-delay:0.1s;">Elsődleges felhasználók és piaci lehetőségek</p>
+                </div>
+                <div class="px-0.5 md:px-4 lg:px-8 py-0.5 md:py-1 w-full">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-3 lg:gap-5 mb-2 md:mb-4 lg:mb-6">
+                        <div class="fade-in-left"><div class="target-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-3 lg:p-5 border border-blue-300 text-center h-full flex flex-col justify-between"><div class="floating-icon mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-user-md text-xl md:text-2xl lg:text-4xl text-blue-300"></i></div><div><h3 class="text-xs md:text-sm lg:text-lg font-bold mb-1 lg:mb-2">Neurológusok</h3><div class="space-y-0.5 md:space-y-1 text-xs lg:text-sm"><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>MS specialisták</div><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>Járóbeteg ellátás</div></div></div><div class="mt-1.5 md:mt-2 lg:mt-3 pt-1.5 md:pt-2 lg:pt-3 border-t border-white border-opacity-20"><div class="text-md md:text-lg lg:text-xl font-bold number-highlight stat-counter">2,500+</div><div class="text-xs text-blue-200">neurológus Mo.</div></div></div></div>
+                        <div class="fade-in-left" style="animation-delay: 0.2s;"><div class="target-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-3 lg:p-5 border border-emerald-300 text-center h-full flex flex-col justify-between"><div class="floating-icon mb-1.5 md:mb-2 lg:mb-3" style="animation-delay: 0.3s;"><i class="fas fa-hospital text-xl md:text-2xl lg:text-4xl text-emerald-300"></i></div><div><h3 class="text-xs md:text-sm lg:text-lg font-bold mb-1 lg:mb-2">MS Centrumok</h3><div class="space-y-0.5 md:space-y-1 text-xs lg:text-sm"><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>Specializált ellátás</div><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>Komplex esetek</div></div></div><div class="mt-1.5 md:mt-2 lg:mt-3 pt-1.5 md:pt-2 lg:pt-3 border-t border-white border-opacity-20"><div class="text-md md:text-lg lg:text-xl font-bold number-highlight stat-counter">25+</div><div class="text-xs text-blue-200">MS centrum országosan</div></div></div></div>
+                        <div class="fade-in-right" style="animation-delay: 0.3s;"><div class="target-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-3 lg:p-5 border border-purple-300 text-center h-full flex flex-col justify-between"><div class="floating-icon mb-1.5 md:mb-2 lg:mb-3" style="animation-delay: 0.5s;"><i class="fas fa-building text-xl md:text-2xl lg:text-4xl text-purple-300"></i></div><div><h3 class="text-xs md:text-sm lg:text-lg font-bold mb-1 lg:mb-2">Kórházak</h3><div class="space-y-0.5 md:space-y-1 text-xs lg:text-sm"><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>Neurológiai osztályok</div><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>Regionális központok</div></div></div><div class="mt-1.5 md:mt-2 lg:mt-3 pt-1.5 md:pt-2 lg:pt-3 border-t border-white border-opacity-20"><div class="text-md md:text-lg lg:text-xl font-bold number-highlight stat-counter">180+</div><div class="text-xs text-blue-200">neurológiai osztály</div></div></div></div>
+                        <div class="fade-in-right" style="animation-delay: 0.4s;"><div class="target-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-3 lg:p-5 border border-yellow-300 text-center h-full flex flex-col justify-between"><div class="floating-icon mb-1.5 md:mb-2 lg:mb-3" style="animation-delay: 0.7s;"><i class="fas fa-microscope text-xl md:text-2xl lg:text-4xl text-yellow-300"></i></div><div><h3 class="text-xs md:text-sm lg:text-lg font-bold mb-1 lg:mb-2">Kutatók</h3><div class="space-y-0.5 md:space-y-1 text-xs lg:text-sm"><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>Klinikai tanulmányok</div><div class="text-blue-200"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2"></i>Epidemiológiai kutatás</div></div></div><div class="mt-1.5 md:mt-2 lg:mt-3 pt-1.5 md:pt-2 lg:pt-3 border-t border-white border-opacity-20"><div class="text-md md:text-lg lg:text-xl font-bold number-highlight stat-counter">500+</div><div class="text-xs text-blue-200">kutató szakember</div></div></div></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 lg:gap-6 mb-1.5 md:mb-3 lg:mb-4">
+                        <div class="fade-in-scale" style="animation-delay: 0.5s;"><div class="target-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-2 md:p-4 lg:p-6 border border-emerald-300 pulse-glow"><div class="flex items-center mb-2 md:mb-3 lg:mb-4"><i class="fas fa-chart-pie text-lg md:text-xl lg:text-3xl text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i><h3 class="text-sm md:text-base lg:text-xl font-bold">Piaci Potenciál</h3></div><div class="grid grid-cols-2 gap-1.5 md:gap-2 lg:gap-4 text-xs md:text-sm"><div class="text-center"><div class="text-lg md:text-xl lg:text-3xl font-bold number-highlight stat-counter mb-0.5 md:mb-1">15,000+</div><div class="text-blue-200">MS beteg Mo.</div></div><div class="text-center"><div class="text-lg md:text-xl lg:text-3xl font-bold number-highlight stat-counter mb-0.5 md:mb-1">3,200+</div><div class="text-blue-200">aktívan kezelt beteg</div></div></div><div class="mt-2 md:mt-3 lg:mt-4 pt-1.5 md:pt-2 lg:pt-3 border-t border-white border-opacity-20 text-xs md:text-sm"><div class="flex items-center justify-between"><span class="text-blue-200">Éves növekedés:</span><span class="text-emerald-300 font-bold">+8-12%</span></div></div></div></div>
+                        <div class="fade-in-scale" style="animation-delay: 0.6s;"><div class="target-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-2 md:p-4 lg:p-6 border border-blue-300"><div class="flex items-center mb-2 md:mb-3 lg:mb-4"><i class="fas fa-globe-europe text-lg md:text-xl lg:text-3xl text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i><h3 class="text-sm md:text-base lg:text-xl font-bold">Nemzetközi Terjeszkedés</h3></div><div class="space-y-1.5 md:space-y-2 lg:space-y-3 text-xs md:text-sm"><div class="flex items-center justify-between"><div class="flex items-center"><i class="fas fa-flag text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i><span>Magyarország</span></div><span class="text-emerald-300 font-bold">2024</span></div><div class="flex items-center justify-between"><div class="flex items-center"><i class="fas fa-flag text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i><span class="text-blue-200">V4 országok</span></div><span class="text-blue-300 font-bold">2025</span></div><div class="flex items-center justify-between"><div class="flex items-center"><i class="fas fa-flag text-purple-300 mr-1.5 md:mr-2 lg:mr-3"></i><span class="text-blue-200">EU piacok</span></div><span class="text-purple-300 font-bold">2026+</span></div></div></div></div>
+                    </div>
+                    <div class="fade-in-up" style="animation-delay: 0.7s;">
+                        <div class="target-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-3 lg:p-4 border border-emerald-300">
+                            <div class="flex flex-col md:flex-row items-center justify-center space-y-1.5 md:space-y-0 md:space-x-3 lg:space-x-8 text-xs md:text-sm">
+                                <div class="flex items-center"><i class="fas fa-users text-md md:text-lg lg:text-xl text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-bold">Több mint 3,000</div><div class="text-blue-200">potenciális felhasználó</div></div></div>
+                                <div class="w-full md:w-px h-px md:h-8 lg:h-10 bg-white bg-opacity-30"></div>
+                                <div class="flex items-center"><i class="fas fa-euro-sign text-md md:text-lg lg:text-xl text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-bold">12M+ EUR</div><div class="text-blue-200">éves piaci potenciál</div></div></div>
+                                <div class="w-full md:w-px h-px md:h-8 lg:h-10 bg-white bg-opacity-30"></div>
+                                <div class="flex items-center"><i class="fas fa-rocket text-md md:text-lg lg:text-xl text-purple-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-bold">B2B SaaS</div><div class="text-blue-200">skálázható modell</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 6: Demo és Felhasználói Felület
+            `
+            <div class="slide-content-wrapper text-white p-1.5 md:p-3 lg:p-4 overflow-y-auto">
+                <div class="text-center py-1.5 md:py-3 lg:py-5">
+                    <h1 class="font-bold fade-in-up">
+                        Demo és <span class="text-emerald-300">Felhasználói Felület</span>
+                    </h1>
+                    <p class="text-sm md:text-base lg:text-lg text-blue-200 fade-in-up mt-1 md:mt-1.5" style="animation-delay:0.1s;">Sclerosis M™ platform élő bemutatása</p>
+                </div>
+                <div class="px-0.5 md:px-4 lg:px-8 py-0.5 md:py-1 w-full">
+                    <div class="fade-in-scale mb-2 md:mb-4 lg:mb-5" style="animation-delay:0.2s;">
+                        <div class="demo-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-1.5 md:p-3 lg:p-5 border border-emerald-300 screen-glow">
+                            <div class="bg-gray-900 rounded-lg p-1.5 md:p-2 lg:p-4 border border-gray-700">
+                                <div class="flex items-center mb-1.5 md:mb-2 lg:mb-3 border-b border-gray-700 pb-1 lg:pb-2"><div class="flex space-x-1 lg:space-x-2 mr-1.5 md:mr-2 lg:mr-4"><div class="w-1.5 h-1.5 lg:w-3 lg:h-3 bg-red-500 rounded-full"></div><div class="w-1.5 h-1.5 lg:w-3 lg:h-3 bg-yellow-500 rounded-full"></div><div class="w-1.5 h-1.5 lg:w-3 lg:h-3 bg-green-500 rounded-full"></div></div><div class="text-gray-400 text-xs lg:text-sm">sclerosis-m.neuratos.com</div></div>
+                                <div class="text-center mb-1.5 md:mb-2 lg:mb-3"><h2 class="text-md md:text-lg lg:text-2xl font-bold text-emerald-300 mb-0.5 md:mb-1">SCLEROSIS M™</h2><p class="text-gray-400 text-xs lg:text-sm">Neuratos Powered | Átfogó MS Kezelési Platform</p></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 md:gap-2 lg:gap-3">
+                                    <div class="module-button rounded-lg p-1.5 md:p-2 lg:p-3 text-center"><i class="fas fa-user-plus text-md md:text-lg lg:text-xl mb-0.5 md:mb-1"></i><div class="font-semibold text-xs lg:text-sm">ÚJ BETEGFELVÉTEL</div><div class="text-blue-200 text-xs">Első vizsgálat</div></div>
+                                    <div class="module-button rounded-lg p-1.5 md:p-2 lg:p-3 text-center"><i class="fas fa-stethoscope text-md md:text-lg lg:text-xl mb-0.5 md:mb-1"></i><div class="font-semibold text-xs lg:text-sm">KONTROLL</div><div class="text-blue-200 text-xs">Követő vizsgálat</div></div>
+                                    <div class="module-button rounded-lg p-1.5 md:p-2 lg:p-3 text-center"><i class="fas fa-pills text-md md:text-lg lg:text-xl mb-0.5 md:mb-1"></i><div class="font-semibold text-xs lg:text-sm">TERÁPIA JAVASLÓ</div><div class="text-blue-200 text-xs">DMT/AHSCT</div></div>
+                                    <div class="module-button rounded-lg p-1.5 md:p-2 lg:p-3 text-center"><i class="fas fa-calculator text-md md:text-lg lg:text-xl mb-0.5 md:mb-1"></i><div class="font-semibold text-xs lg:text-sm">KALKULÁTOROK</div><div class="text-blue-200 text-xs">MSFC, EDSS, SDMT</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-1.5 md:gap-3 lg:gap-5 mb-1.5 md:mb-3 lg:mb-4">
+                        <div class="fade-in-left" style="animation-delay:0.3s;"><div class="demo-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-2 lg:p-4 border border-blue-300 h-full"><div class="flex items-center mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-brain text-md md:text-lg lg:text-xl text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i><h3 class="text-xs md:text-sm lg:text-base font-bold">Intelligens Workflow</h3></div><div class="space-y-1 lg:space-y-2 text-xs lg:text-sm"><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-emerald-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">Automatikus adatkapcsolás</span></div><div class="flex items-center"><i class="fas fa-arrow-right text-emerald-300 mr-1.5 lg:mr-3 workflow-arrow"></i><span class="text-blue-200">Modulok közötti átmenet</span></div><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-purple-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">Személyre szabott ajánlások</span></div></div></div></div>
+                        <div class="fade-in-scale" style="animation-delay:0.4s;"><div class="demo-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-2 lg:p-4 border border-emerald-300 h-full"><div class="flex items-center mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-chart-line text-md md:text-lg lg:text-xl text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i><h3 class="text-xs md:text-sm lg:text-base font-bold">Valós Idejű Számítások</h3></div><div class="space-y-1 lg:space-y-2 text-xs lg:text-sm"><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-blue-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">EDSS, MSFC, SDMT</span></div><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-emerald-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">Progresszió monitorozás</span></div><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-purple-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">Trend elemzés</span></div></div></div></div>
+                        <div class="fade-in-right" style="animation-delay:0.5s;"><div class="demo-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-2 lg:p-4 border border-purple-300 h-full"><div class="flex items-center mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-file-medical text-md md:text-lg lg:text-xl text-purple-300 mr-1.5 md:mr-2 lg:mr-3"></i><h3 class="text-xs md:text-sm lg:text-base font-bold">Automatikus Jelentések</h3></div><div class="space-y-1 lg:space-y-2 text-xs lg:text-sm"><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-blue-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">Ambuláns lap generálás</span></div><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-emerald-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">Kezelési javaslatok</span></div><div class="flex items-center"><div class="w-1.5 lg:w-2 h-1.5 lg:h-2 bg-purple-300 rounded-full mr-1.5 lg:mr-3"></div><span class="text-blue-200">Strukturált dokumentáció</span></div></div></div></div>
+                    </div>
+                    <div class="fade-in-up" style="animation-delay:0.6s;">
+                        <div class="demo-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-2 lg:p-3 border border-emerald-300">
+                            <div class="flex flex-col sm:flex-row items-center justify-around space-y-1.5 sm:space-y-0 sm:space-x-1.5 text-xs">
+                                <div class="flex items-center"><i class="fas fa-mouse-pointer text-sm md:text-base lg:text-lg text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-semibold">Intuitív Felhasználói Élmény</div><div class="text-blue-200">Egyszerű navigáció</div></div></div>
+                                <div class="flex items-center"><i class="fas fa-mobile-alt text-sm md:text-base lg:text-lg text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-semibold">Reszponzív Design</div><div class="text-blue-200">Tablet és mobil</div></div></div>
+                                <div class="flex items-center"><i class="fas fa-shield-alt text-sm md:text-base lg:text-lg text-purple-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-semibold">Adatbiztonság</div><div class="text-blue-200">GDPR megfelelő</div></div></div>
+                                <div class="flex items-center"><i class="fas fa-clock text-sm md:text-base lg:text-lg text-yellow-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-semibold">Időmegtakarítás</div><div class="text-blue-200">60% gyorsabb</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 7: Jövőbeli Tervek
+            `
+            <div class="slide-content-wrapper text-white p-1.5 md:p-3 lg:p-4 overflow-y-auto">
+                <div class="text-center py-1.5 md:py-3 lg:py-5">
+                    <h1 class="font-bold fade-in-up">
+                        Jövőbeli Tervek és <span class="text-emerald-300">Roadmap</span>
+                    </h1>
+                    <p class="text-sm md:text-base lg:text-lg text-blue-200 fade-in-up mt-1 md:mt-1.5" style="animation-delay:0.1s;">Innovatív fejlesztések és bővítési stratégia</p>
+                </div>
+                <div class="px-0.5 md:px-4 lg:px-8 py-0.5 md:py-1 lg:py-2 w-full">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 lg:gap-6 mb-2 md:mb-4 lg:mb-5">
+                        <div class="fade-in-left" style="animation-delay:0.2s;"><div class="future-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-5 border border-emerald-300 nfc-glow h-full"><div class="text-center mb-1.5 md:mb-2 lg:mb-3"><div class="feature-icon w-8 h-8 md:w-10 lg:w-14 lg:h-14 rounded-full flex items-center justify-center mx-auto mb-1 lg:mb-2"><i class="fas fa-credit-card text-md md:text-lg lg:text-xl text-white"></i></div><h3 class="text-xs md:text-sm lg:text-lg font-bold mb-0.5 md:mb-1">NFC Chip Integráció</h3><div class="text-xs lg:text-sm text-emerald-300 font-semibold mb-1 lg:mb-2">2025 Q2</div></div><div class="space-y-1 lg:space-y-2 text-xs"><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Beteg azonosítás</span></div><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Automatikus profil</span></div><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Hibamentes adat</span></div></div><div class="mt-1.5 md:mt-2 lg:mt-3 pt-1 lg:pt-2 border-t border-white border-opacity-20 text-xs"><div class="text-blue-200 text-center"><i class="fas fa-clock text-emerald-300 mr-1 lg:mr-2"></i><strong>80% időmegtakarítás</strong></div></div></div></div>
+                        <div class="fade-in-scale" style="animation-delay:0.3s;"><div class="future-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-5 border border-blue-300 h-full"><div class="text-center mb-1.5 md:mb-2 lg:mb-3"><div class="feature-icon w-8 h-8 md:w-10 lg:w-14 lg:h-14 rounded-full flex items-center justify-center mx-auto mb-1 lg:mb-2"><i class="fas fa-microscope text-md md:text-lg lg:text-xl text-white"></i></div><h3 class="text-xs md:text-sm lg:text-lg font-bold mb-0.5 md:mb-1">Klinikai Tanulmány Platform</h3><div class="text-xs lg:text-sm text-blue-300 font-semibold mb-1 lg:mb-2">2025 Q3</div></div><div class="space-y-1 lg:space-y-2 text-xs"><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Automatikus adatgyűjtés</span></div><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Valós idejű metrikák</span></div><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Compliance monitor</span></div></div><div class="mt-1.5 md:mt-2 lg:mt-3 pt-1 lg:pt-2 border-t border-white border-opacity-20 text-xs"><div class="text-blue-200 text-center"><i class="fas fa-chart-line text-blue-300 mr-1 lg:mr-2"></i><strong>Real-world evidence</strong></div></div></div></div>
+                        <div class="fade-in-right" style="animation-delay:0.4s;"><div class="future-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-5 border border-purple-300 h-full"><div class="text-center mb-1.5 md:mb-2 lg:mb-3"><div class="feature-icon w-8 h-8 md:w-10 lg:w-14 lg:h-14 rounded-full flex items-center justify-center mx-auto mb-1 lg:mb-2"><i class="fas fa-robot text-md md:text-lg lg:text-xl text-white ai-spin"></i></div><h3 class="text-xs md:text-sm lg:text-lg font-bold mb-0.5 md:mb-1">Dinamikus AI Helper</h3><div class="text-xs lg:text-sm text-purple-300 font-semibold mb-1 lg:mb-2">2025 Q4</div></div><div class="space-y-1 lg:space-y-2 text-xs"><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Tanulmány design</span></div><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Protokoll optimalizálás</span></div><div class="flex items-start"><i class="fas fa-check text-emerald-300 mr-1 lg:mr-2 mt-0.5 text-xs"></i><span class="text-blue-200">Prediktív elemzések</span></div></div><div class="mt-1.5 md:mt-2 lg:mt-3 pt-1 lg:pt-2 border-t border-white border-opacity-20 text-xs"><div class="text-blue-200 text-center"><i class="fas fa-brain text-purple-300 mr-1 lg:mr-2"></i><strong>ML-driven</strong> döntés</div></div></div></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 lg:gap-6 mb-1.5 md:mb-3 lg:mb-4">
+                        <div class="fade-in-left" style="animation-delay: 0.5s;"><div class="future-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-2 md:p-4 lg:p-5 border border-emerald-300"><h3 class="text-sm md:text-base lg:text-lg font-bold mb-1.5 md:mb-2 lg:mb-3 flex items-center"><i class="fas fa-calendar-alt text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i>Fejlesztési Ütemterv</h3><div class="space-y-1.5 md:space-y-2 lg:space-y-3 text-xs md:text-sm"><!-- Timeline items --> <div class="relative pl-4 md:pl-5"><div class="absolute left-0 top-1 w-2 lg:w-3 h-2 lg:h-3 bg-emerald-400 rounded-full"></div><div class="font-semibold">2024 Q4 - Alapfunkciók</div><div class="text-blue-200">Core platform</div></div> <div class="relative pl-4 md:pl-5"><div class="absolute left-0 top-1 w-2 lg:w-3 h-2 lg:h-3 bg-blue-400 rounded-full"></div><div class="font-semibold">2025 Q2 - NFC Integráció</div><div class="text-blue-200">Pilot tesztek</div></div> <div class="relative pl-4 md:pl-5"><div class="absolute left-0 top-1 w-2 lg:w-3 h-2 lg:h-3 bg-purple-400 rounded-full"></div><div class="font-semibold">2025 Q3 - Kutatási Platform</div><div class="text-blue-200">Centrum integrációk</div></div> <div class="relative pl-4 md:pl-5"><div class="absolute left-0 top-1 w-2 lg:w-3 h-2 lg:h-3 bg-yellow-400 rounded-full"></div><div class="font-semibold">2025 Q4 - AI Modul</div><div class="text-blue-200">ML deployment</div></div></div></div></div>
+                        <div class="fade-in-right" style="animation-delay: 0.6s;"><div class="future-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-2 md:p-4 lg:p-5 border border-blue-300"><h3 class="text-sm md:text-base lg:text-lg font-bold mb-1.5 md:mb-2 lg:mb-3 flex items-center"><i class="fas fa-rocket text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i>Üzleti Hatás</h3><div class="space-y-1.5 md:space-y-2 lg:space-y-3 text-xs md:text-sm"><!-- Business impact items --> <div class="flex items-center justify-between"><div><div class="font-semibold">Piaci Differenciáció</div><div class="text-blue-200">Egyedülálló NFC</div></div><div class="text-emerald-300 font-bold">+250%</div></div> <div class="flex items-center justify-between"><div><div class="font-semibold">Kutatási Bevételek</div><div class="text-blue-200">B2B research</div></div><div class="text-blue-300 font-bold">+150%</div></div> <div class="flex items-center justify-between"><div><div class="font-semibold">Felhasználói Retenció</div><div class="text-blue-200">AI-powered</div></div><div class="text-purple-300 font-bold">+180%</div></div> <div class="flex items-center justify-between"><div><div class="font-semibold">Nemzetközi Terjeszkedés</div><div class="text-blue-200">Globális piacok</div></div><div class="text-yellow-300 font-bold">+400%</div></div></div></div></div>
+                    </div>
+                    <div class="fade-in-scale" style="animation-delay:0.7s;">
+                        <div class="future-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-2 lg:p-3 border border-emerald-300">
+                            <div class="flex flex-col sm:flex-row items-center justify-center space-y-1.5 sm:space-y-0 sm:space-x-2 lg:space-x-6 text-xs">
+                                <div class="flex items-center"><i class="fas fa-lightbulb text-md md:text-lg lg:text-xl text-yellow-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-bold">3 Innovatív Modul</div><div class="text-blue-200">Piaci előny</div></div></div>
+                                <div class="w-full sm:w-px h-px sm:h-6 lg:h-8 bg-white bg-opacity-30"></div>
+                                <div class="flex items-center"><i class="fas fa-clock text-md md:text-lg lg:text-xl text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-bold">18 Hónapos Roadmap</div><div class="text-blue-200">Gyors piacra jutás</div></div></div>
+                                <div class="w-full sm:w-px h-px sm:h-6 lg:h-8 bg-white bg-opacity-30"></div>
+                                <div class="flex items-center"><i class="fas fa-chart-line text-md md:text-lg lg:text-xl text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="font-bold">5x Bevétel Növekedés</div><div class="text-blue-200">2026-ra várható</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 8: Üzleti Modell
+            `
+            <div class="slide-content-wrapper text-white p-1.5 md:p-3 lg:p-4 overflow-y-auto">
+                <div class="text-center py-1.5 md:py-3 lg:py-5">
+                    <h1 class="font-bold fade-in-up">
+                        Üzleti Modell és <span class="text-emerald-300">Értékajánlat</span>
+                    </h1>
+                    <p class="text-sm md:text-base lg:text-lg text-blue-200 fade-in-up mt-1 md:mt-1.5" style="animation-delay:0.1s;">Fenntartható bevételi modell és kórházi ROI</p>
+                </div>
+                <div class="px-0.5 md:px-4 lg:px-8 py-1 md:py-2 lg:py-4 w-full">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-3 lg:gap-4 mb-2 md:mb-4 lg:mb-6">
+                        <div class="fade-in-left" style="animation-delay:0.2s;"><div class="business-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-5 border border-blue-300 text-center h-full"><div class="revenue-icon step-pulse-icon w-8 h-8 md:w-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-credit-card text-md md:text-lg lg:text-xl text-white"></i></div><h3 class="text-xs lg:text-sm font-bold mb-1 lg:mb-2">SaaS Előfizetés</h3><div class="text-sm md:text-md lg:text-lg font-bold text-blue-300 mb-0.5 md:mb-1">€299/hó</div><div class="text-xs text-blue-200">központ/felh.</div></div></div>
+                        <div class="fade-in-left" style="animation-delay:0.3s;"><div class="business-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-5 border border-emerald-300 text-center h-full"><div class="revenue-icon step-pulse-icon w-8 h-8 md:w-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-building text-md md:text-lg lg:text-xl text-white"></i></div><h3 class="text-xs lg:text-sm font-bold mb-1 lg:mb-2">Enterprise Licenc</h3><div class="text-sm md:text-md lg:text-lg font-bold text-emerald-300 mb-0.5 md:mb-1">€12K/év</div><div class="text-xs text-blue-200">kórház/centrum</div></div></div>
+                        <div class="fade-in-left" style="animation-delay:0.4s;"><div class="business-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-5 border border-purple-300 text-center h-full"><div class="revenue-icon step-pulse-icon w-8 h-8 md:w-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-microscope text-md md:text-lg lg:text-xl text-white"></i></div><h3 class="text-xs lg:text-sm font-bold mb-1 lg:mb-2">Research Platform</h3><div class="text-sm md:text-md lg:text-lg font-bold text-purple-300 mb-0.5 md:mb-1">€25K/év</div><div class="text-xs text-blue-200">klinikai tanulmány</div></div></div>
+                        <div class="fade-in-left" style="animation-delay:0.5s;"><div class="business-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-5 border border-yellow-300 text-center h-full"><div class="revenue-icon step-pulse-icon w-8 h-8 md:w-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center mx-auto mb-1.5 md:mb-2 lg:mb-3"><i class="fas fa-graduation-cap text-md md:text-lg lg:text-xl text-white"></i></div><h3 class="text-xs lg:text-sm font-bold mb-1 lg:mb-2">Képzés & Support</h3><div class="text-sm md:text-md lg:text-lg font-bold text-yellow-300 mb-0.5 md:mb-1">€5K/év</div><div class="text-xs text-blue-200">centrum/support</div></div></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 lg:gap-6 mb-2 md:mb-4 lg:mb-5">
+                        <div class="fade-in-scale" style="animation-delay:0.6s;"><div class="business-card roi-highlight rounded-xl p-2 md:p-4 lg:p-6"><h3 class="text-sm md:text-base lg:text-xl font-bold mb-1.5 md:mb-2 lg:mb-4 flex items-center"><i class="fas fa-chart-line text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i>Kórházi ROI Kalkuláció</h3><div class="space-y-1.5 md:space-y-2 lg:space-y-3 text-xs md:text-sm"><div class="flex justify-between items-center"><span class="text-blue-200">Éves licenc költség:</span><span class="font-semibold">€12,000</span></div><div class="flex justify-between items-center"><span class="text-blue-200">Időmegtakarítás:</span><span class="text-emerald-300 font-semibold">4 óra/hét</span></div><div class="flex justify-between items-center"><span class="text-blue-200">Dokumentáció pontosság:</span><span class="text-emerald-300 font-semibold">+85%</span></div><div class="flex justify-between items-center"><span class="text-blue-200">Kezelési hatékonyság:</span><span class="text-emerald-300 font-semibold">+40%</span></div><div class="border-t border-white border-opacity-20 pt-1.5 md:pt-2 lg:pt-3 mt-1.5 md:mt-2 lg:mt-4"><div class="flex justify-between items-center"><span class="text-xs md:text-sm lg:text-base font-semibold">Éves megtakarítás:</span><span class="text-md md:text-lg lg:text-2xl font-bold text-emerald-300">€45,000+</span></div><div class="text-center mt-1 lg:mt-2"><span class="text-xs lg:text-sm text-emerald-200 bg-emerald-900 bg-opacity-30 px-1.5 py-0.5 lg:px-3 lg:py-1 rounded-full">375% ROI</span></div></div></div></div></div>
+                        <div class="fade-in-right" style="animation-delay:0.7s;"><div class="business-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-2 md:p-4 lg:p-6 border border-blue-300"><h3 class="text-sm md:text-base lg:text-xl font-bold mb-1.5 md:mb-2 lg:mb-4 flex items-center"><i class="fas fa-star text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i>Értékajánlat Kórházaknak</h3><div class="space-y-1.5 md:space-y-2 lg:space-y-3 text-xs"><!-- Value proposition items --><div class="value-metric p-1.5 md:p-2 lg:p-3 rounded-lg"><div class="flex items-center"><i class="fas fa-clock text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="text-xs lg:text-sm font-semibold">Munkaidő Optimalizálás</div><div class="text-blue-200">60% gyorsabb doku.</div></div></div></div> <div class="value-metric p-1.5 md:p-2 lg:p-3 rounded-lg"><div class="flex items-center"><i class="fas fa-shield-alt text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="text-xs lg:text-sm font-semibold">Kockázat Csökkentés</div><div class="text-blue-200">Hibák minimalizálása</div></div></div></div> <div class="value-metric p-1.5 md:p-2 lg:p-3 rounded-lg"><div class="flex items-center"><i class="fas fa-trophy text-purple-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="text-xs lg:text-sm font-semibold">Kompetitív Előny</div><div class="text-blue-200">Modern MS centrum</div></div></div></div> <div class="value-metric p-1.5 md:p-2 lg:p-3 rounded-lg"><div class="flex items-center"><i class="fas fa-chart-bar text-yellow-300 mr-1.5 md:mr-2 lg:mr-3"></i><div><div class="text-xs lg:text-sm font-semibold">Kutatási Lehetőség</div><div class="text-blue-200">Real-world data</div></div></div></div></div></div></div>
+                    </div>
+                    <div class="fade-in-up" style="animation-delay: 0.8s;">
+                        <div class="business-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-3 lg:p-4 border border-emerald-300">
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-4 lg:gap-6 text-center text-xs">
+                                <div><div class="text-md md:text-lg lg:text-2xl font-bold text-emerald-300 mb-0.5 md:mb-1">150+</div><div class="font-semibold">MS Centrum</div><div class="text-blue-200">Európában</div></div>
+                                <div><div class="text-md md:text-lg lg:text-2xl font-bold text-blue-300 mb-0.5 md:mb-1">€2.5M</div><div class="font-semibold">ARR Potenciál</div><div class="text-blue-200">3 év alatt</div></div>
+                                <div><div class="text-md md:text-lg lg:text-2xl font-bold text-purple-300 mb-0.5 md:mb-1">12-18</div><div class="font-semibold">Hónap</div><div class="text-blue-200">Payback</div></div>
+                                <div><div class="text-md md:text-lg lg:text-2xl font-bold text-yellow-300 mb-0.5 md:mb-1">65%</div><div class="font-semibold">Gross Margin</div><div class="text-blue-200">SaaS modell</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 9: Implementáció
+            `
+            <div class="slide-content-wrapper text-white p-1.5 md:p-3 lg:p-4 overflow-y-auto">
+                <div class="text-center py-1.5 md:py-3 lg:py-5">
+                    <h1 class="font-bold fade-in-up">
+                        Implementáció és <span class="text-emerald-300">Következő Lépések</span>
+                    </h1>
+                    <p class="text-sm md:text-base lg:text-lg text-blue-200 fade-in-up mt-1 md:mt-1.5" style="animation-delay:0.1s;">Deployment stratégia és partneri kapcsolatok</p>
+                </div>
+                <div class="px-0.5 md:px-4 lg:px-8 py-0.5 md:py-1 lg:py-4 w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 lg:gap-6 mb-2 md:mb-4 lg:mb-5">
+                        <div class="fade-in-left" style="animation-delay:0.2s;"><div class="implementation-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-emerald-300"><h3 class="text-sm md:text-base lg:text-xl font-bold mb-1.5 md:mb-2 lg:mb-4 flex items-center"><i class="fas fa-road text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i>Implementációs Ütemterv</h3><div class="space-y-1.5 md:space-y-2 lg:space-y-4 text-xs md:text-sm"><!-- Timeline items --><div class="relative pl-5 md:pl-6"><div class="timeline-dot bg-emerald-400" style="left:0; top:0.2rem;"></div><div class="font-semibold">Q1 2025 - Pilot Program</div><div class="text-blue-200">3 MS centrum, 6 hónap</div></div> <div class="relative pl-5 md:pl-6"><div class="timeline-dot bg-blue-400" style="left:0; top:0.2rem;"></div><div class="font-semibold">Q2 2025 - Scaling</div><div class="text-blue-200">15 centrum, feedback</div></div> <div class="relative pl-5 md:pl-6"><div class="timeline-dot bg-purple-400" style="left:0; top:0.2rem;"></div><div class="font-semibold">Q3 2025 - Expansion</div><div class="text-blue-200">Nemzetközi piac</div></div> <div class="relative pl-5 md:pl-6"><div class="timeline-dot bg-yellow-400" style="left:0; top:0.2rem;"></div><div class="font-semibold">Q4 2025 - Market Leader</div><div class="text-blue-200">50+ centrum</div></div></div></div></div>
+                        <div class="fade-in-right" style="animation-delay:0.3s;"><div class="implementation-card partner-glow bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-2 md:p-4 lg:p-6 border border-blue-300"><h3 class="text-sm md:text-base lg:text-xl font-bold mb-1.5 md:mb-2 lg:mb-4 flex items-center"><i class="fas fa-handshake text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i>Stratégiai Partnerségek</h3><div class="space-y-1.5 md:space-y-2 lg:space-y-4 text-xs md:text-sm"><!-- Partnership items --><div class="flex items-start"><div class="step-pulse-icon feature-icon w-5 h-5 md:w-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3 mt-0.5"><i class="fas fa-hospital text-xs lg:text-sm"></i></div><div><div class="font-semibold">Kórházi Partnerség</div><div class="text-blue-200">Semmelweis, Debrecen, Pécs</div></div></div> <div class="flex items-start"><div class="step-pulse-icon feature-icon w-5 h-5 md:w-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3 mt-0.5"><i class="fas fa-microscope text-xs lg:text-sm"></i></div><div><div class="font-semibold">Pharma Kapcsolatok</div><div class="text-blue-200">Novartis, Roche, Biogen</div></div></div> <div class="flex items-start"><div class="step-pulse-icon feature-icon w-5 h-5 md:w-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3 mt-0.5"><i class="fas fa-globe text-xs lg:text-sm"></i></div><div><div class="font-semibold">Nemzetközi Hálózat</div><div class="text-blue-200">ECTRIMS, MAGNIMS</div></div></div> <div class="flex items-start"><div class="step-pulse-icon feature-icon w-5 h-5 md:w-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3 mt-0.5"><i class="fas fa-code text-xs lg:text-sm"></i></div><div><div class="font-semibold">Tech Partnerek</div><div class="text-blue-200">Microsoft Azure, AWS</div></div></div></div></div></div>
+                    </div>
+                    <div class="fade-in-up" style="animation-delay: 0.4s;">
+                        <div class="implementation-card bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-xl p-1.5 md:p-3 lg:p-4 border border-emerald-300">
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 lg:gap-8">
+                                <div><h3 class="text-sm md:text-base lg:text-lg font-bold mb-1.5 md:mb-2 lg:mb-3 flex items-center"><i class="fas fa-coins text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i>Befektetési Igény</h3><div class="space-y-1 lg:space-y-2 text-xs md:text-sm"><div class="flex justify-between items-center"><span class="text-blue-200">Pilot program:</span><span class="text-emerald-300 font-semibold">€250K</span></div><div class="flex justify-between items-center"><span class="text-blue-200">Termékfejlesztés:</span><span class="text-blue-300 font-semibold">€500K</span></div><div class="flex justify-between items-center"><span class="text-blue-200">Marketing & sales:</span><span class="text-purple-300 font-semibold">€200K</span></div><div class="flex justify-between items-center"><span class="text-blue-200">Működési tőke:</span><span class="text-yellow-300 font-semibold">€150K</span></div><div class="border-t border-white border-opacity-20 pt-1 lg:pt-2 mt-1 lg:mt-3"><div class="flex justify-between items-center"><span class="text-xs md:text-sm lg:text-base font-bold">Összesen:</span><span class="text-md md:text-lg lg:text-2xl font-bold text-emerald-300">€1.1M</span></div></div></div></div>
+                                <div><h3 class="text-sm md:text-base lg:text-lg font-bold mb-1.5 md:mb-2 lg:mb-3 flex items-center"><i class="fas fa-steps text-blue-300 mr-1.5 md:mr-2 lg:mr-3"></i>Következő Lépések</h3><div class="space-y-1.5 md:space-y-2 lg:space-y-3 text-xs md:text-sm"><div class="flex items-center"><div class="w-4 h-4 md:w-5 lg:w-6 lg:h-6 bg-emerald-400 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3"><span class="text-xs font-bold text-white">1</span></div><span class="text-blue-200">Due diligence & LOI</span></div><div class="flex items-center"><div class="w-4 h-4 md:w-5 lg:w-6 lg:h-6 bg-blue-400 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3"><span class="text-xs font-bold text-white">2</span></div><span class="text-blue-200">Pilot centrum szerződés</span></div><div class="flex items-center"><div class="w-4 h-4 md:w-5 lg:w-6 lg:h-6 bg-purple-400 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3"><span class="text-xs font-bold text-white">3</span></div><span class="text-blue-200">Implementáció & Go-Live</span></div><div class="flex items-center"><div class="w-4 h-4 md:w-5 lg:w-6 lg:h-6 bg-yellow-400 rounded-full flex items-center justify-center mr-1.5 md:mr-2 lg:mr-3"><span class="text-xs font-bold text-white">4</span></div><span class="text-blue-200">Scaling & befektetési kör</span></div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `,
+            // Slide 10: Köszönetnyilvánítás
+            `
+            <div class="slide-content-wrapper text-white p-1.5 md:p-3 lg:p-4 overflow-y-auto">
+                 <div class="absolute top-5 left-5 md:top-10 md:left-10 floating-icon opacity-20"><i class="fas fa-heartbeat text-2xl md:text-3xl lg:text-4xl text-emerald-300"></i></div>
+                 <div class="absolute top-10 right-10 md:top-20 md:right-20 floating-icon opacity-20" style="animation-delay: 2s;"><i class="fas fa-brain text-2xl md:text-3xl lg:text-4xl text-blue-300"></i></div>
+                 <div class="absolute bottom-10 left-10 md:bottom-20 md:left-20 floating-icon opacity-20" style="animation-delay: 4s;"><i class="fas fa-microscope text-2xl md:text-3xl lg:text-4xl text-purple-300"></i></div>
+
+                <div class="text-center pt-2 md:pt-6 lg:pt-8 pb-1 md:pb-2 lg:pb-4">
+                    <h1 class="font-bold thank-you-text fade-in-up"> <!-- mb-2 md:mb-3 removed -->
+                        Köszönjük a Figyelmüket!
+                    </h1>
+                    <p class="text-md md:text-lg lg:text-xl text-blue-200 fade-in-up mt-1 md:mt-2" style="animation-delay:0.1s;">Együtt forradalmasítjuk a sclerosis multiplex ellátást</p>
+                </div>
+                <div class="px-0.5 md:px-4 lg:px-8 py-0.5 md:py-2 lg:py-4 w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 lg:gap-8 mb-2 md:mb-4 lg:mb-6">
+                        <div class="fade-in-left" style="animation-delay:0.2s;"><div class="closing-card contact-glow-anim bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-3 md:p-6 lg:p-8 border border-blue-300"><div class="text-center mb-2 md:mb-4 lg:mb-6"><h2 class="text-xl md:text-2xl lg:text-3xl font-bold neuratos-logo logo-glow-anim mb-1 lg:mb-2"><i class="fas fa-brain mr-1.5 md:mr-2 lg:mr-3"></i>Neuratos</h2><p class="text-sm md:text-base lg:text-lg text-blue-200">Powered by AI, Driven by Care</p></div><div class="space-y-1.5 md:space-y-2 lg:space-y-4 text-xs md:text-sm lg:text-base"><div class="flex items-center justify-center"><i class="fas fa-envelope text-emerald-300 text-md md:text-lg lg:text-xl mr-1.5 md:mr-2 lg:mr-4"></i><div><div class="font-semibold">Email</div><div class="text-blue-200">contact@neuratos.com</div></div></div><div class="flex items-center justify-center"><i class="fas fa-phone text-blue-300 text-md md:text-lg lg:text-xl mr-1.5 md:mr-2 lg:mr-4"></i><div><div class="font-semibold">Telefon</div><div class="text-blue-200">+36 1 234 5678</div></div></div><div class="flex items-center justify-center"><i class="fas fa-map-marker-alt text-purple-300 text-md md:text-lg lg:text-xl mr-1.5 md:mr-2 lg:mr-4"></i><div><div class="font-semibold">Cím</div><div class="text-blue-200">Budapest, Magyarország</div></div></div></div><div class="flex justify-center space-x-3 md:space-x-4 lg:space-x-6 mt-2 md:mt-4 lg:mt-6 pt-1.5 md:pt-2 lg:pt-4 border-t border-white border-opacity-20"><a href="#" class="social-icon"><i class="fab fa-linkedin text-lg md:text-xl lg:text-2xl text-blue-400"></i></a><a href="#" class="social-icon"><i class="fab fa-twitter text-lg md:text-xl lg:text-2xl text-blue-300"></i></a><a href="#" class="social-icon"><i class="fab fa-github text-lg md:text-xl lg:text-2xl text-gray-300"></i></a><a href="#" class="social-icon"><i class="fas fa-globe text-lg md:text-xl lg:text-2xl text-emerald-300"></i></a></div></div></div>
+                        <div class="fade-in-right" style="animation-delay:0.3s;"><div class="closing-card bg-slate-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-3 md:p-6 lg:p-8 border border-emerald-300"><div class="text-center"><h3 class="text-lg md:text-xl lg:text-2xl font-bold mb-1.5 md:mb-2 lg:mb-4"><i class="fas fa-rocket text-emerald-300 mr-1.5 md:mr-2 lg:mr-3"></i>Csatlakozzon Hozzánk!</h3><p class="text-blue-200 mb-2 md:mb-4 lg:mb-6 leading-relaxed text-xs md:text-sm lg:text-base">Legyen része az egészségügyi technológia jövőjének. Együtt építhetjük fel a következő generációs MS ellátási platformot.</p><button class="cta-button cta-button-pulse text-white font-bold py-1.5 px-3 md:py-3 lg:py-4 lg:px-8 rounded-md md:rounded-lg lg:rounded-xl text-xs md:text-sm lg:text-lg mb-2 md:mb-4 lg:mb-6 hover:shadow-xl transition-all duration-300"><i class="fas fa-handshake mr-1.5 md:mr-2 lg:mr-3"></i>Befektetési Lehetőség</button><div class="grid grid-cols-2 gap-1.5 md:gap-2 lg:gap-4 text-xs md:text-sm"><div class="bg-slate-800 bg-opacity-50 rounded-lg p-1.5 md:p-2 lg:p-3"><div class="font-semibold text-emerald-300">Befektetési Cél</div><div class="text-white text-sm md:text-base lg:text-xl font-bold">€1.1M</div></div><div class="bg-slate-800 bg-opacity-50 rounded-lg p-1.5 md:p-2 lg:p-3"><div class="font-semibold text-blue-300">Várható ROI</div><div class="text-white text-sm md:text-base lg:text-xl font-bold">375%+</div></div></div></div></div></div>
+                    </div>
+                    <div class="fade-in-up mt-2 md:mt-4 lg:mt-6 text-center" style="animation-delay: 0.4s;">
+                        <div class="text-md md:text-lg lg:text-xl font-bold mb-1 lg:mb-2">
+                            <i class="fas fa-lightbulb text-yellow-300 mr-1.5 md:mr-2"></i>
+                            Alakítsuk együtt a sclerosis multiplex ellátás jövőjét!
+                        </div>
+                        <div class="text-blue-200 text-xs md:text-sm lg:text-base">
+                            Vegye fel velünk a kapcsolatot még ma, és legyen része ennek az innovatív útnak.
+                        </div>
+                    </div>
+                </div>
+                <!-- REMOVED BOTTOM LINE -->
+            </div>
+            `
+        ];
+
+        const presentationContainer = document.getElementById('presentation-container');
+        const prevButton = document.getElementById('prev-slide');
+        const nextButton = document.getElementById('next-slide');
+        const slideCounterElement = document.getElementById('slide-counter');
+        let currentSlideIndex = 0;
+        let slideElements = [];
+
+        function initSlides() {
+            slidesHTML.forEach((html, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.classList.add('slide');
+                // Remove the specific bottom line div before setting innerHTML
+                // This targets <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ..."></div>
+                // and <div class="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r ..."></div>
+                let cleanedHtml = html.replace(/<div class="absolute bottom-0 left-0 w-full h-\d+ bg-gradient-to-r from-blue-400 via-emerald-400 to-(blue|purple)-400"><\/div>/g, '');
+                slideDiv.innerHTML = cleanedHtml;
+                presentationContainer.appendChild(slideDiv);
+                slideElements.push(slideDiv);
+            });
+        }
+
+        function showSlide(index) {
+            slideElements.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            currentSlideIndex = index;
+            updateNavigation();
+        }
+
+        function updateNavigation() {
+            slideCounterElement.textContent = `${currentSlideIndex + 1} / ${slidesHTML.length}`;
+            prevButton.disabled = currentSlideIndex === 0;
+            nextButton.disabled = currentSlideIndex === slidesHTML.length - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < slidesHTML.length - 1) {
+                showSlide(currentSlideIndex + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                showSlide(currentSlideIndex - 1);
+            }
+        }
+
+        // Event Listeners
+        prevButton.addEventListener('click', prevSlide);
+        nextButton.addEventListener('click', nextSlide);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        initSlides();
+        showSlide(0);
+
+    </script>
+</body>
+</html>

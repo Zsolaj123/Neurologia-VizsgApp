@@ -3,32 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neurológiai Részvizsga Felkészítő</title>
+    <title>Neurológia VizsgApp by Zsolaj</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/topic-menu.css">
-    <link rel="stylesheet" href="css/content.css">
+    <!-- Single unified CSS file - no conflicts, no duplicates -->
+    <link rel="stylesheet" href="css/app-unified.css">
+    <!-- Browser compatibility overrides -->
+    <link rel="stylesheet" href="css/app-compatible.css">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+    <!-- Favicon removed -->
 </head>
 <body>
     <!-- App Header -->
     <header class="app-header">
-        <h1 class="app-title">🧠 Neurológiai Részvizsga Felkészítő</h1>
+        <h1 class="app-title">
+            Neurológia VizsgApp
+            <span class="author-credit">by Zsolaj</span>
+        </h1>
     </header>
     
     <!-- Main Application Container -->
     <div id="app-container">
+        <!-- Left Sidebar Toggle (Outside sidebar for visibility when hidden) -->
+        <button id="left-sidebar-toggle" class="toggle-btn sidebar-toggle-fixed" title="Tételek">☰</button>
+        
         <!-- Left Sidebar - Topic List -->
         <aside id="left-sidebar" class="topic-list">
             <div class="sidebar-header">
                 <h2 class="sidebar-title">Tételek</h2>
-                <button id="left-sidebar-toggle" class="toggle-btn" title="Oldalsáv">☰</button>
             </div>
             <div class="topic-menu" id="topic-menu">
                 <!-- Topics will be loaded here dynamically -->
@@ -50,11 +55,13 @@
             </div>
         </main>
 
+        <!-- Right Sidebar Toggle (Outside sidebar for visibility when hidden) -->
+        <button id="right-sidebar-toggle" class="toggle-btn sidebar-toggle-fixed right" title="Tartalomjegyzék">☰</button>
+        
         <!-- Right Sidebar - Table of Contents -->
         <aside id="right-sidebar" class="toc-sidebar">
             <div class="sidebar-header">
                 <h3 class="sidebar-title">Tartalomjegyzék</h3>
-                <button id="right-sidebar-toggle" class="toggle-btn" title="Tartalomjegyzék">☰</button>
             </div>
             <div id="toc-container" class="toc-container">
                 <!-- TOC will be generated here -->
@@ -81,5 +88,11 @@
     <script src="js/modules/topic-loader.js"></script>
     <script src="js/modules/ui-manager.js"></script>
     <script src="js/app.js"></script>
+    <!-- Single unified JavaScript - clean, no conflicts -->
+    <script src="js/app-unified.js"></script>
+    <!-- Browser compatibility layer -->
+    <script src="js/app-compatibility.js"></script>
+    <!-- Final sidebar fix -->
+    <script src="js/sidebar-final-fix.js"></script>
 </body>
 </html>

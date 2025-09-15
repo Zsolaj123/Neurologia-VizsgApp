@@ -139,8 +139,9 @@
 
 .toc-container {
     padding: var(--spacing-md);
-    max-height: calc(100vh - var(--header-height) - 100px);
+    height: calc(100vh - var(--header-height) - 80px);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .toc-list {
@@ -203,4 +204,46 @@
     padding: var(--spacing-xxl);
     color: var(--text-muted);
     font-style: italic;
+}
+
+/* ============================================
+   Table of Contents Styles
+   ============================================ */
+
+.toc-item {
+    transition: all var(--transition-fast);
+}
+
+.toc-item.active {
+    background: rgba(0, 255, 65, 0.1);
+    border-left: 3px solid var(--primary-green);
+    margin-left: -3px;
+}
+
+.toc-item.active .toc-link {
+    color: var(--primary-green);
+}
+
+.toc-item.active .toc-text {
+    font-weight: bold;
+    text-shadow: 0 0 10px var(--primary-green);
+}
+
+/* ============================================
+   Image Styles
+   ============================================ */
+
+.topic-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: var(--spacing-lg) auto;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.topic-content img:hover {
+    border-color: var(--primary-green);
+    box-shadow: 0 4px 30px rgba(0, 255, 65, 0.3);
 }

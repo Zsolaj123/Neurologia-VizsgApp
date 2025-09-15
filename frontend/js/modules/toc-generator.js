@@ -252,16 +252,30 @@ class TocGenerator {
         if (!contentArea) return;
         
         // Find all headers in content
-        const headers = contentArea.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        let activeId = null;
+        const headers = contentArea.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
+        if (headers.length === 0) return;
         
-        // Find the header that's currently in view
-        for (const header of headers) {
-            const rect = header.getBoundingClientRect();
-            if (rect.top <= 100) { // 100px offset from top
-                activeId = header.id;
-            } else {
-                break;
+        let activeId = null;
+        const scrollTop = contentArea.scrollTop;
+        const scrollHeight = contentArea.scrollHeight;
+        const clientHeight = contentArea.clientHeight;
+        
+        // Check if we're at the bottom
+        if (scrollTop + clientHeight >= scrollHeight - 10) {
+            // Highlight the last header
+            activeId = headers[headers.length - 1].id;
+        } else {
+            // Find the header that's currently in view
+            for (const header of headers) {
+                const rect = header.getBoundingClientRect();
+                const contentRect = contentArea.getBoundingClientRect();
+                const relativeTop = rect.top - contentRect.top;
+                
+                if (relativeTop <= 50) { // 50px offset from top of content area
+                    activeId = header.id;
+                } else if (relativeTop > 50) {
+                    break;
+                }
             }
         }
         

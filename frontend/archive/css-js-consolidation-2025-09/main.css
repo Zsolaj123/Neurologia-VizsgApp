@@ -220,6 +220,8 @@ ul, ol {
     height: calc(100vh - var(--header-height));
     overflow-y: auto;
     transition: all var(--transition-normal);
+    position: sticky;
+    top: var(--header-height);
 }
 
 .topic-list {
@@ -255,9 +257,8 @@ ul, ol {
     grid-template-columns: 0 1fr 0;
 }
 
-/* Toggle Buttons for Hidden Sidebars */
-#left-sidebar.hidden #left-sidebar-toggle,
-#right-sidebar.hidden #right-sidebar-toggle {
+/* Toggle Buttons - Always Visible */
+.sidebar-toggle-fixed {
     position: fixed;
     background: var(--bg-tertiary);
     border: 1px solid var(--primary-green);
@@ -265,16 +266,27 @@ ul, ol {
     padding: var(--spacing-sm);
     z-index: 50;
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    top: calc(var(--header-height) + 20px);
+    transition: all var(--transition-fast);
 }
 
-#left-sidebar.hidden #left-sidebar-toggle {
+#left-sidebar-toggle {
     left: 10px;
-    top: calc(var(--header-height) + 20px);
 }
 
-#right-sidebar.hidden #right-sidebar-toggle {
+#right-sidebar-toggle {
     right: 10px;
-    top: calc(var(--header-height) + 20px);
+}
+
+/* Hide toggle buttons when sidebars are visible */
+#app-container:not(:has(#left-sidebar.hidden)) #left-sidebar-toggle {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#app-container:not(:has(#right-sidebar.hidden)) #right-sidebar-toggle {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Main Content Area */

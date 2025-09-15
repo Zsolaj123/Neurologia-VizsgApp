@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sclerosis M™ Patient Assessment Tool</title>
+    <script src="tailwind.css"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #404040; 
+            color: #E0E0E0; 
+            font-family: 'Nunito', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .font-nunito { font-family: 'Nunito', sans-serif; }
+        .card-glass {
+            background: rgba(10, 25, 47, 0.6); 
+            backdrop-filter: blur(10px) saturate(140%);
+            -webkit-backdrop-filter: blur(10px) saturate(140%);
+            border: 1px solid rgba(0, 255, 255, 0.15); 
+            border-radius: 1rem; 
+            padding: 1.5rem; 
+            margin-top: 1rem; 
+            margin-bottom: 2rem; 
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.08), 0 0 20px rgba(0, 255, 255, 0.04); 
+        }
+        .text-neon { color: #00FFFF; }
+        .text-neon-teal { color: #33FFDD; }
+        .input-neon {
+            width: 100%; padding: 0.75rem; border-radius: 0.5rem;
+            background-color: rgba(0, 20, 30, 0.4); border: 1px solid #33FFDD; 
+            color: #E0E0E0; transition: all 0.3s ease;
+        }
+        .input-neon:focus {
+            outline: none; border-color: #00FFFF;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.3); 
+            background-color: rgba(0, 30, 40, 0.5);
+        }
+        .input-neon::placeholder { color: #718096; } 
+        select.input-neon {
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2333FFDD%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-13z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat; background-position: right 0.7rem top 50%;
+            background-size: 0.65rem auto; padding-right: 2.5rem;
+        }
+        .form-radio-neon, .form-checkbox-neon {
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            width: 1.25em; height: 1.25em; border: 2px solid #33FFDD;
+            border-radius: 50%; display: inline-block; position: relative;
+            cursor: pointer; margin-right: 0.5rem; vertical-align: middle;
+            transition: all 0.2s ease; flex-shrink: 0;
+        }
+        .form-checkbox-neon { border-radius: 0.25em; }
+        .form-radio-neon:checked, .form-checkbox-neon:checked {
+            background-color: #33FFDD; border-color: #00FFFF;
+            box-shadow: 0 0 3px rgba(0, 255, 255, 0.7); 
+        }
+        .form-radio-neon:checked::before {
+            content: ''; display: block; width: 0.6em; height: 0.6em;
+            background-color: #404040; /* Dark background for the dot */
+            border-radius: 50%; 
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .form-checkbox-neon:checked::before { /* Border-based checkmark */
+            content: "";
+            display: block;
+            width: 0.30em; 
+            height: 0.60em;  
+            border: solid #404040; 
+            border-width: 0 0.17em 0.17em 0; 
+            position: absolute;
+            top: 48%; 
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .btn-neon {
+            padding: 0.75rem 1.5rem; border: 2px solid #00FFFF; color: #00FFFF;
+            background-color: transparent; border-radius: 9999px;
+            text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em;
+            box-shadow: 0 0 3px rgba(0, 255, 255, 0.5), 0 0 6px rgba(0, 255, 255, 0.2); 
+            transition: all 0.3s ease-in-out; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .btn-neon:hover, .btn-neon:focus {
+            color: #1A202C; background-color: #00FFFF; 
+            box-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 15px #00FFFF; 
+            transform: translateY(-1px); 
+        }
+        .btn-neon.btn-red { border-color: #FF0057; color: #FF0057; box-shadow: 0 0 3px rgba(255,0,87,0.5), 0 0 6px rgba(255,0,87,0.2); }
+        .btn-neon.btn-red:hover, .btn-neon.btn-red:focus { background-color: #FF0057; color: #1A202C; box-shadow: 0 0 5px #FF0057, 0 0 10px #FF0057, 0 0 15px #FF0057; }
+        .btn-neon.btn-green { border-color: #00FF7F; color: #00FF7F; box-shadow: 0 0 3px rgba(0,255,127,0.5), 0 0 6px rgba(0,255,127,0.2); }
+        .btn-neon.btn-green:hover, .btn-neon.btn-green:focus { background-color: #00FF7F; color: #1A202C; box-shadow: 0 0 5px #00FF7F, 0 0 10px #00FF7F, 0 0 15px #00FF7F; }
+        .btn-neon.btn-blue { border-color: #00A3FF; color: #00A3FF; box-shadow: 0 0 3px rgba(0,163,255,0.5), 0 0 6px rgba(0,163,255,0.2); }
+        .btn-neon.btn-blue:hover, .btn-neon.btn-blue:focus { background-color: #00A3FF; color: #1A202C; box-shadow: 0 0 5px #00A3FF, 0 0 10px #00A3FF, 0 0 15px #00A3FF; }
+        .btn-neon.btn-purple { border-color: #9F7AEA; color: #9F7AEA; box-shadow: 0 0 3px rgba(159,122,234,0.5), 0 0 6px rgba(159,122,234,0.2); }
+        .btn-neon.btn-purple:hover, .btn-neon.btn-purple:focus { background-color: #9F7AEA; color: #1A202C; box-shadow: 0 0 5px #9F7AEA, 0 0 10px #9F7AEA, 0 0 15px #9F7AEA; }
+        .btn-neon.btn-indigo { border-color: #667EEA; color: #667EEA; box-shadow: 0 0 3px rgba(102,126,234,0.5), 0 0 6px rgba(102,126,234,0.2); }
+        .btn-neon.btn-indigo:hover, .btn-neon.btn-indigo:focus { background-color: #667EEA; color: #1A202C; box-shadow: 0 0 5px #667EEA, 0 0 10px #667EEA, 0 0 15px #667EEA; }
+        .btn-neon.btn-teal { border-color: #38B2AC; color: #38B2AC; box-shadow: 0 0 3px rgba(56,178,172,0.5), 0 0 6px rgba(56,178,172,0.2); }
+        .btn-neon.btn-teal:hover, .btn-neon.btn-teal:focus { background-color: #38B2AC; color: #1A202C; box-shadow: 0 0 5px #38B2AC, 0 0 10px #38B2AC, 0 0 15px #38B2AC; }
+        
+        .progress-container .bg-gray-700 { background-color: rgba(0, 255, 255, 0.06); } 
+        .progress-container .bg-teal-500 { background-color: #00FFFF; box-shadow: 0 0 3px #00FFFF, 0 0 6px #00FFFF; } 
+        .progress-container .text-gray-400 { color: #A0AEC0; } 
+        .progress-container .text-teal-300 { color: #33FFDD; } 
+        
+        footer.app-footer { background-color: transparent; border-top: 1px solid rgba(0, 255, 255, 0.08); color: #A0AEC0; padding: 1.5rem; text-align: center; margin-top: 2rem; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(10, 25, 47, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #33FFDD; border-radius: 10px; border: 1px solid rgba(0, 255, 255, 0.15); }
+        ::-webkit-scrollbar-thumb:hover { background: #00FFFF; }
+        
+        .results-ambulans-lap pre {
+            background: linear-gradient(135deg, rgba(20, 30, 50, 0.7), rgba(10, 20, 35, 0.8)); 
+            border: 1px solid rgba(0, 255, 255, 0.1); 
+            border-radius: 0.5rem; padding: 1rem; color: #CBD5E0; 
+            max-height: 40rem; overflow: auto;
+            box-shadow: inset 0 0 4px rgba(0, 255, 255, 0.08); 
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap; /* Ensure text wraps */
+            word-wrap: break-word; /* Ensure long words break */
+        }
+        .symptom-card {
+            background: rgba(10, 25, 47, 0.3); 
+            border: 1px solid rgba(51, 255, 221, 0.08); 
+            border-radius: 0.75rem; 
+            padding: 0.75rem; 
+            margin-bottom: 0.5rem; 
+        }
+        .mri-card {
+            background: rgba(10, 25, 47, 0.3);
+            border: 1px solid rgba(51, 255, 221, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.25rem; 
+            margin-bottom: 1.5rem; 
+        }
+        .main-menu-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            min-height: 120px;
+        }
+        .main-menu-button svg {
+            margin-bottom: 0.75rem;
+        }
+        .button-description {
+            font-size: 0.75rem;
+            color: #A0AEC0;
+            margin-top: 0.25rem;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: normal;
+        }
+        .dmt-checkbox-container { /* Styling for DMT checkbox list */
+            max-height: 200px; /* Adjust as needed */
+            overflow-y: auto;
+            padding: 0.5rem;
+            border: 1px solid rgba(51, 255, 221, 0.15);
+            border-radius: 0.5rem;
+            background-color: rgba(0, 20, 30, 0.2);
+        }
+        .dmt-checkbox-container label {
+            display: block; /* Each DMT on a new line */
+            margin-bottom: 0.25rem;
+        }
+        /* Utility for icon sizing */
+        .icon-sm { width: 1em; height: 1em; }
+        .icon-md { width: 1.25em; height: 1.25em; }
+        .icon-lg { width: 1.5em; height: 1.5em; }
+        .icon-xl { width: 2em; height: 2em; } /* For main menu buttons */
+
+        /* Hidden class for toggling visibility */
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+    <main class="max-w-6xl mx-auto p-4 md:p-6">
+        <section class="card-glass">
+            <div id="progress-container" class="mb-8" style="display: none;">
+                <!-- Progress bar will be rendered here by JS -->
+            </div>
+            <form id="assessment-form">
+                <div id="form-content">
+                    <!-- Form steps will be rendered here by JS -->
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p class="flex items-center justify-center space-x-2">
+            <span>neuratos</span> 
+            <span id="footer-brain-icon"></span> <!-- Placeholder for footer icon -->
+            <span>© 2025</span>
+        </p>
+        <p class="mt-1 text-xs">készítette Dr. Bálint Zsolt</p>
+    </footer>
+
+    <script>
+        // --- ICON DEFINITIONS (INLINE SVGS) ---
+        const Icons = {
+            Plus: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+            Trash2: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>',
+            ChevronRight: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+            ChevronLeft: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><polyline points="15 18 9 12 15 6"></polyline></svg>',
+            User: (sizeClass = "icon-xl") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${sizeClass}"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+            Stethoscope: (sizeClass = "icon-xl") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${sizeClass}"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 0 0-.3.2l-1 10a2 2 0 0 1-4 0l-1-10A.3.3 0 0 0 4.8 2.3Z"></path><path d="M8 15v1a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-1"></path><circle cx="20" cy="10" r="2"></circle></svg>`,
+            Heart: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>',
+            Brain: (sizeClass = "icon-md") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${sizeClass}"><path d="M12 2a10 10 0 0 0-7.53 16.59l1.42-1.42A8 8 0 0 1 12 4a8 8 0 0 1 8 8 8 8 0 0 1-2.09 5.26l1.42 1.42A10 10 0 0 0 12 2Z"/><path d="M12 12a3 3 0 1 0 3 3"/><path d="M20 13.5c0-2.49-1.6-4.6-4-5.5V8"/><path d="M4 13.5c0-2.49 1.6-4.6 4-5.5V8"/><path d="M12 18a2.5 2.5 0 0 0 2.5-2.5c0-.68-.28-1.3-.73-1.76"/><path d="M12 18a2.5 2.5 0 0 1-2.5-2.5c0-.68.28-1.3.73-1.76"/></svg>`,
+            Droplet: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5S5 13 5 15a7 7 0 0 0 7 7z"></path></svg>',
+            ClipboardList: (sizeClass = "icon-md") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${sizeClass}"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>`,
+            Activity: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>',
+            FlaskConical: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><path d="M10 2v7.31"></path><path d="M14 9.31V2"></path><path d="M8.5 2h7"></path><path d="M12.79 11.79 14 13l-4.04 4.04a0.9.9 0 0 1-1.27 0l-1.37-1.37a0.9.9 0 0 1 0-1.27L11.51 10"></path><path d="m7.19 11.79-1.32 1.32a4.91 4.91 0 0 0 0 6.93l1.32 1.32C7.85 22.01 8.67 22 9.39 22H14.6c.72 0 1.54.01 2.21-.66l1.32-1.32a4.91 4.91 0 0 0 0-6.93l-1.32-1.32"></path></svg>',
+            Info: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-yellow-400"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+            XCircle: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-red-400"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+            CheckCircle: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-green-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+            Shield: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+            Cigarette: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><path d="M18 12H2v4h16"></path><path d="M22 12v4"></path><path d="M7 12v4"></path><path d="M18 8H2V4h16"></path><path d="M22 8V4"></path><path d="M7 8V4"></path><path d="M14 12v4"></path><path d="M14 8V4"></path></svg>',
+            Coffee: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><path d="M17 8h1a4 4 0 0 1 0 8h-1"></path><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path><line x1="6" y1="2" x2="6" y2="4"></line><line x1="10" y1="2" x2="10" y2="4"></line><line x1="14" y1="2" x2="14" y2="4"></line></svg>',
+            Wine: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm text-neon-teal"><path d="M8 22h8"></path><path d="M7 10h10"></path><path d="M12 15v7"></path><path d="M12 15a5 5 0 0 0 5-5c0-2-3-3-3-3s0-1-2-3-5 1-5 3c0 0-1 1-1 3a5 5 0 0 0 5 5Z"></path></svg>',
+            Search: (sizeClass = "icon-md") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${sizeClass}"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
+            RotateCcw: () => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><path d="M3 2v6h6"></path><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"></path></svg>',
+            ExternalLink: (sizeClass = "icon-xl") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${sizeClass}"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`,
+            Calculator: (sizeClass = "icon-xl") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${sizeClass}"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="12" y1="10" x2="12" y2="18"></line><line x1="8" y1="14" x2="16" y2="14"></line></svg>`,
+        };
+
+        // --- DATA DEFINITIONS ---
+        const dmtData = [ 
+          { name: "Interferon Beta-1a (Avonex)", efficacy: "moderate", msTypes: ["RRMS", "CIS"] }, { name: "Interferon Beta-1a (Rebif)", efficacy: "moderate", msTypes: ["RRMS", "CIS"] }, { name: "Interferon Beta-1b (Betaferon/Extavia)", efficacy: "moderate", msTypes: ["RRMS", "CIS"] }, { name: "Peginterferon Beta-1a (Plegridy)", efficacy: "moderate", msTypes: ["RRMS"] }, { name: "Glatiramer Acetate (Copaxone)", efficacy: "moderate", msTypes: ["RRMS", "CIS"] }, { name: "Dimethyl Fumarate (Tecfidera)", efficacy: "moderate", msTypes: ["RRMS"] }, { name: "Diroximel Fumarate (Vumerity)", efficacy: "moderate", msTypes: ["RRMS"] }, { name: "Teriflunomide (Aubagio)", efficacy: "moderate", msTypes: ["RRMS"] }, { name: "Fingolimod (Gilenya)", efficacy: "high", msTypes: ["RRMS"] }, { name: "Siponimod (Mayzent)", efficacy: "moderate", msTypes: ["SPMS-active"] }, { name: "Ozanimod (Zeposia)", efficacy: "high", msTypes: ["RRMS", "SPMS-active"] }, { name: "Ponesimod (Ponvory)", efficacy: "high", msTypes: ["RRMS"] }, { name: "Natalizumab (Tysabri)", efficacy: "high", msTypes: ["RRMS"] }, { name: "Alemtuzumab (Lemtrada)", efficacy: "high", msTypes: ["RRMS"] }, { name: "Ocrelizumab (Ocrevus)", efficacy: "high", msTypes: ["RRMS", "PPMS"] }, { name: "Cladribine (Mavenclad)", efficacy: "high", msTypes: ["RRMS"] }, { name: "Rituximab (Off-label)", efficacy: "high", msTypes: ["RRMS", "PPMS"] }, { name: "Ofatumumab (Kesimpta)", efficacy: "high", msTypes: ["RRMS"] }, { name: "Ublituximab (Briumvi)", efficacy: "high", msTypes: ["RRMS", "SPMS-active"] }, { name: "Mitoxantrone (Novantrone)", efficacy: "high", msTypes: ["RRMS", "SPMS", "PRMS"] }, { name: "Azathioprine (Off-label)", efficacy: "moderate", msTypes: ["RRMS", "SPMS"] }, { name: "Methotrexate (Off-label)", efficacy: "low", msTypes: ["RRMS", "SPMS", "PPMS"] }
+        ];
+
+        const symptomaticTreatmentOptions = {
+          "Fáradékonyság": ["Amantadine", "Modafinil", "Methylphenidate"], "Spaszticitás": ["Baclofen", "Tizanidine", "Dantrolene", "Diazepam", "Botulinum toxin"], "Hólyagdiszfunkció": ["Oxybutynin", "Tolterodine", "Solifenacin", "Mirabegron", "Botulinum toxin (intravesical)"], "Bélműködési zavarok": ["Rostpótlók", "Hashajtók (pl. Laktulóz)", "Loperamide"], "Fájdalom": ["Gabapentin", "Pregabalin", "Carbamazepine", "Duloxetine", "Amitriptyline", "NSAID-ok"], "Depresszió/Szorongás": ["Sertraline", "Fluoxetine", "Citalopram", "Duloxetine", "Venlafaxine", "Alprazolam"], "Kognitív zavarok": ["Donepezil (off-label)", "Modafinil"], "Járászavar": ["Dalfampridine", "Fizioterápia"], "Tremor": ["Propranolol", "Primidone", "Isoniazid (off-label)"], "Szexuális diszfunkció": ["Sildenafil", "Tadalafil", "Tanácsadás"], "Látászavarok": ["Nincs specifikus gyógyszeres kezelés", "Látássegítő eszközök"], "Dizartria/Diszfágia": ["Logopédia", "Diétás módosítások"],
+        };
+        const ambulansLapTemplate = `
+SM Ambuláns Vizsgálati Lap
+
+Anamnézis blokk
+- Elérhetőség: {{contact}}
+- Hozzátartozó (név, tel): {{relative_contact}}
+- Legmagasabb végzettség: {{highest_education}}
+- Évek száma az iskolában: {{school_years}}
+- Családi állapot: {{marital_status}}
+- Foglalkozás / foglalkoztatás jellege: {{occupation}}
+- Domináns kéz: {{dominant_hand}}
+- Élvezeti szerek: {{recreational_substances}}
+- Terhesség / szoptatás: {{pregnancy_status}}
+- Menopauza: {{menopause}}
+- CAVE (gyógyszerallergia, kontraindikáció): {{cave}}
+- Jelenlegi nem-SM gyógyszerek: {{non_ms_meds}}
+
+SM Gyógyszerelés
+- Aktuális DMD: {{current_dmd_name}}
+  - Kezdete (hány éve/hónapja): {{current_dmd_start_duration}} {{current_dmd_start_unit}}
+  - Hatás: {{dmd_effect}}
+  - Egyéb megjegyzés: {{dmd_other_notes}}
+- Rizikófaktorok:
+  - JCV titer: {{jcv_titer}}
+  - Lymphocyta szám: {{lymphocyte_count}}
+  - Egyéb (pl. immunszupresszió, komorbiditás): {{other_risk_factors}}
+
+Családi anamnézis
+- SM / autoimmun betegségek előfordulása: {{family_history}}
+
+Egyéb releváns betegségek
+- Malignitás: {{malignancy}}
+- Opportunista infekció / súlyos fertőzés: {{opportunistic_infections}}
+- Terhesség / Szoptatás (kórelőzmény): {{pregnancy_history}}
+- Egyéb szignifikáns megbetegedés: {{other_comorbidities}}
+
+SM Kórtörténet
+- Lefolyás típusa: {{ms_type_full}}
+- Diagnózis dátuma: {{diagnosis_date}}
+- Betegség időtartama (évek): {{disease_duration_calculated}}
+- SPMS kezdete: {{spms_onset_date}}
+- Relapszusok:
+{{relapses_list}}
+
+Paraklinikai markerek
+
+MRI Vizsgálatok:
+{{mri_exams_list}}
+- MRI Aktivitás az elmúlt 1 évben: {{mri_activity_new}}
+
+Liquor
+- Hely / időpont: {{liquor_location_date}}
+- OCB / IgG index: {{ocb_igg_index}}
+- Egyéb eltérések: {{liquor_other_findings}}
+
+Kiváltott válasz vizsgálatok
+- VEP / SEP / BAEP: {{evoked_potentials_type}}
+- Időpont, eredmény: {{evoked_potentials_date_result}}
+
+Autoantitest panel
+- ANA, ENA, aquaporin-4, MOG: {{autoantibody_panel}}
+- Dátum, eredmény: {{autoantibody_date_result}}
+
+Serostatus, vakcináció
+- HIV: {{hiv_status}}
+- HBV: {{hbv_status}}
+- HCV: {{hcv_status}}
+- VZV: {{vzv_status}}
+- HSV1/2: {{hsv_status}}
+- TBC szűrés (Quantiferon, mellkas RTG): {{tbc_screening_status}}
+
+Aktuális panaszok
+- Vizit időpontja: {{visit_date}}
+- Vizit célja: {{visit_purpose}}
+- Panaszok: {{current_complaints}}
+
+Egyéb Tünetek, melyek orvosi kezelést igényelnek:
+{{symptomatic_treatments_list}}
+
+Status panel
+- Belgyógyászati status: {{internal_medicine_status}}
+- Vitális paraméterek: {{vital_parameters}}
+- Neurológiai status: {{neurológiai_status}}
+- Segédeszköz használat: {{assistive_device_use}}
+- Járástávolság (m): {{walking_distance}}
+- EDSS: {{edss}}
+- Ambulatory Index: {{ambulatory_index}}
+- MSFC tesztek:
+  - 25FWT (s): {{msfc_25fwt}}
+  - 9HPT jobb (s): {{msfc_9hpt_jobb}}
+  - 9HPT bal (s): {{msfc_9hpt_bal}}
+  - PASAT (pontszám): {{msfc_pasat}}
+  - SDMT (pontszám): {{msfc_sdmt}}
+- BICAMS (ha van): {{bicams}}
+
+Epicrisis / Összefoglalás
+- Betegség kezdete / lefolyás típusa: {{disease_onset_type}}
+- Aktuális DMD: {{current_dmd_name}}
+- Vizit oka, eredménye: {{visit_outcome}}
+- Teendők / javaslatok: {{actions_suggestions}}
+- Felírt eszközök / támogatások: {{prescribed_aids}}
+- Életviteli tanácsok: {{lifestyle_advice}}
+
+Tervezett kontrollok
+- Neurológiai vizsgálat: {{next_neurológiai_exam}}
+- MRI kontroll (időpont): {{next_mri_control}}
+- Labor kontroll (pl. JCV, lymph): {{next_lab_control}}
+- Egyedi méltányosság érvényessége: {{individual_equity_validity}}
+`;
+        // --- APPLICATION STATE ---
+        let currentStep = 0;
+        let currentAssessmentType = null;
+        
+        const initialMriExamState = {
+            id: 1,
+            date_location_reporter: '',
+            type: '', // baseline, control, etc.
+            spinal_lesion_localization: '', // Field for spinal lesion location text
+            lesions: {
+                supratentorial: {
+                    t2: { periventricularis: '', juxtacorticalis: '', mely_feherallomanyi: '' },
+                    gd: { periventricularis: '', juxtacorticalis: '', mely_feherallomanyi: '' }
+                },
+                infratentorial: {
+                    t2: { agytorzs: '', cerebellum: '' },
+                    gd: { agytorzs: '', cerebellum: '' }
+                },
+                spinal: {
+                    t2: '',
+                    gd: ''
+                }
+            },
+        };
+
+        const getInitialFormData = () => ({
+            age: '', gender: '', pregnancyPlanning: '', contact: '', relative_contact: '', highest_education: '',
+            school_years: '', marital_status: '', occupation: '', dominant_hand: '', smoking: false, alcohol: false,
+            coffee: false, other_recreational_substances: '', menopause: '', msType: '', diagnosis_date: '',
+            relapses: '', relapses_list: '', spms_onset_date: '', edss: '',
+            mri_exams: [JSON.parse(JSON.stringify(initialMriExamState))], 
+            mri_activity_new: '', comorbidities: [], previousDMTs: [], contraindications: '', non_ms_meds: '',
+            current_dmd_name: '', current_dmd_start_duration: '', current_dmd_start_unit: 'év', dmd_effect: '',
+            dmd_other_notes: '', jcvStatus: '', jcvTiter: '', lymphocyteCount: '', other_risk_factors: '',
+            family_history: '', malignancy: '', opportunistic_infections: '', pregnancy_history: '',
+            other_comorbidities: '', liquor_location_date: '', ocb_igg_index: '', liquor_other_findings: '',
+            evoked_potentials_type: '', evoked_potentials_date_result: '', autoantibody_panel: '',
+            autoantibody_date_result: '', 
+            hiv_status: false, hbv_status: false, hcv_status: false, vzv_status: false, 
+            hsv_status: false, tbc_screening_status: false, 
+            symptomatic_treatments: [], 
+            visit_date: new Date().toLocaleDateString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '-').slice(0,10),
+            visit_purpose: '', current_complaints: '', internal_medicine_status: '', vital_parameters: '',
+            neurological_status: '', assistive_device_use: '', walking_distance: '', ambulatory_index: '',
+            msfc_25fwt: '', msfc_9hpt_jobb: '', msfc_9hpt_bal: '', msfc_pasat: '', msfc_sdmt: '', bicams: '',
+            disease_onset_type: '', visit_outcome: '', actions_suggestions: '', prescribed_aids: '',
+            lifestyle_advice: '', next_neurológiai_exam: '', next_mri_control: '', next_lab_control: '',
+            individual_equity_validity: '',
+        });
+        let formData = getInitialFormData();
+        let generatedAmbulansLap = '';
+
+        // --- DOM Elements ---
+        const formContentEl = document.getElementById('form-content');
+        const assessmentFormEl = document.getElementById('assessment-form');
+        const progressContainerEl = document.getElementById('progress-container');
+        const footerBrainIconEl = document.getElementById('footer-brain-icon');
+
+
+        // --- HELPER FUNCTIONS ---
+        function getDiseaseDurationCalculated() {
+            return formData.diagnosis_date ? new Date().getFullYear() - new Date(formData.diagnosis_date).getFullYear() : '';
+        }
+        
+        function getEDSSExplanation(score) {
+            if (score === '' || isNaN(score)) return '';
+            score = parseFloat(score);
+            if (score === 0) return 'Normális neurológiai vizsgálat (minden FS 0).';
+            if (score === 1.0) return 'Nincs rokkantság, minimális eltérés 1 FS-ben.';
+            if (score === 1.5) return 'Nincs rokkantság, minimális eltérés >1 FS-ben.';
+            if (score === 2.0) return 'Minimális rokkantság 1 FS-ben.';
+            if (score === 2.5) return 'Minimális rokkantság 2 FS-ben.';
+            if (score === 3.0) return 'Mérsékelt rokkantság 1 FS-ben, vagy enyhe 3-4 FS-ben. Teljesen ambuláns.';
+            if (score === 3.5) return 'Teljesen ambuláns, de mérsékelt rokkantság 1 FS-ben és enyhe 1-2 FS-ben.';
+            if (score === 4.0) return 'Teljesen ambuláns segítség nélkül, kb. 12 órát aktív, >500m járás.';
+            if (score === 4.5) return 'Teljesen ambuláns segítség nélkül, egész nap aktív, de korlátozottabb, >300m járás.';
+            if (score === 5.0) return 'Segítség nélkül >200m járás. Rokkantság korlátozza a napi aktivitást.';
+            if (score === 5.5) return 'Segítség nélkül >100m járás. Rokkantság jelentősen korlátozza a napi aktivitást.';
+            if (score === 6.0) return 'Időszakos vagy egyoldali állandó segítség (bot, mankó, merevítő) szükséges >100m járáshoz.';
+            if (score === 6.5) return 'Állandó kétoldali segítség (botok, mankók, merevítők) szükséges >20m járáshoz.';
+            if (score === 7.0) return 'Lényegében kerekesszékhez kötött, <5m járás segítséggel; önellátó kerekesszékkel.';
+            if (score === 7.5) return 'Kerekesszékhez kötött; segítség kell az átszálláshoz; önállóan tolja a székét, de nem egész nap.';
+            if (score === 8.0) return 'Lényegében ágyhoz/székhez kötött, de nincs ágyban egész nap; hatékony karhasználat.';
+            if (score === 8.5) return 'Lényegében ágyhoz kötött; hatékony karhasználat korlátozott.';
+            if (score === 9.0) return 'Magatehetetlen ágyhoz kötött beteg; tud kommunikálni és enni.';
+            if (score === 9.5) return 'Teljesen magatehetetlen ágyhoz kötött beteg; képtelen kommunikálni vagy enni/nyelni.';
+            if (score === 10.0) return 'Halál az SM miatt.';
+            return 'Érvénytelen EDSS pontszám.';
+        }
+
+        function generateAmbulansLapText(data) {
+            let ambulansLap = ambulansLapTemplate;
+            const replacePlaceholder = (template, placeholder, value) => {
+                let displayValue = value;
+                if (typeof value === 'boolean') {
+                    displayValue = value ? 'Igen/Pozitív' : 'Nem/Negatív';
+                }
+                return template.replace(new RegExp(`{{${placeholder}}}`, 'g'), displayValue || 'Nincs adat');
+            }
+
+            Object.keys(data).forEach(key => {
+                const placeholderKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+                if (key === 'mri_exams') {
+                    let mriExamsText = '';
+                    data.mri_exams.forEach((exam, index) => {
+                        const getNum = (val) => parseInt(val, 10) || 0;
+                        const lesions = exam.lesions;
+                        const isControl = exam.type === 'control';
+                        const prefix = isControl ? 'ÚJ ' : '';
+
+                        // Calculate sums again for the report
+                        const sup_t2 = lesions.supratentorial.t2;
+                        const sup_gd = lesions.supratentorial.gd;
+                        const supT2Sum = getNum(sup_t2.periventricularis) + getNum(sup_t2.juxtacorticalis) + getNum(sup_t2.mely_feherallomanyi);
+                        const supGdSum = getNum(sup_gd.periventricularis) + getNum(sup_gd.juxtacorticalis) + getNum(sup_gd.mely_feherallomanyi);
+
+                        const inf_t2 = lesions.infratentorial.t2;
+                        const inf_gd = lesions.infratentorial.gd;
+                        const infT2Sum = getNum(inf_t2.agytorzs) + getNum(inf_t2.cerebellum);
+                        const infGdSum = getNum(inf_gd.agytorzs) + getNum(inf_gd.cerebellum);
+
+                        const spinalT2Sum = getNum(lesions.spinal.t2);
+                        const spinalGdSum = getNum(lesions.spinal.gd);
+
+                        const totalT2Sum = supT2Sum + infT2Sum + spinalT2Sum;
+                        const totalGdSum = supGdSum + infGdSum + spinalGdSum;
+
+                        mriExamsText += `  MRI Vizsgálat ${index + 1}:\n`;
+                        mriExamsText += `    Dátum / hely / leletező: ${exam.date_location_reporter || 'Nincs adat'}\n`;
+                        mriExamsText += `    Típus: ${exam.type || 'Nincs adat'}\n`;
+                        mriExamsText += `    ÖSSZES ${prefix}T2 LÉZIÓ: ${totalT2Sum} (ebből összesen Gd+: ${totalGdSum})\n`;
+                        mriExamsText += `    - Szupratentoriális (össz T2): ${supT2Sum} (ebből Gd+: ${supGdSum})\n`;
+                        mriExamsText += `    - Infratentoriális (össz T2): ${infT2Sum} (ebből Gd+: ${infGdSum})\n`;
+                        mriExamsText += `    - Gerincvelői (össz T2): ${spinalT2Sum} (ebből Gd+: ${spinalGdSum})\n`;
+                        if (exam.spinal_lesion_localization) {
+                             mriExamsText += `      Lokalizáció: ${exam.spinal_lesion_localization}\n`;
+                        }
+                        mriExamsText += `\n`;
+
+                    });
+                    ambulansLap = replacePlaceholder(ambulansLap, 'mri_exams_list', mriExamsText || 'Nincs MRI vizsgálat rögzítve.');
+                } else if (key === 'symptomatic_treatments') {
+                    let symptomaticTreatmentsList = '';
+                    if (data.symptomatic_treatments.length > 0) {
+                        data.symptomatic_treatments.forEach(st => {
+                            symptomaticTreatmentsList += `- ${st.symptom}: ${st.medications.join(', ') || 'Nincs gyógyszer'}\n`;
+                        });
+                    }
+                    ambulansLap = replacePlaceholder(ambulansLap, 'symptomatic_treatments_list', symptomaticTreatmentsList || 'Nincs adat');
+                } else if (key === 'comorbidities') {
+                    const allComorbidities = [...data.comorbidities];
+                    if (data.other_comorbidities) { 
+                        allComorbidities.push(data.other_comorbidities);
+                    }
+                    ambulansLap = replacePlaceholder(ambulansLap, 'other_comorbidities', allComorbidities.join(', ') || 'Nincs');
+                } else if (key === 'msType') {
+                    const msTypeMap = { 'cis': 'Klinikailag Izolált Szindróma (CIS)', 'rrms': 'Relapszáló-remittáló SM (RRSM)', 'spms-active': 'Szekunder progresszív SM aktivitással (Aktív SPSM)', 'spms-nonactive': 'Szekunder progresszív SM aktivitás nélkül (Inaktív SPSM)', 'ppms': 'Primer progresszív SM (PPSM)', 'PRMS': 'Progresszív-relapszáló SM (PRMS)'};
+                    ambulansLap = replacePlaceholder(ambulansLap, 'ms_type_full', msTypeMap[data.msType] || 'Nincs adat');
+                } else if (key === 'relapses_list' && !data.relapses_list) { 
+                     ambulansLap = replacePlaceholder(ambulansLap, 'relapses_list', `  - Relapszusok száma az elmúlt 2 évben: ${data.relapses || 'Nincs adat'}`);
+                } else {
+                     ambulansLap = replacePlaceholder(ambulansLap, placeholderKey, data[key]);
+                }
+            });
+            ambulansLap = replacePlaceholder(ambulansLap, 'disease_duration_calculated', getDiseaseDurationCalculated());
+            
+            const recreationalSubstances = [];
+            if (data.smoking) recreationalSubstances.push('Dohányzás');
+            if (data.alcohol) recreationalSubstances.push('Alkohol');
+            if (data.coffee) recreationalSubstances.push('Kávé');
+            if (data.other_recreational_substances) recreationalSubstances.push(`Egyéb: ${data.other_recreational_substances}`);
+            ambulansLap = replacePlaceholder(ambulansLap, 'recreational_substances', recreationalSubstances.join(', ') || 'Nincs adat');
+            ambulansLap = replacePlaceholder(ambulansLap, 'pregnancy_status', data.pregnancyPlanning === 'yes' ? 'Terhességet tervez/terhes' : data.pregnancyPlanning === 'future' ? 'Később tervez terhességet' : data.pregnancyPlanning === 'no' ? 'Nem tervez terhességet' : 'Nem releváns');
+
+            return ambulansLap;
+        }
+
+
+        // --- EVENT HANDLERS & LOGIC ---
+        function handleInitialChoice(choice) {
+            currentAssessmentType = choice;
+            currentStep = choice === 'new' ? 1 : 0.6;
+            render(true);
+        }
+
+        function handleControlSubChoice(choice) {
+            currentStep = choice === 'mri' ? 2 : 4;
+            render(true);
+             if (choice === 'mri') {
+                setTimeout(() => {
+                    const mriContainer = document.getElementById('mri-exams-container');
+                    if (mriContainer) {
+                        mriContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+            }
+        }
+        
+        function goToStep(step) {
+            if (step < 1 || step > 5) return;
+            if (step === 5 && !generatedAmbulansLap) return; 
+            if (currentAssessmentType === 'control' && (step === 1 || step === 3)) return; 
+            
+            currentStep = step;
+            render(true);
+        }
+
+        function nextStep() {
+            if (currentStep === 3) {
+                currentStep = 4;
+            } else {
+                currentStep++;
+            }
+            render(true);
+        }
+
+        function prevStep() {
+            if (currentStep === 0.6) { 
+              currentStep = 0;
+              currentAssessmentType = null;
+            } else if (currentStep === 1) { 
+              currentStep = 0;
+              currentAssessmentType = null;
+            } else if (currentStep === 2 && currentAssessmentType === 'control') { 
+              currentStep = 0.6;
+            } else if (currentStep === 4 && currentAssessmentType === 'control') { 
+              currentStep = 0.6;
+            } else if (currentStep === 4) { 
+                currentStep = 3;
+            }
+             else if (currentStep > 0) { 
+              currentStep--;
+            }
+            render(true);
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            generatedAmbulansLap = generateAmbulansLapText(formData);
+            currentStep = 5;
+            render(true);
+        }
+
+        function handleChange(event) {
+            const { name, value, type, checked, dataset } = event.target;
+            let needsFullRender = false; 
+
+            if (type === 'checkbox') {
+                if (name === 'symptom_checkbox') {
+                    const symptomName = value;
+                    const symptomExists = formData.symptomatic_treatments.some(st => st.symptom === symptomName);
+                    if (checked) {
+                        if (!symptomExists) {
+                            formData.symptomatic_treatments.push({ symptom: symptomName, medications: [] });
+                        }
+                    } else {
+                        formData.symptomatic_treatments = formData.symptomatic_treatments.filter(st => st.symptom !== symptomName);
+                    }
+                    needsFullRender = true; 
+                } else if (name === 'comorbidities') { 
+                    if (checked) {
+                        if (!formData.comorbidities.includes(value)) formData.comorbidities.push(value);
+                    } else {
+                        formData.comorbidities = formData.comorbidities.filter(c => c !== value);
+                    }
+                } else if (name === 'previousDMTs_checkbox') { 
+                    const dmtName = value;
+                    if (checked) {
+                        if (!formData.previousDMTs.includes(dmtName)) {
+                            formData.previousDMTs.push(dmtName);
+                        }
+                    } else {
+                        formData.previousDMTs = formData.previousDMTs.filter(dmt => dmt !== dmtName);
+                    }
+                }
+                else if (name.startsWith('medication_checkbox_')) {
+                    const symptomName = dataset.symptom;
+                    const medicationName = value;
+                    const treatment = formData.symptomatic_treatments.find(st => st.symptom === symptomName);
+                    if (treatment) {
+                        if (checked) {
+                            if (!treatment.medications.includes(medicationName)) {
+                                treatment.medications.push(medicationName);
+                            }
+                        } else {
+                            treatment.medications = treatment.medications.filter(med => med !== medicationName);
+                        }
+                    }
+                }
+                else { 
+                    formData[name] = checked;
+                }
+            } else if (type === 'select-multiple') { 
+                formData[name] = Array.from(event.target.selectedOptions, option => option.value);
+            }
+            else { 
+                formData[name] = value;
+            }
+
+            // Specific updates
+            if (name === 'diagnosis_date') {
+                const durationEl = document.getElementById('disease_duration_calculated_display');
+                if (durationEl) durationEl.textContent = `Betegség időtartama: ${getDiseaseDurationCalculated()} év`;
+            }
+            if (name === 'edss') {
+                const edssExplanationEl = document.getElementById('edss_explanation');
+                if (edssExplanationEl) edssExplanationEl.textContent = getEDSSExplanation(value);
+            }
+            if (name === 'gender' && currentStep === 1) { 
+                needsFullRender = true;
+            }
+            if (name === 'msType' && currentStep === 2) { 
+                needsFullRender = true; 
+            }
+            if (name === 'current_dmd_name' && currentStep === 3) {
+                needsFullRender = true; 
+            }
+            if (name === 'jcvStatus') {
+                const jcvTiterContainer = document.getElementById('jcvTiterContainer');
+                if (jcvTiterContainer) {
+                    jcvTiterContainer.classList.toggle('hidden', value !== 'positive');
+                }
+            }
+
+            if (needsFullRender) {
+                render(false); 
+            }
+        }
+        
+        function handleMriChange(index, event) {
+            const { name, value } = event.target;
+            formData.mri_exams[index][name] = value;
+            if (name === 'type') {
+                 if(currentStep === 2) renderMRIExams();
+            }
+        }
+
+        function handleMriLesionChange(examIndex, region, contrast, location, value) {
+            const exam = formData.mri_exams[examIndex];
+            if (exam?.lesions?.[region]?.[contrast]) {
+                exam.lesions[region][contrast][location] = value;
+                updateMriSums(examIndex);
+            }
+        }
+
+        function handleSpinalLesionChange(examIndex, contrast, value) {
+            const exam = formData.mri_exams[examIndex];
+            if (exam?.lesions?.spinal) {
+                exam.lesions.spinal[contrast] = value;
+                updateMriSums(examIndex);
+            }
+        }
+
+        function updateMriSums(examIndex) {
+            const exam = formData.mri_exams[examIndex];
+            if (!exam) return;
+
+            const getNum = (val) => parseInt(val, 10) || 0;
+            const lesions = exam.lesions;
+
+            // T2 Sums
+            const supT2Sum = getNum(lesions.supratentorial.t2.periventricularis) + getNum(lesions.supratentorial.t2.juxtacorticalis) + getNum(lesions.supratentorial.t2.mely_feherallomanyi);
+            const infT2Sum = getNum(lesions.infratentorial.t2.agytorzs) + getNum(lesions.infratentorial.t2.cerebellum);
+            const spinalT2Sum = getNum(lesions.spinal.t2);
+            const totalT2Sum = supT2Sum + infT2Sum + spinalT2Sum;
+            
+            // Gd+ Sums
+            const supGdSum = getNum(lesions.supratentorial.gd.periventricularis) + getNum(lesions.supratentorial.gd.juxtacorticalis) + getNum(lesions.supratentorial.gd.mely_feherallomanyi);
+            const infGdSum = getNum(lesions.infratentorial.gd.agytorzs) + getNum(lesions.infratentorial.gd.cerebellum);
+            const spinalGdSum = getNum(lesions.spinal.gd);
+            const totalGdSum = supGdSum + infGdSum + spinalGdSum;
+
+            // Update UI fields
+            document.getElementById(`supratentorial_sum_${examIndex}`).value = supT2Sum;
+            document.getElementById(`infratentorial_sum_${examIndex}`).value = infT2Sum;
+            document.getElementById(`spinal_sum_${examIndex}`).value = spinalT2Sum;
+            document.getElementById(`total_lesion_sum_${examIndex}`).value = totalT2Sum;
+            document.getElementById(`total_gd_sum_${examIndex}`).value = totalGdSum;
+
+
+            if (exam.type === 'control') {
+                updateMriActivity();
+            }
+        }
+        
+        function updateMriActivity() {
+            const lastControlMri = formData.mri_exams.slice().reverse().find(e => e.type === 'control');
+            if (!lastControlMri) return;
+
+            const getNum = val => parseInt(val, 10) || 0;
+            const lesions = lastControlMri.lesions;
+
+            // Calculate total new T2 lesions
+            const newT2Count = (getNum(lesions.supratentorial.t2.periventricularis) + getNum(lesions.supratentorial.t2.juxtacorticalis) + getNum(lesions.supratentorial.t2.mely_feherallomanyi)) +
+                               (getNum(lesions.infratentorial.t2.agytorzs) + getNum(lesions.infratentorial.t2.cerebellum)) +
+                               getNum(lesions.spinal.t2);
+
+            // Calculate total new Gd+ lesions
+            const newGdCount = (getNum(lesions.supratentorial.gd.periventricularis) + getNum(lesions.supratentorial.gd.juxtacorticalis) + getNum(lesions.supratentorial.gd.mely_feherallomanyi)) +
+                               (getNum(lesions.infratentorial.gd.agytorzs) + getNum(lesions.infratentorial.gd.cerebellum)) +
+                               getNum(lesions.spinal.gd);
+
+            let determinedActivity = '';
+            if (newGdCount > 0 || newT2Count >= 2) {
+                determinedActivity = 'high';
+            } else if (newT2Count === 1) { 
+                determinedActivity = 'moderate';
+            } else { 
+                determinedActivity = 'low';
+            }
+
+            formData.mri_activity_new = determinedActivity;
+            const mriActivitySelect = document.getElementById('mri_activity_new');
+            if (mriActivitySelect) mriActivitySelect.value = determinedActivity;
+        }
+
+        function addMriExam() {
+            const newId = formData.mri_exams.length > 0 ? Math.max(...formData.mri_exams.map(m => m.id)) + 1 : 1;
+            const newExamState = JSON.parse(JSON.stringify(initialMriExamState));
+            newExamState.id = newId;
+            formData.mri_exams.push(newExamState);
+            if(currentStep === 2) renderMRIExams();
+        }
+
+        function removeMriExam(id) {
+            formData.mri_exams = formData.mri_exams.filter(exam => exam.id !== id);
+            if(currentStep === 2) renderMRIExams();
+        }
+        
+        // --- RENDERING FUNCTIONS ---
+        function renderProgress() {
+            const progressPercentage = currentStep <= 0.6 ? 0 : (currentStep > 4 ? 100 : (currentStep - 1) * (100 / 4));
+            
+            const isClickable = (step) => {
+                if (step > 5 || step < 1) return false;
+                if (step === 5 && !generatedAmbulansLap) return false;
+                if (currentAssessmentType === 'control' && (step === 1 || step === 3)) return false;
+                return true;
+            };
+
+            const steps = [
+                { number: 1, label: "Alap" }, { number: 2, label: "Jellemzők" },
+                { number: 3, label: "Kórelőzmény" }, { number: 4, label: "Státusz" },
+                { number: 5, label: "Eredmények" }
+            ];
+
+            progressContainerEl.innerHTML = `
+                <div class="w-full bg-gray-700 rounded-full h-2.5">
+                    <div class="bg-teal-500 h-2.5 rounded-full transition-all duration-300 ease-in-out" style="width: ${progressPercentage}%;"></div>
+                </div>
+                <div class="flex flex-wrap justify-between text-xs sm:text-sm mt-2 text-gray-400">
+                    ${steps.map(step => `
+                        <span onclick="${isClickable(step.number) ? `goToStep(${step.number})` : ''}"
+                              class="${currentStep >= step.number ? 'font-bold text-teal-300' : ''} 
+                                     ${isClickable(step.number) ? 'cursor-pointer hover:text-white' : 'cursor-not-allowed opacity-50'}">
+                            ${step.number}. ${step.label}
+                        </span>
+                    `).join('')}
+                </div>
+            `;
+            progressContainerEl.style.display = currentStep > 0 && currentStep <=5 ? 'block' : 'none';
+        }
+
+        function createInput(labelText, id, name, type = 'text', value, required = false, placeholder = '', min, max, step) {
+            return `
+                <div class="mb-4">
+                    <label for="${id}" class="block text-neon-teal font-semibold mb-2">${labelText}</label>
+                    <input type="${type}" id="${id}" name="${name}" value="${value || ''}" 
+                           class="input-neon" 
+                           ${required ? 'required' : ''} 
+                           ${placeholder ? `placeholder="${placeholder}"` : ''}
+                           ${min !== undefined ? `min="${min}"` : ''}
+                           ${max !== undefined ? `max="${max}"` : ''}
+                           ${step !== undefined ? `step="${step}"` : ''}
+                           oninput="handleChange(event)">
+                </div>`;
+        }
+         function createTextarea(labelText, id, name, value, placeholder = '', rows = 2) {
+            return `
+                <div class="mb-4">
+                    <label for="${id}" class="block text-neon-teal font-semibold mb-2">${labelText}</label>
+                    <textarea id="${id}" name="${name}" class="input-neon" rows="${rows}" placeholder="${placeholder}" oninput="handleChange(event)">${value || ''}</textarea>
+                </div>`;
+        }
+
+        function createSelect(labelText, id, name, value, options, required = false, multiple = false) {
+            let currentVal = value;
+            if (multiple && !Array.isArray(currentVal)) { 
+                 currentVal = currentVal ? [currentVal] : [];
+            }
+
+            let optionsHtml = options.map(opt => {
+                let selected = false;
+                if (multiple && Array.isArray(currentVal)) {
+                    selected = currentVal.includes(opt.value);
+                } else if (!multiple) {
+                    selected = currentVal === opt.value;
+                }
+                return `<option value="${opt.value}" ${selected ? 'selected' : ''}>${opt.label}</option>`;
+            }).join('');
+
+            if (!required && !multiple && !options.some(opt => opt.value === "")) { 
+                 optionsHtml = `<option value="">Válasszon</option>` + optionsHtml;
+            }
+            return `
+                <div class="mb-4">
+                    <label for="${id}" class="block text-neon-teal font-semibold mb-2">${labelText}</label>
+                    <select id="${id}" name="${name}" class="input-neon ${multiple ? 'h-32' : ''}" ${required ? 'required' : ''} ${multiple ? 'multiple' : ''} onchange="handleChange(event)">
+                        ${optionsHtml}
+                    </select>
+                </div>`;
+        }
+        
+        function createRadioGroup(labelText, name, currentValue, options) {
+            const optionsHtml = options.map(opt => `
+                <label class="inline-flex items-center text-gray-200">
+                    <input type="radio" name="${name}" value="${opt.value}" ${currentValue === opt.value ? 'checked' : ''} class="form-radio-neon" onchange="handleChange(event)">
+                    <span class="ml-2">${opt.label}</span>
+                </label>
+            `).join('');
+            return `
+                <div class="mb-4">
+                    <label class="block text-neon-teal font-semibold mb-2">${labelText}</label>
+                    <div class="flex flex-col space-y-1">${optionsHtml}</div>
+                </div>`;
+        }
+        
+        function createCheckboxGroup(labelText, items) { 
+            const checkboxesHtml = items.map(item => {
+                let isCurrentlyChecked = false;
+                if (item.name === "comorbidities" && item.value) { 
+                    isCurrentlyChecked = Array.isArray(formData.comorbidities) && formData.comorbidities.includes(item.value);
+                } else { 
+                    isCurrentlyChecked = !!formData[item.name]; 
+                }
+                return `
+                    <label class="inline-flex items-center text-gray-200">
+                        <input type="checkbox" 
+                               name="${item.name}" 
+                               value="${item.value || item.name}" 
+                               ${isCurrentlyChecked ? 'checked' : ''} 
+                               class="form-checkbox-neon" 
+                               onchange="handleChange(event)">
+                        ${item.icon ? item.icon() : ''}
+                        <span class="ml-2">${item.label}</span>
+                    </label>`;
+            }).join('');
+             return `
+                <div class="mb-4">
+                    <label class="block text-neon-teal font-semibold mb-2">${labelText}</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${checkboxesHtml}</div>
+                </div>`;
+        }
+
+        function createDMTCheckboxGroup(labelText, nameAttribute, currentValues, dmtOptions) {
+            const checkboxesHtml = dmtOptions.map(dmt => {
+                const isChecked = Array.isArray(currentValues) && currentValues.includes(dmt.name);
+                return `
+                    <label class="inline-flex items-center text-gray-200">
+                        <input type="checkbox" 
+                               name="${nameAttribute}" 
+                               value="${dmt.name}" 
+                               ${isChecked ? 'checked' : ''} 
+                               class="form-checkbox-neon" 
+                               onchange="handleChange(event)">
+                        <span class="ml-2">${dmt.name}</span>
+                    </label>`;
+            }).join('');
+            return `
+                <div class="mb-4">
+                    <label class="block text-neon-teal font-semibold mb-2">${labelText}</label>
+                    <div class="dmt-checkbox-container grid grid-cols-1 gap-1">
+                        ${checkboxesHtml}
+                    </div>
+                </div>`;
+        }
+        
+        function renderStep0() {
+            formContentEl.innerHTML = `
+                <div class="step-content text-center py-8">
+                    <h3 class="text-3xl font-bold text-neon mb-2 uppercase tracking-wide">Sclerosis M™</h3>
+                    <p class="text-sm text-gray-400 mb-10">powered by neuratos</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex flex-col space-y-6">
+                            <button type="button" id="btn-new-patient" class="btn-neon btn-blue w-full main-menu-button">
+                                ${Icons.User()}
+                                <span>Új betegfelvétel</span>
+                                <span class="button-description">Teljes körű adatbevitel új páciens számára.</span>
+                            </button>
+                            <button type="button" id="btn-control-visit" class="btn-neon btn-green w-full main-menu-button">
+                                ${Icons.Stethoscope()}
+                                <span>Kontroll</span>
+                                <span class="button-description">Korábbi beteg adatainak frissítése vagy státusz rögzítése.</span>
+                            </button>
+                        </div>
+                        <div class="flex flex-col space-y-6">
+                            <a href="https://mibmpgrg.manus.space/" target="_blank" rel="noopener noreferrer" class="btn-neon btn-purple w-full main-menu-button">
+                                ${Icons.ExternalLink()}
+                                <span>Terápia Javasló Eszköz</span>
+                                <span class="button-description">Külső eszköz a terápiás döntések támogatására.</span>
+                            </a>
+                            <a href="https://xvrgvlfu.manus.space/" target="_blank" rel="noopener noreferrer" class="btn-neon btn-indigo w-full main-menu-button">
+                                ${Icons.Calculator()}
+                                <span>MSFC, EDSS, SDMT Kalkulátor</span>
+                                <span class="button-description">Pontszámok és értékelések kalkulálása.</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+            document.getElementById('btn-new-patient').onclick = () => handleInitialChoice('new');
+            document.getElementById('btn-control-visit').onclick = () => handleInitialChoice('control');
+        }
+
+        function renderStep0_6() {
+             formContentEl.innerHTML = `
+                <div class="step-content text-center py-8">
+                    <h3 class="text-2xl font-bold text-neon mb-8 uppercase tracking-wide">Kontroll Vizsgálat Kezdete</h3>
+                    <div class="flex flex-col space-y-6 mb-6">
+                        <button type="button" id="btn-control-mri" class="btn-neon btn-purple w-full md:w-3/4 mx-auto flex items-center justify-center gap-3">
+                            ${Icons.Brain('icon-md')} MRI adatok (2. lépés)
+                        </button>
+                        <button type="button" id="btn-control-status" class="btn-neon btn-indigo w-full md:w-3/4 mx-auto flex items-center justify-center gap-3">
+                            ${Icons.ClipboardList('icon-md')} Aktuális státusz (4. lépés) 
+                        </button>
+                    </div>
+                    <button type="button" id="btn-prev-step" class="btn-neon mt-4">
+                        ${Icons.ChevronLeft()} Vissza
+                    </button>
+                </div>`;
+            document.getElementById('btn-control-mri').onclick = () => handleControlSubChoice('mri');
+            document.getElementById('btn-control-status').onclick = () => handleControlSubChoice('status');
+            document.getElementById('btn-prev-step').onclick = prevStep;
+        }
+        
+        function renderStep1() {
+            let html = `<h3 class="text-2xl font-bold text-neon mb-6 uppercase tracking-wide">1. Alapvető Betegadatok</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('Kor (évek):', 'age', 'age', 'number', formData.age, true, '', 10, 100);
+            html += createRadioGroup('Nem:', 'gender', formData.gender, [{value: 'female', label: 'Nő'}, {value: 'male', label: 'Férfi'}, {value: 'other', label: 'Egyéb'}]);
+            html += createInput('Elérhetőség:', 'contact', 'contact', 'text', formData.contact, false, 'Telefonszám, email');
+            html += createInput('Hozzátartozó (név, tel):', 'relative_contact', 'relative_contact', 'text', formData.relative_contact, false, 'Név, telefonszám');
+            html += createSelect('Legmagasabb végzettség:', 'highest_education', 'highest_education', formData.highest_education, [
+                {value: "általános iskola", label: "Általános iskola"}, {value: "középiskola", label: "Középiskola"}, 
+                {value: "egyetem", label: "Egyetem"}, {value: "főiskola", label: "Főiskola"}, 
+                {value: "doktori", label: "Doktori"}, {value: "egyéb", label: "Egyéb"}
+            ]);
+            html += createInput('Évek száma az iskolában:', 'school_years', 'school_years', 'number', formData.school_years, false, '', 0);
+            html += createInput('Családi állapot:', 'marital_status', 'marital_status', 'text', formData.marital_status, false, 'Pl. nős/hajadon, özvegy');
+            html += createInput('Foglalkozás / jellege:', 'occupation', 'occupation', 'text', formData.occupation, false, 'Pl. mérnök, nyugdíjas');
+            html += createRadioGroup('Domináns kéz:', 'dominant_hand', formData.dominant_hand, [{value: 'Jobb', label: 'Jobb'}, {value: 'Bal', label: 'Bal'}, {value: 'Ambidekter', label: 'Ambidekter'}]);
+            if (formData.gender === 'female') {
+                 html += createInput('Menopauza:', 'menopause', 'menopause', 'text', formData.menopause, false, 'Pl. igen, nem, dátum');
+            } else {
+                 html += `<div></div>`; 
+            }
+            html += `</div>`; 
+
+            html += `<div class="mb-4 mt-4">
+                        ${createCheckboxGroup('Élvezeti szerek:', [
+                            {name: "smoking", label: "Dohányzás", icon: Icons.Cigarette},
+                            {name: "alcohol", label: "Alkohol", icon: Icons.Wine},
+                            {name: "coffee", label: "Kávé", icon: Icons.Coffee}
+                        ])}
+                        <div class="flex items-center mt-1">
+                            <label for="other_recreational_substances" class="mr-2 text-neon-teal whitespace-nowrap">Egyéb:</label>
+                            <input type="text" id="other_recreational_substances" name="other_recreational_substances" value="${formData.other_recreational_substances}" class="input-neon" oninput="handleChange(event)">
+                        </div>
+                    </div>`;
+
+            html += `<div class="flex justify-between mt-8">
+                        <button type="button" id="btn-prev-step" class="btn-neon">${Icons.ChevronLeft()}Vissza</button>
+                        <button type="button" id="btn-next-step" class="btn-neon btn-green">Tovább ${Icons.ChevronRight()}</button>
+                     </div>`;
+            formContentEl.innerHTML = html;
+            document.getElementById('btn-prev-step').onclick = prevStep;
+            document.getElementById('btn-next-step').onclick = nextStep;
+        }
+        
+        function renderMRIExams() { 
+            const container = document.getElementById('mri-exams-container');
+            if (!container) return; 
+
+            let mriHtml = '';
+            formData.mri_exams.forEach((exam, index) => {
+                const isControl = exam.type === 'control';
+
+                const createLesionInput = (region, contrast, location, label) => {
+                    const value = exam.lesions?.[region]?.[contrast]?.[location] || '';
+                    const onInputChange = `handleMriLesionChange(${index}, '${region}', '${contrast}', '${location}', event.target.value)`;
+                    return `
+                        <div class="grid grid-cols-[1fr_auto] items-center gap-x-2">
+                            <label class="text-gray-300 text-sm">${label}:</label>
+                            <input type="number" min="0" value="${value}" 
+                                   oninput="${onInputChange}"
+                                   class="input-neon w-20 text-center p-1">
+                        </div>`;
+                };
+
+                const createSpinalLesionInput = (contrast, label) => {
+                    const value = exam.lesions?.spinal?.[contrast] || '';
+                    const onInputChange = `handleSpinalLesionChange(${index}, '${contrast}', event.target.value)`;
+                    return `
+                         <div class="grid grid-cols-[1fr_auto] items-center gap-x-2">
+                            <label class="text-gray-300 text-sm">${label}:</label>
+                            <input type="number" min="0" value="${value}" 
+                                   oninput="${onInputChange}"
+                                   class="input-neon w-20 text-center p-1">
+                        </div>
+                    `;
+                }
+
+                const createSumInput = (id, label) => {
+                    return `
+                        <div class="grid grid-cols-[1fr_auto] items-center gap-x-2 mt-2 pt-2 border-t border-t-cyan-500/20">
+                            <label for="${id}" class="text-neon-teal font-semibold text-sm">${label}:</label>
+                            <input type="number" id="${id}" readonly 
+                                   class="input-neon w-20 text-center p-1 font-bold bg-gray-900/50 border-cyan-400/50 cursor-not-allowed">
+                        </div>`;
+                }
+
+                mriHtml += `
+                <div key="${exam.id}" class="mri-card mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h5 class="text-lg font-semibold text-neon-teal">MRI Vizsgálat ${index + 1}</h5>
+                        ${formData.mri_exams.length > 1 ? `<button type="button" data-examid="${exam.id}" class="btn-remove-mri btn-neon btn-red px-2 py-1">${Icons.Trash2()} Eltávolítás</button>` : ''}
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                         <input type="text" name="date_location_reporter" value="${exam.date_location_reporter || ''}" data-index="${index}" class="input-neon" placeholder="Dátum / hely / leletező" oninput="handleMriChange(${index}, event)">
+                         <select name="type" data-index="${index}" class="input-neon" onchange="handleMriChange(${index}, event)">
+                            <option value="" ${exam.type === '' ? 'selected':''}>Típus...</option> 
+                            <option value="baseline" ${exam.type === 'baseline' ? 'selected':''}>Baseline</option> 
+                            <option value="re-baseline" ${exam.type === 're-baseline' ? 'selected':''}>Re-baseline</option> 
+                            <option value="control" ${exam.type === 'control' ? 'selected':''}>Kontroll</option>
+                        </select>
+                    </div>
+
+                    ${isControl ? `<div class="mb-4 p-2 text-center bg-yellow-900/50 border border-yellow-500 rounded-lg"><p class="font-bold text-yellow-300">ÚJ LÉZIÓK RÖGZÍTÉSE (előző vizsgálathoz képest)!</p></div>` : ''}
+
+                    <!-- LESION DETAILS GRID -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <!-- Szupratentorialis -->
+                        <div class="p-3 rounded-lg bg-slate-800/40 border border-slate-700/50">
+                            <h6 class="font-bold text-white mb-3">Szupratentoriális</h6>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+                                <div>
+                                    <p class="text-sm text-neon-teal mb-2">T2/Flair hyperintenzív</p>
+                                    <div class="space-y-2">
+                                        ${createLesionInput('supratentorial', 't2', 'periventricularis', 'Periventricularis')}
+                                        ${createLesionInput('supratentorial', 't2', 'juxtacorticalis', 'Juxtacorticalis')}
+                                        ${createLesionInput('supratentorial', 't2', 'mely_feherallomanyi', 'Mély fehérállom.')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-neon-teal mb-2">Ebből gadolínium halmozó</p>
+                                     <div class="space-y-2">
+                                        ${createLesionInput('supratentorial', 'gd', 'periventricularis', 'Periventricularis')}
+                                        ${createLesionInput('supratentorial', 'gd', 'juxtacorticalis', 'Juxtacorticalis')}
+                                        ${createLesionInput('supratentorial', 'gd', 'mely_feherallomanyi', 'Mély fehérállom.')}
+                                    </div>
+                                </div>
+                            </div>
+                            ${createSumInput(`supratentorial_sum_${index}`, 'Szupratent. (T2) összesen')}
+                        </div>
+
+                        <!-- Infratentorialis -->
+                        <div class="p-3 rounded-lg bg-slate-800/40 border border-slate-700/50">
+                             <h6 class="font-bold text-white mb-3">Infratentoriális</h6>
+                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+                                <div>
+                                    <p class="text-sm text-neon-teal mb-2">T2/Flair hyperintenzív</p>
+                                    <div class="space-y-2">
+                                        ${createLesionInput('infratentorial', 't2', 'agytorzs', 'Agytörzs')}
+                                        ${createLesionInput('infratentorial', 't2', 'cerebellum', 'Cerebellum')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-neon-teal mb-2">Ebből gadolínium halmozó</p>
+                                    <div class="space-y-2">
+                                        ${createLesionInput('infratentorial', 'gd', 'agytorzs', 'Agytörzs')}
+                                        ${createLesionInput('infratentorial', 'gd', 'cerebellum', 'Cerebellum')}
+                                    </div>
+                                </div>
+                            </div>
+                            ${createSumInput(`infratentorial_sum_${index}`, 'Infratent. (T2) összesen')}
+                        </div>
+                        
+                        <!-- Gerincveloi -->
+                        <div class="p-3 rounded-lg bg-slate-800/40 border border-slate-700/50">
+                            <h6 class="font-bold text-white mb-3">Gerincvelői</h6>
+                            <div class="space-y-2">
+                                ${createSpinalLesionInput('t2', 'T2/Flair hyperintenzív')}
+                                ${createSpinalLesionInput('gd', 'Ebből gadolínium halmozó')}
+                                 <div class="pt-2">
+                                    <label class="text-gray-300 text-sm">Lokalizáció:</label>
+                                    <input type="text" name="spinal_lesion_localization" value="${exam.spinal_lesion_localization || ''}" oninput="handleMriChange(${index}, event)" class="input-neon p-1 mt-1" placeholder="Pl. C5, T2-T4">
+                                </div>
+                            </div>
+                            ${createSumInput(`spinal_sum_${index}`, 'Gerincvelői (T2) összesen')}
+                        </div>
+                    </div>
+
+                    <!-- TOTAL SUMS -->
+                    <div class="mt-4 pt-4 border-t-2 border-cyan-300/40 flex flex-wrap justify-end gap-x-8 gap-y-2">
+                        <div class="flex items-center space-x-3">
+                            <label for="total_gd_sum_${index}" class="text-lg text-white font-semibold">ÖSSZES GD+ LÉZIÓ:</label>
+                            <input type="number" id="total_gd_sum_${index}" readonly class="input-neon w-24 text-center p-2 font-bold bg-gray-900/50 border-cyan-300 cursor-not-allowed">
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <label for="total_lesion_sum_${index}" class="text-lg text-white font-bold">ÖSSZES T2 LÉZIÓ:</label>
+                            <input type="number" id="total_lesion_sum_${index}" readonly class="input-neon w-24 text-center p-2 font-bold bg-gray-900/50 border-cyan-300 cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = mriHtml;
+
+            formData.mri_exams.forEach((exam, index) => {
+                updateMriSums(index);
+            });
+
+            document.querySelectorAll('.btn-remove-mri').forEach(btn => {
+                btn.onclick = () => removeMriExam(parseInt(btn.dataset.examid));
+            });
+        }
+
+        function renderStep2() {
+            let html = `<h3 class="text-2xl font-bold text-neon mb-6 uppercase tracking-wide">2. Betegség Jellemzők és MRI</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createSelect('SM típus:', 'msType', 'msType', formData.msType, [
+                {value: '', label: 'Válasszon SM típust'},
+                {value: 'cis', label: 'Klinikailag Izolált Szindróma (CIS)'}, {value: 'rrms', label: 'Relapszáló-remittáló SM (RRSM)'},
+                {value: 'spms-active', label: 'Szekunder progresszív SM aktivitással (Aktív SPSM)'}, 
+                {value: 'spms-nonactive', label: 'Szekunder progresszív SM aktivitás nélkül (Inaktív SPSM)'},
+                {value: 'ppms', label: 'Primer progresszív SM (PPSM)'}
+            ], true);
+            html += createInput('Diagnózis dátuma:', 'diagnosis_date', 'diagnosis_date', 'date', formData.diagnosis_date);
+            html += `<div class="mb-4"><p class="text-xs text-gray-400 mt-1" id="disease_duration_calculated_display">${formData.diagnosis_date ? `Betegség időtartama: ${getDiseaseDurationCalculated()} év` : ''}</p></div>`;
+
+            if (formData.msType === 'spms-active' || formData.msType === 'spms-nonactive') {
+                html += createInput('SPMS kezdete:', 'spms_onset_date', 'spms_onset_date', 'date', formData.spms_onset_date);
+            } else { 
+                html += `<div></div>`; 
+            }
+            html += createInput('Relapszusok (elmúlt 2 év):', 'relapses', 'relapses', 'number', formData.relapses, false, '', 0, 20);
+            html += `</div>`; 
+            html += `<div class="mb-4 md:col-span-2"> ${createTextarea('Relapszusok listája (dátum, tünet, kezelés, EDSS):', 'relapses_list', 'relapses_list', formData.relapses_list, 'Pl. 2023.01.15, látászavar, steroid, EDSS 3.0', 3)}</div>`;
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('EDSS pontszám:', 'edss', 'edss', 'number', formData.edss, false, '', 0, 10, 0.5);
+            html += `<div class="mb-4"><p class="text-xs text-gray-400 mt-1" id="edss_explanation">${getEDSSExplanation(formData.edss)}</p></div>`;
+            html += `</div>`; 
+
+            html += `<h4 class="text-xl font-bold text-neon mt-6 mb-4 uppercase tracking-wide">MRI Vizsgálatok</h4>`;
+            html += `<div id="mri-exams-container"></div>`; 
+            
+            html += `<button type="button" id="btn-add-mri" class="btn-neon btn-teal mt-2 mb-4">${Icons.Plus()} MRI Vizsgálat Hozzáadása</button>`;
+            html += createSelect('MRI Aktivitás (elmúlt 1 év, összesített):', 'mri_activity_new', 'mri_activity_new', formData.mri_activity_new, [
+                {value: "", label: "Válasszon"},
+                {value: "high", label: "Magas (pl. ≥2 új T2 vagy Gd+ lézió)"}, 
+                {value: "moderate", label: "Közepes (pl. 1 új T2 lézió)"},
+                {value: "low", label: "Alacsony (nincs új lézió)"}
+            ], false);
+            
+            html += `<div class="flex justify-between mt-8">
+                        <button type="button" id="btn-prev-step" class="btn-neon">${Icons.ChevronLeft()}Vissza</button>
+                        <button type="button" id="btn-next-step" class="btn-neon btn-green">Tovább ${Icons.ChevronRight()}</button>
+                     </div>`;
+            formContentEl.innerHTML = html;
+            renderMRIExams(); 
+            document.getElementById('btn-add-mri').onclick = addMriExam;
+            document.getElementById('btn-prev-step').onclick = prevStep;
+            document.getElementById('btn-next-step').onclick = nextStep;
+        }
+
+        function renderStep3() {
+            let html = `<h3 class="text-2xl font-bold text-neon mb-6 uppercase tracking-wide">3. Kórelőzmény és Rizikófaktorok</h3>`;
+            
+            html += createCheckboxGroup('Komorbiditások:', [ 
+                {name: "comorbidities", value: "cardiac", label: "Szívbetegség", icon: Icons.Heart}, 
+                {name: "comorbidities", value: "liver", label: "Májbetegség", icon: Icons.Droplet}, 
+                {name: "comorbidities", value: "kidney", label: "Vesebetegség", icon: Icons.FlaskConical}, 
+                {name: "comorbidities", value: "autoimmune", label: "Egyéb autoimmun", icon: Icons.Shield},
+                {name: "comorbidities", value: "infection_history", label: "Súlyos fertőzés", icon: Icons.XCircle}, 
+                {name: "comorbidities", value: "myelosuppression", label: "Csontvelő-elnyomás", icon: Icons.Activity}
+            ]);
+            html += createInput('Egyéb szignifikáns megbetegedés (manuális bevitel):', 'other_comorbidities', 'other_comorbidities', 'text', formData.other_comorbidities, false, 'Pl. cukorbetegség');
+
+
+            html += `<h4 class="text-xl font-bold text-neon mt-6 mb-3 uppercase tracking-wide">Tüneti Kezelések</h4>
+                     <div class="space-y-3 mb-4">`;
+            Object.keys(symptomaticTreatmentOptions).forEach(symptom => {
+                const isChecked = formData.symptomatic_treatments.some(st => st.symptom === symptom);
+                html += `<div class="symptom-card">
+                            <label class="inline-flex items-center text-gray-200 w-full">
+                                <input type="checkbox" name="symptom_checkbox" value="${symptom}" ${isChecked ? 'checked' : ''} class="form-checkbox-neon" onchange="handleChange(event)">
+                                <span class="ml-2 font-semibold text-neon-teal">${symptom}</span>
+                            </label>`;
+                if (isChecked) {
+                    const currentTreatment = formData.symptomatic_treatments.find(st => st.symptom === symptom);
+                    html += `<div class="mt-2 ml-6 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">`;
+                    symptomaticTreatmentOptions[symptom].forEach(med => {
+                        const isMedChecked = currentTreatment && currentTreatment.medications.includes(med);
+                        html += `<label class="inline-flex items-center text-gray-200 text-sm">
+                                    <input type="checkbox" name="medication_checkbox_${symptom.replace(/[\s\/]+/g, '_')}" value="${med}" data-symptom="${symptom}" ${isMedChecked ? 'checked' : ''} class="form-checkbox-neon" onchange="handleChange(event)">
+                                    <span class="ml-2">${med}</span>
+                                 </label>`;
+                    });
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            });
+            html += `</div>`; 
+
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createDMTCheckboxGroup('Korábbi DMT kezelések:', 'previousDMTs_checkbox', formData.previousDMTs, dmtData);
+            html += createSelect('Aktuális DMD:', 'current_dmd_name', 'current_dmd_name', formData.current_dmd_name, dmtData.map(d => ({value: d.name, label: d.name})));
+
+            if (formData.current_dmd_name) {
+                html += `<div class="mb-4 flex items-baseline space-x-2">
+                            <label for="current_dmd_start_duration" class="block text-neon-teal font-semibold whitespace-nowrap">Kezdete:</label>
+                            <input type="number" id="current_dmd_start_duration" name="current_dmd_start_duration" min="0" value="${formData.current_dmd_start_duration}" class="input-neon w-20" oninput="handleChange(event)">
+                            <select id="current_dmd_start_unit" name="current_dmd_start_unit" class="input-neon" onchange="handleChange(event)">
+                                <option value="év" ${formData.current_dmd_start_unit === 'év' ? 'selected':''}>év</option> 
+                                <option value="hónap" ${formData.current_dmd_start_unit === 'hónap' ? 'selected':''}>hónap</option>
+                            </select>
+                         </div>`;
+                html += createSelect('DMT hatás:', 'dmd_effect', 'dmd_effect', formData.dmd_effect, [
+                     {value: "", label: "Válasszon"}, {value: "Kiváló", label: "Kiváló"}, {value: "Jó", label: "Jó"}, {value: "Közepes", label: "Közepes"},
+                    {value: "Rossz", label: "Rossz"}, {value: "Nincs hatás", label: "Nincs hatás"}
+                ]);
+                html += `<div class="md:col-span-2">${createTextarea('Megjegyzés (DMD):', 'dmd_other_notes', 'dmd_other_notes', formData.dmd_other_notes, 'Pl. jól tolerálja')}</div>`;
+            } else { 
+                html += `<div></div><div></div><div class="md:col-span-2"></div>`;
+            }
+            html += createInput('CAVE (allergia, KI):', 'contraindications', 'contraindications', 'text', formData.contraindications, false, 'Pl. penicillin allergia');
+            html += createTextarea('Jelenlegi nem-SM gyógyszerek:', 'non_ms_meds', 'non_ms_meds', formData.non_ms_meds, 'Pl. vérnyomáscsökkentő');
+            
+            html += `<div class="mb-4">
+                        <label class="block text-neon-teal font-semibold mb-2">JCV Státusz:</label>
+                        <div class="flex flex-col space-y-1">
+                            ${[{value: "positive", label: "Pozitív", icon: Icons.CheckCircle}, {value: "negative", label: "Negatív", icon: Icons.XCircle}, {value: "unknown", label: "Ismeretlen", icon: Icons.Info}].map(item => `
+                                <label class="inline-flex items-center text-gray-200">
+                                    <input type="radio" name="jcvStatus" value="${item.value}" ${formData.jcvStatus === item.value ? 'checked' : ''} class="form-radio-neon" onchange="handleChange(event)">
+                                    ${item.icon()} <span class="ml-2">${item.label}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                     </div>`;
+            html += `<div id="jcvTiterContainer" class="mb-4 ${formData.jcvStatus === 'positive' ? '' : 'hidden'}">
+                        ${createInput('JCV Titer:', 'jcvTiter', 'jcvTiter', 'text', formData.jcvTiter, false, 'Pl. 0.5, 1.2')}
+                     </div>`;
+            
+            html += createInput('Lymphocyta szám:', 'lymphocyteCount', 'lymphocyteCount', 'number', formData.lymphocyteCount, false, 'Pl. 1500');
+            html += createTextarea('Egyéb rizikófaktorok:', 'other_risk_factors', 'other_risk_factors', formData.other_risk_factors, 'Pl. egyéb immunszupresszió');
+            html += `</div>`; 
+
+            html += `<h4 class="text-xl font-bold text-neon mt-6 mb-3 uppercase tracking-wide">Családi és Egyéb Kórelőzmény</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('Családi anamnézis (SM / autoimmun):', 'family_history', 'family_history', 'text', formData.family_history, false, 'Pl. anyai ágon SM');
+            html += createInput('Malignitás (kórelőzményben):', 'malignancy', 'malignancy', 'text', formData.malignancy, false, 'Pl. emlőrák 5 éve');
+            html += createInput('Opportunista/súlyos infekció:', 'opportunistic_infections', 'opportunistic_infections', 'text', formData.opportunistic_infections, false, 'Pl. herpes zoster');
+            html += createInput('Terhesség / Szoptatás (kórelőzmény):', 'pregnancy_history', 'pregnancy_history', 'text', formData.pregnancy_history, false, 'Pl. 2 terhesség, 1 szoptatás');
+            html += `</div>`;
+
+            html += `<h4 class="text-xl font-bold text-neon mt-6 mb-3 uppercase tracking-wide">Paraklinikai vizsgálatok</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('Liquor (hely / időpont):', 'liquor_location_date', 'liquor_location_date', 'text', formData.liquor_location_date, false, 'Pl. 2024.03.10, SE');
+            html += createInput('OCB / IgG index:', 'ocb_igg_index', 'ocb_igg_index', 'text', formData.ocb_igg_index, false, 'Pl. OCB pozitív, IgG 0.8');
+            html += `<div class="md:col-span-2">${createTextarea('Liquor egyéb eltérések:', 'liquor_other_findings', 'liquor_other_findings', formData.liquor_other_findings, 'Pl. enyhe lymphocytosis')}</div>`;
+            html += createInput('Kiváltott válasz (VEP/SEP/BAEP):', 'evoked_potentials_type', 'evoked_potentials_type', 'text', formData.evoked_potentials_type, false, 'Pl. VEP');
+            html += createInput('Időpont, eredmény (kiv. válasz):', 'evoked_potentials_date_result', 'evoked_potentials_date_result', 'text', formData.evoked_potentials_date_result, false, 'Pl. 2024.02.01, bal megnyúlt lat.');
+            html += createInput('Autoantitest panel (ANA, ENA, AQP4, MOG):', 'autoantibody_panel', 'autoantibody_panel', 'text', formData.autoantibody_panel, false, 'Pl. AQP4 negatív');
+            html += createInput('Dátum, eredmény (autoAT):', 'autoantibody_date_result', 'autoantibody_date_result', 'text', formData.autoantibody_date_result, false, 'Pl. 2024.01.20, negatív');
+            html += `<div class="mb-4 md:col-span-2">
+                        ${createCheckboxGroup('Serostatus, vakcináció:', [ 
+                            {name: "hiv_status", label: "HIV"}, {name: "hbv_status", label: "HBV"}, 
+                            {name: "hcv_status", label: "HCV"}, {name: "vzv_status", label: "VZV"}, 
+                            {name: "hsv_status", label: "HSV1/2"}, {name: "tbc_screening_status", label: "TBC szűrés"}
+                        ])}
+                      </div>`;
+            html += `</div>`; 
+            
+            html += `<div class="flex justify-between mt-8">
+                        <button type="button" id="btn-prev-step" class="btn-neon">${Icons.ChevronLeft()}Vissza</button>
+                        <button type="button" id="btn-next-step" class="btn-neon btn-green">Tovább ${Icons.ChevronRight()}</button>
+                     </div>`;
+            formContentEl.innerHTML = html;
+            document.getElementById('btn-prev-step').onclick = prevStep;
+            document.getElementById('btn-next-step').onclick = nextStep;
+        }
+
+
+        function renderStep4() {
+             let html = `<h3 class="text-2xl font-bold text-neon mb-6 uppercase tracking-wide">4. Aktuális Státusz és Követés</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('Vizit időpontja:', 'visit_date', 'visit_date', 'date', formData.visit_date);
+            html += createInput('Vizit célja:', 'visit_purpose', 'visit_purpose', 'text', formData.visit_purpose, false, 'Pl. kontroll, relapszus');
+            html += `<div class="md:col-span-2">${createTextarea('Aktuális panaszok:', 'current_complaints', 'current_complaints', formData.current_complaints, 'Pl. fáradékonyság, zsibbadás', 3)}</div>`;
+            html += `</div>`;
+
+            html += `<h4 class="text-xl font-bold text-neon mt-6 mb-3 uppercase tracking-wide">Státusz Panel</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('Belgyógyászati státusz:', 'internal_medicine_status', 'internal_medicine_status', 'text', formData.internal_medicine_status, false, 'Pl. stabil, panaszmentes');
+            html += createInput('Vitális paraméterek:', 'vital_parameters', 'vital_parameters', 'text', formData.vital_parameters, false, 'Pl. RR: 120/80 Hgmm, P: 72/min');
+            html += `<div class="md:col-span-2">${createTextarea('Neurológiai státusz:', 'neurological_status', 'neurological_status', formData.neurological_status, 'Pl. ép koponyaidegek', 3)}</div>`;
+            html += createInput('Segédeszköz használat:', 'assistive_device_use', 'assistive_device_use', 'text', formData.assistive_device_use, false, 'Pl. járóbot');
+            html += createInput('Járástávolság (m):', 'walking_distance', 'walking_distance', 'number', formData.walking_distance, false, '', 0);
+            html += createInput('Ambulatory Index:', 'ambulatory_index', 'ambulatory_index', 'text', formData.ambulatory_index, false, 'Pl. 4');
+            html += createInput('MSFC 25FWT (s):', 'msfc_25fwt', 'msfc_25fwt', 'number', formData.msfc_25fwt, false, '', undefined, undefined, 0.1);
+            html += createInput('MSFC 9HPT jobb (s):', 'msfc_9hpt_jobb', 'msfc_9hpt_jobb', 'number', formData.msfc_9hpt_jobb, false, '', undefined, undefined, 0.1);
+            html += createInput('MSFC 9HPT bal (s):', 'msfc_9hpt_bal', 'msfc_9hpt_bal', 'number', formData.msfc_9hpt_bal, false, '', undefined, undefined, 0.1);
+            html += createInput('MSFC PASAT (pont):', 'msfc_pasat', 'msfc_pasat', 'number', formData.msfc_pasat);
+            html += createInput('MSFC SDMT (pont):', 'msfc_sdmt', 'msfc_sdmt', 'number', formData.msfc_sdmt);
+            html += `<div class="mb-4 md:col-span-2 text-center">
+                        <a href="https://xvrgvlfu.manus.space/" target="_blank" rel="noopener noreferrer" class="btn-neon btn-purple mt-2">
+                            ${Icons.Search('icon-md')} MSFC és SDMT Kalkulátor
+                        </a>
+                        <p class="text-xs text-gray-400 mt-1">Részletesebb MSFC/SDMT infókért és kalkulációért.</p>
+                    </div>`;
+            html += createInput('BICAMS (ha van):', 'bicams', 'bicams', 'text', formData.bicams, false, 'Pl. normális');
+            html += `</div>`;
+
+            html += `<h4 class="text-xl font-bold text-neon mt-6 mb-3 uppercase tracking-wide">Epicrisis / Összefoglalás</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('Betegség kezdete / lefolyás:', 'disease_onset_type', 'disease_onset_type', 'text', formData.disease_onset_type, false, 'Pl. 2010, RRSM');
+            html += `<div class="md:col-span-2">${createTextarea('Vizit oka, eredménye:', 'visit_outcome', 'visit_outcome', formData.visit_outcome, 'Pl. kontroll, stabil állapot')}</div>`;
+            html += `<div class="md:col-span-2">${createTextarea('Teendők / javaslatok:', 'actions_suggestions', 'actions_suggestions', formData.actions_suggestions, 'Pl. DMT folytatása', 3)}</div>`;
+            html += createInput('Felírt eszközök / támogatások:', 'prescribed_aids', 'prescribed_aids', 'text', formData.prescribed_aids, false, 'Pl. gyógyászati segédeszköz');
+            html += `<div class="md:col-span-2">${createTextarea('Életviteli tanácsok:', 'lifestyle_advice', 'lifestyle_advice', formData.lifestyle_advice, 'Pl. rendszeres testmozgás')}</div>`;
+            html += `</div>`;
+
+            html += `<h4 class="text-xl font-bold text-neon mt-6 mb-3 uppercase tracking-wide">Tervezett kontrollok</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            html += createInput('Neurológiai vizsgálat:', 'next_neurológiai_exam', 'next_neurológiai_exam', 'text', formData.next_neurológiai_exam, false, 'Pl. 6 hónap múlva');
+            html += createInput('MRI kontroll:', 'next_mri_control', 'next_mri_control', 'text', formData.next_mri_control, false, 'Pl. évente, 2025.05.01');
+            html += createInput('Labor kontroll (JCV, lymph):', 'next_lab_control', 'next_lab_control', 'text', formData.next_lab_control, false, 'Pl. 3 havonta');
+            html += createInput('Egyedi méltányosság érv.:', 'individual_equity_validity', 'individual_equity_validity', 'text', formData.individual_equity_validity, false, 'Pl. 2025.12.31');
+            html += `</div>`;
+            
+            html += `<div class="flex justify-between mt-8">
+                        <button type="button" id="btn-prev-step" class="btn-neon">${Icons.ChevronLeft()}Vissza</button>
+                        <button type="submit" class="btn-neon btn-green">Ambuláns Lap Generálása ${Icons.ChevronRight()}</button>
+                     </div>`;
+            formContentEl.innerHTML = html;
+            document.getElementById('btn-prev-step').onclick = prevStep;
+        }
+
+        function renderStep5() {
+             formContentEl.innerHTML = `
+                <h3 class="text-2xl font-bold text-neon mb-6 uppercase tracking-wide">5. Eredmények</h3>
+                <div class="my-6 text-center">
+                    <a href="https://mibmpgrg.manus.space/" target="_blank" rel="noopener noreferrer" class="btn-neon btn-purple w-full md:w-3/4 mx-auto">
+                        ${Icons.ExternalLink('icon-md')} Terápia Javasló Eszköz
+                    </a>
+                </div>
+                <h4 class="text-xl font-bold text-neon-teal mt-8 mb-4">Generált Ambuláns Lap:</h4>
+                <div class="results-ambulans-lap">
+                    <pre id="ambulans-lap-pre"></pre>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-between mt-8 space-y-3 sm:space-y-0">
+                    <button type="button" id="btn-prev-step" class="btn-neon w-full sm:w-auto">${Icons.ChevronLeft()}Vissza</button>
+                    <button type="button" id="btn-new-assessment" class="btn-neon btn-red w-full sm:w-auto">
+                        ${Icons.RotateCcw()} Új páciens
+                    </button>
+                </div>`;
+            const preElement = document.getElementById('ambulans-lap-pre');
+            if (preElement) {
+                preElement.textContent = generatedAmbulansLap;
+            }
+            document.getElementById('btn-prev-step').onclick = prevStep;
+            document.getElementById('btn-new-assessment').onclick = () => {
+                formData = getInitialFormData();
+                generatedAmbulansLap = '';
+                currentStep = 0;
+                currentAssessmentType = null;
+                render(true);
+            };
+        }
+
+        function render(scrollToTop = false) {
+            renderProgress();
+
+            switch (currentStep) {
+                case 0: renderStep0(); break;
+                case 0.6: renderStep0_6(); break;
+                case 1: renderStep1(); break;
+                case 2: renderStep2(); break;
+                case 3: renderStep3(); break;
+                case 4: renderStep4(); break;
+                case 5: renderStep5(); break;
+                default: formContentEl.innerHTML = '<p>Ismeretlen lépés.</p>';
+            }
+            
+            if (scrollToTop) {
+                const mainSection = document.querySelector('main > section.card-glass');
+                if (mainSection) {
+                     mainSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        // Initial Render
+        document.addEventListener('DOMContentLoaded', () => {
+            if(footerBrainIconEl) { 
+                footerBrainIconEl.innerHTML = Icons.Brain('icon-sm');
+            }
+            assessmentFormEl.onsubmit = handleSubmit;
+            render(true); 
+        });
+
+    </script>
+</body>
+</html>

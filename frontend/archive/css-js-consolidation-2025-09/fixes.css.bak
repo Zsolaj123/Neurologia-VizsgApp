@@ -1,0 +1,268 @@
+/**
+ * Comprehensive CSS Fixes
+ * Resolves conflicts and ensures proper functionality
+ */
+
+/* ============================================
+   1. Header Author Credit Styling
+   ============================================ */
+
+.app-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 var(--spacing-xl) !important;
+}
+
+.app-title {
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+}
+
+.app-title .author-credit {
+    display: inline-block;
+    font-size: 0.9rem !important;
+    font-weight: normal !important;
+    opacity: 0.8;
+    margin-left: var(--spacing-lg);
+    font-family: var(--font-mono);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* Enhanced header layout for author positioning */
+.header-title-wrapper {
+    flex: 0 0 auto;
+}
+
+.header-author-wrapper {
+    margin-left: auto;
+    padding-right: var(--spacing-xl);
+}
+
+.header-author-wrapper .author-credit {
+    font-size: 0.9rem !important;
+    font-weight: normal !important;
+    opacity: 0.7;
+    font-family: var(--font-mono);
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   2. Fix Sticky Sidebars
+   ============================================ */
+
+/* Ensure parent containers don't break sticky */
+#app-container {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: calc(100vh - var(--header-height)) !important;
+}
+
+#left-sidebar,
+#right-sidebar {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: var(--header-height) !important;
+    height: calc(100vh - var(--header-height)) !important;
+    overflow-y: auto !important;
+}
+
+.topic-list,
+.toc-sidebar {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: var(--header-height) !important;
+    height: calc(100vh - var(--header-height)) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Ensure content area doesn't interfere */
+#content-area {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+#content-display {
+    height: calc(100vh - var(--header-height) - 60px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* ============================================
+   3. Toggle Button Visibility Fixes
+   ============================================ */
+
+.sidebar-toggle-fixed {
+    position: fixed !important;
+    z-index: 1000 !important;
+    width: 45px !important;
+    height: 45px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.5rem !important;
+    background: var(--bg-tertiary) !important;
+    border: 2px solid var(--primary-green) !important;
+    color: var(--primary-green) !important;
+    cursor: pointer !important;
+    transition: all var(--transition-fast) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5) !important;
+}
+
+#left-sidebar-toggle {
+    left: 10px !important;
+    transform: translateX(0) !important;
+}
+
+#right-sidebar-toggle {
+    right: 10px !important;
+    transform: translateX(0) !important;
+}
+
+/* Show toggle buttons when sidebars are hidden */
+#left-sidebar.hidden ~ #left-sidebar-toggle,
+#app-container:has(#left-sidebar.hidden) #left-sidebar-toggle {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(0) !important;
+}
+
+#right-sidebar.hidden ~ #right-sidebar-toggle,
+#app-container:has(#right-sidebar.hidden) #right-sidebar-toggle {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(0) !important;
+}
+
+/* Hide toggle buttons when sidebars are visible */
+#app-container:not(:has(#left-sidebar.hidden)) #left-sidebar-toggle {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateX(-60px) !important;
+}
+
+#app-container:not(:has(#right-sidebar.hidden)) #right-sidebar-toggle {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateX(60px) !important;
+}
+
+/* Toggle button hover effects */
+.sidebar-toggle-fixed:hover {
+    background: var(--primary-green) !important;
+    color: var(--bg-primary) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.8) !important;
+}
+
+/* ============================================
+   4. TOC Active Item Highlighting
+   ============================================ */
+
+.toc-item {
+    position: relative;
+    transition: all var(--transition-fast) !important;
+    padding-left: var(--spacing-sm);
+}
+
+.toc-item.active {
+    background: rgba(0, 255, 65, 0.15) !important;
+    border-left: 4px solid var(--primary-green) !important;
+    padding-left: calc(var(--spacing-sm) - 4px) !important;
+}
+
+.toc-item.active .toc-link {
+    color: var(--primary-green) !important;
+    font-weight: bold !important;
+}
+
+.toc-item.active .toc-text {
+    text-shadow: 0 0 15px var(--primary-green) !important;
+}
+
+/* TOC container proper height */
+.toc-container {
+    height: calc(100vh - var(--header-height) - 60px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* ============================================
+   5. Sidebar Hidden State Fixes
+   ============================================ */
+
+#left-sidebar.hidden,
+#right-sidebar.hidden {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all var(--transition-normal) !important;
+}
+
+#left-sidebar:not(.hidden),
+#right-sidebar:not(.hidden) {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: all var(--transition-normal) !important;
+}
+
+/* ============================================
+   6. Scroll behavior improvements
+   ============================================ */
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Add scroll margin for headers when navigating via TOC */
+h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
+    scroll-margin-top: calc(var(--header-height) + 20px);
+}
+
+/* ============================================
+   7. Z-index hierarchy fix
+   ============================================ */
+
+.app-header {
+    z-index: 1000 !important;
+}
+
+.sidebar-toggle-fixed {
+    z-index: 999 !important;
+}
+
+#left-sidebar,
+#right-sidebar {
+    z-index: 100 !important;
+}
+
+/* ============================================
+   8. Mobile responsiveness fixes
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .app-title .author-credit {
+        display: none !important;
+    }
+    
+    .app-header::after {
+        content: "by Zsolaj";
+        font-size: 0.8rem;
+        opacity: 0.7;
+        font-family: var(--font-mono);
+    }
+}

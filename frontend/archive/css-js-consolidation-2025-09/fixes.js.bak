@@ -1,0 +1,204 @@
+/**
+ * JavaScript Fixes for Neurology App
+ * Ensures proper functionality of TOC highlighting and toggle buttons
+ */
+
+(function() {
+    'use strict';
+    
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Fix 1: Ensure TOC scroll highlighting works
+        fixTOCScrollHighlighting();
+        
+        // Fix 2: Ensure toggle buttons work properly
+        fixToggleButtons();
+        
+        // Fix 3: Fix author credit positioning
+        fixAuthorCredit();
+    });
+    
+    /**
+     * Fix TOC scroll highlighting
+     */
+    function fixTOCScrollHighlighting() {
+        const contentDisplay = document.getElementById('content-display');
+        if (!contentDisplay) return;
+        
+        let scrollTimeout;
+        
+        // Enhanced scroll handler
+        const handleScroll = () => {
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            
+            scrollTimeout = setTimeout(() => {
+                const headers = contentDisplay.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
+                if (headers.length === 0) return;
+                
+                const scrollTop = contentDisplay.scrollTop;
+                const scrollHeight = contentDisplay.scrollHeight;
+                const clientHeight = contentDisplay.clientHeight;
+                
+                let activeId = null;
+                
+                // Check if we're at the bottom
+                if (scrollTop + clientHeight >= scrollHeight - 10) {
+                    activeId = headers[headers.length - 1].id;
+                } else {
+                    // Find the header that's currently in view
+                    const contentRect = contentDisplay.getBoundingClientRect();
+                    
+                    for (const header of headers) {
+                        const rect = header.getBoundingClientRect();
+                        const relativeTop = rect.top - contentRect.top;
+                        
+                        if (relativeTop <= 80) { // 80px offset from top
+                            activeId = header.id;
+                        } else if (relativeTop > 80) {
+                            break;
+                        }
+                    }
+                }
+                
+                if (activeId) {
+                    updateActiveTOCItem(activeId);
+                }
+            }, 50); // Debounce delay
+        };
+        
+        // Remove any existing listeners and add new one
+        contentDisplay.removeEventListener('scroll', handleScroll);
+        contentDisplay.addEventListener('scroll', handleScroll);
+        
+        // Also trigger on topic load
+        window.addEventListener('topicDisplayed', () => {
+            setTimeout(handleScroll, 100);
+        });
+    }
+    
+    /**
+     * Update active TOC item
+     */
+    function updateActiveTOCItem(activeId) {
+        const tocContainer = document.getElementById('toc-container');
+        if (!tocContainer) return;
+        
+        // Remove all active classes
+        tocContainer.querySelectorAll('.toc-item.active').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Add active class to current item
+        const activeItem = tocContainer.querySelector(`[data-toc-id="${activeId}"]`);
+        if (activeItem) {
+            activeItem.classList.add('active');
+            
+            // Ensure it's visible in the TOC container
+            const tocContent = tocContainer.querySelector('.toc-content');
+            if (tocContent) {
+                const itemRect = activeItem.getBoundingClientRect();
+                const containerRect = tocContent.getBoundingClientRect();
+                
+                if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
+                    activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+    }
+    
+    /**
+     * Fix toggle button functionality
+     */
+    function fixToggleButtons() {
+        const leftToggle = document.getElementById('left-sidebar-toggle');
+        const rightToggle = document.getElementById('right-sidebar-toggle');
+        const leftSidebar = document.getElementById('left-sidebar');
+        const rightSidebar = document.getElementById('right-sidebar');
+        
+        if (leftToggle && leftSidebar) {
+            // Remove existing listeners
+            const newLeftToggle = leftToggle.cloneNode(true);
+            leftToggle.parentNode.replaceChild(newLeftToggle, leftToggle);
+            
+            // Add new listener
+            newLeftToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                leftSidebar.classList.toggle('hidden');
+                
+                // Update app state
+                if (window.appState && window.appState.ui) {
+                    window.appState.ui.leftSidebarVisible = !leftSidebar.classList.contains('hidden');
+                    window.appState.saveUIState();
+                }
+                
+                // Trigger layout adjustment
+                if (window.uiManager) {
+                    window.uiManager.adjustLayout();
+                }
+            });
+        }
+        
+        if (rightToggle && rightSidebar) {
+            // Remove existing listeners
+            const newRightToggle = rightToggle.cloneNode(true);
+            rightToggle.parentNode.replaceChild(newRightToggle, rightToggle);
+            
+            // Add new listener
+            newRightToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                rightSidebar.classList.toggle('hidden');
+                
+                // Update app state
+                if (window.appState && window.appState.ui) {
+                    window.appState.ui.rightSidebarVisible = !rightSidebar.classList.contains('hidden');
+                    window.appState.saveUIState();
+                }
+                
+                // Trigger layout adjustment
+                if (window.uiManager) {
+                    window.uiManager.adjustLayout();
+                }
+            });
+        }
+    }
+    
+    /**
+     * Fix author credit positioning
+     */
+    function fixAuthorCredit() {
+        const header = document.querySelector('.app-header');
+        const title = document.querySelector('.app-title');
+        const authorCredit = document.querySelector('.author-credit');
+        
+        if (header && title && authorCredit) {
+            // Remove author credit from title
+            authorCredit.remove();
+            
+            // Create new structure
+            const titleWrapper = document.createElement('div');
+            titleWrapper.className = 'header-title-wrapper';
+            titleWrapper.appendChild(title);
+            
+            const authorWrapper = document.createElement('div');
+            authorWrapper.className = 'header-author-wrapper';
+            authorWrapper.appendChild(authorCredit);
+            
+            // Clear header and rebuild
+            header.innerHTML = '';
+            header.appendChild(titleWrapper);
+            header.appendChild(authorWrapper);
+        }
+    }
+    
+    // Re-run fixes when app initializes
+    window.addEventListener('load', function() {
+        setTimeout(() => {
+            fixTOCScrollHighlighting();
+            fixToggleButtons();
+        }, 500);
+    });
+    
+})();

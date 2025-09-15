@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSFC & EDSS Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .main-calculator-container { /* Renamed for clarity */
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .language-switcher {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+            gap: 0.5rem;
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #fff;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .lang-btn.active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .lang-btn:not(.active):hover {
+            background-color: #f0f0f0;
+        }
+        .description-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .description-section h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .description-section p, .description-section ul {
+            font-size: 0.95rem;
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+        .description-section ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+        .description-section strong {
+            color: #111827;
+        }
+        .input-group { /* General input group styling */
+            margin-bottom: 1.5rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .input-field-container { /* For MSFC timer inputs */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .input-group input[type="number"], .input-group select { /* General styling for inputs/selects */
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .input-group input[type="number"]:focus, .input-group select:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        .stopwatch-btn { /* For MSFC timer buttons */
+            padding: 0.6rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: 1px solid transparent;
+        }
+        .start-btn { background-color: #22c55e; color: white; border-color: #16a34a;}
+        .start-btn:hover { background-color: #16a34a; }
+        .start-btn:disabled { background-color: #86efac; cursor: not-allowed; }
+        .stop-btn { background-color: #ef4444; color: white; border-color: #dc2626;}
+        .stop-btn:hover { background-color: #dc2626; }
+        .stop-btn:disabled { background-color: #fca5a5; cursor: not-allowed; }
+        .reset-btn { background-color: #6b7280; color: white; border-color: #4b5563;}
+        .reset-btn:hover { background-color: #4b5563; }
+        .reset-btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        .timer-display { /* For MSFC timers */
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1e40af;
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 0.5rem;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .btn-calculate, .btn-launch { /* General button for calculations or launching tools */
+            display: block;
+            width: 100%;
+            padding: 0.875rem;
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            margin-top: 0.5rem; /* Added margin for spacing */
+        }
+        .btn-calculate { background-color: #2563eb; } /* Blue for MSFC calculate */
+        .btn-calculate:hover { background-color: #1d4ed8; }
+        
+        .btn-launch { /* For launching PASAT sim or EDSS calc */
+             background-color: #4f46e5; /* Indigo for launching tools */
+        }
+        .btn-launch:hover {
+            background-color: #4338ca; /* Darker indigo */
+        }
+
+
+        .result-box { /* General result box */
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+        }
+        .result-box h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            text-align: center;
+        }
+        .result-item p { /* For MSFC results */
+            font-size: 1.1rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .result-item span { /* For MSFC results */
+            font-weight: 600;
+            color: #1e40af;
+        }
+        .interpretation-text, .edss-interpretation { /* General interpretation text */
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-top: 1.5rem;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .info-icon {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            background-color: #9ca3af;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            cursor: pointer;
+            margin-left: 0.25rem;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 280px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 5px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #991b1b;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+        }
+        .disclaimer strong { color: #7f1d1d; }
+        .disclaimer ul { list-style-type: disc; padding-left: 1.25rem; margin-top: 0.5rem; }
+
+        .instructions-toggle {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .instructions-toggle:hover { background-color: #e5e7eb; }
+        .instructions-content { display: none; padding: 1rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 1.5rem; }
+        .instructions-content.active { display: block; }
+
+        .trial-container { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .trial-row { display: flex; align-items: center; gap: 0.5rem; }
+        .trial-label { min-width: 60px; font-size: 0.9rem; color: #4b5563; }
+
+        .references-section { margin-top: 2rem; padding: 1.5rem; background-color: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+        .references-section h3 { font-size: 1.25rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem; }
+        .references-section ol { list-style-type: decimal; padding-left: 1.5rem; font-size: 0.9rem; color: #4b5563; line-height: 1.6; }
+        .references-section li { margin-bottom: 0.5rem; }
+
+        .pasat-info-section { margin-top: 1.5rem; padding: 1.5rem; background-color: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; }
+        .pasat-info-section h3 { font-size: 1.25rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; }
+        .pasat-info-section h4 { font-size: 1.1rem; font-weight: 600; color: #1e40af; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .pasat-info-section p { font-size: 0.95rem; color: #4b5563; line-height: 1.6; margin-bottom: 0.75rem; }
+        .pasat-info-section ul, .pasat-info-section ol { list-style-type: disc; padding-left: 1.5rem; font-size: 0.95rem; color: #4b5563; line-height: 1.6; margin-bottom: 0.75rem; }
+        .pasat-info-section ol { list-style-type: decimal; }
+        .pasat-info-section .example { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+        .pasat-info-section .instruction-quote { font-style: italic; background-color: #f9fafb; border-left: 4px solid #bae6fd; padding: 0.75rem; margin: 1rem 0; }
+
+        /* PASAT Simulator Styles */
+        #pasatSimulatorContainer { background-color: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.08); text-align: center; width: 100%; max-width: 600px; margin: 1.5rem auto; border: 1px solid #e5e7eb; }
+        #pasatSimulatorContainer.hidden { display: none; }
+        #pasatSimulatorContainer .pasat-sim-display { font-size: 3em; margin: 20px 0; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; min-height: 60px; display: flex; justify-content: center; align-items: center; background-color: #f9fafb; }
+        #pasatSimulatorContainer #pasatSimNumberDisplay { color: #2563eb; font-weight: 600; }
+        #pasatSimulatorContainer #pasatSimSumDisplay { color: #16a34a; font-size: 2.5em; font-weight: 500; }
+        #pasatSimulatorContainer .pasat-sim-info { font-size: 1.1em; margin-bottom: 15px; color: #4b5563; }
+        #pasatSimulatorContainer button { font-size: 1em; padding: 10px 20px; margin: 8px; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; font-weight: 500; }
+        #pasatSimulatorContainer button:active { transform: scale(0.98); }
+        #pasatSimulatorContainer #pasatSimStartButton, #pasatSimulatorContainer #pasatSimRestartButton { background-color: #3b82f6; color: white; }
+        #pasatSimulatorContainer #pasatSimStartButton:hover, #pasatSimulatorContainer #pasatSimRestartButton:hover { background-color: #2563eb; }
+        #pasatSimulatorContainer .pasat-sim-scoreButton { background-color: #6b7280; color: white; }
+        #pasatSimulatorContainer .pasat-sim-scoreButton:hover { background-color: #4b5563; }
+        #pasatSimulatorContainer .pasat-sim-scoreButton.correct { background-color: #22c55e; }
+        #pasatSimulatorContainer .pasat-sim-scoreButton.correct:hover { background-color: #16a34a; }
+        #pasatSimulatorContainer .pasat-sim-scoreButton.incorrect { background-color: #ef4444; }
+        #pasatSimulatorContainer .pasat-sim-scoreButton.incorrect:hover { background-color: #dc2626; }
+        #pasatSimulatorContainer #pasatSimScoreArea, #pasatSimulatorContainer #pasatSimFinalResultsArea { margin-top: 20px; font-size: 1.1em; }
+        #pasatSimulatorContainer #pasatSimHistoryList { list-style-type: none; padding: 0; text-align: left; max-height: 250px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-top: 12px; background-color: #f9fafb; }
+        #pasatSimulatorContainer #pasatSimHistoryList li { padding: 7px 5px; border-bottom: 1px dotted #d1d5db; font-size: 0.9em; }
+        #pasatSimulatorContainer #pasatSimHistoryList li:last-child { border-bottom: none; }
+        #pasatSimulatorContainer .pasat-sim-hidden { display: none; }
+        #pasatSimulatorContainer .pasat-sim-prompt { margin-top: 12px; font-style: italic; color: #6b7280; font-size: 0.95em; }
+        #pasatSimulatorContainer h1 { color: #1e3a8a; margin-bottom: 20px; font-size: 1.5rem; }
+        #pasatSimulatorContainer #pasatSimInstructionHeading, #pasatSimulatorContainer #pasatSimTestCompleteHeading, #pasatSimulatorContainer #pasatSimHistoryHeading { margin-bottom: 12px; font-size: 1.2rem; }
+
+        /* EDSS Calculator Styles */
+        #edssCalculatorContainer { background-color: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.08); width: 100%; margin: 1.5rem auto; border: 1px solid #e5e7eb; }
+        #edssCalculatorContainer.hidden { display: none; }
+        #edssCalculatorContainer .input-group label { font-weight: 600; color: #374151; }
+        #edssCalculatorContainer .input-group select, #edssCalculatorContainer .input-group input[type="number"] { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; }
+        #edssCalculatorContainer .btn-edss-calculate { display: block; width: 100%; padding: 0.875rem; background-color: #10b981; /* Emerald for EDSS calculate */ color: white; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; text-align: center; margin-top: 1.5rem; }
+        #edssCalculatorContainer .btn-edss-calculate:hover { background-color: #059669; }
+        #edssCalculatorContainer .edss-result-box { margin-top: 2rem; padding: 1.5rem; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; text-align: center; }
+        #edssCalculatorContainer .edss-result-box h3 { margin-bottom: 0.75rem; font-size: 1.5rem; font-weight: 700; color: #166534; }
+        #edssCalculatorContainer .edss-result-box p#edss_edssScoreDisplay { font-size: 1.75rem; font-weight: bold; color: #15803d; } /* Made score bigger */
+        
+        .contextual-data-section {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #eef2ff; /* Light blue, similar to result box */
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+        }
+        .contextual-data-section h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 0.75rem;
+        }
+        .contextual-data-section p {
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .page-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+
+        @media (max-width: 640px) {
+            .main-calculator-container { margin: 1rem; padding: 1.5rem; }
+            .result-box h3 { font-size: 1.25rem; }
+            .result-item p { font-size: 1rem; }
+            .description-section { padding: 1rem; }
+            .description-section h3 { font-size: 1.1rem; }
+            .description-section p, .description-section ul { font-size: 0.9rem; }
+            .input-field-container { flex-direction: column; align-items: stretch; }
+            .input-field-container input[type="number"] { margin-bottom: 0.5rem; }
+            .stopwatch-controls { display: flex; justify-content: space-between; }
+            .stopwatch-btn { flex-grow: 1; margin: 0 0.2rem; }
+            .timer-display { width: 100%; margin-bottom: 0.5rem; }
+
+            #pasatSimulatorContainer { padding: 15px; }
+            #pasatSimulatorContainer .pasat-sim-display { font-size: 2.5em; min-height: 50px; }
+            #pasatSimulatorContainer #pasatSimSumDisplay { font-size: 2em; }
+            #pasatSimulatorContainer button { font-size: 0.9em; padding: 8px 15px; }
+            #pasatSimulatorContainer #pasatSimScoringButtons { display: flex; flex-direction: column; }
+            #pasatSimulatorContainer .pasat-sim-scoreButton { width: 100%; margin: 4px 0; }
+
+            #edssCalculatorContainer { padding: 15px; }
+            #edssCalculatorContainer .edss-result-box h3 { font-size: 1.25rem; }
+            #edssCalculatorContainer .edss-result-box p#edss_edssScoreDisplay { font-size: 1.5rem; }
+        }
+
+        @media print {
+            body { background-color: white; }
+            .main-calculator-container { box-shadow: none; margin: 0; padding: 0; }
+            .stopwatch-controls, .btn-calculate, .language-switcher, #pasatSimulatorContainer, .btn-launch, #edssCalculatorContainer, .page-footer { display: none; }
+            .result-box { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-calculator-container">
+        <div class="language-switcher">
+            <button id="lang-en" class="lang-btn active" onclick="setLanguage('en')">English</button>
+            <button id="lang-hu" class="lang-btn" onclick="setLanguage('hu')">Magyar</button>
+        </div>
+
+        <h1 class="text-4xl font-bold text-center mb-4 text-gray-800" data-translate="mainPageTitle">MS Clinical Calculators</h1>
+        
+        <div class="tool-launcher-buttons grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+            <button onclick="toggleSection('msfcCalculatorSection', 'toggleMsfcButton')" id="toggleMsfcButton" class="btn-launch bg-sky-600 hover:bg-sky-700" data-translate="launchMsfcButton">MSFC Calculator</button>
+            <button onclick="toggleSection('edssCalculatorSection', 'toggleEdssButton')" id="toggleEdssButton" class="btn-launch bg-emerald-600 hover:bg-emerald-700" data-translate="launchEdssButton">EDSS Calculator</button>
+        </div>
+
+        <div id="msfcCalculatorSection" class="hidden">
+            <h2 class="text-3xl font-bold text-center mb-6 text-gray-700" data-translate="pageTitle">Multiple Sclerosis Functional Composite (MSFC) Calculator</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 mb-6">
+                <div class="input-group">
+                    <label for="msfcAge" data-translate="msfcAgeLabel">Age (years):</label>
+                    <input type="number" id="msfcAge" min="1" max="120">
+                </div>
+                <div class="input-group">
+                    <label for="msfcSex" data-translate="msfcSexLabel">Sex:</label>
+                    <select id="msfcSex">
+                        <option value="female" data-translate="msfcSexFemale">Female</option>
+                        <option value="male" data-translate="msfcSexMale">Male</option>
+                        <option value="other" data-translate="msfcSexOther">Other</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="msfcRefPopulation" data-translate="msfcRefPopulationLabel">Reference Population:</label>
+                    <select id="msfcRefPopulation">
+                        <option value="nmss" data-translate="msfcRefPopNmss">NMSS Task Force (Standard for Z-Scores)</option>
+                        <option value="european" data-translate="msfcRefPopEuropean">European Age-Adjusted (Contextual Data)</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="description-section">
+                <h3 data-translate="descSection1Title">Primary Clinical Application:</h3>
+                <p data-translate="descSection1Para1">The MSFC was developed by the National MS Society's Clinical Outcome Assessment Task Force to provide a standardized, quantitative measure of disability in MS across three key clinical dimensions. It was designed to address some limitations of the EDSS, particularly its relative insensitivity to cognitive dysfunction and upper extremity impairment.<sup>30</sup></p>
+                <h3 data-translate="descSection2Title">Key Input Data/Parameters:</h3>
+                <p data-translate="descSection2Para1">The MSFC comprises three distinct tests:<sup>30</sup></p>
+                <ul>
+                    <li><strong data-translate="descSection2ListItem1Strong">Leg Function/Ambulation:</strong> <span data-translate="descSection2ListItem1Text">Assessed using the Timed 25-Foot Walk (T25FW). The patient is instructed to walk a 25-foot course as quickly as possible, but safely. The time taken (in seconds) is recorded for two trials, and the average or best time is typically used.</span></li>
+                    <li><strong data-translate="descSection2ListItem2Strong">Arm/Hand Function:</strong> <span data-translate="descSection2ListItem2Text">Assessed using the 9-Hole Peg Test (9HPT). The patient is timed while placing nine pegs into nine holes on a board and then removing them. This is performed twice with the dominant hand and twice with the non-dominant hand. The time taken (in seconds) for each trial is recorded, and the average for each hand is used.</span></li>
+                    <li><strong data-translate="descSection2ListItem3Strong">Cognitive Function:</strong> <span data-translate="descSection2ListItem3Text">Assessed using the Paced Auditory Serial Addition Test (PASAT), typically the 3-second version (PASAT-3). Single digits are presented auditorily every 3 seconds, and the patient must add each new digit to the one immediately preceding it. The score is the number of correct sums out of 60 items.</span></li>
+                </ul>
+                <h3 data-translate="descSection3Title">Output/Scoring Interpretation:</h3>
+                <p data-translate="descSection3Para1">The raw scores from each of the three components (average T25FW time, average 9HPT time for dominant and non-dominant hands, PASAT correct responses) are converted to Z-scores. A Z-score represents how many standard deviations an individual's score is from the mean of a reference population. An overall MSFC composite score is then calculated by averaging these individual Z-scores (with inversion of walk and peg test Z-scores so that higher Z-scores consistently indicate better performance).<sup>30</sup></p>
+            </div>
+            <button class="instructions-toggle" onclick="toggleInstructions('msfcAdminInstructions', 'msfcAdminToggleText')">
+                <span id="msfcAdminToggleText" data-translate="toggleInstructionsShow">▶ Show Standardized Administration Instructions</span>
+            </button>
+            <div id="msfcAdminInstructions" class="instructions-content">
+                <h3 class="font-semibold text-lg mb-2" data-translate="adminInstructionsTitle">Standardized MSFC Administration</h3>
+                <p class="mb-2" data-translate="adminInstructionsPara1">The MSFC should be administered as close to the beginning of a study visit as possible, but definitely before the patient does a distance walk. MSFC components should be administered in the following order:</p>
+                <ol class="list-decimal pl-6 mb-4">
+                    <li data-translate="adminInstructionsListItem1">Trial 1, Timed 25-Foot Walk</li>
+                    <li data-translate="adminInstructionsListItem2">Trial 2, Timed 25-Foot Walk</li>
+                    <li data-translate="adminInstructionsListItem3">Trial 1, Dominant Hand, 9-HPT</li>
+                    <li data-translate="adminInstructionsListItem4">Trial 2, Dominant Hand, 9-HPT</li>
+                    <li data-translate="adminInstructionsListItem5">Trial 1, Non-Dominant Hand, 9-HPT</li>
+                    <li data-translate="adminInstructionsListItem6">Trial 2, Non-Dominant Hand, 9-HPT</li>
+                    <li data-translate="adminInstructionsListItem7">PASAT-3"</li>
+                </ol>
+                <h4 class="font-semibold mt-4 mb-2" data-translate="t25fwInstructionsTitle">Timed 25-Foot Walk Instructions:</h4>
+                <p class="mb-2" data-translate="t25fwInstructionsPara1">The Timed 25-Foot Walk is a quantitative measure of lower extremity function. The patient is directed to one end of a clearly marked 25-foot course and is instructed to walk 25 feet as quickly as possible, but safely. The task is immediately administered again by having the patient walk back the same distance. Patients may use assistive devices when doing this task.</p>
+                <p class="italic text-sm mb-4" data-translate="t25fwInstructionsQuote">"I'd like you to walk 25 feet as quickly as possible, but safely. Do not slow down until after you've passed the finish line. Ready? Go."</p>
+                <h4 class="font-semibold mt-4 mb-2" data-translate="hptInstructionsTitle">9-Hole Peg Test Instructions:</h4>
+                <p class="mb-2" data-translate="hptInstructionsPara1">The 9-HPT is a quantitative measure of upper extremity (arm and hand) function. Both the dominant and non-dominant hands are tested twice. The patient must pick up the pegs one at a time, using one hand only, and put them into the holes as quickly as possible. Then, without pausing, the patient must remove the pegs one at a time and return them to the container.</p>
+                <p class="italic text-sm mb-4" data-translate="hptInstructionsQuote">"I want you to pick up the pegs one at a time, using only your [dominant/non-dominant] hand, and put them into the holes as quickly as possible. Then, without pausing, remove the pegs one at a time and return them to the container. We'll time you from when I say 'Go' until the last peg hits the container. Ready? Go."</p>
+                <h4 class="font-semibold mt-4 mb-2" data-translate="pasatInstructionsTitle">PASAT-3 Instructions:</h4>
+                <p class="mb-2" data-translate="pasatInstructionsPara1">The PASAT is a measure of cognitive function that specifically assesses auditory information processing speed and flexibility, as well as calculation ability. Single digits are presented every 3 seconds and the patient must add each new digit to the one immediately prior to it.</p>
+                <p class="italic text-sm mb-4" data-translate="pasatInstructionsQuote">"On this tape you will hear a series of single digit numbers presented at the rate of one every 3 seconds. Listen for the first two numbers, add them up, and tell me your answer. When you hear the next number, add it to the one you heard right before it. Continue to add the next number to each preceding one. Remember, you're not being asked to give me a running total, but rather the sum of the last two numbers that were presented."</p>
+            </div>
+            <button class="instructions-toggle mt-4" onclick="toggleInstructions('pasatInfoContent', 'pasatInfoToggleText')">
+                <span id="pasatInfoToggleText" data-translate="togglePasatInfoShow">▶ Show PASAT-3 Background and Administration Guide</span>
+            </button>
+            <div id="pasatInfoContent" class="instructions-content">
+                <div class="pasat-info-section">
+                    <h3 data-translate="pasatInfoTitle">PASAT-3 Background and Administration Guide</h3>
+                    <h4 data-translate="pasatInfoBackgroundTitle">Background</h4>
+                    <p data-translate="pasatInfoBackgroundPara1">The Paced Auditory Serial Addition Test (PASAT) is a measure of cognitive function that specifically assesses:</p>
+                    <ul><li data-translate="pasatInfoBackgroundListItem1">Auditory information processing speed</li><li data-translate="pasatInfoBackgroundListItem2">Mental flexibility</li><li data-translate="pasatInfoBackgroundListItem3">Calculation ability</li></ul>
+                    <p data-translate="pasatInfoBackgroundPara2">Originally developed by Gronwall in 1977 to monitor recovery of patients with mild head injuries, the test was later adapted for use with MS patients by Rao and colleagues in 1989. The PASAT has since become widely used in MS studies and is a key component of the Multiple Sclerosis Functional Composite (MSFC).</p>
+                    <p data-translate="pasatInfoBackgroundPara3">The PASAT-3 (3-second version) presents single digits every 3 seconds via an audio recording, requiring the patient to add each new digit to the one immediately prior to it. The test score is the number of correct sums given out of 60 possible answers.</p>
+                    <h4 data-translate="pasatInfoMaterialsTitle">Materials Needed</h4>
+                    <ul><li data-translate="pasatInfoMaterialsListItem1">Audio player (tape or CD player)</li><li data-translate="pasatInfoMaterialsListItem2">Recording with PASAT stimuli (presented at 3-second intervals)</li><li data-translate="pasatInfoMaterialsListItem3">PASAT Record Form</li><li data-translate="pasatInfoMaterialsListItem4">Clipboard</li><li data-translate="pasatInfoMaterialsListItem5">Pen/pencil</li></ul>
+                    <h4 data-translate="pasatInfoAdminTitle">Administration Instructions</h4>
+                    <ol><li data-translate="pasatInfoAdminListItem1">Position the patient in a quiet environment with minimal distractions.</li><li data-translate="pasatInfoAdminListItem2">The PASAT should be administered last in the MSFC sequence, after the Timed 25-Foot Walk and 9-Hole Peg Test.</li><li data-translate="pasatInfoAdminListItem3">Read the following instructions to the patient:</li></ol>
+                    <div class="instruction-quote"><p data-translate="pasatInfoAdminQuote">"On this recording you will hear a series of single digit numbers that will be presented at the rate of one every 3 seconds. Listen for the first two numbers, add them up, and tell me your answer. When you hear the next number, add it to the one you heard right before it. Continue to add the next number to each preceding one. Remember, you are not being asked to give me a running total, but rather the sum of the last two numbers that were spoken."</p></div>
+                    <h4 data-translate="pasatInfoDemoTitle">Demonstration</h4>
+                    <div class="example"><p data-translate="pasatInfoDemoPara1">Write the numbers 5, 7, 3, and 2 from left to right on a sheet of paper.</p><p data-translate="pasatInfoDemoPara2">Say: "For example, if the first two numbers are '5' and '7,' you would say '12.' If the next number is '3' you would say '10' (7+3). Then if the next number is '2' you would say '5' (3+2)."</p><p class="mt-2" data-translate="pasatInfoDemoPara3">The sequence would look like this:</p><p class="font-mono" data-translate="pasatInfoDemoPresented">Presented numbers: 5, 7, 3, 2</p><p class="font-mono" data-translate="pasatInfoDemoResponses">Patient responses: &nbsp;&nbsp; 12, 10, 5</p></div>
+                    <h4 data-translate="pasatInfoPracticeTitle">Practice Trials</h4>
+                    <ol><li data-translate="pasatInfoPracticeListItem1">Always administer at least one practice trial before the actual test.</li><li data-translate="pasatInfoPracticeListItem2">Play the practice items, stopping after the last practice item.</li><li data-translate="pasatInfoPracticeListItem3">If the patient gets lost, prompt them to resume by saying, "Jump back in with the next two numbers you hear."</li><li data-translate="pasatInfoPracticeListItem4">Proceed to the PASAT-3 test if the patient gets two or more answers correct (consecutive or not).</li><li data-translate="pasatInfoPracticeListItem5">Repeat the practice items, if necessary, up to three times.</li></ol>
+                    <h4 data-translate="pasatInfoTestAdminTitle">Administering the Test</h4>
+                    <ol><li data-translate="pasatInfoTestAdminListItem1">Once the patient understands the task, begin the PASAT-3 test.</li><li data-translate="pasatInfoTestAdminListItem2">Remind the patient: "Remember, if you get lost, just jump back in because I can't stop the test once it has begun."</li><li data-translate="pasatInfoTestAdminListItem3">Discourage talking and oral calculations during the test; only the patient's answers should be spoken aloud.</li><li data-translate="pasatInfoTestAdminListItem4">If the patient gets lost, after five consecutive "no responses," redirect by saying, "Jump back in," but do not stop the recording.</li></ol>
+                    <h4 data-translate="pasatInfoScoringTitle">Scoring</h4>
+                    <ul><li data-translate="pasatInfoScoringListItem1">The total score is the number of correct answers (maximum 60).</li><li data-translate="pasatInfoScoringListItem2">Circle all correct answers on the record form.</li><li data-translate="pasatInfoScoringListItem3">Write in any incorrect responses in the space provided.</li><li data-translate="pasatInfoScoringListItem4">Place a dash when no response is given.</li><li data-translate="pasatInfoScoringListItem5">If the patient corrects themselves after giving a response, count the amended answer as the response.</li></ul>
+                    <h4 data-translate="pasatInfoClinicalSigTitle">Clinical Significance</h4>
+                    <p data-translate="pasatInfoClinicalSigPara1">The PASAT-3 provides valuable information about cognitive processing that may not be captured by physical measures alone. Cognitive dysfunction can significantly impact quality of life and daily functioning in MS patients, even when physical disability is minimal. The PASAT-3 is particularly sensitive to the information processing deficits commonly seen in MS.</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-6 mt-4" data-translate="enterScoresNote">Enter average raw scores below, or use the integrated stopwatches. <strong data-translate="higherZScoreNote">Higher (more positive) Z-scores generally indicate better performance.</strong></p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                <div class="input-group"><label for="t25fw" data-translate="t25fwLabel">Timed 25-Foot Walk (T25FW)<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="t25fwTooltip">Enter average time in seconds from two trials. Lower time is better.</span></div></label><div class="trial-container"><div class="trial-row"><span class="trial-label" data-translate="trial1Label">Trial 1:</span><div class="timer-display" id="t25fw_trial1_display">0.0</div><div class="stopwatch-controls flex gap-1"><button onclick="startTimer('t25fw_trial1')" class="stopwatch-btn start-btn" id="t25fw_trial1_start" data-translate="startButton">Start</button><button onclick="stopTimer('t25fw_trial1')" class="stopwatch-btn stop-btn" id="t25fw_trial1_stop" disabled data-translate="stopButton">Stop</button><button onclick="resetTimer('t25fw_trial1')" class="stopwatch-btn reset-btn" id="t25fw_trial1_reset" data-translate="resetButton">Reset</button></div></div><div class="trial-row"><span class="trial-label" data-translate="trial2Label">Trial 2:</span><div class="timer-display" id="t25fw_trial2_display">0.0</div><div class="stopwatch-controls flex gap-1"><button onclick="startTimer('t25fw_trial2')" class="stopwatch-btn start-btn" id="t25fw_trial2_start" data-translate="startButton">Start</button><button onclick="stopTimer('t25fw_trial2')" class="stopwatch-btn stop-btn" id="t25fw_trial2_stop" disabled data-translate="stopButton">Stop</button><button onclick="resetTimer('t25fw_trial2')" class="stopwatch-btn reset-btn" id="t25fw_trial2_reset" data-translate="resetButton">Reset</button></div></div></div><div class="input-field-container mt-2"><input type="number" id="t25fw" placeholder="Avg. time (s)" step="0.1" data-translate-placeholder="avgTimePlaceholder"><button onclick="calculateAverage('t25fw')" class="stopwatch-btn bg-blue-500 hover:bg-blue-600 text-white" data-translate="calculateAvgButton">Calculate Avg</button></div></div>
+                <div class="input-group"><label for="hpt_dom" data-translate="hptDomLabel">9-Hole Peg Test - Dominant Hand<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="hptDomTooltip">Enter average time in seconds from two trials. Lower time is better.</span></div></label><div class="trial-container"><div class="trial-row"><span class="trial-label" data-translate="trial1Label">Trial 1:</span><div class="timer-display" id="hpt_dom_trial1_display">0.0</div><div class="stopwatch-controls flex gap-1"><button onclick="startTimer('hpt_dom_trial1')" class="stopwatch-btn start-btn" id="hpt_dom_trial1_start" data-translate="startButton">Start</button><button onclick="stopTimer('hpt_dom_trial1')" class="stopwatch-btn stop-btn" id="hpt_dom_trial1_stop" disabled data-translate="stopButton">Stop</button><button onclick="resetTimer('hpt_dom_trial1')" class="stopwatch-btn reset-btn" id="hpt_dom_trial1_reset" data-translate="resetButton">Reset</button></div></div><div class="trial-row"><span class="trial-label" data-translate="trial2Label">Trial 2:</span><div class="timer-display" id="hpt_dom_trial2_display">0.0</div><div class="stopwatch-controls flex gap-1"><button onclick="startTimer('hpt_dom_trial2')" class="stopwatch-btn start-btn" id="hpt_dom_trial2_start" data-translate="startButton">Start</button><button onclick="stopTimer('hpt_dom_trial2')" class="stopwatch-btn stop-btn" id="hpt_dom_trial2_stop" disabled data-translate="stopButton">Stop</button><button onclick="resetTimer('hpt_dom_trial2')" class="stopwatch-btn reset-btn" id="hpt_dom_trial2_reset" data-translate="resetButton">Reset</button></div></div></div><div class="input-field-container mt-2"><input type="number" id="hpt_dom" placeholder="Avg. time (s)" step="0.1" data-translate-placeholder="avgTimePlaceholder"><button onclick="calculateAverage('hpt_dom')" class="stopwatch-btn bg-blue-500 hover:bg-blue-600 text-white" data-translate="calculateAvgButton">Calculate Avg</button></div></div>
+                <div class="input-group"><label for="hpt_nondom" data-translate="hptNonDomLabel">9-Hole Peg Test - Non-Dominant Hand<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="hptNonDomTooltip">Enter average time in seconds from two trials. Lower time is better.</span></div></label><div class="trial-container"><div class="trial-row"><span class="trial-label" data-translate="trial1Label">Trial 1:</span><div class="timer-display" id="hpt_nondom_trial1_display">0.0</div><div class="stopwatch-controls flex gap-1"><button onclick="startTimer('hpt_nondom_trial1')" class="stopwatch-btn start-btn" id="hpt_nondom_trial1_start" data-translate="startButton">Start</button><button onclick="stopTimer('hpt_nondom_trial1')" class="stopwatch-btn stop-btn" id="hpt_nondom_trial1_stop" disabled data-translate="stopButton">Stop</button><button onclick="resetTimer('hpt_nondom_trial1')" class="stopwatch-btn reset-btn" id="hpt_nondom_trial1_reset" data-translate="resetButton">Reset</button></div></div><div class="trial-row"><span class="trial-label" data-translate="trial2Label">Trial 2:</span><div class="timer-display" id="hpt_nondom_trial2_display">0.0</div><div class="stopwatch-controls flex gap-1"><button onclick="startTimer('hpt_nondom_trial2')" class="stopwatch-btn start-btn" id="hpt_nondom_trial2_start" data-translate="startButton">Start</button><button onclick="stopTimer('hpt_nondom_trial2')" class="stopwatch-btn stop-btn" id="hpt_nondom_trial2_stop" disabled data-translate="stopButton">Stop</button><button onclick="resetTimer('hpt_nondom_trial2')" class="stopwatch-btn reset-btn" id="hpt_nondom_trial2_reset" data-translate="resetButton">Reset</button></div></div></div><div class="input-field-container mt-2"><input type="number" id="hpt_nondom" placeholder="Avg. time (s)" step="0.1" data-translate-placeholder="avgTimePlaceholder"><button onclick="calculateAverage('hpt_nondom')" class="stopwatch-btn bg-blue-500 hover:bg-blue-600 text-white" data-translate="calculateAvgButton">Calculate Avg</button></div></div>
+                <div class="input-group"><label for="pasat3" data-translate="pasat3Label">PASAT-3<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="pasat3Tooltip">Enter number of correct responses (typically out of 60). Higher score is better.</span></div></label><input type="number" id="pasat3" placeholder="Correct responses" step="1" max="60" data-translate-placeholder="correctResponsesPlaceholder">
+                <button onclick="togglePasatSimulator()" class="btn-launch mt-2 w-full" data-translate="launchPasatSimButton">Launch PASAT-3 Interactive Test</button></div>
+            </div>
+            <div id="pasatSimulatorContainer" class="hidden">
+                <h1 data-translate="pasatSim_instructionHeading" id="pasatSimInstructionHeading">PASAT-3 Simulator</h1>
+                <div id="pasatSimInstructions"><p data-translate="pasatSim_instructionP1" id="pasatSimInstructionP1">You will be presented with a series of single digits, spoken aloud, at 3-second intervals.</p><p data-translate="pasatSim_instructionP2" id="pasatSimInstructionP2">Your task is to <strong>add each new digit to the one immediately prior to it</strong>.</p><p data-translate="pasatSim_instructionP3" id="pasatSimInstructionP3">After a sum is shown, indicate if your mental calculation was correct before the next number appears.</p><p data-translate="pasatSim_instructionP4" id="pasatSimInstructionP4">The test consists of 60 sums.</p><button id="pasatSimStartButton" data-translate="pasatSim_startButton">Start Test</button></div>
+                <div id="pasatSimGameArea" class="pasat-sim-hidden"><div class="pasat-sim-info"><span data-translate="pasatSim_sumCountLabel" id="pasatSimSumCountLabel">Sum</span> <span id="pasatSimCurrentSumNumber">0</span> <span data-translate="pasatSim_sumOfLabel" id="pasatSimSumOfLabel">of</span> 60</div><div id="pasatSimNumberDisplay" class="pasat-sim-display">--</div><div id="pasatSimSumDisplay" class="pasat-sim-display">--</div><div id="pasatSimFeedbackPrompt" class="pasat-sim-prompt pasat-sim-hidden" data-translate="pasatSim_feedbackPrompt">Did you calculate the sum above correctly?</div><div id="pasatSimScoringButtons" class="pasat-sim-hidden"><button class="pasat-sim-scoreButton correct" id="pasatSimCorrectButton" data-translate="pasatSim_correctButton">My Calculation was Correct</button><button class="pasat-sim-scoreButton incorrect" id="pasatSimIncorrectButton" data-translate="pasatSim_incorrectButton">My Calculation was Incorrect</button></div></div>
+                <div id="pasatSimScoreArea" class="pasat-sim-hidden"><span data-translate="pasatSim_currentScoreLabel" id="pasatSimCurrentScoreLabel">Current Score</span>: <span id="pasatSimCurrentScore">0</span> / <span id="pasatSimSumsAttemptedDisplay">0</span></div>
+                <div id="pasatSimFinalResultsArea" class="pasat-sim-hidden"><h2 data-translate="pasatSim_testCompleteHeading" id="pasatSimTestCompleteHeading">Test Complete!</h2><p><span data-translate="pasatSim_finalScoreLabel" id="pasatSimFinalScoreLabel">Final Score</span>: <span id="pasatSimFinalScore">0</span> / 60</p><h3 data-translate="pasatSim_historyHeading" id="pasatSimHistoryHeading">History of Numbers and Sums:</h3><ul id="pasatSimHistoryList"></ul><button id="pasatSimRestartButton" data-translate="pasatSim_restartButton">Restart Test</button></div>
+            </div>
+            <button onclick="calculateMSFC()" class="btn-calculate mt-8" data-translate="calculateMsfcButton">Calculate MSFC Scores</button>
+            <div id="resultBoxMSFC" class="result-box" style="display: none;"></div>
+            <div id="msfcContextualData" class="contextual-data-section" style="display:none;"></div>
+        </div> <div id="edssCalculatorSection" class="hidden">
+            <h2 class="text-3xl font-bold text-center mb-6 text-gray-700" data-translate="edss_title">Expanded Disability Status Scale (EDSS) Calculator</h2>
+            <p class="text-sm text-gray-600 mb-6" data-translate="edss_description">
+                The EDSS quantifies disability in Multiple Sclerosis. Scores range from 0 (normal neurological exam) to 10 (death due to MS).
+                Please fill in the scores for each Functional System (FS) and answer questions about ambulation.
+                FS scores typically range from 0 (no disability) to 5 or 6 (severe disability).
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="input-group"><label for="edss_pyramidal" data-translate="edss_pyramidal_label">Pyramidal Functions<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="edss_pyramidal_tooltip">Motor strength. Grade 0-6.</span></div></label><select id="edss_pyramidal"><option value="0" data-translate="edss_pyramidal_opt_0">0 - Normal</option><option value="1" data-translate="edss_pyramidal_opt_1">1 - Abnormal signs without disability</option><option value="2" data-translate="edss_pyramidal_opt_2">2 - Minimal disability</option><option value="3" data-translate="edss_pyramidal_opt_3">3 - Mild to moderate paraparesis or hemiparesis; severe monoparesis</option><option value="4" data-translate="edss_pyramidal_opt_4">4 - Marked paraparesis or hemiparesis; moderate quadriparesis; or monoplegia</option><option value="5" data-translate="edss_pyramidal_opt_5">5 - Paraplegia, hemiplegia, or marked quadriparesis</option><option value="6" data-translate="edss_pyramidal_opt_6">6 - Quadriplegia</option></select></div>
+                <div class="input-group"><label for="edss_cerebellar" data-translate="edss_cerebellar_label">Cerebellar Functions<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="edss_cerebellar_tooltip">Coordination and balance. Grade 0-5.</span></div></label><select id="edss_cerebellar"><option value="0" data-translate="edss_cerebellar_opt_0">0 - Normal</option><option value="1" data-translate="edss_cerebellar_opt_1">1 - Abnormal signs without disability</option><option value="2" data-translate="edss_cerebellar_opt_2">2 - Mild ataxia</option><option value="3" data-translate="edss_cerebellar_opt_3">3 - Moderate ataxia</option><option value="4" data-translate="edss_cerebellar_opt_4">4 - Severe ataxia</option><option value="5" data-translate="edss_cerebellar_opt_5">5 - Unable to perform coordinated movements due to ataxia</option></select></div>
+                <div class="input-group"><label for="edss_brainstem" data-translate="edss_brainstem_label">Brainstem Functions<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="edss_brainstem_tooltip">Speech, swallowing, nystagmus. Grade 0-5.</span></div></label><select id="edss_brainstem"><option value="0" data-translate="edss_brainstem_opt_0">0 - Normal</option><option value="1" data-translate="edss_brainstem_opt_1">1 - Signs only</option><option value="2" data-translate="edss_brainstem_opt_2">2 - Moderate nystagmus or other mild disability</option><option value="3" data-translate="edss_brainstem_opt_3">3 - Severe nystagmus, marked extraocular weakness or moderate disability from other cranial nerves</option><option value="4" data-translate="edss_brainstem_opt_4">4 - Marked dysarthria or other marked disability</option><option value="5" data-translate="edss_brainstem_opt_5">5 - Inability to swallow or speak</option></select></div>
+                <div class="input-group"><label for="edss_sensory" data-translate="edss_sensory_label">Sensory Functions<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="edss_sensory_tooltip">Touch, pain, vibration, position sense. Grade 0-6.</span></div></label><select id="edss_sensory"><option value="0" data-translate="edss_sensory_opt_0">0 - Normal</option><option value="1" data-translate="edss_sensory_opt_1">1 - Vibration or figure-writing decrease only</option><option value="2" data-translate="edss_sensory_opt_2">2 - Mild decrease in touch or pain or position sense, and/or moderate decrease in vibration</option><option value="3" data-translate="edss_sensory_opt_3">3 - Moderate decrease in touch or pain or position sense, and/or marked decrease in vibration</option><option value="4" data-translate="edss_sensory_opt_4">4 - Marked decrease in touch or pain or position sense</option><option value="5" data-translate="edss_sensory_opt_5">5 - Loss of sensation in one or two limbs</option><option value="6" data-translate="edss_sensory_opt_6">6 - More extensive sensory loss</option></select></div>
+                <div class="input-group"><label for="edss_bowel_bladder" data-translate="edss_bowel_bladder_label">Bowel and Bladder Functions<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="edss_bowel_bladder_tooltip">Grade 0-6.</span></div></label><select id="edss_bowel_bladder"><option value="0" data-translate="edss_bowel_bladder_opt_0">0 - Normal</option><option value="1" data-translate="edss_bowel_bladder_opt_1">1 - Mild urinary hesitancy, urgency or retention</option><option value="2" data-translate="edss_bowel_bladder_opt_2">2 - Moderate hesitancy, urgency, retention, or rare urinary incontinence</option><option value="3" data-translate="edss_bowel_bladder_opt_3">3 - Frequent urinary incontinence</option><option value="4" data-translate="edss_bowel_bladder_opt_4">4 - In need of catheterization</option><option value="5" data-translate="edss_bowel_bladder_opt_5">5 - Loss of bladder function</option><option value="6" data-translate="edss_bowel_bladder_opt_6">6 - Loss of bladder and bowel function</option></select></div>
+                <div class="input-group"><label for="edss_visual" data-translate="edss_visual_label">Visual Functions<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="edss_visual_tooltip">Visual acuity and fields. Grade 0-6.</span></div></label><select id="edss_visual"><option value="0" data-translate="edss_visual_opt_0">0 - Normal</option><option value="1" data-translate="edss_visual_opt_1">1 - Scotoma with visual acuity (corrected) better than 20/30</option><option value="2" data-translate="edss_visual_opt_2">2 - Worse eye with scotoma and/or visual acuity (corrected) of 20/30 to 20/59</option><option value="3" data-translate="edss_visual_opt_3">3 - Worse eye with large scotoma, or moderate decrease in fields, or visual acuity (corrected) of 20/60 to 20/99</option><option value="4" data-translate="edss_visual_opt_4">4 - Worse eye with marked decrease of fields and/or visual acuity (corrected) of 20/100 to 20/200; other eye 20/60 or better</option><option value="5" data-translate="edss_visual_opt_5">5 - Worse eye with visual acuity (corrected) less than 20/200; other eye 20/60 or better OR Grade 4 plus other eye worse than 20/60</option><option value="6" data-translate="edss_visual_opt_6">6 - Grade 5 plus other eye worse than 20/60</option></select></div>
+                <div class="input-group md:col-span-2"><label for="edss_cerebral" data-translate="edss_cerebral_label">Cerebral (or Mental) Functions<div class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" data-translate="edss_cerebral_tooltip">Cognitive functions. Grade 0-5.</span></div></label><select id="edss_cerebral"><option value="0" data-translate="edss_cerebral_opt_0">0 - Normal</option><option value="1" data-translate="edss_cerebral_opt_1">1 - Mood alteration only (does not affect EDSS score)</option><option value="2" data-translate="edss_cerebral_opt_2">2 - Mild decrease in mentation</option><option value="3" data-translate="edss_cerebral_opt_3">3 - Moderate decrease in mentation</option><option value="4" data-translate="edss_cerebral_opt_4">4 - Marked decrease in mentation (chronic brain syndrome, moderate)</option><option value="5" data-translate="edss_cerebral_opt_5">5 - Dementia or chronic brain syndrome, severe</option></select></div>
+            </div>
+            <hr class="my-8 border-gray-300">
+            <h3 class="text-2xl font-semibold mb-6 text-gray-700" data-translate="edss_ambulation_title">Ambulation Assessment</h3>
+            <div class="input-group"><label for="edss_ambulation_status" data-translate="edss_ambulation_label">Select the statement that best describes ambulation ability:</label><select id="edss_ambulation_status"><option value="0_full" data-translate="edss_amb_opt_0">0 - Fully ambulatory, no impairment (EDSS 0-3.5 range, FS dependent)</option><option value="4_500m" data-translate="edss_amb_opt_1">1 - Fully ambulatory without aid or rest for >500m (EDSS 4.0)</option><option value="4.5_300m" data-translate="edss_amb_opt_2">2 - Fully ambulatory without aid or rest for >300m but <500m (EDSS 4.5)</option><option value="5_200m" data-translate="edss_amb_opt_3">3 - Ambulatory without aid or rest for >200m (EDSS 5.0)</option><option value="5.5_100m" data-translate="edss_amb_opt_4">4 - Ambulatory without aid or rest for >100m (EDSS 5.5)</option><option value="6_cane_100m" data-translate="edss_amb_opt_5">5 - Requires unilateral constant assistance (cane/crutch) to walk 100m (EDSS 6.0)</option><option value="6.5_bilateral_20m" data-translate="edss_amb_opt_6">6 - Requires bilateral constant assistance (canes/crutches/brace) to walk 20m (EDSS 6.5)</option><option value="7_wheelchair_active" data-translate="edss_amb_opt_7">7 - Restricted to wheelchair; able to transfer independently; mobile in wheelchair 12hrs/day (EDSS 7.0)</option><option value="7.5_wheelchair_transfer_assist" data-translate="edss_amb_opt_8">8 - Restricted to wheelchair; needs assistance for transfer; mobile in wheelchair (EDSS 7.5)</option><option value="8_bed_chair_adl" data-translate="edss_amb_opt_9">9 - Restricted to bed or chair but out of bed much of day; retains many self-care functions; generally effective use of arms (EDSS 8.0)</option><option value="8.5_bed_some_adl" data-translate="edss_amb_opt_10">10 - Restricted to bed much of day; retains some self-care functions; some effective use of arms (EDSS 8.5)</option><option value="9_bed_dependent" data-translate="edss_amb_opt_11">11 - Helpless bed patient; can communicate and eat (EDSS 9.0)</option><option value="9.5_bed_total_dependent" data-translate="edss_amb_opt_12">12 - Totally helpless bed patient; unable to communicate effectively or eat/swallow (EDSS 9.5)</option><option value="10_death" data-translate="edss_amb_opt_13">13 - Death due to MS (EDSS 10.0)</option></select></div>
+            <button onclick="edss_calculateEDSS()" class="btn-edss-calculate" data-translate="edss_calculate_btn">Calculate EDSS</button>
+            <div id="edss_resultBox" class="edss-result-box" style="display: none;">
+                <h3 data-translate="edss_result_title">EDSS Score</h3>
+                <p id="edss_edssScoreDisplay" class="font-bold text-3xl"></p>
+                <div id="edss_edssInterpretation" class="edss-interpretation"></div>
+            </div>
+        </div> 
+        <div class="references-section mt-8">
+            <h3 data-translate="referencesTitle">References</h3>
+            <ol>
+                 <li>Fischer JS, Rudick RA, Cutter GR, Reingold SC. The Multiple Sclerosis Functional Composite measure (MSFC): an integrated approach to MS clinical outcome assessment. Mult Scler. 1999;5(4):244-250.</li>
+                <li>Rudick R, Antel J, Confavreux C, et al. Recommendations from the National Multiple Sclerosis Society Clinical Outcomes Assessment Task Force. Ann Neurol. 1997;42(3):379-382.</li>
+                <li>Cutter GR, Baier ML, Rudick RA, et al. Development of a multiple sclerosis functional composite as a clinical trial outcome measure. Brain. 1999;122(5):871-882.</li>
+                <li>Fischer JS, Jak AJ, Kniker JE, Rudick RA, Cutter G. Multiple Sclerosis Functional Composite (MSFC): Administration and Scoring Manual. National Multiple Sclerosis Society; 2001.</li>
+                <li>Cohen JA, Cutter GR, Fischer JS, et al. Use of the multiple sclerosis functional composite as an outcome measure in a phase 3 clinical trial. Arch Neurol. 2001;58(6):961-967.</li>
+                <li>Gronwall DMA. Paced Auditory Serial Addition Task: A measure of recovery from concussion. Perceptual and Motor Skills. 1977;44:367-373.</li>
+                <li>Rao SM, Leo GJ, Haughton VM, St. Aubin-Faubert P, Bernardin L. Correlation of magnetic resonance imaging with neuropsychological testing in multiple sclerosis. Neurology. 1989;39:161-166.</li>
+                <li>Kurtzke JF. Rating neurologic impairment in multiple sclerosis: an expanded disability status scale (EDSS). Neurology. 1983;33(11):1444-1452. (Reference for EDSS)</li>
+            </ol>
+        </div>
+        <footer class="page-footer">
+            <p data-translate="attribution">Made by Zsolt Bálint MD</p>
+        </footer>
+    </div>
+
+    <script>
+        // Main Translations Object
+        const translations = {
+            en: {
+                mainPageTitle: "MS Clinical Calculators",
+                launchMsfcButton: "MSFC Calculator",
+                launchEdssButton: "EDSS Calculator",
+                pageTitle: "Multiple Sclerosis Functional Composite (MSFC) Calculator",
+                msfcAgeLabel: "Age (years):",
+                msfcSexLabel: "Sex:",
+                msfcSexFemale: "Female",
+                msfcSexMale: "Male",
+                msfcSexOther: "Other",
+                msfcRefPopulationLabel: "Reference Population:",
+                msfcRefPopNmss: "NMSS Task Force (Standard for Z-Scores)",
+                msfcRefPopEuropean: "European Age-Adjusted (Contextual Data)",
+                msfcContextualDataTitle: "European Age-Adjusted Contextual Data",
+                msfcT25fwContextLabel: "T25FW Context:",
+                msfcT25fwContextText: "For age {age}, the European validated pathological threshold (cut-point) is <strong>{cutPoint}s</strong> (Gait Speed: {gaitSpeed} m/s). Scores above this may indicate impairment.",
+                msfcT25fwContextNotAvailable: "T25FW European cut-point data not available for age {age}.",
+                msfc9hptContextLabel: "9HPT Context (Raw Times):",
+                msfc9hptContextTextDominant: "Dominant Hand (Age {age}): Mean <strong>{meanTime}s</strong> (SD {sdTime}s).",
+                msfc9hptContextTextNonDominant: "Non-Dominant Hand (Age {age}): Mean <strong>{meanTime}s</strong> (SD {sdTime}s).",
+                msfc9hptContextNotAvailable: "9HPT European reference data not available for age {age}.",
+                msfcZadjLegLabel: "Age-Adjusted Z-Score (T25FW, European Context):",
+                msfcZadjArmLabel: "Age-Adjusted Z-Score (9HPT, European Context):",
+                msfcZadjCognitiveLabel: "Age-Adjusted Z-Score (PASAT, European Context):",
+                msfcZadjCompositeLabel: "Age-Adjusted Composite MSFC Z-Score (European Context):",
+                msfcPasatAdjustNote: "Note: PASAT age adjustment using the general formula may be an oversimplification; PASAT scores are also influenced by education and other factors.",
+                msfcContextualDisclaimer: "Note: The Z-Scores above are calculated using the standard NMSS Task Force reference. The European data and Age-Adjusted Z-Scores are provided for contextual information only.",
+                descSection1Title: "Primary Clinical Application:",
+                descSection1Para1: "The MSFC was developed by the National MS Society's Clinical Outcome Assessment Task Force to provide a standardized, quantitative measure of disability in MS across three key clinical dimensions. It was designed to address some limitations of the EDSS, particularly its relative insensitivity to cognitive dysfunction and upper extremity impairment.<sup>30</sup>",
+                descSection2Title: "Key Input Data/Parameters:",
+                descSection2Para1: "The MSFC comprises three distinct tests:<sup>30</sup>",
+                descSection2ListItem1Strong: "Leg Function/Ambulation:",
+                descSection2ListItem1Text: "Assessed using the Timed 25-Foot Walk (T25FW). The patient is instructed to walk a 25-foot course as quickly as possible, but safely. The time taken (in seconds) is recorded for two trials, and the average or best time is typically used.",
+                descSection2ListItem2Strong: "Arm/Hand Function:",
+                descSection2ListItem2Text: "Assessed using the 9-Hole Peg Test (9HPT). The patient is timed while placing nine pegs into nine holes on a board and then removing them. This is performed twice with the dominant hand and twice with the non-dominant hand. The time taken (in seconds) for each trial is recorded, and the average for each hand is used.",
+                descSection2ListItem3Strong: "Cognitive Function:",
+                descSection2ListItem3Text: "Assessed using the Paced Auditory Serial Addition Test (PASAT), typically the 3-second version (PASAT-3). Single digits are presented auditorily every 3 seconds, and the patient must add each new digit to the one immediately preceding it. The score is the number of correct sums out of 60 items.",
+                descSection3Title: "Output/Scoring Interpretation:",
+                descSection3Para1: "The raw scores from each of the three components (average T25FW time, average 9HPT time for dominant and non-dominant hands, PASAT correct responses) are converted to Z-scores. A Z-score represents how many standard deviations an individual's score is from the mean of a reference population. An overall MSFC composite score is then calculated by averaging these individual Z-scores (with inversion of walk and peg test Z-scores so that higher Z-scores consistently indicate better performance).<sup>30</sup>",
+                toggleInstructionsShow: "▶ Show Standardized Administration Instructions",
+                toggleInstructionsHide: "▼ Hide Standardized Administration Instructions",
+                adminInstructionsTitle: "Standardized MSFC Administration",
+                adminInstructionsPara1: "The MSFC should be administered as close to the beginning of a study visit as possible, but definitely before the patient does a distance walk. MSFC components should be administered in the following order:",
+                adminInstructionsListItem1: "Trial 1, Timed 25-Foot Walk",
+                adminInstructionsListItem2: "Trial 2, Timed 25-Foot Walk",
+                adminInstructionsListItem3: "Trial 1, Dominant Hand, 9-HPT",
+                adminInstructionsListItem4: "Trial 2, Dominant Hand, 9-HPT",
+                adminInstructionsListItem5: "Trial 1, Non-Dominant Hand, 9-HPT",
+                adminInstructionsListItem6: "Trial 2, Non-Dominant Hand, 9-HPT",
+                adminInstructionsListItem7: "PASAT-3\"",
+                t25fwInstructionsTitle: "Timed 25-Foot Walk Instructions:",
+                t25fwInstructionsPara1: "The Timed 25-Foot Walk is a quantitative measure of lower extremity function. The patient is directed to one end of a clearly marked 25-foot course and is instructed to walk 25 feet as quickly as possible, but safely. The task is immediately administered again by having the patient walk back the same distance. Patients may use assistive devices when doing this task.",
+                t25fwInstructionsQuote: "\"I'd like you to walk 25 feet as quickly as possible, but safely. Do not slow down until after you've passed the finish line. Ready? Go.\"",
+                hptInstructionsTitle: "9-Hole Peg Test Instructions:",
+                hptInstructionsPara1: "The 9-HPT is a quantitative measure of upper extremity (arm and hand) function. Both the dominant and non-dominant hands are tested twice. The patient must pick up the pegs one at a time, using one hand only, and put them into the holes as quickly as possible. Then, without pausing, the patient must remove the pegs one at a time and return them to the container.",
+                hptInstructionsQuote: "\"I want you to pick up the pegs one at a time, using only your [dominant/non-dominant] hand, and put them into the holes as quickly as possible. Then, without pausing, remove the pegs one at a time and return them to the container. We'll time you from when I say 'Go' until the last peg hits the container. Ready? Go.\"",
+                pasatInstructionsTitle: "PASAT-3 Instructions:",
+                pasatInstructionsPara1: "The PASAT is a measure of cognitive function that specifically assesses auditory information processing speed and flexibility, as well as calculation ability. Single digits are presented every 3 seconds and the patient must add each new digit to the one immediately prior to it.",
+                pasatInstructionsQuote: "\"On this tape you will hear a series of single digit numbers presented at the rate of one every 3 seconds. Listen for the first two numbers, add them up, and tell me your answer. When you hear the next number, add it to the one you heard right before it. Continue to add the next number to each preceding one. Remember, you're not being asked to give me a running total, but rather the sum of the last two numbers that were presented.\"",
+                togglePasatInfoShow: "▶ Show PASAT-3 Background and Administration Guide",
+                togglePasatInfoHide: "▼ Hide PASAT-3 Background and Administration Guide",
+                pasatInfoTitle: "PASAT-3 Background and Administration Guide",
+                pasatInfoBackgroundTitle: "Background",
+                pasatInfoBackgroundPara1: "The Paced Auditory Serial Addition Test (PASAT) is a measure of cognitive function that specifically assesses:",
+                pasatInfoBackgroundListItem1: "Auditory information processing speed",
+                pasatInfoBackgroundListItem2: "Mental flexibility",
+                pasatInfoBackgroundListItem3: "Calculation ability",
+                pasatInfoBackgroundPara2: "Originally developed by Gronwall in 1977 to monitor recovery of patients with mild head injuries, the test was later adapted for use with MS patients by Rao and colleagues in 1989. The PASAT has since become widely used in MS studies and is a key component of the Multiple Sclerosis Functional Composite (MSFC).",
+                pasatInfoBackgroundPara3: "The PASAT-3 (3-second version) presents single digits every 3 seconds via an audio recording, requiring the patient to add each new digit to the one immediately prior to it. The test score is the number of correct sums given out of 60 possible answers.",
+                pasatInfoMaterialsTitle: "Materials Needed",
+                pasatInfoMaterialsListItem1: "Audio player (tape or CD player)",
+                pasatInfoMaterialsListItem2: "Recording with PASAT stimuli (presented at 3-second intervals)",
+                pasatInfoMaterialsListItem3: "PASAT Record Form",
+                pasatInfoMaterialsListItem4: "Clipboard",
+                pasatInfoMaterialsListItem5: "Pen/pencil",
+                pasatInfoAdminTitle: "Administration Instructions",
+                pasatInfoAdminListItem1: "Position the patient in a quiet environment with minimal distractions.",
+                pasatInfoAdminListItem2: "The PASAT should be administered last in the MSFC sequence, after the Timed 25-Foot Walk and 9-Hole Peg Test.",
+                pasatInfoAdminListItem3: "Read the following instructions to the patient:",
+                pasatInfoAdminQuote: "\"On this recording you will hear a series of single digit numbers that will be presented at the rate of one every 3 seconds. Listen for the first two numbers, add them up, and tell me your answer. When you hear the next number, add it to the one you heard right before it. Continue to add the next number to each preceding one. Remember, you are not being asked to give me a running total, but rather the sum of the last two numbers that were spoken.\"",
+                pasatInfoDemoTitle: "Demonstration",
+                pasatInfoDemoPara1: "Write the numbers 5, 7, 3, and 2 from left to right on a sheet of paper.",
+                pasatInfoDemoPara2: "Say: \"For example, if the first two numbers are '5' and '7,' you would say '12.' If the next number is '3' you would say '10' (7+3). Then if the next number is '2' you would say '5' (3+2).\"",
+                pasatInfoDemoPara3: "The sequence would look like this:",
+                pasatInfoDemoPresented: "Presented numbers: 5, 7, 3, 2",
+                pasatInfoDemoResponses: "Patient responses: &nbsp;&nbsp; 12, 10, 5",
+                pasatInfoPracticeTitle: "Practice Trials",
+                pasatInfoPracticeListItem1: "Always administer at least one practice trial before the actual test.",
+                pasatInfoPracticeListItem2: "Play the practice items, stopping after the last practice item.",
+                pasatInfoPracticeListItem3: "If the patient gets lost, prompt them to resume by saying, \"Jump back in with the next two numbers you hear.\"",
+                pasatInfoPracticeListItem4: "Proceed to the PASAT-3 test if the patient gets two or more answers correct (consecutive or not).",
+                pasatInfoPracticeListItem5: "Repeat the practice items, if necessary, up to three times.",
+                pasatInfoTestAdminTitle: "Administering the Test",
+                pasatInfoTestAdminListItem1: "Once the patient understands the task, begin the PASAT-3 test.",
+                pasatInfoTestAdminListItem2: "Remind the patient: \"Remember, if you get lost, just jump back in because I can't stop the test once it has begun.\"",
+                pasatInfoTestAdminListItem3: "Discourage talking and oral calculations during the test; only the patient's answers should be spoken aloud.",
+                pasatInfoTestAdminListItem4: "If the patient gets lost, after five consecutive \"no responses,\" redirect by saying, \"Jump back in,\" but do not stop the recording.",
+                pasatInfoScoringTitle: "Scoring",
+                pasatInfoScoringListItem1: "The total score is the number of correct answers (maximum 60).",
+                pasatInfoScoringListItem2: "Circle all correct answers on the record form.",
+                pasatInfoScoringListItem3: "Write in any incorrect responses in the space provided.",
+                pasatInfoScoringListItem4: "Place a dash when no response is given.",
+                pasatInfoScoringListItem5: "If the patient corrects themselves after giving a response, count the amended answer as the response.",
+                pasatInfoClinicalSigTitle: "Clinical Significance",
+                pasatInfoClinicalSigPara1: "The PASAT-3 provides valuable information about cognitive processing that may not be captured by physical measures alone. Cognitive dysfunction can significantly impact quality of life and daily functioning in MS patients, even when physical disability is minimal. The PASAT-3 is particularly sensitive to the information processing deficits commonly seen in MS.",
+                enterScoresNote: "Enter average raw scores below, or use the integrated stopwatches.",
+                higherZScoreNote: "Higher (more positive) Z-scores generally indicate better performance.",
+                t25fwLabel: "Timed 25-Foot Walk (T25FW)",
+                t25fwTooltip: "Enter average time in seconds from two trials. Lower time is better.",
+                trial1Label: "Trial 1:",
+                trial2Label: "Trial 2:",
+                startButton: "Start",
+                stopButton: "Stop",
+                resetButton: "Reset",
+                avgTimePlaceholder: "Avg. time (s)",
+                calculateAvgButton: "Calculate Avg",
+                hptDomLabel: "9-Hole Peg Test - Dominant Hand",
+                hptDomTooltip: "Enter average time in seconds from two trials. Lower time is better.",
+                hptNonDomLabel: "9-Hole Peg Test - Non-Dominant Hand",
+                hptNonDomTooltip: "Enter average time in seconds from two trials. Lower time is better.",
+                pasat3Label: "PASAT-3",
+                pasat3Tooltip: "Enter number of correct responses (typically out of 60). Higher score is better.",
+                correctResponsesPlaceholder: "Correct responses",
+                launchPasatSimButton: "Launch PASAT-3 Interactive Test",
+                calculateMsfcButton: "Calculate MSFC Scores",
+                resultsTitle: "MSFC Results",
+                armZScoreLabel: "Arm (9HPT) Z-Score:",
+                legZScoreLabel: "Leg (T25FW) Z-Score:",
+                cognitiveZScoreLabel: "Cognitive (PASAT-3) Z-Score:",
+                compositeZScoreLabel: "Composite MSFC Z-Score:",
+                basedOnAvgReciprocal: "Based on avg. reciprocal:",
+                basedOnAvgTime: "Based on avg. time:",
+                basedOnCorrectResponses: "Based on correct responses:",
+                understandingZScoresTitle: "Understanding Z-Scores:",
+                zScoreExplanation: "A Z-score indicates how many standard deviations a raw score is from the average (mean) of a reference population.",
+                zScoreListItem1: "A Z-score of 0 means the performance is average.",
+                zScoreListItem2: "A positive Z-score means performance is above average (better).",
+                zScoreListItem3: "A negative Z-score means performance is below average (worse).",
+                zScoreFurtherExplanation: "The component Z-scores are calculated such that a more positive value always reflects better performance relative to the reference population.",
+                disclaimerTitle: "Important Disclaimer:",
+                disclaimerText: "The Z-scores are calculated using reference population data from the <strong>NMSS Task Force database (MSFC Manual, Oct 2001, Table 3)</strong>:",
+                disclaimerListItem1: "Avg. Reciprocal of 9HPT Times: Mean = ${refData.hpt_reciprocal.mean.toFixed(4)}, SD = ${refData.hpt_reciprocal.sd.toFixed(4)}",
+                disclaimerListItem2: "Avg. T25FW Time: Mean = ${refData.t25fw.mean.toFixed(4)}s, SD = ${refData.t25fw.sd.toFixed(4)}s",
+                disclaimerListItem3: "PASAT-3 Correct: Mean = ${refData.pasat3.mean.toFixed(4)}, SD = ${refData.pasat3.sd.toFixed(4)}",
+                disclaimerFurtherText: "These values may not be appropriate for all populations. For clinical or research use, Z-scores MUST be calculated using validated normative data appropriate for the specific patient population being assessed. This tool is not a substitute for professional medical assessment or validated clinical outcome measures.",
+                disclaimerEuropeanContext: "The European Age-Adjusted data displayed above is for contextual information only and is not used in the Z-score calculation.",
+                errorTitle: "Error",
+                errorInvalidInput: "Please enter valid numbers for all MSFC component fields, or use the stopwatches.",
+                errorPositiveTime: "Times for T25FW and 9-HPT must be greater than zero.",
+                errorPasatRange: "PASAT-3 score must be between 0 and 60.",
+                errorAgeMissing: "Please enter a valid age to display European contextual data.",
+                alertBothTrials: "Please complete both trials before calculating the average.",
+                referencesTitle: "References",
+                attribution: "Made by Zsolt Bálint MD",
+                pasatSim_instructionHeading: "PASAT-3 Simulator",
+                pasatSim_instructionP1: "You will be presented with a series of single digits, spoken aloud, at 3-second intervals.",
+                pasatSim_instructionP2: "Your task is to <strong>add each new digit to the one immediately prior to it</strong>.",
+                pasatSim_instructionP3: "After a sum is shown, indicate if your mental calculation was correct before the next number appears.",
+                pasatSim_instructionP4: "The test consists of 60 sums.",
+                pasatSim_startButton: "Start Test",
+                pasatSim_sumCountLabel: "Sum",
+                pasatSim_sumOfLabel: "of",
+                pasatSim_getReady: "Get ready...",
+                pasatSim_firstNumIs: "First number is...",
+                pasatSim_feedbackPrompt: "Did you calculate the sum above correctly?",
+                pasatSim_correctButton: "My Calculation was Correct",
+                pasatSim_incorrectButton: "My Calculation was Incorrect",
+                pasatSim_currentScoreLabel: "Current Score",
+                pasatSim_testCompleteHeading: "Test Complete!",
+                pasatSim_finalScoreLabel: "Final Score",
+                pasatSim_historyHeading: "History of Numbers and Sums:",
+                pasatSim_restartButton: "Restart Test",
+                pasatSim_historyFirstNum: "{itemNum}. First number presented: {digit}",
+                pasatSim_historySum: "{itemNum}. Numbers: {n1}, {n2} → Sum: {sum}. (You said: {response})",
+                pasatSim_responseCorrect: "Correct",
+                pasatSim_responseIncorrect: "Incorrect",
+                pasatSim_responseNone: "No response recorded",
+
+                // EDSS Translations
+                edss_title: "Expanded Disability Status Scale (EDSS) Calculator",
+                edss_description: "The EDSS quantifies disability in Multiple Sclerosis. Scores range from 0 (normal neurological exam) to 10 (death due to MS). Please fill in the scores for each Functional System (FS) and answer questions about ambulation. FS scores typically range from 0 (no disability) to 5 or 6 (severe disability).",
+                edss_pyramidal_label: "Pyramidal Functions",
+                edss_pyramidal_tooltip: "Motor strength. Grade 0-6.",
+                edss_pyramidal_opt_0: "0 - Normal",
+                edss_pyramidal_opt_1: "1 - Abnormal signs without disability",
+                edss_pyramidal_opt_2: "2 - Minimal disability",
+                edss_pyramidal_opt_3: "3 - Mild to moderate paraparesis or hemiparesis; severe monoparesis",
+                edss_pyramidal_opt_4: "4 - Marked paraparesis or hemiparesis; moderate quadriparesis; or monoplegia",
+                edss_pyramidal_opt_5: "5 - Paraplegia, hemiplegia, or marked quadriparesis",
+                edss_pyramidal_opt_6: "6 - Quadriplegia",
+                edss_cerebellar_label: "Cerebellar Functions",
+                edss_cerebellar_tooltip: "Coordination and balance. Grade 0-5.",
+                edss_cerebellar_opt_0: "0 - Normal",
+                edss_cerebellar_opt_1: "1 - Abnormal signs without disability",
+                edss_cerebellar_opt_2: "2 - Mild ataxia",
+                edss_cerebellar_opt_3: "3 - Moderate ataxia",
+                edss_cerebellar_opt_4: "4 - Severe ataxia",
+                edss_cerebellar_opt_5: "5 - Unable to perform coordinated movements due to ataxia",
+                edss_brainstem_label: "Brainstem Functions",
+                edss_brainstem_tooltip: "Speech, swallowing, nystagmus. Grade 0-5.",
+                edss_brainstem_opt_0: "0 - Normal",
+                edss_brainstem_opt_1: "1 - Signs only",
+                edss_brainstem_opt_2: "2 - Moderate nystagmus or other mild disability",
+                edss_brainstem_opt_3: "3 - Severe nystagmus, marked extraocular weakness or moderate disability from other cranial nerves",
+                edss_brainstem_opt_4: "4 - Marked dysarthria or other marked disability",
+                edss_brainstem_opt_5: "5 - Inability to swallow or speak",
+                edss_sensory_label: "Sensory Functions",
+                edss_sensory_tooltip: "Touch, pain, vibration, position sense. Grade 0-6.",
+                edss_sensory_opt_0: "0 - Normal",
+                edss_sensory_opt_1: "1 - Vibration or figure-writing decrease only",
+                edss_sensory_opt_2: "2 - Mild decrease in touch or pain or position sense, and/or moderate decrease in vibration",
+                edss_sensory_opt_3: "3 - Moderate decrease in touch or pain or position sense, and/or marked decrease in vibration",
+                edss_sensory_opt_4: "4 - Marked decrease in touch or pain or position sense",
+                edss_sensory_opt_5: "5 - Loss of sensation in one or two limbs",
+                edss_sensory_opt_6: "6 - More extensive sensory loss",
+                edss_bowel_bladder_label: "Bowel and Bladder Functions",
+                edss_bowel_bladder_tooltip: "Grade 0-6.",
+                edss_bowel_bladder_opt_0: "0 - Normal",
+                edss_bowel_bladder_opt_1: "1 - Mild urinary hesitancy, urgency or retention",
+                edss_bowel_bladder_opt_2: "2 - Moderate hesitancy, urgency, retention, or rare urinary incontinence",
+                edss_bowel_bladder_opt_3: "3 - Frequent urinary incontinence",
+                edss_bowel_bladder_opt_4: "4 - In need of catheterization",
+                edss_bowel_bladder_opt_5: "5 - Loss of bladder function",
+                edss_bowel_bladder_opt_6: "6 - Loss of bladder and bowel function",
+                edss_visual_label: "Visual Functions",
+                edss_visual_tooltip: "Visual acuity and fields. Grade 0-6.",
+                edss_visual_opt_0: "0 - Normal",
+                edss_visual_opt_1: "1 - Scotoma with visual acuity (corrected) better than 20/30",
+                edss_visual_opt_2: "2 - Worse eye with scotoma and/or visual acuity (corrected) of 20/30 to 20/59",
+                edss_visual_opt_3: "3 - Worse eye with large scotoma, or moderate decrease in fields, or visual acuity (corrected) of 20/60 to 20/99",
+                edss_visual_opt_4: "4 - Worse eye with marked decrease of fields and/or visual acuity (corrected) of 20/100 to 20/200; other eye 20/60 or better",
+                edss_visual_opt_5: "5 - Worse eye with visual acuity (corrected) less than 20/200; other eye 20/60 or better OR Grade 4 plus other eye worse than 20/60",
+                edss_visual_opt_6: "6 - Grade 5 plus other eye worse than 20/60",
+                edss_cerebral_label: "Cerebral (or Mental) Functions",
+                edss_cerebral_tooltip: "Cognitive functions. Grade 0-5.",
+                edss_cerebral_opt_0: "0 - Normal",
+                edss_cerebral_opt_1: "1 - Mood alteration only (does not affect EDSS score)",
+                edss_cerebral_opt_2: "2 - Mild decrease in mentation",
+                edss_cerebral_opt_3: "3 - Moderate decrease in mentation",
+                edss_cerebral_opt_4: "4 - Marked decrease in mentation (chronic brain syndrome, moderate)",
+                edss_cerebral_opt_5: "5 - Dementia or chronic brain syndrome, severe",
+                edss_ambulation_title: "Ambulation Assessment",
+                edss_ambulation_label: "Select the statement that best describes ambulation ability:",
+                edss_amb_opt_0: "0 - Fully ambulatory, no impairment (EDSS 0-3.5 range, FS dependent)",
+                edss_amb_opt_1: "1 - Fully ambulatory without aid or rest for >500m (EDSS 4.0)",
+                edss_amb_opt_2: "2 - Fully ambulatory without aid or rest for >300m but <500m (EDSS 4.5)",
+                edss_amb_opt_3: "3 - Ambulatory without aid or rest for >200m (EDSS 5.0)",
+                edss_amb_opt_4: "4 - Ambulatory without aid or rest for >100m (EDSS 5.5)",
+                edss_amb_opt_5: "5 - Requires unilateral constant assistance (cane/crutch) to walk 100m (EDSS 6.0)",
+                edss_amb_opt_6: "6 - Requires bilateral constant assistance (canes/crutches/brace) to walk 20m (EDSS 6.5)",
+                edss_amb_opt_7: "7 - Restricted to wheelchair; able to transfer independently; mobile in wheelchair 12hrs/day (EDSS 7.0)",
+                edss_amb_opt_8: "8 - Restricted to wheelchair; needs assistance for transfer; mobile in wheelchair (EDSS 7.5)",
+                edss_amb_opt_9: "9 - Restricted to bed or chair but out of bed much of day; retains many self-care functions; generally effective use of arms (EDSS 8.0)",
+                edss_amb_opt_10: "10 - Restricted to bed much of day; retains some self-care functions; some effective use of arms (EDSS 8.5)",
+                edss_amb_opt_11: "11 - Helpless bed patient; can communicate and eat (EDSS 9.0)",
+                edss_amb_opt_12: "12 - Totally helpless bed patient; unable to communicate effectively or eat/swallow (EDSS 9.5)",
+                edss_amb_opt_13: "13 - Death due to MS (EDSS 10.0)",
+                edss_calculate_btn: "Calculate EDSS",
+                edss_result_title: "EDSS Score",
+                edss_interpretation_label: "Interpretation:",
+                edss_disclaimer: "<strong>Disclaimer:</strong> This calculator provides an estimation based on simplified EDSS rules. The EDSS is a clinical scale and should be scored by a trained healthcare professional. The scoring logic for EDSS 0-3.5 is particularly complex and relies on specific combinations of Functional System grades. This tool is for informational purposes and not a substitute for professional medical assessment.",
+                edss_interp_10_0: "Death due to MS.",
+                edss_interp_9_5: "Totally helpless bed patient; unable to communicate effectively or eat/swallow.",
+                edss_interp_9_0: "Helpless bed patient; can communicate and eat.",
+                edss_interp_8_5: "Confined to bed much of day; retains some self-care functions; some effective use of arms.",
+                edss_interp_8_0: "Confined to bed or chair but out of bed much of day; retains many self-care functions; generally effective use of arms.",
+                edss_interp_7_5: "Unable to take more than a few steps; restricted to wheelchair; needs aid to transfer; wheels self but may need aid for some activities.",
+                edss_interp_7_0: "Unable to walk beyond approximately 5 meters even with aid; essentially restricted to wheelchair; wheels self and transfers alone; active in wheelchair about 12 hours a day.",
+                edss_interp_6_5: "Constant bilateral assistance (canes, crutches, or braces) required to walk about 20 meters without resting.",
+                edss_interp_6_0: "Intermittent or unilateral constant assistance (cane, crutch, or brace) required to walk about 100 meters with or without resting.",
+                edss_interp_5_5: "Ambulatory without aid or rest for more than 100 meters; disability severe enough to preclude full daily activities.",
+                edss_interp_5_0: "Ambulatory without aid or rest for about 200 meters; disability severe enough to impair full daily activities (e.g., to work a full day without special provisions).",
+                edss_interp_4_5: "Ambulatory without aid or rest for about 300 meters; fully ambulatory but with moderate disability in certain FS (one FS grade 4, or several FS grade 3).",
+                edss_interp_4_0: "Ambulatory without aid or rest for about 500 meters; significant disability but self-sufficient and up about 12 hours a day.",
+                edss_interp_0_0: "Normal neurological exam.",
+                edss_interp_1_0: "No disability, minimal signs in one FS.",
+                edss_interp_1_5: "No disability, minimal signs in more than one FS.",
+                edss_interp_2_0: "Minimal disability in one FS (FS grade 2, others 0 or 1).",
+                edss_interp_2_5: "Minimal disability in two FS (two FS grade 2, others 0 or 1).",
+                edss_interp_3_0: "Moderate disability in one FS (one FS grade 3, others 0 or 1) or mild disability in three or four FS (three/four FS grade 2, others 0 or 1). Fully ambulatory.",
+                edss_interp_3_5: "Fully ambulatory but with moderate disability in one FS (grade 3) and mild disability in one or two FS (grade 2); or moderate disability in two FS; or five FS with grade 2.",
+                edss_interp_fallback: "Calculated based on FS scores. Ambulation is key for EDSS 4.0+. This is an estimate for EDSS < 4.0. Consult official EDSS guidelines for precise scoring. If ambulation is impaired, select the appropriate option above."
+            },
+            hu: {
+                mainPageTitle: "SM Klinikai Kalkulátorok",
+                launchMsfcButton: "MSFC Kalkulátor",
+                launchEdssButton: "EDSS Kalkulátor",
+                pageTitle: "Multiple Sclerosis Funkcionális Kompozit (MSFC) Kalkulátor",
+                msfcAgeLabel: "Életkor (év):",
+                msfcSexLabel: "Nem:",
+                msfcSexFemale: "Nő",
+                msfcSexMale: "Férfi",
+                msfcSexOther: "Egyéb",
+                msfcRefPopulationLabel: "Referencia Populáció:",
+                msfcRefPopNmss: "NMSS Munkacsoport (Standard Z-pontszámokhoz)",
+                msfcRefPopEuropean: "Európai Korrigált (Kontextuális Adatok)",
+                msfcContextualDataTitle: "Európai Korrigált Kontextuális Adatok",
+                msfcT25fwContextLabel: "T25FW Kontextus:",
+                msfcT25fwContextText: "{age} éves korban az európai validált patológiás küszöbérték (cut-point) <strong>{cutPoint}mp</strong> (Járási sebesség: {gaitSpeed} m/s). E feletti pontszámok károsodásra utalhatnak.",
+                msfcT25fwContextNotAvailable: "A T25FW európai küszöbérték adatai nem állnak rendelkezésre {age} éves korra.",
+                msfc9hptContextLabel: "9HPT Kontextus (Nyers Idők):",
+                msfc9hptContextTextDominant: "Domináns kéz ({age} év): Átlag <strong>{meanTime}mp</strong> (SD {sdTime}mp).",
+                msfc9hptContextTextNonDominant: "Nem domináns kéz ({age} év): Átlag <strong>{meanTime}mp</strong> (SD {sdTime}mp).",
+                msfc9hptContextNotAvailable: "A 9HPT európai referenciaadatai nem állnak rendelkezésre {age} éves korra.",
+                msfcZadjLegLabel: "Korrigált Z-pontszám (T25FW, Európai Kontextus):",
+                msfcZadjArmLabel: "Korrigált Z-pontszám (9HPT, Európai Kontextus):",
+                msfcZadjCognitiveLabel: "Korrigált Z-pontszám (PASAT, Európai Kontextus):",
+                msfcZadjCompositeLabel: "Korrigált Összetett MSFC Z-pontszám (Európai Kontextus):",
+                msfcPasatAdjustNote: "Megjegyzés: A PASAT kor szerinti korrekciója az általános képlettel egyszerűsítés lehet; a PASAT pontszámokat az oktatás és egyéb tényezők is befolyásolják.",
+                msfcContextualDisclaimer: "Megjegyzés: A fenti Z-pontszámok a standard NMSS Munkacsoport referencia alapján kerültek kiszámításra. Az európai adatok és a korrigált Z-pontszámok csak kontextuális tájékoztatásul szolgálnak.",
+                descSection1Title: "Elsődleges Klinikai Alkalmazás:",
+                descSection1Para1: "Az MSFC-t a Nemzeti MS Társaság Klinikai Eredményértékelési Munkacsoportja fejlesztette ki, hogy szabványosított, kvantitatív mérést biztosítson az MS fogyatékosságáról három kulcsfontosságú klinikai dimenzióban. Célja az EDSS néhány korlátjának kezelése volt, különösen a kognitív diszfunkcióval és a felső végtagi károsodással szembeni viszonylagos érzéketlensége.<sup>30</sup>",
+                descSection2Title: "Kulcsfontosságú Bemeneti Adatok/Paraméterek:",
+                descSection2Para1: "Az MSFC három különálló tesztből áll:<sup>30</sup>",
+                descSection2ListItem1Strong: "Lábfunkció/Járás:",
+                descSection2ListItem1Text: "A Timed 25-Foot Walk (T25FW) segítségével értékelik. A beteget arra utasítják, hogy a lehető leggyorsabban, de biztonságosan tegyen meg egy 25 láb hosszú távot. A két próbálkozás során mért időt (másodpercben) rögzítik, és általában az átlagos vagy a legjobb időt használják.",
+                descSection2ListItem2Strong: "Kar/Kéz Funkció:",
+                descSection2ListItem2Text: "A 9-Hole Peg Test (9HPT) segítségével értékelik. A beteg idejét mérik, miközben kilenc pöcköt helyez el kilenc lyukba egy táblán, majd eltávolítja azokat. Ezt kétszer végzik el a domináns és kétszer a nem domináns kézzel. Az egyes próbálkozások során mért időt (másodpercben) rögzítik, és mindkét kéz átlagát használják.",
+                descSection2ListItem3Strong: "Kognitív Funkció:",
+                descSection2ListItem3Text: "A Paced Auditory Serial Addition Test (PASAT) segítségével értékelik, általában a 3 másodperces verziót (PASAT-3). Egyjegyű számokat mutatnak be hallás útján 3 másodpercenként, és a betegnek minden új számjegyet hozzá kell adnia az azt közvetlenül megelőzőhöz. A pontszám a 60 tételből helyesen összeadott összegek száma.",
+                descSection3Title: "Kimenet/Pontozás Értelmezése:",
+                descSection3Para1: "A három komponens (átlagos T25FW idő, domináns és nem domináns kéz átlagos 9HPT ideje, PASAT helyes válaszok) nyers pontszámait Z-pontszámokká alakítják át. A Z-pontszám azt mutatja meg, hogy egy egyén pontszáma hány szórással tér el egy referencia populáció átlagától. Az összesített MSFC kompozit pontszámot ezután ezen egyedi Z-pontszámok átlagolásával számítják ki (a séta és a pöckös teszt Z-pontszámainak invertálásával, hogy a magasabb Z-pontszámok következetesen jobb teljesítményt jelezzenek).<sup>30</sup>",
+                toggleInstructionsShow: "▶ Standardizált Beadási Utasítások Megjelenítése",
+                toggleInstructionsHide: "▼ Standardizált Beadási Utasítások Elrejtése",
+                adminInstructionsTitle: "Standardizált MSFC Beadása",
+                adminInstructionsPara1: "Az MSFC-t a vizsgálati látogatás elejéhez a lehető legközelebb kell beadni, de mindenképpen azelőtt, hogy a beteg távolsági sétát végezne. Az MSFC komponenseket a következő sorrendben kell beadni:",
+                adminInstructionsListItem1: "1. próba, Időzített 25 lábas séta",
+                adminInstructionsListItem2: "2. próba, Időzített 25 lábas séta",
+                adminInstructionsListItem3: "1. próba, Domináns kéz, 9-HPT",
+                adminInstructionsListItem4: "2. próba, Domináns kéz, 9-HPT",
+                adminInstructionsListItem5: "1. próba, Nem domináns kéz, 9-HPT",
+                adminInstructionsListItem6: "2. próba, Nem domináns kéz, 9-HPT",
+                adminInstructionsListItem7: "PASAT-3\"",
+                t25fwInstructionsTitle: "Időzített 25 lábas séta utasításai:",
+                t25fwInstructionsPara1: "Az Időzített 25 lábas séta az alsó végtagi funkció kvantitatív mérése. A beteget egyértelműen megjelölt 25 láb hosszú pálya egyik végére irányítják, és arra utasítják, hogy a lehető leggyorsabban, de biztonságosan sétáljon 25 lábat. A feladatot azonnal megismétlik azzal, hogy a beteg ugyanazon a távolságon visszasétál. A betegek segédeszközöket használhatnak a feladat elvégzése során.",
+                t25fwInstructionsQuote: "\"Szeretném, ha a lehető leggyorsabban, de biztonságosan sétálna 25 lábat. Ne lassítson le, amíg át nem haladt a célvonalon. Készen áll? Induljon!\"",
+                hptInstructionsTitle: "9 Pöckös Teszt (9-HPT) utasításai:",
+                hptInstructionsPara1: "A 9-HPT a felső végtag (kar és kéz) funkciójának kvantitatív mérése. Mind a domináns, mind a nem domináns kezet kétszer tesztelik. A betegnek egyenként kell felvennie a pöcköket, csak az egyik kezét használva, és a lehető leggyorsabban be kell helyeznie őket a lyukakba. Ezután szünet nélkül egyenként el kell távolítania a pöcköket, és vissza kell helyeznie őket a tartályba.",
+                hptInstructionsQuote: "\"Azt szeretném, ha egyenként felvenné a pöcköket, csak a [domináns/nem domináns] kezét használva, és a lehető leggyorsabban behelyezné őket a lyukakba. Ezután szünet nélkül távolítsa el egyenként a pöcköket, és tegye vissza őket a tartályba. Az időt attól kezdve mérjük, amikor azt mondom 'Induljon!', amíg az utolsó pöcök a tartályba nem ér. Készen áll? Induljon!\"",
+                pasatInstructionsTitle: "PASAT-3 Utasítások:",
+                pasatInstructionsPara1: "A PASAT egy kognitív funkciót mérő teszt, amely kifejezetten az auditív információfeldolgozási sebességet és rugalmasságot, valamint a számolási képességet vizsgálja. Egyjegyű számokat mutatnak be 3 másodpercenként, és a betegnek minden új számjegyet hozzá kell adnia az azt közvetlenül megelőzőhöz.",
+                pasatInstructionsQuote: "\"Ezen a felvételen egyjegyű számok sorozatát fogja hallani, amelyeket 3 másodpercenként mutatnak be. Hallgassa meg az első két számot, adja össze őket, és mondja meg a választ. Amikor meghallja a következő számot, adja hozzá az előtte hallotthoz. Folytassa a következő szám hozzáadását minden előzőhöz. Ne feledje, nem arra kérik, hogy folyamatos összeget adjon meg, hanem az utoljára elhangzott két szám összegét.\"",
+                togglePasatInfoShow: "▶ PASAT-3 Háttér és Beadási Útmutató Megjelenítése",
+                togglePasatInfoHide: "▼ PASAT-3 Háttér és Beadási Útmutató Elrejtése",
+                pasatInfoTitle: "PASAT-3 Háttér és Beadási Útmutató",
+                pasatInfoBackgroundTitle: "Háttér",
+                pasatInfoBackgroundPara1: "A Paced Auditory Serial Addition Test (PASAT) egy kognitív funkciót mérő teszt, amely kifejezetten az alábbiakat vizsgálja:",
+                pasatInfoBackgroundListItem1: "Auditív információfeldolgozási sebesség",
+                pasatInfoBackgroundListItem2: "Mentális rugalmasság",
+                pasatInfoBackgroundListItem3: "Számolási képesség",
+                pasatInfoBackgroundPara2: "Eredetileg Gronwall fejlesztette ki 1977-ben enyhe fejsérülést szenvedett betegek felépülésének monitorozására, később Rao és munkatársai 1989-ben adaptálták SM betegek számára. A PASAT azóta széles körben elterjedt az SM vizsgálatokban, és a Multiple Sclerosis Functional Composite (MSFC) kulcsfontosságú eleme.",
+                pasatInfoBackgroundPara3: "A PASAT-3 (3 másodperces verzió) egyjegyű számokat mutat be 3 másodpercenként hangfelvétel útján, megkövetelve a betegtől, hogy minden új számjegyet adjon hozzá az azt közvetlenül megelőzőhöz. A teszt pontszáma a 60 lehetséges válaszból helyesen megadott összegek száma.",
+                pasatInfoMaterialsTitle: "Szükséges Anyagok",
+                pasatInfoMaterialsListItem1: "Hanglejátszó (kazettás vagy CD-lejátszó)",
+                pasatInfoMaterialsListItem2: "PASAT ingereket tartalmazó felvétel (3 másodperces időközönként bemutatva)",
+                pasatInfoMaterialsListItem3: "PASAT Jegyzőkönyv",
+                pasatInfoMaterialsListItem4: "Vágólap",
+                pasatInfoMaterialsListItem5: "Toll/ceruza",
+                pasatInfoAdminTitle: "Beadási Utasítások",
+                pasatInfoAdminListItem1: "Helyezze a beteget csendes környezetbe, minimális zavaró tényezőkkel.",
+                pasatInfoAdminListItem2: "A PASAT-ot az MSFC sorrendjében utolsóként kell beadni, az Időzített 25 lábas séta és a 9 Pöckös Teszt után.",
+                pasatInfoAdminListItem3: "Olvassa fel a következő utasításokat a betegnek:",
+                pasatInfoAdminQuote: "\"Ezen a felvételen egyjegyű számok sorozatát fogja hallani, amelyeket 3 másodpercenként mutatnak be. Hallgassa meg az első két számot, adja össze őket, és mondja meg a választ. Amikor meghallja a következő számot, adja hozzá az előtte hallotthoz. Folytassa a következő szám hozzáadását minden előzőhöz. Ne feledje, nem arra kérik, hogy folyamatos összeget adjon meg, hanem az utoljára elhangzott két szám összegét.\"",
+                pasatInfoDemoTitle: "Bemutató",
+                pasatInfoDemoPara1: "Írja fel az 5, 7, 3 és 2 számokat balról jobbra egy papírlapra.",
+                pasatInfoDemoPara2: "Mondja: \"Például, ha az első két szám '5' és '7', akkor '12'-t mondana. Ha a következő szám '3', akkor '10'-et mondana (7+3). Majd ha a következő szám '2', akkor '5'-öt mondana (3+2).\"",
+                pasatInfoDemoPara3: "A sorozat így nézne ki:",
+                pasatInfoDemoPresented: "Bemutatott számok: 5, 7, 3, 2",
+                pasatInfoDemoResponses: "Beteg válaszai: &nbsp;&nbsp; 12, 10, 5",
+                pasatInfoPracticeTitle: "Gyakorló Próbák",
+                pasatInfoPracticeListItem1: "Mindig végezzen legalább egy gyakorló próbát a tényleges teszt előtt.",
+                pasatInfoPracticeListItem2: "Játssza le a gyakorló elemeket, az utolsó gyakorló elem után álljon meg.",
+                pasatInfoPracticeListItem3: "Ha a beteg eltéved, kérje meg, hogy folytassa azzal, hogy \"Ugorjon vissza a következő két hallott számmal.\"",
+                pasatInfoPracticeListItem4: "Folytassa a PASAT-3 teszttel, ha a beteg két vagy több választ helyesen ad meg (egymást követően vagy sem).",
+                pasatInfoPracticeListItem5: "Szükség esetén ismételje meg a gyakorló elemeket, legfeljebb háromszor.",
+                pasatInfoTestAdminTitle: "A Teszt Beadása",
+                pasatInfoTestAdminListItem1: "Miután a beteg megértette a feladatot, kezdje el a PASAT-3 tesztet.",
+                pasatInfoTestAdminListItem2: "Emlékeztesse a beteget: \"Ne feledje, ha eltéved, csak ugorjon vissza, mert nem tudom leállítani a tesztet, miután elkezdődött.\"",
+                pasatInfoTestAdminListItem3: "Kerülje a beszédet és a szóbeli számításokat a teszt során; csak a beteg válaszait szabad hangosan kimondani.",
+                pasatInfoTestAdminListItem4: "Ha a beteg eltéved, öt egymást követő \"nincs válasz\" után irányítsa át azzal, hogy \"Ugorjon vissza\", de ne állítsa le a felvételt.",
+                pasatInfoScoringTitle: "Pontozás",
+                pasatInfoScoringListItem1: "A teljes pontszám a helyes válaszok száma (maximum 60).",
+                pasatInfoScoringListItem2: "Karikázza be az összes helyes választ a jegyzőkönyvön.",
+                pasatInfoScoringListItem3: "Írja be a helytelen válaszokat a megadott helyre.",
+                pasatInfoScoringListItem4: "Helyezzen el egy kötőjelet, ha nincs válasz.",
+                pasatInfoScoringListItem5: "Ha a beteg egy válasz után kijavítja magát, a módosított választ számítsa válasznak.",
+                pasatInfoClinicalSigTitle: "Klinikai Jelentőség",
+                pasatInfoClinicalSigPara1: "A PASAT-3 értékes információkat nyújt a kognitív feldolgozásról, amelyeket a fizikai mérések önmagukban nem feltétlenül rögzítenek. A kognitív diszfunkció jelentősen befolyásolhatja az életminőséget és a napi működést az SM betegeknél, még akkor is, ha a fizikai fogyatékosság minimális. A PASAT-3 különösen érzékeny az SM-ben gyakran megfigyelhető információfeldolgozási hiányosságokra.",
+                enterScoresNote: "Adja meg az átlagos nyers pontszámokat alább, vagy használja az integrált stoppereket.",
+                higherZScoreNote: "A magasabb (pozitívabb) Z-pontszámok általában jobb teljesítményt jeleznek.",
+                t25fwLabel: "Időzített 25 lábas séta (T25FW)",
+                t25fwTooltip: "Adja meg a két próba átlagos idejét másodpercben. Az alacsonyabb idő jobb.",
+                trial1Label: "1. próba:",
+                trial2Label: "2. próba:",
+                startButton: "Start",
+                stopButton: "Stop",
+                resetButton: "Reset",
+                avgTimePlaceholder: "Átl. idő (s)",
+                calculateAvgButton: "Átlag számítása",
+                hptDomLabel: "9 Pöckös Teszt - Domináns kéz",
+                hptDomTooltip: "Adja meg a két próba átlagos idejét másodpercben. Az alacsonyabb idő jobb.",
+                hptNonDomLabel: "9 Pöckös Teszt - Nem domináns kéz",
+                hptNonDomTooltip: "Adja meg a két próba átlagos idejét másodpercben. Az alacsonyabb idő jobb.",
+                pasat3Label: "PASAT-3",
+                pasat3Tooltip: "Adja meg a helyes válaszok számát (jellemzően 60-ból). A magasabb pontszám jobb.",
+                correctResponsesPlaceholder: "Helyes válaszok",
+                launchPasatSimButton: "PASAT-3 Interaktív Teszt Indítása",
+                calculateMsfcButton: "MSFC Pontszámok Kiszámítása",
+                resultsTitle: "MSFC Eredmények",
+                armZScoreLabel: "Kar (9HPT) Z-pontszám:",
+                legZScoreLabel: "Láb (T25FW) Z-pontszám:",
+                cognitiveZScoreLabel: "Kognitív (PASAT-3) Z-pontszám:",
+                compositeZScoreLabel: "Összetett MSFC Z-pontszám:",
+                basedOnAvgReciprocal: "Átl. reciprok alapján:",
+                basedOnAvgTime: "Átl. idő alapján:",
+                basedOnCorrectResponses: "Helyes válaszok alapján:",
+                understandingZScoresTitle: "A Z-pontszámok Megértése:",
+                zScoreExplanation: "A Z-pontszám azt jelzi, hogy egy nyers pontszám hány szórással tér el egy referencia populáció átlagától (középértékétől).",
+                zScoreListItem1: "A 0 Z-pontszám átlagos teljesítményt jelent.",
+                zScoreListItem2: "A pozitív Z-pontszám átlag feletti (jobb) teljesítményt jelent.",
+                zScoreListItem3: "A negatív Z-pontszám átlag alatti (rosszabb) teljesítményt jelent.",
+                zScoreFurtherExplanation: "A komponens Z-pontszámokat úgy számítják ki, hogy a pozitívabb érték mindig jobb teljesítményt tükröz a referencia populációhoz képest.",
+                disclaimerTitle: "Fontos Figyelmeztetés:",
+                disclaimerText: "A Z-pontszámok kiszámítása a <strong>NMSS Munkacsoport adatbázisának (MSFC Kézikönyv, 2001. október, 3. táblázat)</strong> referencia populációs adatai alapján történik:",
+                disclaimerListItem1: "9HPT idők átlagos reciproka: Átlag = ${refData.hpt_reciprocal.mean.toFixed(4)}, SD = ${refData.hpt_reciprocal.sd.toFixed(4)}",
+                disclaimerListItem2: "Átlagos T25FW idő: Átlag = ${refData.t25fw.mean.toFixed(4)}mp, SD = ${refData.t25fw.sd.toFixed(4)}mp",
+                disclaimerListItem3: "PASAT-3 helyes: Átlag = ${refData.pasat3.mean.toFixed(4)}, SD = ${refData.pasat3.sd.toFixed(4)}",
+                disclaimerFurtherText: "Ezek az értékek nem minden populációra lehetnek megfelelőek. Klinikai vagy kutatási felhasználás esetén a Z-pontszámokat MINDIG a vizsgált betegpopulációra vonatkozó, validált normatív adatok felhasználásával KELL kiszámítani. Ez az eszköz nem helyettesíti a professzionális orvosi értékelést vagy a validált klinikai kimeneti mérőeszközöket.",
+                disclaimerEuropeanContext: "A fent megjelenített Európai Korrigált adatok csak kontextuális tájékoztatásul szolgálnak, és nem használatosak a Z-pontszám kiszámításához.",
+                errorTitle: "Hiba",
+                errorInvalidInput: "Kérjük, adjon meg érvényes számokat az összes MSFC komponens mezőhöz, vagy használja a stoppereket.",
+                errorPositiveTime: "A T25FW és a 9-HPT idejének nullánál nagyobbnak kell lennie.",
+                errorPasatRange: "A PASAT-3 pontszámnak 0 és 60 között kell lennie.",
+                errorAgeMissing: "Kérjük, adjon meg érvényes életkort az európai kontextuális adatok megjelenítéséhez.",
+                alertBothTrials: "Kérjük, végezze el mindkét próbát az átlag kiszámítása előtt.",
+                referencesTitle: "Hivatkozások",
+                attribution: "Készítette: Dr. Bálint Zsolt",
+                pasatSim_instructionHeading: "PASAT-3 Szimulátor",
+                pasatSim_instructionP1: "Egyjegyű számokat fog hallani és látni 3 másodperces időközönként.",
+                pasatSim_instructionP2: "A feladata, hogy <strong>minden új számot hozzáadjon az azt közvetlenül megelőzőhöz</strong>.",
+                pasatSim_instructionP3: "Miután egy összeg megjelenik, jelezze, hogy a fejben végzett számítása helyes volt-e, mielőtt a következő szám megjelenne.",
+                pasatSim_instructionP4: "A teszt 60 összegzésből áll.",
+                pasatSim_startButton: "Teszt Indítása",
+                pasatSim_sumCountLabel: "Összeg",
+                pasatSim_sumOfLabel: "/",
+                pasatSim_getReady: "Készülj fel...",
+                pasatSim_firstNumIs: "Az első szám...",
+                pasatSim_feedbackPrompt: "Helyesen számolta ki a fenti összeget?",
+                pasatSim_correctButton: "Helyesen Számoltam",
+                pasatSim_incorrectButton: "Helytelenül Számoltam",
+                pasatSim_currentScoreLabel: "Jelenlegi Pontszám",
+                pasatSim_testCompleteHeading: "A Teszt Befejeződött!",
+                pasatSim_finalScoreLabel: "Végső Pontszám",
+                pasatSim_historyHeading: "Számok és Összegek Előzményei:",
+                pasatSim_restartButton: "Teszt Újraindítása",
+                pasatSim_historyFirstNum: "{itemNum}. Első bemutatott szám: {digit}",
+                pasatSim_historySum: "{itemNum}. Számok: {n1}, {n2} → Összeg: {sum}. (Válaszod: {response})",
+                pasatSim_responseCorrect: "Helyes",
+                pasatSim_responseIncorrect: "Helytelen",
+                pasatSim_responseNone: "Nincs rögzített válasz",
+
+                // EDSS Translations (HU)
+                edss_title: "Kiterjesztett Fogyatékossági Állapot Skála (EDSS) Kalkulátor",
+                edss_description: "Az EDSS a Sclerosis Multiplexben fennálló fogyatékosságot számszerűsíti. A pontszámok 0-tól (normál neurológiai vizsgálat) 10-ig (SM okozta halál) terjednek. Kérjük, töltse ki az egyes Funkcionális Rendszerek (FR) pontszámait, és válaszoljon a járóképességgel kapcsolatos kérdésekre. Az FR pontszámok jellemzően 0 (nincs fogyatékosság) és 5 vagy 6 (súlyos fogyatékosság) között mozognak.",
+                edss_pyramidal_label: "Piramidális Funkciók",
+                edss_pyramidal_tooltip: "Motoros erő. Pontozás 0-6.",
+                edss_pyramidal_opt_0: "0 - Normál",
+                edss_pyramidal_opt_1: "1 - Kóros jelek fogyatékosság nélkül",
+                edss_pyramidal_opt_2: "2 - Minimális fogyatékosság",
+                edss_pyramidal_opt_3: "3 - Enyhe vagy közepes paraparézis vagy hemiparézis; súlyos monoparézis",
+                edss_pyramidal_opt_4: "4 - Kifejezett paraparézis vagy hemiparézis; közepes quadraparézis; vagy monoplégia",
+                edss_pyramidal_opt_5: "5 - Paraplégia, hemiplégia, vagy kifejezett quadraparézis",
+                edss_pyramidal_opt_6: "6 - Quadriplégia",
+                edss_cerebellar_label: "Cerebelláris Funkciók",
+                edss_cerebellar_tooltip: "Koordináció és egyensúly. Pontozás 0-5.",
+                edss_cerebellar_opt_0: "0 - Normál",
+                edss_cerebellar_opt_1: "1 - Kóros jelek fogyatékosság nélkül",
+                edss_cerebellar_opt_2: "2 - Enyhe ataxia",
+                edss_cerebellar_opt_3: "3 - Közepes ataxia",
+                edss_cerebellar_opt_4: "4 - Súlyos ataxia",
+                edss_cerebellar_opt_5: "5 - Ataxia miatt képtelen koordinált mozgásokra",
+                edss_brainstem_label: "Agytörzsi Funkciók",
+                edss_brainstem_tooltip: "Beszéd, nyelés, nystagmus. Pontozás 0-5.",
+                edss_brainstem_opt_0: "0 - Normál",
+                edss_brainstem_opt_1: "1 - Csak jelek",
+                edss_brainstem_opt_2: "2 - Közepes nystagmus vagy egyéb enyhe fogyatékosság",
+                edss_brainstem_opt_3: "3 - Súlyos nystagmus, kifejezett extraokuláris gyengeség vagy közepes fogyatékosság más agyidegekből",
+                edss_brainstem_opt_4: "4 - Kifejezett dysarthria vagy egyéb kifejezett fogyatékosság",
+                edss_brainstem_opt_5: "5 - Képtelenség nyelni vagy beszélni",
+                edss_sensory_label: "Szenzoros Funkciók",
+                edss_sensory_tooltip: "Tapintás, fájdalom, vibráció, helyzetérzékelés. Pontozás 0-6.",
+                edss_sensory_opt_0: "0 - Normál",
+                edss_sensory_opt_1: "1 - Csak vibráció- vagy ábraírás-csökkenés",
+                edss_sensory_opt_2: "2 - Enyhe tapintás-, fájdalom- vagy helyzetérzékelés-csökkenés, és/vagy közepes vibrációcsökkenés",
+                edss_sensory_opt_3: "3 - Közepes tapintás-, fájdalom- vagy helyzetérzékelés-csökkenés, és/vagy kifejezett vibrációcsökkenés",
+                edss_sensory_opt_4: "4 - Kifejezett tapintás-, fájdalom- vagy helyzetérzékelés-csökkenés",
+                edss_sensory_opt_5: "5 - Érzéskiesés egy vagy két végtagban",
+                edss_sensory_opt_6: "6 - Kiterjedtebb érzéskiesés",
+                edss_bowel_bladder_label: "Bél- és Hólyagfunkciók",
+                edss_bowel_bladder_tooltip: "Pontozás 0-6.",
+                edss_bowel_bladder_opt_0: "0 - Normál",
+                edss_bowel_bladder_opt_1: "1 - Enyhe vizeletürítési nehézség, sürgősség vagy retenció",
+                edss_bowel_bladder_opt_2: "2 - Közepes vizeletürítési nehézség, sürgősség, retenció, vagy ritka vizeletinkontinencia",
+                edss_bowel_bladder_opt_3: "3 - Gyakori vizeletinkontinencia",
+                edss_bowel_bladder_opt_4: "4 - Katéterezésre szorul",
+                edss_bowel_bladder_opt_5: "5 - Hólyagfunkció elvesztése",
+                edss_bowel_bladder_opt_6: "6 - Hólyag- és bélfunkció elvesztése",
+                edss_visual_label: "Vizuális Funkciók",
+                edss_visual_tooltip: "Látásélesség és látótér. Pontozás 0-6.",
+                edss_visual_opt_0: "0 - Normál",
+                edss_visual_opt_1: "1 - Scotoma, korrigált látásélesség jobb mint 20/30",
+                edss_visual_opt_2: "2 - Rosszabb szem scotomával és/vagy korrigált látásélesség 20/30 és 20/59 között",
+                edss_visual_opt_3: "3 - Rosszabb szem nagy scotomával, vagy közepes látótér-csökkenés, vagy korrigált látásélesség 20/60 és 20/99 között",
+                edss_visual_opt_4: "4 - Rosszabb szem kifejezett látótér-csökkenéssel és/vagy korrigált látásélesség 20/100 és 20/200 között; másik szem 20/60 vagy jobb",
+                edss_visual_opt_5: "5 - Rosszabb szem korrigált látásélessége kevesebb mint 20/200; másik szem 20/60 vagy jobb VAGY 4-es fokozat plusz másik szem rosszabb mint 20/60",
+                edss_visual_opt_6: "6 - 5-ös fokozat plusz másik szem rosszabb mint 20/60",
+                edss_cerebral_label: "Cerebrális (vagy Mentális) Funkciók",
+                edss_cerebral_tooltip: "Kognitív funkciók. Pontozás 0-5.",
+                edss_cerebral_opt_0: "0 - Normál",
+                edss_cerebral_opt_1: "1 - Csak hangulati változás (nem befolyásolja az EDSS pontszámot)",
+                edss_cerebral_opt_2: "2 - Enyhe mentális hanyatlás",
+                edss_cerebral_opt_3: "3 - Közepes mentális hanyatlás",
+                edss_cerebral_opt_4: "4 - Kifejezett mentális hanyatlás (krónikus agyi szindróma, közepes)",
+                edss_cerebral_opt_5: "5 - Demencia vagy krónikus agyi szindróma, súlyos",
+                edss_ambulation_title: "Járóképesség Felmérése",
+                edss_ambulation_label: "Válassza ki a járóképességet legjobban leíró állítást:",
+                edss_amb_opt_0: "0 - Teljesen járóképes, nincs károsodás (EDSS 0-3.5 tartomány, FR függő)",
+                edss_amb_opt_1: "1 - Teljesen járóképes segédeszköz vagy pihenés nélkül >500m (EDSS 4.0)",
+                edss_amb_opt_2: "2 - Teljesen járóképes segédeszköz vagy pihenés nélkül >300m, de <500m (EDSS 4.5)",
+                edss_amb_opt_3: "3 - Járóképes segédeszköz vagy pihenés nélkül >200m (EDSS 5.0)",
+                edss_amb_opt_4: "4 - Járóképes segédeszköz vagy pihenés nélkül >100m (EDSS 5.5)",
+                edss_amb_opt_5: "5 - Egyoldali állandó segítségre (bot/mankó) szorul 100m megtételéhez (EDSS 6.0)",
+                edss_amb_opt_6: "6 - Kétoldali állandó segítségre (botok/mankók/merevítő) szorul 20m megtételéhez (EDSS 6.5)",
+                edss_amb_opt_7: "7 - Kerekesszékhez kötött; önállóan képes áthelyezkedni; kerekesszékben mobilis napi 12 órában (EDSS 7.0)",
+                edss_amb_opt_8: "8 - Kerekesszékhez kötött; segítségre szorul az áthelyezkedéshez; kerekesszékben mobilis (EDSS 7.5)",
+                edss_amb_opt_9: "9 - Ágyhoz vagy székhez kötött, de a nap nagy részében ágyon kívül van; sok önellátó funkciót megőriz; karjait általában hatékonyan használja (EDSS 8.0)",
+                edss_amb_opt_10: "10 - A nap nagy részében ágyhoz kötött; néhány önellátó funkciót megőriz; karjait részben hatékonyan használja (EDSS 8.5)",
+                edss_amb_opt_11: "11 - Teljesen magatehetetlen ágyban fekvő beteg; képes kommunikálni és enni (EDSS 9.0)",
+                edss_amb_opt_12: "12 - Teljesen magatehetetlen ágyban fekvő beteg; képtelen hatékonyan kommunikálni vagy enni/nyelni (EDSS 9.5)",
+                edss_amb_opt_13: "13 - SM okozta halál (EDSS 10.0)",
+                edss_calculate_btn: "EDSS Kiszámítása",
+                edss_result_title: "EDSS Pontszám",
+                edss_interpretation_label: "Értelmezés:",
+                edss_disclaimer: "<strong>Felelősségkizárás:</strong> Ez a kalkulátor egy becslést ad egyszerűsített EDSS szabályok alapján. Az EDSS egy klinikai skála, melyet képzett egészségügyi szakembernek kell pontoznia. Az EDSS 0-3.5 pontozási logikája különösen összetett és a Funkcionális Rendszer fokozatok specifikus kombinációin alapul. Ez az eszköz tájékoztató jellegű, és nem helyettesíti a szakszerű orvosi értékelést.",
+                edss_interp_10_0: "SM okozta halál.",
+                edss_interp_9_5: "Teljesen magatehetetlen ágyban fekvő beteg; képtelen hatékonyan kommunikálni vagy enni/nyelni.",
+                edss_interp_9_0: "Teljesen magatehetetlen ágyban fekvő beteg; képes kommunikálni és enni.",
+                edss_interp_8_5: "A nap nagy részében ágyhoz kötött; néhány önellátó funkciót megőriz; karjait részben hatékonyan használja.",
+                edss_interp_8_0: "Ágyhoz vagy székhez kötött, de a nap nagy részében ágyon kívül van; sok önellátó funkciót megőriz; karjait általában hatékonyan használja.",
+                edss_interp_7_5: "Néhány lépésnél többet nem tud megtenni; kerekesszékhez kötött; segítségre szorul az áthelyezkedéshez; önmagát tolja a kerekesszékben, de bizonyos tevékenységekhez segítségre szorulhat.",
+                edss_interp_7_0: "Kb. 5 méternél többet nem tud gyalogolni még segítséggel sem; lényegében kerekesszékhez kötött; önmagát tolja és egyedül helyezkedik át; napi kb. 12 órát aktív a kerekesszékben.",
+                edss_interp_6_5: "Állandó kétoldali segítség (botok, mankók vagy merevítők) szükséges kb. 20 méter megtételéhez pihenés nélkül.",
+                edss_interp_6_0: "Időszakos vagy egyoldali állandó segítség (bot, mankó vagy merevítő) szükséges kb. 100 méter megtételéhez pihenéssel vagy anélkül.",
+                edss_interp_5_5: "Több mint 100 métert képes megtenni segítség vagy pihenés nélkül; a fogyatékosság elég súlyos ahhoz, hogy kizárja a teljes napi tevékenységet.",
+                edss_interp_5_0: "Kb. 200 métert képes megtenni segítség vagy pihenés nélkül; a fogyatékosság elég súlyos ahhoz, hogy korlátozza a teljes napi tevékenységet (pl. egész napos munkavégzés különleges intézkedések nélkül).",
+                edss_interp_4_5: "Kb. 300 métert képes megtenni segítség vagy pihenés nélkül; teljesen járóképes, de bizonyos FR-ekben közepes fokú fogyatékossággal (egy FR 4-es fokozat, vagy több FR 3-as fokozat).",
+                edss_interp_4_0: "Kb. 500 métert képes megtenni segítség vagy pihenés nélkül; jelentős fogyatékosság, de önellátó és kb. napi 12 órát talpon van.",
+                edss_interp_0_0: "Normál neurológiai vizsgálat.",
+                edss_interp_1_0: "Nincs fogyatékosság, minimális jelek egy FR-ben.",
+                edss_interp_1_5: "Nincs fogyatékosság, minimális jelek több FR-ben.",
+                edss_interp_2_0: "Minimális fogyatékosság egy FR-ben (FR 2-es fokozat, a többi 0 vagy 1).",
+                edss_interp_2_5: "Minimális fogyatékosság két FR-ben (két FR 2-es fokozat, a többi 0 vagy 1).",
+                edss_interp_3_0: "Közepes fogyatékosság egy FR-ben (egy FR 3-as fokozat, a többi 0 vagy 1) vagy enyhe fogyatékosság három vagy négy FR-ben (három/négy FR 2-es fokozat, a többi 0 vagy 1). Teljesen járóképes.",
+                edss_interp_3_5: "Teljesen járóképes, de közepes fogyatékossággal egy FR-ben (3-as fokozat) és enyhe fogyatékossággal egy vagy két FR-ben (2-es fokozat); vagy közepes fogyatékosság két FR-ben; vagy öt FR 2-es fokozattal.",
+                edss_interp_fallback: "Az FR pontszámok alapján számítva. A járóképesség kulcsfontosságú az EDSS 4.0+ értékeknél. Ez egy becslés az EDSS < 4.0 értékekre. A pontos pontozáshoz olvassa el a hivatalos EDSS irányelveket. Ha a járóképesség károsodott, válassza ki a megfelelő opciót fent."
+            }
+        };
+
+        let currentLanguage = 'en'; // Default language
+
+        // --- European Reference Data Constants ---
+        const EUROPEAN_T25FW_CUTPOINTS = [
+            { ageMin: 20, ageMax: 29, cutPoint: 5.1, gaitSpeed: 1.47 }, 
+            { ageMin: 30, ageMax: 39, cutPoint: 5.3, gaitSpeed: 1.41 },
+            { ageMin: 40, ageMax: 49, cutPoint: 5.7, gaitSpeed: 1.31 }, 
+            { ageMin: 50, ageMax: 59, cutPoint: 6.2, gaitSpeed: 1.21 },
+            { ageMin: 60, ageMax: 69, cutPoint: 7.0, gaitSpeed: 1.07 }, 
+            { ageMin: 70, ageMax: 79, cutPoint: 8.1, gaitSpeed: 0.93 }
+        ];
+
+        const EUROPEAN_9HPT_RANGES = [ // Raw times in seconds
+            { ageMin: 18, ageMax: 30, dominant: { mean: 18.2, sd: 2.1 }, nonDominant: { mean: 19.5, sd: 2.4 } },
+            { ageMin: 31, ageMax: 50, dominant: { mean: 19.8, sd: 2.7 }, nonDominant: { mean: 21.3, sd: 3.1 } },
+            { ageMin: 51, ageMax: 65, dominant: { mean: 22.4, sd: 3.5 }, nonDominant: { mean: 24.1, sd: 3.9 } }
+        ];
+
+
+        // --- General Utility Functions ---
+        function toggleSection(sectionId, buttonId) {
+            const section = document.getElementById(sectionId);
+            const button = document.getElementById(buttonId);
+            const allSections = document.querySelectorAll('.main-calculator-container > div[id$="Section"], #pasatSimulatorContainer'); 
+            const edssContainer = document.getElementById('edssCalculatorContainer');
+            const msfcContainer = document.getElementById('msfcCalculatorSection');
+
+
+            const allToggleButtons = document.querySelectorAll('.tool-launcher-buttons button');
+
+            allToggleButtons.forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500')); 
+
+            if (section.classList.contains('hidden')) {
+                allSections.forEach(sec => {
+                    if (sec.id !== sectionId) {
+                        sec.classList.add('hidden');
+                    }
+                });
+                 if (edssContainer && sectionId !== 'edssCalculatorSection') edssContainer.classList.add('hidden');
+
+
+                section.classList.remove('hidden');
+                if (button) button.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-500'); 
+
+                if (sectionId === 'msfcCalculatorSection' && msfcContainer) { 
+                    msfcContainer.classList.remove('hidden');
+                } else if (sectionId === 'edssCalculatorSection' && edssContainer) { 
+                     edssContainer.classList.remove('hidden');
+                }
+
+
+                if (sectionId === 'pasatSimulatorContainer') pasatSim_updateUIText();
+                if (sectionId === 'edssCalculatorSection') edss_updateUIText();
+
+            } else {
+                // section.classList.add('hidden'); // Keep section visible if already active
+                // if (button) button.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500');
+            }
+        }
+
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang;
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-hu').classList.toggle('active', lang === 'hu');
+
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    const tooltipSpan = element.querySelector('.tooltip .tooltiptext');
+                    if (tooltipSpan && element.childNodes.length > 0 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
+                        element.childNodes[0].nodeValue = translations[lang][key].split(/<div/)[0] + " "; 
+                        const tooltipKey = tooltipSpan.getAttribute('data-translate'); 
+                         if (tooltipKey && translations[lang][tooltipKey]) {
+                            tooltipSpan.textContent = translations[lang][tooltipKey];
+                         } else if (tooltipKey && translations.en[tooltipKey]) { 
+                             tooltipSpan.textContent = translations.en[tooltipKey];
+                         } else { 
+                             const parentKey = element.getAttribute('data-translate');
+                             if (parentKey && translations[lang][parentKey + "_tooltip"]) {
+                                 tooltipSpan.textContent = translations[lang][parentKey + "_tooltip"];
+                             } else if (parentKey && translations.en[parentKey + "_tooltip"]) {
+                                 tooltipSpan.textContent = translations.en[parentKey + "_tooltip"];
+                             }
+                         }
+                    } else {
+                         element.innerHTML = translations[lang][key];
+                    }
+                } else if (translations.en && translations.en[key]) { 
+                     element.innerHTML = translations.en[key];
+                }
+            });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[lang] && translations[lang][key]) {
+                    element.placeholder = translations[lang][key];
+                } else if (translations.en && translations.en[key]) {
+                    element.placeholder = translations.en[key];
+                }
+            });
+            
+            updateToggleButtonText('msfcAdminToggleText', 'msfcAdminInstructions', translations[lang].toggleInstructionsShow, translations[lang].toggleInstructionsHide);
+            updateToggleButtonText('pasatInfoToggleText', 'pasatInfoContent', translations[lang].togglePasatInfoShow, translations[lang].togglePasatInfoHide);
+
+            if (document.getElementById('resultBoxMSFC').style.display === 'block') calculateMSFC(false);
+            updateMsfcContextualData(); 
+            pasatSim_updateUIText();
+            edss_updateUIText(); 
+            
+            document.title = translations[lang].mainPageTitle || translations.en.mainPageTitle;
+        }
+
+        function updateToggleButtonText(textElementId, contentElementId, showText, hideText) {
+            const textElement = document.getElementById(textElementId);
+            const contentElement = document.getElementById(contentElementId);
+            if (textElement && contentElement) {
+                textElement.innerHTML = contentElement.classList.contains('active') ? hideText : showText;
+            }
+        }
+
+
+        // --- MSFC Calculator Functions ---
+        const refData = { t25fw: { mean: 9.5353, sd: 11.4058 }, hpt_reciprocal: { mean: 0.0439, sd: 0.0101 }, pasat3: { mean: 45.0311, sd: 12.0771 } };
+        function calculateZScore(raw, mean, sd) { return (raw - mean) / sd; }
+        let timers = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            pasatSim_initializeDOMElements();
+            pasatSim_loadVoices();
+            edss_initializeDOMElements(); 
+            
+            const userLang = navigator.language || navigator.userLanguage;
+            setLanguage(userLang.startsWith('hu') ? 'hu' : 'en');
+
+            document.getElementById('msfcAge').addEventListener('input', () => updateMsfcContextualData(
+                parseFloat(document.getElementById('resultBoxMSFC')?.querySelector('#hpt_z')?.textContent || NaN), // Pass current Z-arm if available
+                parseFloat(document.getElementById('resultBoxMSFC')?.querySelector('#t25fw_z')?.textContent || NaN), // Pass current Z-leg
+                parseFloat(document.getElementById('resultBoxMSFC')?.querySelector('#pasat3_z')?.textContent || NaN) // Pass current Z-cog
+            ));
+            document.getElementById('msfcRefPopulation').addEventListener('change', () => updateMsfcContextualData(
+                parseFloat(document.getElementById('resultBoxMSFC')?.querySelector('#hpt_z')?.textContent || NaN),
+                parseFloat(document.getElementById('resultBoxMSFC')?.querySelector('#t25fw_z')?.textContent || NaN),
+                parseFloat(document.getElementById('resultBoxMSFC')?.querySelector('#pasat3_z')?.textContent || NaN)
+            ));
+
+
+            pasatSimStartButton.addEventListener('click', pasatSim_startTest);
+            pasatSimRestartButton.addEventListener('click', pasatSim_startTest);
+            pasatSimCorrectButton.addEventListener('click', () => pasatSim_handleUserScoreInput(true));
+            pasatSimIncorrectButton.addEventListener('click', () => pasatSim_handleUserScoreInput(false));
+
+            toggleSection('msfcCalculatorSection', 'toggleMsfcButton');
+        });
+
+        function toggleInstructions(contentId, toggleTextId) {
+            const content = document.getElementById(contentId);
+            const toggleTextElem = document.getElementById(toggleTextId);
+            content.classList.toggle('active');
+            const lang = translations[currentLanguage];
+            const hideKey = lang.toggleInstructionsHide || translations.en.toggleInstructionsHide;
+            const showKey = lang.toggleInstructionsShow || translations.en.toggleInstructionsShow;
+            toggleTextElem.innerHTML = content.classList.contains('active') ? hideKey : showKey;
+        }
+
+
+        function startTimer(timerId) {
+            if (timers[timerId] && timers[timerId].interval) { clearInterval(timers[timerId].interval); }
+            timers[timerId] = { startTime: Date.now(), interval: setInterval(() => { document.getElementById(`${timerId}_display`).textContent = ((Date.now() - timers[timerId].startTime) / 1000).toFixed(1); }, 100) };
+            document.getElementById(`${timerId}_start`).disabled = true;
+            document.getElementById(`${timerId}_stop`).disabled = false;
+        }
+        function stopTimer(timerId) {
+            if (timers[timerId] && timers[timerId].interval) {
+                clearInterval(timers[timerId].interval);
+                timers[timerId].finalTime = ((Date.now() - timers[timerId].startTime) / 1000);
+                document.getElementById(`${timerId}_display`).textContent = timers[timerId].finalTime.toFixed(1);
+                timers[timerId].interval = null;
+            }
+            document.getElementById(`${timerId}_start`).disabled = false;
+            document.getElementById(`${timerId}_stop`).disabled = true;
+        }
+        function resetTimer(timerId) {
+            if (timers[timerId] && timers[timerId].interval) { clearInterval(timers[timerId].interval); timers[timerId].interval = null; }
+            document.getElementById(`${timerId}_display`).textContent = '0.0';
+            document.getElementById(`${timerId}_start`).disabled = false;
+            document.getElementById(`${timerId}_stop`).disabled = true;
+            if (timers[timerId]) { timers[timerId].finalTime = null; }
+        }
+        function calculateAverage(testType) {
+            let t1 = timers[`${testType}_trial1`]?.finalTime;
+            let t2 = timers[`${testType}_trial2`]?.finalTime;
+            if (t1 !== undefined && t2 !== undefined && t1 !== null && t2 !== null) {
+                document.getElementById(testType).value = ((t1 + t2) / 2).toFixed(1);
+            } else {
+                alert(translations[currentLanguage].alertBothTrials);
+            }
+        }
+
+        function updateMsfcContextualData(z_arm_nmss, z_leg_nmss, z_cognitive_nmss) { 
+            const selectedRefPopulation = document.getElementById('msfcRefPopulation').value;
+            const ageInput = document.getElementById('msfcAge').value;
+            const age = ageInput ? parseInt(ageInput) : null;
+            const contextualDataBox = document.getElementById('msfcContextualData');
+            const lang = translations[currentLanguage];
+
+            contextualDataBox.innerHTML = ''; 
+            contextualDataBox.style.display = 'none';
+
+            if (selectedRefPopulation === 'european') {
+                if (age === null || isNaN(age) || age < 1 || age > 120) {
+                    contextualDataBox.innerHTML = `<p class="text-red-600">${lang.errorAgeMissing}</p>`;
+                    contextualDataBox.style.display = 'block';
+                    return; 
+                }
+
+                let contextualHTML = `<h4>${lang.msfcContextualDataTitle}</h4>`;
+                // T25FW Context (Raw Data)
+                const t25fwData = EUROPEAN_T25FW_CUTPOINTS.find(r => age >= r.ageMin && age <= r.ageMax);
+                contextualHTML += `<p><strong>${lang.msfcT25fwContextLabel}</strong> `;
+                if (t25fwData) {
+                    contextualHTML += lang.msfcT25fwContextText.replace('{age}', age).replace('{cutPoint}', t25fwData.cutPoint.toFixed(1)).replace('{gaitSpeed}', t25fwData.gaitSpeed.toFixed(2));
+                } else { contextualHTML += lang.msfcT25fwContextNotAvailable.replace('{age}', age); }
+                contextualHTML += `</p>`;
+
+                // 9HPT Context (Raw Data)
+                const n9hptData = EUROPEAN_9HPT_RANGES.find(r => age >= r.ageMin && age <= r.ageMax);
+                contextualHTML += `<p class="mt-2"><strong>${lang.msfc9hptContextLabel}</strong></p>`;
+                if (n9hptData) {
+                    contextualHTML += `<p class="ml-4">${lang.msfc9hptContextTextDominant.replace('{age}', age).replace('{meanTime}', n9hptData.dominant.mean.toFixed(1)).replace('{sdTime}', n9hptData.dominant.sd.toFixed(1))}</p>`;
+                    contextualHTML += `<p class="ml-4">${lang.msfc9hptContextTextNonDominant.replace('{age}', age).replace('{meanTime}', n9hptData.nonDominant.mean.toFixed(1)).replace('{sdTime}', n9hptData.nonDominant.sd.toFixed(1))}</p>`;
+                } else { contextualHTML += `<p class="ml-4">${lang.msfc9hptContextNotAvailable.replace('{age}', age)}</p>`; }
+                
+                // Age-Adjusted Z-Scores (if NMSS Z-scores are available)
+                if (z_arm_nmss !== undefined && !isNaN(z_arm_nmss) && 
+                    z_leg_nmss !== undefined && !isNaN(z_leg_nmss) &&
+                    z_cognitive_nmss !== undefined && !isNaN(z_cognitive_nmss)) {
+                    const nmssMeanAge = 38.2;
+                    const ageDelta = age - nmssMeanAge;
+                    const z_leg_adj = z_leg_nmss * (1 + 0.03 * ageDelta);
+                    const z_arm_adj = z_arm_nmss * (1 + 0.03 * ageDelta);
+                    const z_cognitive_adj = z_cognitive_nmss * (1 + 0.03 * ageDelta); // Apply to PASAT as well
+                    const msfc_composite_z_adj = (z_arm_adj + z_leg_adj + z_cognitive_adj) / 3;
+
+                    contextualHTML += `<p class="mt-3"><strong>${lang.msfcZadjLegLabel}</strong> ${z_leg_adj.toFixed(2)}</p>`;
+                    contextualHTML += `<p><strong>${lang.msfcZadjArmLabel}</strong> ${z_arm_adj.toFixed(2)}</p>`;
+                    contextualHTML += `<p><strong>${lang.msfcZadjCognitiveLabel}</strong> ${z_cognitive_adj.toFixed(2)} <span class="text-xs italic">(${lang.msfcPasatAdjustNote})</span></p>`;
+                    contextualHTML += `<p class="font-semibold mt-1"><strong>${lang.msfcZadjCompositeLabel}</strong> ${msfc_composite_z_adj.toFixed(2)}</p>`;
+                }
+
+                contextualHTML += `<p class="text-sm italic mt-2">${lang.msfcContextualDisclaimer}</p>`;
+                contextualDataBox.innerHTML = contextualHTML;
+                contextualDataBox.style.display = 'block';
+            }
+        }
+        
+        function calculateMSFC(scrollToResult = true) {
+            const t25fw_raw = parseFloat(document.getElementById('t25fw').value);
+            const hpt_dom_raw = parseFloat(document.getElementById('hpt_dom').value);
+            const hpt_nondom_raw = parseFloat(document.getElementById('hpt_nondom').value);
+            const pasat3_raw = parseFloat(document.getElementById('pasat3').value);
+            const resultBox = document.getElementById('resultBoxMSFC');
+            const lang = translations[currentLanguage];
+            const selectedRefPopulation = document.getElementById('msfcRefPopulation').value; 
+            const ageInput = document.getElementById('msfcAge').value; 
+            const age = ageInput ? parseInt(ageInput) : null;
+
+
+            if (isNaN(t25fw_raw) || isNaN(hpt_dom_raw) || isNaN(hpt_nondom_raw) || isNaN(pasat3_raw)) {
+                resultBox.innerHTML = `<h3 class='text-red-600 font-semibold'>${lang.errorTitle}</h3><p class='text-red-700'>${lang.errorInvalidInput}</p>`;
+                document.getElementById('msfcContextualData').style.display = 'none'; 
+                resultBox.style.display = 'block'; if(scrollToResult) resultBox.scrollIntoView({ behavior: 'smooth' }); return;
+            }
+             if (t25fw_raw <= 0 || hpt_dom_raw <= 0 || hpt_nondom_raw <= 0) {
+                resultBox.innerHTML = `<h3 class='text-red-600 font-semibold'>${lang.errorTitle}</h3><p class='text-red-700'>${lang.errorPositiveTime}</p>`;
+                document.getElementById('msfcContextualData').style.display = 'none';
+                resultBox.style.display = 'block'; if(scrollToResult) resultBox.scrollIntoView({ behavior: 'smooth' }); return;
+            }
+            if (pasat3_raw < 0 || pasat3_raw > 60) {
+                resultBox.innerHTML = `<h3 class='text-red-600 font-semibold'>${lang.errorTitle}</h3><p class='text-red-700'>${lang.errorPasatRange}</p>`;
+                document.getElementById('msfcContextualData').style.display = 'none';
+                resultBox.style.display = 'block'; if(scrollToResult) resultBox.scrollIntoView({ behavior: 'smooth' }); return;
+            }
+
+            const hpt_avg_reciprocal = ( (1/hpt_dom_raw) + (1/hpt_nondom_raw) ) / 2;
+            const z_arm_nmss = calculateZScore(hpt_avg_reciprocal, refData.hpt_reciprocal.mean, refData.hpt_reciprocal.sd);
+            const z_leg_nmss = -calculateZScore(t25fw_raw, refData.t25fw.mean, refData.t25fw.sd);
+            const z_cognitive_nmss = calculateZScore(pasat3_raw, refData.pasat3.mean, refData.pasat3.sd);
+            const msfc_composite_z = (z_arm_nmss + z_leg_nmss + z_cognitive_nmss) / 3;
+
+            resultBox.innerHTML = `<h3>${lang.resultsTitle}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div class="result-item bg-white p-3 rounded-md shadow"><p>${lang.armZScoreLabel} <span>${z_arm_nmss.toFixed(2)}</span></p><p class="text-sm text-gray-600">${lang.basedOnAvgReciprocal} ${hpt_avg_reciprocal.toFixed(4)}</p></div><div class="result-item bg-white p-3 rounded-md shadow"><p>${lang.legZScoreLabel} <span>${z_leg_nmss.toFixed(2)}</span></p><p class="text-sm text-gray-600">${lang.basedOnAvgTime} ${t25fw_raw.toFixed(1)}s</p></div><div class="result-item bg-white p-3 rounded-md shadow md:col-span-2"><p>${lang.cognitiveZScoreLabel} <span>${z_cognitive_nmss.toFixed(2)}</span></p><p class="text-sm text-gray-600">${lang.basedOnCorrectResponses} ${pasat3_raw}</p></div></div><div class="result-item bg-blue-100 p-4 rounded-md shadow-lg mt-4"><p class="text-xl font-semibold text-blue-800 text-center">${lang.compositeZScoreLabel} <span class="text-2xl">${msfc_composite_z.toFixed(2)}</span></p></div><div class="interpretation-text"><strong>${lang.understandingZScoresTitle}</strong> ${lang.zScoreExplanation}<ul><li>${lang.zScoreListItem1}</li><li>${lang.zScoreListItem2}</li><li>${lang.zScoreListItem3}</li></ul>${lang.zScoreFurtherExplanation}</div>`;
+            
+            let disclaimerHTML = `<div class="disclaimer"><strong>${lang.disclaimerTitle}</strong> ${lang.disclaimerText}<ul>`;
+            disclaimerHTML += `<li>${lang.disclaimerListItem1.replace('${refData.hpt_reciprocal.mean.toFixed(4)}', refData.hpt_reciprocal.mean.toFixed(4)).replace('${refData.hpt_reciprocal.sd.toFixed(4)}', refData.hpt_reciprocal.sd.toFixed(4))}</li>`;
+            disclaimerHTML += `<li>${lang.disclaimerListItem2.replace('${refData.t25fw.mean.toFixed(4)}', refData.t25fw.mean.toFixed(4)).replace('${refData.t25fw.sd.toFixed(4)}', refData.t25fw.sd.toFixed(4))}</li>`;
+            disclaimerHTML += `<li>${lang.disclaimerListItem3.replace('${refData.pasat3.mean.toFixed(4)}', refData.pasat3.mean.toFixed(4)).replace('${refData.pasat3.sd.toFixed(4)}', refData.pasat3.sd.toFixed(4))}</li>`;
+            disclaimerHTML += `</ul>`;
+            
+            if (selectedRefPopulation === 'european' && (age !== null && !isNaN(age) && age >=1 && age <=120) ) {
+                 disclaimerHTML += `<p class="mt-2">${lang.disclaimerEuropeanContext}</p>`;
+            }
+            disclaimerHTML += `${lang.disclaimerFurtherText}</div>`;
+            resultBox.innerHTML += disclaimerHTML;
+            
+            updateMsfcContextualData(z_arm_nmss, z_leg_nmss, z_cognitive_nmss); 
+            
+            resultBox.style.display = 'block'; 
+            if(scrollToResult) resultBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- PASAT Simulator Functions ---
+        let pasatSimStartButton, pasatSimInstructionsDiv, pasatSimGameAreaDiv, pasatSimNumberDisplay, pasatSimSumDisplay, pasatSimCurrentSumNumberDisplay, pasatSimFeedbackPromptDiv, pasatSimScoringButtonsDiv, pasatSimCorrectButton, pasatSimIncorrectButton, pasatSimScoreAreaDiv, pasatSimCurrentScoreDisplay, pasatSimSumsAttemptedDisplay, pasatSimFinalResultsAreaDiv, pasatSimFinalScoreDisplay, pasatSimHistoryList, pasatSimRestartButton;
+        const PASAT_SIM_TOTAL_SUMS = 60; const PASAT_SIM_PACE_INTERVAL = 3000;
+        let pasatSim_previousDigit = null, pasatSim_currentDigit = null, pasatSim_userScore = 0, pasatSim_sumCount = 0, pasatSim_presentationsDone = 0, pasatSim_testHistory = [], pasatSim_timeoutId = null, pasatSim_currentIdForScoring = null;
+        const pasatSim_synth = window.speechSynthesis; let pasatSim_voices = [];
+
+        function pasatSim_initializeDOMElements() {
+            pasatSimStartButton = document.getElementById('pasatSimStartButton'); pasatSimInstructionsDiv = document.getElementById('pasatSimInstructions'); pasatSimGameAreaDiv = document.getElementById('pasatSimGameArea'); pasatSimNumberDisplay = document.getElementById('pasatSimNumberDisplay'); pasatSimSumDisplay = document.getElementById('pasatSimSumDisplay'); pasatSimCurrentSumNumberDisplay = document.getElementById('pasatSimCurrentSumNumber'); pasatSimFeedbackPromptDiv = document.getElementById('pasatSimFeedbackPrompt'); pasatSimScoringButtonsDiv = document.getElementById('pasatSimScoringButtons'); pasatSimCorrectButton = document.getElementById('pasatSimCorrectButton'); pasatSimIncorrectButton = document.getElementById('pasatSimIncorrectButton'); pasatSimScoreAreaDiv = document.getElementById('pasatSimScoreArea'); pasatSimCurrentScoreDisplay = document.getElementById('pasatSimCurrentScore'); pasatSimSumsAttemptedDisplay = document.getElementById('pasatSimSumsAttemptedDisplay'); pasatSimFinalResultsAreaDiv = document.getElementById('pasatSimFinalResultsArea'); pasatSimFinalScoreDisplay = document.getElementById('pasatSimFinalScore'); pasatSimHistoryList = document.getElementById('pasatSimHistoryList'); pasatSimRestartButton = document.getElementById('pasatSimRestartButton');
+        }
+        function pasatSim_loadVoices() { pasatSim_voices = pasatSim_synth.getVoices(); }
+        if (pasatSim_synth.onvoiceschanged !== undefined) { pasatSim_synth.onvoiceschanged = pasatSim_loadVoices; }
+
+        function pasatSim_updateUIText() {
+            const lang = translations[currentLanguage];
+            if (!pasatSimInstructionsDiv || pasatSimInstructionsDiv.classList.contains('pasat-sim-hidden')) { /* Do nothing if not visible or not initialized */ }
+            else if (!pasatSimGameAreaDiv.classList.contains('pasat-sim-hidden')) { pasatSim_updateScoreDisplay(); pasatSimCurrentSumNumberDisplay.textContent = pasatSim_sumCount; }
+            else if (!pasatSimFinalResultsAreaDiv.classList.contains('pasat-sim-hidden')) { pasatSim_renderHistory(); }
+            if (pasatSimNumberDisplay) {
+                if (pasatSimNumberDisplay.textContent === translations.en.pasatSim_getReady || pasatSimNumberDisplay.textContent === translations.hu.pasatSim_getReady) { pasatSimNumberDisplay.textContent = lang.pasatSim_getReady; }
+                else if (pasatSimNumberDisplay.textContent === translations.en.pasatSim_firstNumIs || pasatSimNumberDisplay.textContent === translations.hu.pasatSim_firstNumIs) { pasatSimNumberDisplay.textContent = lang.pasatSim_firstNumIs; }
+            }
+        }
+        function pasatSim_getRandomDigit() { return Math.floor(Math.random() * 9) + 1; }
+        function pasatSim_speakText(text) { if (pasatSim_synth && text) { pasatSim_synth.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = currentLanguage === 'hu' ? 'hu-HU' : 'en-US'; pasatSim_synth.speak(u); } }
+        function pasatSim_displayInitialMessage(key) { const m = translations[currentLanguage][key]; pasatSimNumberDisplay.textContent = m; pasatSimSumDisplay.textContent = "--"; pasatSimFeedbackPromptDiv.classList.add('pasat-sim-hidden'); pasatSimScoringButtonsDiv.classList.add('pasat-sim-hidden'); }
+        function pasatSim_updateScoreDisplay() { pasatSimCurrentScoreDisplay.textContent = pasatSim_userScore; pasatSimSumsAttemptedDisplay.textContent = pasatSim_sumCount; }
+        function pasatSim_startTest() {
+            pasatSimInstructionsDiv.classList.add('pasat-sim-hidden'); pasatSimGameAreaDiv.classList.remove('pasat-sim-hidden'); pasatSimScoreAreaDiv.classList.remove('pasat-sim-hidden'); pasatSimFinalResultsAreaDiv.classList.add('pasat-sim-hidden'); pasatSimScoringButtonsDiv.classList.add('pasat-sim-hidden'); pasatSimFeedbackPromptDiv.classList.add('pasat-sim-hidden');
+            pasatSim_userScore = 0; pasatSim_sumCount = 0; pasatSim_presentationsDone = 0; pasatSim_previousDigit = null; pasatSim_currentDigit = null; pasatSim_testHistory = []; pasatSim_currentIdForScoring = null; pasatSimHistoryList.innerHTML = '';
+            pasatSim_updateUIText(); pasatSim_updateScoreDisplay(); pasatSimCurrentSumNumberDisplay.textContent = "0";
+            pasatSim_displayInitialMessage("pasatSim_getReady"); pasatSim_speakText(translations[currentLanguage].pasatSim_getReady);
+            if (pasatSim_timeoutId) clearTimeout(pasatSim_timeoutId);
+            pasatSim_timeoutId = setTimeout(() => { pasatSim_displayInitialMessage("pasatSim_firstNumIs"); pasatSim_speakText(translations[currentLanguage].pasatSim_firstNumIs); pasatSim_timeoutId = setTimeout(pasatSim_proceedToNextStep, PASAT_SIM_PACE_INTERVAL / 1.5); }, PASAT_SIM_PACE_INTERVAL / 1.5);
+        }
+        function pasatSim_proceedToNextStep() {
+            clearTimeout(pasatSim_timeoutId); pasatSim_presentationsDone++;
+            pasatSimScoringButtonsDiv.classList.add('pasat-sim-hidden'); pasatSimFeedbackPromptDiv.classList.add('pasat-sim-hidden'); pasatSimSumDisplay.textContent = "--";
+            pasatSim_currentDigit = pasatSim_getRandomDigit(); pasatSimNumberDisplay.textContent = pasatSim_currentDigit; pasatSim_speakText(String(pasatSim_currentDigit));
+            if (pasatSim_previousDigit !== null) {
+                if (pasatSim_sumCount < PASAT_SIM_TOTAL_SUMS) {
+                    pasatSim_sumCount++; pasatSimCurrentSumNumberDisplay.textContent = pasatSim_sumCount; const sum = pasatSim_previousDigit + pasatSim_currentDigit; pasatSimSumDisplay.textContent = `${pasatSim_previousDigit} + ${pasatSim_currentDigit} = ${sum}`;
+                    pasatSim_currentIdForScoring = pasatSim_sumCount; pasatSim_testHistory.push({ presentedNumbers: [pasatSim_previousDigit, pasatSim_currentDigit], sum: sum, userResponse: null, id: pasatSim_currentIdForScoring });
+                    pasatSimFeedbackPromptDiv.classList.remove('pasat-sim-hidden'); pasatSimScoringButtonsDiv.classList.remove('pasat-sim-hidden');
+                }
+            } else { pasatSim_testHistory.push({ presentedNumbers: [pasatSim_currentDigit], sum: null, userResponse: null, id: 0 }); }
+            pasatSim_previousDigit = pasatSim_currentDigit; pasatSim_updateScoreDisplay();
+            if (pasatSim_presentationsDone < PASAT_SIM_TOTAL_SUMS + 1) { pasatSim_timeoutId = setTimeout(pasatSim_proceedToNextStep, PASAT_SIM_PACE_INTERVAL); } else { pasatSim_timeoutId = setTimeout(pasatSim_endTest, PASAT_SIM_PACE_INTERVAL); }
+        }
+        function pasatSim_handleUserScoreInput(wasCorrect) {
+            pasatSimScoringButtonsDiv.classList.add('pasat-sim-hidden'); pasatSimFeedbackPromptDiv.classList.add('pasat-sim-hidden');
+            if (pasatSim_currentIdForScoring !== null) { const entry = pasatSim_testHistory.find(item => item.id === pasatSim_currentIdForScoring && item.sum !== null); if (entry && entry.userResponse === null) { entry.userResponse = wasCorrect; if (wasCorrect) pasatSim_userScore++; pasatSim_updateScoreDisplay(); } }
+        }
+        function pasatSim_endTest() {
+            clearTimeout(pasatSim_timeoutId); if(pasatSim_synth) pasatSim_synth.cancel();
+            pasatSimGameAreaDiv.classList.add('pasat-sim-hidden'); pasatSimScoreAreaDiv.classList.add('pasat-sim-hidden'); pasatSimFinalResultsAreaDiv.classList.remove('pasat-sim-hidden'); pasatSimScoringButtonsDiv.classList.add('pasat-sim-hidden'); pasatSimFeedbackPromptDiv.classList.add('pasat-sim-hidden');
+            pasatSim_updateUIText(); pasatSimFinalScoreDisplay.textContent = pasatSim_userScore; pasatSim_renderHistory();
+            document.getElementById('pasat3').value = pasatSim_userScore;
+        }
+        function pasatSim_renderHistory() {
+            pasatSimHistoryList.innerHTML = ''; const t = translations[currentLanguage]; let itemNum = 0;
+            pasatSim_testHistory.forEach(item => { const li = document.createElement('li'); itemNum++;
+                if (item.sum === null) { li.textContent = t.pasatSim_historyFirstNum.replace('{itemNum}', itemNum).replace('{digit}', item.presentedNumbers[0]); }
+                else { let rText; if (item.userResponse === true) rText = t.pasatSim_responseCorrect; else if (item.userResponse === false) rText = t.pasatSim_responseIncorrect; else rText = t.pasatSim_responseNone;
+                    li.textContent = t.pasatSim_historySum.replace('{itemNum}', itemNum).replace('{n1}', item.presentedNumbers[0]).replace('{n2}', item.presentedNumbers[1]).replace('{sum}', item.sum).replace('{response}', rText); }
+                pasatSimHistoryList.appendChild(li); });
+        }
+        function togglePasatSimulator() {
+            const simContainer = document.getElementById('pasatSimulatorContainer');
+            const isHidden = simContainer.classList.toggle('hidden'); 
+             if (!isHidden) { 
+                if (pasatSimFinalResultsAreaDiv.classList.contains('pasat-sim-hidden') && pasatSimGameAreaDiv.classList.contains('pasat-sim-hidden')) {
+                    pasatSimInstructionsDiv.classList.remove('pasat-sim-hidden');
+                }
+                pasatSim_updateUIText();
+                simContainer.scrollIntoView({ behavior: 'smooth' });
+            } else { 
+                clearTimeout(pasatSim_timeoutId); if(pasatSim_synth) pasatSim_synth.cancel();
+            }
+        }
+
+        // --- EDSS Calculator Functions (prefixed with edss_) ---
+        let edss_pyramidalSelect, edss_cerebellarSelect, edss_brainstemSelect, edss_sensorySelect, edss_bowelBladderSelect, edss_visualSelect, edss_cerebralSelect, edss_ambulationSelect, edss_resultBoxDiv, edss_scoreDisplayP, edss_interpretationDiv;
+
+        function edss_initializeDOMElements() {
+            edss_pyramidalSelect = document.getElementById('edss_pyramidal');
+            edss_cerebellarSelect = document.getElementById('edss_cerebellar');
+            edss_brainstemSelect = document.getElementById('edss_brainstem');
+            edss_sensorySelect = document.getElementById('edss_sensory');
+            edss_bowelBladderSelect = document.getElementById('edss_bowel_bladder');
+            edss_visualSelect = document.getElementById('edss_visual');
+            edss_cerebralSelect = document.getElementById('edss_cerebral');
+            edss_ambulationSelect = document.getElementById('edss_ambulation_status');
+            edss_resultBoxDiv = document.getElementById('edss_resultBox');
+            edss_scoreDisplayP = document.getElementById('edss_edssScoreDisplay');
+            edss_interpretationDiv = document.getElementById('edss_edssInterpretation');
+        }
+
+        function edss_updateUIText() {
+            if (edss_resultBoxDiv && edss_resultBoxDiv.style.display === 'block') {
+                edss_calculateEDSS(false); 
+            }
+        }
+
+        function edss_calculateEDSS(scrollToResult = true) {
+            const fsScores = {
+                pyramidal: parseInt(edss_pyramidalSelect.value),
+                cerebellar: parseInt(edss_cerebellarSelect.value),
+                brainstem: parseInt(edss_brainstemSelect.value),
+                sensory: parseInt(edss_sensorySelect.value),
+                bowel_bladder: parseInt(edss_bowelBladderSelect.value),
+                visual: parseInt(edss_visualSelect.value),
+                cerebral: parseInt(edss_cerebralSelect.value)
+            };
+            const ambulationValue = edss_ambulationSelect.value;
+            let edss = 0;
+            let interpretationKey = "";
+            const lang = translations[currentLanguage];
+
+            switch (ambulationValue) {
+                case "10_death": edss = 10.0; interpretationKey = "edss_interp_10_0"; break;
+                case "9.5_bed_total_dependent": edss = 9.5; interpretationKey = "edss_interp_9_5"; break;
+                case "9_bed_dependent": edss = 9.0; interpretationKey = "edss_interp_9_0"; break;
+                case "8.5_bed_some_adl": edss = 8.5; interpretationKey = "edss_interp_8_5"; break;
+                case "8_bed_chair_adl": edss = 8.0; interpretationKey = "edss_interp_8_0"; break;
+                case "7.5_wheelchair_transfer_assist": edss = 7.5; interpretationKey = "edss_interp_7_5"; break;
+                case "7_wheelchair_active": edss = 7.0; interpretationKey = "edss_interp_7_0"; break;
+                case "6.5_bilateral_20m": edss = 6.5; interpretationKey = "edss_interp_6_5"; break;
+                case "6_cane_100m": edss = 6.0; interpretationKey = "edss_interp_6_0"; break;
+                case "5.5_100m": edss = 5.5; interpretationKey = "edss_interp_5_5"; break;
+                case "5_200m": edss = 5.0; interpretationKey = "edss_interp_5_0"; break;
+                case "4.5_300m": edss = 4.5; interpretationKey = "edss_interp_4_5"; break;
+                case "4_500m": edss = 4.0; interpretationKey = "edss_interp_4_0"; break;
+                case "0_full": 
+                    let fsCountAtGrade = [0,0,0,0,0,0,0]; 
+                    let maxFsScore = 0;
+                    let numFsAffected = 0; 
+                    let numFsGrade2 = 0;
+                    let numFsGrade3 = 0;
+                    Object.keys(fsScores).forEach(key => {
+                        const score = fsScores[key];
+                        if (key === 'cerebral' && score === 1) return; 
+                        if (score > 0) numFsAffected++;
+                        if (score > maxFsScore) maxFsScore = score;
+                        if (score < fsCountAtGrade.length) fsCountAtGrade[score]++;
+                        if (score === 2) numFsGrade2++;
+                        if (score === 3) numFsGrade3++;
+                    });
+
+                    if (numFsAffected === 0) { edss = 0.0; interpretationKey = "edss_interp_0_0"; }
+                    else if (numFsAffected === 1 && maxFsScore === 1) { edss = 1.0; interpretationKey = "edss_interp_1_0"; }
+                    else if (numFsAffected > 1 && maxFsScore === 1) { edss = 1.5; interpretationKey = "edss_interp_1_5"; }
+                    else if (numFsAffected === 1 && maxFsScore === 2) { edss = 2.0; interpretationKey = "edss_interp_2_0"; } 
+                    else if (numFsGrade2 >= 2 && maxFsScore === 2) { edss = 2.5; interpretationKey = "edss_interp_2_5"; } 
+                    else if ( (numFsAffected === 1 && maxFsScore === 3) || (numFsGrade3 === 1 && numFsGrade2 === 0 && numFsAffected <=1) || (numFsGrade2 >=3 && numFsGrade3 === 0 && maxFsScore === 2) ) { edss = 3.0; interpretationKey = "edss_interp_3_0"; }
+                    else if ( (numFsGrade3 === 1 && numFsGrade2 >= 1) || (numFsGrade3 >= 2) || (numFsGrade2 >= 5) ) { edss = 3.5; interpretationKey = "edss_interp_3_5"; }
+                    else { edss = 0.0; interpretationKey = "edss_interp_fallback"; } 
+                    break;
+                default: edss = 0.0; interpretationKey = "edss_interp_fallback"; 
+            }
+            const interpretationText = lang[interpretationKey] || translations.en[interpretationKey];
+            const disclaimerText = lang.edss_disclaimer || translations.en.edss_disclaimer;
+            const interpretationLabelText = lang.edss_interpretation_label || translations.en.edss_interpretation_label;
+
+            edss_scoreDisplayP.textContent = edss.toFixed(1);
+            edss_interpretationDiv.innerHTML = `<strong>${interpretationLabelText}</strong> ${interpretationText}<br><br><small>${disclaimerText}</small>`;
+            edss_resultBoxDiv.style.display = 'block';
+            if (scrollToResult) { edss_resultBoxDiv.scrollIntoView({ behavior: 'smooth' }); }
+        }
+
+    </script>
+</body>
+</html>

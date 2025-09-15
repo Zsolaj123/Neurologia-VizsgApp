@@ -86,7 +86,7 @@ class UIManager {
         // Content scroll for TOC sync
         if (this.elements.contentDisplay) {
             this.elements.contentDisplay.addEventListener('scroll', 
-                this.debounce(this.handleContentScroll, 100)
+                this.debounce(this.handleContentScroll, 50)
             );
         }
         
@@ -180,10 +180,6 @@ class UIManager {
                             <button class="topic-item" data-topic-id="${topic.id}">
                                 ${titleStartsWithNumber ? '' : `<span class="topic-number">${topic.id}.</span>`}
                                 <span class="topic-title">${topic.title}</span>
-                                <div class="topic-badges">
-                                    ${topic.hasOsszefoglalas ? '<span class="badge badge-summary">Ö</span>' : ''}
-                                    ${topic.hasKepek ? '<span class="badge badge-images">K</span>' : ''}
-                                </div>
                             </button>
                         `;
                     }

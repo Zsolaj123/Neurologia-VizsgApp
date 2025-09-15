@@ -206,17 +206,17 @@ class MarkdownParser {
         
         // Convert links and images
         html = html.replace(this.patterns.image, (match, alt, src) => {
-            // If it's a local image reference, try to load from képek folder
+            // If it's a local image reference, try to load from images folder
             if (!src.startsWith('http') && !src.startsWith('data:')) {
                 // Extract just the filename from the path
                 const filename = src.split('/').pop();
-                src = `../template_reszvizsga_app/képek/${filename}`;
+                src = `images/${filename}`;
             }
             return `<img src="${src}" alt="${alt}" />`;
         });
         html = html.replace(this.patterns.obsidianImage, (match, filename) => {
-            // Convert Obsidian-style image links to template képek folder
-            const imagePath = `../template_reszvizsga_app/képek/${filename}`;
+            // Convert Obsidian-style image links to images folder
+            const imagePath = `images/${filename}`;
             return `<img src="${imagePath}" alt="${filename}" />`;
         });
         html = html.replace(this.patterns.link, '<a href="$2">$1</a>');

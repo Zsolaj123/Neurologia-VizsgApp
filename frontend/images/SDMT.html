@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDMT Assessment Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .symbol-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            background-color: #f9fafb;
+        }
+        .symbol-svg {
+            width: 30px;
+            height: 30px;
+        }
+        .key-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 4px;
+        }
+        .key-digit {
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .test-symbol-display {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #d1d5db;
+        }
+        .test-symbol-svg {
+            width: 50px;
+            height: 50px;
+        }
+        .message-box {
+            min-height: 24px;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        .btn-disabled {
+            background-color: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        .number-pad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+            width: 100%;
+            max-width: 240px;
+        }
+        .number-pad-btn {
+            padding: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            background-color: #e5e7eb;
+            color: #1f2937;
+            transition: background-color 0.2s ease;
+        }
+        .number-pad-btn:hover {
+            background-color: #d1d5db;
+        }
+        .number-pad-btn:active {
+            background-color: #9ca3af;
+            transform: translateY(1px);
+        }
+        .lang-switcher {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 0.5rem 1rem;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+        }
+        .form-input {
+            border: 1px solid #d1d5db; /* gray-300 */
+            padding: 0.5rem 0.75rem; /* py-2 px-3 */
+            border-radius: 0.375rem; /* rounded-md */
+            width: 100%;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.25rem; /* mb-1 */
+            font-weight: 500; /* font-medium */
+            color: #374151; /* text-gray-700 */
+        }
+        .demographics-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1rem; /* gap-4 */
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .demographics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        #demographics-section, #main-test-interface {
+            transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out;
+            overflow: hidden;
+        }
+        .hidden-section {
+            opacity: 0;
+            max-height: 0;
+            pointer-events: none;
+        }
+        .visible-section {
+            opacity: 1;
+            max-height: 2000px; /* Large enough to accommodate content */
+        }
+        .z-score-block {
+            margin-bottom: 0.75rem; /* mb-3 */
+            padding: 0.75rem; /* p-3 */
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+            border-radius: 0.375rem; /* rounded-md */
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4 relative">
+
+    <button id="lang-switcher-btn" class="btn lang-switcher">HU / EN</button>
+
+    <div class="w-full max-w-3xl bg-white p-6 md:p-8 rounded-xl shadow-2xl">
+        <header class="mb-6 text-center">
+            <h1 id="main-title" class="text-3xl font-bold text-gray-800">Symbol Digit Modalities Test (SDMT)</h1>
+        </header>
+
+        <section id="demographics-section" class="mb-6 visible-section">
+            <h2 id="demographics-title" class="text-2xl font-semibold text-gray-700 mb-4 text-center">Participant Information</h2>
+            <form id="demographics-form">
+                <div class="demographics-grid">
+                    <div>
+                        <label for="age" id="label-age" class="form-label">Age (18-80):</label>
+                        <input type="number" id="age" name="age" class="form-input" min="18" max="80" required>
+                    </div>
+                    <div>
+                        <label for="education" id="label-education" class="form-label">Education (years):</label>
+                        <input type="number" id="education" name="education" class="form-input" min="0" max="30" required>
+                    </div>
+                    <div>
+                        <label for="gender" id="label-gender" class="form-label">Gender:</label>
+                        <select id="gender" name="gender" class="form-input" required>
+                            <option value="" id="option-gender-select">Select...</option>
+                            <option value="female" id="option-gender-female">Female</option>
+                            <option value="male" id="option-gender-male">Male</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="patient-type" id="label-patient-type" class="form-label">Participant Type:</label>
+                        <select id="patient-type" name="patientType" class="form-input" required>
+                            <option value="" id="option-ptype-select">Select...</option>
+                            <option value="healthy" id="option-ptype-healthy">Healthy Control</option>
+                            <option value="ms" id="option-ptype-ms">MS Patient</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="ms-specific-inputs" class="mt-4 demographics-grid hidden">
+                    <div>
+                        <label for="ms-type" id="label-ms-type" class="form-label">MS Type:</label>
+                        <select id="ms-type" name="msType" class="form-input">
+                            <option value="" id="option-mstype-select">Select...</option>
+                            <option value="RRMS" id="option-mstype-rrms">RRMS</option>
+                            <option value="SPMS" id="option-mstype-spms">SPMS</option>
+                            <option value="CIS" id="option-mstype-cis">CIS</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edss-score" id="label-edss" class="form-label">EDSS Score (0-9.5):</label>
+                        <input type="number" id="edss-score" name="edssScore" class="form-input" min="0" step="0.5" max="9.5">
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <button type="submit" id="submit-demographics-btn" class="btn btn-primary w-full sm:w-auto">Continue</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="main-test-interface" class="hidden-section">
+            <p id="instructions" class="text-gray-600 mt-2 mb-4 text-center">Welcome! Click "Start Practice" to begin with 10 practice items. Then, proceed to the timed test.</p>
+            <div id="key-area" class="mb-6 p-4 bg-gray-50 rounded-lg shadow">
+                <h2 id="key-title" class="text-xl font-semibold text-gray-700 mb-3 text-center">Reference Key</h2>
+                <div id="key-container" class="flex flex-wrap justify-center items-center"></div>
+            </div>
+
+            <div id="test-area" class="mb-6 p-6 bg-white rounded-lg text-center min-h-[350px] flex flex-col justify-center items-center">
+                <div id="timer-label" class="text-2xl font-bold text-red-500 mb-1">Time: <span id="timer-display">0s</span></div>
+                <div id="current-symbol-display" class="symbol-container test-symbol-display my-4 hidden"></div>
+                <div id="number-pad" class="number-pad-container hidden"></div>
+                <p id="message-box" class="message-box text-sm text-gray-500 mt-2"></p>
+            </div>
+
+            <div id="controls-area" class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <button id="start-practice-btn" class="btn btn-primary w-full sm:w-auto">Start Practice</button>
+                <button id="start-test-btn" class="btn btn-primary w-full sm:w-auto" disabled>Start Test</button>
+            </div>
+
+            <div id="score-area" class="mt-6 text-center">
+                <p class="text-xl font-semibold text-gray-700 mb-2"><span id="score-label">Score</span>: <span id="score-value">0</span></p>
+                <div id="z-score-results-area" class="mt-2 text-left"></div>
+                <p id="final-message" class="text-lg text-blue-600 mt-2"></p>
+                <button id="change-demographics-btn" class="btn btn-secondary w-full sm:w-auto mt-4 hidden">Change Demographics</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // --- Symbol Definitions (SVG) ---
+        const SVG_SYMBOLS = [
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><path d="M40,10 Q70,50 40,90" stroke="black" stroke-width="10" fill="none"/></svg>', 
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><line x1="10" y1="30" x2="90" y2="30" stroke="black" stroke-width="10"/><line x1="50" y1="30" x2="50" y2="90" stroke="black" stroke-width="10"/></svg>',
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><path d="M60,10 Q30,50 60,90" stroke="black" stroke-width="10" fill="none"/></svg>',
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><line x1="10" y1="70" x2="90" y2="70" stroke="black" stroke-width="10"/><line x1="50" y1="10" x2="50" y2="70" stroke="black" stroke-width="10"/></svg>',
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><line x1="10" y1="50" x2="90" y2="50" stroke="black" stroke-width="10"/><circle cx="50" cy="25" r="10" fill="black"/><circle cx="50" cy="75" r="10" fill="black"/></svg>',
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><line x1="50" y1="10" x2="50" y2="90" stroke="black" stroke-width="10"/><line x1="10" y1="50" x2="90" y2="50" stroke="black" stroke-width="10"/></svg>',
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><polyline points="30,15 75,50 30,85" stroke="black" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><polyline points="20,80 20,20 80,20" stroke="black" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            '<svg viewBox="0 0 100 100" class="symbol-svg"><polyline points="20,20 80,20 80,80" stroke="black" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        ];
+
+        // --- Translations ---
+        const translations = {
+            en: {
+                mainTitle: "Symbol Digit Modalities Test (SDMT)",
+                demographicsTitle: "Participant Information",
+                labelAge: "Age (18-80):",
+                labelEducation: "Education (years):",
+                labelGender: "Gender:",
+                optionGenderSelect: "Select...",
+                optionGenderFemale: "Female",
+                optionGenderMale: "Male",
+                labelPatientType: "Participant Type:",
+                optionPtypeSelect: "Select...",
+                optionPtypeHealthy: "Healthy Control",
+                optionPtypeMs: "MS Patient",
+                labelMsType: "MS Type:",
+                optionMstypeSelect: "Select...",
+                optionMstypeRrms: "RRMS",
+                optionMstypeSpms: "SPMS",
+                optionMstypeCis: "CIS",
+                labelEdss: "EDSS Score (0-9.5):",
+                continueBtn: "Continue",
+                changeDemographicsBtn: "Change Demographics",
+                welcomeInstructions: 'Please fill in your information to proceed. Then click "Start Practice" to begin with 10 practice items, followed by the timed test.',
+                keyTitle: "Reference Key",
+                timerLabel: "Time",
+                practiceModeInstructions: "Practice Mode: Click the digit for each symbol. {count} items.",
+                practiceFinishedInstructions: 'Practice finished! Click "Start Test" to begin the timed assessment.',
+                testModeInstructions: "Test Mode: Click the digit for each symbol as quickly as possible. 90 seconds.",
+                testFinishedInstructions: "Test finished. Results below. You can start a new practice or test session.",
+                startPracticeBtn: "Start Practice",
+                restartPracticeBtn: "Restart Practice",
+                startNewPracticeBtn: "Start New Practice",
+                startTestBtn: "Start Test",
+                startNewTestBtn: "Start New Test",
+                correctMsg: "Correct!",
+                incorrectMsg: "Incorrect. The correct answer was {digit}.",
+                practiceScoreMsg: "Practice score: {score}/{total}.",
+                testCompletedMsg: "Test Completed!",
+                scoreLabel: "Raw Score",
+                zScoreLabel: "Z-Score", // Generic Z-score label for healthy
+                zScoreVsHealthyLabel: "Z-Score (vs. Healthy Norms)", // For MS patients
+                zScoreVsMsLabel: "Z-Score (vs. MS Norms)", // For MS patients
+                interpretationLabel: "Interpretation",
+                timeUpMsg: "Time Up!",
+                practiceStatus: "Practice",
+                healthyZSuperior: "Superior",
+                healthyZHighAvg: "High Average",
+                healthyZAvg: "Average",
+                healthyZLowAvg: "Low Average",
+                healthyZClinicalSig: "Clinically Significant Deviation",
+                msZPreserved: "Preserved function (relative to MS norms)",
+                msZTypicalDecline: "Disease-typical decline (relative to MS norms)",
+                msZActiveProgression: "Possible active progression marker (relative to MS norms)",
+                msZTreatmentFailure: "Possible treatment failure indicator (relative to MS norms)",
+                formValidationMsg: "Please fill all required fields correctly.",
+                ageValidationMsg: "Age must be between 18 and 80.",
+                msFieldsRequired: "MS Type and EDSS Score are required for MS patients."
+            },
+            hu: {
+                mainTitle: "Szimbólum Számjegy Modalitások Teszt (SDMT)",
+                demographicsTitle: "Résztvevő Információi",
+                labelAge: "Életkor (18-80):",
+                labelEducation: "Iskolázottság (évek):",
+                labelGender: "Nem:",
+                optionGenderSelect: "Válasszon...",
+                optionGenderFemale: "Nő",
+                optionGenderMale: "Férfi",
+                labelPatientType: "Résztvevő Típusa:",
+                optionPtypeSelect: "Válasszon...",
+                optionPtypeHealthy: "Egészséges Kontroll",
+                optionPtypeMs: "SM Páciens",
+                labelMsType: "SM Típus:",
+                optionMstypeSelect: "Válasszon...",
+                optionMstypeRrms: "RRMS",
+                optionMstypeSpms: "SPMS",
+                optionMstypeCis: "CIS",
+                labelEdss: "EDSS Pontszám (0-9.5):",
+                continueBtn: "Tovább",
+                changeDemographicsBtn: "Adatok Módosítása",
+                welcomeInstructions: 'Kérjük, töltse ki az adatait a folytatáshoz. Ezután kattintson a "Gyakorlás Indítása" gombra 10 gyakorló feladattal való kezdéshez, majd következik az időzített teszt.',
+                keyTitle: "Jelmagyarázat",
+                timerLabel: "Idő",
+                practiceModeInstructions: "Gyakorló Mód: Kattintson a szimbólumhoz tartozó számjegyre. {count} feladat.",
+                practiceFinishedInstructions: 'Gyakorlás befejezve! Kattintson a "Teszt Indítása" gombra az időzített értékelés megkezdéséhez.',
+                testModeInstructions: "Teszt Mód: Kattintson a szimbólumhoz tartozó számjegyre, amilyen gyorsan csak tud. 90 másodperc.",
+                testFinishedInstructions: "Teszt befejezve. Eredmények alább. Új gyakorló vagy teszt ülést kezdhet.",
+                startPracticeBtn: "Gyakorlás Indítása",
+                restartPracticeBtn: "Gyakorlás Újraindítása",
+                startNewPracticeBtn: "Új Gyakorlás Indítása",
+                startTestBtn: "Teszt Indítása",
+                startNewTestBtn: "Új Teszt Indítása",
+                correctMsg: "Helyes!",
+                incorrectMsg: "Helytelen. A helyes válasz {digit} volt.",
+                practiceScoreMsg: "Gyakorlási pontszám: {score}/{total}.",
+                testCompletedMsg: "Teszt Befejezve!",
+                scoreLabel: "Nyers Pontszám",
+                zScoreLabel: "Z-Pontszám",
+                zScoreVsHealthyLabel: "Z-Pontszám (egészséges normákhoz képest)",
+                zScoreVsMsLabel: "Z-Pontszám (SM normákhoz képest)",
+                interpretationLabel: "Értelmezés",
+                timeUpMsg: "Idő Lejárt!",
+                practiceStatus: "Gyakorlás",
+                healthyZSuperior: "Kiemelkedő",
+                healthyZHighAvg: "Átlag feletti",
+                healthyZAvg: "Átlagos",
+                healthyZLowAvg: "Átlag alatti",
+                healthyZClinicalSig: "Klinikailag Szignifikáns Eltérés",
+                msZPreserved: "Megőrzött funkció (SM normákhoz képest)",
+                msZTypicalDecline: "Betegségre jellemző hanyatlás (SM normákhoz képest)",
+                msZActiveProgression: "Lehetséges aktív progresszió jele (SM normákhoz képest)",
+                msZTreatmentFailure: "Lehetséges kezelési sikertelenség jele (SM normákhoz képest)",
+                formValidationMsg: "Kérjük, töltse ki az összes kötelező mezőt helyesen.",
+                ageValidationMsg: "Az életkornak 18 és 80 között kell lennie.",
+                msFieldsRequired: "SM betegek esetén az SM Típus és az EDSS pontszám megadása kötelező."
+            }
+        };
+        let currentLanguage = 'en';
+        let userDemographics = {};
+
+        // --- DOM Elements ---
+        const mainTitleEl = document.getElementById('main-title');
+        const demographicsSection = document.getElementById('demographics-section');
+        const mainTestInterface = document.getElementById('main-test-interface');
+        const demographicsForm = document.getElementById('demographics-form');
+        const demographicsTitleEl = document.getElementById('demographics-title');
+        const labelAgeEl = document.getElementById('label-age');
+        const labelEducationEl = document.getElementById('label-education');
+        const labelGenderEl = document.getElementById('label-gender');
+        const optionGenderSelectEl = document.getElementById('option-gender-select');
+        const optionGenderFemaleEl = document.getElementById('option-gender-female');
+        const optionGenderMaleEl = document.getElementById('option-gender-male');
+        const labelPatientTypeEl = document.getElementById('label-patient-type');
+        const optionPtypeSelectEl = document.getElementById('option-ptype-select');
+        const optionPtypeHealthyEl = document.getElementById('option-ptype-healthy');
+        const optionPtypeMsEl = document.getElementById('option-ptype-ms');
+        const msSpecificInputs = document.getElementById('ms-specific-inputs');
+        const labelMsTypeEl = document.getElementById('label-ms-type');
+        const optionMstypeSelectEl = document.getElementById('option-mstype-select');
+        const optionMstypeRrmsEl = document.getElementById('option-mstype-rrms');
+        const optionMstypeSpmsEl = document.getElementById('option-mstype-spms');
+        const optionMstypeCisEl = document.getElementById('option-mstype-cis');
+        const labelEdssEl = document.getElementById('label-edss');
+        const submitDemographicsBtn = document.getElementById('submit-demographics-btn');
+        const changeDemographicsBtn = document.getElementById('change-demographics-btn');
+        
+        const instructionsEl = document.getElementById('instructions');
+        const keyTitleEl = document.getElementById('key-title');
+        const timerLabelEl = document.getElementById('timer-label');
+        const timerDisplay = document.getElementById('timer-display');
+        const keyContainer = document.getElementById('key-container');
+        const currentSymbolDisplay = document.getElementById('current-symbol-display');
+        const numberPadContainer = document.getElementById('number-pad');
+        const messageBox = document.getElementById('message-box');
+        const startPracticeBtn = document.getElementById('start-practice-btn');
+        const startTestBtn = document.getElementById('start-test-btn');
+        const scoreLabelEl = document.getElementById('score-label');
+        const scoreValue = document.getElementById('score-value');
+        const zScoreResultsArea = document.getElementById('z-score-results-area'); // Container for Z-scores
+        const finalMessageEl = document.getElementById('final-message');
+        const langSwitcherBtn = document.getElementById('lang-switcher-btn');
+        const patientTypeSelect = document.getElementById('patient-type');
+        const ageInput = document.getElementById('age');
+        const educationInput = document.getElementById('education');
+        const genderSelect = document.getElementById('gender');
+        const msTypeSelect = document.getElementById('ms-type');
+        const edssScoreInput = document.getElementById('edss-score');
+
+        // --- Game State Variables ---
+        let symbolDigitKey = []; 
+        let testItems = []; 
+        let currentItemIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let timeLeft = 90; 
+        let isPracticeMode = false;
+        let practiceItemsCount = 10; 
+        let practiceItemsDone = 0;
+
+        // --- Utility Functions ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function updateUIText() {
+            const t = translations[currentLanguage];
+            mainTitleEl.textContent = t.mainTitle;
+            demographicsTitleEl.textContent = t.demographicsTitle;
+            labelAgeEl.textContent = t.labelAge;
+            labelEducationEl.textContent = t.labelEducation;
+            labelGenderEl.textContent = t.labelGender;
+            optionGenderSelectEl.textContent = t.optionGenderSelect;
+            optionGenderFemaleEl.textContent = t.optionGenderFemale;
+            optionGenderMaleEl.textContent = t.optionGenderMale;
+            labelPatientTypeEl.textContent = t.labelPatientType;
+            optionPtypeSelectEl.textContent = t.optionPtypeSelect;
+            optionPtypeHealthyEl.textContent = t.optionPtypeHealthy;
+            optionPtypeMsEl.textContent = t.optionPtypeMs;
+            labelMsTypeEl.textContent = t.labelMsType;
+            optionMstypeSelectEl.textContent = t.optionMstypeSelect;
+            optionMstypeRrmsEl.textContent = t.optionMstypeRrms;
+            optionMstypeSpmsEl.textContent = t.optionMstypeSpms;
+            optionMstypeCisEl.textContent = t.optionMstypeCis;
+            labelEdssEl.textContent = t.labelEdss;
+            submitDemographicsBtn.textContent = t.continueBtn;
+            changeDemographicsBtn.textContent = t.changeDemographicsBtn;
+
+            instructionsEl.textContent = t.welcomeInstructions;
+            keyTitleEl.textContent = t.keyTitle;
+            timerLabelEl.firstChild.textContent = `${t.timerLabel}: `; 
+            scoreLabelEl.textContent = t.scoreLabel;
+            
+            if (startPracticeBtn.classList.contains('hidden')) {
+                 if (finalMessageEl.textContent.includes(translations[currentLanguage].practiceScoreMsg.split(':')[0])) {
+                    startPracticeBtn.textContent = t.restartPracticeBtn;
+                 } else {
+                    startPracticeBtn.textContent = t.startNewPracticeBtn;
+                 }
+            } else {
+                startPracticeBtn.textContent = t.startPracticeBtn;
+            }
+
+            if(startTestBtn.disabled && !startTestBtn.classList.contains('hidden') && !startPracticeBtn.classList.contains('hidden')){
+                 startTestBtn.textContent = t.startTestBtn;
+            } else if (!startTestBtn.classList.contains('hidden') && !startTestBtn.disabled) {
+                 startTestBtn.textContent = t.startNewTestBtn;
+            } else {
+                 startTestBtn.textContent = t.startTestBtn;
+            }
+        }
+
+        // --- Z-Score Calculation Logic ---
+        function calculateZScore(rawScore, demographics) {
+            const { age, education, patientType, msType, edssScore } = demographics;
+            const t = translations[currentLanguage];
+            let results = { type: patientType };
+
+            // Calculate Z-score vs Healthy Norms (for everyone, and as one of two for MS)
+            let predictedHealthyScore, sdHealthy, zScoreHealthy;
+            if (age < 18 || age > 60) {
+                console.warn("Healthy norms (Greek) are primarily for ages 18-60. Current age is outside this primary range.");
+            }
+            predictedHealthyScore = 63.7 - (0.51 * age);
+            sdHealthy = 7.2;
+            zScoreHealthy = (rawScore - predictedHealthyScore) / sdHealthy;
+            
+            if (patientType === 'healthy') {
+                results.zScore = zScoreHealthy;
+                results.interpretation = getHealthyZScoreInterpretation(zScoreHealthy, t);
+            } else if (patientType === 'ms') {
+                results.zScoreHealthy = zScoreHealthy;
+                results.interpretationHealthy = getHealthyZScoreInterpretation(zScoreHealthy, t); // Standard interpretation vs healthy
+
+                // Calculate Z-score vs MS Norms
+                let baseScoreMs, sdMs, zScoreMs;
+                if (msType === 'RRMS') {
+                    baseScoreMs = 48.1 - (0.38 * age) + (1.2 * education);
+                    sdMs = 8.9;
+                } else if (msType === 'SPMS') {
+                    baseScoreMs = 39.3 - (0.29 * age) + (0.9 * education);
+                    sdMs = 6.7;
+                } else if (msType === 'CIS') {
+                    baseScoreMs = 52.4 - (0.41 * age) + (1.4 * education);
+                    sdMs = 8.9; 
+                } else {
+                    results.zScoreMs = null;
+                    results.interpretationMs = "MS Type not specified or invalid.";
+                    return results;
+                }
+
+                let edssPenalty = 0;
+                if (edssScore >= 0 && edssScore <= 1.5) edssPenalty = 0;
+                else if (edssScore >= 2 && edssScore <= 3.5) edssPenalty = 2.1;
+                else if (edssScore >= 4 && edssScore <= 5.5) edssPenalty = 4.7;
+                else if (edssScore >= 6) edssPenalty = 7.3;
+                
+                const predictedMsScore = baseScoreMs - edssPenalty;
+                zScoreMs = (rawScore - predictedMsScore) / sdMs;
+                results.zScoreMs = zScoreMs;
+                results.interpretationMs = getMsZScoreInterpretation(zScoreMs, t);
+            } else {
+                 results.error = "Participant type not supported for Z-score.";
+            }
+            return results;
+        }
+
+        function getHealthyZScoreInterpretation(zScore, t) {
+            if (zScore === null || isNaN(zScore)) return "";
+            if (zScore >= 1.5) return t.healthyZSuperior;
+            if (zScore >= 0.5) return t.healthyZHighAvg;
+            if (zScore > -0.5) return t.healthyZAvg; 
+            if (zScore >= -1.5) return t.healthyZLowAvg; 
+            return t.healthyZClinicalSig;
+        }
+
+        function getMsZScoreInterpretation(zScore, t) {
+            if (zScore === null || isNaN(zScore)) return "";
+            if (zScore >= -0.5) return t.msZPreserved;
+            if (zScore > -1.5) return t.msZTypicalDecline; 
+            if (zScore > -2.0) return t.msZActiveProgression; 
+            return t.msZTreatmentFailure; 
+        }
+
+        // --- Core Logic (generateKey, displayKey, createNumberPad, handleNumberPadInput, generateTestItems, displayCurrentItem, checkAnswer, startTimer are mostly unchanged) ---
+        function generateKey() { 
+            symbolDigitKey = [];
+            const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            shuffleArray(digits); 
+            for (let i = 0; i < SVG_SYMBOLS.length; i++) {
+                symbolDigitKey.push({ symbolIndex: i, digit: digits[i], svg: SVG_SYMBOLS[i] });
+            }
+        }
+        function displayKey() { 
+            keyContainer.innerHTML = ''; 
+            symbolDigitKey.forEach(item => {
+                const keyItemDiv = document.createElement('div');
+                keyItemDiv.className = 'key-item';
+                const symbolDiv = document.createElement('div');
+                symbolDiv.className = 'symbol-container';
+                symbolDiv.innerHTML = item.svg;
+                const digitP = document.createElement('p');
+                digitP.className = 'key-digit text-gray-700';
+                digitP.textContent = item.digit;
+                keyItemDiv.appendChild(symbolDiv);
+                keyItemDiv.appendChild(digitP);
+                keyContainer.appendChild(keyItemDiv);
+            });
+        }
+        function createNumberPad() { 
+            numberPadContainer.innerHTML = '';
+            for (let i = 1; i <= 9; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = 'number-pad-btn';
+                button.addEventListener('click', () => handleNumberPadInput(i));
+                numberPadContainer.appendChild(button);
+            }
+        }
+        function handleNumberPadInput(digit) { 
+            if (isPracticeMode) {
+                checkAnswer(digit);
+            } else if (!isPracticeMode && timeLeft > 0) {
+                checkAnswer(digit);
+            }
+        }
+        function generateTestItems() { 
+            testItems = [];
+            const firstSixSymbolIndicesInKey = symbolDigitKey.slice(0, 6).map(item => item.symbolIndex);
+            const allNineSymbolIndicesInKey = symbolDigitKey.map(item => item.symbolIndex);
+            for (let i = 0; i < 26; i++) {
+                testItems.push(firstSixSymbolIndicesInKey[Math.floor(Math.random() * firstSixSymbolIndicesInKey.length)]);
+            }
+            for (let i = 0; i < 124; i++) { 
+                testItems.push(allNineSymbolIndicesInKey[Math.floor(Math.random() * allNineSymbolIndicesInKey.length)]);
+            }
+        }
+        function displayCurrentItem() { 
+            if (currentItemIndex < testItems.length) {
+                const symbolIndexToShow = testItems[currentItemIndex];
+                currentSymbolDisplay.innerHTML = SVG_SYMBOLS[symbolIndexToShow].replace('class="symbol-svg"', 'class="test-symbol-svg"');
+                currentSymbolDisplay.classList.remove('hidden');
+                messageBox.textContent = '';
+                numberPadContainer.classList.remove('hidden');
+            } else {
+                if (!isPracticeMode) endTest();
+                else endPractice();
+            }
+        }
+        function checkAnswer(userAnswerDigit) { 
+            const currentSymbolIndexInTest = testItems[currentItemIndex];
+            const keyEntry = symbolDigitKey.find(item => item.symbolIndex === currentSymbolIndexInTest);
+            const correctDigit = keyEntry.digit;
+            const userAnswer = userAnswerDigit;
+            const t = translations[currentLanguage];
+
+            if (userAnswer === correctDigit) {
+                score++;
+                scoreValue.textContent = score;
+                if (isPracticeMode) {
+                    messageBox.textContent = t.correctMsg;
+                    messageBox.className = 'message-box text-sm text-green-500 mt-2';
+                } else {
+                     messageBox.textContent = '';
+                }
+            } else {
+                 if (isPracticeMode) {
+                    messageBox.textContent = t.incorrectMsg.replace('{digit}', correctDigit);
+                    messageBox.className = 'message-box text-sm text-red-500 mt-2';
+                 } else {
+                    messageBox.textContent = ''; 
+                 }
+            }
+            currentItemIndex++;
+            if (isPracticeMode) {
+                practiceItemsDone++;
+                if (practiceItemsDone >= practiceItemsCount) {
+                    endPractice();
+                } else {
+                    displayCurrentItem();
+                }
+            } else {
+                if (currentItemIndex < testItems.length && timeLeft > 0) {
+                    displayCurrentItem();
+                } else if (timeLeft > 0) { 
+                    endTest(); 
+                }
+            }
+        }
+        function startTimer() { 
+            timeLeft = 90;
+            timerDisplay.textContent = `${timeLeft}s`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endTest();
+                }
+            }, 1000);
+        }
+
+        function resetTestState(keepDemographics = false) {
+            score = 0;
+            currentItemIndex = 0;
+            practiceItemsDone = 0;
+            scoreValue.textContent = '0';
+            finalMessageEl.textContent = '';
+            zScoreResultsArea.innerHTML = ''; // Clear previous Z-score results
+            messageBox.textContent = '';
+            timerDisplay.textContent = '0s';
+            clearInterval(timerInterval);
+            
+            if (!keepDemographics) {
+                userDemographics = {};
+                demographicsForm.reset();
+                msSpecificInputs.classList.add('hidden');
+                demographicsSection.classList.remove('hidden-section');
+                demographicsSection.classList.add('visible-section');
+                mainTestInterface.classList.remove('visible-section');
+                mainTestInterface.classList.add('hidden-section');
+                changeDemographicsBtn.classList.add('hidden');
+            } else {
+                demographicsSection.classList.add('hidden-section');
+                demographicsSection.classList.remove('visible-section');
+                mainTestInterface.classList.remove('hidden-section');
+                mainTestInterface.classList.add('visible-section');
+            }
+
+            if (symbolDigitKey.length === 0 || !keepDemographics) {
+                generateKey();
+                displayKey();
+            }
+            const t = translations[currentLanguage];
+            startPracticeBtn.classList.remove('hidden', 'btn-disabled');
+            startPracticeBtn.disabled = false;
+            startPracticeBtn.textContent = t.startPracticeBtn;
+
+            startTestBtn.classList.remove('hidden');
+            startTestBtn.classList.add('btn-disabled');
+            startTestBtn.disabled = true;
+            startTestBtn.textContent = t.startTestBtn;
+
+            currentSymbolDisplay.classList.add('hidden');
+            numberPadContainer.classList.add('hidden');
+        }
+
+        function startPractice() {
+            const t = translations[currentLanguage];
+            isPracticeMode = true;
+            score = 0;
+            currentItemIndex = 0;
+            practiceItemsDone = 0;
+            scoreValue.textContent = '0';
+            finalMessageEl.textContent = '';
+            zScoreResultsArea.innerHTML = '';
+            messageBox.textContent = '';
+            
+            generateKey(); 
+            displayKey();
+            generateTestItems(); 
+
+            instructionsEl.textContent = t.practiceModeInstructions.replace('{count}', practiceItemsCount);
+            startPracticeBtn.classList.add('hidden'); 
+            startTestBtn.classList.remove('btn-disabled'); 
+            startTestBtn.disabled = false; 
+            startTestBtn.textContent = t.startTestBtn; 
+            
+            timerLabelEl.firstChild.textContent = `${t.practiceStatus}: `; 
+            timerDisplay.textContent = ''; 
+            displayCurrentItem(); 
+        }
+
+        function endPractice() {
+            const t = translations[currentLanguage];
+            isPracticeMode = false;
+            currentSymbolDisplay.classList.add('hidden'); 
+            numberPadContainer.classList.add('hidden');
+            
+            instructionsEl.textContent = t.practiceFinishedInstructions;
+            finalMessageEl.textContent = t.practiceScoreMsg.replace('{score}', score).replace('{total}', practiceItemsCount);
+            messageBox.textContent = '';
+
+            startTestBtn.classList.remove('btn-disabled'); 
+            startTestBtn.disabled = false;
+            startTestBtn.textContent = t.startTestBtn;
+            startPracticeBtn.classList.remove('hidden'); 
+            startPracticeBtn.textContent = t.restartPracticeBtn;
+            timerLabelEl.firstChild.textContent = `${t.timerLabel}: `; 
+            changeDemographicsBtn.classList.remove('hidden');
+        }
+
+        function startTest() {
+            const t = translations[currentLanguage];
+            isPracticeMode = false;
+            score = 0;
+            currentItemIndex = 0;
+            practiceItemsDone = 0; 
+            scoreValue.textContent = '0';
+            finalMessageEl.textContent = '';
+            zScoreResultsArea.innerHTML = '';
+            messageBox.textContent = '';
+
+            generateKey(); 
+            displayKey();
+            generateTestItems(); 
+
+            instructionsEl.textContent = t.testModeInstructions;
+            startPracticeBtn.classList.add('btn-disabled'); 
+            startPracticeBtn.disabled = true;
+            startTestBtn.classList.add('btn-disabled');     
+            startTestBtn.disabled = true;
+            
+            timerLabelEl.firstChild.textContent = `${t.timerLabel}: `; 
+            displayCurrentItem(); 
+            startTimer();         
+        }
+
+        function endTest() {
+            const t = translations[currentLanguage];
+            clearInterval(timerInterval); 
+            currentSymbolDisplay.classList.add('hidden'); 
+            numberPadContainer.classList.add('hidden');
+            
+            timerDisplay.textContent = t.timeUpMsg;
+            finalMessageEl.textContent = t.testCompletedMsg;
+            instructionsEl.textContent = t.testFinishedInstructions;
+            messageBox.textContent = ''; 
+            zScoreResultsArea.innerHTML = ''; // Clear previous results
+
+            const zResults = calculateZScore(score, userDemographics);
+
+            if (zResults.type === 'healthy' && zResults.zScore !== undefined) {
+                const block = document.createElement('div');
+                block.className = 'z-score-block';
+                block.innerHTML = `
+                    <p class="text-lg font-semibold">${t.zScoreLabel}: ${zResults.zScore.toFixed(2)}</p>
+                    <p class="text-md">${t.interpretationLabel}: ${zResults.interpretation}</p>
+                `;
+                zScoreResultsArea.appendChild(block);
+            } else if (zResults.type === 'ms') {
+                // Z-Score vs Healthy Norms for MS patient
+                if (zResults.zScoreHealthy !== undefined) {
+                    const blockHealthy = document.createElement('div');
+                    blockHealthy.className = 'z-score-block';
+                    blockHealthy.innerHTML = `
+                        <p class="text-lg font-semibold">${t.zScoreVsHealthyLabel}: ${zResults.zScoreHealthy.toFixed(2)}</p>
+                        <p class="text-md">${t.interpretationLabel}: ${zResults.interpretationHealthy}</p>
+                    `;
+                    zScoreResultsArea.appendChild(blockHealthy);
+                }
+                // Z-Score vs MS Norms for MS patient
+                if (zResults.zScoreMs !== undefined) {
+                     const blockMs = document.createElement('div');
+                    blockMs.className = 'z-score-block mt-2'; // Add margin top for separation
+                    blockMs.innerHTML = `
+                        <p class="text-lg font-semibold">${t.zScoreVsMsLabel}: ${zResults.zScoreMs.toFixed(2)}</p>
+                        <p class="text-md">${t.interpretationLabel}: ${zResults.interpretationMs}</p>
+                    `;
+                    zScoreResultsArea.appendChild(blockMs);
+                } else if (zResults.interpretationMs) { // Handle case where MS Z-score couldn't be calculated (e.g. invalid MS Type)
+                    const blockMsError = document.createElement('div');
+                    blockMsError.className = 'z-score-block mt-2';
+                    blockMsError.innerHTML = `<p class="text-lg font-semibold">${t.zScoreVsMsLabel}: N/A</p><p class="text-md">${t.interpretationLabel}: ${zResults.interpretationMs}</p>`;
+                    zScoreResultsArea.appendChild(blockMsError);
+                }
+            } else if (zResults.error) {
+                zScoreResultsArea.innerHTML = `<p class="text-red-500">${zResults.error}</p>`;
+            }
+
+            startPracticeBtn.classList.remove('btn-disabled', 'hidden'); 
+            startPracticeBtn.disabled = false;
+            startPracticeBtn.textContent = t.startNewPracticeBtn;
+            startTestBtn.classList.remove('btn-disabled', 'hidden'); 
+            startTestBtn.disabled = false; 
+            startTestBtn.textContent = t.startNewTestBtn;
+            changeDemographicsBtn.classList.remove('hidden');
+        }
+
+        // --- Event Listeners ---
+        demographicsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const t = translations[currentLanguage];
+            const ageVal = parseInt(ageInput.value);
+            const educationVal = parseInt(educationInput.value);
+            const genderVal = genderSelect.value;
+            const patientTypeVal = patientTypeSelect.value;
+            const msTypeVal = msTypeSelect.value;
+            const edssScoreVal = parseFloat(edssScoreInput.value);
+
+            if (isNaN(ageVal) || ageVal < 18 || ageVal > 80) {
+                alert(t.ageValidationMsg); return;
+            }
+            if (isNaN(educationVal) || educationVal < 0) {
+                alert(t.formValidationMsg); return;
+            }
+            if (!genderVal || !patientTypeVal) {
+                 alert(t.formValidationMsg); return;
+            }
+            userDemographics = { age: ageVal, education: educationVal, gender: genderVal, patientType: patientTypeVal };
+            if (patientTypeVal === 'ms') {
+                if (!msTypeVal || isNaN(edssScoreVal) || edssScoreVal < 0 || edssScoreVal > 9.5) { // Added validation for EDSS range
+                    alert(t.msFieldsRequired); return;
+                }
+                userDemographics.msType = msTypeVal;
+                userDemographics.edssScore = edssScoreVal;
+            }
+            
+            demographicsSection.classList.add('hidden-section');
+            demographicsSection.classList.remove('visible-section');
+            mainTestInterface.classList.remove('hidden-section');
+            mainTestInterface.classList.add('visible-section');
+            
+            instructionsEl.textContent = t.welcomeInstructions.split('.')[1].trim(); 
+            resetTestState(true); 
+            changeDemographicsBtn.classList.remove('hidden'); 
+        });
+
+        patientTypeSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'ms') {
+                msSpecificInputs.classList.remove('hidden');
+                msTypeSelect.required = true;
+                edssScoreInput.required = true;
+            } else {
+                msSpecificInputs.classList.add('hidden');
+                msTypeSelect.required = false;
+                edssScoreInput.required = false;
+            }
+        });
+        
+        changeDemographicsBtn.addEventListener('click', () => {
+            resetTestState(false); 
+            updateUIText(); 
+        });
+
+        startPracticeBtn.addEventListener('click', startPractice);
+        startTestBtn.addEventListener('click', startTest);
+        
+        langSwitcherBtn.addEventListener('click', () => {
+            currentLanguage = currentLanguage === 'en' ? 'hu' : 'en';
+            updateUIText();
+            const t = translations[currentLanguage];
+            if (mainTestInterface.classList.contains('visible-section')) {
+                if (isPracticeMode) {
+                    instructionsEl.textContent = t.practiceModeInstructions.replace('{count}', practiceItemsCount);
+                } else if (timeLeft < 90 && timeLeft > 0) { 
+                    instructionsEl.textContent = t.testModeInstructions;
+                } else if (finalMessageEl.textContent !== '') { 
+                    if (finalMessageEl.textContent.startsWith(translations.en.practiceScoreMsg.split(':')[0]) || finalMessageEl.textContent.startsWith(translations.hu.practiceScoreMsg.split(':')[0])) {
+                        instructionsEl.textContent = t.practiceFinishedInstructions;
+                        finalMessageEl.textContent = t.practiceScoreMsg.replace('{score}', score).replace('{total}', practiceItemsCount); // Re-translate existing message
+                    } else {
+                        instructionsEl.textContent = t.testFinishedInstructions;
+                        finalMessageEl.textContent = t.testCompletedMsg; // Re-translate existing message
+                        // Re-translate Z-score if present
+                        if (zScoreResultsArea.innerHTML !== '') {
+                            // This is complex because the content is dynamic. For simplicity, we might just re-run endTest's display part
+                            // or advise user to switch lang before test. For now, let's re-populate if demographics exist.
+                            if (Object.keys(userDemographics).length > 0) {
+                                endTest(); // This will re-calculate and re-display with new lang
+                            }
+                        }
+                    }
+                } else { 
+                     instructionsEl.textContent = t.welcomeInstructions.split('.')[1].trim();
+                }
+            } else { 
+                 instructionsEl.textContent = t.welcomeInstructions; 
+            }
+             if (messageBox.textContent.startsWith(translations[currentLanguage === 'en' ? 'hu' : 'en'].correctMsg)) {
+                messageBox.textContent = t.correctMsg;
+            } else if (messageBox.textContent.includes(translations[currentLanguage === 'en' ? 'hu' : 'en'].incorrectMsg.split('{digit}')[0])) {
+                const digit = messageBox.textContent.match(/\d+/);
+                if (digit) {
+                    messageBox.textContent = t.incorrectMsg.replace('{digit}', digit[0]);
+                }
+            }
+        });
+
+        // --- Initial Setup ---
+        function initializeTool() {
+            updateUIText(); 
+            resetTestState(false); 
+            createNumberPad(); 
+        }
+
+        window.onload = initializeTool;
+    </script>
+</body>
+</html>

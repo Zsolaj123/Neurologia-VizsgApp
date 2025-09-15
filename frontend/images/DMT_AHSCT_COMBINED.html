@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Minimalista SM Kezelési Irányító Eszköz</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #f4f7f9; /* Lightest gray for page background */
+            --bg-card: #ffffff;   /* White for cards/containers */
+            --text-primary: #2c3e50; /* Dark blue-gray for main text */
+            --text-secondary: #576574; /* Medium gray for secondary text */
+            --accent-primary: #3498db; /* A calm, modern blue */
+            --accent-secondary: #95a5a6; /* Light gray for borders, subtle elements */
+            --accent-success: #2ecc71; /* Green for success/completion */
+            --accent-warning: #f39c12; /* Orange for warnings */
+            --accent-danger: #e74c3c;  /* Red for errors/danger */
+            --shadow-color: rgba(44, 62, 80, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        .content-card { /* Renamed from futuristic-container */
+            background-color: var(--bg-card);
+            border: 1px solid var(--accent-secondary);
+            border-radius: 12px; /* Slightly softer radius */
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .input-group-title {
+            font-size: 1.15rem; 
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--accent-secondary);
+        }
+
+        label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        input[type="number"], input[type="text"], select {
+            background-color: var(--bg-card);
+            border: 1px solid var(--accent-secondary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.65rem 1rem; /* Adjusted padding */
+            transition: border-color 0.3s, box-shadow 0.3s;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* Focus ring */
+            outline: none;
+        }
+        select option {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent-primary);
+            width: 1.1rem;
+            height: 1.1rem;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            border: 1px solid var(--accent-secondary); /* Custom border for non-accented state */
+            border-radius: 3px;
+        }
+         input[type="checkbox"]:checked {
+            border-color: var(--accent-primary);
+        }
+        input[type="checkbox"] + span {
+             color: var(--text-secondary);
+             font-size: 0.9rem;
+        }
+
+
+        .btn-primary {
+            background-color: var(--accent-primary);
+            color: white;
+            font-weight: 500;
+            padding: 0.7rem 1.8rem;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9; /* Darker shade of primary accent */
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--accent-secondary);
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: var(--accent-secondary);
+            color: white;
+            border-color: var(--accent-secondary);
+        }
+
+        /* Multi-step form */
+        .form-step { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .form-step.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef; /* Light gray for progress track */
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 8px; /* Slimmer bar */
+            background-color: var(--accent-primary);
+            width: 0%;
+            border-radius: 8px;
+            transition: width 0.5s ease-in-out;
+        }
+        .step-indicator-container { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+        .step-indicator {
+            width: 28px; height: 28px; border-radius: 50%;
+            background-color: var(--bg-card);
+            border: 2px solid var(--accent-secondary);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent-secondary); font-weight: 600; font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .step-indicator.active {
+            background-color: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+        .step-indicator.completed {
+             background-color: var(--accent-success);
+            color: white;
+            border-color: var(--accent-success);
+        }
+
+        /* Results cards */
+        .medication-card {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        .medication-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        .rank-badge {
+            background-color: var(--accent-primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Traffic Light for AHSCT */
+        .traffic-light-container { /* Wrapper for centering and spacing */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .traffic-light {
+            width: 40px; /* Slimmer */
+            height: 120px;
+            background: #e0e0e0; /* Light gray housing */
+            border-radius: 8px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            margin-bottom: 0.5rem; /* Space for score */
+            border: 1px solid #ccc;
+        }
+        .traffic-light .light {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #bdbdbd; /* Off state */
+            margin: auto;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            border: 1px solid #aaa;
+        }
+        .traffic-light .light.red.active { background: var(--accent-danger); box-shadow: 0 0 8px var(--accent-danger); }
+        .traffic-light .light.yellow.active { background: var(--accent-warning); box-shadow: 0 0 8px var(--accent-warning); }
+        .traffic-light .light.green.active { background: var(--accent-success); box-shadow: 0 0 8px var(--accent-success); }
+
+
+        .tooltip {
+          position: relative; display: inline-block;
+          border-bottom: 1px dotted var(--text-secondary); cursor: help;
+        }
+        .tooltip .tooltiptext {
+          visibility: hidden; width: max-content; max-width: 250px;
+          background-color: var(--text-primary); color: var(--bg-card);
+          text-align: center; border-radius: 6px; padding: 5px 10px;
+          position: absolute; z-index: 10; bottom: 125%; left: 50%;
+          transform: translateX(-50%);
+          opacity: 0; transition: opacity 0.3s;
+          font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        
+        #riskChartContainer {
+            padding: 1rem; background-color: var(--bg-card);
+            border-radius: 8px; margin-top: 1.5rem;
+            border: 1px solid var(--accent-secondary);
+        }
+
+        .modal { background-color: rgba(44, 62, 80, 0.7); } 
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--accent-secondary);
+            color: var(--text-primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .modal-close { color: var(--text-secondary); }
+        .modal-close:hover { color: var(--text-primary); }
+        .checkbox-grid label span { color: var(--text-secondary); }
+
+        /* Shake animation for validation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="min-h-screen">
+        <header class="py-5 shadow-md bg-white border-b border-gray-200">
+            <div class="container mx-auto px-4">
+                <h1 class="text-2xl md:text-3xl font-semibold text-center text-primary flex items-center justify-center">
+                    <i class="fas fa-brain mr-3 text-accent-primary"></i>
+                    SM Kezelési Irányító Eszköz
+                </h1>
+                <p class="mt-1 text-text-secondary text-center text-sm md:text-base">Bizonyítékokon alapuló, személyre szabott kezelési ajánlások</p>
+            </div>
+        </header>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 container mx-auto rounded-md shadow-sm">
+            <div class="flex">
+                <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 mt-1 text-lg"></i>
+                <div>
+                    <h3 class="font-semibold text-yellow-700">Orvosi Figyelmeztetés</h3>
+                    <p class="text-yellow-600 text-sm mt-1">
+                        Ez az eszköz csak oktatási és döntéstámogató célokat szolgál. Nem helyettesíti a szakképzett 
+                        egészségügyi szakemberek klinikai értékelését. A kezelési döntéseket mindig neurológussal 
+                        való konzultáció után kell meghozni.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-6">
+            <div class="content-card">
+                <h2 class="text-xl font-semibold text-center text-text-primary mb-4 flex items-center justify-center">
+                    <i class="fas fa-tasks mr-3 text-accent-primary"></i>
+                    Beteg Értékelő Varázsló
+                </h2>
+
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+                <div id="stepIndicatorContainer" class="step-indicator-container mb-6"></div>
+
+                <form id="assessmentForm" class="space-y-8">
+                    <!-- Step 1: Demographics & MS Characteristics -->
+                    <div class="form-step active" data-step="1">
+                        <fieldset>
+                            <legend class="input-group-title">1. Alapadatok és SM Jellemzők</legend>
+                            <div class="grid md:grid-cols-2 gap-x-6 gap-y-4 mb-6">
+                                <div>
+                                    <label for="age" class="block mb-1"><i class="fas fa-calendar-alt mr-1"></i>Életkor (év) <span class="text-red-500">*</span></label>
+                                    <input type="number" id="age" min="10" max="90" required>
+                                </div>
+                                <div>
+                                    <label for="gender" class="block mb-1"><i class="fas fa-venus-mars mr-1"></i>Nem</label>
+                                    <select id="gender">
+                                        <option value="">Válasszon...</option> <option value="male">Férfi</option> <option value="female">Nő</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="msType" class="block mb-1"><i class="fas fa-diagnoses mr-1"></i><span class="tooltip">SM Típus<span class="tooltiptext">Sclerosis Multiplex típusa</span></span> <span class="text-red-500">*</span></label>
+                                    <select id="msType" required>
+                                        <option value="">Válasszon...</option>
+                                        <option value="rrms">Relapszáló-Remittáló SM (RRMS)</option>
+                                        <option value="spms">Szekunder Progresszív SM (SPMS) - Aktív</option>
+                                        <option value="spms_inactive">Szekunder Progresszív SM (SPMS) - Nem Aktív</option>
+                                        <option value="ppms">Primer Progresszív SM (PPMS)</option>
+                                        <option value="cis">Klinikailag Izolált Szindróma (CIS)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="diseaseDuration" class="block mb-1"><i class="fas fa-clock mr-1"></i>Betegségtartam (év)</label>
+                                    <input type="number" id="diseaseDuration" min="0" max="60" step="0.5">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- Step 2: Disease Activity & Prognostic Factors -->
+                    <div class="form-step" data-step="2">
+                        <fieldset>
+                            <legend class="input-group-title">2. Betegségaktivitás és Prognózis</legend>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 mb-6">
+                                <div>
+                                    <label for="edss" class="block mb-1"><i class="fas fa-chart-line mr-1"></i><span class="tooltip">EDSS<span class="tooltiptext">Expanded Disability Status Scale - Rokkantsági Skála</span></span> <span class="text-red-500">*</span></label>
+                                    <select id="edss" required>
+                                        <option value="">Válasszon...</option>
+                                        <option value="0">0.0</option> <option value="1">1.0-1.5</option> <option value="2">2.0-2.5</option>
+                                        <option value="3">3.0-3.5</option> <option value="4">4.0-4.5</option> <option value="5">5.0-5.5</option>
+                                        <option value="6">6.0-6.5</option> <option value="7">7.0+</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="relapses" class="block mb-1"><i class="fas fa-sync-alt mr-1"></i>Relapszusok (elmúlt 12 hó) <span class="text-red-500">*</span></label>
+                                    <select id="relapses" required>
+                                        <option value="">Válasszon...</option> <option value="0">0</option> <option value="1">1</option>
+                                        <option value="2">2</option> <option value="3">3+</option>
+                                    </select>
+                                </div>
+                                 <div>
+                                    <label for="lastRelapseSeverity" class="block mb-1"><i class="fas fa-notes-medical mr-1"></i>Utolsó relapszus súlyossága</label>
+                                    <select id="lastRelapseSeverity">
+                                        <option value="">Nem releváns/Nem volt</option>
+                                        <option value="mild_full_recovery">Enyhe (teljes felépülés)</option>
+                                        <option value="moderate_good_recovery">Közepes (jó felépülés)</option>
+                                        <option value="severe_incomplete_recovery">Súlyos (inkomplett felépülés)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="mriActivity" class="block mb-1"><i class="fas fa-brain mr-1"></i>Új T2 léziók (MRI, 12hó) <span class="text-red-500">*</span></label>
+                                    <select id="mriActivity" required>
+                                        <option value="">Válasszon...</option> <option value="none">Nincs új T2</option>
+                                        <option value="mild">1-2 új T2</option> <option value="moderate">3-9 új T2</option>
+                                        <option value="high">10+ új T2</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="gdPlusLesions" class="block mb-1"><i class="fas fa-atom mr-1"></i>Gd+ léziók (MRI, 12hó)</label>
+                                    <select id="gdPlusLesions">
+                                        <option value="">Válasszon...</option> <option value="0">0</option>
+                                        <option value="1">1-2</option> <option value="2">3+</option>
+                                    </select>
+                                </div>
+                                 <div>
+                                    <label class="block mb-1"><i class="fas fa-exclamation-triangle mr-1"></i>Kedvezőtlen progn. faktorok</label>
+                                     <div class="space-y-1 bg-gray-50 p-3 rounded-md border border-gray-300">
+                                        <label class="flex items-center"><input type="checkbox" name="prognosticFactor" value="early_motor"><span>Korai motoros tünetek</span></label>
+                                        <label class="flex items-center"><input type="checkbox" name="prognosticFactor" value="infratentorial_spinal"><span>Infratent./Gerincvelői léziók</span></label>
+                                         <label class="flex items-center"><input type="checkbox" name="prognosticFactor" value="high_lesion_load_diag"><span>Magas léziószám diagnóziskor</span></label>
+                                     </div>
+                                </div>
+                            </div>
+                             <div id="riskChartContainer" class="hidden">
+                                <canvas id="activityRiskChart" height="250"></canvas>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- Step 3: Previous Treatments & Biomarkers -->
+                    <div class="form-step" data-step="3">
+                        <fieldset>
+                            <legend class="input-group-title">3. Korábbi Kezelések és Biomarkerek</legend>
+                            <div class="mb-6">
+                                <label class="block mb-1"><i class="fas fa-history mr-1"></i>Korábban alkalmazott <span class="tooltip">DMT</span>-k<span class="tooltiptext">Betegségmódosító Terápiák</span></label>
+                                <div id="previousDMTsContainer" class="checkbox-grid"></div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-x-6 gap-y-4">
+                                <div>
+                                    <label for="treatmentResponse" class="block mb-1"><i class="fas fa-thumbs-up mr-1"></i>Válasz utolsó/fő DMT-re</label>
+                                    <select id="treatmentResponse">
+                                        <option value="">Nincs korábbi / Válasszon...</option>
+                                        <option value="excellent">Kiváló</option> <option value="good">Jó</option>
+                                        <option value="partial">Részleges</option> <option value="poor">Gyenge/Hatástalan</option>
+                                        <option value="intolerant">Intolerancia</option>
+                                    </select>
+                                </div>
+                                 <div>
+                                    <label for="jcvStatus" class="block mb-1"><i class="fas fa-vial-virus mr-1"></i><span class="tooltip">JCV Státusz<span class="tooltiptext">John Cunningham Vírus Antitest Státusz</span></span></label>
+                                    <select id="jcvStatus">
+                                        <option value="">Válasszon...</option> <option value="negative">Negatív</option>
+                                        <option value="positive_low">Pozitív (alacsony)</option>
+                                        <option value="positive_high">Pozitív (magas)</option>
+                                        <option value="unknown">Ismeretlen</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    
+                    <!-- Step 4: Additional Factors, Preferences, Comorbidities -->
+                    <div class="form-step" data-step="4">
+                        <fieldset>
+                            <legend class="input-group-title">4. További Tényezők és Preferenciák</legend>
+                             <div class="mb-6">
+                                <label class="block mb-1"><i class="fas fa-notes-medical mr-1"></i>Komorbiditások</label>
+                                <div id="comorbiditiesContainer" class="checkbox-grid">
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="none"><span>Nincs jelentős</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="cardiac"><span>Szív-érrendszeri (jelentős)</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="hepatic"><span>Májbetegség (jelentős)</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="renal"><span>Vesebetegség (jelentős)</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="psychiatric_severe"><span>Pszichiátriai (súlyos)</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="autoimmune_other_active"><span>Más aktív autoimmun</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="malignancy_active_risk"><span>Malignitás (aktív/kock.)</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="chronic_infection_active"><span>Krónikus fertőzés (aktív)</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="diabetes_uncontrolled"><span>Nem kontrollált diabetes</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="severe_osteoporosis"><span>Súlyos osteoporosis</span></label>
+                                    <label class="flex items-center"><input type="checkbox" name="comorbidities" value="thyroid_uncontrolled"><span>Nem kontrollált pajzsmirigy</span></label>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-x-6 gap-y-4">
+                                <div>
+                                    <label for="pregnancy" class="block mb-1"><i class="fas fa-baby-carriage mr-1"></i>Családtervezés/Terhesség</label>
+                                    <select id="pregnancy">
+                                        <option value="">Válasszon...</option> <option value="none">Nem releváns</option>
+                                        <option value="planning">Tervezik</option> <option value="pregnant">Terhes</option>
+                                        <option value="breastfeeding">Szoptat</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="adminPreference" class="block mb-1"><i class="fas fa-syringe mr-1"></i>Adminisztrációs preferencia</label>
+                                    <select id="adminPreference">
+                                        <option value="">Nincs preferencia</option> <option value="oral">Orális</option>
+                                        <option value="sc_home">Szubkután (otthoni)</option> <option value="iv_clinic">Intravénás (klinikai)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- Step 5: AHSCT Specific Factors -->
+                    <div class="form-step" data-step="5">
+                        <fieldset>
+                            <legend class="input-group-title">5. <span class="tooltip">AHSCT</span><span class="tooltiptext">Autológ Hematopoetikus Őssejt Transzplantáció</span> Specifikus Tényezők</legend>
+                             <div class="space-y-6">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="aggressiveDespiteHET" class="mr-2">
+                                    <span>Agresszív betegség HET(k) ellenére?</span>
+                                </label>
+                                <div>
+                                    <label for="psychosocialSupport" class="block mb-1"><i class="fas fa-users-cog mr-1"></i>Pszichoszociális támogatottság</label>
+                                    <select id="psychosocialSupport">
+                                        <option value="">Válasszon...</option> <option value="excellent">Kiváló</option>
+                                        <option value="good">Jó</option> <option value="fair">Megfelelő, de kihívásokkal</option>
+                                        <option value="poor">Gyenge / Nem elegendő</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-text-secondary mb-2">AHSCT Ellenjavallatok (Jelölje, ha fennáll):</h4>
+                                    <div class="checkbox-grid">
+                                        <label class="flex items-center"><input type="checkbox" id="ahsctContraCardiac"><span>Súlyos kardiális diszfunkció</span></label>
+                                        <label class="flex items-center"><input type="checkbox" id="ahsctContraPulmonary"><span>Súlyos pulmonális diszfunkció</span></label>
+                                        <label class="flex items-center"><input type="checkbox" id="ahsctContraRenal"><span>Súlyos vesekárosodás</span></label>
+                                        <label class="flex items-center"><input type="checkbox" id="ahsctContraInfectionActive"><span>Aktív, kontrollálatlan fertőzés</span></label>
+                                        <label class="flex items-center"><input type="checkbox" id="ahsctContraHepatic"><span>Súlyos májkárosodás</span></label>
+                                        <label class="flex items-center"><input type="checkbox" id="ahsctContraMalignancyActive"><span>Aktív malignitás</span></label>
+                                        <label class="flex items-center"><input type="checkbox" id="ahsctContraPregnancy"><span>Terhesség / Szoptatás</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                     <!-- Step 6: Symptom Assessment -->
+                    <div class="form-step" data-step="6">
+                        <fieldset>
+                            <legend class="input-group-title">6. Jelenlegi Főbb Tünetek</legend>
+                            <div class="checkbox-grid">
+                                <label class="flex items-center"><input type="checkbox" id="fatigue" name="symptoms" value="fatigue"><span>Fáradtság</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="bladder" name="symptoms" value="bladder"><span>Hólyag diszfunkció</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="sexual" name="symptoms" value="sexual"><span>Szexuális diszfunkció</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="depression" name="symptoms" value="depression"><span>Depresszió/Szorongás</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="cognitive" name="symptoms" value="cognitive"><span>Kognitív zavarok</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="spasticity" name="symptoms" value="spasticity"><span>Spaszticitás</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="pain" name="symptoms" value="pain"><span>Fájdalom</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="walking" name="symptoms" value="walking"><span>Járászavar</span></label>
+                                <label class="flex items-center"><input type="checkbox" id="tremor" name="symptoms" value="tremor"><span>Tremor</span></label>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between pt-6">
+                        <button type="button" id="prevBtn" onclick="navigateStep(-1)" class="btn-secondary hidden"><i class="fas fa-arrow-left mr-2"></i>Előző</button>
+                        <button type="button" id="nextBtn" onclick="navigateStep(1)" class="btn-primary">Következő<i class="fas fa-arrow-right ml-2"></i></button>
+                        <button type="button" id="submitBtn" onclick="generateRecommendations()" class="btn-primary hidden"><i class="fas fa-cogs mr-2"></i>Ajánlások Generálása</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden opacity-0 transition-opacity duration-1000">
+                <div class="content-card">
+                    <h2 class="text-xl font-semibold text-text-primary mb-6 flex items-center"><i class="fas fa-award mr-3 text-accent-primary"></i>Top 3 DMT Ajánlás</h2>
+                    <div id="dmtRecommendations" class="space-y-6"></div>
+                </div>
+
+                <div class="content-card">
+                    <h2 class="text-xl font-semibold text-text-primary mb-6 flex items-center"><i class="fas fa-dna mr-3 text-accent-primary"></i>AHSCT Alkalmasság</h2>
+                    <div id="ahsctAssessment"></div>
+                     <div id="ahsctWashoutNotes" class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 text-sm rounded-md hidden">
+                        <h4 class="font-semibold text-yellow-800 mb-2"><i class="fas fa-info-circle mr-2"></i>Fontos Megjegyzések AHSCT-hez (Kiürülési Idők)</h4>
+                        <ul class="list-disc list-inside"></ul>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h2 class="text-xl font-semibold text-text-primary mb-6 flex items-center"><i class="fas fa-notes-medical mr-3 text-accent-primary"></i>Szimptóma Kezelési Ajánlások</h2>
+                    <div id="symptomManagement"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="validationModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <p id="validationMessage" class="text-red-500 font-semibold"></p> <!-- Error color for message -->
+        <button onclick="closeModal()" class="mt-4 btn-primary">OK</button>
+      </div>
+    </div>
+
+    <script>
+        // DMT Database (reflecting updates from "magyar DMT ajánló report.md")
+        const dmtDatabase = {
+            interferon: { name: 'Interferon béta készítmények', category: 'Mérsékelt hatékonyságú', mechanism: 'Immunmodulátor hatás, gyulladásos citokinek csökkentése.', efficacy_description: 'Csökkenti a relapszusok gyakoriságát RRSM-ben.', dosing: 'SC vagy IM inj., heti 1-3x vagy kéthetente (pegilált).', monitoring: 'Vérkép, májfunkció, pajzsmirigy funkció.', sideEffects: 'Influenzaszerű tünetek, injekciós reakciók, depresszió rosszabbodása, májenzim emelkedés, vérképeltérések.', contraindications: 'Súlyos depresszió, nem kontrollált epilepszia, súlyos májbetegség.', pregnancy: 'Relatíve biztonságos', admin_type: 'sc_home', washout_months_ahsct: 0.1 },
+            glatiramer: { name: 'Glatiramer acetát (Copaxone)', category: 'Mérsékelt hatékonyságú', mechanism: 'Th2 irányú immunválasz elősegítése.', efficacy_description: 'Csökkenti a relapszusok gyakoriságát, jó hosszú távú biztonsági profil.', dosing: 'SC inj., napi vagy heti 3x.', monitoring: 'Minimális.', sideEffects: 'Injekciós reakciók, lipoatrophia, átmeneti szisztémás reakció.', contraindications: 'Túlérzékenység.', pregnancy: 'Biztonságos', admin_type: 'sc_home', washout_months_ahsct: 0.1 },
+            dimethylfumarate: { name: 'Dimetil-fumarát (Tecfidera)', category: 'Mérsékelt hatékonyságú', mechanism: 'Nrf2 antioxidáns útvonal aktiválása.', efficacy_description: 'Csökkenti a relapszusokat és MRI aktivitást RRSM-ben.', dosing: 'Orális, napi 2x.', monitoring: 'Vérkép (limfocita), máj- és vesefunkció.', sideEffects: 'Flushing, GI tünetek, limfopénia, ritkán PML.', contraindications: 'Súlyos limfopénia, súlyos vese-/májkárosodás.', pregnancy: 'Kerülendő', admin_type: 'oral', washout_months_ahsct: 0.5 },
+            teriflunomide: { name: 'Teriflunomid (Aubagio)', category: 'Mérsékelt hatékonyságú', mechanism: 'Pirimidin de novo szintézis gátlása.', efficacy_description: 'Csökkenti a relapszusokat, lassítja progressziót RRSM-ben.', dosing: 'Orális, napi 1x.', monitoring: 'Májfunkció (ALT), vérkép, vérnyomás.', sideEffects: 'Hajhullás, GI tünetek, májenzim-emelkedés, perifériás neuropátia.', contraindications: 'Súlyos májkárosodás, terhesség, súlyos immundeficiencia.', pregnancy: 'Szigorúan ellenjavalt', admin_type: 'oral', washout_months_ahsct: 24, accelerated_washout_possible: true },
+            fingolimod: { name: 'Fingolimod (Gilenya)', category: 'Nagy hatékonyságú', mechanism: 'S1P receptor modulátor.', efficacy_description: 'Jelentősen csökkenti relapszusokat/MRI aktivitást, gyermekeknek is.', dosing: 'Orális, napi 1x.', monitoring: 'Első dózis kardiológiai monitorozás; szemészet, bőrgyógyászat, vérkép, májfunkció.', sideEffects: 'Bradycardia, makula ödéma, májenzim-emelkedés, fertőzések, PML (ritka).', contraindications: 'Bizonyos szívbetegségek, aktív fertőzés, súlyos májkárosodás.', pregnancy: 'Szigorúan ellenjavalt', admin_type: 'oral', washout_months_ahsct: 2 },
+            siponimod: { name: 'Siponimod (Mayzent)', category: 'Nagy hatékonyságú', mechanism: 'Szelektív S1P1/S1P5 receptor modulátor.', efficacy_description: 'Aktív SPMS kezelésére, lassítja progressziót.', dosing: 'Orális, napi 1x (CYP2C9 genotipizálás, titrálás).', monitoring: 'CYP2C9 genotipizálás; kardiológiai megfigyelés; szemészet; vérkép, májfunkció.', sideEffects: 'Fejfájás, hipertónia, májenzim-emelkedés, limfopénia, bradycardia, makula ödéma.', contraindications: 'Bizonyos CYP2C9 genotípusok; spec. kardiológiai állapotok.', pregnancy: 'Szigorúan ellenjavalt', admin_type: 'oral', washout_months_ahsct: 0.5 },
+            ponesimod: { name: 'Ponesimod (Ponvory)', category: 'Nagy hatékonyságú', mechanism: 'Szelektív S1P1 receptor modulátor.', efficacy_description: 'Relapszáló SM formák kezelésére.', dosing: 'Orális, napi 1x (14 napos titrálás).', monitoring: 'Kardiológiai értékelés; szemészet; vérkép, májfunkció, légzésfunkció.', sideEffects: 'Nasopharyngitis, ALAT emelkedés, bradyarrhythmia, májenzim-emelkedés.', contraindications: 'Bizonyos súlyos kardiológiai állapotok.', pregnancy: 'Szigorúan ellenjavalt', admin_type: 'oral', washout_months_ahsct: 0.25 },
+            cladribine: { name: 'Kladribin (Mavenclad)', category: 'Nagy hatékonyságú (Indukciós/Immunrekonstitúciós)', mechanism: 'Purin nukleozid analóg, limfocita depléció.', efficacy_description: 'Nagy aktivitású relapszáló SM-re, tartós hatás.', dosing: 'Orális, 2 év, évente 2 rövid kúra.', monitoring: 'Vérkép (limfocita); fertőzés/malignitás szűrés.', sideEffects: 'Limfopénia, fertőzések (herpes zoster), fejfájás. Malignitás kockázat?', contraindications: 'Aktív malignitás, HIV, aktív TB/hepatitis, terhesség.', pregnancy: 'Szigorúan ellenjavalt', admin_type: 'oral', washout_months_ahsct: 6 },
+            natalizumab: { name: 'Natalizumab (Tysabri)', category: 'Nagy hatékonyságú', mechanism: 'α4-integrin gátló.', efficacy_description: 'Nagyon hatékony aktív betegségben.', dosing: 'IV infúzió, 4 hetente.', monitoring: 'JCV antitest státusz; MRI (PML szűrés).', sideEffects: 'PML kockázat (JCV+), infúziós/túlérzékenységi reakciók.', contraindications: 'PML anamnézis, magas PML kockázat (JCV+).', pregnancy: 'Kerülendő', admin_type: 'iv_clinic', washout_months_ahsct: 3 },
+            ocrelizumab: { name: 'Ocrelizumab (Ocrevus)', category: 'Nagy hatékonyságú', mechanism: 'Anti-CD20 mAb, B-sejt depléció.', efficacy_description: 'Nagyon hatékony RMS és PPMS esetén.', dosing: 'IV infúzió, 6 havonta (kezdő dózis után).', monitoring: 'HBV szűrés; immunglobulin szintek.', sideEffects: 'Infúziós reakciók, fertőzések, csökkent Ig, ritkán PML, HBV reaktiváció.', contraindications: 'Aktív HBV, aktív fertőzések, súlyos immunszuppresszió.', pregnancy: 'Kerülendő', admin_type: 'iv_clinic', washout_months_ahsct: 6 },
+            ofatumumab: { name: 'Ofatumumab (Kesimpta)', category: 'Nagy hatékonyságú', mechanism: 'Anti-CD20 mAb (humán), B-sejt depléció.', efficacy_description: 'Nagyon hatékony relapszáló SM-ben, otthoni SC.', dosing: 'SC inj., havonta (kezdő dózisok után).', monitoring: 'HBV szűrés; immunglobulin szintek.', sideEffects: 'Injekciós reakciók, felső légúti fertőzések, csökkent IgM.', contraindications: 'Aktív HBV, aktív fertőzések.', pregnancy: 'Kerülendő', admin_type: 'sc_home', washout_months_ahsct: 6 },
+            alemtuzumab: { name: 'Alemtuzumab (Lemtrada)', category: 'Nagyon magas hatékonyságú (Indukciós/Immunrekonstitúciós)', mechanism: 'Anti-CD52 mAb, T/B-limfocita depléció.', efficacy_description: 'Nagyon hatékony aktív RRSM-ben, tartós hatás.', dosing: 'IV infúzió, 2 kúra (1. év 5 nap, 2. év 3 nap).', monitoring: 'Vérkép, pajzsmirigy-, vesefunkció (min. 48 hó); bőrgyógyászat.', sideEffects: 'Infúziós reakciók, fertőzések, autoimmun betegségek (pajzsmirigy, ITP, vese).', contraindications: 'HIV, aktív súlyos fertőzés, egyéb súlyos autoimmun betegség.', pregnancy: 'Szigorúan ellenjavalt', admin_type: 'iv_clinic', washout_months_ahsct: 12 }
+        };
+
+        const symptomManagementDb = { 
+            fatigue: { title: 'Fáradtság kezelése', icon: 'fas fa-battery-quarter', medications: ['Modafinil (100-200mg/nap)', 'Amantadin (100-200mg/nap)', 'Esetleg SSRI-k'], nonPharmacological: ['Rendszeres, mértékkel végzett testmozgás (pl. jóga, tai chi)', 'Energiatakarékos technikák, pihenési stratégiák', 'Alvási higiénia javítása', 'Kognitív viselkedésterápia (CBT)'] },
+            bladder: { title: 'Hólyag diszfunkció kezelése', icon: 'fas fa-tint', medications: ['Antikolinergikumok (pl. Oxybutynin, Tolterodin)', 'Mirabegron (β3-agonista)', 'Desmopressin (nocturia esetén)'], nonPharmacological: ['Időzített vizelés, hólyagtréning', 'Kismedencei torna (Kegel-gyakorlatok)', 'Folyadékbevitel optimalizálása', 'Intermittáló önkatéterezés (retenció esetén)'] },
+            sexual: { title: 'Szexuális diszfunkció kezelése', icon: 'fas fa-heart', medications: ['PDE5-gátlók (pl. Sildenafil, Tadalafil) férfiaknál erektilis diszfunkcióra', 'Lokális ösztrogén nőknek hüvelyszárazságra', 'Sikositók'], nonPharmacological: ['Szexuálterápia, párterápia', 'Fáradtság, spaszticitás, fájdalom kezelése', 'Pszichológiai tanácsadás'] },
+            depression: { title: 'Depresszió és szorongás kezelése', icon: 'fas fa-brain', medications: ['SSRI-k (pl. Sertralin, Escitalopram)', 'SNRI-k (pl. Venlafaxin, Duloxetin)'], nonPharmacological: ['Kognitív viselkedésterápia (CBT)', 'Mindfulness alapú terápiák', 'Relaxációs technikák', 'Támogató csoportok'] },
+            cognitive: { title: 'Kognitív zavarok kezelése', icon: 'fas fa-lightbulb', medications: ['Tüneti szerek (pl. Modafinil figyelemre) korlátozott hatékonysággal', 'Donepezil (ritkán, mérsékelt bizonyíték)'], nonPharmacological: ['Kognitív rehabilitáció, neuropszichológiai tréning', 'Memória stratégiák, kompenzációs technikák', 'Számítógépes kognitív tréning programok'] },
+            spasticity: { title: 'Spaszticitás kezelése', icon: 'fas fa-running', medications: ['Baclofen (orális, intrathecalis pumpa)', 'Tizanidin', 'Gabapentin/Pregabalin', 'Diazepam (rövid távon)', 'Botulinum toxin injekciók (lokalizált spaszticitásra)'], nonPharmacological: ['Rendszeres nyújtás, fizioterápia', 'Hidroterápia', 'Ortézisek, segédeszközök'] },
+            pain: { title: 'Fájdalom kezelése', icon: 'fas fa-hand-holding-medical', medications: ['Neuropátiás fájdalomra: Gabapentin, Pregabalin, Amitriptilin, Duloxetin, Karbamazepin (trigeminus neuralgia)', 'Mozgásszervi fájdalomra: NSAID-ok, paracetamol'], nonPharmacological: ['Fizikoterápia, TENS', 'Akupunktúra, masszázs', 'Relaxációs technikák, CBT'] },
+            walking: { title: 'Járászavar kezelése', icon: 'fas fa-walking', medications: ['Dalfampridin (Fampridin) - szelektált betegeknél', 'Spaszticitás és fáradtság kezelése'], nonPharmacological: ['Fizioterápia, járástréning, egyensúlyfejlesztés', 'Segédeszközök (bot, járókeret, ortézisek)', 'Funkcionális elektromos stimuláció (FES)'] },
+            tremor: { title: 'Tremor kezelése', icon: 'fas fa-hand-paper', medications: ['Propranolol', 'Primidon', 'Clonazepam (óvatosan)', 'Topiramat', 'Ondansetron'], nonPharmacological: ['Foglalkozásterápia, súlyozott eszközök', 'Hűtés', 'Mélyagyi stimuláció (DBS) - refrakter esetekben'] }
+        };
+
+        let currentStep = 1;
+        const totalSteps = 6; 
+        let activityRiskChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            populateDmtCheckboxes();
+            setupStepIndicators();
+            updateFormNavigation();
+            setupInitialChart();
+            attachLiveChartUpdateListeners(); // Attach listeners for live chart updates
+        });
+        
+        function populateDmtCheckboxes() {
+            const dmtContainer = document.getElementById('previousDMTsContainer');
+            if (!dmtContainer) return;
+            let dmtCheckboxesHTML = '';
+            const sortedDmtKeys = Object.keys(dmtDatabase).sort((a,b) => dmtDatabase[a].name.localeCompare(dmtDatabase[b].name));
+            for (const key of sortedDmtKeys) {
+                dmtCheckboxesHTML += `
+                    <label class="flex items-center">
+                        <input type="checkbox" name="previousDMTs" value="${key}" class="mr-2 h-4 w-4">
+                        <span>${dmtDatabase[key].name}</span>
+                    </label>`;
+            }
+            dmtContainer.innerHTML = dmtCheckboxesHTML;
+        }
+
+        function setupStepIndicators() {
+            const container = document.getElementById('stepIndicatorContainer');
+            if (!container) return;
+            for (let i = 1; i <= totalSteps; i++) {
+                const indicator = document.createElement('div');
+                indicator.classList.add('step-indicator');
+                indicator.textContent = i;
+                indicator.id = `step-indicator-${i}`;
+                if (i === 1) indicator.classList.add('active');
+                container.appendChild(indicator);
+            }
+        }
+        
+        function setupInitialChart() {
+            const ctx = document.getElementById('activityRiskChart')?.getContext('2d');
+            if (!ctx) return;
+            const initialData = {
+                labels: ['Relapszusok', 'MRI T2 Aktivitás', 'Gd+ Léziók', 'Prognosztikai Faktorok'],
+                datasets: [{
+                    label: 'Betegség Aktivitási Profil',
+                    data: [0, 0, 0, 0], 
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(52, 152, 219, 1)',
+                    pointBorderColor: '#fff',
+                }]
+            };
+            const config = {
+                type: 'radar', 
+                data: initialData,
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { r: {
+                        angleLines: { color: 'rgba(0,0,0,0.1)' }, grid: { color: 'rgba(0,0,0,0.1)' },
+                        pointLabels: { color: 'var(--text-secondary)', font: { size: 11, family: 'Poppins'}},
+                        ticks: { backdropColor: 'transparent', color: 'var(--text-secondary)', stepSize: 1, font: {family: 'Poppins'}},
+                        suggestedMin: 0, suggestedMax: 3 
+                    }},
+                    plugins: { legend: { display: false }} // Simplified legend
+                }
+            };
+            if (activityRiskChartInstance) activityRiskChartInstance.destroy();
+            activityRiskChartInstance = new Chart(ctx, config);
+        }
+
+        function attachLiveChartUpdateListeners() {
+            const chartInputs = [
+                'relapses', 'mriActivity', 'gdPlusLesions', 'lastRelapseSeverity'
+            ];
+            chartInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', () => {
+                    if (currentStep === 2) { // Only update if on the relevant step
+                         updateActivityChart(collectFormDataForChart());
+                    }
+                });
+            });
+            document.querySelectorAll('input[name="prognosticFactor"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (currentStep === 2) {
+                        updateActivityChart(collectFormDataForChart());
+                    }
+                });
+            });
+        }
+
+        function updateActivityChart(formData) {
+            if (!activityRiskChartInstance) return;
+            let relapseScore = 0;
+            const relapsesNum = parseInt(formData.relapses);
+            if (relapsesNum >= 2) relapseScore = 3;
+            else if (relapsesNum === 1) relapseScore = 2;
+            else if (relapsesNum === 0) relapseScore = 1;
+
+            let t2Score = 0;
+            if (formData.mriActivity === 'high') t2Score = 3;
+            else if (formData.mriActivity === 'moderate') t2Score = 2;
+            else if (formData.mriActivity === 'mild') t2Score = 1;
+
+            let gdScore = 0;
+            if (formData.gdPlusLesions === '2') gdScore = 3; 
+            else if (formData.gdPlusLesions === '1') gdScore = 2;
+
+            let prognosticRiskScore = 0;
+            if (formData.prognosticFactors.length > 0) prognosticRiskScore = Math.min(3, formData.prognosticFactors.length);
+            if (formData.lastRelapseSeverity === 'severe_incomplete_recovery') prognosticRiskScore = Math.min(3, prognosticRiskScore + 1); // Add to existing, cap at 3
+            
+            activityRiskChartInstance.data.datasets[0].data = [relapseScore, t2Score, gdScore, prognosticRiskScore];
+            activityRiskChartInstance.update();
+            
+            const riskChartContainer = document.getElementById('riskChartContainer');
+            if (riskChartContainer) riskChartContainer.classList.remove('hidden');
+        }
+
+        function navigateStep(direction) {
+            const steps = document.querySelectorAll('.form-step');
+            const currentStepElement = steps[currentStep - 1];
+            
+            if (direction > 0) {
+                const requiredInputs = currentStepElement.querySelectorAll('input[required], select[required]');
+                let allValid = true;
+                requiredInputs.forEach(input => {
+                    if (!input.value) {
+                        allValid = false;
+                        input.style.borderColor = 'var(--accent-danger)'; 
+                        input.classList.add('animate-shake');
+                        setTimeout(() => input.classList.remove('animate-shake'), 300);
+                    } else {
+                        input.style.borderColor = 'var(--accent-secondary)'; 
+                    }
+                });
+                if (!allValid) {
+                    showModal('Kérjük, töltse ki az összes csillaggal jelölt (*) kötelező mezőt ezen a lépésen!');
+                    return;
+                }
+            }
+
+            document.getElementById(`step-indicator-${currentStep}`).classList.remove('active');
+            if (direction > 0) document.getElementById(`step-indicator-${currentStep}`).classList.add('completed');
+            
+            currentStep += direction;
+            currentStepElement.classList.remove('active');
+            steps[currentStep - 1].classList.add('active');
+            document.getElementById(`step-indicator-${currentStep}`).classList.add('active');
+            updateFormNavigation();
+            
+            if (currentStep === 2) { // If navigating TO step 2, update chart
+                updateActivityChart(collectFormDataForChart());
+            } else { // If navigating AWAY from step 2, hide chart
+                 const riskChartContainer = document.getElementById('riskChartContainer');
+                 if (riskChartContainer && !riskChartContainer.classList.contains('hidden') && currentStep !==2) {
+                    // riskChartContainer.classList.add('hidden'); // Option: hide if not on step 2
+                 }
+            }
+        }
+        
+        function collectFormDataForChart() {
+             return {
+                relapses: document.getElementById('relapses').value,
+                mriActivity: document.getElementById('mriActivity').value,
+                gdPlusLesions: document.getElementById('gdPlusLesions').value,
+                lastRelapseSeverity: document.getElementById('lastRelapseSeverity').value,
+                prognosticFactors: getSelectedCheckboxValues('prognosticFactor'),
+            };
+        }
+
+        function updateFormNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const progressBar = document.getElementById('progressBar');
+            prevBtn.classList.toggle('hidden', currentStep === 1);
+            nextBtn.classList.toggle('hidden', currentStep === totalSteps);
+            submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
+            progressBar.style.width = `${((currentStep -1) / (totalSteps -1)) * 100}%`;
+        }
+
+        const modal = document.getElementById("validationModal");
+        const modalMessage = document.getElementById("validationMessage");
+        function showModal(message) { modalMessage.textContent = message; modal.style.display = "block"; }
+        function closeModal() { modal.style.display = "none"; }
+        window.onclick = function(event) { if (event.target == modal) closeModal(); }
+
+        function getSelectedCheckboxValues(name) {
+            return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+        }
+
+        function calculateDMTScore(dmt, patientData) {
+            let score = 0;
+            const efficacyScores = { 
+                'Mérsékelt hatékonyságú': 5, 'Nagy hatékonyságú': 8,
+                'Nagy hatékonyságú (Indukciós/Immunrekonstitúciós)': 9,
+                'Nagyon magas hatékonyságú (Indukciós/Immunrekonstitúciós)': 10
+            };
+            let categoryToScore = dmt.category;
+            if (dmt.category === 'Alacsony-közepes hatékonyság') categoryToScore = 'Mérsékelt hatékonyságú';
+            if (dmt.category === 'Nagyon magas hatékonyság' && !dmt.name.includes('Alemtuzumab')) categoryToScore = 'Nagy hatékonyságú';
+            score += efficacyScores[categoryToScore] || 0;
+
+            const relapses = parseInt(patientData.relapses) || 0;
+            const mriActivityT2 = patientData.mriActivity;
+            const gdPlus = patientData.gdPlusLesions;
+            const lastRelapseSeverity = patientData.lastRelapseSeverity;
+            const hasPoorPrognosticFactors = patientData.prognosticFactors.length > 0;
+
+            let activityLevel = 0;
+            if (relapses >= 2) activityLevel = 2; 
+            else if (relapses === 1) activityLevel = 1;
+            if (mriActivityT2 === 'high' || gdPlus === '2') activityLevel = Math.max(activityLevel, 2);
+            else if (mriActivityT2 === 'moderate' || gdPlus === '1') activityLevel = Math.max(activityLevel, 1);
+            if (lastRelapseSeverity === 'severe_incomplete_recovery') activityLevel = Math.max(activityLevel, 2);
+            else if (lastRelapseSeverity === 'moderate_good_recovery' && relapses > 0) activityLevel = Math.max(activityLevel, 1);
+            if (hasPoorPrognosticFactors && activityLevel > 0) activityLevel = Math.max(activityLevel, 2);
+            if (relapses === 1 && (lastRelapseSeverity === 'severe_incomplete_recovery' || (hasPoorPrognosticFactors && (mriActivityT2 === 'high' || gdPlus === '2')))) {
+                activityLevel = 2;
+            }
+
+            if (activityLevel >= 2) { 
+                if (categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) score += 7;
+                else if (categoryToScore.includes('Mérsékelt')) score -= 7;
+            } else if (activityLevel === 1) { 
+                if (categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) score += 4;
+                else if (categoryToScore.includes('Mérsékelt')) score += 2;
+            } else { 
+                if (categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) score -=2;
+                else if (categoryToScore.includes('Mérsékelt')) score +=3;
+            }
+
+            if (patientData.msType === 'ppms') {
+                if (dmt.name.includes('Ocrelizumab')) score += 15; else score -= 20;
+            }
+            if (patientData.msType === 'spms') { 
+                 if (dmt.name.includes('Siponimod') || dmt.name.includes('Ocrelizumab') || dmt.name.includes('Interferon-β1b')) score += 10;
+                 else if (categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) score += 2; 
+                 else score -=5;
+            }
+             if (patientData.msType === 'spms_inactive') {
+                score = Math.max(0, score -10);
+            }
+            if (patientData.msType === 'cis') {
+                if (activityLevel >= 2) { 
+                     if (categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) score += 2;
+                     else if (categoryToScore.includes('Mérsékelt')) score +=1;
+                } else { 
+                    if (categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) score -= 4; 
+                    else if (categoryToScore.includes('Mérsékelt')) score +=1;
+                }
+            }
+
+            let failedHET = false;
+            let failedStandardDMT = false;
+            if (patientData.previousDMTs.length > 0 && (patientData.treatmentResponse === 'poor' || patientData.treatmentResponse === 'intolerant')) {
+                patientData.previousDMTs.forEach(prevDMTKey => {
+                    const prevDMTInfo = dmtDatabase[prevDMTKey];
+                    if (prevDMTInfo) {
+                        if (prevDMTInfo.category.includes('Nagy') || prevDMTInfo.category.includes('Nagyon magas')) failedHET = true;
+                        else if (prevDMTInfo.category.includes('Mérsékelt')) failedStandardDMT = true;
+                    }
+                });
+            }
+
+            if (failedHET) { 
+                 if ((categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) && !patientData.previousDMTs.includes(Object.keys(dmtDatabase).find(k => dmtDatabase[k].name === dmt.name)) ) score += 6; 
+                 else score -= 10;
+            } else if (failedStandardDMT) { 
+                if (categoryToScore.includes('Nagy') || categoryToScore.includes('Nagyon magas')) score += 5; 
+                else if (categoryToScore.includes('Mérsékelt') && !patientData.previousDMTs.includes(Object.keys(dmtDatabase).find(k => dmtDatabase[k].name === dmt.name))) score += 1; 
+                else score -=5;
+            }
+
+            const age = parseInt(patientData.age) || 0;
+            if (age > 55) { 
+                if (dmt.category.includes('Nagy') || dmt.category.includes('Nagyon magas')) score -= 4;
+                if (dmt.name.includes('Alemtuzumab') || dmt.name.includes('Cladribine')) score -= 2;
+            }
+             if (age < 30 && activityLevel >=2 && (dmt.category.includes('Nagy') || dmt.category.includes('Nagyon magas'))) score +=3;
+
+            if (patientData.pregnancy === 'planning' || patientData.pregnancy === 'pregnant' || patientData.pregnancy === 'breastfeeding') {
+                if (dmt.pregnancy === 'Biztonságos') score += 10; 
+                else if (dmt.pregnancy === 'Relatíve biztonságos') score += 5; 
+                else if (dmt.pregnancy === 'Szigorúan ellenjavalt') score -= 30; 
+                else if (dmt.pregnancy === 'Kerülendő') score -= 15; 
+                else if (dmt.pregnancy === 'Mérlegelendő') score -=7;
+            }
+
+            patientData.comorbidities.forEach(comorb => {
+                if (comorb === 'cardiac' && (dmt.name.includes('Fingolimod') || dmt.name.includes('Siponimod') || dmt.name.includes('Ponesimod') || dmt.name.includes('Alemtuzumab'))) score -= 12;
+                if (comorb === 'hepatic' && (dmt.name.includes('Teriflunomid') || dmt.name.includes('Interferon') || dmt.name.includes('Fingolimod') || dmt.name.includes('Siponimod') || dmt.name.includes('Ponesimod'))) score -= 10;
+                if (comorb === 'autoimmune_other_active' && dmt.name.includes('Alemtuzumab')) score -= 18;
+                if (comorb === 'malignancy_active_risk' && (dmt.name.includes('Cladribine') || dmt.name.includes('Alemtuzumab') || dmt.name.includes('Fingolimod') || dmt.name.includes('Ocrelizumab') || dmt.name.includes('Ofatumumab') )) score -= 12;
+                if (comorb === 'chronic_infection_active' && (dmt.category.includes('Nagy') || dmt.category.includes('Nagyon magas'))) score -= 8;
+                if (comorb === 'psychiatric_severe' && dmt.name.includes('Interferon')) score -=7;
+            });
+
+            if (dmt.name.includes('Natalizumab')) {
+                if (patientData.jcvStatus === 'positive_high') score -= 30; 
+                else if (patientData.jcvStatus === 'positive_low') score -= 12;
+                else if (patientData.jcvStatus === 'negative') score += 4; 
+                else if (patientData.jcvStatus === 'unknown') score -=5;
+            }
+
+            if (patientData.adminPreference && dmt.admin_type) {
+                if (patientData.adminPreference === dmt.admin_type) score += 2;
+                else if (activityLevel < 2) score -=1; 
+            }
+            if (dmt.name.includes('Ofatumumab') && (patientData.adminPreference === 'sc_home' || patientData.adminPreference === '')) score += 2;
+
+            return Math.max(0, score);
+        }
+
+        function generateRecommendations() {
+            if (currentStep === totalSteps) {
+                 const lastStepElement = document.querySelector('.form-step.active');
+                 const requiredInputs = lastStepElement.querySelectorAll('input[required], select[required]');
+                 let allValid = true;
+                requiredInputs.forEach(input => {
+                    if (!input.value) {
+                        allValid = false; input.style.borderColor = 'var(--accent-danger)';
+                    } else { input.style.borderColor = 'var(--accent-secondary)';}
+                });
+                if (!allValid) {
+                    showModal('Kérjük, töltse ki az összes csillaggal jelölt (*) kötelező mezőt ezen a lépésen!');
+                    return;
+                }
+            }
+            const formData = {
+                age: document.getElementById('age').value, gender: document.getElementById('gender').value,
+                msType: document.getElementById('msType').value, diseaseDuration: document.getElementById('diseaseDuration').value,
+                edss: document.getElementById('edss').value, relapses: document.getElementById('relapses').value,
+                lastRelapseSeverity: document.getElementById('lastRelapseSeverity').value, mriActivity: document.getElementById('mriActivity').value,
+                gdPlusLesions: document.getElementById('gdPlusLesions').value, prognosticFactors: getSelectedCheckboxValues('prognosticFactor'),
+                previousDMTs: getSelectedCheckboxValues('previousDMTs'), treatmentResponse: document.getElementById('treatmentResponse').value,
+                jcvStatus: document.getElementById('jcvStatus').value, comorbidities: getSelectedCheckboxValues('comorbidities'),
+                pregnancy: document.getElementById('pregnancy').value, adminPreference: document.getElementById('adminPreference').value,
+                aggressiveDespiteHET: document.getElementById('aggressiveDespiteHET').checked,
+                psychosocialSupport: document.getElementById('psychosocialSupport').value,
+                ahsctContraCardiac: document.getElementById('ahsctContraCardiac').checked, ahsctContraPulmonary: document.getElementById('ahsctContraPulmonary').checked,
+                ahsctContraRenal: document.getElementById('ahsctContraRenal').checked, ahsctContraInfectionActive: document.getElementById('ahsctContraInfectionActive').checked,
+                ahsctContraHepatic: document.getElementById('ahsctContraHepatic').checked, ahsctContraMalignancyActive: document.getElementById('ahsctContraMalignancyActive').checked,
+                ahsctContraPregnancy: document.getElementById('ahsctContraPregnancy').checked,
+            };
+            if (formData.comorbidities.includes('none') && formData.comorbidities.length > 1) {
+                 showModal('Ha "Nincs jelentős komorbiditás" van kiválasztva, más komorbiditás nem választható.'); return;
+            }
+            const dmtScores = Object.entries(dmtDatabase).map(([key, dmt]) => ({ key, dmt, score: calculateDMTScore(dmt, formData) }));
+            const topDMTs = dmtScores.sort((a, b) => b.score - a.score).slice(0, 3);
+            displayDMTRecommendations(topDMTs, formData);
+            displayAHSCTAssessment(formData);
+            displaySymptomManagement(formData); 
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.remove('hidden');
+            setTimeout(() => resultsSection.classList.remove('opacity-0'), 10); 
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayDMTRecommendations(topDMTs, patientData) {
+            const container = document.getElementById('dmtRecommendations');
+            container.innerHTML = topDMTs.map((item, index) => {
+                const reasons = generateRecommendationReasons(item.dmt, patientData, item.score);
+                let categoryDisplay = item.dmt.category;
+                 if (item.dmt.category === 'Nagyon magas hatékonyságú (Indukciós/Immunrekonstitúciós)') categoryDisplay = 'Nagyon Magas Hat. (Indukciós)';
+                 else if (item.dmt.category === 'Nagy hatékonyságú (Indukciós/Immunrekonstitúciós)') categoryDisplay = 'Nagy Hat. (Indukciós)';
+                return `
+                    <div class="medication-card">
+                        <div class="${['rank-1', 'rank-2', 'rank-3'][index]} rank-badge">${index+1}.</div>
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-text-primary mb-1">${item.dmt.name}</h3>
+                                <span class="inline-block px-2 py-0.5 bg-gray-100 text-accent-primary text-xs font-medium rounded-full border border-accent-primary">${categoryDisplay}</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-accent-primary">${item.score}</div>
+                                <div class="text-xs text-text-secondary">Pontszám</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h4 class="font-medium text-text-secondary text-sm mb-1 flex items-center"><i class="fas fa-lightbulb mr-2 text-accent-primary"></i>Főbb ajánlási okok:</h4>
+                            <ul class="text-xs text-text-secondary space-y-1">${reasons.map(r => `<li class="flex items-start"><i class="fas fa-check-circle text-accent-success mr-2 mt-0.5 text-xs"></i>${r}</li>`).join('')}</ul>
+                        </div>
+                        <details class="text-xs mt-3"><summary class="font-medium text-accent-primary cursor-pointer hover:underline">További részletek</summary>
+                            <div class="mt-2 space-y-1 text-text-secondary">
+                                <p><strong>Hatásmechanizmus:</strong> ${item.dmt.mechanism}</p>
+                                <p><strong>Hatékonyság:</strong> ${item.dmt.efficacy_description}</p>
+                                <p><strong>Adagolás:</strong> ${item.dmt.dosing}</p>
+                                <p><strong>Monitorozás:</strong> ${item.dmt.monitoring}</p> 
+                                <p><strong>Mellékhatások:</strong> ${item.dmt.sideEffects}</p>
+                                <p><strong>Ellenjavallatok:</strong> ${item.dmt.contraindications}</p> 
+                                <p><strong>Terhesség:</strong> ${item.dmt.pregnancy}</p>
+                                <p><strong>AHSCT kiürülés:</strong> ~${item.dmt.washout_months_ahsct} hónap ${item.dmt.accelerated_washout_possible ? '(gyorsított lehetséges)' : ''}</p>
+                            </div>
+                        </details>
+                    </div>`;
+            }).join('');
+        }
+        
+        function generateRecommendationReasons(dmt, patientData, score) {
+            const reasons = [];
+            const relapses = parseInt(patientData.relapses) || 0;
+            const mriActivityT2 = patientData.mriActivity;
+            const gdPlus = patientData.gdPlusLesions;
+            const lastRelapseSeverity = patientData.lastRelapseSeverity;
+            const hasPoorPrognosticFactors = patientData.prognosticFactors.length > 0;
+            let activityLevel = 0;
+            if (relapses >= 2) activityLevel = 2; else if (relapses === 1) activityLevel = 1;
+            if (mriActivityT2 === 'high' || gdPlus === '2') activityLevel = Math.max(activityLevel, 2);
+            else if (mriActivityT2 === 'moderate' || gdPlus === '1') activityLevel = Math.max(activityLevel, 1);
+            if (lastRelapseSeverity === 'severe_incomplete_recovery') activityLevel = Math.max(activityLevel, 2);
+            else if (lastRelapseSeverity === 'moderate_good_recovery' && relapses > 0) activityLevel = Math.max(activityLevel, 1);
+            if (hasPoorPrognosticFactors && activityLevel > 0) activityLevel = Math.max(activityLevel, 2);
+             if (relapses === 1 && (lastRelapseSeverity === 'severe_incomplete_recovery' || (hasPoorPrognosticFactors && (mriActivityT2 === 'high' || gdPlus === '2')))) {
+                activityLevel = 2;
+            }
+
+            if (activityLevel >= 2 && (dmt.category.includes('Nagy') || dmt.category.includes('Nagyon magas'))) reasons.push('Magas betegségaktivitás/rossz prognózis indokolja.');
+            else if (activityLevel === 1 && (dmt.category.includes('Nagy') || dmt.category.includes('Mérsékelt'))) reasons.push('Közepes betegségaktivitáshoz illeszkedik.');
+            else if (activityLevel === 0 && dmt.category.includes('Mérsékelt')) reasons.push('Alacsony betegségaktivitáshoz megfelelő.');
+
+            if (patientData.msType === 'ppms' && dmt.name.includes('Ocrelizumab')) reasons.push('PPMS-ben bizonyítottan hatásos.');
+            if (patientData.msType === 'spms' && (dmt.name.includes('Siponimod') || dmt.name.includes('Ocrelizumab'))) reasons.push('Aktív SPMS-ben hatékony lehet.');
+            
+            let failedHET = false;
+            if (patientData.previousDMTs.length > 0 && (patientData.treatmentResponse === 'poor' || patientData.treatmentResponse === 'intolerant')) {
+                 patientData.previousDMTs.forEach(prevDMTKey => {
+                    if (dmtDatabase[prevDMTKey] && (dmtDatabase[prevDMTKey].category.includes('Nagy') || dmtDatabase[prevDMTKey].category.includes('Nagyon magas'))) failedHET = true;
+                });
+            }
+            if (failedHET && (dmt.category.includes('Nagy') || dmt.category.includes('Nagyon magas')) && !patientData.previousDMTs.includes(Object.keys(dmtDatabase).find(k => dmtDatabase[k].name === dmt.name))) {
+                reasons.push('Korábbi HET sikertelensége után más HET-re váltás.');
+            } else if ((patientData.treatmentResponse === 'poor' || patientData.treatmentResponse === 'intolerant') && patientData.previousDMTs.length > 0 && (dmt.category.includes('Nagy') || dmt.category.includes('Nagyon magas'))) {
+                reasons.push('Korábbi kezelés elégtelen válasza/intoleranciája miatti eszkaláció.');
+            }
+
+            if ((patientData.pregnancy === 'planning' || patientData.pregnancy === 'pregnant' || patientData.pregnancy === 'breastfeeding')) {
+                if (dmt.pregnancy === 'Biztonságos') reasons.push('Terhesség/szoptatás alatt biztonságosnak tekinthető.');
+                else if (dmt.pregnancy === 'Relatíve biztonságos') reasons.push('Terhesség alatt mérlegelés után alkalmazható.');
+            } 
+
+            if (dmt.name.includes('Natalizumab') && patientData.jcvStatus === 'negative') reasons.push('Negatív JCV státusz kedvező Natalizumabhoz.');
+            if (patientData.adminPreference && dmt.admin_type === patientData.adminPreference) {
+                let adminPrefText = patientData.adminPreference === 'oral' ? 'orális' : patientData.adminPreference === 'sc_home' ? 'otthoni szubkután' : 'klinikai intravénás';
+                reasons.push(`Illeszkedik az adminisztrációs preferenciához (${adminPrefText}).`);
+            }
+            if (dmt.name.includes('Ofatumumab') && (patientData.adminPreference === 'sc_home' || patientData.adminPreference === '')) reasons.push('Kényelmes, otthoni SC HET opció.');
+            
+            if (reasons.length === 0) reasons.push('Általános profil és a gyógyszer jellemzői alapján.');
+            return reasons.slice(0,4);
+        }
+
+        function calculateAHSCTScore(patientData) { 
+            let score = 0;
+            const reasons = [];
+            const contraindicationTriggers = [];
+
+            if (patientData.ahsctContraCardiac) contraindicationTriggers.push("Súlyos kardiális diszfunkció");
+            if (patientData.ahsctContraPulmonary) contraindicationTriggers.push("Súlyos pulmonális diszfunkció");
+            if (patientData.ahsctContraRenal) contraindicationTriggers.push("Súlyos vesekárosodás");
+            if (patientData.ahsctContraInfectionActive) contraindicationTriggers.push("Aktív, kontrollálatlan fertőzés");
+            if (patientData.ahsctContraHepatic) contraindicationTriggers.push("Súlyos májkárosodás");
+            if (patientData.ahsctContraMalignancyActive) contraindicationTriggers.push("Aktív malignitás");
+            if (patientData.ahsctContraPregnancy) contraindicationTriggers.push("Terhesség/Szoptatás");
+            
+            if (contraindicationTriggers.length > 0) return { score: 0, reasons, contraindicationTriggers };
+
+            const age = parseInt(patientData.age) || 0; let ageScore = 0;
+            if (age >= 18 && age <= 35) ageScore = 20; else if (age <= 45) ageScore = 15; else if (age <= 50) ageScore = 10; else if (age <= 55) ageScore = 5;
+            score += ageScore; reasons.push({text: `Életkor (${age} év)`, points: ageScore});
+            
+            const duration = parseFloat(patientData.diseaseDuration) || 0; let durationScore = 0;
+            if (duration <= 5) durationScore = 15; else if (duration <= 10) durationScore = 10; else if (duration <= 15) durationScore = 5;
+            score += durationScore; reasons.push({text: `Betegségtartam (${duration} év)`, points: durationScore});
+            
+            const edss = parseInt(patientData.edss) || 0; let edssScore = 0; 
+            if (edss <= 2) edssScore = 20; else if (edss <= 4) edssScore = 15; else if (edss <= 5) edssScore = 10; else if (edss == 6) edssScore = 5;
+            score += edssScore; const edssTextMap = ["0.0", "1.0-1.5", "2.0-2.5", "3.0-3.5", "4.0-4.5", "5.0-5.5", "6.0-6.5", "7.0+"];
+            reasons.push({text: `EDSS (${edssTextMap[edss]})`, points: edssScore});
+            
+            let activityScoreAHSCT = 0; const relapses = parseInt(patientData.relapses) || 0;
+            let activityReasonAHSCT = "Betegségaktivitás AHSCT-hez: ";
+            if (patientData.aggressiveDespiteHET) { 
+                activityScoreAHSCT = 25; activityReasonAHSCT += "Agresszív betegség HET(k) ellenére. ";
+            } else {
+                if (relapses >= 2 && (patientData.gdPlusLesions === '2' || patientData.mriActivity === 'high')) { activityScoreAHSCT += 15; activityReasonAHSCT += "Nagyon magas klinikai és MRI aktivitás. ";}
+                else if (relapses >= 1 && (patientData.gdPlusLesions !== '0' || patientData.mriActivity !== 'none')) { activityScoreAHSCT += 10; activityReasonAHSCT += "Jelentős klinikai és MRI aktivitás. ";}
+            }
+            score += activityScoreAHSCT; reasons.push({text: activityReasonAHSCT.trim(), points: activityScoreAHSCT});
+            
+            let prevTxScoreAHSCT = 0; let prevTxReasonAHSCT = "Korábbi kezelések AHSCT-hez: ";
+            let failedMultipleHETs = 0;
+            let failedAnyHET = false;
+            patientData.previousDMTs.forEach(dmtKey => {
+                const dmtInfo = dmtDatabase[dmtKey];
+                if (dmtInfo && (dmtInfo.category.includes("Nagy") || dmtInfo.category.includes("Nagyon magas"))) {
+                    if (patientData.treatmentResponse === 'poor' || patientData.treatmentResponse === 'intolerant') {
+                        failedAnyHET = true;
+                        failedMultipleHETs++;
+                    }
+                }
+            });
+
+            if (patientData.aggressiveDespiteHET || failedMultipleHETs >=2 ) { 
+                prevTxScoreAHSCT = 20; prevTxReasonAHSCT += "Több HET sikertelen / expliciten agresszív HET ellenére. ";
+            } else if (failedAnyHET) {
+                prevTxScoreAHSCT = 15; prevTxReasonAHSCT += "Legalább egy HET sikertelen. ";
+            } else if (patientData.previousDMTs.length > 0 && (patientData.treatmentResponse === 'poor' || patientData.treatmentResponse === 'intolerant')) {
+                 prevTxScoreAHSCT = 5; prevTxReasonAHSCT += "Standard DMT(k) sikertelenek. ";
+            }
+            score += prevTxScoreAHSCT; reasons.push({text: prevTxReasonAHSCT.trim(), points: prevTxScoreAHSCT});
+            
+            let comorbidityScoreAHSCT = 0; 
+            if (patientData.comorbidities.includes('none') || patientData.comorbidities.length === 0) { comorbidityScoreAHSCT = 10;}
+            else if (patientData.comorbidities.some(c => ['cardiac', 'hepatic', 'renal', 'autoimmune_other_active', 'malignancy_active_risk', 'chronic_infection_active', 'diabetes_uncontrolled'].includes(c))) {
+                comorbidityScoreAHSCT = -15; 
+            } else if (patientData.comorbidities.includes('psychiatric_severe')) {
+                 comorbidityScoreAHSCT = -5; 
+            }
+            score += comorbidityScoreAHSCT; reasons.push({text: `Komorbiditások AHSCT-hez`, points: comorbidityScoreAHSCT});
+
+            let psychosocialScore = 0; 
+            if (patientData.psychosocialSupport === 'excellent') psychosocialScore = 5;
+            else if (patientData.psychosocialSupport === 'good') psychosocialScore = 3;
+            else if (patientData.psychosocialSupport === 'poor') psychosocialScore = -10;
+            score += psychosocialScore; reasons.push({text: `Pszichoszociális támogatás (${patientData.psychosocialSupport || 'N/A'})`, points: psychosocialScore});
+            
+            return { score: Math.min(100, Math.max(0, score)), reasons, contraindicationTriggers };
+        }
+
+        function displayAHSCTAssessment(patientData) {
+            const ahsctEval = calculateAHSCTScore(patientData);
+            const container = document.getElementById('ahsctAssessment');
+            const washoutContainer = document.getElementById('ahsctWashoutNotes');
+            const washoutList = washoutContainer.querySelector('ul');
+            washoutList.innerHTML = ''; 
+            washoutContainer.classList.add('hidden');
+
+            let assessment, lightColor, recommendation;
+            if (ahsctEval.contraindicationTriggers.length > 0) {
+                assessment = 'NEM ALKALMAS (Ellenjavallat)'; lightColor = 'red';
+                recommendation = `Az AHSCT nem javasolt az alábbi ellenjavallat(ok) miatt: ${ahsctEval.contraindicationTriggers.join(', ')}.`;
+            } else if (ahsctEval.score >= 70) { 
+                assessment = 'ERŐSEN MÉRLEGELENDŐ / POTENCIÁLISAN ALKALMAS'; lightColor = 'green';
+                recommendation = 'A beteg profilja alapján az AHSCT erősen mérlegelendő lehetőség. Részletes szakspecialista konzultáció és kivizsgálás szükséges.';
+            } else if (ahsctEval.score >= 50) { 
+                assessment = 'MÉRLEGELENDŐ OPCIÓ'; lightColor = 'yellow';
+                recommendation = 'Az AHSCT mérlegelhető lehetőség, de alapos egyéni értékelés és multidiszciplináris team döntése szükséges.';
+            } else {
+                assessment = 'JELENLEG NEM VALÓSZÍNŰ OPCIÓ'; lightColor = 'red';
+                recommendation = 'Jelenlegi profil alapján az AHSCT kevésbé valószínű opció. Más terápiás stratégiák előnyben részesítendők.';
+            }
+
+            container.innerHTML = `
+                <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+                    <div class="mb-4 md:mb-0 md:w-2/3">
+                        <h3 class="text-lg font-semibold text-text-primary mb-1">${assessment}</h3>
+                        <p class="text-text-secondary mt-1 text-sm">${recommendation}</p>
+                    </div>
+                    <div class="traffic-light-container">
+                        <div class="traffic-light">
+                            <div class="light red ${lightColor === 'red' ? 'active' : ''}"></div>
+                            <div class="light yellow ${lightColor === 'yellow' ? 'active' : ''}"></div>
+                            <div class="light green ${lightColor === 'green' ? 'active' : ''}"></div>
+                        </div>
+                        <div class="text-center mt-1">
+                            <div class="text-2xl font-bold text-accent-primary">${ahsctEval.score}</div>
+                            <div class="text-xs text-text-secondary">Pontszám</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 class="font-medium text-text-secondary text-sm mb-3">Értékelési szempontok (AHSCT):</h4>
+                    <ul class="list-disc list-inside text-xs space-y-1 text-text-secondary">
+                        ${ahsctEval.reasons.map(r => `<li>${r.text}: <span class="font-semibold">${r.points >= 0 ? '+' : ''}${r.points} pont</span></li>`).join('')}
+                        ${ahsctEval.contraindicationTriggers.length > 0 ? `<li class="text-red-500 font-semibold">Abszolút ellenjavallat(ok) észlelve: ${ahsctEval.contraindicationTriggers.join(', ')}</li>` : ''}
+                    </ul>
+                </div>`;
+
+            if (ahsctEval.contraindicationTriggers.length === 0 && ahsctEval.score >= 50 && patientData.previousDMTs.length > 0) {
+                let washoutNotesHTML = '';
+                patientData.previousDMTs.forEach(dmtKey => {
+                    const dmtInfo = dmtDatabase[dmtKey];
+                    if (dmtInfo && dmtInfo.washout_months_ahsct > 0.1) { 
+                        let note = `${dmtInfo.name}: ~${dmtInfo.washout_months_ahsct} hónap`;
+                        if (dmtInfo.accelerated_washout_possible) note += " (gyorsított kiürítés lehetséges)";
+                        washoutNotesHTML += `<li>${note}</li>`;
+                    }
+                });
+                if (washoutNotesHTML) {
+                    washoutList.innerHTML = washoutNotesHTML;
+                    washoutContainer.classList.remove('hidden');
+                }
+            }
+        }
+
+        function displaySymptomManagement(patientData) { 
+             const symptomCheckboxes = ['fatigue', 'bladder', 'sexual', 'depression', 'cognitive', 'spasticity', 'pain', 'walking', 'tremor'];
+             const actualSelectedSymptoms = symptomCheckboxes.filter(id => document.getElementById(id)?.checked);
+
+            const container = document.getElementById('symptomManagement');
+            if (actualSelectedSymptoms.length === 0) {
+                container.innerHTML = `<div class="text-center text-text-secondary py-8"><i class="fas fa-info-circle text-3xl mb-3 text-accent-secondary"></i><p>Nincs kiválasztott tünet a részletes ajánlásokhoz.</p></div>`;
+                return;
+            }
+            container.innerHTML = actualSelectedSymptoms.map(symptomKey => {
+                const info = symptomManagementDb[symptomKey];
+                if (!info) return '';
+                return `
+                    <div class="medication-card mb-6 border-l-4 border-accent-success"> <!-- Symptom cards with green accent -->
+                        <h3 class="text-lg font-semibold text-text-primary mb-3 flex items-center"><i class="${info.icon} mr-2 text-accent-success"></i>${info.title}</h3>
+                        <div class="grid md:grid-cols-2 gap-x-6 gap-y-4">
+                            <div><h4 class="font-medium text-text-secondary text-sm mb-2 flex items-center"><i class="fas fa-pills mr-2 text-accent-primary"></i>Gyógyszeres lehetőségek</h4><ul class="space-y-1 text-xs text-text-secondary">${info.medications.map(med => `<li class="flex items-start"><i class="fas fa-prescription-bottle-alt text-accent-primary mr-2 mt-0.5 text-tiny"></i><span>${med}</span></li>`).join('')}</ul></div>
+                            <div><h4 class="font-medium text-text-secondary text-sm mb-2 flex items-center"><i class="fas fa-spa mr-2 text-accent-primary"></i>Nem gyógyszeres lehetőségek</h4><ul class="space-y-1 text-xs text-text-secondary">${info.nonPharmacological.map(therapy => `<li class="flex items-start"><i class="fas fa-leaf text-accent-primary mr-2 mt-0.5 text-tiny"></i><span>${therapy}</span></li>`).join('')}</ul></div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
