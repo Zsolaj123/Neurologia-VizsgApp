@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Tests - Neurológiai Részvizsga App</title>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #0A0A0A;
+            color: #00FF41;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        h1, h2 {
+            color: #00FF41;
+            text-shadow: 0 0 10px #00FF41;
+        }
+        
+        .test-suite {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00FF41;
+            border-radius: 8px;
+        }
+        
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .pass {
+            background: rgba(0, 255, 0, 0.2);
+            border-left: 4px solid #00FF00;
+        }
+        
+        .fail {
+            background: rgba(255, 0, 0, 0.2);
+            border-left: 4px solid #FF0000;
+        }
+        
+        .pending {
+            background: rgba(255, 255, 0, 0.2);
+            border-left: 4px solid #FFD700;
+        }
+        
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 65, 0.05);
+            border: 2px solid #00FF41;
+            border-radius: 8px;
+        }
+        
+        button {
+            background: #00FF41;
+            color: #0A0A0A;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        button:hover {
+            box-shadow: 0 0 20px #00FF41;
+        }
+        
+        #test-output {
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Contract Tests</h1>
+    <p>Ez az oldal a modulok contract tesztjeit futtatja</p>
+    
+    <button onclick="runAllTests()">Összes teszt futtatása</button>
+    <button onclick="clearResults()">Eredmények törlése</button>
+    
+    <div id="test-results"></div>
+    
+    <div class="summary" id="test-summary"></div>
+
+    <!-- Load test framework -->
+    <script>
+        // Simple test framework
+        class TestRunner {
+            constructor() {
+                this.results = [];
+                this.currentSuite = null;
+            }
+            
+            describe(suiteName, callback) {
+                this.currentSuite = {
+                    name: suiteName,
+                    tests: []
+                };
+                callback();
+                this.results.push(this.currentSuite);
+                this.currentSuite = null;
+            }
+            
+            beforeEach(callback) {
+                // Simple beforeEach implementation
+                if (callback) callback();
+            }
+            
+            it(testName, callback) {
+                const test = {
+                    name: testName,
+                    status: 'pending',
+                    error: null
+                };
+                
+                try {
+                    callback();
+                    test.status = 'pass';
+                } catch (error) {
+                    test.status = 'fail';
+                    test.error = error.message;
+                }
+                
+                if (this.currentSuite) {
+                    this.currentSuite.tests.push(test);
+                }
+            }
+            
+            async itAsync(testName, callback) {
+                const test = {
+                    name: testName,
+                    status: 'pending',
+                    error: null
+                };
+                
+                try {
+                    await callback();
+                    test.status = 'pass';
+                } catch (error) {
+                    test.status = 'fail';
+                    test.error = error.message;
+                }
+                
+                if (this.currentSuite) {
+                    this.currentSuite.tests.push(test);
+                }
+            }
+            
+            expect(actual) {
+                return {
+                    toBe(expected) {
+                        if (actual !== expected) {
+                            throw new Error(`Expected ${expected} but got ${actual}`);
+                        }
+                    },
+                    toEqual(expected) {
+                        if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                            throw new Error(`Expected ${JSON.stringify(expected)} but got ${JSON.stringify(actual)}`);
+                        }
+                    },
+                    toBeTruthy() {
+                        if (!actual) {
+                            throw new Error(`Expected truthy value but got ${actual}`);
+                        }
+                    },
+                    toBeFalsy() {
+                        if (actual) {
+                            throw new Error(`Expected falsy value but got ${actual}`);
+                        }
+                    },
+                    toThrow() {
+                        let threw = false;
+                        try {
+                            if (typeof actual === 'function') {
+                                actual();
+                            }
+                        } catch (e) {
+                            threw = true;
+                        }
+                        if (!threw) {
+                            throw new Error('Expected function to throw');
+                        }
+                    },
+                    toContain(item) {
+                        if (!actual.includes(item)) {
+                            throw new Error(`Expected array/string to contain ${item}`);
+                        }
+                    },
+                    toHaveLength(length) {
+                        if (actual.length !== length) {
+                            throw new Error(`Expected length ${length} but got ${actual.length}`);
+                        }
+                    }
+                };
+            }
+            
+            displayResults() {
+                const container = document.getElementById('test-results');
+                const summary = document.getElementById('test-summary');
+                
+                let totalTests = 0;
+                let passedTests = 0;
+                let failedTests = 0;
+                
+                container.innerHTML = '';
+                
+                this.results.forEach(suite => {
+                    const suiteDiv = document.createElement('div');
+                    suiteDiv.className = 'test-suite';
+                    
+                    const suiteTitle = document.createElement('h2');
+                    suiteTitle.textContent = suite.name;
+                    suiteDiv.appendChild(suiteTitle);
+                    
+                    suite.tests.forEach(test => {
+                        totalTests++;
+                        if (test.status === 'pass') passedTests++;
+                        if (test.status === 'fail') failedTests++;
+                        
+                        const testDiv = document.createElement('div');
+                        testDiv.className = `test-result ${test.status}`;
+                        testDiv.textContent = `${test.status === 'pass' ? '✓' : '✗'} ${test.name}`;
+                        
+                        if (test.error) {
+                            const errorDiv = document.createElement('div');
+                            errorDiv.style.marginLeft = '20px';
+                            errorDiv.style.color = '#FF4444';
+                            errorDiv.textContent = test.error;
+                            testDiv.appendChild(errorDiv);
+                        }
+                        
+                        suiteDiv.appendChild(testDiv);
+                    });
+                    
+                    container.appendChild(suiteDiv);
+                });
+                
+                summary.innerHTML = `
+                    <h3>Összegzés</h3>
+                    <p>Összes teszt: ${totalTests}</p>
+                    <p style="color: #00FF00">Sikeres: ${passedTests}</p>
+                    <p style="color: #FF0000">Sikertelen: ${failedTests}</p>
+                    <p>Eredmény: ${failedTests === 0 ? '✅ Minden teszt sikeres!' : '❌ Vannak hibák'}</p>
+                `;
+            }
+        }
+        
+        const testRunner = new TestRunner();
+        const { describe, it, expect, beforeEach } = {
+            describe: testRunner.describe.bind(testRunner),
+            it: testRunner.it.bind(testRunner),
+            itAsync: testRunner.itAsync.bind(testRunner),
+            expect: testRunner.expect.bind(testRunner),
+            beforeEach: testRunner.beforeEach.bind(testRunner)
+        };
+    </script>
+
+    <!-- Import modules to test -->
+    <script src="js/models/topic.js"></script>
+    <script src="js/models/app-state.js"></script>
+    <script src="js/models/errors.js"></script>
+    <script src="js/modules/markdown-parser.js"></script>
+    <script src="js/modules/toc-generator.js"></script>
+    <script src="js/modules/topic-loader.js"></script>
+    <script src="js/modules/ui-manager.js"></script>
+    
+    <!-- Import test files -->
+    <!-- Contract Tests -->
+    <script src="tests/contract/test-topic-loader.js"></script>
+    <script src="tests/contract/test-markdown-parser.js"></script>
+    <script src="tests/contract/test-ui-manager.js"></script>
+    <script src="tests/contract/test-toc-generator.js"></script>
+    
+    <!-- Integration Tests -->
+    <script src="tests/integration/test-topic-loading.js"></script>
+    <script src="tests/integration/test-section-switching.js"></script>
+    <script src="tests/integration/test-toc-navigation.js"></script>
+    <script src="tests/integration/test-error-handling.js"></script>
+    
+    <script>
+        function runAllTests() {
+            // Clear previous results
+            testRunner.results = [];
+            
+            // Run all test suites
+            // Contract Tests
+            if (typeof testTopicLoader === 'function') testTopicLoader();
+            if (typeof testMarkdownParser === 'function') testMarkdownParser();
+            if (typeof testUIManager === 'function') testUIManager();
+            if (typeof testTocGenerator === 'function') testTocGenerator();
+            
+            // Integration Tests
+            if (typeof testTopicLoadingFlow === 'function') testTopicLoadingFlow();
+            if (typeof testSectionSwitching === 'function') testSectionSwitching();
+            if (typeof testTocNavigation === 'function') testTocNavigation();
+            if (typeof testErrorHandling === 'function') testErrorHandling();
+            
+            // Display results
+            testRunner.displayResults();
+        }
+        
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('test-summary').innerHTML = '';
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('load', runAllTests);
+    </script>
+</body>
+</html>

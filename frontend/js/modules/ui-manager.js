@@ -1,0 +1,634 @@
+/**
+ * UI Manager Module
+ * Manages all UI interactions and updates
+ */
+
+class UIManager {
+    constructor() {
+        // DOM elements
+        this.elements = {
+            topicMenu: null,
+            contentDisplay: null,
+            sectionTabs: null,
+            loadingOverlay: null,
+            errorContainer: null,
+            leftSidebar: null,
+            rightSidebar: null,
+            appContainer: null
+        };
+        
+        // Current state
+        this.currentTopic = null;
+        this.currentSection = 'reszletes';
+        this.isLoading = false;
+        
+        // Error dismiss timer
+        this.errorTimer = null;
+        
+        // Bind methods
+        this.handleTopicClick = this.handleTopicClick.bind(this);
+        this.handleSectionClick = this.handleSectionClick.bind(this);
+        this.handleKeyboardShortcuts = this.handleKeyboardShortcuts.bind(this);
+        this.handleContentScroll = this.handleContentScroll.bind(this);
+    }
+    
+    /**
+     * Initialize UI Manager
+     */
+    initialize() {
+        // Get DOM elements
+        this.elements.topicMenu = document.getElementById('topic-menu');
+        this.elements.contentDisplay = document.getElementById('content-display');
+        this.elements.sectionTabs = document.getElementById('section-tabs');
+        this.elements.loadingOverlay = document.getElementById('loading-overlay');
+        this.elements.errorContainer = document.getElementById('error-container');
+        this.elements.leftSidebar = document.getElementById('left-sidebar');
+        this.elements.rightSidebar = document.getElementById('right-sidebar');
+        this.elements.appContainer = document.getElementById('app-container');
+        
+        // Validate required elements
+        const required = ['topicMenu', 'contentDisplay', 'sectionTabs'];
+        for (const elem of required) {
+            if (!this.elements[elem]) {
+                throw new InitializationError(`Required element ${elem} not found`);
+            }
+        }
+        
+        // Set up event listeners
+        this.setupEventListeners();
+        
+        // Load UI state
+        this.loadUIState();
+        
+        // Populate topic menu
+        this.populateTopicMenu();
+        
+        // Initialize TOC generator
+        tocGenerator.initialize();
+        
+        appState.initialized = true;
+    }
+    
+    /**
+     * Set up event listeners
+     * @private
+     */
+    setupEventListeners() {
+        // Topic menu clicks
+        this.elements.topicMenu.addEventListener('click', this.handleTopicClick);
+        
+        // Section tab clicks
+        this.elements.sectionTabs.addEventListener('click', this.handleSectionClick);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', this.handleKeyboardShortcuts);
+        
+        // Content scroll for TOC sync
+        if (this.elements.contentDisplay) {
+            this.elements.contentDisplay.addEventListener('scroll', 
+                this.debounce(this.handleContentScroll, 100)
+            );
+        }
+        
+        // Sidebar toggle buttons
+        const leftToggle = document.getElementById('left-sidebar-toggle');
+        const rightToggle = document.getElementById('right-sidebar-toggle');
+        
+        if (leftToggle) {
+            leftToggle.addEventListener('click', () => this.toggleSidebar('left'));
+        }
+        
+        if (rightToggle) {
+            rightToggle.addEventListener('click', () => this.toggleSidebar('right'));
+        }
+        
+        // Window resize
+        window.addEventListener('resize', 
+            this.debounce(() => this.adjustLayout(), 200)
+        );
+        
+        // Custom events
+        window.addEventListener('tocNavigation', (e) => {
+            this.handleTocNavigation(e.detail);
+        });
+    }
+    
+    /**
+     * Populate topic menu
+     * @private
+     */
+    populateTopicMenu() {
+        const topics = topicLoader.getAvailableTopics();
+        const ranges = ['1-20', '21-40', '41-59'];
+        
+        let html = '';
+        
+        for (const range of ranges) {
+            const rangeTopics = topics.filter(t => this.getTopicRange(t.id) === range);
+            
+            if (rangeTopics.length > 0) {
+                html += `<div class="topic-range">
+                    <h4 class="range-header">${range}. tételek</h4>
+                    <div class="topic-list">`;
+                
+                for (const topic of rangeTopics) {
+                    // Don't add number prefix if title already starts with number
+                    const titleStartsWithNumber = /^\d+\./.test(topic.title);
+                    html += `
+                        <button class="topic-item" data-topic-id="${topic.id}">
+                            ${titleStartsWithNumber ? '' : `<span class="topic-number">${topic.id}.</span>`}
+                            <span class="topic-title">${topic.title}</span>
+                            <div class="topic-badges">
+                                ${topic.hasOsszefoglalas ? '<span class="badge badge-summary">Ö</span>' : ''}
+                                ${topic.hasKepek ? '<span class="badge badge-images">K</span>' : ''}
+                            </div>
+                        </button>
+                    `;
+                }
+                
+                html += '</div></div>';
+            }
+        }
+        
+        this.elements.topicMenu.innerHTML = html;
+    }
+    
+    /**
+     * Get topic range
+     * @private
+     */
+    getTopicRange(topicId) {
+        if (topicId <= 20) return '1-20';
+        if (topicId <= 40) return '21-40';
+        return '41-59';
+    }
+    
+    /**
+     * Handle topic click
+     * @private
+     */
+    async handleTopicClick(event) {
+        const topicItem = event.target.closest('.topic-item');
+        if (!topicItem) return;
+        
+        const topicId = parseInt(topicItem.dataset.topicId);
+        if (isNaN(topicId)) return;
+        
+        // Don't reload if already current
+        if (this.currentTopic && this.currentTopic.id === topicId) {
+            return;
+        }
+        
+        await this.loadTopic(topicId);
+    }
+    
+    /**
+     * Load a topic
+     * @param {number} topicId - The topic ID
+     */
+    async loadTopic(topicId) {
+        try {
+            this.showLoading(true);
+            
+            // Load topic
+            const topic = await topicLoader.loadTopic(topicId);
+            
+            // Update state
+            this.currentTopic = topic;
+            appState.setCurrentTopic(topic);
+            
+            // Update UI
+            this.displayTopic(topic);
+            this.updateActiveTopicItem(topicId);
+            
+            // Generate TOC
+            tocGenerator.generateTOC(topic);
+            
+            // Reset to detailed section
+            this.switchSection('reszletes');
+            
+            // Save UI state
+            appState.ui.currentTopicId = topicId;
+            appState.saveUIState();
+            
+            // Emit event
+            window.dispatchEvent(new CustomEvent('topicDisplayed', {
+                detail: { topicId, topic }
+            }));
+            
+        } catch (error) {
+            appState.logError(error, 'topic-load');
+            this.showError(ErrorUtils.formatForDisplay(error));
+        } finally {
+            this.showLoading(false);
+        }
+    }
+    
+    /**
+     * Display topic content
+     * @private
+     */
+    displayTopic(topic) {
+        if (!topic) {
+            this.elements.contentDisplay.innerHTML = '';
+            return;
+        }
+        
+        // Display current section
+        const section = topic.getSection(this.currentSection);
+        
+        if (!section || section.isEmpty) {
+            this.displayEmptySection(this.currentSection);
+        } else {
+            this.elements.contentDisplay.innerHTML = this.wrapContent(section.content);
+        }
+        
+        // Update section tabs
+        this.updateSectionTabs(topic);
+        
+        // Scroll to top
+        this.elements.contentDisplay.scrollTop = 0;
+    }
+    
+    /**
+     * Wrap content with proper structure
+     * @private
+     */
+    wrapContent(html) {
+        return `<div class="topic-content">${html}</div>`;
+    }
+    
+    /**
+     * Display empty section message
+     * @private
+     */
+    displayEmptySection(sectionType) {
+        const messages = {
+            'reszletes': 'Nincs elérhető részletes leírás ehhez a tételhez.',
+            'osszefoglalas': 'Nincs elérhető összefoglalás ehhez a tételhez.',
+            'kepek': 'Nincsenek elérhető képek vagy diagrammok ehhez a tételhez.'
+        };
+        
+        this.elements.contentDisplay.innerHTML = `
+            <div class="empty-section">
+                <p>${messages[sectionType] || 'Ez a szakasz üres.'}</p>
+            </div>
+        `;
+    }
+    
+    /**
+     * Update section tabs
+     * @private
+     */
+    updateSectionTabs(topic) {
+        const tabs = [
+            { id: 'reszletes', label: 'Részletes', available: true },
+            { id: 'osszefoglalas', label: 'Összefoglalás', available: topic.hasSection('osszefoglalas') },
+            { id: 'kepek', label: 'Képek', available: topic.hasSection('kepek') }
+        ];
+        
+        let html = '';
+        for (const tab of tabs) {
+            const isActive = tab.id === this.currentSection;
+            const isDisabled = !tab.available;
+            
+            html += `
+                <button class="section-tab ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}"
+                        data-section="${tab.id}"
+                        ${isDisabled ? 'disabled' : ''}>
+                    ${tab.label}
+                    ${isDisabled ? '<span class="unavailable">(nem elérhető)</span>' : ''}
+                </button>
+            `;
+        }
+        
+        this.elements.sectionTabs.innerHTML = html;
+    }
+    
+    /**
+     * Handle section click
+     * @private
+     */
+    handleSectionClick(event) {
+        const tab = event.target.closest('.section-tab:not(.disabled)');
+        if (!tab) return;
+        
+        const section = tab.dataset.section;
+        if (section && section !== this.currentSection) {
+            this.switchSection(section);
+        }
+    }
+    
+    /**
+     * Switch to a different section
+     * @param {string} sectionType - The section type
+     */
+    switchSection(sectionType) {
+        if (!this.currentTopic) return;
+        
+        this.currentSection = sectionType;
+        appState.ui.activeSection = sectionType;
+        
+        // Update content
+        this.displayTopic(this.currentTopic);
+        
+        // Save UI state
+        appState.saveUIState();
+        
+        // Emit event
+        window.dispatchEvent(new CustomEvent('sectionSwitched', {
+            detail: { 
+                sectionType, 
+                topicId: this.currentTopic.id,
+                isEmpty: !this.currentTopic.hasSection(sectionType)
+            }
+        }));
+    }
+    
+    /**
+     * Update active topic item
+     * @private
+     */
+    updateActiveTopicItem(topicId) {
+        // Remove previous active
+        const previousActive = this.elements.topicMenu.querySelector('.topic-item.active');
+        if (previousActive) {
+            previousActive.classList.remove('active');
+        }
+        
+        // Set new active
+        const newActive = this.elements.topicMenu.querySelector(`[data-topic-id="${topicId}"]`);
+        if (newActive) {
+            newActive.classList.add('active');
+            
+            // Ensure visible in scrollable container
+            newActive.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    
+    /**
+     * Show/hide loading overlay
+     * @param {boolean} show - Whether to show loading
+     */
+    showLoading(show) {
+        this.isLoading = show;
+        appState.setLoading(show);
+        
+        if (this.elements.loadingOverlay) {
+            if (show) {
+                this.elements.loadingOverlay.classList.remove('hidden');
+            } else {
+                this.elements.loadingOverlay.classList.add('hidden');
+            }
+        }
+    }
+    
+    /**
+     * Show error message
+     * @param {string} message - The error message
+     */
+    showError(message) {
+        if (!this.elements.errorContainer) return;
+        
+        // Clear previous timer
+        if (this.errorTimer) {
+            clearTimeout(this.errorTimer);
+        }
+        
+        // Show error
+        this.elements.errorContainer.innerHTML = `
+            <div class="error-message">
+                <span class="error-icon">⚠️</span>
+                <span class="error-text">${message}</span>
+                <button class="error-close" onclick="uiManager.hideError()">×</button>
+            </div>
+        `;
+        this.elements.errorContainer.classList.remove('hidden');
+        
+        // Auto-hide after 5 seconds
+        this.errorTimer = setTimeout(() => this.hideError(), 5000);
+    }
+    
+    /**
+     * Hide error message
+     */
+    hideError() {
+        if (this.elements.errorContainer) {
+            this.elements.errorContainer.classList.add('hidden');
+        }
+        
+        if (this.errorTimer) {
+            clearTimeout(this.errorTimer);
+            this.errorTimer = null;
+        }
+    }
+    
+    /**
+     * Handle keyboard shortcuts
+     * @private
+     */
+    handleKeyboardShortcuts(event) {
+        // Don't handle if in input field
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        switch (event.key) {
+            case '1':
+                if (event.ctrlKey || event.metaKey) {
+                    event.preventDefault();
+                    this.toggleSidebar('left');
+                }
+                break;
+                
+            case '2':
+                if (event.ctrlKey || event.metaKey) {
+                    event.preventDefault();
+                    this.toggleSidebar('right');
+                }
+                break;
+                
+            case 'ArrowLeft':
+                if (event.altKey) {
+                    event.preventDefault();
+                    this.navigateTopic(-1);
+                }
+                break;
+                
+            case 'ArrowRight':
+                if (event.altKey) {
+                    event.preventDefault();
+                    this.navigateTopic(1);
+                }
+                break;
+                
+            case 'r':
+                if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+                    this.switchSection('reszletes');
+                }
+                break;
+                
+            case 'o':
+                if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+                    this.switchSection('osszefoglalas');
+                }
+                break;
+                
+            case 'k':
+                if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+                    this.switchSection('kepek');
+                }
+                break;
+        }
+    }
+    
+    /**
+     * Toggle sidebar visibility
+     * @param {string} side - 'left' or 'right'
+     */
+    toggleSidebar(side) {
+        appState.ui.toggleSidebar(side);
+        
+        const sidebar = side === 'left' ? this.elements.leftSidebar : this.elements.rightSidebar;
+        if (sidebar) {
+            sidebar.classList.toggle('hidden');
+        }
+        
+        this.adjustLayout();
+        appState.saveUIState();
+    }
+    
+    /**
+     * Navigate to next/previous topic
+     * @private
+     */
+    navigateTopic(direction) {
+        if (!this.currentTopic) return;
+        
+        const currentId = this.currentTopic.id;
+        const newId = currentId + direction;
+        
+        // Check bounds
+        if (newId >= 1 && newId <= 59) {
+            this.loadTopic(newId);
+        }
+    }
+    
+    /**
+     * Handle content scroll for TOC sync
+     * @private
+     */
+    handleContentScroll() {
+        tocGenerator.updateActiveFromScroll();
+    }
+    
+    /**
+     * Handle TOC navigation
+     * @private
+     */
+    handleTocNavigation(detail) {
+        // Content scrolling is handled by tocGenerator
+        // We just need to track the event
+        console.log('TOC navigation:', detail);
+    }
+    
+    /**
+     * Adjust layout based on sidebar visibility
+     * @private
+     */
+    adjustLayout() {
+        if (!this.elements.appContainer) return;
+        
+        const leftVisible = !this.elements.leftSidebar?.classList.contains('hidden');
+        const rightVisible = !this.elements.rightSidebar?.classList.contains('hidden');
+        
+        this.elements.appContainer.classList.toggle('left-sidebar-hidden', !leftVisible);
+        this.elements.appContainer.classList.toggle('right-sidebar-hidden', !rightVisible);
+    }
+    
+    /**
+     * Load UI state from storage
+     * @private
+     */
+    loadUIState() {
+        appState.loadUIState();
+        
+        // Apply loaded state
+        if (!appState.ui.leftSidebarVisible) {
+            this.toggleSidebar('left');
+        }
+        
+        if (!appState.ui.rightSidebarVisible) {
+            this.toggleSidebar('right');
+        }
+        
+        // Load last topic if available
+        if (appState.ui.currentTopicId) {
+            setTimeout(() => {
+                this.loadTopic(appState.ui.currentTopicId);
+            }, 100);
+        }
+    }
+    
+    /**
+     * Debounce helper
+     * @private
+     */
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    /**
+     * Get current state
+     */
+    getState() {
+        return {
+            currentTopicId: this.currentTopic?.id,
+            currentSection: this.currentSection,
+            isLoading: this.isLoading,
+            sidebarStates: {
+                left: !this.elements.leftSidebar?.classList.contains('hidden'),
+                right: !this.elements.rightSidebar?.classList.contains('hidden')
+            }
+        };
+    }
+    
+    /**
+     * Destroy UI manager
+     */
+    destroy() {
+        // Remove event listeners
+        this.elements.topicMenu?.removeEventListener('click', this.handleTopicClick);
+        this.elements.sectionTabs?.removeEventListener('click', this.handleSectionClick);
+        document.removeEventListener('keydown', this.handleKeyboardShortcuts);
+        this.elements.contentDisplay?.removeEventListener('scroll', this.handleContentScroll);
+        
+        // Clear timers
+        if (this.errorTimer) {
+            clearTimeout(this.errorTimer);
+        }
+        
+        // Destroy TOC generator
+        tocGenerator.destroy();
+        
+        // Clear state
+        this.currentTopic = null;
+        appState.clearCurrentTopic();
+    }
+}
+
+// Create singleton instance
+const uiManager = new UIManager();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { UIManager, uiManager };
+}

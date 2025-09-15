@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Részvizsga Felkészítő</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/cyberpunk.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout-fix.css">
+    <link rel="stylesheet" href="css/content-fix.css">
+    <link rel="stylesheet" href="css/toc-fix.css">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <h1 class="app-title">🧠 Neurológiai Részvizsga Felkészítő</h1>
+    </header>
+    
+    <!-- Main Application Container -->
+    <div id="app-container">
+        <!-- Left Sidebar - Topic List -->
+        <aside id="left-sidebar" class="topic-list">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Neuroanatómia</h2>
+                <button id="left-sidebar-toggle" class="toggle-btn" title="Oldalsáv">☰</button>
+            </div>
+            <div class="topic-menu" id="topic-menu">
+                <!-- Topics will be loaded here dynamically -->
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="content-area">
+            <!-- Section Tabs -->
+            <nav id="section-tabs" class="section-tabs">
+                <button class="section-tab active" data-section="reszletes">Részletes</button>
+                <button class="section-tab" data-section="osszefoglalas">Összefoglalás</button>
+                <button class="section-tab" data-section="kepek">Képek</button>
+            </nav>
+            
+            <!-- Content Display -->
+            <div id="content-display" class="content-display">
+                <!-- Content will be loaded here dynamically -->
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Table of Contents -->
+        <aside id="right-sidebar" class="toc-sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">Tartalomjegyzék</h3>
+                <button id="right-sidebar-toggle" class="toggle-btn" title="Tartalomjegyzék">☰</button>
+            </div>
+            <div id="toc-container" class="toc-container">
+                <!-- TOC will be generated here -->
+            </div>
+        </aside>
+    </div>
+
+    <!-- Error Display -->
+    <div id="error-container" class="error-container hidden"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Betöltés...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data/topic-metadata.js"></script>
+    <script src="js/models/topic.js"></script>
+    <script src="js/models/app-state.js"></script>
+    <script src="js/models/errors.js"></script>
+    <script src="js/modules/markdown-parser.js"></script>
+    <script src="js/modules/toc-generator.js"></script>
+    <script src="js/modules/topic-loader.js"></script>
+    <script src="js/modules/ui-manager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

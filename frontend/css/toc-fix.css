@@ -1,0 +1,186 @@
+/**
+ * TOC Fix CSS
+ * Fixes text overflow and formatting issues in the Table of Contents
+ */
+
+/* TOC Container improvements */
+#toc-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.toc-content {
+    width: 100%;
+    padding-right: var(--spacing-sm);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* TOC Items - Fix text overflow */
+.toc-item {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: var(--spacing-xs);
+}
+
+.toc-link {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    overflow: hidden;
+    text-decoration: none;
+}
+
+/* TOC text wrapping */
+.toc-text {
+    flex: 1;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    line-height: 1.4;
+    white-space: normal !important;
+    max-width: calc(100% - 20px); /* Account for arrow/bullet */
+}
+
+/* Arrows and bullets */
+.toc-arrow,
+.toc-bullet {
+    flex-shrink: 0;
+    margin-right: var(--spacing-sm);
+    margin-top: 2px; /* Align with first line of text */
+    font-size: 0.75rem;
+    min-width: 12px;
+}
+
+/* Nested items indentation fix */
+.toc-children {
+    width: 100%;
+    padding-left: var(--spacing-md);
+}
+
+.toc-children .toc-item {
+    width: 100%;
+}
+
+/* Ensure proper spacing for different heading levels */
+.toc-item[data-level="1"] .toc-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.toc-item[data-level="2"] .toc-text {
+    font-size: 0.9rem;
+}
+
+.toc-item[data-level="3"] .toc-text,
+.toc-item[data-level="4"] .toc-text,
+.toc-item[data-level="5"] .toc-text,
+.toc-item[data-level="6"] .toc-text {
+    font-size: 0.85rem;
+}
+
+/* Hover states with better visibility */
+.toc-link:hover {
+    background: rgba(0, 255, 65, 0.1);
+    border-radius: 4px;
+}
+
+.toc-link:hover .toc-text {
+    color: var(--primary-green);
+}
+
+/* Active state */
+.toc-item.active .toc-link {
+    background: rgba(0, 255, 65, 0.2);
+    border-radius: 4px;
+}
+
+.toc-item.active .toc-text {
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+/* Scrollbar styling for TOC */
+.toc-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.toc-content::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.toc-content::-webkit-scrollbar-thumb {
+    background: var(--primary-green);
+    border-radius: 3px;
+    opacity: 0.5;
+}
+
+.toc-content::-webkit-scrollbar-thumb:hover {
+    opacity: 1;
+}
+
+/* Fix header styling */
+.toc-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.toc-header h3 {
+    font-size: 1rem;
+    color: var(--primary-green);
+    margin: 0;
+}
+
+/* Expand/collapse button */
+.toc-toggle {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.toc-toggle:hover {
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+/* Smooth scroll behavior for navigation */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Offset for fixed header when navigating */
+.topic-content h1[id],
+.topic-content h2[id],
+.topic-content h3[id],
+.topic-content h4[id],
+.topic-content h5[id],
+.topic-content h6[id] {
+    scroll-margin-top: calc(var(--header-height) + 20px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .toc-text {
+        font-size: 0.85rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    #toc-container {
+        display: none;
+    }
+}

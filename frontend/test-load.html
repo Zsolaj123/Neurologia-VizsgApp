@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Topic Loading</title>
+</head>
+<body>
+    <h1>Testing Topic File Loading</h1>
+    <div id="result"></div>
+    
+    <script>
+        // Test loading topic 1
+        const testUrl = 'content/neuroanat/1-20/1. A csontos koponya és gerinc anatómiája.md';
+        
+        fetch(testUrl)
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(content => {
+                console.log('Content loaded successfully');
+                document.getElementById('result').innerHTML = `
+                    <p style="color: green;">✓ Successfully loaded topic 1</p>
+                    <p>Content length: ${content.length} characters</p>
+                    <pre style="max-height: 200px; overflow: auto; background: #f0f0f0; padding: 10px;">
+${content.substring(0, 500)}...
+                    </pre>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading topic:', error);
+                document.getElementById('result').innerHTML = `
+                    <p style="color: red;">✗ Failed to load topic 1</p>
+                    <p>Error: ${error.message}</p>
+                    <p>Attempted URL: ${testUrl}</p>
+                `;
+            });
+    </script>
+</body>
+</html>
