@@ -123,53 +123,209 @@ class UIManager {
         
         let html = '';
         
-        // Add section headers
-        let currentSection = 'neuroanat';
+        // Structure for organizing topics by main categories
+        const categories = [
+            {
+                id: 'neuroanat',
+                title: 'Neuroanatómia',
+                ranges: ['1-20', '21-40', '41-59'],
+                collapsed: false
+            },
+            {
+                id: 'clinical',
+                title: 'Vizsgálómódszerek, Általános Klinikum',
+                ranges: ['60-79', '80-99', '100-119', '120-139', '140-159', '160-179'],
+                collapsed: false
+            },
+            {
+                id: 'detailed-clinical',
+                title: 'Részletes Klinikum',
+                ranges: ['180-199', '200-219', '220-239', '240-259'],
+                collapsed: false
+            }
+        ];
         
-        for (const range of ranges) {
-            const rangeTopics = topics.filter(t => this.getTopicRange(t.id) === range);
+        // Load collapsed states from localStorage
+        const collapsedStates = this.loadCollapsedStates();
+        
+        categories.forEach(category => {
+            const categoryCollapsed = collapsedStates.categories[category.id] || false;
             
-            // Add section header when switching from neuroanat to clinical topics
-            if (range === '60-79' && currentSection === 'neuroanat') {
-                currentSection = 'clinical';
-                html += `<div class="section-divider">
-                    <h3 class="section-title">Vizsgálómódszerek, Általános Klinikum</h3>
-                </div>`;
-            }
+            html += `
+                <div class="topic-category ${categoryCollapsed ? 'collapsed' : ''}" data-category="${category.id}">
+                    <div class="category-header" onclick="uiManager.toggleCategory('${category.id}')">
+                        <span class="collapse-icon">${categoryCollapsed ? '▶' : '▼'}</span>
+                        <h3 class="category-title">${category.title}</h3>
+                    </div>
+                    <div class="category-content">`;
             
-            // Add section header for detailed clinical topics
-            if (range === '180-199' && currentSection === 'clinical') {
-                currentSection = 'detailed-clinical';
-                html += `<div class="section-divider">
-                    <h3 class="section-title">Részletes Klinikum</h3>
-                </div>`;
-            }
-            
-            if (rangeTopics.length > 0) {
-                html += `<div class="topic-range">
-                    <h4 class="range-header">${range}. tételek</h4>
-                    <div class="topic-list">`;
+            category.ranges.forEach(range => {
+                const rangeTopics = topics.filter(t => this.getTopicRange(t.id) === range);
+                const rangeCollapsed = collapsedStates.ranges[range] || false;
                 
-                for (const topic of rangeTopics) {
-                    // Don't add number prefix if title already starts with number
-                    const titleStartsWithNumber = /^\d+\./.test(topic.title);
+                if (rangeTopics.length > 0) {
                     html += `
-                        <button class="topic-item" data-topic-id="${topic.id}">
-                            ${titleStartsWithNumber ? '' : `<span class="topic-number">${topic.id}.</span>`}
-                            <span class="topic-title">${topic.title}</span>
-                            <div class="topic-badges">
-                                ${topic.hasOsszefoglalas ? '<span class="badge badge-summary">Ö</span>' : ''}
-                                ${topic.hasKepek ? '<span class="badge badge-images">K</span>' : ''}
+                        <div class="topic-range ${rangeCollapsed ? 'collapsed' : ''}" data-range="${range}">
+                            <div class="range-header" onclick="uiManager.toggleRange('${range}')">
+                                <span class="collapse-icon">${rangeCollapsed ? '▶' : '▼'}</span>
+                                <span class="range-title">${range}. tételek</span>
+                                <span class="range-count">(${rangeTopics.length})</span>
                             </div>
-                        </button>
-                    `;
+                            <div class="topic-list">`;
+                    
+                    for (const topic of rangeTopics) {
+                        // Don't add number prefix if title already starts with number
+                        const titleStartsWithNumber = /^\d+\./.test(topic.title);
+                        html += `
+                            <button class="topic-item" data-topic-id="${topic.id}">
+                                ${titleStartsWithNumber ? '' : `<span class="topic-number">${topic.id}.</span>`}
+                                <span class="topic-title">${topic.title}</span>
+                                <div class="topic-badges">
+                                    ${topic.hasOsszefoglalas ? '<span class="badge badge-summary">Ö</span>' : ''}
+                                    ${topic.hasKepek ? '<span class="badge badge-images">K</span>' : ''}
+                                </div>
+                            </button>
+                        `;
+                    }
+                    
+                    html += '</div></div>';
                 }
-                
-                html += '</div></div>';
-            }
-        }
+            });
+            
+            html += '</div></div>';
+        });
+        
+        // Add expand/collapse all buttons
+        html = `
+            <div class="topic-menu-controls">
+                <button class="control-btn" onclick="uiManager.expandAll()">Összes kinyitása</button>
+                <button class="control-btn" onclick="uiManager.collapseAll()">Összes bezárása</button>
+            </div>
+        ` + html;
         
         this.elements.topicMenu.innerHTML = html;
+    }
+    
+    /**
+     * Load collapsed states from localStorage
+     * @private
+     */
+    loadCollapsedStates() {
+        const saved = localStorage.getItem('topicMenuCollapsedStates');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return {
+            categories: {},
+            ranges: {}
+        };
+    }
+    
+    /**
+     * Save collapsed states to localStorage
+     * @private
+     */
+    saveCollapsedStates(states) {
+        localStorage.setItem('topicMenuCollapsedStates', JSON.stringify(states));
+    }
+    
+    /**
+     * Toggle category collapse state
+     * @param {string} categoryId - The category ID
+     */
+    toggleCategory(categoryId) {
+        const categoryEl = this.elements.topicMenu.querySelector(`[data-category="${categoryId}"]`);
+        if (!categoryEl) return;
+        
+        const isCollapsed = categoryEl.classList.contains('collapsed');
+        categoryEl.classList.toggle('collapsed');
+        
+        // Update icon
+        const icon = categoryEl.querySelector('.collapse-icon');
+        if (icon) {
+            icon.textContent = isCollapsed ? '▼' : '▶';
+        }
+        
+        // Save state
+        const states = this.loadCollapsedStates();
+        states.categories[categoryId] = !isCollapsed;
+        this.saveCollapsedStates(states);
+    }
+    
+    /**
+     * Toggle range collapse state
+     * @param {string} range - The range (e.g., '1-20')
+     */
+    toggleRange(range) {
+        const rangeEl = this.elements.topicMenu.querySelector(`[data-range="${range}"]`);
+        if (!rangeEl) return;
+        
+        const isCollapsed = rangeEl.classList.contains('collapsed');
+        rangeEl.classList.toggle('collapsed');
+        
+        // Update icon
+        const icon = rangeEl.querySelector('.collapse-icon');
+        if (icon) {
+            icon.textContent = isCollapsed ? '▼' : '▶';
+        }
+        
+        // Save state
+        const states = this.loadCollapsedStates();
+        states.ranges[range] = !isCollapsed;
+        this.saveCollapsedStates(states);
+        
+        // Stop event propagation
+        event.stopPropagation();
+    }
+    
+    /**
+     * Expand all categories and ranges
+     */
+    expandAll() {
+        // Expand all categories
+        this.elements.topicMenu.querySelectorAll('.topic-category').forEach(el => {
+            el.classList.remove('collapsed');
+            const icon = el.querySelector('.category-header .collapse-icon');
+            if (icon) icon.textContent = '▼';
+        });
+        
+        // Expand all ranges
+        this.elements.topicMenu.querySelectorAll('.topic-range').forEach(el => {
+            el.classList.remove('collapsed');
+            const icon = el.querySelector('.range-header .collapse-icon');
+            if (icon) icon.textContent = '▼';
+        });
+        
+        // Clear saved states
+        this.saveCollapsedStates({ categories: {}, ranges: {} });
+    }
+    
+    /**
+     * Collapse all categories and ranges
+     */
+    collapseAll() {
+        const states = { categories: {}, ranges: {} };
+        
+        // Collapse all categories
+        this.elements.topicMenu.querySelectorAll('.topic-category').forEach(el => {
+            el.classList.add('collapsed');
+            const icon = el.querySelector('.category-header .collapse-icon');
+            if (icon) icon.textContent = '▶';
+            const categoryId = el.dataset.category;
+            if (categoryId) states.categories[categoryId] = true;
+        });
+        
+        // Collapse all ranges
+        this.elements.topicMenu.querySelectorAll('.topic-range').forEach(el => {
+            el.classList.add('collapsed');
+            const icon = el.querySelector('.range-header .collapse-icon');
+            if (icon) icon.textContent = '▶';
+            const range = el.dataset.range;
+            if (range) states.ranges[range] = true;
+        });
+        
+        // Save states
+        this.saveCollapsedStates(states);
     }
     
     /**
