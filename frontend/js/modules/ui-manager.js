@@ -119,12 +119,23 @@ class UIManager {
      */
     populateTopicMenu() {
         const topics = topicLoader.getAvailableTopics();
-        const ranges = ['1-20', '21-40', '41-59'];
+        const ranges = ['1-20', '21-40', '41-59', '60-79', '80-99', '100-119', '120-139', '140-159', '160-179'];
         
         let html = '';
         
+        // Add section headers
+        let currentSection = 'neuroanat';
+        
         for (const range of ranges) {
             const rangeTopics = topics.filter(t => this.getTopicRange(t.id) === range);
+            
+            // Add section header when switching from neuroanat to clinical topics
+            if (range === '60-79' && currentSection === 'neuroanat') {
+                currentSection = 'clinical';
+                html += `<div class="section-divider">
+                    <h3 class="section-title">Vizsgálómódszerek, Általános Klinikum</h3>
+                </div>`;
+            }
             
             if (rangeTopics.length > 0) {
                 html += `<div class="topic-range">
@@ -160,7 +171,13 @@ class UIManager {
     getTopicRange(topicId) {
         if (topicId <= 20) return '1-20';
         if (topicId <= 40) return '21-40';
-        return '41-59';
+        if (topicId <= 59) return '41-59';
+        if (topicId <= 79) return '60-79';
+        if (topicId <= 99) return '80-99';
+        if (topicId <= 119) return '100-119';
+        if (topicId <= 139) return '120-139';
+        if (topicId <= 159) return '140-159';
+        return '160-179';
     }
     
     /**
@@ -509,7 +526,7 @@ class UIManager {
         const newId = currentId + direction;
         
         // Check bounds
-        if (newId >= 1 && newId <= 59) {
+        if (newId >= 1 && newId <= 179) {
             this.loadTopic(newId);
         }
     }

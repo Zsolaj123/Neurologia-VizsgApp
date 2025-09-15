@@ -22,26 +22,26 @@ class TopicLoader {
         
         // Use the actual topic metadata if available
         if (window.TOPIC_METADATA) {
-            for (let i = 1; i <= 59; i++) {
+            for (let i = 1; i <= 179; i++) {
                 const topicData = window.TOPIC_METADATA[i];
                 if (topicData) {
                     metadata.set(i, {
                         id: i,
                         title: topicData.title,
-                        category: 'neuroanat',
+                        category: topicData.category || 'neuroanat',
                         range: topicData.folder,
                         folder: topicData.folder,
-                        filename: `${i}. ${topicData.title}.md`
+                        filename: this.getTopicFilename(i, topicData)
                     });
                 }
             }
         } else {
             // Fallback if metadata not loaded
-            for (let i = 1; i <= 59; i++) {
+            for (let i = 1; i <= 179; i++) {
                 metadata.set(i, {
                     id: i,
                     title: `${i}. tétel`,
-                    category: 'neuroanat',
+                    category: i <= 59 ? 'neuroanat' : 'clinical',
                     range: this.getTopicRange(i),
                     folder: this.getTopicRange(i),
                     filename: `${i}.md`
@@ -53,13 +53,47 @@ class TopicLoader {
     }
     
     /**
+     * Get topic filename
+     * @private
+     */
+    getTopicFilename(id, topicData) {
+        // Handle special cases like 70-71, 91-92, etc.
+        const title = topicData.title;
+        
+        // Check if filename might be a range (e.g., 70-71)
+        if (id === 70 || id === 71) {
+            return `70-71. ${title}.md`;
+        } else if (id === 91 || id === 92) {
+            return `91-92. ${title}.md`;
+        } else if (id === 101 || id === 102) {
+            return `101-102. ${title}.md`;
+        } else if (id === 138 || id === 139) {
+            return `138-139. ${title}.md`;
+        } else if (id === 155 || id === 156) {
+            return `155-156. ${title}.md`;
+        } else if (id === 160 || id === 161) {
+            return `160-161. ${title}.md`;
+        } else if (id === 163 || id === 164) {
+            return `163-164. ${title}.md`;
+        } else {
+            return `${id}. ${title}.md`;
+        }
+    }
+    
+    /**
      * Get topic range
      * @private
      */
     getTopicRange(topicId) {
         if (topicId <= 20) return '1-20';
         if (topicId <= 40) return '21-40';
-        return '41-59'; // Note: actual range is 41-60, but following template pattern
+        if (topicId <= 59) return '41-59';
+        if (topicId <= 79) return '60-79';
+        if (topicId <= 99) return '80-99';
+        if (topicId <= 119) return '100-119';
+        if (topicId <= 139) return '120-139';
+        if (topicId <= 159) return '140-159';
+        return '160-179';
     }
     
     /**
@@ -142,7 +176,16 @@ class TopicLoader {
      */
     async _loadTopicContent(topicId) {
         const meta = this.topicMetadata.get(topicId);
-        const url = `${this.baseUrl}/${meta.folder}/${meta.filename}`;
+        
+        // Determine base URL based on category
+        let baseUrl;
+        if (meta.category === 'clinical') {
+            baseUrl = 'content/clinical';
+        } else {
+            baseUrl = this.baseUrl; // neuroanat
+        }
+        
+        const url = `${baseUrl}/${meta.folder}/${meta.filename}`;
         
         try {
             const response = await fetch(url);
