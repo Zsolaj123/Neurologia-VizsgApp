@@ -119,7 +119,7 @@ class UIManager {
      */
     populateTopicMenu() {
         const topics = topicLoader.getAvailableTopics();
-        const ranges = ['1-20', '21-40', '41-59', '60-79', '80-99', '100-119', '120-139', '140-159', '160-179'];
+        const ranges = ['1-20', '21-40', '41-59', '60-79', '80-99', '100-119', '120-139', '140-159', '160-179', '180-199', '200-219', '220-239', '240-259'];
         
         let html = '';
         
@@ -134,6 +134,14 @@ class UIManager {
                 currentSection = 'clinical';
                 html += `<div class="section-divider">
                     <h3 class="section-title">Vizsgálómódszerek, Általános Klinikum</h3>
+                </div>`;
+            }
+            
+            // Add section header for detailed clinical topics
+            if (range === '180-199' && currentSection === 'clinical') {
+                currentSection = 'detailed-clinical';
+                html += `<div class="section-divider">
+                    <h3 class="section-title">Részletes Klinikum</h3>
                 </div>`;
             }
             
@@ -177,7 +185,11 @@ class UIManager {
         if (topicId <= 119) return '100-119';
         if (topicId <= 139) return '120-139';
         if (topicId <= 159) return '140-159';
-        return '160-179';
+        if (topicId <= 179) return '160-179';
+        if (topicId <= 199) return '180-199';
+        if (topicId <= 219) return '200-219';
+        if (topicId <= 239) return '220-239';
+        return '240-259';
     }
     
     /**
@@ -526,7 +538,7 @@ class UIManager {
         const newId = currentId + direction;
         
         // Check bounds
-        if (newId >= 1 && newId <= 179) {
+        if (newId >= 1 && newId <= 259) {
             this.loadTopic(newId);
         }
     }

@@ -22,7 +22,7 @@ class TopicLoader {
         
         // Use the actual topic metadata if available
         if (window.TOPIC_METADATA) {
-            for (let i = 1; i <= 179; i++) {
+            for (let i = 1; i <= 259; i++) {
                 const topicData = window.TOPIC_METADATA[i];
                 if (topicData) {
                     metadata.set(i, {
@@ -37,11 +37,11 @@ class TopicLoader {
             }
         } else {
             // Fallback if metadata not loaded
-            for (let i = 1; i <= 179; i++) {
+            for (let i = 1; i <= 259; i++) {
                 metadata.set(i, {
                     id: i,
                     title: `${i}. tétel`,
-                    category: i <= 59 ? 'neuroanat' : 'clinical',
+                    category: i <= 59 ? 'neuroanat' : (i <= 179 ? 'clinical' : 'detailed-clinical'),
                     range: this.getTopicRange(i),
                     folder: this.getTopicRange(i),
                     filename: `${i}.md`
@@ -75,6 +75,54 @@ class TopicLoader {
             return `160-161. ${title}.md`;
         } else if (id === 163 || id === 164) {
             return `163-164. ${title}.md`;
+        }
+        // Detailed clinical topics with multiple topics per file
+        else if (id === 181 || id === 182) {
+            return `181-182. Alkoholizmussal és kábítószerrel kapcsolatos neurológiai kórképek.md`;
+        } else if (id >= 185 && id <= 187) {
+            return `185-186-187. Parkinson-kór, Parkinson-kór vizsgálata és kezelése.md`;
+        } else if (id === 189 || id === 190) {
+            return `189-190. Parkinson szindrómával járó betegségek klinikuma és kórszövettana és multiszisztémás atrófia.md`;
+        } else if (id === 193 || id === 194) {
+            return `193-194. Dystoniák, choreák és kezelésük.md`;
+        } else if (id === 202 || id === 203) {
+            return `202-203. Neuroborreliosis és neurosyphilis.md`;
+        } else if (id === 211 || id === 212) {
+            return `211-212. A polyneuropathiák diagnózisa és kezelése.md`;
+        } else if (id === 213 || id === 214) {
+            return `213-214. Szerzett és herediter polyneuropathiák.md`;
+        } else if (id === 218 || id === 219) {
+            return `218-219. Izomdystrophiák, myotonia és a neuromuscularis ingerületátvitel zavarai.md`;
+        } else if (id === 220 || id === 221) {
+            return `220-221. Myopathiák és gyulladásos, endokrin, metabolikus és toxikus izombetegségek.md`;
+        } else if (id === 224 || id === 225) {
+            return `224-225. A tensios és a cluster fejfájás; Neuralgiák.md`;
+        } else if (id === 229 || id === 230) {
+            return `229-230. Nem-Alzheimer típusú degeneratív demenciák és Vascularis demencia.md`;
+        } else if (id === 232 || id === 233) {
+            return `232-233. Kezelhető dementia formák és normal pressure hydrocephalus.md`;
+        } else if (id === 234 || id === 235) {
+            return `234-235. Demenciák kezelése és a neuropszichológiai vizsgálatok.md`;
+        } else if (id === 236 || id === 237) {
+            return `236-237. Mitochondiralis és trinucleotid repeat expanziós betegségek.md`;
+        } else if (id === 238 || id === 239) {
+            return `238-239. Neurogenetika - demenciák és izombetegségek.md`;
+        } else if (id === 240 || id === 241) {
+            return `240-241. A neurológiai rehabilitációs és az aphasia rehabilitációja.md`;
+        } else if (id === 242 || id === 243) {
+            return `242-243. A koponyasérült beteg kivizsgálásának menete és a traumás intracraniális vérzések.md`;
+        } else if (id === 244 || id === 245) {
+            return `244-245. Az agy traumás károsodása és a post-traumás neurológiai kórképek.md`;
+        } else if (id === 246 || id === 247) {
+            return `246-247. Vizsgálati stratégia gerincvelő károsodás gyanúja esetén és a gerincvelői harántlézió.md`;
+        } else if (id === 248 || id === 249) {
+            return `248-249. Psychosomaticus zavarok tünetei és depresszió organikus idegrendszeri betegségekben.md`;
+        } else if (id === 250 || id === 251) {
+            return `250-251. Organikus psychoszindrómák és konverziós kórképek differenciáldiagnosztikája.md`;
+        } else if (id === 252 || id === 253) {
+            return `252-253. Monitorizálás neurológiai intenzív osztályon és az agyhalál megállapítása.md`;
+        } else if (id === 258 || id === 259) {
+            return `258-259. Neurológiai betegségek a terhesség alatt és az idős kor neurológiája.md`;
         } else {
             return `${id}. ${title}.md`;
         }
@@ -93,7 +141,11 @@ class TopicLoader {
         if (topicId <= 119) return '100-119';
         if (topicId <= 139) return '120-139';
         if (topicId <= 159) return '140-159';
-        return '160-179';
+        if (topicId <= 179) return '160-179';
+        if (topicId <= 199) return '180-199';
+        if (topicId <= 219) return '200-219';
+        if (topicId <= 239) return '220-239';
+        return '240-259';
     }
     
     /**
@@ -181,6 +233,8 @@ class TopicLoader {
         let baseUrl;
         if (meta.category === 'clinical') {
             baseUrl = 'content/clinical';
+        } else if (meta.category === 'detailed-clinical') {
+            baseUrl = 'content/detailed-clinical';
         } else {
             baseUrl = this.baseUrl; // neuroanat
         }
