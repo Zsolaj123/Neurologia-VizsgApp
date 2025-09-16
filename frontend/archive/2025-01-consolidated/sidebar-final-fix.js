@@ -9,10 +9,18 @@
     console.log('🔧 Final sidebar fix initializing...');
     
     // Override the toggleSidebar function in ui-manager
+    let retryCount = 0;
+    const maxRetries = 20; // Max 10 seconds
+    
     function fixUiManagerToggle() {
         if (!window.uiManager) {
-            console.warn('UI Manager not found, retrying...');
-            setTimeout(fixUiManagerToggle, 500);
+            retryCount++;
+            if (retryCount < maxRetries) {
+                console.warn(`UI Manager not found, retrying... (${retryCount}/${maxRetries})`);
+                setTimeout(fixUiManagerToggle, 500);
+            } else {
+                console.error('UI Manager not found after maximum retries');
+            }
             return;
         }
         

@@ -1,0 +1,195 @@
+/**
+ * Browser Compatible CSS Overrides
+ * Fixes for browsers that don't support :has() selector
+ * And ensures sticky positioning works correctly
+ */
+
+/* ============================================
+   CRITICAL FIX: Parent Overflow for Sticky
+   ============================================ */
+
+/* Force all parent containers to have visible overflow */
+html, body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: 100% !important;
+}
+
+#app-container {
+    overflow: visible !important;
+    min-height: 100vh !important;
+}
+
+#content-area {
+    overflow: visible !important;
+}
+
+/* Only the content display should scroll */
+#content-display {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 60px - 60px) !important;
+}
+
+/* ============================================
+   FORCE STICKY SIDEBARS
+   ============================================ */
+
+.topic-list,
+.toc-sidebar {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 60px !important;
+    height: calc(100vh - 60px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* ============================================
+   TOGGLE BUTTONS - BROWSER COMPATIBLE
+   ============================================ */
+
+/* Buttons inside headers when sidebars are visible */
+.sidebar-toggle,
+#left-sidebar-toggle,
+#right-sidebar-toggle {
+    /* Force buttons to be visible */
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 0.6 !important;
+    pointer-events: auto !important;
+    width: 35px !important;
+    height: 35px !important;
+    position: relative !important;
+    z-index: 999 !important;
+}
+
+.sidebar-toggle:hover,
+#left-sidebar-toggle:hover,
+#right-sidebar-toggle:hover {
+    opacity: 1 !important;
+    background: #00ff41 !important;
+    color: #0a0a0a !important;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.8) !important;
+}
+
+/* Ensure button styling */
+#left-sidebar-toggle,
+#right-sidebar-toggle {
+    background: #1a1a1a !important;
+    border: 2px solid #00ff41 !important;
+    border-radius: 8px !important;
+    color: #00ff41 !important;
+    font-size: 1.2rem !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3) !important;
+    transition: all 0.3s ease !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+/* Fixed buttons for when sidebars are hidden */
+.sidebar-toggle-fixed {
+    display: none !important; /* Hidden by default */
+}
+
+/* Show fixed buttons only when sidebars are hidden */
+.left-sidebar-hidden .sidebar-toggle-fixed#left-sidebar-toggle-fixed {
+    display: flex !important;
+    position: fixed !important;
+    left: 10px !important;
+    top: 80px !important;
+}
+
+.right-sidebar-hidden .sidebar-toggle-fixed#right-sidebar-toggle-fixed {
+    display: flex !important;
+    position: fixed !important;
+    right: 10px !important;
+    top: 80px !important;
+}
+
+/* ============================================
+   SIDEBAR STATES USING CLASSES
+   ============================================ */
+
+/* Grid adjustments using classes instead of :has() */
+.left-sidebar-hidden #app-container,
+#app-container.left-sidebar-hidden {
+    grid-template-columns: 0 1fr 280px !important;
+}
+
+.right-sidebar-hidden #app-container,
+#app-container.right-sidebar-hidden {
+    grid-template-columns: 320px 1fr 0 !important;
+}
+
+.both-sidebars-hidden #app-container,
+#app-container.left-sidebar-hidden.right-sidebar-hidden {
+    grid-template-columns: 0 1fr 0 !important;
+}
+
+/* ============================================
+   BUTTON VISIBILITY OVERRIDE
+   ============================================ */
+
+/* Force buttons to be visible regardless of parent states */
+.sidebar-header .sidebar-toggle,
+.sidebar-header #left-sidebar-toggle,
+.sidebar-header #right-sidebar-toggle,
+#left-sidebar .sidebar-header button,
+#right-sidebar .sidebar-header button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 0.6 !important;
+}
+
+/* Ensure headers don't hide their children */
+.sidebar-header {
+    overflow: visible !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+/* Position buttons correctly in headers */
+#left-sidebar .sidebar-header #left-sidebar-toggle {
+    order: 2 !important; /* Right side */
+    margin-left: auto !important;
+}
+
+#right-sidebar .sidebar-header #right-sidebar-toggle {
+    order: -1 !important; /* Left side */
+    margin-right: auto !important;
+}
+
+/* Remove any transform that might move buttons off-screen */
+#left-sidebar-toggle,
+#right-sidebar-toggle {
+    transform: none !important;
+    position: relative !important;
+}
+
+/* ============================================
+   FINAL FIXES
+   ============================================ */
+
+/* Ensure proper z-index hierarchy */
+.app-header {
+    z-index: 1000 !important;
+}
+
+.sidebar-toggle-fixed {
+    z-index: 900 !important;
+}
+
+.topic-list,
+.toc-sidebar {
+    z-index: 100 !important;
+}
+
+/* Remove any potential transform on sidebars */
+#left-sidebar,
+#right-sidebar {
+    transform: none !important;
+}

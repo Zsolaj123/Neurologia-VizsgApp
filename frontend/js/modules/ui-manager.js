@@ -809,6 +809,9 @@ class UIManager {
 // Create singleton instance
 const uiManager = new UIManager();
 
+// Make it available globally for browser use
+window.uiManager = uiManager;
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { UIManager, uiManager };

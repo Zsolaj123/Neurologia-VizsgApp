@@ -115,9 +115,13 @@
         leftToggle.removeAttribute('style');
         rightToggle.removeAttribute('style');
         
-        // Ensure they have the correct class
-        leftToggle.classList.add('sidebar-toggle-fixed');
-        rightToggle.classList.add('sidebar-toggle-fixed');
+        // Don't add sidebar-toggle-fixed class - it hides the buttons
+        // leftToggle.classList.add('sidebar-toggle-fixed');
+        // rightToggle.classList.add('sidebar-toggle-fixed');
+        
+        // Ensure they have the sidebar-toggle class instead
+        leftToggle.classList.add('sidebar-toggle');
+        rightToggle.classList.add('sidebar-toggle');
         
         // Log their computed styles
         const leftStyles = window.getComputedStyle(leftToggle);
@@ -148,12 +152,12 @@
             leftSidebar: {
                 exists: !!leftSidebar,
                 classes: leftSidebar ? leftSidebar.className : 'N/A',
-                position: leftSidebar ? getComputedStyle(leftSidebar.querySelector('.topic-list')).position : 'N/A'
+                position: leftSidebar && leftSidebar.querySelector('.topic-list') ? getComputedStyle(leftSidebar.querySelector('.topic-list')).position : 'N/A'
             },
             rightSidebar: {
                 exists: !!rightSidebar,
                 classes: rightSidebar ? rightSidebar.className : 'N/A',
-                position: rightSidebar ? getComputedStyle(rightSidebar.querySelector('.toc-sidebar')).position : 'N/A'
+                position: rightSidebar && rightSidebar.querySelector('.toc-sidebar') ? getComputedStyle(rightSidebar.querySelector('.toc-sidebar')).position : 'N/A'
             },
             contentArea: {
                 exists: !!contentArea,

@@ -288,6 +288,9 @@ ul, ol {
     padding: var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
     z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sidebar-title {
@@ -301,66 +304,7 @@ ul, ol {
 /* ============================================
    6. TOGGLE BUTTONS
    ============================================ */
-
-.sidebar-toggle-fixed {
-    position: fixed;
-    width: 45px;
-    height: 45px;
-    top: calc(var(--header-height) + 20px);
-    background: var(--bg-tertiary);
-    border: 2px solid var(--primary-green);
-    border-radius: var(--radius-md);
-    color: var(--primary-green);
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: var(--z-toggle-buttons);
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
-    transition: all 0.3s ease;
-}
-
-#left-sidebar-toggle {
-    left: 10px;
-}
-
-#right-sidebar-toggle {
-    right: 10px;
-}
-
-/* Hide buttons when sidebars are visible */
-#app-container:not(:has(#left-sidebar.hidden)) #left-sidebar-toggle {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-60px);
-}
-
-#app-container:not(:has(#right-sidebar.hidden)) #right-sidebar-toggle {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(60px);
-}
-
-/* Show buttons when sidebars are hidden */
-#app-container:has(#left-sidebar.hidden) #left-sidebar-toggle {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(0);
-}
-
-#app-container:has(#right-sidebar.hidden) #right-sidebar-toggle {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(0);
-}
-
-.sidebar-toggle-fixed:hover {
-    background: var(--primary-green);
-    color: var(--bg-primary);
-    transform: scale(1.1);
-    box-shadow: 0 0 30px rgba(0, 255, 65, 0.8);
-}
+/* Toggle button styles moved to sidebar-buttons.css for consolidation */
 
 /* ============================================
    7. CONTENT AREA
