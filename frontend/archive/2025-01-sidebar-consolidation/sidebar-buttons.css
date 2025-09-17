@@ -16,11 +16,10 @@
     height: 35px;
     
     /* Appearance */
-    background: var(--bg-tertiary);
-    border: 2px solid var(--primary-green);
-    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
     color: var(--primary-green);
-    font-size: 1.2rem;
+    font-size: 1.8rem;
     
     /* Layout */
     display: flex;
@@ -29,11 +28,13 @@
     
     /* Interaction */
     cursor: pointer;
-    opacity: 0.6;
+    opacity: 0.8;
     transition: all 0.3s ease;
     
-    /* Visual effects */
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    /* Glowing triangle effect */
+    text-shadow: 0 0 10px var(--primary-green),
+                 0 0 20px var(--primary-green),
+                 0 0 30px rgba(0, 255, 65, 0.5);
     
     /* Ensure visibility */
     visibility: visible;
@@ -45,6 +46,20 @@
     flex-shrink: 0;
     margin: 0;
     padding: 0;
+    
+    /* Animation */
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% { 
+        opacity: 0.8; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.1);
+    }
 }
 
 /* Hover state */
@@ -52,9 +67,18 @@
 #left-sidebar-toggle:hover,
 #right-sidebar-toggle:hover {
     opacity: 1;
-    background: var(--primary-green);
-    color: var(--bg-primary);
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+    transform: scale(1.2);
+    text-shadow: 0 0 15px var(--primary-green),
+                 0 0 30px var(--primary-green),
+                 0 0 45px rgba(0, 255, 65, 0.8);
+    animation: none;
+}
+
+/* Active state */
+.sidebar-toggle:active,
+#left-sidebar-toggle:active,
+#right-sidebar-toggle:active {
+    transform: scale(0.95);
 }
 
 /* Position buttons correctly in headers */
@@ -87,18 +111,26 @@
     width: 45px;
     height: 45px;
     top: calc(var(--header-height) + 20px);
-    background: var(--bg-tertiary);
+    background: rgba(26, 26, 26, 0.9);
     border: 2px solid var(--primary-green);
     border-radius: var(--radius-md);
     color: var(--primary-green);
-    font-size: 1.5rem;
+    font-size: 2rem;
     display: none; /* Hidden by default */
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: var(--z-toggle-buttons);
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    
+    /* Glowing effect */
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5),
+                inset 0 0 10px rgba(0, 255, 65, 0.2);
+    text-shadow: 0 0 10px var(--primary-green),
+                 0 0 20px var(--primary-green),
+                 0 0 30px rgba(0, 255, 65, 0.5);
+    
     transition: all 0.3s ease;
+    animation: glow-pulse 2s ease-in-out infinite;
 }
 
 #left-sidebar-toggle-fixed {
@@ -110,10 +142,14 @@
 }
 
 .sidebar-toggle-fixed:hover {
-    background: var(--primary-green);
-    color: var(--bg-primary);
-    transform: scale(1.1);
-    box-shadow: 0 0 30px rgba(0, 255, 65, 0.8);
+    background: rgba(0, 255, 65, 0.1);
+    transform: scale(1.15);
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.8),
+                inset 0 0 15px rgba(0, 255, 65, 0.3);
+    text-shadow: 0 0 15px var(--primary-green),
+                 0 0 30px var(--primary-green),
+                 0 0 45px rgba(0, 255, 65, 0.8);
+    animation: none;
 }
 
 /* Show fixed buttons when sidebars are hidden */

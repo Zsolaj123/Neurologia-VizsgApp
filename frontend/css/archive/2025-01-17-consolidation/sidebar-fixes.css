@@ -1,0 +1,202 @@
+/**
+ * Sidebar Fixes - Comprehensive solution for all sidebar issues
+ * This file addresses:
+ * 1. Right sidebar animation not smooth
+ * 2. Toggle buttons teleporting after collapse
+ * 3. Sidebar alignment with content
+ * 4. Sticky positioning not working
+ */
+
+/* ============================================
+   FIX 1: SMOOTH ANIMATIONS FOR BOTH SIDEBARS
+   ============================================ */
+
+/* Ensure both sidebars have the same transition properties */
+.sidebar-container {
+    /* Override any conflicting transitions */
+    transition: width 1.2s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+/* Ensure the inner sticky elements don't interfere with animation */
+.sidebar-container .topic-list,
+.sidebar-container .toc-sidebar {
+    /* Remove any transitions on the sticky elements themselves */
+    transition: none;
+    /* Ensure they fill their container */
+    width: 100%;
+}
+
+/* Fix sidebar content transitions */
+.sidebar-container .sidebar-content {
+    /* Ensure content fades smoothly */
+    transition: opacity 0.5s ease-in-out;
+    transition-delay: 0.5s;
+    overflow: hidden;
+}
+
+.sidebar-container.collapsed .sidebar-content,
+.sidebar-container.hidden .sidebar-content {
+    opacity: 0;
+    transition-delay: 0s;
+}
+
+/* ============================================
+   FIX 2: CONSISTENT POSITIONING & ALIGNMENT
+   ============================================ */
+
+/* Standardize the sticky top position across all elements */
+:root {
+    /* Define the exact top position after header and tabs */
+    --sticky-top: calc(var(--header-height) + var(--section-tabs-height));
+}
+
+/* Fix section tabs positioning to be properly sticky */
+#section-tabs {
+    position: sticky;
+    position: -webkit-sticky;
+    top: var(--header-height);
+    z-index: 80;
+    /* Ensure it doesn't create extra space */
+    margin: 0;
+}
+
+/* Fix sticky sidebar positioning to align with content */
+.topic-list,
+.toc-sidebar {
+    position: sticky;
+    position: -webkit-sticky;
+    /* Use the standardized top position */
+    top: var(--sticky-top);
+    /* Exact height calculation */
+    height: calc(100vh - var(--sticky-top));
+    /* Remove any margins that might cause misalignment */
+    margin: 0;
+}
+
+/* ============================================
+   FIX 3: TOGGLE BUTTON POSITIONING
+   ============================================ */
+
+/* Fix header positioning within collapsed sidebars */
+.sidebar-container .sidebar-header {
+    /* Ensure header stays in place during collapse */
+    position: relative;
+    width: 100%;
+    min-width: 100%;
+    /* Prevent content from disappearing */
+    overflow: visible;
+    /* Smooth transition for any layout changes */
+    transition: padding 0.3s ease;
+}
+
+/* Special handling for collapsed state headers */
+.sidebar-container.collapsed .sidebar-header,
+.sidebar-container.hidden .sidebar-header {
+    /* Keep header visible in collapsed state */
+    opacity: 1;
+    /* Adjust padding for narrow sidebar */
+    padding: var(--spacing-sm) 0;
+    /* Center the content */
+    justify-content: center;
+}
+
+/* Hide title in collapsed state */
+.sidebar-container.collapsed .sidebar-title,
+.sidebar-container.hidden .sidebar-title {
+    display: none;
+}
+
+/* Ensure toggle buttons stay visible and positioned correctly */
+.sidebar-container.collapsed .sidebar-toggle,
+.sidebar-container.hidden .sidebar-toggle {
+    /* Center the button in collapsed state */
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Fix the fixed toggle buttons positioning */
+.sidebar-toggle-fixed {
+    /* Align with the sticky sidebars */
+    top: var(--sticky-top);
+    /* Add some margin from the top */
+    margin-top: 20px;
+}
+
+/* ============================================
+   FIX 4: OVERFLOW HIERARCHY FOR STICKY
+   ============================================ */
+
+/* Ensure the grid container allows sticky positioning */
+#app-container {
+    /* Critical: must be relative or static for sticky children */
+    position: relative;
+    /* Must have visible overflow */
+    overflow: visible;
+    /* Ensure it's tall enough */
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Ensure content area doesn't break sticky */
+#content-area {
+    /* Must not have overflow hidden */
+    overflow: visible;
+    /* Flexbox for proper layout */
+    display: flex;
+    flex-direction: column;
+    /* Fill available space */
+    flex: 1;
+}
+
+/* Only the content display should scroll */
+#content-display {
+    /* This is the scrollable area */
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Exact height to match sidebars */
+    height: calc(100vh - var(--sticky-top));
+    /* Ensure it's a scroll container */
+    position: relative;
+}
+
+/* ============================================
+   FIX 5: GRID LAYOUT ADJUSTMENTS
+   ============================================ */
+
+/* When sidebars are collapsed, maintain proper spacing */
+#app-container:has(.sidebar-container.collapsed),
+#app-container:has(.sidebar-container.hidden) {
+    /* Don't completely remove the column */
+    grid-template-columns: 25px 1fr 25px;
+}
+
+#app-container:has(#left-sidebar.collapsed):has(#right-sidebar:not(.collapsed)),
+#app-container:has(#left-sidebar.hidden):has(#right-sidebar:not(.hidden)) {
+    grid-template-columns: 25px 1fr var(--toc-width);
+}
+
+#app-container:has(#left-sidebar:not(.collapsed)):has(#right-sidebar.collapsed),
+#app-container:has(#left-sidebar:not(.hidden)):has(#right-sidebar.hidden) {
+    grid-template-columns: var(--sidebar-width) 1fr 25px;
+}
+
+/* ============================================
+   BROWSER COMPATIBILITY FALLBACKS
+   ============================================ */
+
+/* For browsers without :has() support */
+@supports not selector(:has(*)) {
+    .left-sidebar-hidden #app-container,
+    .left-sidebar-collapsed #app-container {
+        grid-template-columns: 25px 1fr var(--toc-width);
+    }
+    
+    .right-sidebar-hidden #app-container,
+    .right-sidebar-collapsed #app-container {
+        grid-template-columns: var(--sidebar-width) 1fr 25px;
+    }
+    
+    .left-sidebar-hidden.right-sidebar-hidden #app-container,
+    .left-sidebar-collapsed.right-sidebar-collapsed #app-container {
+        grid-template-columns: 25px 1fr 25px;
+    }
+}

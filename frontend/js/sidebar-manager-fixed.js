@@ -1,12 +1,18 @@
 /**
- * Sidebar Manager - Consolidated
- * Single source of truth for all sidebar toggle functionality
+ * Sidebar Manager - Fixed Version
+ * Handles all sidebar functionality without duplicates
  */
 
 (function() {
     'use strict';
     
-    console.log('🔧 Sidebar Manager Consolidated initializing...');
+    // Prevent multiple initializations
+    if (window.sidebarManagerInitialized) {
+        console.log('Sidebar Manager already initialized');
+        return;
+    }
+    
+    console.log('🔧 Sidebar Manager Fixed initializing...');
     
     class SidebarManager {
         constructor() {
@@ -14,8 +20,6 @@
             this.rightSidebar = null;
             this.leftToggle = null;
             this.rightToggle = null;
-            this.leftToggleFixed = null;
-            this.rightToggleFixed = null;
             this.initialized = false;
             
             // Bind methods
@@ -26,6 +30,9 @@
         
         init() {
             if (this.initialized) return;
+            
+            // Clean up any existing fixed buttons first
+            this.cleanupFixedButtons();
             
             // Get DOM elements
             this.leftSidebar = document.getElementById('left-sidebar');
@@ -38,14 +45,12 @@
                 return;
             }
             
-            // Create fixed buttons if they don't exist
-            this.createFixedButtons();
-            
             // Set up event listeners
             this.setupEventListeners();
             
             // Initial state update
             this.updateBodyClasses();
+            this.updateButtonStates();
             
             // Set up mutation observer
             this.setupObserver();
@@ -54,52 +59,30 @@
             this.hookIntoUiManager();
             
             this.initialized = true;
+            window.sidebarManagerInitialized = true;
             console.log('✅ Sidebar Manager initialized successfully');
         }
         
-        createFixedButtons() {
-            // Create left fixed button if not exists
-            if (!document.getElementById('left-sidebar-toggle-fixed')) {
-                this.leftToggleFixed = document.createElement('button');
-                this.leftToggleFixed.id = 'left-sidebar-toggle-fixed';
-                this.leftToggleFixed.className = 'sidebar-toggle-fixed';
-                this.leftToggleFixed.innerHTML = '☰';
-                this.leftToggleFixed.title = 'Tételek megjelenítése';
-                document.body.appendChild(this.leftToggleFixed);
-            } else {
-                this.leftToggleFixed = document.getElementById('left-sidebar-toggle-fixed');
-            }
-            
-            // Create right fixed button if not exists
-            if (!document.getElementById('right-sidebar-toggle-fixed')) {
-                this.rightToggleFixed = document.createElement('button');
-                this.rightToggleFixed.id = 'right-sidebar-toggle-fixed';
-                this.rightToggleFixed.className = 'sidebar-toggle-fixed';
-                this.rightToggleFixed.innerHTML = '☰';
-                this.rightToggleFixed.title = 'Tartalomjegyzék megjelenítése';
-                document.body.appendChild(this.rightToggleFixed);
-            } else {
-                this.rightToggleFixed = document.getElementById('right-sidebar-toggle-fixed');
-            }
+        cleanupFixedButtons() {
+            // Remove any existing fixed buttons
+            const existingFixed = document.querySelectorAll('.sidebar-toggle-fixed');
+            existingFixed.forEach(btn => btn.remove());
         }
         
         setupEventListeners() {
             // Header toggle buttons
             if (this.leftToggle) {
+                // Remove any existing listeners
+                this.leftToggle.replaceWith(this.leftToggle.cloneNode(true));
+                this.leftToggle = document.getElementById('left-sidebar-toggle');
                 this.leftToggle.addEventListener('click', this.toggleLeft);
             }
             
             if (this.rightToggle) {
+                // Remove any existing listeners
+                this.rightToggle.replaceWith(this.rightToggle.cloneNode(true));
+                this.rightToggle = document.getElementById('right-sidebar-toggle');
                 this.rightToggle.addEventListener('click', this.toggleRight);
-            }
-            
-            // Fixed toggle buttons
-            if (this.leftToggleFixed) {
-                this.leftToggleFixed.addEventListener('click', this.toggleLeft);
-            }
-            
-            if (this.rightToggleFixed) {
-                this.rightToggleFixed.addEventListener('click', this.toggleRight);
             }
         }
         
@@ -137,16 +120,36 @@
         
         toggleSidebar(side) {
             const sidebar = side === 'left' ? this.leftSidebar : this.rightSidebar;
+            const button = side === 'left' ? this.leftToggle : this.rightToggle;
             
             if (!sidebar) return;
+            
+            // Trigger laser animation
+            const shineEffect = sidebar.querySelector('.shine-effect');
+            if (shineEffect) {
+                shineEffect.classList.add('active');
+                setTimeout(() => {
+                    shineEffect.classList.remove('active');
+                }, 1200); // Match animation duration
+            }
             
             // Use uiManager if available, otherwise toggle directly
             if (window.uiManager && typeof window.uiManager.toggleSidebar === 'function') {
                 window.uiManager.toggleSidebar(side);
             } else {
-                sidebar.classList.toggle('hidden');
+                // Toggle between collapsed and expanded states
+                sidebar.classList.toggle('collapsed');
+                // Also toggle hidden for backward compatibility
+                if (sidebar.classList.contains('collapsed')) {
+                    sidebar.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('hidden');
+                }
                 this.updateBodyClasses();
             }
+            
+            // Update button state
+            this.updateButtonStates();
         }
         
         updateBodyClasses() {
@@ -157,41 +160,73 @@
             
             // Clear all state classes
             body.classList.remove(
-                'left-sidebar-visible', 'left-sidebar-hidden',
-                'right-sidebar-visible', 'right-sidebar-hidden',
-                'both-sidebars-hidden'
+                'left-sidebar-visible', 'left-sidebar-hidden', 'left-sidebar-collapsed',
+                'right-sidebar-visible', 'right-sidebar-hidden', 'right-sidebar-collapsed',
+                'both-sidebars-hidden', 'both-sidebars-collapsed'
             );
             
-            container.classList.remove('left-sidebar-hidden', 'right-sidebar-hidden');
+            container.classList.remove('left-sidebar-hidden', 'right-sidebar-hidden', 
+                                       'left-sidebar-collapsed', 'right-sidebar-collapsed');
             
             // Check current states
             const leftHidden = this.leftSidebar.classList.contains('hidden');
+            const leftCollapsed = this.leftSidebar.classList.contains('collapsed');
             const rightHidden = this.rightSidebar.classList.contains('hidden');
+            const rightCollapsed = this.rightSidebar.classList.contains('collapsed');
             
             // Update classes based on state
-            if (leftHidden) {
+            if (leftHidden || leftCollapsed) {
                 body.classList.add('left-sidebar-hidden');
                 container.classList.add('left-sidebar-hidden');
+                if (leftCollapsed) {
+                    body.classList.add('left-sidebar-collapsed');
+                    container.classList.add('left-sidebar-collapsed');
+                }
             } else {
                 body.classList.add('left-sidebar-visible');
             }
             
-            if (rightHidden) {
+            if (rightHidden || rightCollapsed) {
                 body.classList.add('right-sidebar-hidden');
                 container.classList.add('right-sidebar-hidden');
+                if (rightCollapsed) {
+                    body.classList.add('right-sidebar-collapsed');
+                    container.classList.add('right-sidebar-collapsed');
+                }
             } else {
                 body.classList.add('right-sidebar-visible');
             }
             
-            if (leftHidden && rightHidden) {
+            if ((leftHidden || leftCollapsed) && (rightHidden || rightCollapsed)) {
                 body.classList.add('both-sidebars-hidden');
+                if (leftCollapsed && rightCollapsed) {
+                    body.classList.add('both-sidebars-collapsed');
+                }
             }
             
             console.log('📊 Body classes updated:', {
                 leftHidden,
+                leftCollapsed,
                 rightHidden,
-                bodyClasses: body.className
+                rightCollapsed
             });
+        }
+        
+        updateButtonStates() {
+            // Update button icons based on current sidebar states
+            if (this.leftToggle && this.leftSidebar) {
+                const leftHidden = this.leftSidebar.classList.contains('hidden') || 
+                                   this.leftSidebar.classList.contains('collapsed');
+                this.leftToggle.textContent = leftHidden ? '▶' : '◀';
+                this.leftToggle.title = leftHidden ? 'Tételek megjelenítése' : 'Összecsukás';
+            }
+            
+            if (this.rightToggle && this.rightSidebar) {
+                const rightHidden = this.rightSidebar.classList.contains('hidden') || 
+                                    this.rightSidebar.classList.contains('collapsed');
+                this.rightToggle.textContent = rightHidden ? '◀' : '▶';
+                this.rightToggle.title = rightHidden ? 'Tartalomjegyzék megjelenítése' : 'Összecsukás';
+            }
         }
         
         hookIntoUiManager() {
@@ -209,10 +244,13 @@
                 console.log(`🔄 Enhanced toggle for ${side} sidebar`);
                 
                 // Call original
-                originalToggleSidebar.call(window.uiManager, side);
+                if (originalToggleSidebar) {
+                    originalToggleSidebar.call(window.uiManager, side);
+                }
                 
                 // Update our body classes
                 this.updateBodyClasses();
+                this.updateButtonStates();
             };
             
             console.log('✅ Hooked into uiManager');
@@ -228,15 +266,11 @@
                 this.rightToggle.removeEventListener('click', this.toggleRight);
             }
             
-            if (this.leftToggleFixed) {
-                this.leftToggleFixed.removeEventListener('click', this.toggleLeft);
-            }
-            
-            if (this.rightToggleFixed) {
-                this.rightToggleFixed.removeEventListener('click', this.toggleRight);
-            }
+            // Clean up fixed buttons
+            this.cleanupFixedButtons();
             
             this.initialized = false;
+            window.sidebarManagerInitialized = false;
         }
     }
     
@@ -249,9 +283,6 @@
     } else {
         sidebarManager.init();
     }
-    
-    // Also try after a delay to catch late initialization
-    setTimeout(() => sidebarManager.init(), 500);
     
     // Export for debugging
     window.sidebarManager = sidebarManager;

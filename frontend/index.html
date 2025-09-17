@@ -6,10 +6,8 @@
     <title>Neurológia VizsgApp by Zsolaj</title>
     
     <!-- CSS -->
-    <!-- Single unified CSS file - no conflicts, no duplicates -->
-    <link rel="stylesheet" href="css/app-unified.css">
-    <!-- Consolidated sidebar button styles -->
-    <link rel="stylesheet" href="css/sidebar-buttons.css">
+    <!-- Fixed consolidated CSS file - all issues resolved -->
+    <link rel="stylesheet" href="css/app-consolidated-fixed.css">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -28,13 +26,18 @@
     <!-- Main Application Container -->
     <div id="app-container">
         <!-- Left Sidebar - Topic List -->
-        <aside id="left-sidebar" class="topic-list">
-            <div class="sidebar-header">
-                <h2 class="sidebar-title">Tételek</h2>
-                <button id="left-sidebar-toggle" class="toggle-btn sidebar-toggle" title="Összecsukás">☰</button>
-            </div>
-            <div class="topic-menu" id="topic-menu">
-                <!-- Topics will be loaded here dynamically -->
+        <aside id="left-sidebar" class="sidebar-container">
+            <div class="shine-effect"></div>
+            <div class="topic-list">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">Tételek</h2>
+                    <button id="left-sidebar-toggle" class="toggle-btn sidebar-toggle" title="Összecsukás">◀</button>
+                </div>
+                <div class="sidebar-content">
+                    <div class="topic-menu" id="topic-menu">
+                        <!-- Topics will be loaded here dynamically -->
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -54,13 +57,18 @@
         </main>
 
         <!-- Right Sidebar - Table of Contents -->
-        <aside id="right-sidebar" class="toc-sidebar">
-            <div class="sidebar-header">
-                <button id="right-sidebar-toggle" class="toggle-btn sidebar-toggle" title="Összecsukás">☰</button>
-                <h3 class="sidebar-title">Tartalomjegyzék</h3>
-            </div>
-            <div id="toc-container" class="toc-container">
-                <!-- TOC will be generated here -->
+        <aside id="right-sidebar" class="sidebar-container">
+            <div class="shine-effect"></div>
+            <div class="toc-sidebar">
+                <div class="sidebar-header">
+                    <button id="right-sidebar-toggle" class="toggle-btn sidebar-toggle" title="Összecsukás">▶</button>
+                    <h3 class="sidebar-title">Tartalomjegyzék</h3>
+                </div>
+                <div class="sidebar-content">
+                    <div id="toc-container" class="toc-container">
+                        <!-- TOC will be generated here -->
+                    </div>
+                </div>
             </div>
         </aside>
     </div>
@@ -84,9 +92,7 @@
     <script src="js/modules/topic-loader.js"></script>
     <script src="js/modules/ui-manager.js"></script>
     <script src="js/app.js"></script>
-    <!-- Single unified JavaScript - clean, no conflicts -->
-    <script src="js/app-unified.js"></script>
-    <!-- Consolidated sidebar management -->
-    <script src="js/sidebar-manager-consolidated.js"></script>
+    <!-- Fixed sidebar management - no duplicates -->
+    <script src="js/sidebar-manager-fixed.js"></script>
 </body>
 </html>
