@@ -292,6 +292,15 @@ ul, ol {
     overflow: hidden; /* Hide content when collapsed */
 }
 
+/* Make collapsed sidebars sticky to keep button accessible */
+.sidebar-container.collapsed,
+.sidebar-container.hidden {
+    position: sticky;
+    position: -webkit-sticky;
+    top: var(--content-top);
+    height: calc(100vh - var(--content-top));
+}
+
 /* Fixed Sticky Implementation */
 .topic-list,
 .toc-sidebar {
@@ -335,15 +344,57 @@ ul, ol {
     justify-content: center;
     cursor: pointer;
     opacity: 0.8;
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
     text-shadow: 0 0 10px var(--primary-green),
                  0 0 20px var(--primary-green);
     flex-shrink: 0;
+    position: relative;
+}
+
+/* Pulse animation for collapsed state */
+.sidebar-container.collapsed .sidebar-toggle,
+.sidebar-container.hidden .sidebar-toggle {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.8;
+        text-shadow: 0 0 10px var(--primary-green),
+                     0 0 20px var(--primary-green);
+    }
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 15px var(--primary-green),
+                     0 0 30px var(--primary-green),
+                     0 0 40px rgba(38, 237, 101, 0.8);
+    }
 }
 
 .sidebar-toggle:hover {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.15);
+    text-shadow: 0 0 15px var(--primary-green),
+                 0 0 30px var(--primary-green),
+                 0 0 45px rgba(38, 237, 101, 0.8);
+    animation: none;
+}
+
+/* Rotating animation on click */
+.sidebar-toggle.rotating {
+    animation: rotate-fade 0.3s ease-out;
+}
+
+@keyframes rotate-fade {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.2) rotate(180deg);
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+    }
 }
 
 /* Sidebar Content */
@@ -376,81 +427,152 @@ ul, ol {
 .sidebar-container.hidden .sidebar-header {
     justify-content: center;
     padding: var(--spacing-md) 0;
+    /* Make header sticky in collapsed state */
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+    width: var(--sidebar-collapsed);
+    min-width: var(--sidebar-collapsed);
 }
 
 /* ============================================
-   6. MATRIX LASER EFFECT - Fixed & Mirrored
+   6. MATRIX LASER EFFECT - Enhanced & Smooth
    ============================================ */
 
 /* Laser Effect Container */
 .shine-effect {
     position: absolute;
     top: 0;
-    width: 4px;
+    width: 6px; /* Slightly wider for better visibility */
     height: 100%;
     z-index: var(--z-laser);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--transition-medium);
+    transition: opacity 0.3s ease-in-out;
 }
 
 /* Left sidebar - laser on right edge */
 #left-sidebar .shine-effect { 
-    right: -2px;
+    right: 0;
     background: linear-gradient(
         to bottom,
         transparent 0%,
-        var(--laser-green) 5%,
-        var(--matrix-green) 15%,
-        transparent 30%
+        transparent 10%,
+        rgba(38, 237, 101, 0.1) 15%,
+        rgba(38, 237, 101, 0.8) 20%,
+        var(--laser-green) 25%,
+        var(--laser-green) 30%,
+        rgba(38, 237, 101, 0.8) 35%,
+        rgba(38, 237, 101, 0.1) 40%,
+        transparent 45%,
+        transparent 100%
     );
-    background-size: 100% 200%;
+    background-size: 100% 400%;
     background-position: 0% -100%;
+    filter: blur(1px);
 }
 
 /* Right sidebar - laser on left edge */
 #right-sidebar .shine-effect {
-    left: -2px;
+    left: 0;
     background: linear-gradient(
         to bottom,
         transparent 0%,
-        var(--laser-green) 5%,
-        var(--matrix-green) 15%,
-        transparent 30%
+        transparent 10%,
+        rgba(38, 237, 101, 0.1) 15%,
+        rgba(38, 237, 101, 0.8) 20%,
+        var(--laser-green) 25%,
+        var(--laser-green) 30%,
+        rgba(38, 237, 101, 0.8) 35%,
+        rgba(38, 237, 101, 0.1) 40%,
+        transparent 45%,
+        transparent 100%
     );
-    background-size: 100% 200%;
+    background-size: 100% 400%;
     background-position: 0% -100%;
+    filter: blur(1px);
 }
 
 /* Active state animations */
-#left-sidebar .shine-effect.active {
+.shine-effect.active {
     opacity: 1;
-    animation: laser-scan-down var(--transition-sidebar) linear forwards;
-    box-shadow: 0 0 10px 5px rgba(38, 237, 101, 0.9);
+    filter: blur(0);
+    animation: laser-scan var(--transition-sidebar) cubic-bezier(0.86, 0, 0.07, 1) forwards;
+}
+
+/* Glow effect during animation */
+#left-sidebar .shine-effect.active {
+    box-shadow: 
+        0 0 20px rgba(38, 237, 101, 0.9),
+        inset -2px 0 15px rgba(38, 237, 101, 0.6);
 }
 
 #right-sidebar .shine-effect.active {
-    opacity: 1;
-    animation: laser-scan-down var(--transition-sidebar) linear forwards;
-    box-shadow: 0 0 10px 5px rgba(38, 237, 101, 0.9);
+    box-shadow: 
+        0 0 20px rgba(38, 237, 101, 0.9),
+        inset 2px 0 15px rgba(38, 237, 101, 0.6);
 }
 
-/* Single animation for both sides */
-@keyframes laser-scan-down {
+/* Smooth laser scanning animation */
+@keyframes laser-scan {
     0% { 
         background-position: 0% -100%;
         opacity: 0;
+        filter: blur(2px);
     }
-    10% {
-        opacity: 1;
+    5% {
+        opacity: 0.5;
+        filter: blur(1px);
     }
-    90% {
+    15% {
         opacity: 1;
+        filter: blur(0);
+    }
+    85% {
+        opacity: 1;
+        filter: blur(0);
+    }
+    95% {
+        opacity: 0.5;
+        filter: blur(1px);
     }
     100% { 
-        background-position: 0% 100%;
+        background-position: 0% 200%;
         opacity: 0;
+        filter: blur(2px);
     }
+}
+
+/* Additional glow on sidebar edges during collapse/expand */
+.sidebar-container {
+    position: relative;
+}
+
+.sidebar-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    opacity: 0;
+    transition: opacity var(--transition-medium);
+}
+
+#left-sidebar::after {
+    right: 0;
+    background: var(--matrix-green);
+    box-shadow: 0 0 10px var(--matrix-green);
+}
+
+#right-sidebar::after {
+    left: 0;
+    background: var(--matrix-green);
+    box-shadow: 0 0 10px var(--matrix-green);
+}
+
+/* Show edge glow during animation */
+.sidebar-container.animating::after {
+    opacity: 0.5;
 }
 
 /* ============================================

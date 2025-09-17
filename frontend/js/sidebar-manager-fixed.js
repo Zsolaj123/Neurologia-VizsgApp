@@ -124,6 +124,9 @@
             
             if (!sidebar) return;
             
+            // Add animating class for edge glow
+            sidebar.classList.add('animating');
+            
             // Trigger laser animation
             const shineEffect = sidebar.querySelector('.shine-effect');
             if (shineEffect) {
@@ -132,6 +135,11 @@
                     shineEffect.classList.remove('active');
                 }, 1200); // Match animation duration
             }
+            
+            // Remove animating class after transition
+            setTimeout(() => {
+                sidebar.classList.remove('animating');
+            }, 1200);
             
             // Use uiManager if available, otherwise toggle directly
             if (window.uiManager && typeof window.uiManager.toggleSidebar === 'function') {
@@ -146,6 +154,14 @@
                     sidebar.classList.remove('hidden');
                 }
                 this.updateBodyClasses();
+            }
+            
+            // Add rotating animation to button
+            if (button) {
+                button.classList.add('rotating');
+                setTimeout(() => {
+                    button.classList.remove('rotating');
+                }, 300);
             }
             
             // Update button state
