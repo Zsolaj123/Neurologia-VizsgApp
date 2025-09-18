@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Button Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #00ff41;
+            background: rgba(0, 255, 65, 0.05);
+        }
+        
+        h1 {
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid #00ff41;
+        }
+        
+        .error {
+            border-left-color: #ff0041;
+            color: #ff0041;
+        }
+        
+        .success {
+            border-left-color: #00ff41;
+        }
+        
+        .warning {
+            border-left-color: #ffa500;
+            color: #ffa500;
+        }
+        
+        button {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: monospace;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: rgba(0, 255, 65, 0.1);
+            text-shadow: 0 0 10px #00ff41;
+        }
+        
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Sidebar Toggle Button Test</h1>
+        
+        <div id="test-results">
+            <h2>Running Tests...</h2>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="runAllTests()">Run All Tests</button>
+            <button onclick="window.location.href='index.html'">Back to App</button>
+        </div>
+    </div>
+
+    <script>
+        const testResults = document.getElementById('test-results');
+        
+        function log(message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            testResults.appendChild(div);
+        }
+        
+        function runAllTests() {
+            testResults.innerHTML = '<h2>Test Results:</h2>';
+            
+            // Test 1: Check if buttons exist in DOM
+            log('=== Test 1: Check Button Elements ===');
+            const leftButton = document.getElementById('left-sidebar-toggle');
+            const rightButton = document.getElementById('right-sidebar-toggle');
+            
+            if (leftButton) {
+                log('✓ Left sidebar toggle button found');
+                log(`  Classes: ${leftButton.className}`);
+                log(`  ID: ${leftButton.id}`);
+            } else {
+                log('✗ Left sidebar toggle button NOT found', 'error');
+            }
+            
+            if (rightButton) {
+                log('✓ Right sidebar toggle button found');
+                log(`  Classes: ${rightButton.className}`);
+                log(`  ID: ${rightButton.id}`);
+            } else {
+                log('✗ Right sidebar toggle button NOT found', 'error');
+            }
+            
+            // Test 2: Check CSS styles
+            log('\n=== Test 2: Check Button Styles ===');
+            if (leftButton) {
+                const styles = window.getComputedStyle(leftButton);
+                log(`Left button display: ${styles.display}`);
+                log(`Left button visibility: ${styles.visibility}`);
+                log(`Left button opacity: ${styles.opacity}`);
+                log(`Left button cursor: ${styles.cursor}`);
+            }
+            
+            // Test 3: Check event listeners
+            log('\n=== Test 3: Check Event Handlers ===');
+            
+            // Check if sidebar manager is initialized
+            if (window.sidebarManagerOptimized) {
+                log('✓ Sidebar manager optimized is initialized');
+                const state = window.sidebarManagerOptimized.getState();
+                log(`  Left sidebar collapsed: ${state.leftCollapsed}`);
+                log(`  Right sidebar collapsed: ${state.rightCollapsed}`);
+            } else {
+                log('✗ Sidebar manager optimized NOT initialized', 'error');
+            }
+            
+            // Test 4: Check for conflicts
+            log('\n=== Test 4: Check for Conflicts ===');
+            
+            // Check if ui-manager has event listeners
+            if (window.uiManager) {
+                log('✓ UI Manager is available');
+                
+                // Test if toggleSidebar delegates properly
+                try {
+                    const originalHandleToggle = window.sidebarManagerOptimized ? 
+                        window.sidebarManagerOptimized.handleToggle : null;
+                    let delegated = false;
+                    
+                    if (window.sidebarManagerOptimized) {
+                        window.sidebarManagerOptimized.handleToggle = function(side) {
+                            delegated = true;
+                            if (originalHandleToggle) {
+                                originalHandleToggle.call(this, side);
+                            }
+                        };
+                    }
+                    
+                    window.uiManager.toggleSidebar('left');
+                    
+                    if (delegated) {
+                        log('✓ UI Manager correctly delegates to sidebar manager');
+                    } else {
+                        log('⚠ UI Manager did not delegate to sidebar manager', 'warning');
+                    }
+                    
+                    // Restore original
+                    if (window.sidebarManagerOptimized && originalHandleToggle) {
+                        window.sidebarManagerOptimized.handleToggle = originalHandleToggle;
+                    }
+                } catch (e) {
+                    log(`✗ Error testing delegation: ${e.message}`, 'error');
+                }
+            } else {
+                log('✗ UI Manager NOT available', 'error');
+            }
+            
+            // Test 5: Simulate button clicks
+            log('\n=== Test 5: Simulate Button Clicks ===');
+            
+            if (leftButton) {
+                try {
+                    // Save initial state
+                    const initialState = window.sidebarManagerOptimized ? 
+                        window.sidebarManagerOptimized.getState() : null;
+                    
+                    // Click left button
+                    leftButton.click();
+                    
+                    setTimeout(() => {
+                        const newState = window.sidebarManagerOptimized ? 
+                            window.sidebarManagerOptimized.getState() : null;
+                        
+                        if (newState && initialState) {
+                            if (newState.leftCollapsed !== initialState.leftCollapsed) {
+                                log('✓ Left button click changed sidebar state');
+                            } else {
+                                log('✗ Left button click did NOT change state', 'error');
+                            }
+                        }
+                        
+                        // Test right button
+                        if (rightButton) {
+                            rightButton.click();
+                            log('✓ Right button clicked (check UI for visual confirmation)');
+                        }
+                    }, 500);
+                } catch (e) {
+                    log(`✗ Error clicking buttons: ${e.message}`, 'error');
+                }
+            }
+            
+            // Summary
+            log('\n=== Test Summary ===');
+            log('Tests completed. Check the main app to visually confirm button functionality.');
+        }
+        
+        // Load required scripts
+        function loadScriptsAndTest() {
+            const scripts = [
+                'js/models/app-state.js',
+                'js/modules/ui-manager.js',
+                'js/sidebar-manager-optimized.js'
+            ];
+            
+            let loaded = 0;
+            scripts.forEach(src => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    loaded++;
+                    if (loaded === scripts.length) {
+                        setTimeout(runAllTests, 100);
+                    }
+                };
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            // First try to run tests directly
+            runAllTests();
+            
+            // If modules not loaded, load them
+            if (!window.sidebarManagerOptimized || !window.uiManager) {
+                log('Loading required modules...', 'warning');
+                loadScriptsAndTest();
+            }
+        });
+    </script>
+</body>
+</html>

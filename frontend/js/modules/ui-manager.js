@@ -90,17 +90,8 @@ class UIManager {
             );
         }
         
-        // Sidebar toggle buttons
-        const leftToggle = document.getElementById('left-sidebar-toggle');
-        const rightToggle = document.getElementById('right-sidebar-toggle');
-        
-        if (leftToggle) {
-            leftToggle.addEventListener('click', () => this.toggleSidebar('left'));
-        }
-        
-        if (rightToggle) {
-            rightToggle.addEventListener('click', () => this.toggleSidebar('right'));
-        }
+        // Sidebar toggle buttons - Removed to prevent conflicts with sidebar-manager-optimized.js
+        // The optimized sidebar manager handles all toggle button functionality
         
         // Window resize
         window.addEventListener('resize', 
@@ -668,15 +659,22 @@ class UIManager {
      * @param {string} side - 'left' or 'right'
      */
     toggleSidebar(side) {
-        appState.ui.toggleSidebar(side);
-        
-        const sidebar = side === 'left' ? this.elements.leftSidebar : this.elements.rightSidebar;
-        if (sidebar) {
-            sidebar.classList.toggle('hidden');
+        // Delegate to sidebar-manager-optimized.js instead of handling here
+        if (window.sidebarManagerOptimized && window.sidebarManagerOptimized.handleToggle) {
+            window.sidebarManagerOptimized.handleToggle(side);
+        } else {
+            // Fallback only if optimized manager not available
+            console.warn('Sidebar manager not available, using fallback');
+            appState.ui.toggleSidebar(side);
+            
+            const sidebar = side === 'left' ? this.elements.leftSidebar : this.elements.rightSidebar;
+            if (sidebar) {
+                sidebar.classList.toggle('hidden');
+            }
+            
+            this.adjustLayout();
+            appState.saveUIState();
         }
-        
-        this.adjustLayout();
-        appState.saveUIState();
     }
     
     /**
