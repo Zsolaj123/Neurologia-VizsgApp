@@ -8,6 +8,24 @@
     
     console.log('🔧 Animation fixes loading...');
     
+    // Force remove any CSS that might interfere
+    function removeConflictingCSS() {
+        const style = document.createElement('style');
+        style.textContent = `
+            /* Override any overflow hidden on sidebars */
+            .sidebar-container,
+            #left-sidebar,
+            #right-sidebar,
+            #left-sidebar.collapsed,
+            #left-sidebar.hidden,
+            #right-sidebar.collapsed,
+            #right-sidebar.hidden {
+                overflow: visible !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
     // Wait for app to be ready
     function waitForApp(callback) {
         if (window.sidebarManagerOptimized && window.tocGenerator) {
@@ -19,6 +37,9 @@
     
     waitForApp(() => {
         console.log('✅ Applying animation fixes...');
+        
+        // Apply CSS conflict fixes first
+        removeConflictingCSS();
         
         // Fix 1: Ensure laser animation is visible
         function enhanceLaserAnimation() {
@@ -176,18 +197,28 @@
             // Ensure scroll handler is properly attached
             const contentDisplay = document.getElementById('content-display');
             if (contentDisplay) {
-                // Remove any existing listeners
-                const newContentDisplay = contentDisplay.cloneNode(true);
-                contentDisplay.parentNode.replaceChild(newContentDisplay, contentDisplay);
-                
-                // Add new scroll listener with shorter debounce
+                // Add scroll listener with proper event handling
                 let scrollTimeout;
-                newContentDisplay.addEventListener('scroll', () => {
+                const scrollHandler = () => {
                     clearTimeout(scrollTimeout);
                     scrollTimeout = setTimeout(() => {
+                        console.log('Scroll event triggered, updating TOC...');
                         window.tocGenerator.updateActiveFromScroll();
                     }, 50); // Shorter debounce for more responsive updates
-                });
+                };
+                
+                // Remove existing listener if any
+                contentDisplay.removeEventListener('scroll', scrollHandler);
+                
+                // Add new listener
+                contentDisplay.addEventListener('scroll', scrollHandler);
+                
+                // Also ensure uiManager's scroll handler is working
+                if (window.uiManager && window.uiManager.handleContentScroll) {
+                    // Re-bind the scroll handler
+                    const uiScrollHandler = window.uiManager.handleContentScroll.bind(window.uiManager);
+                    contentDisplay.addEventListener('scroll', window.uiManager.debounce(uiScrollHandler, 50));
+                }
             }
             
             console.log('✅ TOC highlighting fixed');

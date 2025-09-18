@@ -1,0 +1,197 @@
+/**
+ * CSS Conflicts Fix for Laser Animation and TOC Highlighting
+ * Resolves overflow and z-index issues preventing animations
+ */
+
+/* ============================================
+   FIX 1: LASER ANIMATION VISIBILITY
+   ============================================ */
+
+/* Remove overflow hidden from sidebars to allow laser effect */
+#left-sidebar,
+#right-sidebar,
+#left-sidebar.collapsed,
+#left-sidebar.hidden,
+#right-sidebar.collapsed,
+#right-sidebar.hidden {
+    overflow: visible !important;
+}
+
+/* Ensure sidebar container doesn't clip */
+.sidebar-container {
+    overflow: visible !important;
+    position: relative !important;
+}
+
+/* Keep content scrollable but don't clip animations */
+.sidebar-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure shine effect is properly positioned and visible */
+.shine-effect {
+    position: absolute !important;
+    top: 0 !important;
+    width: 8px !important; /* Wider for better visibility */
+    height: 100% !important;
+    z-index: 1000 !important; /* Very high z-index */
+    opacity: 0;
+    pointer-events: none !important;
+    /* Enhanced gradient for visibility */
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 255, 65, 0.2) 5%,
+        rgba(0, 255, 65, 0.5) 20%,
+        rgba(0, 255, 65, 0.8) 40%,
+        #00ff41 50%,
+        rgba(0, 255, 65, 0.8) 60%,
+        rgba(0, 255, 65, 0.5) 80%,
+        rgba(0, 255, 65, 0.2) 95%,
+        transparent 100%
+    ) !important;
+    transform: translateY(-100%) !important;
+    box-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41 !important;
+}
+
+/* Position laser on correct edges */
+#left-sidebar .shine-effect { 
+    right: -4px !important; /* Slightly outside to ensure visibility */
+}
+
+#right-sidebar .shine-effect {
+    left: -4px !important; /* Slightly outside to ensure visibility */
+}
+
+/* Active laser animation with better visibility */
+.shine-effect.active {
+    opacity: 1 !important;
+    animation: enhanced-laser-sweep 0.8s ease-out forwards !important;
+}
+
+/* Enhanced laser animation */
+@keyframes enhanced-laser-sweep {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    5% {
+        opacity: 1;
+    }
+    95% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+/* Ensure animating class doesn't interfere */
+.sidebar-container.animating {
+    overflow: visible !important;
+}
+
+/* ============================================
+   FIX 2: TOC HIGHLIGHTING
+   ============================================ */
+
+/* Ensure TOC items are properly styled */
+.toc-item {
+    position: relative;
+    padding: 8px 16px !important;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+    border-left: 4px solid transparent !important;
+}
+
+/* Active TOC item with strong visibility */
+.toc-item.active {
+    background: rgba(0, 255, 65, 0.2) !important;
+    border-left: 4px solid #00ff41 !important;
+    color: #00ff41 !important;
+    font-weight: bold !important;
+    text-shadow: 0 0 10px #00ff41 !important;
+    box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.1) !important;
+}
+
+/* Hover effect for better feedback */
+.toc-item:hover:not(.active) {
+    background: rgba(0, 255, 65, 0.1) !important;
+    border-left-color: rgba(0, 255, 65, 0.5) !important;
+}
+
+/* Ensure TOC container is scrollable */
+.toc-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 200px) !important;
+}
+
+/* ============================================
+   FIX 3: Z-INDEX HIERARCHY
+   ============================================ */
+
+/* Ensure proper layering */
+.sidebar-header {
+    z-index: 110 !important;
+}
+
+.sidebar-content {
+    z-index: 100 !important;
+}
+
+.shine-effect {
+    z-index: 1000 !important; /* Above everything */
+}
+
+.topic-list,
+.toc-sidebar {
+    z-index: 90 !important;
+}
+
+/* ============================================
+   FIX 4: SIDEBAR HEADER POSITIONING
+   ============================================ */
+
+/* Ensure headers don't block animations */
+.sidebar-header {
+    position: relative !important;
+    background: var(--bg-sidebar) !important; /* Solid background */
+}
+
+/* ============================================
+   FIX 5: WILL-CHANGE OPTIMIZATION
+   ============================================ */
+
+/* Prepare elements for animation */
+.shine-effect {
+    will-change: transform, opacity !important;
+}
+
+.toc-item {
+    will-change: background-color, border-color !important;
+}
+
+/* ============================================
+   DEBUG MODE (uncomment to visualize issues)
+   ============================================ */
+
+/*
+.shine-effect {
+    background: red !important;
+    opacity: 1 !important;
+    width: 20px !important;
+}
+
+.sidebar-container {
+    border: 2px solid yellow !important;
+}
+
+.sidebar-content {
+    border: 2px solid blue !important;
+}
+*/
