@@ -1,0 +1,208 @@
+/**
+ * Consolidated Animation Fixes
+ * Single source of truth for all animations
+ */
+
+/* ============================================
+   ANIMATION TIMING VARIABLES
+   ============================================ */
+:root {
+    /* Unified timing - SINGLE SOURCE OF TRUTH */
+    --sidebar-duration: 0.8s; /* Smooth but not too slow */
+    --laser-duration: 0.8s;    /* MUST match sidebar duration */
+    --sidebar-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    --laser-easing: ease-in-out;
+    
+    /* Visual properties */
+    --laser-width: 6px;
+    --laser-height: 100px;
+    --laser-glow: 25px;
+}
+
+/* ============================================
+   OVERRIDE CONFLICTING ANIMATIONS
+   ============================================ */
+
+/* Override the base CSS transition */
+#left-sidebar,
+#right-sidebar,
+.sidebar-container {
+    transition: width var(--sidebar-duration) var(--sidebar-easing);
+}
+
+/* ============================================
+   FIX OVERFLOW ISSUES
+   ============================================ */
+
+/* Allow laser to be visible */
+#left-sidebar,
+#right-sidebar,
+#left-sidebar.collapsed,
+#left-sidebar.hidden,
+#right-sidebar.collapsed,
+#right-sidebar.hidden {
+    overflow: visible;
+}
+
+/* Keep content scrollable */
+.sidebar-content {
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================
+   LASER ANIMATION DEFINITION
+   ============================================ */
+
+/* Reset and redesign shine effect */
+.shine-effect {
+    position: absolute;
+    width: var(--laser-width);
+    height: var(--laser-height);
+    top: -100px; /* Start above viewport */
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+    
+    /* Enhanced laser beam */
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 255, 65, 0.2) 10%,
+        rgba(0, 255, 65, 0.4) 25%,
+        rgba(0, 255, 65, 0.8) 40%,
+        #00ff41 50%,
+        rgba(0, 255, 65, 0.8) 60%,
+        rgba(0, 255, 65, 0.4) 75%,
+        rgba(0, 255, 65, 0.2) 90%,
+        transparent 100%
+    );
+    
+    /* Glow effect */
+    box-shadow: 
+        0 0 var(--laser-glow) rgba(0, 255, 65, 0.6),
+        0 0 calc(var(--laser-glow) * 2) rgba(0, 255, 65, 0.3),
+        inset 0 0 10px rgba(255, 255, 255, 0.8);
+        
+    /* Performance */
+    will-change: transform, opacity;
+}
+
+/* Position on inner edges */
+#left-sidebar .shine-effect {
+    right: -3px;
+}
+
+#right-sidebar .shine-effect {
+    left: -3px;
+}
+
+/* Trigger animation when sidebar animates */
+.sidebar-container.animating .shine-effect {
+    opacity: 1;
+    animation: laser-scan var(--laser-duration) var(--laser-easing) forwards;
+}
+
+/* Synchronized laser scan animation */
+@keyframes laser-scan {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+    2% {
+        opacity: 1;
+    }
+    98% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(calc(100vh + var(--laser-height)));
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   TOC HIGHLIGHTING
+   ============================================ */
+
+/* Clean TOC item styles */
+.toc-item {
+    position: relative;
+    padding: 8px 12px 8px 16px;
+    margin: 2px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+/* Hover state */
+.toc-item:hover {
+    background: rgba(0, 255, 65, 0.05);
+    border-left-color: rgba(0, 255, 65, 0.3);
+}
+
+/* Active state - highly visible */
+.toc-item.active {
+    background: rgba(0, 255, 65, 0.15);
+    border-left-color: #00ff41;
+    color: #00ff41;
+    font-weight: 600;
+}
+
+.toc-item.active .toc-text {
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+}
+
+/* Remove any conflicting active styles */
+.toc-link {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* ============================================
+   EDGE GLOW ENHANCEMENT
+   ============================================ */
+
+/* Static edge line during animation */
+.sidebar-container.animating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 255, 65, 0.4) 25%,
+        rgba(0, 255, 65, 0.6) 50%,
+        rgba(0, 255, 65, 0.4) 75%,
+        transparent 100%
+    );
+    opacity: 1;
+}
+
+#left-sidebar.animating::after {
+    right: 0;
+}
+
+#right-sidebar.animating::after {
+    left: 0;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+    :root {
+        --sidebar-duration: 0.5s;
+        --laser-duration: 0.5s;
+        --laser-width: 4px;
+        --laser-height: 80px;
+    }
+}
