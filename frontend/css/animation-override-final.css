@@ -1,0 +1,208 @@
+/**
+ * Final Animation Override - Clean Solution
+ * This file MUST be loaded last to override all conflicts
+ */
+
+/* ============================================
+   FORCE TIMING CONSISTENCY
+   ============================================ */
+
+/* Override root variables */
+:root {
+    --transition-sidebar: 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    --transition-laser: 0.8s ease-in-out !important;
+    --transition-quick: 0.2s ease-out !important;
+    --transition-normal: 0.3s ease-out !important;
+}
+
+/* ============================================
+   SIDEBAR ANIMATION OVERRIDES
+   ============================================ */
+
+/* Force sidebar transitions */
+#left-sidebar,
+#right-sidebar,
+.sidebar-container {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Remove conflicting mobile transforms */
+@media (max-width: 768px) {
+    #left-sidebar,
+    #right-sidebar {
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+}
+
+/* Fix overflow to show laser */
+#left-sidebar,
+#right-sidebar,
+#left-sidebar.collapsed,
+#left-sidebar.hidden,
+#right-sidebar.collapsed,
+#right-sidebar.hidden,
+.sidebar-container,
+.sidebar-container.collapsed,
+.sidebar-container.hidden {
+    overflow: visible !important;
+}
+
+/* Keep content scrollable */
+.sidebar-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* ============================================
+   LASER ANIMATION OVERRIDE
+   ============================================ */
+
+/* Reset shine effect completely */
+.shine-effect {
+    all: unset;
+    position: absolute !important;
+    width: 8px !important;
+    height: 120px !important;
+    top: -120px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 255, 65, 0.1) 5%,
+        rgba(0, 255, 65, 0.3) 15%,
+        rgba(0, 255, 65, 0.6) 30%,
+        rgba(0, 255, 65, 0.9) 45%,
+        #00ff41 50%,
+        rgba(0, 255, 65, 0.9) 55%,
+        rgba(0, 255, 65, 0.6) 70%,
+        rgba(0, 255, 65, 0.3) 85%,
+        rgba(0, 255, 65, 0.1) 95%,
+        transparent 100%
+    ) !important;
+    
+    box-shadow: 
+        0 0 30px rgba(0, 255, 65, 0.8),
+        0 0 60px rgba(0, 255, 65, 0.4),
+        inset 0 0 15px rgba(255, 255, 255, 0.8) !important;
+        
+    transform: translateY(0) !important;
+    will-change: transform, opacity !important;
+}
+
+/* Position overrides */
+#left-sidebar .shine-effect {
+    right: -4px !important;
+    left: auto !important;
+}
+
+#right-sidebar .shine-effect {
+    left: -4px !important;
+    right: auto !important;
+}
+
+/* Override any conflicting active states */
+.shine-effect.active {
+    animation: none !important;
+}
+
+/* Laser animation when sidebar is animating */
+.sidebar-container.animating .shine-effect {
+    opacity: 1 !important;
+    animation: laser-scan-final 0.8s ease-in-out forwards !important;
+}
+
+@keyframes laser-scan-final {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+    2% {
+        opacity: 1;
+    }
+    98% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(calc(100vh + 120px));
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   TOC HIGHLIGHTING OVERRIDES
+   ============================================ */
+
+/* Reset all TOC item styles */
+.toc-item {
+    all: unset;
+    display: block !important;
+    position: relative !important;
+    padding: 10px 16px 10px 20px !important;
+    margin: 3px 0 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border-left: 4px solid transparent !important;
+    color: var(--text-secondary) !important;
+}
+
+/* Remove conflicting styles */
+.toc-item.active {
+    background: none !important;
+    border-left: none !important;
+    margin-left: 0 !important;
+}
+
+/* Apply clean active state */
+.toc-item.active {
+    background: rgba(0, 255, 65, 0.2) !important;
+    border-left: 4px solid #00ff41 !important;
+    color: #00ff41 !important;
+    font-weight: 700 !important;
+}
+
+.toc-item.active .toc-text {
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.6) !important;
+}
+
+/* Hover state */
+.toc-item:hover:not(.active) {
+    background: rgba(0, 255, 65, 0.08) !important;
+    border-left-color: rgba(0, 255, 65, 0.4) !important;
+}
+
+/* Fix TOC link styles */
+.toc-link {
+    color: inherit !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+/* ============================================
+   REMOVE INLINE STYLE CONFLICTS
+   ============================================ */
+
+/* Force removal of inline styles on animation */
+.sidebar-container.animating {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ============================================
+   DEBUG MODE (uncomment to test)
+   ============================================ */
+
+/*
+.shine-effect {
+    background: red !important;
+    opacity: 1 !important;
+    width: 20px !important;
+}
+
+.toc-item.active {
+    outline: 2px solid yellow !important;
+}
+*/

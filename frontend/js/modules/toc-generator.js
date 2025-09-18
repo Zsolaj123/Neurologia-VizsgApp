@@ -334,6 +334,9 @@ class TocGenerator {
 // Create singleton instance
 const tocGenerator = new TocGenerator();
 
+// Make available globally
+window.tocGenerator = tocGenerator;
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { TocGenerator, tocGenerator };
