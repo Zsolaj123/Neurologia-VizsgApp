@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Test - Laser Animation & TOC Highlight</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #00ff41;
+            background: rgba(0, 255, 65, 0.05);
+        }
+        
+        h2 {
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+        
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid #00ff41;
+        }
+        
+        .error {
+            border-left-color: #ff0041;
+            color: #ff0041;
+        }
+        
+        .warning {
+            border-left-color: #ffa500;
+            color: #ffa500;
+        }
+        
+        .info {
+            border-left-color: #0099ff;
+            color: #0099ff;
+        }
+        
+        .test-button {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: monospace;
+        }
+        
+        .test-button:hover {
+            background: rgba(0, 255, 65, 0.1);
+            text-shadow: 0 0 10px #00ff41;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #00ff41;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feature Test: Laser Animation & TOC Highlight</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button class="test-button" onclick="testLaserAnimation()">Test Laser Animation</button>
+        <button class="test-button" onclick="testTOCHighlight()">Test TOC Highlight</button>
+        <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+        <button class="test-button" onclick="openMainApp()">Open Main App</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Live App View</h2>
+        <iframe id="app-frame" src="index.html"></iframe>
+    </div>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        let appWindow = null;
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(div);
+            console.log(message);
+        }
+        
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+        }
+        
+        function getAppWindow() {
+            const iframe = document.getElementById('app-frame');
+            return iframe.contentWindow;
+        }
+        
+        function waitForApp(callback) {
+            const appWin = getAppWindow();
+            if (appWin.sidebarManagerOptimized && appWin.tocGenerator && appWin.uiManager) {
+                callback(appWin);
+            } else {
+                log('Waiting for app to initialize...', 'warning');
+                setTimeout(() => waitForApp(callback), 500);
+            }
+        }
+        
+        function testLaserAnimation() {
+            clearResults();
+            log('=== Testing Laser Animation ===');
+            
+            waitForApp((appWin) => {
+                const leftSidebar = appWin.document.getElementById('left-sidebar');
+                const rightSidebar = appWin.document.getElementById('right-sidebar');
+                const leftShine = leftSidebar?.querySelector('.shine-effect');
+                const rightShine = rightSidebar?.querySelector('.shine-effect');
+                
+                // Check if shine effects exist
+                if (!leftShine || !rightShine) {
+                    log('❌ Shine effect elements not found!', 'error');
+                    return;
+                }
+                
+                log('✓ Shine effect elements found');
+                
+                // Check if animation classes are applied
+                const checkAnimation = () => {
+                    // Trigger left sidebar toggle
+                    log('Triggering left sidebar toggle...');
+                    appWin.sidebarManagerOptimized.handleToggle('left');
+                    
+                    // Check for animation classes after a short delay
+                    setTimeout(() => {
+                        const leftHasAnimating = leftSidebar.classList.contains('animating');
+                        const leftShineActive = leftShine.classList.contains('active');
+                        
+                        log(`Left sidebar animating class: ${leftHasAnimating ? '✓' : '❌'}`);
+                        log(`Left shine effect active: ${leftShineActive ? '✓' : '❌'}`);
+                        
+                        if (!leftShineActive) {
+                            log('Checking shine effect styles...', 'info');
+                            const styles = appWin.getComputedStyle(leftShine);
+                            log(`  Position: ${styles.position}`);
+                            log(`  Opacity: ${styles.opacity}`);
+                            log(`  Animation: ${styles.animation || 'none'}`);
+                            log(`  Z-index: ${styles.zIndex}`);
+                        }
+                        
+                        // Test right sidebar
+                        setTimeout(() => {
+                            log('\nTesting right sidebar...');
+                            appWin.sidebarManagerOptimized.handleToggle('right');
+                            
+                            setTimeout(() => {
+                                const rightHasAnimating = rightSidebar.classList.contains('animating');
+                                const rightShineActive = rightShine.classList.contains('active');
+                                
+                                log(`Right sidebar animating class: ${rightHasAnimating ? '✓' : '❌'}`);
+                                log(`Right shine effect active: ${rightShineActive ? '✓' : '❌'}`);
+                            }, 100);
+                        }, 1000);
+                    }, 100);
+                };
+                
+                checkAnimation();
+            });
+        }
+        
+        function testTOCHighlight() {
+            clearResults();
+            log('=== Testing TOC Highlight ===');
+            
+            waitForApp((appWin) => {
+                // First, load a topic
+                log('Loading topic 1 for testing...');
+                appWin.uiManager.loadTopic(1);
+                
+                setTimeout(() => {
+                    const contentDisplay = appWin.document.getElementById('content-display');
+                    const tocContainer = appWin.document.getElementById('toc-container');
+                    
+                    if (!contentDisplay || !tocContainer) {
+                        log('❌ Required elements not found!', 'error');
+                        return;
+                    }
+                    
+                    log('✓ Content and TOC containers found');
+                    
+                    // Check if TOC has items
+                    const tocItems = tocContainer.querySelectorAll('.toc-item');
+                    log(`TOC items found: ${tocItems.length}`);
+                    
+                    if (tocItems.length === 0) {
+                        log('❌ No TOC items generated!', 'error');
+                        return;
+                    }
+                    
+                    // Check if scroll handler is working
+                    log('Testing scroll handler...');
+                    
+                    // Get current active item
+                    const activeItemBefore = tocContainer.querySelector('.toc-item.active');
+                    log(`Active item before scroll: ${activeItemBefore ? activeItemBefore.textContent : 'none'}`);
+                    
+                    // Scroll content
+                    contentDisplay.scrollTop = 500;
+                    
+                    // Trigger scroll event manually
+                    contentDisplay.dispatchEvent(new Event('scroll'));
+                    
+                    // Check after a delay (debounce)
+                    setTimeout(() => {
+                        const activeItemAfter = tocContainer.querySelector('.toc-item.active');
+                        log(`Active item after scroll: ${activeItemAfter ? activeItemAfter.textContent : 'none'}`);
+                        
+                        if (!activeItemAfter) {
+                            log('❌ No active TOC item after scroll!', 'error');
+                            
+                            // Try calling the method directly
+                            log('Calling updateActiveFromScroll directly...', 'info');
+                            appWin.tocGenerator.updateActiveFromScroll();
+                            
+                            setTimeout(() => {
+                                const activeItemDirect = tocContainer.querySelector('.toc-item.active');
+                                log(`Active item after direct call: ${activeItemDirect ? activeItemDirect.textContent : 'none'}`);
+                            }, 100);
+                        } else {
+                            log('✓ TOC highlight is working!');
+                        }
+                    }, 200);
+                }, 1000);
+            });
+        }
+        
+        function runAllTests() {
+            clearResults();
+            log('Running all tests...');
+            testLaserAnimation();
+            setTimeout(() => testTOCHighlight(), 3000);
+        }
+        
+        function openMainApp() {
+            window.open('index.html', '_blank');
+        }
+        
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            log('Test page loaded. Click buttons to run tests.');
+        });
+    </script>
+</body>
+</html>
