@@ -36,8 +36,8 @@
             
             // Configuration
             this.config = {
-                animationDuration: 400, // Match CSS transition
-                laserDuration: 600,     // Match laser animation
+                animationDuration: 1500, // 1.5s to match CSS animations
+                laserDuration: 1500,     // Match CSS laser animation duration
                 debounceDelay: 50
             };
             
@@ -226,16 +226,13 @@
             const shineEffect = sidebar.querySelector('.shine-effect');
             if (!shineEffect) return;
             
-            // Add will-change for optimization
-            shineEffect.classList.add('will-animate');
+            // Reset animation by forcing reflow
+            shineEffect.style.animation = 'none';
+            void shineEffect.offsetWidth; // Force reflow
+            shineEffect.style.animation = ''; // Let CSS take over
             
-            // Trigger animation
-            shineEffect.classList.add('active');
-            
-            // Cleanup after animation
-            setTimeout(() => {
-                shineEffect.classList.remove('active', 'will-animate');
-            }, this.config.laserDuration);
+            // The parent .animating class will trigger the CSS animation
+            // No need to add .active class since CSS uses .animating .shine-effect
         }
         
         expandSidebar(side) {

@@ -10,10 +10,10 @@
     
     // Configuration - matches CSS exactly
     const TIMING = {
-        sidebarDuration: 800,  // 0.8s in ms
-        laserDuration: 800,    // Must match sidebar
-        debounceDelay: 30,     // TOC scroll debounce
-        cleanupDelay: 50       // Small buffer after animation
+        sidebarDuration: 1500,  // 1.5s in ms - smoother animation
+        laserDuration: 1500,    // Must match sidebar
+        debounceDelay: 50,      // TOC scroll debounce - slightly increased for smoothness
+        cleanupDelay: 100       // Increased buffer after animation
     };
     
     // Initialize when DOM is ready

@@ -33,6 +33,18 @@ class UIManager {
     }
     
     /**
+     * Debounce function for scroll events
+     * @private
+     */
+    debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    /**
      * Initialize UI Manager
      */
     initialize() {
@@ -86,7 +98,7 @@ class UIManager {
         // Content scroll for TOC sync
         if (this.elements.contentDisplay) {
             this.elements.contentDisplay.addEventListener('scroll', 
-                this.debounce(this.handleContentScroll, 50)
+                this.debounce(() => this.handleContentScroll(), 50)
             );
         }
         
@@ -182,11 +194,10 @@ class UIManager {
             html += '</div></div>';
         });
         
-        // Add expand/collapse all buttons
+        // Add expand/collapse all button
         html = `
             <div class="topic-menu-controls">
-                <button class="control-btn" onclick="uiManager.expandAll()">Összes kinyitása</button>
-                <button class="control-btn" onclick="uiManager.collapseAll()">Összes bezárása</button>
+                <button class="control-btn" id="topic-expand-all" onclick="uiManager.toggleAllTopics()">Összes kinyitása</button>
             </div>
         ` + html;
         
@@ -263,6 +274,29 @@ class UIManager {
         
         // Stop event propagation
         event.stopPropagation();
+    }
+    
+    /**
+     * Toggle all categories and ranges
+     */
+    toggleAllTopics() {
+        const allCategories = this.elements.topicMenu.querySelectorAll('.topic-category');
+        const allRanges = this.elements.topicMenu.querySelectorAll('.topic-range');
+        const expandButton = document.getElementById('topic-expand-all');
+        
+        // Check if any are collapsed
+        const hasCollapsed = Array.from(allCategories).some(el => el.classList.contains('collapsed')) ||
+                           Array.from(allRanges).some(el => el.classList.contains('collapsed'));
+        
+        if (hasCollapsed) {
+            // Expand all
+            this.expandAll();
+            if (expandButton) expandButton.textContent = 'Összes bezárása';
+        } else {
+            // Collapse all
+            this.collapseAll();
+            if (expandButton) expandButton.textContent = 'Összes kinyitása';
+        }
     }
     
     /**

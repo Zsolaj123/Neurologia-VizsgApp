@@ -9,10 +9,10 @@
 
 /* Override root variables */
 :root {
-    --transition-sidebar: 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    --transition-laser: 0.8s ease-in-out !important;
-    --transition-quick: 0.2s ease-out !important;
-    --transition-normal: 0.3s ease-out !important;
+    --transition-sidebar: 1.5s cubic-bezier(0.6, 0.04, 0.3, 0.96) !important;
+    --transition-laser: 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    --transition-quick: 0.3s ease-out !important;
+    --transition-normal: 0.4s ease-out !important;
 }
 
 /* ============================================
@@ -23,14 +23,14 @@
 #left-sidebar,
 #right-sidebar,
 .sidebar-container {
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: width 1.5s cubic-bezier(0.6, 0.04, 0.3, 0.96) !important;
 }
 
 /* Remove conflicting mobile transforms */
 @media (max-width: 768px) {
     #left-sidebar,
     #right-sidebar {
-        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition: transform 1s cubic-bezier(0.6, 0.04, 0.3, 0.96) !important;
     }
 }
 
@@ -111,7 +111,7 @@
 /* Laser animation when sidebar is animating */
 .sidebar-container.animating .shine-effect {
     opacity: 1 !important;
-    animation: laser-scan-final 0.8s ease-in-out forwards !important;
+    animation: laser-scan-final 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
 }
 
 @keyframes laser-scan-final {
@@ -119,11 +119,17 @@
         transform: translateY(0);
         opacity: 0;
     }
-    2% {
+    3% {
+        opacity: 0.8;
+    }
+    10% {
         opacity: 1;
     }
-    98% {
+    90% {
         opacity: 1;
+    }
+    97% {
+        opacity: 0.8;
     }
     100% {
         transform: translateY(calc(100vh + 120px));
@@ -188,7 +194,7 @@
 
 /* Force removal of inline styles on animation */
 .sidebar-container.animating {
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: width 1.5s cubic-bezier(0.6, 0.04, 0.3, 0.96) !important;
 }
 
 /* ============================================

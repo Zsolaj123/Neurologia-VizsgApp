@@ -8,15 +8,16 @@
    ============================================ */
 :root {
     /* Unified timing - SINGLE SOURCE OF TRUTH */
-    --sidebar-duration: 0.8s; /* Smooth but not too slow */
-    --laser-duration: 0.8s;    /* MUST match sidebar duration */
-    --sidebar-easing: cubic-bezier(0.4, 0, 0.2, 1);
-    --laser-easing: ease-in-out;
+    --sidebar-duration: 1.5s; /* Slower, more elegant */
+    --laser-duration: 1.5s;    /* MUST match sidebar duration */
+    /* More natural, organic easing curve */
+    --sidebar-easing: cubic-bezier(0.6, 0.04, 0.3, 0.96);
+    --laser-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     
     /* Visual properties */
-    --laser-width: 6px;
-    --laser-height: 100px;
-    --laser-glow: 25px;
+    --laser-width: 8px;
+    --laser-height: 120px;
+    --laser-glow: 30px;
 }
 
 /* ============================================
@@ -28,6 +29,19 @@
 #right-sidebar,
 .sidebar-container {
     transition: width var(--sidebar-duration) var(--sidebar-easing);
+    transform-origin: left center;
+}
+
+#right-sidebar,
+#right-sidebar.sidebar-container {
+    transform-origin: right center;
+}
+
+/* Subtle scale effect during animation */
+.sidebar-container.animating {
+    transform: scaleX(1.002); /* Very subtle expansion */
+    transition: width var(--sidebar-duration) var(--sidebar-easing),
+                transform var(--sidebar-duration) var(--sidebar-easing);
 }
 
 /* ============================================
@@ -66,25 +80,31 @@
     pointer-events: none;
     z-index: 1000;
     
-    /* Enhanced laser beam */
+    /* Enhanced laser beam with smoother gradient */
     background: linear-gradient(
         to bottom,
         transparent 0%,
-        rgba(0, 255, 65, 0.2) 10%,
-        rgba(0, 255, 65, 0.4) 25%,
-        rgba(0, 255, 65, 0.8) 40%,
+        rgba(0, 255, 65, 0.1) 5%,
+        rgba(0, 255, 65, 0.3) 15%,
+        rgba(0, 255, 65, 0.5) 25%,
+        rgba(0, 255, 65, 0.7) 35%,
+        rgba(0, 255, 65, 0.9) 45%,
         #00ff41 50%,
-        rgba(0, 255, 65, 0.8) 60%,
-        rgba(0, 255, 65, 0.4) 75%,
-        rgba(0, 255, 65, 0.2) 90%,
+        rgba(0, 255, 65, 0.9) 55%,
+        rgba(0, 255, 65, 0.7) 65%,
+        rgba(0, 255, 65, 0.5) 75%,
+        rgba(0, 255, 65, 0.3) 85%,
+        rgba(0, 255, 65, 0.1) 95%,
         transparent 100%
     );
     
-    /* Glow effect */
+    /* Enhanced glow effect with pulse */
     box-shadow: 
-        0 0 var(--laser-glow) rgba(0, 255, 65, 0.6),
-        0 0 calc(var(--laser-glow) * 2) rgba(0, 255, 65, 0.3),
-        inset 0 0 10px rgba(255, 255, 255, 0.8);
+        0 0 var(--laser-glow) rgba(0, 255, 65, 0.8),
+        0 0 calc(var(--laser-glow) * 1.5) rgba(0, 255, 65, 0.5),
+        0 0 calc(var(--laser-glow) * 2.5) rgba(0, 255, 65, 0.3),
+        0 0 calc(var(--laser-glow) * 3.5) rgba(0, 255, 65, 0.1),
+        inset 0 0 15px rgba(255, 255, 255, 0.9);
         
     /* Performance */
     will-change: transform, opacity;
@@ -105,17 +125,23 @@
     animation: laser-scan var(--laser-duration) var(--laser-easing) forwards;
 }
 
-/* Synchronized laser scan animation */
+/* Synchronized laser scan animation with smoother fade */
 @keyframes laser-scan {
     0% {
         transform: translateY(0);
         opacity: 0;
     }
-    2% {
+    3% {
+        opacity: 0.8;
+    }
+    10% {
         opacity: 1;
     }
-    98% {
+    90% {
         opacity: 1;
+    }
+    97% {
+        opacity: 0.8;
     }
     100% {
         transform: translateY(calc(100vh + var(--laser-height)));
@@ -168,22 +194,36 @@
    EDGE GLOW ENHANCEMENT
    ============================================ */
 
-/* Static edge line during animation */
+/* Static edge line during animation with subtle pulsing */
 .sidebar-container.animating::after {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 1px;
+    width: 2px;
     background: linear-gradient(
         to bottom,
         transparent 0%,
-        rgba(0, 255, 65, 0.4) 25%,
-        rgba(0, 255, 65, 0.6) 50%,
-        rgba(0, 255, 65, 0.4) 75%,
+        rgba(0, 255, 65, 0.3) 15%,
+        rgba(0, 255, 65, 0.5) 30%,
+        rgba(0, 255, 65, 0.7) 50%,
+        rgba(0, 255, 65, 0.5) 70%,
+        rgba(0, 255, 65, 0.3) 85%,
         transparent 100%
     );
     opacity: 1;
+    animation: edge-pulse 1.5s ease-in-out;
+}
+
+@keyframes edge-pulse {
+    0%, 100% {
+        opacity: 0.6;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.2);
+    }
 }
 
 #left-sidebar.animating::after {
@@ -200,9 +240,9 @@
 
 @media (max-width: 768px) {
     :root {
-        --sidebar-duration: 0.5s;
-        --laser-duration: 0.5s;
-        --laser-width: 4px;
-        --laser-height: 80px;
+        --sidebar-duration: 1s;
+        --laser-duration: 1s;
+        --laser-width: 6px;
+        --laser-height: 100px;
     }
 }

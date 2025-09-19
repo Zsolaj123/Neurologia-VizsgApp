@@ -144,9 +144,55 @@ When sidebars aren't working:
 4. **Document fixes** to prevent regression
 5. **Avoid !important** - use specificity instead
 
+## Issue #6: Sidebar Animation & TOC Highlighting Not Working
+
+### Symptoms:
+- Laser animation not showing during sidebar collapse/expand
+- TOC items not highlighting when scrolling
+- Multiple CSS files conflicting
+
+### Root Causes:
+1. **Class mismatch**: JavaScript adds `.active` to shine effect, but CSS expects `.animating` on parent
+2. **Timing conflicts**: CSS variables in app-optimized.css (0.4s/0.6s) vs override files (1.5s)
+3. **Selector specificity**: Override files not properly overriding base styles
+4. **TOC layout shift**: Active state adds border causing items to jump
+
+### Solution Applied:
+```css
+/* Fix in app-optimized.css */
+--transition-sidebar: 1.5s cubic-bezier(0.6, 0.04, 0.3, 0.96);
+--transition-laser: 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+/* Fix selector to match JavaScript behavior */
+.sidebar-container.animating .shine-effect {
+    opacity: 1;
+    animation: laser-scan var(--transition-laser) forwards;
+}
+
+/* Prevent TOC layout shift */
+.toc-item {
+    border-left: 4px solid transparent;
+}
+```
+
+```javascript
+// Fix in sidebar-manager-optimized.js
+config: {
+    animationDuration: 1500, // Match CSS
+    laserDuration: 1500
+}
+```
+
+### Prevention Strategy:
+1. **Single source of truth**: Define animations in one place
+2. **Check class names**: Ensure JS and CSS use same classes
+3. **Avoid excessive overrides**: Fix root cause instead
+4. **Test animations**: Check DevTools for applied styles
+
 ## File History
 
 - 2024-09-17: Initial sidebar implementation
 - 2024-09-17: Added Matrix-style laser animation
 - 2024-09-17: Fixed sticky positioning issues
 - 2024-09-17: Created sidebar-fixes.css for consolidated fixes
+- 2025-01-18: Fixed animation conflicts and TOC highlighting

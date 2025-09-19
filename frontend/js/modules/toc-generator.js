@@ -90,7 +90,6 @@ class TocGenerator {
         
         this.tocContainer.innerHTML = `
             <div class="toc-header">
-                <h3>Tartalomjegyzék</h3>
                 <button class="toc-toggle" id="toc-expand-all">Összes kinyitása</button>
             </div>
             <div class="toc-content">
@@ -195,9 +194,11 @@ class TocGenerator {
         
         if (isExpanded) {
             children.classList.remove('expanded');
+            item.classList.remove('expanded');
             arrow.textContent = '▶';
         } else {
             children.classList.add('expanded');
+            item.classList.add('expanded');
             arrow.textContent = '▼';
         }
     }
@@ -215,12 +216,24 @@ class TocGenerator {
         
         if (hasCollapsed) {
             // Expand all
-            allChildren.forEach(child => child.classList.add('expanded'));
+            allChildren.forEach(child => {
+                child.classList.add('expanded');
+                const parentItem = child.previousElementSibling;
+                if (parentItem && parentItem.classList.contains('toc-item')) {
+                    parentItem.classList.add('expanded');
+                }
+            });
             allArrows.forEach(arrow => arrow.textContent = '▼');
             if (expandButton) expandButton.textContent = 'Összes becsukása';
         } else {
             // Collapse all
-            allChildren.forEach(child => child.classList.remove('expanded'));
+            allChildren.forEach(child => {
+                child.classList.remove('expanded');
+                const parentItem = child.previousElementSibling;
+                if (parentItem && parentItem.classList.contains('toc-item')) {
+                    parentItem.classList.remove('expanded');
+                }
+            });
             allArrows.forEach(arrow => arrow.textContent = '▶');
             if (expandButton) expandButton.textContent = 'Összes kinyitása';
         }
@@ -231,6 +244,23 @@ class TocGenerator {
      * @private
      */
     ensureItemVisible(item) {
+        // First ensure all parent items are expanded
+        let parent = item.parentElement;
+        while (parent && parent !== this.tocContainer) {
+            if (parent.classList.contains('toc-children') && !parent.classList.contains('expanded')) {
+                // Expand this parent
+                parent.classList.add('expanded');
+                const parentItem = parent.previousElementSibling;
+                if (parentItem && parentItem.classList.contains('toc-item')) {
+                    parentItem.classList.add('expanded');
+                    const arrow = parentItem.querySelector('.toc-arrow');
+                    if (arrow) arrow.textContent = '▼';
+                }
+            }
+            parent = parent.parentElement;
+        }
+        
+        // Then scroll into view if needed
         const container = this.tocContainer.querySelector('.toc-content');
         if (!container) return;
         
@@ -246,14 +276,23 @@ class TocGenerator {
      * Update TOC based on scroll position
      */
     updateActiveFromScroll() {
-        if (!this.currentTopic || !this.currentTopic.tableOfContents) return;
+        if (!this.currentTopic || !this.currentTopic.tableOfContents) {
+            console.debug('TOC: No current topic or TOC data');
+            return;
+        }
         
         const contentArea = document.getElementById('content-display');
-        if (!contentArea) return;
+        if (!contentArea) {
+            console.debug('TOC: No content area found');
+            return;
+        }
         
         // Find all headers in content
         const headers = contentArea.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
-        if (headers.length === 0) return;
+        if (headers.length === 0) {
+            console.debug('TOC: No headers found in content');
+            return;
+        }
         
         let activeId = null;
         const scrollTop = contentArea.scrollTop;
