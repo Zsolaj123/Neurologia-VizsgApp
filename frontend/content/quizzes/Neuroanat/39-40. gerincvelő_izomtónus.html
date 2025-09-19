@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Kvíz - 3. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .btn-incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+        .explanation {
+            background-color: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: #166534;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div id="quiz-container" class="quiz-container w-full">
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Neuroanatómia Kvíz 3.</h1>
+            <p class="text-lg text-gray-600 mb-8">Teszteld a tudásodat a gerincvelő anatómiája, sérülései és az izomtónus-szabályozás témakörében.</p>
+            <button id="start-btn" class="btn bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg text-xl shadow-lg hover:bg-emerald-700">
+                Kvíz Indítása
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div id="progress-container" class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="question-counter" class="text-sm font-semibold text-gray-600"></span>
+                    <span id="score-counter" class="text-sm font-semibold text-gray-600">Pontszám: 0</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6 min-h-[100px]"></h2>
+            <div id="answer-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+            <div id="feedback-container" class="mt-4">
+                <div id="feedback-text" class="text-center font-semibold text-lg"></div>
+                <div id="explanation-text" class="explanation hidden"></div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Eredmény</h1>
+            <p id="results-text" class="text-2xl text-gray-600 mb-8"></p>
+            <p id="final-score" class="text-6xl font-extrabold text-emerald-600 mb-8"></p>
+            <button id="restart-btn" class="btn bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg text-xl shadow-lg hover:bg-emerald-700">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questionBank = [
+            // From 38. A gerincvelő anatómiája.md
+            {
+                question: "Felnőtt emberben a gerincvelő tipikusan melyik csigolya magasságában végződik?",
+                answers: [
+                    { text: "L1-L2", correct: true },
+                    { text: "T12", correct: false },
+                    { text: "L5", correct: false },
+                    { text: "S2", correct: false }
+                ],
+                explanation: "A gerincvelő rövidebb, mint a gerincoszlop, és az első vagy második ágyéki (lumbalis) csigolya szintjében, a conus medullarisban végződik."
+            },
+            {
+                question: "Melyik gerincvelői dúzzanat (intumescentia) felelős a felső végtagokat beidegző idegfonat eredéséért?",
+                answers: [
+                    { text: "Intumescentia cervicalis (nyaki dúzzanat)", correct: true },
+                    { text: "Intumescentia lumbosacralis", correct: false },
+                    { text: "Conus medullaris", correct: false },
+                    { text: "Cauda equina", correct: false }
+                ],
+                explanation: "Az intumescentia cervicalis (C4-T1 szegmentumok) azért vastagabb, mert itt találhatók a plexus brachialist (karfonatot) alkotó idegsejtek, amelyek a karokat és a kezeket idegzik be."
+            },
+            {
+                question: "Mi a cauda equina (lófarok)?",
+                answers: [
+                    { text: "A gerincvelő vége alatti lumbalis és sacralis ideggyökerek kötege", correct: true },
+                    { text: "A gerincvelő legalsó, kúpszerű szakasza", correct: false },
+                    { text: "A gerincvelőt rögzítő szalag", correct: false },
+                    { text: "A gerincvelő vérellátását biztosító fő artéria", correct: false }
+                ],
+                explanation: "Az L1-L2 csigolyaszint alatt a gerinccsatornában már csak a lefelé haladó ideggyökerek kötege, a cauda equina található, amely a perifériás idegrendszer része."
+            },
+            {
+                question: "Melyik agyhártya-tér tartalmazza az agy-gerincvelői folyadékot (liquort)?",
+                answers: [
+                    { text: "Szubarachnoidális tér", correct: true },
+                    { text: "Epidurális tér", correct: false },
+                    { text: "Szubdurális tér", correct: false },
+                    { text: "A canalis centralis", correct: false }
+                ],
+                explanation: "A szubarachnoidális tér az arachnoidea (pókhálóhártya) és a pia mater (lágy agyhártya) között helyezkedik el, és a liquor tölti ki, amely mechanikai védelmet nyújt."
+            },
+            {
+                question: "A gerincvelő szürkeállományának melyik szarva tartalmazza a mozgató (motoros) neuronokat?",
+                answers: [
+                    { text: "Elülső szarv (cornu anterius)", correct: true },
+                    { text: "Hátulsó szarv (cornu posterius)", correct: false },
+                    { text: "Oldalsó szarv (cornu laterale)", correct: false },
+                    { text: "Commissura grisea", correct: false }
+                ],
+                explanation: "Az elülső szarvban (elsősorban a Rexed IX. laminában) helyezkednek el az alfa- és gamma-motoneuronok, amelyek a vázizmokat idegzik be."
+            },
+            {
+                question: "Melyik Rexed-lamina felel meg a substantia gelatinosának, és játszik kulcsszerepet a fájdalom modulációjában?",
+                answers: [
+                    { text: "Lamina II", correct: true },
+                    { text: "Lamina I", correct: false },
+                    { text: "Lamina IV", correct: false },
+                    { text: "Lamina IX", correct: false }
+                ],
+                explanation: "A Lamina II (substantia gelatinosa Rolandi) a C-rostok fő végződési helye, és tele van gátló interneuronokkal, amelyek a 'kapu-kontroll' elmélet alapját képezik."
+            },
+            {
+                question: "Melyik felszálló pálya felelős a finom, diszkriminatív tapintás és a tudatos propriocepció szállításáért?",
+                answers: [
+                    { text: "Hátsó kötegi rendszer (Fasciculus gracilis et cuneatus)", correct: true },
+                    { text: "Tractus spinothalamicus lateralis", correct: false },
+                    { text: "Tractus spinothalamicus anterior", correct: false },
+                    { text: "Tractus spinocerebellaris", correct: false }
+                ],
+                explanation: "A hátsó kötegi rendszer szállítja azokat az érzőinformációkat, amelyek a nyúltvelőben kereszteződnek (lemniscus medialis), és a pontos tapintás, vibráció és helyzetérzés tudatosulásáért felelősek."
+            },
+            {
+                question: "Hol kereszteződik a tractus corticospinalis rostjainak nagy része?",
+                answers: [
+                    { text: "A nyúltvelő alsó részén (decussatio pyramidum)", correct: true },
+                    { text: "A gerincvelő szintjén, az elülső commissurában", correct: false },
+                    { text: "A középagyban", correct: false },
+                    { text: "Nem kereszteződik", correct: false }
+                ],
+                explanation: "A piramispálya rostjainak kb. 85-90%-a a nyúltvelői piramisokban kereszteződik át az ellenoldalra, és mint tractus corticospinalis lateralis halad tovább."
+            },
+            {
+                question: "Melyik artéria látja el a gerincvelő elülső kétharmadát?",
+                answers: [
+                    { text: "Arteria spinalis anterior", correct: true },
+                    { text: "Arteriae spinales posteriores (pár)", correct: false },
+                    { text: "Arteria radicularis magna (Adamkiewicz-artéria)", correct: false },
+                    { text: "Plexus venosus vertebralis internus", correct: false }
+                ],
+                explanation: "Az egyetlen, páratlan arteria spinalis anterior felelős a gerincvelő elülső, motoros és spinothalamicus területeket is magába foglaló részének vérellátásáért."
+            },
+            {
+                question: "A nervus phrenicus (rekeszideg), amely a rekeszizmot idegzi be, főként mely gerincvelői szegmentumokból ered?",
+                answers: [
+                    { text: "C3-C5", correct: true },
+                    { text: "C1-C2", correct: false },
+                    { text: "C6-C8", correct: false },
+                    { text: "T1-T2", correct: false }
+                ],
+                explanation: "A rekeszizom beidegzése a plexus cervicalisból eredő nervus phrenicuson keresztül történik, amelynek rostjai főként a C3, C4 és C5 szegmentumokból származnak."
+            },
+
+            // From 39. Magassági és keresztmetszeti kórisme a gerincvelő károsodásnál.md
+            {
+                question: "A 'lovaglónadrág' eloszlású érzészavar melyik gerincvelői szindrómára a legjellemzőbb?",
+                answers: [
+                    { text: "Conus medullaris és Cauda equina szindróma", correct: true },
+                    { text: "Brown-Séquard szindróma", correct: false },
+                    { text: "Anterior cord szindróma", correct: false },
+                    { text: "Central cord szindróma", correct: false }
+                ],
+                explanation: "A perinealis, genitális és combok belső-hátsó felszínét érintő, 'lovaglónadrág' anaesthesia az S2-S5 sacralis szegmentumok, illetve ideggyökök károsodásának jele."
+            },
+            {
+                question: "Milyen tünetegyüttest okoz a Brown-Séquard szindróma (féloldali gerincvelő-károsodás)?",
+                answers: [
+                    { text: "Ipszilaterális motoros bénulás és kontralaterális fájdalom/hőérzés-kiesés", correct: true },
+                    { text: "Kontralaterális motoros bénulás és ipszilaterális fájdalom/hőérzés-kiesés", correct: false },
+                    { text: "Mindkét oldali teljes bénulás", correct: false },
+                    { text: "Csak az alsó végtagok bénulása", correct: false }
+                ],
+                explanation: "A féloldali sérülés a már kereszteződött spinothalamicus pályát (fájdalom, hő) és a még nem kereszteződött corticospinalis (motoros) és hátsó kötegi (propriocepció) pályákat érinti. Így a bénulás és propriocepció-zavar azonos, a fájdalom- és hőérzés-kiesés pedig ellenoldali lesz."
+            },
+            {
+                question: "Mi jellemzi a spinalis shock állapotát közvetlenül a súlyos gerincvelő-sérülés után?",
+                answers: [
+                    { text: "Petyhüdt bénulás és areflexia a sérülés szintje alatt", correct: true },
+                    { text: "Spaszticitás és fokozott reflexek", correct: false },
+                    { text: "Csak érzéskiesés, motoros funkciók megtartottak", correct: false },
+                    { text: "Fájdalmas izomgörcsök", correct: false }
+                ],
+                explanation: "A spinalis shock egy átmeneti állapot, amelyben a leszálló pályák megszakadása miatt a sérülés alatti gerincvelői reflexkörök funkcionálisan 'némák', ami petyhüdt bénulást és reflexkiesést eredményez."
+            },
+            {
+                question: "Melyik klinikai jel visszatérése jelzi a spinalis shock fázisának végét?",
+                answers: [
+                    { text: "A bulbocavernosus reflex megjelenése", correct: true },
+                    { text: "A Babinski-jel megjelenése", correct: false },
+                    { text: "A patellareflex visszatérése", correct: false },
+                    { text: "Az akaratlagos mozgás visszatérése", correct: false }
+                ],
+                explanation: "A bulbocavernosus reflex (a glans penis vagy clitoris megszorítására az analis sphincter összehúzódik) egy sacralis reflex, amelynek visszatérése jelzi, hogy a gerincvelői reflexkörök újra működőképesek."
+            },
+            {
+                question: "Melyik myotom felelős a könyök hajlításáért (m. biceps brachii)?",
+                answers: [
+                    { text: "C5", correct: true },
+                    { text: "C6", correct: false },
+                    { text: "C7", correct: false },
+                    { text: "C8", correct: false }
+                ],
+                explanation: "A C5 myotom kulcsizma a könyökhajlítókért felelős m. biceps brachii. Ennek erejét vizsgálva a C5 szegmentum motoros funkciójáról kapunk képet."
+            },
+            {
+                question: "Az Achilles-reflex kiváltásával melyik gerincvelői szegmentumokat vizsgáljuk?",
+                answers: [
+                    { text: "S1-S2", correct: true },
+                    { text: "L3-L4", correct: false },
+                    { text: "L5", correct: false },
+                    { text: "C7-C8", correct: false }
+                ],
+                explanation: "Az Achilles-reflex (a boka plantárflexiója az Achilles-ín megütésére) az S1 és S2 ideggyökök épségét teszteli."
+            },
+            {
+                question: "Mit jelent az ASIA 'A' fokozatú gerincvelő-sérülés?",
+                answers: [
+                    { text: "Komplett sérülés, sem motoros, sem szenzoros funkció nincs a sacralis szegmentumokban", correct: true },
+                    { text: "Inkomplett sérülés, csak szenzoros funkció van megőrizve", correct: false },
+                    { text: "Inkomplett sérülés, a motoros funkciók többsége megőrzött", correct: false },
+                    { text: "Normális neurológiai állapot", correct: false }
+                ],
+                explanation: "Az ASIA A a legsúlyosabb sérülési kategória, amely a gerincvelő teljes funkcionális átszakadását jelenti, a legalsó sacralis (S4-S5) szegmentumok funkcióinak hiányával."
+            },
+            {
+                question: "Melyik gerincvelői pálya megkíméltsége miatt marad meg a propriocepció és a vibrációérzés az anterior cord szindrómában?",
+                answers: [
+                    { text: "Hátsó kötegek (Fasciculus gracilis et cuneatus)", correct: true },
+                    { text: "Tractus spinothalamicus", correct: false },
+                    { text: "Tractus corticospinalis", correct: false },
+                    { text: "Tractus spinocerebellaris", correct: false }
+                ],
+                explanation: "Az anterior cord szindrómát az arteria spinalis anterior elzáródása okozza, amely a gerincvelő elülső 2/3-át látja el. A hátsó kötegek az arteriae spinales posteriores által ellátottak, így funkciójuk (propriocepció, vibráció) megmarad."
+            },
+
+            // From 40. Izomtónus szabályozása.md
+            {
+                question: "Mi az izomtónus fiziológiai definíciója?",
+                answers: [
+                    { text: "Az izom nyugalmi állapotban is meglévő, enyhe, állandó feszülése", correct: true },
+                    { text: "Az izom maximális összehúzódási képessége", correct: false },
+                    { text: "Az izom teljes elernyedésének állapota", correct: false },
+                    { text: "Akaratlagos izom-összehúzódás", correct: false }
+                ],
+                explanation: "Az izomtónus egy alapvető feszesség, amely a testtartás fenntartásához és a mozgásokra való gyors reagáláshoz szükséges."
+            },
+            {
+                question: "Melyik proprioceptor érzékeli az izom hosszának és a megnyúlás sebességének változását?",
+                answers: [
+                    { text: "Izomorsó", correct: true },
+                    { text: "Golgi-féle ínorsó", correct: false },
+                    { text: "Ruffini-végtest", correct: false },
+                    { text: "Pacinian-testecske", correct: false }
+                ],
+                explanation: "Az izomorsók az izomrostokkal párhuzamosan helyezkednek el, és az izomhossz változásaira érzékenyek, míg a Golgi-ínorsók az izomfeszülést detektálják."
+            },
+            {
+                question: "Mi az alfa-gamma koaktiváció funkciója?",
+                answers: [
+                    { text: "Fenntartja az izomorsó érzékenységét az izom aktív rövidülése közben", correct: true },
+                    { text: "Gátolja az antagonista izmot", correct: false },
+                    { text: "Kizárólag az alfa-motoneuronokat serkenti", correct: false },
+                    { text: "Kizárólag a gamma-motoneuronokat serkenti", correct: false }
+                ],
+                explanation: "A gamma-motoneuronok az izomorsó intrafuzális rostjait feszítik meg, így az orsó akkor is képes jelezni a hossz-változást, amikor a fő (extrafuzális) izomrostok rövidülnek."
+            },
+            {
+                question: "A nyújtási reflex (pl. patellareflex) egy ...",
+                answers: [
+                    { text: "monoszinaptikus reflex", correct: true },
+                    { text: "poliszinaptikus reflex", correct: false },
+                    { text: "tanult reflex", correct: false },
+                    { text: "vegetatív reflex", correct: false }
+                ],
+                explanation: "A nyújtási reflexben az izomorsóból érkező Ia afferens rost közvetlenül, egyetlen szinapszissal kapcsolódik át az alfa-motoneuronra a gerincvelőben."
+            },
+            {
+                question: "Melyik receptor aktiválódása váltja ki az inverz nyújtási reflexet (autogén gátlást)?",
+                answers: [
+                    { text: "Golgi-féle ínorsó", correct: true },
+                    { text: "Izomorsó", correct: false },
+                    { text: "Szabad idegvégződés", correct: false },
+                    { text: "Merkel-sejt", correct: false }
+                ],
+                explanation: "Az inverz nyújtási reflex a túlzott izomfeszülés elleni védelmet szolgálja, és a feszülésre érzékeny Golgi-ínorsók aktiválják."
+            },
+            {
+                question: "Melyik leszálló pálya felelős elsődlegesen az egyensúly fenntartásáért és az antigravitációs izmok tónusának fokozásáért?",
+                answers: [
+                    { text: "Tractus vestibulospinalis", correct: true },
+                    { text: "Tractus corticospinalis lateralis", correct: false },
+                    { text: "Tractus rubrospinalis", correct: false },
+                    { text: "Tractus tectospinalis", correct: false }
+                ],
+                explanation: "A vestibulospinalis pályák az egyensúlyérzékelő szervből kapnak információt, és az extenzor izmok tónusának facilitálásával segítik a testtartás megőrzését."
+            },
+            {
+                question: "Melyik állapotra jellemző a sebességfüggő tónusfokozódás és a 'zsebkéstünet'?",
+                answers: [
+                    { text: "Spaszticitás", correct: true },
+                    { text: "Rigiditás", correct: false },
+                    { text: "Hipotónia", correct: false },
+                    { text: "Atonia", correct: false }
+                ],
+                explanation: "A spaszticitás a felső motoneuron sérülésének jele, ahol a nyújtási reflex kórosan fokozott, és az ellenállás a passzív mozgatás sebességével nő."
+            },
+            {
+                question: "A Parkinson-kórra jellemző rigiditás mely agyi struktúra károsodásának következménye?",
+                answers: [
+                    { text: "Bazális ganglionok (törzsdúcok)", correct: true },
+                    { text: "Kisagy (cerebellum)", correct: false },
+                    { text: "Gerincvelő elülső szarva", correct: false },
+                    { text: "Motoros kéreg", correct: false }
+                ],
+                explanation: "A rigiditás, a bradykinesia és a nyugalmi tremor a bazális ganglionok, különösen a substantia nigra dopaminerg sejtjeinek pusztulásával járó Parkinson-kór klasszikus tünetei."
+            },
+            {
+                question: "A kisagy károsodása milyen típusú izomtónus-zavart okoz jellemzően?",
+                answers: [
+                    { text: "Hipotónia", correct: true },
+                    { text: "Spaszticitás", correct: false },
+                    { text: "Rigiditás", correct: false },
+                    { text: "Dystonia", correct: false }
+                ],
+                explanation: "A kisagy a mozgáskoordináció mellett az izomtónus finomhangolásáért is felelős. Sérülésekor a tónusfenntartó reflexkörök facilitációja csökken, ami hipotóniához vezet."
+            }
+        ];
+        
+        // Function to create a full question bank with enough questions
+        function createFullQuestionBank(targetSize) {
+            let fullBank = [...questionBank];
+            let i = 0;
+            while (fullBank.length < targetSize) {
+                const newQuestion = JSON.parse(JSON.stringify(questionBank[i % questionBank.length]));
+                fullBank.push(newQuestion);
+                i++;
+            }
+            const extraQuestions = [
+                {
+                    question: "A gerincvelő elülső kötegében (funiculus anterior) melyik leszálló pálya NEM található meg?",
+                    answers: [
+                        { text: "Tractus corticospinalis lateralis", correct: true },
+                        { text: "Tractus corticospinalis anterior", correct: false },
+                        { text: "Tractus vestibulospinalis", correct: false },
+                        { text: "Tractus reticulospinalis (mediális/pontin)", correct: false }
+                    ],
+                    explanation: "A tractus corticospinalis lateralis (keresztezett piramispálya) a gerincvelő oldalsó kötegében (funiculus lateralis) halad."
+                },
+                {
+                    question: "Melyik interneuron valósít meg negatív visszacsatolást az alfa-motoneuronokra, stabilizálva azok kisülési frekvenciáját?",
+                    answers: [
+                        { text: "Renshaw-sejt", correct: true },
+                        { text: "Ia gátló interneuron", correct: false },
+                        { text: "Clarke-oszlop neuronja", correct: false },
+                        { text: "WDR neuron", correct: false }
+                    ],
+                    explanation: "A Renshaw-sejteket az alfa-motoneuronok rekurrens kollaterálisai aktiválják, és visszagátolják ugyanazokat a motoneuronokat, megakadályozva a túlzott aktivitást."
+                },
+                {
+                    question: "Melyik gerincvelői szindróma okoz disszociált érzészavart?",
+                    answers: [
+                        { text: "Brown-Séquard szindróma", correct: true },
+                        { text: "Teljes harántlézió", correct: false },
+                        { text: "Conus medullaris szindróma", correct: false },
+                        { text: "Posterior cord szindróma", correct: false }
+                    ],
+                    explanation: "A Brown-Séquard szindrómában (féloldali lézió) a propriocepció azonos oldalon, míg a fájdalom- és hőérzés az ellenkező oldalon esik ki a pályák kereszteződési viszonyai miatt."
+                },
+                 {
+                    question: "Melyik idegfonat (plexus) biztosítja a felső végtag teljes beidegzését?",
+                    answers: [
+                        { text: "Plexus brachialis (C5-T1)", correct: true },
+                        { text: "Plexus cervicalis (C1-C4)", correct: false },
+                        { text: "Plexus lumbalis (L1-L4)", correct: false },
+                        { text: "Plexus sacralis (L4-S4)", correct: false }
+                    ],
+                    explanation: "A plexus brachialisból erednek a kar és kéz fő idegei, mint a n. radialis, n. medianus és n. ulnaris."
+                },
+                {
+                    question: "Melyik agyideg sérülése okozza a nyelv mozgásainak zavarát?",
+                    answers: [
+                        { text: "Nervus hypoglossus (XII.)", correct: true },
+                        { text: "Nervus glossopharyngeus (IX.)", correct: false },
+                        { text: "Nervus vagus (X.)", correct: false },
+                        { text: "Nervus facialis (VII.)", correct: false }
+                    ],
+                    explanation: "A XII. agyideg, a nervus hypoglossus, a nyelv külső és belső izmainak motoros beidegzéséért felelős."
+                },
+                {
+                    question: "Mi a 'fogaskerék' rigiditás?",
+                    answers: [
+                        { text: "Rigiditás és nyugalmi tremor kombinációja, amely a passzív mozgatás során szakaszos ellenállást okoz", correct: true },
+                        { text: "A spaszticitás egyik formája", correct: false },
+                        { text: "A hipotónia jele", correct: false },
+                        { text: "Egy normális fiziológiás jelenség", correct: false }
+                    ],
+                    explanation: "A 'fogaskerék' (cogwheel) rigiditás a Parkinson-kórra jellemző tünet, ahol a folyamatos merevséget (rigiditást) a végtag remegése (tremor) szakítja meg."
+                }
+            ];
+
+            // Add more unique questions based on the logic
+             let moreQuestions = [
+                {
+                    question: "A gerincvelő melyik szarvában található a szimpatikus idegrendszer preganglionáris neuronjainak sejtteste?",
+                    answers: [
+                        { text: "Oldalsó szarv (T1-L2 szegmentumokban)", correct: true },
+                        { text: "Elülső szarv", correct: false },
+                        { text: "Hátulsó szarv", correct: false },
+                        { text: "Bárhol a szürkeállományban", correct: false }
+                    ],
+                    explanation: "Az oldalsó szarv (cornu laterale) a T1-L2(L3) szinteken a szimpatikus, az S2-S4 szinteken pedig a paraszimpatikus preganglionáris neuronokat tartalmazza."
+                },
+                {
+                    question: "Melyik pálya felelős a nem tudatosuló proprioceptív információk szállításáért a kisagyba?",
+                    answers: [
+                        { text: "Tractus spinocerebellaris", correct: true },
+                        { text: "Tractus spinothalamicus", correct: false },
+                        { text: "Hátsó kötegi rendszer", correct: false },
+                        { text: "Tractus corticospinalis", correct: false }
+                    ],
+                    explanation: "A spinocerebelláris pályák (anterior és posterior) az izmokból és ízületekből származó, a mozgáskoordinációhoz szükséges információkat szállítják a kisagynak."
+                },
+                {
+                    question: "A patella reflex (térdreflex) melyik gerincvelői szegmentumokat teszteli elsősorban?",
+                    answers: [
+                        { text: "L2-L4", correct: true },
+                        { text: "C5-C6", correct: false },
+                        { text: "S1-S2", correct: false },
+                        { text: "T8-T10", correct: false }
+                    ],
+                    explanation: "A patella reflex a m. quadriceps femoris nyújtási reflexe, amelyet főként az L3 és L4 ideggyökök közvetítenek a n. femoralison keresztül."
+                },
+                {
+                    question: "Mi a 'felső motoneuron lézió' egyik jellegzetes tünete a spinalis shock lezajlása után?",
+                    answers: [
+                        { text: "Spaszticitás és hiperreflexia", correct: true },
+                        { text: "Petyhüdt bénulás és areflexia", correct: false },
+                        { text: "Izomatrófia", correct: false },
+                        { text: "Fasciculatio", correct: false }
+                    ],
+                    explanation: "A felső motoneuron (pl. a piramispálya) sérülésekor a leszálló gátló hatások kiesnek, ami a gerincvelői reflexek kóros fokozódásához, spaszticitáshoz vezet."
+                },
+                {
+                    question: "Mi a 'reciprok gátlás' lényege?",
+                    answers: [
+                        { text: "Amikor egy izom összehúzódik, az ellentétes működésű (antagonista) izom ellazul", correct: true },
+                        { text: "Ugyanazon izom gátlása, amelyik összehúzódott", correct: false },
+                        { text: "Minden izom egyidejű gátlása", correct: false },
+                        { text: "A nyújtási reflex gátlása", correct: false }
+                    ],
+                    explanation: "A reciprok gátlást az Ia gátló interneuronok közvetítik, biztosítva a sima és koordinált mozgást azáltal, hogy megakadályozzák az antagonista izmok ellenállását."
+                },
+            ];
+
+            fullBank.push(...extraQuestions, ...moreQuestions, ...moreQuestions, ...extraQuestions); // Adding more variation
+            // Ensure bank size is sufficient
+            let finalBank = [];
+            for (let i = 0; i < targetSize; i++) {
+                finalBank.push(fullBank[i % fullBank.length]);
+            }
+            return finalBank;
+        }
+
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const questionCounter = document.getElementById('question-counter');
+        const scoreCounter = document.getElementById('score-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const answerButtons = document.getElementById('answer-buttons');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackText = document.getElementById('feedback-text');
+        const explanationText = document.getElementById('explanation-text');
+
+        const resultsText = document.getElementById('results-text');
+        const finalScore = document.getElementById('final-score');
+
+        let allQuestions, shuffledQuestions, currentQuestionIndex;
+        let score = 0;
+        const totalQuestionsForQuiz = 20; // Number of questions per quiz session
+
+        // Functions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            allQuestions = createFullQuestionBank(80); // Ensure the bank is large enough
+            shuffledQuestions = shuffleArray([...allQuestions]).slice(0, totalQuestionsForQuiz);
+            currentQuestionIndex = 0;
+            score = 0;
+            updateScoreDisplay();
+            setNextQuestion();
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion(shuffledQuestions[currentQuestionIndex]);
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionText.innerText = question.question;
+            // Create a shuffled version of the answers for display
+            const answersToShow = shuffleArray([...question.answers]);
+            answersToShow.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerHTML = answer.text; // Use innerHTML to render potential formatting
+                button.classList.add('btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'text-gray-700', 'hover:bg-gray-100');
+                button.dataset.correct = answer.correct;
+                button.dataset.explanation = question.explanation;
+                button.addEventListener('click', selectAnswer);
+                answerButtons.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            feedbackText.innerText = '';
+            feedbackText.classList.remove('text-green-600', 'text-red-600');
+            explanationText.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.currentTarget; // Use currentTarget to be safe
+            const correct = selectedBtn.dataset.correct === 'true';
+            const explanation = selectedBtn.dataset.explanation;
+
+            // Disable all buttons
+            Array.from(answerButtons.children).forEach(button => {
+                button.disabled = true;
+                // Highlight the correct answer
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('btn-correct');
+                }
+            });
+
+            if (correct) {
+                score++;
+                updateScoreDisplay();
+                selectedBtn.classList.add('btn-correct');
+                feedbackText.innerText = 'Helyes!';
+                feedbackText.classList.add('text-green-600');
+            } else {
+                selectedBtn.classList.add('btn-incorrect');
+                feedbackText.innerText = 'Helytelen.';
+                feedbackText.classList.add('text-red-600');
+            }
+            
+            // Show explanation
+            if (explanation) {
+                explanationText.innerText = explanation;
+                explanationText.classList.remove('hidden');
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                setNextQuestion();
+            }, 4000); // Increased delay to read explanation
+        }
+
+        function updateProgress() {
+            questionCounter.innerText = `Kérdés: ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`;
+            const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+        
+        function updateScoreDisplay() {
+            scoreCounter.innerText = `Pontszám: ${score}`;
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            const percentage = Math.round((score / shuffledQuestions.length) * 100);
+            resultsText.innerText = `A tesztet ${score} ponttal zártad a ${shuffledQuestions.length}-ból.`;
+            finalScore.innerText = `${percentage}%`;
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

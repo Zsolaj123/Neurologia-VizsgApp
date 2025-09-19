@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option:hover {
+            background-color: #f0f9ff; /* light blue */
+            border-color: #3b82f6; /* blue */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* light green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        .explanation {
+            border-left: 4px solid #60a5fa; /* blue */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="bg-white p-8 rounded-2xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold mb-2 text-slate-900">Interaktív Neurológia Teszt</h1>
+            <p class="text-slate-600 mb-8">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button data-topic="140" class="topic-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">140. A szimptómás epilepsziás rohamok</button>
+                <button data-topic="141" class="topic-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">141. Vizsgálati stratégia első epilepsziás roham esetén</button>
+                <button data-topic="142" class="topic-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">142. Az antiepilepticumok alkalmazásának elvei</button>
+                <button data-topic="144" class="topic-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">144. A konvulzív és non-konvulzív status epilepticus kezelése</button>
+                <button data-topic="145" class="topic-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">145. A rövid ideig tartó eszméletvesztések differenciáldiagnózisa</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-xl font-bold text-slate-900">Téma Címe</h2>
+                    <button id="back-to-menu" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg text-sm">Vissza a menübe</button>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="feedback-container" class="mt-6 hidden">
+                    <div id="explanation-box" class="explanation bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-slate-800 mb-2">Magyarázat</h3>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                    <button id="next-question-btn" class="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-slate-900">Eredmények</h2>
+                <p id="score-text" class="text-xl mb-6 text-slate-700"></p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition">Újrapróbálkozás</button>
+                    <button id="main-menu-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition">Főmenü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+            "140": {
+                title: "140. A szimptómás epilepsziás rohamok",
+                questions: [
+                    {
+                        question: "Mi a definíciója az akut szimptómás (provokált) rohamnak?",
+                        options: [
+                            "Legalább két, 24 órán túli különbséggel jelentkező nem provokált roham.",
+                            "Egy specifikus, azonosítható, átmeneti vagy tartós agyi vagy szisztémás inzultus közvetlen következményeként fellépő roham.",
+                            "Ismeretlen eredetű, ismétlődő rohamok sorozata.",
+                            "Egyetlen nem provokált roham, alacsony kiújulási kockázattal."
+                        ],
+                        answer: 1,
+                        explanation: "A dokumentum szerint az akut szimptómás roham 'olyan epilepsziás roham, amely egy specifikus, azonosítható, átmeneti vagy tartós agyi vagy szisztémás inzultus közvetlen következményeként lép fel'. A többi opció az epilepszia betegség definíciójára vagy annak részeire utal."
+                    },
+                    {
+                        question: "Melyik NEM tartozik a szimptómás epilepsziák strukturális agyi elváltozásai közé?",
+                        options: [
+                            "Koponyatrauma",
+                            "Agyi térfoglaló folyamatok",
+                            "Hypoglykaemia",
+                            "Cerebrovaszkuláris betegségek"
+                        ],
+                        answer: 2,
+                        explanation: "A hypoglykaemia (alacsony vércukorszint) egy metabolikus zavar, nem pedig strukturális agyi elváltozás. A koponyatrauma, agydaganatok és a stroke mind strukturális okok."
+                    },
+                    {
+                        question: "Melyik metabolikus zavar okozhat akut szimptómás rohamot?",
+                        options: [
+                            "Hyperthyreosis",
+                            "Hyponatraemia",
+                            "Hypercholesterinaemia",
+                            "Hyperuricaemia"
+                        ],
+                        answer: 1,
+                        explanation: "A hyponatraemia (alacsony nátriumszint) egyike a felsorolt elektrolit-egyensúlyzavaroknak, amelyek megváltoztathatják a neuronmembránok ingerlékenységét és rohamot okozhatnak. A többi felsorolt állapot általában nem közvetlen rohamkiváltó ok."
+                    },
+                    {
+                        question: "Mi jellemző a tudatzavarral járó fokális rohamokra (korábban komplex parciális rohamok)?",
+                        options: [
+                            "A tudat teljesen megtartott, a beteg végig reagál.",
+                            "A tudatállapot megváltozik, a beteg zavart lehet és automatizmusok jelentkezhetnek.",
+                            "Mindig az egész testre kiterjedő ritmikus rángásokkal jár.",
+                            "Néhány másodperces 'elbambulás', ami után a beteg azonnal folytatja a tevékenységét."
+                        ],
+                        answer: 1,
+                        explanation: "A tudatzavarral járó fokális rohamok során 'a tudatállapot megváltozik, a beteg lehet zavart, nem reagál megfelelően a környezetére... Gyakoriak az automatizmusok (pl. csámcsogás, nyeldeklés, ruhapiszkálás)'."
+                    },
+                    {
+                        question: "Mi az 'aura' egy epilepsziás roham kontextusában?",
+                        options: [
+                            "A roham utáni zavartság állapota.",
+                            "A rohamot bevezető szubjektív érzés vagy tünet, amelyet a beteg a roham kezdeteként él meg.",
+                            "A roham alatti eszméletvesztés.",
+                            "A rohamot kiváltó külső inger."
+                        ],
+                        answer: 1,
+                        explanation: "Az aura 'egyes fokális rohamokat, illetve a fokálisból generalizálódó rohamokat bevezető szubjektív érzés vagy tünet, amelyet a beteg a roham kezdeteként él meg'. Az aura jellege utalhat a roham kiindulási helyére."
+                    },
+                    {
+                        question: "Melyik a legfontosabb képalkotó eljárás strukturális agyi eltérések kimutatására epilepsziában?",
+                        options: [
+                            "Koponya CT",
+                            "Koponya röntgen",
+                            "Koponya MRI",
+                            "Koponya UH"
+                        ],
+                        answer: 2,
+                        explanation: "A koponya MRI 'a legfontosabb képalkotó eljárás strukturális agyi eltérések (pl. daganat, stroke, fejlődési rendellenesség, hippokampusz szklerózis) kimutatására', mivel sokkal érzékenyebb a finomabb eltérésekre, mint a CT."
+                    },
+                    {
+                        question: "Mikor indokolt általában antiepileptikum (AED) beállítása egy akut szimptómás roham esetén?",
+                        options: [
+                            "Minden esetben azonnal el kell kezdeni.",
+                            "Csak akkor, ha a beteg elmúlt 60 éves.",
+                            "Általában nem indokolt, ha a provokáló tényező kiiktatható.",
+                            "Csak ha a roham 1 percnél tovább tartott."
+                        ],
+                        answer: 2,
+                        explanation: "Akut szimptómás roham esetén az antiepileptikumok beállítása 'általában nem indokolt, ha a provokáló tényező kiiktatható és nem várható annak gyors visszatérése'. A kezelés elsősorban a kiváltó ok megszüntetésére irányul."
+                    },
+                    {
+                        question: "Mi a posztiktális állapot?",
+                        options: [
+                            "A rohamot megelőző időszak.",
+                            "A roham alatti motoros jelenségek összessége.",
+                            "A roham lezajlása utáni periódus, amelyet zavartság, fáradtság, fejfájás jellemezhet.",
+                            "A gyógyszeres kezelés beállításának fázisa."
+                        ],
+                        answer: 2,
+                        explanation: "A posztiktális állapot 'a roham lezajlása utáni periódus, amelyet zavartság, fáradtság, fejfájás, izomfájdalom, aluszékonyság jellemezhet'."
+                    },
+                    {
+                        question: "Melyik rohamtípusra jellemző a hirtelen, rövid tudatmegszakadás, 'elbambulás', főleg gyermekkorban?",
+                        options: [
+                            "Tónusos-klónusos roham",
+                            "Absence roham",
+                            "Myoclonusos roham",
+                            "Atóniás roham"
+                        ],
+                        answer: 1,
+                        explanation: "Az absence roham ('petit mal') 'főleg gyermekkorban jellemző. Rövid (néhány másodperces) tudatmegszakadással, \"elbambulással\" jár, a beteg tevékenységét megszakítja, tekintete üres'."
+                    },
+                    {
+                        question: "Az alábbiak közül melyik NEM egy tipikus kiváltó oka az akut szimptómás rohamoknak?",
+                        options: [
+                            "Alkoholmegvonás",
+                            "Magas koleszterinszint",
+                            "Központi idegrendszeri fertőzés",
+                            "Súlyos fejsérülés"
+                        ],
+                        answer: 1,
+                        explanation: "Míg az alkoholmegvonás, a fertőzések (meningitis, encephalitis) és a koponyatrauma gyakori okok, a magas koleszterinszint önmagában nem közvetlen kiváltója egy akut szimptómás rohamnak."
+                    },
+                    {
+                        question: "Mi a Todd-parézis?",
+                        options: [
+                            "A rohamot bevezető bénulásos érzés.",
+                            "Fokális rohamok után előforduló átmeneti neurológiai deficit, pl. végtaggyengeség.",
+                            "A gyógyszeres kezelés egyik mellékhatása.",
+                            "Egy ritka, genetikai epilepszia szindróma."
+                        ],
+                        answer: 1,
+                        explanation: "A Todd-parézis egy, a posztiktális állapotban előforduló 'átmeneti neurológiai deficit', amely a roham által érintett agyterületnek megfelelő funkciókiesést (pl. bénulást) jelent."
+                    },
+                    {
+                        question: "Milyen típusú daganatok asszociálódnak gyakrabban epilepsziával?",
+                        options: [
+                            "A gyorsan növő, magas malignitású tumorok.",
+                            "A lassan növő, alacsony malignitású tumorok (LEATs).",
+                            "Kizárólag a metasztatikus agydaganatok.",
+                            "Kizárólag a jóindulatú agydaganatok."
+                        ],
+                        answer: 1,
+                        explanation: "A dokumentum szerint 'a lassan növő, alacsony malignitású tumorok (LEATs) gyakrabban asszociálódnak epilepsziával, mint a magas malignitásúak'."
+                    },
+                    {
+                        question: "Melyik parazitás fertőzés gyakori oka az epilepsziának endémiás területeken?",
+                        options: [
+                            "Malária",
+                            "Toxoplazmózis",
+                            "Neurociszticerkózis",
+                            "Álomkór"
+                        ],
+                        answer: 2,
+                        explanation: "A neurociszticerkózis, amelyet a Taenia solium lárvája okoz, 'endémiás területeken az epilepszia gyakori oka'."
+                    },
+                    {
+                        question: "Mi jellemző az atóniás rohamokra?",
+                        options: [
+                            "Az izmok hirtelen megfeszülése.",
+                            "Ritmikus rángások az egész testen.",
+                            "Az izomtónus hirtelen elvesztése, a beteg 'összecsuklik'.",
+                            "Fényfelvillanások látása."
+                        ],
+                        answer: 2,
+                        explanation: "Az atóniás rohamokra 'az izomtónus hirtelen elvesztése, a beteg \"összecsuklik\", elesik' jellemző."
+                    },
+                    {
+                        question: "Melyik diagnosztikai eljárás a leghasznosabb a rohamok epilepsziás eredetének megerősítésében az agy elektromos aktivitásának vizsgálatával?",
+                        options: [
+                            "MRI",
+                            "CT",
+                            "EEG",
+                            "SPECT"
+                        ],
+                        answer: 2,
+                        explanation: "Az elektroenkefalográfia (EEG) 'az agy elektromos aktivitásának vizsgálata', amely 'segít a rohamok epilepsziás eredetének megerősítésében'."
+                    },
+                    {
+                        question: "Milyen provokációs módszereket alkalmaznak az EEG vizsgálat során?",
+                        options: [
+                            "Fizikai terhelés és hideg víz",
+                            "Fotostimuláció és hiperventilláció",
+                            "Hangos zajok és pszichológiai tesztek",
+                            "Gyógyszeres provokáció és alvásindukció"
+                        ],
+                        answer: 1,
+                        explanation: "Az EEG vizsgálat során alkalmazott provokációs módszerek a 'fotostimuláció (villogó fényingerlés), hiperventilláció (mély, szapora légzés)'."
+                    },
+                    {
+                        question: "Mi a prognózisa egy olyan akut szimptómás rohamnak, amelynek kiváltó oka átmeneti és maradéktalanul gyógyítható (pl. láz)?",
+                        options: [
+                            "Rossz, szinte biztosan epilepszia alakul ki.",
+                            "Változó, a beteg életkorától függ.",
+                            "Általában jó, a további rohamok kockázata alacsony.",
+                            "Ismeretlen, nem lehet előre jelezni."
+                        ],
+                        answer: 2,
+                        explanation: "Ha a kiváltó ok átmeneti és maradéktalanul gyógyítható, 'a prognózis általában jó, és a további rohamok kockázata alacsony, miután az alapállapot rendeződött'."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ a szimptómás epilepsziás rohamok prognózisával kapcsolatban?",
+                        options: [
+                            "A prognózis független a kiváltó októl.",
+                            "A komplex parciális rohamoknak általában jobb a prognózisa, mint a generalizált rohamoknak.",
+                            "A súlyos, tartós agyi károsodással járó állapotok növelik a későbbi epilepszia kialakulásának kockázatát.",
+                            "Az elsőként választott gyógyszerre adott válasz nem befolyásolja a prognózist."
+                        ],
+                        answer: 2,
+                        explanation: "Súlyos, tartós agyi károsodással járó állapotok (pl. súlyos koponyatrauma, kiterjedt stroke) esetén 'nagyobb a valószínűsége a rohamok kiújulásának és a későbbi epilepszia kialakulásának', ami rosszabb prognózist jelent."
+                    },
+                    {
+                        question: "Melyik NEM egy tipikus tünete a tudatzavar nélküli fokális rohamoknak?",
+                        options: [
+                            "Egy végtag rángása.",
+                            "Teljes eszméletvesztés és elesés.",
+                            "Zsibbadás vagy bizsergés.",
+                            "Deja vu vagy félelem érzése."
+                        ],
+                        answer: 1,
+                        explanation: "A tudatzavar nélküli fokális rohamok során 'a tudat megtartott'. A teljes eszméletvesztés és elesés generalizált rohamokra vagy tudatzavarral járó fokális rohamokra jellemző, amelyek másodlagosan generalizálódnak."
+                    },
+                    {
+                        question: "Milyen időbeli viszonyt jelent az 'akut szimptómás' roham a kiváltó eseményhez képest?",
+                        options: [
+                            "Több mint 1 hónappal a kiváltó esemény után.",
+                            "Pontosan 24 órával a kiváltó esemény után.",
+                            "Kevesebb mint 7 nappal a kiváltó esemény után.",
+                            "Több mint 7 nappal a kiváltó esemény után."
+                        ],
+                        answer: 2,
+                        explanation: "Az összefoglaló táblázat szerint az akut szimptómás roham időbeli viszonya a kiváltó eseményhez képest kevesebb mint 7 nap."
+                    }
+                ]
+            },
+            "141": {
+                title: "141. Vizsgálati stratégia első epilepsziás roham esetén",
+                questions: [
+                    {
+                        question: "Mi az epilepszia betegség operatív klinikai definíciója az ILAE 2014 szerint?",
+                        options: [
+                            "Bármilyen, eszméletvesztéssel járó roham.",
+                            "Legalább két, nem provokált roham, melyek között több mint 24 óra telt el.",
+                            "Egyetlen, láz által provokált roham gyermekkorban.",
+                            "Minden olyan roham, ami után a beteg zavart."
+                        ],
+                        answer: 1,
+                        explanation: "Az ILAE 2014-es definíciója szerint az epilepszia betegség diagnózisa felállítható, ha 'legalább két, nem provokált (vagy reflex) roham, melyek között több mint 24 óra telt el'. A definíciónak további két pontja is van, de ez az egyik alapfeltétel."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ az első epilepsziás roham kivizsgálásával kapcsolatban?",
+                        options: [
+                            "Minden első roham epilepszia betegséget jelent.",
+                            "A kivizsgálás célja annak eldöntése, hogy valóban epilepsziás rohamról van-e szó, és mi az etiológiája.",
+                            "A kivizsgálás során az MRI vizsgálat felesleges.",
+                            "A szemtanúk beszámolója nem fontos."
+                        ],
+                        answer: 1,
+                        explanation: "A dokumentum hangsúlyozza, hogy 'az első epilepsziás roham kivizsgálásának célja annak eldöntése, hogy valóban epilepsziás rohamról van-e szó, és ha igen, akkor akut szimptómás, provokált (alkalmi), izolált nem-provokált, vagy ismétlődő nem-provokált (tehát epilepszia keretében jelentkező) rohamról van-e szó'."
+                    },
+                    {
+                        question: "Miért kulcsfontosságú a heteroanamnézis (szemtanúk beszámolója) az epilepszia diagnosztikájában?",
+                        options: [
+                            "Mert a beteg mindig szándékosan eltitkolja a tüneteket.",
+                            "Mert a beteg a roham alatt gyakran eszméletlen vagy amnéziás az eseményekre.",
+                            "Mert a szemtanúk mindig orvosi szakértők.",
+                            "Mert a heteroanamnézis helyettesíti az EEG vizsgálatot."
+                        ],
+                        answer: 1,
+                        explanation: "A heteroanamnézis azért kulcsfontosságú, mert 'a beteg a roham alatt gyakran eszméletlen vagy amnéziás az eseményekre, a szemtanúk (családtagok, barátok, munkatársak) beszámolója kulcsfontosságú'."
+                    },
+                    {
+                        question: "Az alábbiak közül melyik egy tipikus vizuális aura, ami occipitális lebenyi kiindulásra utalhat?",
+                        options: [
+                            "Félelemérzet",
+                            "Epigastriális felszálló érzés",
+                            "Fényfelvillanások, geometriai formák",
+                            "Kellemetlen szagérzés"
+                        ],
+                        answer: 2,
+                        explanation: "A vizuális aura, mint például 'fényfelvillanások, geometriai formák, komplex látomások', occipitális lebenyi kiindulásra utalhat."
+                    },
+                    {
+                        question: "Mi a Todd-parézis?",
+                        options: [
+                            "A rohamot kiváltó pszichés állapot.",
+                            "A roham utáni átmeneti fokális neurológiai deficit.",
+                            "Egy speciális rohamtípus.",
+                            "A gyógyszeres kezelés megkezdése előtti állapot."
+                        ],
+                        answer: 1,
+                        explanation: "A Todd-parézis a 'postictalis fázisban' jelentkező 'átmeneti fokális neurológiai deficit', amely a roham kiindulási helyének megfelelő agyterület átmeneti kimerülését jelzi."
+                    },
+                    {
+                        question: "Melyik laboratóriumi vizsgálat NEM tartozik a rutinból elvégzendő vizsgálatok közé első roham esetén?",
+                        options: [
+                            "Vércukor",
+                            "Szérum elektrolitok (Na, K, Ca)",
+                            "Teljes vérkép",
+                            "Specifikus genetikai tesztek"
+                        ],
+        
+                        answer: 3,
+                        explanation: "Míg a vércukor, elektrolitok és a vérkép rutin vizsgálatok, a 'genetikai vizsgálatok (kromoszóma és DNS analízis) jöhetnek szóba, ha felmerül örökletes betegség gyanúja', de nem képezik a rutin kivizsgálás részét minden esetben."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ az EEG vizsgálattal kapcsolatban?",
+                        options: [
+                            "A normális, negatív interiktális EEG lelet kizárja az epilepszia diagnózisát.",
+                            "A kóros EEG lelet klinikai tünetek nélkül is elegendő az epilepszia diagnózisához.",
+                            "Az első rohamot követő 24-48 órán belül elvégzett EEG növeli a kóros eltérés kimutatásának esélyét.",
+                            "Az EEG vizsgálat mindig fájdalmas."
+                        ],
+                        answer: 2,
+                        explanation: "A dokumentum szerint 'az első rohamot követő 24-48 órán belül elvégzett EEG növeli a kóros eltérés kimutatásának esélyét'. Fontos, hogy a negatív EEG nem zárja ki, és a kóros lelet önmagában nem diagnosztikus értékű."
+                    },
+                    {
+                        question: "Mikor választandó a koponya CT az MRI helyett az epilepszia kivizsgálásában?",
+                        options: [
+                            "Minden esetben a CT az elsődleges.",
+                            "Sürgősségi helyzetekben, mint akut trauma vagy vérzés gyanúja esetén.",
+                            "Finom strukturális eltérések keresésekor.",
+                            "Gyermekeknél, a sugárterhelés elkerülése miatt."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A koponya CT 'elsősorban sürgősségi helyzetekben választandó, például akut neurológiai kórkép (stroke, vérzés), koponyatrauma gyanúja esetén, vagy ha az MRI vizsgálat nem elérhető, illetve kontraindikált'."
+                    },
+                    {
+                        question: "Mi a leggyakoribb elkülönítendő kórkép egy rövid eszméletvesztés (TLOC) esetén?",
+                        options: [
+                            "Migrén aurával",
+                            "Szinkópe (ájulás)",
+                            "Pánikroham",
+                            "Tranziens globális amnézia"
+                        ],
+                        answer: 1,
+                        explanation: "A szinkópe (ájulás) 'a leggyakoribb elkülönítendő kórkép', amelyet az átmeneti agyi hipoperfúzió okoz."
+                    },
+                    {
+                        question: "Mi jellemző a pszichogén nem epilepsziás rohamokra (PNES)?",
+                        options: [
+                            "Mindig rövid, sztereotip mozgásokkal jár.",
+                            "A szemek a roham alatt jellemzően nyitva vannak.",
+                            "A rohamok hosszan tarthatnak, intenzitásuk fluktuálhat, a szemek gyakran csukva vannak.",
+                            "Mindig súlyos, oldalsó nyelvharapással jár."
+                        ],
+                        answer: 2,
+                        explanation: "A PNES-re jellemző, hogy 'a rohamok hosszan tarthatnak (akár percekig, órákig), intenzitásuk fluktuálhat. A szemek gyakran csukva vannak a roham alatt'."
+                    },
+                    {
+                        question: "Melyik tényező növeli jelentősen a roham ismétlődésének kockázatát egy nem provokált roham után?",
+                        options: [
+                            "A beteg magas testsúlya.",
+                            "Kóros EEG lelet (epileptiform kisülések).",
+                            "A beteg dohányzása.",
+                            "Magas vérnyomás."
+                        ],
+                        answer: 1,
+                        explanation: "A magas evidenciájú adatok alapján a 'kóros EEG lelet', azaz az 'egyértelmű epileptiform kisülések jelenléte szignifikánsan, körülbelül kétszeresére növeli a rohamismétlődés kockázatát'."
+                    },
+                    {
+                        question: "Mikor állítható fel az epilepszia betegség diagnózisa már egyetlen nem provokált roham után?",
+                        options: [
+                            "Soha, mindig kell legalább két roham.",
+                            "Ha a beteg elmúlt 50 éves.",
+                            "Ha a további rohamok bekövetkezésének valószínűsége a következő 10 évben legalább 60%.",
+                            "Ha a roham éjszaka történt."
+                        ],
+        
+                        answer: 2,
+                        explanation: "Az ILAE 2014-es definíciója szerint egy nem provokált roham után is felállítható a diagnózis, 'amennyiben a további rohamok bekövetkezésének valószínűsége a következő 10 évben hasonló a két nem provokált roham utáni általános kiújulási kockázathoz (azaz legalább 60%)'."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a konvulzív szinkópéra?",
+                        options: [
+                            "Valódi epilepsziás görcsroham.",
+                            "Az agyi hipoxia következtében rövid rángások fordulhatnak elő.",
+                            "Fontos elkülöníteni a valódi epilepsziás görcsöktől.",
+                            "A rángások általában rövidebbek, mint egy tónusos-klónusos roham klónusos fázisa."
+                        ],
+        
+                        answer: 0,
+                        explanation: "A konvulzív szinkópe során fellépő rángások 'nem valódi epilepsziás görcsök, hanem az agyi hipoxia következményei'. Ezért az első állítás hamis."
+                    },
+                    {
+                        question: "Mi a 'gold standard' diagnosztikai módszer a PNES és az epilepsziás rohamok elkülönítésére?",
+                        options: [
+                            "Koponya MRI",
+                            "Szérum prolaktinszint mérés",
+                            "Video-EEG monitorozás",
+                            "Neuropszichológiai teszt"
+                        ],
+        
+                        answer: 2,
+                        explanation: "A PNES diagnózisának 'gold standard' módszere a 'video-EEG monitorozás, amely során a beteg számára típusos rosszullétet rögzítenek, és az EEG-n nem látható az eseménnyel korreláló epileptiform aktivitás'."
+                    },
+                    {
+                        question: "Melyik tünet utal erősen migrénes aurára inkább, mint epilepsziás aurára?",
+                        options: [
+                            "Hirtelen kezdet, másodpercekig tart.",
+                            "Fokozatosan, percek alatt (5-20 perc) kialakuló tünetek, melyeket fejfájás követ.",
+                            "Mindig komplex motoros automatizmusokkal jár.",
+                            "Deja vu érzés."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A migrénes aura tünetei 'általában fokozatosan, percek alatt (tipikusan 5-20 perc alatt, de legfeljebb 60 percig) alakulnak ki', míg az epilepsziás aura általában hirtelen kezdődik és rövidebb ideig tart."
+                    },
+                    {
+                        question: "Milyen típusú rohamok az akut szimptómás rohamok?",
+                        options: [
+                            "Nem provokált rohamok",
+                            "Provokált (alkalmi) rohamok",
+                            "Mindig generalizált rohamok",
+                            "Kizárólag gyermekkorban előforduló rohamok"
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az akut szimptómás rohamok más néven 'provokált vagy alkalmi rohamok', mivel egy akut, azonosítható ok váltja ki őket."
+                    },
+                    {
+                        question: "Melyik képalkotó szekvencia különösen fontos az epilepszia protokoll MRI során?",
+                        options: [
+                            "Csak T1 súlyozott felvételek",
+                            "T2 súlyozott és FLAIR felvételek, különös tekintettel a temporális lebenyekre",
+                            "Diffúziós súlyozott képalkotás (DWI)",
+                            "Angiográfiás szekvenciák"
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az epilepszia protokoll MRI 'vékony szeletes T1 súlyozott, T2 súlyozott és FLAIR (Fluid Attenuated Inversion Recovery) felvételeket' tartalmaz, 'különös tekintettel a temporális lebenyekre irányított koronális ferde síkú képekre'."
+                    },
+                    {
+                        question: "Melyik állítás igaz az antiepileptikum (AED) kezelés megkezdésére egyetlen nem provokált roham után?",
+                        options: [
+                            "Azonnal el kell kezdeni minden esetben a hosszú távú prognózis javítása érdekében.",
+                            "A döntést a beteggel közösen kell meghozni, mérlegelve a kiújulási kockázatot és a mellékhatásokat.",
+                            "Soha nem szabad elkezdeni, amíg a második roham be nem következik.",
+                            "Csak akkor szabad elkezdeni, ha a betegnek van jogosítványa."
+                        ],
+                        answer: 1,
+                        explanation: "A döntést 'a kezelőorvosnak a beteggel közösen (shared decision-making) kell meghoznia, figyelembe véve az individuális körülményeket'. Az azonnali kezelés csökkenti a korai kiújulás esélyét, de a hosszú távú prognózist nem feltétlenül javítja."
+                    },
+                    {
+                        question: "Melyik a halántéklebenyi epilepszia leggyakoribb strukturális oka, amelyet MRI-vel ki lehet mutatni?",
+                        options: [
+                            "Fokális kortikális diszplázia",
+                            "Cavernoma",
+                            "Mesialis temporalis sclerosis (hippocampus sclerosis)",
+                            "Agyi tályog"
+                        ],
+                        answer: 2,
+                        explanation: "Az MRI képes azonosítani 'a halántéklebenyi epilepszia leggyakoribb oka, a mesialis temporalis sclerosis (hippocampus sclerosis)'."
+                    },
+                    {
+                        question: "Milyen esetben lehet indokolt a liquorvizsgálat (lumbálpunkció) egy első roham után?",
+                        options: [
+                            "Minden esetben rutinból el kell végezni.",
+                            "Csak ha a beteg 18 év alatti.",
+                            "Központi idegrendszeri fertőzés (meningitis, encephalitis) gyanúja esetén.",
+                            "Ha a koponya CT negatív."
+                        ],
+                        answer: 2,
+                        explanation: "A liquorvizsgálat 'központi idegrendszeri fertőzés (meningitis, encephalitis) vagy gyulladásos betegség gyanúja esetén' indokolt."
+                    }
+                ]
+            },
+            "142": {
+                title: "142. Az antiepilepticumok alkalmazásának elvei",
+                questions: [
+                    {
+                        question: "Mi az antiepileptikus kezelés alapelve?",
+                        options: [
+                            "Politerápia, azaz több gyógyszer kombinálása a kezdetektől.",
+                            "Monoterápia, azaz egyetlen AED alkalmazása a lehető legalacsonyabb hatásos dózisban.",
+                            "A legmagasabb tolerálható dózis azonnali beállítása.",
+                            "Kizárólag a legrégebbi típusú gyógyszerek alkalmazása."
+                        ],
+                        answer: 1,
+                        explanation: "Az antiepileptikus kezelés alapelve a 'monoterápia, azaz egyetlen AED alkalmazása a lehető legalacsonyabb hatásos dózisban'."
+                    },
+                    {
+                        question: "Melyik antiepileptikum rontja tipikusan a mioklónusos vagy absence rohamokat?",
+                        options: [
+                            "Valproát",
+                            "Levetiracetám",
+                            "Karbamazepin",
+                            "Etosuximid"
+                        ],
+                        answer: 2,
+                        explanation: "A karbamazepin 'akár ronthatja is' a generalizált epilepsziákat, 'különösen mioklónusos vagy absence rohamok esetén'. A mioklónusos rohamoknál kifejezetten kerülendőként van feltüntetve."
+                    },
+                    {
+                        question: "Melyik gyógyszer az elsőként választandó szer tiszta absence rohamok esetén?",
+                        options: [
+                            "Karbamazepin",
+                            "Fenitoin",
+                            "Etosuximid",
+                            "Gabapentin"
+                        ],
+                        answer: 2,
+                        explanation: "Absence rohamok (kisrohamok) esetén 'elsőként választandó az etosuximid (csak tiszta absence esetén) vagy a valproát (ha PGTC is társul)'."
+                    },
+                    {
+                        question: "Miért kell különös óvatossággal eljárni fogamzóképes nők AED terápiájánál?",
+                        options: [
+                            "Mert a nők kevésbé reagálnak a gyógyszerekre.",
+                            "A teratogenitás (magzatkárosító hatás) és a fogamzásgátlókkal való interakciók miatt.",
+                            "Mert a nők mindig alacsonyabb dózist igényelnek.",
+                            "Mert az AED-k meddőséget okoznak."
+                        ],
+                        answer: 1,
+                        explanation: "Fogamzóképes nőknél 'a teratogenitás (magzatkárosító hatás) és a hormonális fogamzásgátlókkal való interakciók kiemelt jelentőségűek'. Különösen a valproát magas teratogén kockázata miatt kerülendő."
+                    },
+                    {
+                        question: "Melyik antiepileptikumot kell kerülni súlyos májbetegség esetén?",
+                        options: [
+                            "Levetiracetám",
+                            "Gabapentin",
+                            "Valproát",
+                            "Pregabalin"
+                        ],
+                        answer: 2,
+                        explanation: "Májbetegség esetén 'kerülendők a nagymértékben májban metabolizálódó és potenciálisan hepatotoxikus szerek (pl. valproát, fenitoin, karbamazepin, felbamát)'."
+                    },
+                    {
+                        question: "Melyik genetikai marker (allél) jelenléte növeli a súlyos bőrreakciók kockázatát karbamazepin szedésekor ázsiai populációkban?",
+                        options: [
+                            "HLA-A*31:01",
+                            "HLA-B*15:02",
+                            "DRD2 génvariáns",
+                            "APOE4 allél"
+                        ],
+                        answer: 1,
+                        explanation: "A 'HLA-B*15:02 ázsiai populációkban karbamazepinnel... szignifikánsan növeli a súlyos, potenciálisan életveszélyes bőrreakciók (Stevens-Johnson szindróma...)' kockázatát."
+                    },
+                    {
+                        question: "Melyik hatásmechanizmus jellemző a fenitoinra és a karbamazepinre?",
+                        options: [
+                            "GABAerg transzmisszió fokozása",
+                            "T-típusú kalciumcsatorna-blokád",
+                            "Feszültségfüggő nátriumcsatorna-blokád",
+                            "SV2A proteinhez való kötődés"
+                        ],
+                        answer: 2,
+                        explanation: "A fenitoin (PHT) és a karbamazepin (CBZ) a feszültségfüggő nátriumcsatorna-blokkolók csoportjába tartoznak. Ezek a gyógyszerek stabilizálják a nátriumcsatornákat inaktív állapotban, gátolva a repetitív kisüléseket."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport hat a preszinaptikus kalciumcsatornák α2δ alegységére?",
+                        options: [
+                            "Barbiturátok",
+                            "Benzodiazepinek",
+                            "Gabapentin és pregabalin",
+                            "Valproát és etosuximid"
+                        ],
+                        answer: 2,
+                        explanation: "A gabapentin (GBP) és a pregabalin (PGB) 'a feszültségfüggő kalciumcsatornák preszinaptikus α2δ-1 és α2δ-2 alegységéhez kötődnek', csökkentve a serkentő neurotranszmitterek felszabadulását."
+                    },
+                    {
+                        question: "Hogyan fejtik ki hatásukat a benzodiazepinek?",
+                        options: [
+                            "Gátolják a GABA lebontását.",
+                            "Blokkolják a glutamát receptorokat.",
+                            "Pozitív allosztérikus modulátorként fokozzák a GABA-A receptor működését.",
+                            "Gátolják a GABA visszavételét a szinaptikus résből."
+                        ],
+                        answer: 2,
+                        explanation: "A benzodiazepinek 'a GABA-A receptor kloridcsatorna komplexéhez kötődnek... és fokozzák a GABA kötődésének hatását, azaz növelik a kloridion-beáramlás frekvenciáját'."
+                    },
+                    {
+                        question: "Melyik gyógyszer hatásmechanizmusa kötődik az SV2A (szinaptikus vezikulum protein 2A) proteinhez?",
+                        options: [
+                            "Lamotrigin",
+                            "Topiramát",
+                            "Levetiracetám",
+                            "Fenobarbitál"
+                        ],
+                        answer: 2,
+                        explanation: "A levetiracetám (LEV) és a brivaracetám (BRV) az SV2A proteinhez kötődve modulálják a neurotranszmitter-felszabadulást."
+                    },
+                    {
+                        question: "Melyik antiepileptikum ismert a multiplex, több támadásponton érvényesülő hatásmechanizmusáról?",
+                        options: [
+                            "Etosuximid",
+                            "Gabapentin",
+                            "Valproát",
+                            "Tiagabin"
+                        ],
+                        answer: 2,
+                        explanation: "A valproát (VPA) 'komplex hatásmechanizmusú, széles spektrumú AED'. Hatásai közé tartozik a nátrium- és T-típusú kalciumcsatorna-blokád, valamint a GABAerg transzmisszió fokozása."
+                    },
+                    {
+                        question: "Mi a 'start low, go slow' elv a dózistitrálás során?",
+                        options: [
+                            "A kezelést magas dózissal kell kezdeni, majd lassan csökkenteni.",
+                            "A kezelést alacsony kezdődózissal kell indítani, majd a dózist fokozatosan emelni.",
+                            "A gyógyszert csak alacsony dózisban, de gyorsan kell beállítani.",
+                            "A gyógyszert lassan kell elkezdeni, és csak alacsony dózisban szabad tartani."
+                        ],
+                        answer: 1,
+                        explanation: "A 'start low, go slow' (kezdj alacsonyan, haladj lassan) elv azt jelenti, hogy a kezelést 'alacsony kezdődózissal kell indítani, majd a dózist fokozatosan, általában 1-2 hetente emelni a célértékig'."
+                    },
+                    {
+                        question: "Mikor indokolt a politerápia (kombinált kezelés)?",
+                        options: [
+                            "Minden epilepsziás betegnél ez az első választás.",
+                            "Ha a beteg nem szereti a monoterápiát.",
+                            "Ha legalább két, megfelelően választott monoterápiás kísérlet sikertelen volt.",
+                            "Csak idős betegeknél."
+                        ],
+                        answer: 2,
+                        explanation: "Politerápia 'akkor indokolt, ha legalább két, megfelelően választott és adekvát dózisban, elegendő ideig alkalmazott monoterápiás kísérlet sikertelen volt a rohamkontroll elérésében'."
+                    },
+                    {
+                        question: "Melyik gyógyszer okozhat testsúlycsökkenést mellékhatásként?",
+                        options: [
+                            "Valproát",
+                            "Gabapentin",
+                            "Topiramát",
+                            "Pregabalin"
+                        ],
+                        answer: 2,
+                        explanation: "A topiramát és a zonisamid 'testsúlycsökkenést... okozhat', míg a valproát, gabapentin és pregabalin testsúlynövekedést."
+                    },
+                    {
+                        question: "Melyik szer az elsőként választandó juvenilis mioklónusos epilepszia (JME) esetén?",
+                        options: [
+                            "Karbamazepin",
+                            "Valproát",
+                            "Fenitoin",
+                            "Lamotrigin"
+                        ],
+                        answer: 1,
+                        explanation: "Juvenilis mioklónusos epilepszia (JME) részeként jelentkező mioklónusos rohamoknál 'elsőként választandó a valproát'. A karbamazepin és a lamotrigin ronthatja a mioklónusokat."
+                    },
+                    {
+                        question: "Melyik gyógyszer metabolizmusára jellemző az autoindukció?",
+                        options: [
+                            "Levetiracetam",
+                            "Lamotrigin",
+                            "Karbamazepin",
+                            "Valproát"
+                        ],
+                        answer: 2,
+                        explanation: "A karbamazepinre jellemző az autoindukció, ami azt jelenti, hogy a gyógyszer felgyorsítja a saját metabolizmusát, így idővel csökkenhet a plazmaszintje azonos dózis mellett."
+                    },
+                    {
+                        question: "Időskorban melyik típusú AED-k részesítendők előnyben?",
+                        options: [
+                            "Az erős enzimindukáló szerek, mint a fenitoin.",
+                            "A kevés interakcióval és jó tolerálhatósággal bíró szerek, mint a levetiracetám.",
+                            "A legújabb, legdrágább gyógyszerek.",
+                            "Kizárólag a barbiturátok."
+                        ],
+                        answer: 1,
+                        explanation: "Időskorban 'előnyben részesítendők a kevés interakcióval és jó tolerálhatósággal bíró szerek (pl. levetiracetám, lamotrigin, gabapentin, lakozamid)'. Az enzimindukáló AED-k általában kerülendők."
+                    },
+                    {
+                        question: "Milyen óvintézkedés szükséges lamotrigin beállításakor a súlyos bőrreakciók elkerülése érdekében?",
+                        options: [
+                            "Magas kezdődózis és gyors titrálás.",
+                            "Folsav egyidejű adása.",
+                            "Lassú dózistitrálás.",
+                            "A gyógyszer étkezés közbeni bevétele."
+                        ],
+                        answer: 2,
+                        explanation: "A lamotrigin a Stevens-Johnson szindróma (súlyos bőrreakció) kockázatát hordozza, ezért a 'lassú titrálás' elengedhetetlen a mellékhatás elkerülése érdekében."
+                    },
+                    {
+                        question: "Melyik gyógyszer ismert mellékhatása a gingiva hyperplasia (fogíny-megnagyobbodás)?",
+                        options: [
+                            "Valproát",
+                            "Levetiracetam",
+                            "Lamotrigin",
+                            "Fenitoin"
+                        ],
+                        answer: 3,
+                        explanation: "A fenitoin egyik klasszikus, krónikus mellékhatása a gingiva hyperplasia."
+                    },
+                    {
+                        question: "Melyik állítás igaz a szérumszint monitorozásra az új generációs AED-k esetében?",
+                        options: [
+                            "Minden betegnél kötelező hetente elvégezni.",
+                            "Teljesen felesleges, soha nem indokolt.",
+                            "Kevésbé standardizált és ritkábban szükséges, mint a klasszikus szereknél.",
+                            "Csak a toxicitás gyanúja esetén, de a compliance ellenőrzésére nem alkalmas."
+                        ],
+                        answer: 2,
+                        explanation: "Az új generációs szerek (pl. levetiracetám, lamotrigin) terápiás tartománya 'kevésbé standardizált', és a szérumszint monitorozás nem rutin eljárás, csak specifikus helyzetekben (pl. terhesség, interakció gyanúja, compliance ellenőrzése) indokolt."
+                    }
+                ]
+            },
+            "144": {
+                title: "144. A konvulzív és non-konvulzív status epilepticus kezelése",
+                questions: [
+                    {
+                        question: "Mi a status epilepticus (SE) operatív definíciója konvulzív rohamok esetén?",
+                        options: [
+                            "30 percnél tovább tartó folyamatos rohamaktivitás.",
+                            "Egyetlen, 1 percnél hosszabb roham.",
+                            "5 percnél tovább tartó folyamatos rohamaktivitás vagy ismétlődő rohamok tudattisztulás nélkül.",
+                            "Bármilyen roham, ami kórházi felvételt igényel."
+                        ],
+                        answer: 2,
+                        explanation: "A modern definíció szerint a konvulzív SE 'egy 5 percnél... tovább tartó folyamatos rohamaktivitás, vagy pedig kettő vagy több, egymást követő roham jellemez, amelyek között a beteg nem nyeri vissza teljesen a tudatát'."
+                    },
+                    {
+                        question: "Mi a non-konvulzív status epilepticus (NCSE) fő tünete?",
+                        options: [
+                            "Generalizált tónusos-klónusos görcsök.",
+                            "A tudatzavar (pl. zavartság, letargia, kóma) vagy viselkedésváltozás.",
+                            "Heves fejfájás.",
+                            "Magas láz."
+                        ],
+                        answer: 1,
+                        explanation: "Az NCSE esetében 'a fő tünet a tudatzavar (pl. zavartság, letargia, kóma) vagy viselkedésváltozás', miközben a nyilvánvaló motoros tünetek minimálisak vagy hiányoznak."
+                    },
+                    {
+                        question: "Mi a refrakter status epilepticus (RSE)?",
+                        options: [
+                            "Az első benzodiazepin adagra nem reagáló SE.",
+                            "Az SE, ami az első- és másodvonalbeli (benzodiazepin + IV AED) terápia ellenére is fennáll.",
+                            "Bármilyen, 24 óránál tovább tartó SE.",
+                            "Kizárólag non-konvulzív formában jelentkező SE."
+                        ],
+                        answer: 1,
+                        explanation: "A refrakter SE (RSE) az az állapot, amikor az 'SE továbbra is fennáll az első- és másodvonalbeli (egy benzodiazepin és egy megfelelően választott, adekvát dózisú intravénás AED) terápia ellenére'."
+                    },
+                    {
+                        question: "Mi a patofiziológiai alapja a benzodiazepinek hatékonyságának csökkenésének SE alatt?",
+                        options: [
+                            "Az NMDA receptorok downregulációja.",
+                            "A GABA-A receptorok internalizációja és deszenzitizációja.",
+                            "A gyógyszer gyors lebomlása a vérben.",
+                            "A vér-agy gát áteresztőképességének csökkenése."
+                        ],
+                        answer: 1,
+                        explanation: "A benzodiazepinek hatékonyságának csökkenése a 'GABA-A receptorok internalizációja (a sejt belsejébe kerülnek a sejtmembránról) és deszenzitizációja' miatt következik be a tartós rohamaktivitás során."
+                    },
+                    {
+                        question: "Mi az első lépés a konvulzív status epilepticus sürgősségi ellátásában?",
+                        options: [
+                            "Azonnali koponya MRI készítése.",
+                            "Az ABCDE elvek szerinti ellátás: légútbiztosítás, légzés és keringés stabilizálása.",
+                            "Azonnali lumbálpunkció.",
+                            "Magas dózisú barbiturát adása."
+                        ],
+                        answer: 1,
+                        explanation: "A CSE ellátása az 'általános sürgősségi ellátási alapelvek (ABCDE)' szerint kezdődik, amelynek első elemei a légútbiztosítás (Airway), a légzés (Breathing) és a keringés (Circulation) stabilizálása."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport képezi az elsővonalbeli terápiát a korai SE (0-10 perc) kezelésében?",
+                        options: [
+                            "Barbiturátok",
+                            "Benzodiazepinek",
+                            "Neuroszteroidok",
+                            "Valproát"
+                        ],
+                        answer: 1,
+                        explanation: "Az elsővonalbeli terápia gyógyszerei a benzodiazepinek (pl. lorazepam, diazepam, midazolam), amelyeket a roham azonnali megszakítására használnak."
+                    },
+                    {
+                        question: "Melyik másodvonalbeli intravénás antiepileptikum NEM szerepel az ESSETT vizsgálat által javasolt, hasonló hatékonyságú szerek között?",
+                        options: [
+                            "Foszfenitoin",
+                            "Valproát",
+                            "Levetiracetám",
+                            "Karbamazepin"
+                        ],
+                        answer: 3,
+                        explanation: "Az ESSETT vizsgálat szerint a 'foszfenitoin, valproát és levetiracetám hasonló hatékonyságúak és biztonságosságúak' a kialakult SE kezelésében. A karbamazepinnek nincs intravénás formája, és nem használatos SE kezelésére."
+                    },
+                    {
+                        question: "Milyen monitorozás elengedhetetlen a harmadvonalbeli (refrakter SE) kezelés során?",
+                        options: [
+                            "Folyamatos vérnyomásmérés",
+                            "Folyamatos EKG monitorozás",
+                            "Folyamatos EEG (cEEG) monitorozás",
+                            "Folyamatos hőmérsékletmérés"
+                        ],
+                        answer: 2,
+                        explanation: "Refrakter SE-ben, anesztetikumok adása mellett, a 'folyamatos EEG (cEEG) monitorozás elengedhetetlen' a terápia hatékonyságának ellenőrzésére és a dózis titrálására."
+                    },
+                    {
+                        question: "Melyik anesztetikum használata jár a propofol infúziós szindróma (PRIS) kockázatával?",
+                        options: [
+                            "Midazolam",
+                            "Propofol",
+                            "Ketamin",
+                            "Thiopental"
+                        ],
+                        answer: 1,
+                        explanation: "A propofol infúziós szindróma (PRIS) 'kockázata magas dózisoknál vagy tartós (>48 óra) alkalmazásnál' merül fel propofol infúzió esetén."
+                    },
+                    {
+                        question: "Melyik gyógyszer hatásmechanizmusa (NMDA receptor antagonizmus) teszi különösen előnyössé refrakter SE-ben?",
+                        options: [
+                            "Lorazepam",
+                            "Fenitoin",
+                            "Ketamin",
+                            "Valproát"
+                        ],
+                        answer: 2,
+                        explanation: "A ketamin NMDA receptor antagonista hatása 'előnyös lehet a GABAerg szerekre rezisztens SE-ben, ahol az NMDA receptorok upregulálódnak'."
+                    },
+                    {
+                        question: "Mi a szuper-refrakter status epilepticus (SRSE)?",
+                        options: [
+                            "Az SE, ami 1 órán túl is fennáll.",
+                            "Az SE, ami 24 órán túl is perzisztál vagy visszatér a folyamatos intravénás anesztetikus kezelés ellenére.",
+                            "Az SE, ami csak gyermekeknél fordul elő.",
+                            "Az SE, ami csak enyhe tünetekkel jár."
+                        ],
+                        answer: 1,
+                        explanation: "Az SRSE definíciója szerint az az SE, ami '24 órán túl is perzisztál vagy visszatér a folyamatos intravénás anesztetikus kezelés ellenére, vagy annak csökkentésekor/leállításakor kiújul'."
+                    },
+                    {
+                        question: "Milyen diagnosztikai módszer kulcsfontosságú az NCSE diagnózisának megerősítésében?",
+                        options: [
+                            "Klinikai tünetek megfigyelése",
+                            "Koponya CT",
+                            "EEG vizsgálat",
+                            "Laboratóriumi vizsgálatok"
+                        ],
+                        answer: 2,
+                        explanation: "Az EEG vizsgálat 'kulcsfontosságú az NCSE diagnózisának megerősítésében és a kezelésre adott válasz követésében', mivel a klinikai kép gyakran nem specifikus."
+                    },
+                    {
+                        question: "Melyik állítás igaz az NCSE kezelésének agresszivitására a CSE-hez képest?",
+                        options: [
+                            "Mindig agresszívabban kell kezelni, mint a CSE-t.",
+                            "Az NCSE kezelése általában kevésbé sürgős és kevésbé agresszív, egyéni mérlegelés alapján.",
+                            "A kezelés agresszivitása megegyezik a CSE-ével.",
+                            "Az NCSE-t soha nem kell gyógyszeresen kezelni."
+                        ],
+                        answer: 1,
+                        explanation: "Az NCSE kezelése 'általában kevésbé sürgős és kevésbé agresszív, mint a CSE-é... a terápiás ablak tágabb lehet, és a kezelés mellékhatásainak kockázatát jobban figyelembe kell venni'."
+                    },
+                    {
+                        question: "Milyen dózisú lorazepam javasolt felnőtteknek elsővonalbeli terápiaként CSE esetén?",
+                        options: [
+                            "0.01 mg/kg",
+                            "0.1 mg/kg (maximum 4 mg)",
+                            "1 mg/kg",
+                            "10 mg fix dózis"
+                        ],
+                        answer: 1,
+                        explanation: "Felnőtteknek a javasolt lorazepam dózis 0.1 mg/kg, de általában maximum 4 mg egy adagban, lassan, 2 mg/perc sebességgel beadva."
+                    },
+                    {
+                        question: "Milyen óvintézkedés szükséges tiamin (B1-vitamin) adásakor?",
+                        options: [
+                            "Mindig a glükóz után kell adni.",
+                            "Alkoholizmus vagy malnutríció gyanúja esetén a glükóz előtt vagy azzal egyidőben kell adni.",
+                            "Csak gyermekeknek adható.",
+                            "Lassan, 1 óra alatt kell beadni."
+                        ],
+                        answer: 1,
+                        explanation: "Alkoholizmus vagy malnutríció gyanúja esetén a tiamint 'a glükóz előtt vagy azzal egyidőben' kell adni a Wernicke encephalopathia megelőzése érdekében."
+                    },
+                    {
+                        question: "Melyik másodvonalbeli szer használata során szükséges az EKG és vérnyomás monitorozása a kardiovaszkuláris mellékhatások (hypotonia, arrhythmia) miatt?",
+                        options: [
+                            "Levetiracetám",
+                            "Valproát",
+                            "Foszfenitoin/Fenitoin",
+                            "Lacosamid"
+                        ],
+                        answer: 2,
+                        explanation: "A foszfenitoin és a fenitoin adása során 'EKG és vérnyomás monitorozás szükséges az infúzió alatt' a szívritmuszavarok és a hypotonia kockázata miatt."
+                    },
+                    {
+                        question: "Mi a 'time is brain' elv jelentése a status epilepticus kontextusában?",
+                        options: [
+                            "Az agynak időre van szüksége a gyógyuláshoz.",
+                            "Minél tovább tart a roham, annál nagyobb a maradandó agykárosodás kockázata.",
+                            "A diagnózist lassan, megfontoltan kell felállítani.",
+                            "Az agy időérzékelése megváltozik a roham alatt."
+                        ],
+                        answer: 1,
+                        explanation: "A 'time is brain' elv azt jelenti, hogy 'minél tovább tart a rohamaktivitás, annál nagyobb a maradandó agykárosodás és a szisztémás szövődmények kockázata, és annál rosszabb a prognózis'."
+                    },
+                    {
+                        question: "Melyik NCSE típus reagál általában a legjobban a benzodiazepin kezelésre?",
+                        options: [
+                            "NCSE kómában",
+                            "Komplex fokális NCSE",
+                            "Absence status epilepticus",
+                            "Atipikus absence status epilepticus"
+                        ],
+                        answer: 2,
+                        explanation: "Az absence status epilepticus esetén 'a benzodiazepinek általában nagyon hatékonyak'."
+                    },
+                    {
+                        question: "Milyen terápia javasolt, ha autoimmun encephalitis áll a szuper-refrakter SE hátterében?",
+                        options: [
+                            "Ketogén diéta",
+                            "Hypothermia",
+                            "Immunmoduláns terápia (pl. szteroidok, IVIG, plazmaferézis)",
+                            "Elektrokonvulzív terápia (ECT)"
+                        ],
+                        answer: 2,
+                        explanation: "Ha autoimmun encephalitis a kiváltó ok, 'immunmoduláns terápia' javasolt, mint például kortikoszteroidok, intravénás immunglobulin (IVIG) vagy plazmaferézis."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a status epilepticus patofiziológiájára?",
+                        options: [
+                            "A glutamát által közvetített excitáció fokozódik.",
+                            "A GABAerg gátlás elégtelenné válik.",
+                            "A GABA-A receptorok száma a szinaptikus membránon megnő.",
+                            "Az NMDA receptorok a szinaptikus membránba helyeződnek át."
+                        ],
+                        answer: 2,
+                        explanation: "A patofiziológia során a GABA-A receptorok internalizálódnak, azaz a sejt belsejébe kerülnek, így a számuk a szinaptikus membránon csökken, nem pedig nő. Ez vezet a GABAerg gátlás elégtelenségéhez."
+                    }
+                ]
+            },
+            "145": {
+                title: "145. A rövid ideig tartó eszméletvesztések differenciáldiagnózisa",
+                questions: [
+                    {
+                        question: "Mi a tranziens eszméletvesztés (TLOC) definíciója?",
+                        options: [
+                            "Bármilyen szédüléses epizód.",
+                            "Egy átmeneti, rövid ideig tartó eszméletvesztés gyors, spontán és teljes felépüléssel.",
+                            "Hosszan tartó kóma, amelyből a beteg lassan ébred.",
+                            "Hirtelen elesés eszméletvesztés nélkül."
+                        ],
+                        answer: 1,
+                        explanation: "A TLOC definíció szerint 'egy átmeneti, rövid ideig tartó eszméletvesztés, amelyre jellemző a gyors kezdet, a rövid időtartam, valamint a spontán, teljes és gyors felépülés'."
+                    },
+                    {
+                        question: "Melyik a három leggyakoribb oka a TLOC-nak?",
+                        options: [
+                            "Migrén, TIA és agydaganat.",
+                            "Hypoglykaemia, hypoxia és intoxikáció.",
+                            "Syncope, epilepsziás roham és pszichogén nem epilepsziás roham (PNES).",
+                            "Szívinfarktus, stroke és agyrázkódás."
+                        ],
+                        answer: 2,
+                        explanation: "A TLOC leggyakoribb okai a 'syncope, az epilepsziás rohamok és a pszichogén nem epilepsziás rohamok (PNES)', amelyek az esetek több mint 90%-át teszik ki."
+                    },
+                    {
+                        question: "Mi a syncope alapvető patofiziológiai oka?",
+                        options: [
+                            "Az agyi neuronok kóros elektromos kisülése.",
+                            "Átmeneti globális agyi hipoperfúzió (elégtelen vérellátás).",
+                            "Pszichológiai stressz fizikai tünetekben való megjelenése.",
+                            "Az agyi vércukorszint hirtelen leesése."
+                        ],
+                        answer: 1,
+                        explanation: "A syncope 'átmeneti globális agyi hipoperfúzió (elégtelen vérellátás) okozta' rövid eszméletvesztés."
+                    },
+                    {
+                        question: "Melyik syncope típus hordozza a hirtelen szívhalál legmagasabb kockázatát?",
+                        options: [
+                            "Vazovagális syncope",
+                            "Szituációs syncope",
+                            "Ortosztatikus hypotonia okozta syncope",
+                            "Kardiális syncope"
+                        ],
+                        answer: 3,
+                        explanation: "A kardiális syncope, amelyet szívritmuszavarok vagy strukturális szívbetegségek okoznak, 'hordozza a hirtelen szívhalál legmagasabb kockázatát'."
+                    },
+                    {
+                        question: "Mi jellemző a vazovagális syncope prodromális (bevezető) tüneteire?",
+                        options: [
+                            "Hirtelen, éles mellkasi fájdalom.",
+                            "Nincs semmilyen bevezető tünet.",
+                            "Sápadtság, szédülés, látászavar, verejtékezés, hányinger.",
+                            "Egyik végtag zsibbadása."
+                        ],
+                        answer: 2,
+                        explanation: "A vazovagális syncope-t gyakran jellegzetes prodromális tünetek előzik meg, mint 'általános gyengeség, szédülés, látászavarok..., émelygés, hasi diszkomfort, verejtékezés, melegségérzés, sápadtság'."
+                    },
+                    {
+                        question: "Melyik klinikai jel utal erősen epilepsziás rohamra a syncope-val szemben?",
+                        options: [
+                            "Sápadtság és verejtékezés a roham előtt.",
+                            "Rövid, néhány másodperces eszméletvesztés.",
+                            "Oldalsó nyelvharapás és hosszan tartó posztiktális zavartság.",
+                            "Gyors, teljes tudattisztulás az esemény után."
+                        ],
+        
+                        answer: 2,
+                        explanation: "Az 'oldalsó nyelvharapás kifejezetten epilepsziára utal', ahogy a 'hosszan tartó posztiktális zavartság, álmosság, fejfájás' is, szemben a syncope-ra jellemző gyors felépüléssel."
+                    },
+                    {
+                        question: "Mi a 'convulsive syncope'?",
+                        options: [
+                            "Egy másik elnevezés a generalizált tónusos-klónusos epilepsziás rohamra.",
+                            "Syncope, amelyet az agyi hipoxia következtében rövid, nem epilepsziás rángások kísérnek.",
+                            "Pszichogén roham, amely görcsöket utánoz.",
+                            "Kizárólag szívbetegeknél előforduló syncope forma."
+                        ],
+                        answer: 1,
+                        explanation: "A 'convulsive syncope' során az agyi hipoxia következtében 'rövid... aszinkron myoclonusos rángások előfordulhatnak', de ezek 'nem valódi epilepsziás görcsök'."
+                    },
+                    {
+                        question: "Melyik állítás jellemző a pszichogén nem epilepsziás rohamokra (PNES)?",
+                        options: [
+                            "A rohamok rövidek, sztereotipek, a szemek mindig nyitva vannak.",
+                            "A rohamok alatt az EEG mindig kóros, epileptiform aktivitást mutat.",
+                            "A rohamok hosszan tarthatnak, a mozgások bizarrak, a szemek gyakran csukva vannak.",
+                            "A diagnózis felállításához elegendő a beteg beszámolója."
+                        ],
+                        answer: 2,
+                        explanation: "A PNES-re jellemzőek a 'hosszan tartó, fluktuáló intenzitású' rohamok, 'bizarr, aszinkron mozgások', és a 'szemek gyakran csukva vannak' az esemény alatt."
+                    },
+                    {
+                        question: "Mi a TLOC kivizsgálásának legelső és legfontosabb lépése?",
+                        options: [
+                            "Azonnali koponya MRI.",
+                            "Részletes anamnézis felvétele a betegtől és szemtanúktól.",
+                            "Billenőasztal-teszt elvégzése.",
+                            "Antiepileptikum azonnali beállítása."
+                        ],
+                        answer: 1,
+                        explanation: "A TLOC kivizsgálásának 'abszolút alapköve a rendkívül részletes, minden apró részletre kiterjedő anamnézis felvétele', beleértve a szemtanúk beszámolóját is."
+                    },
+                    {
+                        question: "Milyen típusú syncope-ra utal, ha az eszméletvesztés fizikai terhelés közben következik be?",
+                        options: [
+                            "Vazovagális syncope",
+                            "Szituációs syncope",
+                            "Kardiális syncope",
+                            "Ortosztatikus syncope"
+                        ],
+                        answer: 2,
+                        explanation: "A fizikai terhelés közben bekövetkező syncope egy vészjel, amely erősen felveti a kardiális syncope gyanúját, például kiáramlási pálya obstrukció (aorta stenosis) vagy terhelés indukálta arrhythmia miatt."
+                    },
+                    {
+                        question: "Melyik vizsgálat elengedhetetlen a kardiális syncope gyanújának kezdeti felmérésére?",
+                        options: [
+                            "EEG",
+                            "Vérkép",
+                            "12 elvezetéses EKG",
+                            "Koponya CT"
+                        ],
+                        answer: 2,
+                        explanation: "A 12 elvezetéses EKG alapvető vizsgálat, mivel kimutathatja a syncope hátterében álló szívritmuszavart, vezetési zavart vagy strukturális szívbetegségre utaló jeleket."
+                    },
+                    {
+                        question: "Mi a billenőasztal-teszt (tilt-table test) célja?",
+                        options: [
+                            "Epilepsziás rohamok provokálása.",
+                            "Az agyi véráramlás mérése.",
+                            "A neurogén/reflex syncope (pl. vazovagális) diagnózisának megerősítése.",
+                            "A pszichogén rohamok kizárása."
+                        ],
+                        answer: 2,
+                        explanation: "A billenőasztal-tesztet a neurogén (reflex) syncope, különösen a vazovagális syncope diagnosztizálására használják, mivel a testhelyzet változtatásával provokálhatja a kóros reflexválaszt."
+                    },
+                    {
+                        question: "Melyik állítás igaz a TLOC-t okozó epilepsziás rohamok és a syncope időtartamára?",
+                        options: [
+                            "A syncope általában hosszabb, mint egy epilepsziás roham.",
+                            "Mindkettő mindig pontosan 1 percig tart.",
+                            "Az epilepsziás rohamok (pl. GTCS) gyakran hosszabbak, mint a syncope-s eszméletvesztés.",
+                            "Az időtartamnak nincs diagnosztikus jelentősége."
+                        ],
+                        answer: 2,
+                        explanation: "A syncope-s eszméletvesztés 'tipikusan rövid, másodpercektől legfeljebb 1-2 percig tart', míg egy generalizált tónusos-klónusos roham vagy egy PNES epizód ennél gyakran hosszabb."
+                    },
+                    {
+                        question: "Mi az ortosztatikus hypotonia definíciója?",
+                        options: [
+                            "A vérnyomás emelkedése felálláskor.",
+                            "A szisztolés vérnyomás legalább 20 Hgmm-es és/vagy a diasztolés vérnyomás legalább 10 Hgmm-es csökkenése a felállást követő 3 percen belül.",
+                            "A pulzusszám csökkenése felálláskor.",
+                            "Bármilyen szédülés felálláskor."
+                        ],
+                        answer: 1,
+                        explanation: "A klasszikus ortosztatikus hypotonia definíciója 'a szisztolés vérnyomás legalább 20 Hgmm-es és/vagy a diasztolés vérnyomás legalább 10 Hgmm-es csökkenése a felállást követő 3 percen belül'."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport okozhat ortosztatikus hypotoniát?",
+                        options: [
+                            "Antibiotikumok",
+                            "Fájdalomcsillapítók",
+                            "Vazodilatátorok és diuretikumok",
+                            "Vitaminok"
+                        ],
+                        answer: 2,
+                        explanation: "Az ortosztatikus hypotoniát okozhatják 'különböző gyógyszerek (pl. vazodilatátorok, diuretikumok, antidepresszánsok)'."
+                    },
+                    {
+                        question: "Milyen tünetegyüttes (triád) jellemző a súlyos aorta stenosisra?",
+                        options: [
+                            "Fejfájás, láz, hányinger.",
+                            "Angina (mellkasi fájdalom), syncope és szívelégtelenség.",
+                            "Szédülés, fülzúgás, látászavar.",
+                            "Izomfájdalom, ízületi fájdalom, kiütés."
+                        ],
+                        answer: 1,
+                        explanation: "A súlyos aorta stenosis klasszikus tüneti triádja az angina, a (gyakran terhelésre jelentkező) syncope és a szívelégtelenség tünetei."
+                    },
+                    {
+                        question: "Milyen típusú mozgások jellemzőek a PNES-re?",
+                        options: [
+                            "Sztereotip, tónusos-klónusos progresszió.",
+                            "Finom, szimmetrikus myoclonusok.",
+                            "Aszinkron, bizarr mozgások, pl. medence emelgetése, fej oldalra ingatása.",
+                            "Nincsenek mozgásjelenségek, csak eszméletvesztés."
+                        ],
+                        answer: 2,
+                        explanation: "A PNES-re 'gyakran bizarr, teátrális, aszinkron, fluktuáló intenzitású mozgások jellemzőek', mint a 'szabálytalan rángatózás, vonaglás... a medence ritmikus emelgetése (pelvic thrusting)'."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ a syncope utáni felépülésre?",
+                        options: [
+                            "A felépülés lassú, órákig tartó zavartsággal jár.",
+                            "A tudat visszatérése általában gyors és teljes, minimális zavartsággal.",
+                            "A beteg soha nem emlékszik a syncope előtti eseményekre.",
+                            "Mindig átmeneti bénulás követi."
+                        ],
+                        answer: 1,
+                        explanation: "A syncope után 'a tudat visszatérése általában gyors (másodpercek-percek alatt) és teljes, minimális vagy csak nagyon rövid ideig tartó zavartsággal'."
+                    },
+                    {
+                        question: "Mi a 'drop attack'?",
+                        options: [
+                            "Mindig epilepsziás eredetű.",
+                            "Hirtelen elesés eszméletvesztés nélkül.",
+                            "A syncope egy másik neve.",
+                            "Egy pszichogén rohamtípus."
+                        ],
+                        answer: 1,
+                        explanation: "A 'drop attack' egy hirtelen, tónusvesztés miatti elesés eszméletvesztés nélkül. Bár lehet epilepsziás (atoniás roham) vagy kardiális eredetű is, a definíció szerint maga az esemény nem jár eszméletvesztéssel, így elkülönítendő a TLOC-tól."
+                    },
+                    {
+                        question: "Milyen esetben kell gondolni carotis sinus syncope-ra?",
+                        options: [
+                            "Fiatal nőknél, érzelmi stressz hatására.",
+                            "Idősebb férfiaknál, borotválkozás vagy a fej elfordítása által kiváltott ájulás esetén.",
+                            "Gyermekeknél, köhögés után.",
+                            "Bárkinél, aki hosszan állt egy helyben."
+                        ],
+                        answer: 1,
+                        explanation: "A carotis sinus syncope 'jellemzően 40 éves kor felett gyakoribb. Kiválthatja a fej hirtelen elfordítása, borotválkozás, vagy szoros nyakú ruha viselése'."
+                    }
+                ]
+            }
+        };
+
+        // DOM Elements
+        const topicSelectionScreen = document.getElementById('topic-selection');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        
+        const progressBar = document.getElementById('progress-bar');
+
+        const scoreText = document.getElementById('score-text');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const mainMenuBtn = document.getElementById('main-menu-btn');
+
+        // State
+        let currentTopic = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz(topicId) {
+            currentTopic = topicId;
+            currentQuestionIndex = 0;
+            score = 0;
+            questions = shuffleArray([...quizData[topicId].questions]);
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTitle.textContent = quizData[topicId].title;
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            feedbackContainer.classList.add('hidden');
+            const questionData = questions[currentQuestionIndex];
+
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            questionText.textContent = `${currentQuestionIndex + 1}. ${questionData.question}`;
+            optionsContainer.innerHTML = '';
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'p-4', 'text-left', 'border-2', 'border-slate-300', 'rounded-lg', 'quiz-option');
+                button.dataset.index = index;
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const selectedIndex = parseInt(selectedButton.dataset.index);
+            const correctIndex = questions[currentQuestionIndex].answer;
+
+            // Disable all options after one is clicked
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.removeEventListener('click', selectAnswer);
+                btn.disabled = true;
+            });
+
+            if (selectedIndex === correctIndex) {
+                selectedButton.classList.add('correct');
+                score++;
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Highlight the correct answer
+                optionsContainer.children[correctIndex].classList.add('correct');
+            }
+
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            feedbackContainer.classList.remove('hidden');
+
+            if (currentQuestionIndex === questions.length - 1) {
+                nextQuestionBtn.textContent = 'Eredmények megtekintése';
+            } else {
+                nextQuestionBtn.textContent = 'Következő kérdés';
+            }
+        }
+
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreText.textContent = `Eredményed: ${score} / ${questions.length}`;
+        }
+
+        function goBackToMenu() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.topic-btn').forEach(button => {
+            button.addEventListener('click', () => startQuiz(button.dataset.topic));
+        });
+
+        nextQuestionBtn.addEventListener('click', handleNextQuestion);
+        backToMenuBtn.addEventListener('click', goBackToMenu);
+        restartQuizBtn.addEventListener('click', () => startQuiz(currentTopic));
+        mainMenuBtn.addEventListener('click', goBackToMenu);
+
+    </script>
+</body>
+</html>

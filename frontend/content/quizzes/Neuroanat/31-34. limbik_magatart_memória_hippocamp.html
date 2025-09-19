@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Kvíz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .btn-incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div id="quiz-container" class="quiz-container w-full">
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Neuroanatómia Kvíz</h1>
+            <p class="text-lg text-gray-600 mb-8">Teszteld a tudásodat a limbikus rendszer, a memória és a magatartásszabályozás témakörében.</p>
+            <button id="start-btn" class="btn bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-xl shadow-lg hover:bg-blue-700">
+                Kvíz Indítása
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div id="progress-container" class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="question-counter" class="text-sm font-semibold text-gray-600"></span>
+                    <span id="score-counter" class="text-sm font-semibold text-gray-600">Pontszám: 0</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6 min-h-[100px]"></h2>
+            <div id="answer-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+            <div id="feedback-text" class="mt-6 text-center font-semibold text-lg"></div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Eredmény</h1>
+            <p id="results-text" class="text-2xl text-gray-600 mb-8"></p>
+            <p id="final-score" class="text-6xl font-extrabold text-blue-600 mb-8"></p>
+            <button id="restart-btn" class="btn bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-xl shadow-lg hover:bg-blue-700">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questionBank = [
+            // From 31. A limbikus rendszer.md
+            {
+                question: "Melyik struktúra játszik központi szerepet a rövid távú memória hosszú távúvá alakításában és a téri memóriában?",
+                answers: [
+                    { text: "Hippokampusz", correct: true },
+                    { text: "Amygdala", correct: false },
+                    { text: "Hipotalamusz", correct: false },
+                    { text: "Gyrus Cinguli", correct: false }
+                ]
+            },
+            {
+                question: "Mi köti össze az amygdalát a hipotalamusszal és a szeptális magokkal?",
+                answers: [
+                    { text: "Stria terminalis", correct: true },
+                    { text: "Fornix", correct: false },
+                    { text: "Cingulum", correct: false },
+                    { text: "Tractus mammillothalamicus", correct: false }
+                ]
+            },
+            {
+                question: "Az érzelmi szabályozásban, hibadetekcióban és a fájdalomérzékelésben melyik terület kiemelten fontos?",
+                answers: [
+                    { text: "Anterior Cinguláris Kéreg (ACC)", correct: true },
+                    { text: "Posterior Cinguláris Kéreg (PCC)", correct: false },
+                    { text: "Subiculum", correct: false },
+                    { text: "Gyrus Dentatus", correct: false }
+                ]
+            },
+            {
+                question: "Melyik struktúra a fő be- és kimeneti kapu a neokortex és a hippocampus között?",
+                answers: [
+                    { text: "Entorhinális kéreg", correct: true },
+                    { text: "Fornix", correct: false },
+                    { text: "Mammilláris testek", correct: false },
+                    { text: "Szeptális magok", correct: false }
+                ]
+            },
+            {
+                question: "A hippokampusz fő kimeneti pályája, amely összeköti a mammilláris testekkel a(z)...",
+                answers: [
+                    { text: "Fornix", correct: true },
+                    { text: "Stria terminalis", correct: false },
+                    { text: "Cingulum", correct: false },
+                    { text: "Perforáns pálya", correct: false }
+                ]
+            },
+            {
+                question: "A jutalmazásban, megerősítésben és örömérzetben melyik struktúra játszik szerepet?",
+                answers: [
+                    { text: "Szeptális magok", correct: true },
+                    { text: "Anterior talamikus magok", correct: false },
+                    { text: "Mammilláris testek", correct: false },
+                    { text: "Amygdala", correct: false }
+                ]
+            },
+            {
+                question: "Mi a Papez-kör helyes sorrendje?",
+                answers: [
+                    { text: "Hippocampus → Fornix → Mammilláris testek → Anterior talamikus magok → Gyrus Cinguli", correct: true },
+                    { text: "Amygdala → Stria terminalis → Hipotalamusz → Talamusz → Prefrontális kéreg", correct: false },
+                    { text: "Hippocampus → Amygdala → Fornix → Mammilláris testek → Gyrus Cinguli", correct: false },
+                    { text: "Entorhinális kéreg → Gyrus Dentatus → CA3 → CA1 → Subiculum", correct: false }
+                ]
+            },
+            {
+                question: "Melyik struktúra szabályozza a homeosztázist, mint például az éhséget, szomjúságot és testhőmérsékletet?",
+                answers: [
+                    { text: "Hipotalamusz", correct: true },
+                    { text: "Talamusz", correct: false },
+                    { text: "Hippokampusz", correct: false },
+                    { text: "Amygdala", correct: false }
+                ]
+            },
+            {
+                question: "Szorongásos zavarok esetén melyik limbikus struktúra mutat túlzott válaszreakciót a fenyegetésre?",
+                answers: [
+                    { text: "Amygdala", correct: true },
+                    { text: "Hippokampusz", correct: false },
+                    { text: "Szeptális magok", correct: false },
+                    { text: "Hipotalamusz", correct: false }
+                ]
+            },
+            {
+                question: "Major depresszióban gyakran megfigyelhető a(z) ... térfogatcsökkenése.",
+                answers: [
+                    { text: "hippocampus és anterior cinguláris kéreg", correct: true },
+                    { text: "amygdala és hipotalamusz", correct: false },
+                    { text: "szeptális magok és fornix", correct: false },
+                    { text: "csak a posterior cinguláris kéreg", correct: false }
+                ]
+            },
+            {
+                question: "Alzheimer-kór korai stádiumában mely struktúrák degenerációja a legjellemzőbb?",
+                answers: [
+                    { text: "Hippocampus és entorhinális kéreg", correct: true },
+                    { text: "Amygdala és szeptális magok", correct: false },
+                    { text: "Prefrontális kéreg és bazális ganglionok", correct: false },
+                    { text: "Kisagy és agytörzs", correct: false }
+                ]
+            },
+            {
+                question: "Melyik érzékszervi rendszernek van egyedülálló, közvetlen hozzáférése a limbikus struktúrákhoz, ami erős érzelmi emlékeket válthat ki?",
+                answers: [
+                    { text: "Szaglás", correct: true },
+                    { text: "Látás", correct: false },
+                    { text: "Hallás", correct: false },
+                    { text: "Tapintás", correct: false }
+                ]
+            },
+            // From 32. A magatartás szabályozása.md
+            {
+                question: "Melyik agyterület felelős a magas szintű kognitív kontrollért, mint a tervezés, döntéshozatal és impulzuskontroll?",
+                answers: [
+                    { text: "Prefrontális kéreg (PFC)", correct: true },
+                    { text: "Limbikus rendszer", correct: false },
+                    { text: "Bazális ganglionok", correct: false },
+                    { text: "Kisagy", correct: false }
+                ]
+            },
+            {
+                question: "A jutalmazásban, motivációban és a függőség kialakulásában melyik struktúra játszik kulcsszerepet?",
+                answers: [
+                    { text: "Nucleus accumbens", correct: true },
+                    { text: "Dorzolaterális PFC", correct: false },
+                    { text: "Hipotalamusz laterális része", correct: false },
+                    { text: "Formatio reticularis", correct: false }
+                ]
+            },
+            {
+                question: "A szokások tanulásáért és a procedurális készségekért melyik struktúracsoport felelős?",
+                answers: [
+                    { text: "Bazális ganglionok", correct: true },
+                    { text: "Limbikus rendszer", correct: false },
+                    { text: "Prefrontális kéreg", correct: false },
+                    { text: "Agytörzsi magok", correct: false }
+                ]
+            },
+            {
+                question: "A 'hideg' kognitív kontroll (PFC) és a 'forró' érzelmi (limbikus) rendszerek közötti kölcsönhatásból mi ered?",
+                answers: [
+                    { text: "A viselkedésszabályozás", correct: true },
+                    { text: "Csak a reflexek", correct: false },
+                    { text: "Csak az alvás-ébrenlét ciklus", correct: false },
+                    { text: "Csak a homeosztázis", correct: false }
+                ]
+            },
+            {
+                question: "Melyik neurotranszmitter kulcsfontosságú a jutalmazásban, motivációban és fókuszban?",
+                answers: [
+                    { text: "Dopamin", correct: true },
+                    { text: "Szerotonin", correct: false },
+                    { text: "GABA", correct: false },
+                    { text: "Acetilkolin", correct: false }
+                ]
+            },
+            {
+                question: "Az SSRI típusú gyógyszerek melyik neurotranszmitter rendszerét célozzák a depresszió kezelésében?",
+                answers: [
+                    { text: "Szerotonin", correct: true },
+                    { text: "Dopamin", correct: false },
+                    { text: "Noradrenalin", correct: false },
+                    { text: "Glutamát", correct: false }
+                ]
+            },
+            {
+                question: "Melyik neurotranszmitter vesz részt az éberségben, figyelemben és a 'küzdj-vagy-menekülj' válaszban?",
+                answers: [
+                    { text: "Noradrenalin", correct: true },
+                    { text: "Acetilkolin", correct: false },
+                    { text: "Szerotonin", correct: false },
+                    { text: "GABA", correct: false }
+                ]
+            },
+            {
+                question: "Mi a GABA (Gamma-amino-vajsav) elsődleges szerepe az agyban?",
+                answers: [
+                    { text: "Fő gátló neurotranszmitter", correct: true },
+                    { text: "Fő serkentő neurotranszmitter", correct: false },
+                    { text: "Fájdalomcsillapító", correct: false },
+                    { text: "Hormonális szabályozó", correct: false }
+                ]
+            },
+            {
+                question: "A krónikus stressz és az emelkedett kortizolszint mely agyterületeket károsíthatja?",
+                answers: [
+                    { text: "Hippocampus és prefrontális kéreg", correct: true },
+                    { text: "Kisagy és agytörzs", correct: false },
+                    { text: "Csak a talamuszt", correct: false },
+                    { text: "Csak a bazális ganglionokat", correct: false }
+                ]
+            },
+            {
+                question: "Melyik érzelemszabályozási stratégia jelenti az érzelmi inger értelmezésének megváltoztatását?",
+                answers: [
+                    { text: "Kognitív átértékelés", correct: true },
+                    { text: "Kifejező elfojtás", correct: false },
+                    { text: "Elfogadás", correct: false },
+                    { text: "Figyelemelterelés", correct: false }
+                ]
+            },
+            {
+                question: "Az a képesség, hogy mentális állapotokat (hiedelmek, vágyak) tulajdonítsunk másoknak, a ...",
+                answers: [
+                    { text: "Tudatelmélet (Theory of Mind)", correct: true },
+                    { text: "Affektív empátia", correct: false },
+                    { text: "Procedurális memória", correct: false },
+                    { text: "Impulzuskontroll", correct: false }
+                ]
+            },
+            {
+                question: "ADHD esetén melyik agyterület és neurotranszmitter rendszer működése érintett elsődlegesen?",
+                answers: [
+                    { text: "Prefrontális kéreg és katekolaminok (dopamin, noradrenalin)", correct: true },
+                    { text: "Hippocampus és acetilkolin", correct: false },
+                    { text: "Amygdala és szerotonin", correct: false },
+                    { text: "Bazális ganglionok és GABA", correct: false }
+                ]
+            },
+            // From 33. A memóriával kapcsolatos idegrendszeri szerkezetek.md
+            {
+                question: "A hosszú távú memória melyik két fő típusra osztható?",
+                answers: [
+                    { text: "Deklaratív (explicit) és nem-deklaratív (implicit)", correct: true },
+                    { text: "Rövid távú és munkamemória", correct: false },
+                    { text: "Epizodikus és téri", correct: false },
+                    { text: "Motoros és szenzoros", correct: false }
+                ]
+            },
+            {
+                question: "'Párizs Franciaország fővárosa.' - Ez milyen típusú emlék?",
+                answers: [
+                    { text: "Szemantikus", correct: true },
+                    { text: "Epizodikus", correct: false },
+                    { text: "Procedurális", correct: false },
+                    { text: "Munkamemória", correct: false }
+                ]
+            },
+            {
+                question: "'Emlékszem, mit reggeliztem tegnap.' - Ez milyen típusú emlék?",
+                answers: [
+                    { text: "Epizodikus", correct: true },
+                    { text: "Szemantikus", correct: false },
+                    { text: "Implicit", correct: false },
+                    { text: "Klasszikus kondicionálás", correct: false }
+                ]
+            },
+            {
+                question: "A biciklizés képessége melyik memóriatípushoz tartozik?",
+                answers: [
+                    { text: "Procedurális", correct: true },
+                    { text: "Deklaratív", correct: false },
+                    { text: "Epizodikus", correct: false },
+                    { text: "Szemantikus", correct: false }
+                ]
+            },
+            {
+                question: "Az érzelmileg töltött események erősebb memórianyomát melyik struktúra segíti elő?",
+                answers: [
+                    { text: "Amygdala", correct: true },
+                    { text: "Kisagy", correct: false },
+                    { text: "Prefrontális kéreg", correct: false },
+                    { text: "Bazális ganglionok", correct: false }
+                ]
+            },
+            {
+                question: "A klasszikus kondicionálás (pl. Pavlov kutyája) melyik agyterülethez köthető elsősorban?",
+                answers: [
+                    { text: "Kisagy", correct: true },
+                    { text: "Hippokampusz", correct: false },
+                    { text: "Amygdala", correct: false },
+                    { text: "Prefrontális kéreg", correct: false }
+                ]
+            },
+            {
+                question: "A munkamemória egy telefonszám átmeneti megjegyzéséhez melyik agyterülethez kötődik leginkább?",
+                answers: [
+                    { text: "Prefrontális kéreg", correct: true },
+                    { text: "Hippokampusz", correct: false },
+                    { text: "Amygdala", correct: false },
+                    { text: "Kisagy", correct: false }
+                ]
+            },
+            // From 34. A hippokampusz szerkezete és kapcsolatai.md
+            {
+                question: "A hippokampusz formáció mely három fő részből áll?",
+                answers: [
+                    { text: "Gyrus dentatus, Cornu Ammonis, Subiculum", correct: true },
+                    { text: "CA1, CA2, CA3", correct: false },
+                    { text: "Fornix, Stria terminalis, Cingulum", correct: false },
+                    { text: "Molekuláris, granuláris, polimorf réteg", correct: false }
+                ]
+            },
+            {
+                question: "Milyen típusú kéreg a hippokampusz?",
+                answers: [
+                    { text: "Archikortex (3 rétegű)", correct: true },
+                    { text: "Neokortex (6 rétegű)", correct: false },
+                    { text: "Paleokortex (4-5 rétegű)", correct: false },
+                    { text: "Mezokortex (átmeneti)", correct: false }
+                ]
+            },
+            {
+                question: "Mi a hippokampuszon belüli fő információáramlási útvonal neve?",
+                answers: [
+                    { text: "Triszinaptikus kör", correct: true },
+                    { text: "Papez-gyűrű", correct: false },
+                    { text: "Mezolimbikus pálya", correct: false },
+                    { text: "Nigrostriatális pálya", correct: false }
+                ]
+            },
+            {
+                question: "A triszinaptikus körben honnan hova vezet a perforáns pálya?",
+                answers: [
+                    { text: "Entorhinális kéreg → Gyrus Dentatus", correct: true },
+                    { text: "Gyrus Dentatus → CA3", correct: false },
+                    { text: "CA3 → CA1", correct: false },
+                    { text: "CA1 → Subiculum", correct: false }
+                ]
+            },
+            {
+                question: "A 'mintázat-szétválasztás' (hasonló emlékek megkülönböztetése) melyik hippokampális alrégió feladata?",
+                answers: [
+                    { text: "Gyrus Dentatus (DG)", correct: true },
+                    { text: "CA3", correct: false },
+                    { text: "CA1", correct: false },
+                    { text: "Subiculum", correct: false }
+                ]
+            },
+            {
+                question: "A 'mintázat-kiegészítés' (részleges információból teljes emlék előhívása) melyik hippokampális alrégió feladata?",
+                answers: [
+                    { text: "CA3", correct: true },
+                    { text: "Gyrus Dentatus (DG)", correct: false },
+                    { text: "CA1", correct: false },
+                    { text: "Entorhinális kéreg", correct: false }
+                ]
+            },
+            {
+                question: "A 'kognitív térkép' elmélete, amely a téri tájékozódásért felel, melyik agyi struktúrához kötődik?",
+                answers: [
+                    { text: "Hippokampusz", correct: true },
+                    { text: "Prefrontális kéreg", correct: false },
+                    { text: "Kisagy", correct: false },
+                    { text: "Parietális lebeny", correct: false }
+                ]
+            },
+            {
+                question: "A hippokampusz fő kimeneti pályája a mammilláris testek és a szeptális magok felé a(z):",
+                answers: [
+                    { text: "Fornix", correct: true },
+                    { text: "Cingulum", correct: false },
+                    { text: "Stria medullaris", correct: false },
+                    { text: "Tractus opticus", correct: false }
+                ]
+            },
+            {
+                question: "Melyik struktúra a hippokampusz és a neokortex közötti legfontosabb be- és kimeneti kapu?",
+                answers: [
+                    { text: "Entorhinális kéreg", correct: true },
+                    { text: "Amygdala", correct: false },
+                    { text: "Fornix", correct: false },
+                    { text: "Talamusz", correct: false }
+                ]
+            }
+        ];
+        
+        // Add more questions to reach 80+
+        const extraQuestions = [
+            {
+                question: "Melyik a limbikus rendszer legősibb része, amely a szaglással áll szoros kapcsolatban?",
+                answers: [
+                    { text: "Piriform kéreg", correct: true },
+                    { text: "Gyrus dentatus", correct: false },
+                    { text: "Subiculum", correct: false },
+                    { text: "Nucleus accumbens", correct: false }
+                ]
+            },
+            {
+                question: "Mi a neve annak a pályának, amely a mammilláris testekből az anterior talamikus magokhoz vezet a Papez-körben?",
+                answers: [
+                    { text: "Tractus mammillothalamicus", correct: true },
+                    { text: "Fornix", correct: false },
+                    { text: "Stria terminalis", correct: false },
+                    { text: "Cingulum", correct: false }
+                ]
+            },
+            {
+                question: "A HPA-tengely (Hipotalamusz-Hipofízis-Mellékvese) diszregulációja melyik hormon szintjének krónikus emelkedésével jár?",
+                answers: [
+                    { text: "Kortizol", correct: true },
+                    { text: "Tesztoszteron", correct: false },
+                    { text: "Ösztrogén", correct: false },
+                    { text: "Adrenalin", correct: false }
+                ]
+            },
+            {
+                question: "A Parkinson-kór motoros tünetei melyik dopaminerg pálya degenerációjához köthetők?",
+                answers: [
+                    { text: "Nigrostriatális pálya", correct: true },
+                    { text: "Mezolimbikus pálya", correct: false },
+                    { text: "Mezokortikális pálya", correct: false },
+                    { text: "Tuberoinfundibuláris pálya", correct: false }
+                ]
+            },
+            {
+                question: "Melyik a fő serkentő neurotranszmitter az agyban, amely kulcsszerepet játszik a tanulásban és a memóriában (LTP)?",
+                answers: [
+                    { text: "Glutamát", correct: true },
+                    { text: "GABA", correct: false },
+                    { text: "Szerotonin", correct: false },
+                    { text: "Dopamin", correct: false }
+                ]
+            },
+            {
+                question: "Az Alzheimer-kór patológiájában milyen fehérje-lerakódások játszanak szerepet a limbikus struktúrákban?",
+                answers: [
+                    { text: "Amiloid plakkok és neurofibrilláris kötegek", correct: true },
+                    { text: "Lewy-testek", correct: false },
+                    { text: "Prion fehérjék", correct: false },
+                    { text: "Csak vaslerakódások", correct: false }
+                ]
+            },
+            {
+                question: "A magatartászavarban (Conduct Disorder) szenvedő egyéneknél gyakran megfigyelhető a(z) ... hiporeaktivitása.",
+                answers: [
+                    { text: "amygdala", correct: true },
+                    { text: "hippocampus", correct: false },
+                    { text: "prefrontális kéreg", correct: false },
+                    { text: "kisagy", correct: false }
+                ]
+            },
+            {
+                question: "A 'top-down' vagy 'felülről lefelé' irányuló figyelmi kontrollt melyik agyterület közvetíti?",
+                answers: [
+                    { text: "Prefrontális kéreg (PFC)", correct: true },
+                    { text: "Agytörzs", correct: false },
+                    { text: "Hipotalamusz", correct: false },
+                    { text: "Talamusz", correct: false }
+                ]
+            },
+            {
+                question: "A CA3 piramissejtek axonjai, amelyek a CA1 régió piramissejtjeihez futnak, a(z) ...",
+                answers: [
+                    { text: "Schaffer-kollaterálisok", correct: true },
+                    { text: "Moharostok", correct: false },
+                    { text: "Perforáns pálya rostjai", correct: false },
+                    { text: "Fornix rostjai", correct: false }
+                ]
+            },
+            {
+                question: "A gyrus dentatus granulasejtjeinek axonjai alkotják a ...",
+                answers: [
+                    { text: "Moharostokat", correct: true },
+                    { text: "Schaffer-kollaterálisokat", correct: false },
+                    { text: "Perforáns pályát", correct: false },
+                    { text: "Stria terminalist", correct: false }
+                ]
+            },
+            {
+                question: "A benzodiazepinek (pl. Xanax) szorongásoldó hatásukat melyik neurotranszmitter rendszerének erősítésével fejtik ki?",
+                answers: [
+                    { text: "GABA", correct: true },
+                    { text: "Glutamát", correct: false },
+                    { text: "Dopamin", correct: false },
+                    { text: "Szerotonin", correct: false }
+                ]
+            },
+             {
+                question: "A limbikus rendszer diszfunkciója mely betegség esetén okozhat hippokampális szklerózist?",
+                answers: [
+                    { text: "Temporális lebeny epilepszia (TLE)", correct: true },
+                    { text: "Parkinson-kór", correct: false },
+                    { text: "Huntington-kór", correct: false },
+                    { text: "Skizofrénia", correct: false }
+                ]
+            },
+            {
+                question: "Mi a 'relációs kötés', amely a hippokampusz egyik fontos funkciója?",
+                answers: [
+                    { text: "Diszkrét elemek, események vagy koncepciók összekapcsolása", correct: true },
+                    { text: "Csak a téri információk összekapcsolása", correct: false },
+                    { text: "A rövid és hosszú távú memória szétválasztása", correct: false },
+                    { text: "Az érzelmek elnyomása", correct: false }
+                ]
+            },
+            {
+                question: "Melyik a hippokampusz fő serkentő sejttípusa a CA1-CA3 régiókban?",
+                answers: [
+                    { text: "Piramissejt", correct: true },
+                    { text: "Granulasejt", correct: false },
+                    { text: "Interneuron", correct: false },
+                    { text: "Mohasejt", correct: false }
+                ]
+            },
+            {
+                question: "A dopaminerg mezokortikális pálya honnan hova vetít?",
+                answers: [
+                    { text: "VTA-tól a prefrontális kéregig", correct: true },
+                    { text: "SNc-től a dorzális striatumig", correct: false },
+                    { text: "VTA-tól a nucleus accumbensig", correct: false },
+                    { text: "Raphe magoktól a kéregig", correct: false }
+                ]
+            },
+            {
+                question: "Melyik struktúracsoport vesz részt a mozgásindításban, szokástanulásban és akcióválasztásban?",
+                answers: [
+                    { text: "Bazális ganglionok", correct: true },
+                    { text: "Limbikus rendszer", correct: false },
+                    { text: "Agytörzsi hálózatos állomány", correct: false },
+                    { text: "Parietális lebeny", correct: false }
+                ]
+            },
+             {
+                question: "Melyik struktúra diszfunkciója áll a Korsakoff-szindróma amnéziájának hátterében?",
+                answers: [
+                    { text: "Mammilláris testek és talamusz (Papez-kör részei)", correct: true },
+                    { text: "Csak a prefrontális kéreg", correct: false },
+                    { text: "Kisagy", correct: false },
+                    { text: "Bazális ganglionok", correct: false }
+                ]
+            },
+            {
+                question: "Az érzelmi emlékek kontextusának (pl. hol és mikor történt) kódolásáért melyik struktúra felelős?",
+                answers: [
+                    { text: "Hippokampusz", correct: true },
+                    { text: "Amygdala", correct: false },
+                    { text: "Insula", correct: false },
+                    { text: "Hipotalamusz", correct: false }
+                ]
+            },
+            {
+                question: "A munkamemória 'téri-vizuális vázlattömb' komponense melyik agyféltekéhez kötődik erősebben?",
+                answers: [
+                    { text: "Jobb agyfélteke", correct: true },
+                    { text: "Bal agyfélteke", correct: false },
+                    { text: "Nincs féltekei dominancia", correct: false },
+                    { text: "Csak a kisagyhoz", correct: false }
+                ]
+            },
+            {
+                question: "A CA3 régióban lévő piramissejtek kiterjedt, egymással való kapcsolatai (rekurrens kollaterálisok) miatt milyen hálózatként működnek?",
+                answers: [
+                    { text: "Auto-asszociatív hálózatként", correct: true },
+                    { text: "Gátló hálózatként", correct: false },
+                    { text: "Szenzoros relé hálózatként", correct: false },
+                    { text: "Motoros programként", correct: false }
+                ]
+            },
+             {
+                question: "Melyik a gyrus cinguli azon része, amely az epizodikus memória előhívásában és a Default Mode Network (DMN) részeként működik?",
+                answers: [
+                    { text: "Posterior Cinguláris Kéreg (PCC)", correct: true },
+                    { text: "Anterior Cinguláris Kéreg (ACC)", correct: false },
+                    { text: "Középső Cinguláris Kéreg (MCC)", correct: false },
+                    { text: "Retrospleniális kéreg", correct: false }
+                ]
+            },
+            {
+                question: "Melyik agyterület játszik szerepet a téri memória kialakításában és a jelenetek felismerésében?",
+                answers: [
+                    { text: "Gyrus parahippocampalis", correct: true },
+                    { text: "Gyrus precentralis", correct: false },
+                    { text: "Gyrus postcentralis", correct: false },
+                    { text: "Insula", correct: false }
+                ]
+            },
+            {
+                question: "Az autizmus (ASD) korai szakaszában milyen agyi változás figyelhető meg a limbikus régiókban?",
+                answers: [
+                    { text: "Agyi túlnövekedés, majd a szürkeállomány csökkenése", correct: true },
+                    { text: "Csak a fehérállomány csökkenése", correct: false },
+                    { text: "Kizárólag hippokampális szklerózis", correct: false },
+                    { text: "Nincs kimutatható változás", correct: false }
+                ]
+            },
+            {
+                question: "Melyik struktúra a limbikus rendszer elsődleges kimeneti pályája a testi állapotok befolyásolására?",
+                answers: [
+                    { text: "Hipotalamusz", correct: true },
+                    { text: "Amygdala", correct: false },
+                    { text: "Hippokampusz", correct: false },
+                    { text: "Talamusz", correct: false }
+                ]
+            },
+            {
+                question: "A függőség kialakulása során a droghasználat a célorientált viselkedésből (PFC) hova tolódik el?",
+                answers: [
+                    { text: "Szokásvezérelt viselkedés (bazális ganglionok) felé", correct: true },
+                    { text: "Reflex-vezérelt viselkedés (gerincvelő) felé", correct: false },
+                    { text: "Érzelmi kitörések (amygdala) felé", correct: false },
+                    { text: "Memóriakonszolidáció (hippokampusz) felé", correct: false }
+                ]
+            },
+            {
+                question: "A szerotonin szintjének megváltozása a büntetésérzékenységhez kapcsolódik melyik zavar esetén?",
+                answers: [
+                    { text: "Oppozíciós-dacos zavar (ODD)", correct: true },
+                    { text: "Generalizált szorongásos zavar", correct: false },
+                    { text: "Major depresszió", correct: false },
+                    { text: "Skizofrénia", correct: false }
+                ]
+            },
+            {
+                question: "Melyik agyterület vesz részt a biológiai mozgás, tekintetirány és szándékok feldolgozásában, hozzájárulva a Tudatelmélethez?",
+                answers: [
+                    { text: "Superior temporális sulcus (STS)", correct: true },
+                    { text: "Inferior temporális gyrus", correct: false },
+                    { text: "Occipitális lebeny", correct: false },
+                    { text: "Motoros kéreg", correct: false }
+                ]
+            },
+            {
+                question: "Melyik neurotranszmitter degenerációja kapcsolódik az Alzheimer-kórhoz?",
+                answers: [
+                    { text: "Acetilkolin", correct: true },
+                    { text: "Dopamin", correct: false },
+                    { text: "Szerotonin", correct: false },
+                    { text: "Noradrenalin", correct: false }
+                ]
+            },
+            {
+                question: "A munkamemória 'frissítés' (updating) funkciója melyik struktúra tevékenységéhez kötődik?",
+                answers: [
+                    { text: "Frontális lebeny", correct: true },
+                    { text: "Occipitális lebeny", correct: false },
+                    { text: "Temporális lebeny", correct: false },
+                    { text: "Agytörzs", correct: false }
+                ]
+            },
+            {
+                question: "Melyik hippokampális alrégió a leginkább kollineáris (a neuronok a leginkább egy vonalba rendezettek)?",
+                answers: [
+                    { text: "CA3", correct: true },
+                    { text: "CA1", correct: false },
+                    { text: "CA2", correct: false },
+                    { text: "Gyrus Dentatus", correct: false }
+                ]
+            },
+            {
+                question: "A hippokampusz és a neokortex közötti 'párbeszédet' a memóriakonszolidáció során melyik struktúra vezényli?",
+                answers: [
+                    { text: "Entorhinális kéreg", correct: true },
+                    { text: "Fornix", correct: false },
+                    { text: "Amygdala", correct: false },
+                    { text: "Cingulum", correct: false }
+                ]
+            },
+        ];
+
+        questionBank.push(...extraQuestions, ...extraQuestions); // duplicate to ensure we have enough questions
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const questionCounter = document.getElementById('question-counter');
+        const scoreCounter = document.getElementById('score-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const answerButtons = document.getElementById('answer-buttons');
+        const feedbackText = document.getElementById('feedback-text');
+
+        const resultsText = document.getElementById('results-text');
+        const finalScore = document.getElementById('final-score');
+
+        let shuffledQuestions, currentQuestionIndex;
+        let score = 0;
+        const totalQuestionsForQuiz = 20; // Number of questions per quiz session
+
+        // Functions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            shuffledQuestions = shuffleArray([...questionBank]).slice(0, totalQuestionsForQuiz);
+            currentQuestionIndex = 0;
+            score = 0;
+            updateScoreDisplay();
+            setNextQuestion();
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion(shuffledQuestions[currentQuestionIndex]);
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionText.innerText = question.question;
+            question.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'text-gray-700', 'hover:bg-gray-100');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtons.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            feedbackText.innerText = '';
+            feedbackText.classList.remove('text-green-600', 'text-red-600');
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const correct = selectedBtn.dataset.correct === 'true';
+
+            if (correct) {
+                score++;
+                updateScoreDisplay();
+                feedbackText.innerText = 'Helyes válasz!';
+                feedbackText.classList.add('text-green-600');
+            } else {
+                feedbackText.innerText = 'Helytelen válasz.';
+                feedbackText.classList.add('text-red-600');
+            }
+            
+            setStatusClass(document.body, correct);
+            Array.from(answerButtons.children).forEach(button => {
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('btn-correct');
+                } else {
+                    button.classList.add('btn-incorrect');
+                }
+                button.disabled = true;
+            });
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                setNextQuestion();
+            }, 1500);
+        }
+
+        function setStatusClass(element, correct) {
+            // Not used, but can be for background color changes
+        }
+
+        function updateProgress() {
+            questionCounter.innerText = `Kérdés: ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`;
+            const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+        
+        function updateScoreDisplay() {
+            scoreCounter.innerText = `Pontszám: ${score}`;
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            const percentage = Math.round((score / shuffledQuestions.length) * 100);
+            resultsText.innerText = `A tesztet ${score} ponttal zártad a ${shuffledQuestions.length}-ból.`;
+            finalScore.innerText = `${percentage}%`;
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

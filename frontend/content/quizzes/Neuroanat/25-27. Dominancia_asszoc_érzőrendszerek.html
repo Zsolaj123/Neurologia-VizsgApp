@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Átfogó Neuroanatómia Teszt: Dominancia, Asszociációs és Érzőrendszerek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Átfogó Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Féltekei Dominancia, Asszociációs Kéreg és Érzőrendszer</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- Questions will be dynamically inserted here -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- Detailed results will be dynamically inserted here -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        const fullQuizData = [
+            // ----- TOPIC 1: Féltekei dominancia -----
+            { question: "A legtöbb jobbkezes embernél melyik agyfélteke domináns a nyelvi funkciók (beszédképzés, beszédértés) tekintetében?", answers: { a: "A jobb agyfélteke", b: "A bal agyfélteke", c: "Nincs dominancia, mindkettő egyenlő mértékben vesz részt.", d: "A kisagy" }, correctAnswer: "b", explanation: "A jobbkezesek mintegy 90-95%-ánál a nyelvi központok, mint a Broca- és Wernicke-területek, a bal agyféltekében helyezkednek el." },
+            { question: "Melyik agyi struktúra felelős elsődlegesen a téri-vizuális feldolgozásért, az arcfelismerésért és a holisztikus gondolkodásért?", answers: { a: "A bal agyfélteke", b: "A jobb agyfélteke", c: "A corpus callosum", d: "A thalamus" }, correctAnswer: "b", explanation: "A jobb agyfélteke specializációja a téri-vizuális és holisztikus információfeldolgozás, beleértve a komplex mintázatok, így az arcok felismerését is." },
+            { question: "Mi a Wada-teszt célja?", answers: { a: "Az agyi elektromos aktivitás mérése.", b: "A nyelvi és memória funkciók féltekei lokalizációjának meghatározása egy félteke átmeneti 'kikapcsolásával'.", c: "A reflexek kiválthatóságának vizsgálata.", d: "Az agyi véráramlás mérése." }, correctAnswer: "b", explanation: "A Wada-teszt során nátrium-amobarbitál injektálásával ideiglenesen inaktiválják az egyik agyféltekét, hogy meghatározzák, melyik félteke felelős a beszédért és memóriáért, tipikusan epilepszia műtétek előtt." },
+            { question: "Melyik állítás írja le a legpontosabban a 'split-brain' (hasított agyú) betegek vizsgálatának jelentőségét?", answers: { a: "Lehetővé tette az agysejtek metabolizmusának tanulmányozását.", b: "Bizonyította, hogy a két agyfélteke teljesen szimmetrikus.", c: "Feltárta a két, egymástól nagyrészt elválasztott agyfélteke eltérő képességeit és funkcionális specializációját.", d: "Kimutatta, hogy a corpus callosumnak nincs fontos funkciója." }, correctAnswer: "c", explanation: "A corpus callosum átmetszése után végzett vizsgálatok (pl. Sperry, Gazzaniga) alapvető betekintést nyújtottak a két agyfélteke eltérő funkcionális specializációjába." },
+            { question: "Melyik állítás igaz a kezesség és az agyi lateralizáció kapcsolatára balkezeseknél?", answers: { a: "Minden balkezesnél a jobb agyfélteke a nyelvi domináns.", b: "Minden balkezesnél a bal agyfélteke a nyelvi domináns.", c: "A lateralizációs mintázatuk változatosabb, lehet jobb agyféltekei dominancia, vagy a funkciók kevésbé lehetnek lateralizáltak.", d: "A kezességük nincs kapcsolatban az agyi lateralizációval." }, correctAnswer: "c", explanation: "Balkezeseknél az agyi szerveződés heterogénebb. Míg sokuknál a jobb félteke domináns a nyelvben, másoknál a bal, és sok esetben a funkciók megoszlanak a két félteke között." },
+            { question: "Melyik funkció NEM köthető elsődlegesen a bal agyféltekéhez?", answers: { a: "Analitikus gondolkodás", b: "Az érzelmi hangsúly (prozódia) értelmezése", c: "Számolás", d: "Beszédprodukció (Broca-terület)" }, correctAnswer: "b", explanation: "A beszéd érzelmi töltetének, a prozódiának az értelmezése tipikusan a jobb agyfélteke funkciója, kiegészítve a bal félteke szemantikai és grammatikai elemzését." },
+            { question: "A 'dominanciazavar' (pl. kevert dominancia) milyen problémákkal hozható összefüggésbe?", answers: { a: "Kizárólag jobb motoros teljesítménnyel", b: "Kizárólag jobb matematikai képességekkel", c: "Tanulási nehézségekkel, mint a diszlexia vagy diszgráfia", d: "Nem okoz semmilyen problémát." }, correctAnswer: "c", explanation: "A nem egyértelműen kialakult laterális dominancia összefüggésbe hozható az idegrendszer érési zavaraival, ami tanulási, írási, olvasási és téri tájékozódási nehézségekben nyilvánulhat meg." },
+            { question: "Mi a dichotikus hallgatási teszt alapelve?", answers: { a: "A két fül hallásélességét méri.", b: "Azt használja ki, hogy a féltekék főként az ellenoldali fülből érkező nyelvi ingereket dolgozzák fel hatékonyabban.", c: "A zenei hallás lateralizációját vizsgálja.", d: "Azt méri, hogy a beteg melyik fülével hall jobban." }, correctAnswer: "b", explanation: "A 'jobb fül fölény' nyelvi ingerekre a legtöbb embernél azt tükrözi, hogy a bal agyfélteke domináns a nyelvfeldolgozásban, és az ellenoldali (jobb) fülből érkező információt preferálja." },
+            { question: "Melyik hormonális tényező befolyásolhatja az agyi lateralizáció kialakulását?", answers: { a: "Inzulin", b: "Adrenalin", c: "Prenatális nemi hormonok (pl. tesztoszteron)", d: "Kortizol" }, correctAnswer: "c", explanation: "A magzati korban ható nemi hormonok, mint a tesztoszteron, befolyásolhatják az agyfejlődést és a féltekék közötti strukturális és funkcionális aszimmetriák kialakulását." },
+            { question: "Mi a tudományos álláspont a 'logikus bal agyfélteke' vs. 'kreatív jobb agyfélteke' dichotómiáról?", answers: { a: "Ez egy tudományosan teljesen alátámasztott tény.", b: "Ez egy erős leegyszerűsítés; a komplex funkciók, mint a kreativitás, mindkét félteke integrált működését igénylik.", c: "Csak a férfiakra igaz.", d: "Csak a nőkre igaz." }, correctAnswer: "b", explanation: "Bár a funkcionális specializáció létezik, a legtöbb magasabb rendű funkció, beleértve a kreativitást és a logikát is, a két félteke közötti dinamikus együttműködés eredménye." },
+            { question: "Melyik állítás írja le helyesen a Broca-terület funkcióját és lokalizációját?", answers: { a: "Beszédértés; domináns temporális lebeny.", b: "Beszédképzés (motoros); domináns frontális lebeny.", c: "Téri tájékozódás; nem-domináns parietális lebeny.", d: "Olvasás; occipitális lebeny." }, correctAnswer: "b", explanation: "A Broca-terület a domináns (általában bal) félteke frontális lebenyének inferior gyrusában található és a beszéd motoros programozásáért felelős." },
+            { question: "A jobb agyfélteke sérülése milyen típusú kommunikációs zavart okozhat leginkább?", answers: { a: "Súlyos agrammatizmust", b: "A prozódia (érzelmi hangsúly) megértésének és használatának zavarát (aprosodia)", c: "Szómegnevezési nehézséget (anomia)", d: "A beszéd teljes elvesztését" }, correctAnswer: "b", explanation: "A jobb agyfélteke a kommunikáció nem-verbális, érzelmi aspektusaiért felelős. Sérülése aprosodiához vezethet, amikor a beteg nem érti vagy nem tudja használni a beszéd érzelmi hangsúlyozását." },
+            { question: "Milyen következménye lehet, ha egy balkezes gyermeket a jobb keze használatára szoktatnak át?", answers: { a: "Mindig javítja a tanulmányi eredményeit.", b: "Megzavarhatja az agy természetes lateralizációs folyamatait, ami tanulási nehézségekhez vezethet.", c: "Nincs semmilyen hatása.", d: "Mindig jobbkezessé válik." }, correctAnswer: "b", explanation: "Az átszoktatás kényszere konfliktust teremthet az agy veleszületett motoros dominanciája és a tanult viselkedés között, ami negatívan befolyásolhatja a finommotoros készségeket és a kognitív fejlődést." },
+            { question: "Melyik állítás igaz a féltekei dominancia és a nemek kapcsolatára?", answers: { a: "A férfiak agya mindig erősebben lateralizált, mint a nőké.", b: "A nők agya mindig erősebben lateralizált, mint a férfiaké.", c: "Vannak kutatások, amelyek szerint a férfiak agya átlagosan valamivel erősebben lateralizált lehet, de a különbségek kicsik és a funkciótól függenek.", d: "Nincs semmilyen különbség a nemek között." }, correctAnswer: "c", explanation: "Bár vannak statisztikai tendenciák, melyek szerint a férfiak agya bizonyos funkciókban (pl. téri képességek) erősebben lateralizált lehet, ez nem egy általános szabály, és nagy az egyéni variabilitás." },
+            { question: "A holisztikus, 'összképre' fókuszáló gondolkodásmód melyik agyféltekéhez köthető?", answers: { a: "Bal agyfélteke", b: "Jobb agyfélteke", c: "Mindkettőhöz egyformán", d: "A kisagyhoz" }, correctAnswer: "b", explanation: "Míg a bal félteke inkább analitikus és a részletekre fókuszál, a jobb félteke a mintázatok, a globális formák és az összkép felismerésében játszik kitüntetett szerepet." },
+            { question: "Melyik vizsgálóeljárás NEM alkalmas az agyi funkciók lateralizációjának vizsgálatára?", answers: { a: "fMRI", b: "Wada-teszt", c: "Dichotikus hallgatási teszt", d: "Koponya röntgen" }, correctAnswer: "d", explanation: "A koponya röntgen a csontos struktúrákat ábrázolja, de nem ad információt az agyi funkciókról. Az fMRI, a Wada-teszt és a dichotikus hallgatás mind a funkcionális aszimmetriák vizsgálatára szolgálnak." },
+            { question: "Miért fontos a nyelvi dominancia meghatározása agyműtétek előtt?", answers: { a: "Mert befolyásolja az altatás módját.", b: "Hogy a sebész elkerülhesse a kritikus beszédközpontok (Broca, Wernicke) sérülését a domináns féltekén.", c: "Mert a balkezeseket nem lehet műteni.", d: "Nincs klinikai jelentősége." }, correctAnswer: "b", explanation: "A nyelvi központok pontos lokalizálása (pl. Wada-teszttel vagy fMRI-vel) elengedhetetlen a műtéti tervezés során, hogy a beavatkozás a lehető legkisebb kockázattal járjon a beszédképesség elvesztésére." },
+            { question: "Milyen nyelvi képessége maradhat meg egy 'split-brain' betegnek, ha egy szót a bal vizuális félterébe vetítenek?", answers: { a: "Meg tudja nevezni a szót.", b: "Le tudja rajzolni a tárgyat a bal kezével.", c: "Le tudja írni a szót a jobb kezével.", d: "Semmilyen módon nem tud reagálni." }, correctAnswer: "b", explanation: "A bal vizuális féltér információja a jobb agyféltekébe jut. Mivel a beszédközpont a bal oldalon van, a beteg nem tudja megnevezni a szót. Azonban a jobb félteke kontrollálja a bal kezet, így le tudja rajzolni a látott tárgyat, anélkül, hogy tudatosan tudná, mit rajzol." },
+            { question: "A test melyik oldala mutatja ki kifejezőbben az érzelmeket az arcon?", answers: { a: "A jobb arcfél", b: "A bal arcfél", c: "Mindkettő egyformán", d: "Ez az érzelemtől függ." }, correctAnswer: "b", explanation: "Mivel az érzelemkifejezésért főként a jobb agyfélteke felelős, amely az ellenoldali (bal) arcfelet kontrollálja, az érzelmek gyakran intenzívebben és gyorsabban jelennek meg a bal arcfélen." },
+            { question: "Melyik állítás igaz?", answers: { a: "A lateralizáció csak az embernél létező jelenség.", b: "A lateralizáció már a Homo habilisnál is kifejezett volt.", c: "A lateralizáció jelei más állatfajoknál is megfigyelhetők, de az embernél a legkifejezettebb, különösen a nyelvi funkciók terén.", d: "A lateralizáció a korral csökken, és időskorra teljesen eltűnik." }, correctAnswer: "c", explanation: "Bár a lateralizáció az emberi agy egyik legjellemzőbb vonása, az aszimmetria bizonyos formái más fajoknál is jelen vannak. Az emberi agyban a nyelvi specializáció a leginkább kiemelkedő példa." },
+            { question: "A szekvenciális, időbeli információfeldolgozás melyik agyfélteke specialitása?", answers: { a: "Jobb agyfélteke", b: "Bal agyfélteke", c: "Mindkettő egyenlő mértékben", d: "A kisagy" }, correctAnswer: "b", explanation: "A bal agyfélteke analitikus működésmódjához tartozik az események sorrendjének, időbeli mintázatának precíz feldolgozása, ami a nyelv és a logikai gondolkodás alapja." },
+
+            // ----- TOPIC 2: Asszociációs kéreg -----
+            { question: "Mi az asszociációs kéreg legfőbb funkciója?", answers: { a: "Primer szenzoros ingerek fogadása.", b: "Direkt motoros parancsok kiadása.", c: "Különböző modalitású információk integrálása és magasabb rendű kognitív funkciók ellátása.", d: "Az agytörzsi reflexek szabályozása." }, correctAnswer: "c", explanation: "Az asszociációs kéreg nem primer érző vagy mozgató, hanem az ezekből származó információkat kapcsolja össze és dolgozza fel, lehetővé téve a komplex gondolkodást, tervezést és a nyelvhasználatot." },
+            { question: "Melyik a legnagyobb asszociációs pályarendszer, amely ugyanazon agyféltekén belül a frontális, parietális és temporális lebenyeket köti össze?", answers: { a: "Fasciculus uncinatus", b: "Fasciculus longitudinalis superior", c: "Cingulum", d: "Corpus callosum" }, correctAnswer: "b", explanation: "A fasciculus longitudinalis superior egy hatalmas asszociációs köteg, amely a lebenyek közötti hosszútávú kommunikációt biztosítja egy féltekén belül. Része a fasciculus arcuatus is." },
+            { question: "A 'neglect' szindróma (térbeli féloldali elhanyagolás) melyik asszociációs kéreg sérülésére utal leginkább?", answers: { a: "A domináns prefrontális kéreg", b: "A nem-domináns parietális asszociációs kéreg", c: "A limbikus asszociációs kéreg", d: "Az occipitális kéreg" }, correctAnswer: "b", explanation: "A neglect szindróma leggyakrabban a jobb (nem-domináns) parietális lebeny sérülésekor alakul ki, amely a téri figyelem és a tudatosság központja." },
+            { question: "Melyik fehérállományi pálya köti össze a két agyféltekét?", answers: { a: "Asszociációs pályák", b: "Projekciós pályák", c: "Komisszurális pályák", d: "Spinothalamicus pálya" }, correctAnswer: "c", explanation: "A komisszurális pályák (legnagyobb a corpus callosum) a két agyfélteke szimmetrikus területeit kötik össze, biztosítva a hemispheriumok közötti kommunikációt." },
+            { question: "Melyik Brodmann-area felel meg a Wernicke-féle beszédértő központ egy részének?", answers: { a: "BA 4", b: "BA 17", c: "BA 22", d: "BA 44, 45" }, correctAnswer: "c", explanation: "A Wernicke-terület klasszikusan a domináns félteke Brodmann 22-es areájának hátsó részéhez köthető (a gyrus temporalis superioron)." },
+            { question: "Mi a 'sztereognózis' és melyik agyterület sérülése okozza a zavarát (astereognosis)?", answers: { a: "Arcfelismerés; temporális lebeny", b: "Tárgyak tapintás alapján történő felismerése; parietális asszociációs kéreg", c: "Színek megkülönböztetése; occipitális lebeny", d: "Útvonaltervezés; frontális lebeny" }, correctAnswer: "b", explanation: "A sztereognózis a tárgyak tapintással való felismerése, amihez a primer érzőkéregből jövő információk integrálására van szükség a parietális asszociációs kéregben (BA 5, 7)." },
+            { question: "Milyen típusú információfeldolgozást végeznek a polimodális asszociációs területek?", answers: { a: "Csak egyetlen szenzoros modalitást dolgoznak fel.", b: "Több különböző szenzoros modalitásból (látás, hallás, tapintás) származó információt integrálnak.", c: "Csak motoros parancsokat generálnak.", d: "Csak az érzelmeket szabályozzák." }, correctAnswer: "b", explanation: "A polimodális (vagy multimodális) asszociációs kérgek (pl. a PTO kéreg) a legmagasabb szintű integrációs központok, ahol a különböző érzékszervi információk összekapcsolódnak." },
+            { question: "A prosopagnosia, azaz az arcfelismerés zavara, melyik agyterület sérüléséhez köthető?", answers: { a: "A domináns frontális lebeny", b: "A temporális lebeny inferior része (gyrus fusiformis), gyakran a jobb oldalon", c: "A primer látókéreg", d: "A hippocampus" }, correctAnswer: "b", explanation: "Az arcfelismerésért egy specializált terület, a gyrus fusiformis 'arc-területe' felelős, amely a ventrális vizuális pályán található, és sérülése prosopagnosiához vezet." },
+            { question: "Melyik állítás HAMIS az agykéreg asszociációs területeire vonatkozóan?", answers: { a: "Az emberi agykéreg legnagyobb részét teszik ki.", b: "Sérülésük komplex kognitív zavarokhoz (agnózia, apraxia, afázia) vezethet.", c: "A fejlődés során ezek a területek érnek a legkésőbb.", d: "Kizárólag a két agyfélteke közötti kommunikációért felelősek." }, correctAnswer: "d", explanation: "Bár a kommunikáció fontos, ez a komisszurális pályák feladata. Az asszociációs területek fő funkciója a magasabb szintű információfeldolgozás és integráció a féltekéken belül és közöttük." },
+            { question: "Melyik agylebeny játszik kulcsszerepet az epizodikus memória konszolidációjában a hippocampus révén?", answers: { a: "Frontális lebeny", b: "Parietális lebeny", c: "Occipitális lebeny", d: "Temporális lebeny" }, correctAnswer: "d", explanation: "A temporális lebeny mediális része, beleértve a hippocampust és a környező parahippocampalis kérget, elengedhetetlen az új, személyes élmények (epizodikus memória) hosszú távú tárolásához." },
+            { question: "A fasciculus arcuatus mely két fontos nyelvi területet köti össze?", answers: { a: "A két primer hallókérget", b: "A Broca- és a Wernicke-területet", c: "A prefrontális kérget és a kisagyat", d: "A látókérget és a motoros kérget" }, correctAnswer: "b", explanation: "A fasciculus arcuatus (a fasciculus longitudinalis superior része) a beszédértő (Wernicke) és a beszédmotoros (Broca) központok közötti kritikus összeköttetés, sérülése vezetéses (conduction) afáziát okoz." },
+            { question: "Mi az apraxia?", answers: { a: "A tárgyak felismerésének zavara.", b: "A beszédértés zavara.", c: "Tanult, célirányos mozgások tervezésének és kivitelezésének zavara ép motoros és szenzoros funkciók mellett.", d: "A téri tájékozódás zavara." }, correctAnswer: "c", explanation: "Apraxia esetén a beteg fizikailag képes lenne a mozgásra, de az agy nem tudja a megfelelő mozgásprogramot megtervezni és elindítani. Gyakran a domináns parietális lebeny sérüléséhez köthető." },
+            { question: "Melyik asszociációs terület sérülése okozhatja a Gerstmann-szindróma tüneteit (agraphia, acalculia, ujjagnózia, jobb-bal tévesztés)?", answers: { a: "Domináns gyrus angularis (BA 39)", b: "Nem-domináns prefrontális kéreg", c: "Limbikus kéreg", d: "Primer látókéreg" }, correctAnswer: "a", explanation: "A Gerstmann-szindróma egy specifikus tünetegyüttes, amely a domináns (általában bal) parietális lebeny gyrus angularisának károsodásakor alakul ki." },
+            { question: "Melyik állítás írja le az 'unimodális' asszociációs kérget?", answers: { a: "Minden érzékszervi információt feldolgoz.", b: "Csak a limbikus rendszerből kap bemenetet.", c: "Egyetlen szenzoros modalitásból (pl. csak a látásból) származó információt dolgoz fel magasabb szinten.", d: "Azonos a primer érzőkéreggel." }, correctAnswer: "c", explanation: "Az unimodális asszociációs kérgek a primer érzőkéregből kapott információt dolgozzák fel tovább, de még egy modalitáson belül maradnak (pl. V2-V5 a látásnál)." },
+            { question: "A cingulum nevű asszociációs pálya melyik funkcionális rendszer fontos része?", answers: { a: "Motoros rendszer", b: "Vizuális rendszer", c: "Limbikus rendszer", d: "Szomatoszenzoros rendszer" }, correctAnswer: "c", explanation: "A cingulum a limbikus asszociációs kéreg (gyrus cinguli) fő pályarendszere, amely az érzelmek és a memória integrációjában játszik szerepet." },
+            { question: "A prefrontális kéreg melyik része felelős az impulzuskontrollért és a szociálisan helytelen viselkedés gátlásáért?", answers: { a: "DLPFC", b: "ACC", c: "OFC", d: "SMA" }, correctAnswer: "c", explanation: "Az orbitofrontális kéreg (OFC) kulcsfontosságú a viselkedéses válaszok társas és érzelmi következményeinek mérlegelésében és a nem megfelelő impulzusok gátlásában." },
+            { question: "Milyen típusú memóriazavar a legjellemzőbb a hippocampus kétoldali sérülésekor?", answers: { a: "Procedurális memória elvesztése", b: "Súlyos anterográd amnézia", c: "Csak rövid távú memória zavara", d: "Csak retrográd amnézia" }, correctAnswer: "b", explanation: "Az anterográd amnézia az új emlékek kialakításának képtelenségét jelenti, ami a hippocampus és a mediális temporális lebeny kétoldali károsodásának klasszikus következménye." },
+            { question: "Melyek az asszociációs rostok?", answers: { a: "A két agyféltekét kötik össze.", b: "Az agykérget kötik össze szubkortikális struktúrákkal.", c: "Ugyanazon agyféltekén belül kötnek össze különböző kérgi területeket.", d: "A perifériás idegek részei." }, correctAnswer: "c", explanation: "Az asszociációs rostok egy agyféltekén belüli kommunikációt szolgálják, lehetnek rövidek (szomszédos gyrusok között) vagy hosszúak (különböző lebenyek között)." },
+            { question: "A látás 'Mi?' és 'Hol?' pályája mely asszociációs területeken végződik?", answers: { a: "'Mi?' a frontális, 'Hol?' a parietális lebenyben", b: "'Mi?' a temporális, 'Hol?' a parietális lebenyben", c: "'Mi?' a parietális, 'Hol?' a temporális lebenyben", d: "Mindkettő az occipitális lebenyben végződik." }, correctAnswer: "b", explanation: "A ventrális ('Mi?') pálya a tárgyfelismerésért felelős, és a temporális lebenyben végződik. A dorzális ('Hol?') pálya a téri lokalizációért felelős, és a parietális lebenyben végződik." },
+            { question: "A primer motoros kéreg (BA 4) a Brodmann-felosztás szerint melyik lebenyben van?", answers: { a: "Parietális", b: "Temporális", c: "Occipitális", d: "Frontális" }, correctAnswer: "d", explanation: "A primer motoros kéreg a gyrus precentralison, a frontális lebeny leg-hátsóbb részén, közvetlenül a sulcus centralis előtt helyezkedik el." },
+
+            // ----- TOPIC 3: Sensory System Anatomy -----
+            { question: "Melyik két fő felszálló pályarendszer szállítja a szomatoszenzoros információkat a testből?", answers: { a: "Piramispálya és extrapiramidális rendszer", b: "Direkt és indirekt út", c: "Hátsó kötegi-lemniscus medialis és anterolaterális rendszer", d: "Ventrális és dorzális vizuális pálya" }, correctAnswer: "c", explanation: "A hátsó kötegi-lemniscus medialis rendszer a finom tapintást és propriocepciót, míg az anterolaterális rendszer (főként a tractus spinothalamicus) a fájdalmat és a hőmérsékletet szállítja." },
+            { question: "Melyik receptor felelős a bőrön a vibrációérzékelésért?", answers: { a: "Meissner-testecskék", b: "Merkel-sejtek", c: "Ruffini-végződések", d: "Pacini-testecskék" }, correctAnswer: "d", explanation: "A Pacini-testecskék gyorsan adaptálódó mechanoreceptorok a bőr mélyebb rétegeiben, amelyek különösen a magas frekvenciájú vibrációra érzékenyek." },
+            { question: "Hol történik a hátsó kötegi rendszer rostjainak átkereszteződése?", answers: { a: "A gerincvelőben, a belépés szintjén", b: "A nyúltvelőben (decussatio lemniscorum medialium)", c: "A thalamusban", d: "Az agykéregben" }, correctAnswer: "b", explanation: "A hátsó kötegi rendszer elsődleges neuronjai az azonos oldalon szállnak fel a nyúltvelőig, ahol átkapcsolódnak, és a másodlagos neuronok axonjai kereszteződnek át az ellenoldalra." },
+            { question: "Mi a 'dermatoma'?", answers: { a: "Egy adott izomcsoport, amit egy gerincvelői szegmentum idegez be.", b: "Egy bőrfelület, amelyet egyetlen gerincvelői ideggyök lát el szenzorosan.", c: "A bőr legkülső rétege.", d: "Egyfajta bőrbetegség." }, correctAnswer: "b", explanation: "A dermatómák olyan, sávszerű bőrterületek, amelyeknek érző beidegzését egy-egy specifikus gerincvelői szegmentumból származó ideggyök biztosítja." },
+            { question: "Melyik agytörzsi mag a hallópálya elsődleges átkapcsoló állomása, ahol a hallóideg rostjai végződnek?", answers: { a: "Nucleus olivaris superior", b: "Colliculus inferior", c: "Nuclei cochleares", d: "Corpus geniculatum mediale" }, correctAnswer: "c", explanation: "A hallóideg (nervus cochlearis) rostjai a híd-nyúltvelő határán belépve a dorsalis és ventralis cochlearis magvakban kapcsolódnak át a hallópálya másodlagos neuronjaira." },
+            { question: "Melyik szenzoros modalitás az egyetlen, amelynek pályája NEM kapcsolódik át a thalamusban?", answers: { a: "Látás", b: "Hallás", c: "Szaglás", d: "Ízlelés" }, correctAnswer: "c", explanation: "A szaglópálya egyedülálló, mert a szaglógumóból közvetlenül a primer szaglókéregbe (pl. piriform kéreg) projiciál, elkerülve a thalamikus relét." },
+            { question: "Melyik thalamikus mag a testből és a végtagokból származó szomatoszenzoros információk fő reléállomása?", answers: { a: "VPM (Nucleus ventralis posteromedialis)", b: "VPL (Nucleus ventralis posterolateralis)", c: "CGL (Corpus geniculatum laterale)", d: "CGM (Corpus geniculatum mediale)" }, correctAnswer: "b", explanation: "A VPL magba fut be a testet reprezentáló lemniscus medialis és tractus spinothalamicus. A VPM az arc szenzoros relé magja." },
+            { question: "Hol található a primer szomatoszenzoros kéreg (S1)?", answers: { a: "Gyrus precentralis", b: "Gyrus postcentralis", c: "Gyrus temporalis superior", d: "Sulcus calcarinus" }, correctAnswer: "b", explanation: "Az S1 a parietális lebenyben, közvetlenül a sulcus centralis mögött, a gyrus postcentralison helyezkedik el." },
+            { question: "Melyik receptor felelős a szövetkárosító ingerek érzékeléséért, ami fájdalomérzethez vezet?", answers: { a: "Mechanoreceptorok", b: "Fotoreceptorok", c: "Kemoreceptorok", d: "Nociceptorok" }, correctAnswer: "d", explanation: "A nociceptorok specializált szabad idegvégződések, amelyek erős mechanikai, hő- vagy kémiai ingerekre aktiválódnak, jelezve a potenciális vagy tényleges szövetkárosodást." },
+            { question: "A 'tonotópia' elve mit jelent a hallórendszerben?", answers: { a: "A hangok hangerejének kódolását.", b: "A hangok frekvenciájának térbeli leképeződését a hallópálya mentén.", c: "A két fülből érkező információk összehasonlítását.", d: "A hangok érzelmi feldolgozását." }, correctAnswer: "b", explanation: "A tonotópia azt jelenti, hogy a különböző hangfrekvenciák a cochlea baziláris membránjának specifikus helyeit aktiválják, és ez a frekvencia-hely leképeződés megmarad az egész hallópályán, egészen a primer hallókéregig." },
+            { question: "Az anterolaterális rendszer melyik pályája szállítja elsődlegesen a fájdalom- és hőinformációt?", answers: { a: "Tractus spinothalamicus anterior", b: "Tractus spinocerebellaris", c: "Tractus spinothalamicus lateralis", d: "Fasciculus gracilis" }, correctAnswer: "c", explanation: "Az anterolaterális rendszeren belül a tractus spinothalamicus lateralis specializálódott a fájdalom- és hőérzetek továbbítására, míg az anterior pálya a durva tapintásért felelős." },
+            { question: "Melyik agyideg NEM vesz részt az ízérzés közvetítésében?", answers: { a: "N. facialis (VII)", b: "N. glossopharyngeus (IX)", c: "N. vagus (X)", d: "N. hypoglossus (XII)" }, correctAnswer: "d", explanation: "A N. hypoglossus (XII) tisztán motoros ideg, a nyelv izmait idegzi be. Az ízérzést a VII. (nyelv elülső 2/3), a IX. (nyelv hátsó 1/3) és a X. (epiglottis) agyideg közvetíti." },
+            { question: "Mi a szenzoros homunculus?", answers: { a: "A kisagy egy része.", b: "A test aránytalan, torzított leképeződése a primer szomatoszenzoros kéregben.", c: "Egy specifikus típusú érző receptor a bőrben.", d: "Egy gerincvelői reflexív." }, correctAnswer: "b", explanation: "A homunculus egy térkép a gyrus postcentralison, ahol a testrészek mérete nem a valós méretükkel, hanem az érzékenységükkel és a beidegzésük sűrűségével arányos. Az ajkak és a kezek aránytalanul nagyok." },
+            { question: "Hol található a primer ízlelőkéreg?", answers: { a: "Az occipitális lebenyben", b: "A prefrontális kéregben", c: "Az insulában és a frontális operculumban", d: "A hippocampusban" }, correctAnswer: "c", explanation: "Az ízinformációk a thalamus VPM magjából az insula elülső részébe és a frontális operculumba vetülnek, ami a primer ízlelőkéregnek felel meg." },
+            { question: "A Meissner-testecskék milyen típusú ingerekre a legérzékenyebbek?", answers: { a: "Tartós nyomás", b: "Bőrfeszülés", c: "Finom tapintás és alacsony frekvenciájú vibráció", d: "Magas frekvenciájú vibráció" }, correctAnswer: "c", explanation: "A Meissner-testecskék gyorsan adaptálódó receptorok, amelyek a bőr felszínén helyezkednek el, és különösen érzékenyek a finom, diszkriminatív tapintásra és a csúszó mozgások által keltett vibrációra." },
+            { question: "Melyik állítás írja le a 'címkézett pálya' (labeled line) elvét?", answers: { a: "Minden receptor minden típusú ingerre reagál.", b: "Az inger intenzitását az akciós potenciálok amplitúdója kódolja.", c: "Egy adott szenzoros pálya aktiválódása mindig azonos típusú érzetet kelt, függetlenül az ingerlés módjától.", d: "Az érzőpályák a korral változnak." }, correctAnswer: "c", explanation: "A 'labeled line' elv szerint az agy az alapján azonosítja az inger modalitását (pl. fény, hang), hogy melyik specifikus idegpálya aktiválódott. A látóideg ingerlése ezért mindig fényérzetet kelt." },
+            { question: "Hol kereszteződik az anterolaterális (spinothalamicus) rendszer?", answers: { a: "A nyúltvelőben", b: "Nem kereszteződik", c: "A középagyban", d: "A gerincvelőben, a belépési szegmentum közelében" }, correctAnswer: "d", explanation: "Ellentétben a hátsó kötegi rendszerrel, a spinothalamicus pálya másodlagos neuronjai már a gerincvelőben átkereszteződnek az ellenoldalra a commissura albán keresztül, és ott szállnak fel." },
+            { question: "Mi az izomorsók elsődleges funkciója?", answers: { a: "Az izomfeszülés érzékelése.", b: "Az izom megnyúlásának és a nyúlás sebességének érzékelése.", c: "A fájdalomérzet közvetítése az izomból.", d: "Az izom vérellátásának szabályozása." }, correctAnswer: "b", explanation: "Az izomorsók az izomrostokkal párhuzamosan elhelyezkedő proprioceptorok, amelyek az izom hosszának és annak változási sebességének érzékelésével alapvető információt szolgáltatnak a nyújtási reflexhez és a mozgáskoordinációhoz." },
+            { question: "Melyik agytörzsi mag a hallópálya fontos állomása, amely a hanglokalizációban (binaurális hallás) játszik kulcsszerepet?", answers: { a: "Nucleus ruber", b: "Superior oliva komplexum", c: "Nucleus gracilis", d: "Substantia nigra" }, correctAnswer: "b", explanation: "A superior oliva komplexum az első hely az agytörzsben, ahol a két fülből érkező hallási információ integrálódik. Összehasonlítja az interaurális idő- és intenzitáskülönbségeket, ami a hangforrás irányának meghatározásának alapja." },
+            { question: "Melyik állítás HAMIS a szaglórendszerre vonatkozóan?", answers: { a: "A receptorai bipoláris neuronok a szaglóhámban.", b: "A szaglóideg rostjai a lamina cribrosán keresztül lépnek a koponyaüregbe.", c: "A szaglópálya átkapcsolódik a thalamus mediodorsalis magjában.", d: "Közvetlen projekciói vannak a limbikus rendszerhez, pl. az amygdalához." }, correctAnswer: "c", explanation: "A szaglópálya egyedülálló abban, hogy elkerüli a thalamikus relét, és a szaglógumóból közvetlenül a primer szaglókéregbe és a limbikus struktúrákba vetül." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Initial quiz setup
+        startNewRound();
+    </script>
+</body>
+</html>

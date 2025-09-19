@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option:hover {
+            background-color: #eef2ff; /* light indigo */
+            border-color: #6366f1; /* indigo */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* lighter green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        .explanation {
+            border-left: 4px solid #818cf8; /* indigo */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="bg-white p-8 rounded-2xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold mb-2 text-slate-900">Interaktív Neurológia Teszt</h1>
+            <p class="text-slate-600 mb-8">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button data-topic="group1" class="topic-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">Agydaganatok és Metasztázisok</button>
+                <button data-topic="group2" class="topic-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">Neuroimmunológiai Betegségek Kezelése</button>
+                <button data-topic="group3" class="topic-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">Neurokután Szindrómák</button>
+                <button data-topic="group4" class="topic-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">Sella Környéki Folyamatok</button>
+                <button data-topic="group5" class="topic-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">Agyödéma és ICP Csökkentés</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-xl font-bold text-slate-900">Téma Címe</h2>
+                    <button id="back-to-menu" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg text-sm">Vissza a menübe</button>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-indigo-500 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="feedback-container" class="mt-6 hidden">
+                    <div id="explanation-box" class="explanation bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-slate-800 mb-2">Magyarázat</h3>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                    <button id="next-question-btn" class="w-full mt-6 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-slate-900">Eredmények</h2>
+                <p id="score-text" class="text-xl mb-6 text-slate-700"></p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition">Újrapróbálkozás</button>
+                    <button id="main-menu-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition">Főmenü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+            "group1": {
+                title: "Agydaganatok és Metasztázisok",
+                questions: [
+                    {
+                        question: "Melyik a leggyakoribb elsődleges rosszindulatú agydaganat felnőttekben a 2021-es WHO klasszifikáció szerint?",
+                        options: ["Astrocytoma, IDH-mutáns", "Oligodendroglioma, 1p/19q-kodélt", "Glioblastoma, IDH-wildtype", "Meningeoma, Grade 3"],
+                        answer: 2,
+                        explanation: "A Glioblastoma, IDH-wildtype (CNS WHO grade 4) a leggyakoribb és legagresszívabb elsődleges rosszindulatú agydaganat felnőttekben. Ez a leggyakoribb primer malignus agydaganat."
+                    },
+                    {
+                        question: "Melyik molekuláris marker jelenléte definiál egy gliomát oligodendrogliomaként?",
+                        options: ["IDH mutáció önmagában", "1p/19q kodéleció önmagában", "IDH mutáció és 1p/19q kodéleció együttesen", "MGMT promoter metiláció"],
+                        answer: 2,
+                        explanation: "A 2021-es WHO klasszifikáció szerint az oligodendroglioma diagnózisához az IDH-mutáció és az 1p/19q kodéleció együttes jelenléte szükséges."
+                    },
+                    {
+                        question: "Mit jelez a TERT promoter mutáció vagy a CDKN2A/B homozigóta deléció egy meningeomában?",
+                        options: ["Jó prognózist és lassú növekedést.", "A daganat automatikusan WHO Grade 3 besorolást kap, a szövettantól függetlenül.", "A daganat jóindulatú természetét.", "A daganat érzékenységét a kemoterápiára."],
+                        answer: 1,
+                        explanation: "A 2021-es WHO klasszifikáció szerint a TERT promoter mutáció vagy a CDKN2A/B homozigóta deléció önmagában is CNS WHO Grade 3 (anaplasztikus/malignus) meningeomát definiál, mivel ezek agresszív biológiai viselkedést jeleznek."
+                    },
+                    {
+                        question: "Mi a Stupp-protokoll?",
+                        options: ["Egy sebészeti eljárás meningeomák eltávolítására.", "A glioblastoma standard kezelése, amely sugárterápiát és temozolomid kemoterápiát foglal magában.", "Egy prognosztikai pontrendszer agyi áttétekre.", "Egy új immunterápiás kezelés."],
+                        answer: 1,
+                        explanation: "A Stupp-protokoll a glioblastoma standard ellátása, amely a műtét utáni egyidejű sugárterápiát temozolomiddal, majd azt követő adjuváns temozolomid kezelést jelenti."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb intrakraniális daganat felnőttkorban?",
+                        options: ["Primer agydaganatok", "Agyi áttétek (metasztázisok)", "Meningeomák", "Hypophysis adenomák"],
+                        answer: 1,
+                        explanation: "Az agyi áttétek a felnőttkori intrakraniális daganatok leggyakoribb formái, előfordulásuk mintegy tízszerese az elsődleges agydaganatokénak."
+                    },
+                    {
+                        question: "Melyik primer daganat ad leggyakrabban agyi áttétet?",
+                        options: ["Emlőrák", "Vastagbélrák", "Tüdőrák", "Prosztatarák"],
+                        answer: 2,
+                        explanation: "A leggyakoribb primer tumor, amely agyi áttétet ad, a tüdőrák, amely az agyi áttétek akár feléért is felelős lehet."
+                    },
+                    {
+                        question: "Mi a leptomeningealis metasztázis (LMD)?",
+                        options: ["A daganat áttéte a koponyacsontba.", "A daganatsejtek diffúz infiltrációja az agyburkokba és a liquorba.", "Az agyállományon belüli egyetlen, nagy áttét.", "A gerincvelő állományán belüli áttét."],
+                        answer: 1,
+                        explanation: "Az LMD a daganatsejtek diffúz vagy multifokális infiltrációját jelenti a lágyagyburkokba (leptomeninxek) és a cerebrospinalis folyadékba (CSF)."
+                    },
+                    {
+                        question: "Melyik képalkotó módszer a 'gold standard' az agydaganatok és áttétek kimutatására?",
+                        options: ["Natív CT", "Kontrasztanyagos MRI", "PET-CT", "Koponya röntgen"],
+                        answer: 1,
+                        explanation: "Az MRI kontrasztanyaggal az agydaganatok kimutatásának és jellemzésének arany standardja a kiváló lágyrész kontrasztja és részletgazdagsága miatt."
+                    },
+                    {
+                        question: "Mi a 'maximális biztonságos reszekció' (MSR) célja gliomák műtétjénél?",
+                        options: ["A daganat egy kis részének eltávolítása biopsziás céllal.", "A lehető legtöbb daganatszövet eltávolítása a neurológiai funkciók maradandó károsítása nélkül.", "A daganat teljes eltávolítása, a funkcionális károsodás kockázatától függetlenül.", "Csak a daganat centrális, nekrotikus részének eltávolítása."],
+                        answer: 1,
+                        explanation: "Az MSR célja a lehető legtöbb daganatszövet eltávolítása, miközben megőrzik a beteg neurológiai funkcióit. Ez a modern idegsebészet egyik alapelve."
+                    },
+                    {
+                        question: "Milyen célt szolgál a fluoreszcencia-vezérelt sebészet (5-ALA) magas grádusú gliomák műtétjénél?",
+                        options: ["A műtéti idő lerövidítését.", "A daganatszövet és az ép agyszövet közötti határ jobb vizualizációját.", "A beteg ébren tartását a műtét alatt.", "A daganat sugárkezelését."],
+                        answer: 1,
+                        explanation: "Az 5-ALA hatására a daganatszövet speciális fénnyel megvilágítva fluoreszkál, ami segíti a sebészt a daganat pontosabb azonosításában és a teljesebb eltávolításban."
+                    },
+                    {
+                        question: "Mikor javasolt a sztereotaxiás sugársebészet (SRS) agyi áttétek esetén?",
+                        options: ["Multiplex (>10) áttét esetén.", "Limitált számú (általában 1-4), jól körülírt áttét esetén.", "Minden esetben a teljes agyi besugárzás helyett.", "Csak ha a beteg 50 év alatti."],
+                        answer: 1,
+                        explanation: "Az SRS egyre inkább előtérbe kerül limitált számú agyi áttét kezelésében, mivel nagy dózisú, precíz sugárkezelést tesz lehetővé, elkerülve a teljes agyi besugárzás (WBRT) neurokognitív mellékhatásait."
+                    },
+                    {
+                        question: "Melyik állítás igaz a célzott terápiák hatékonyságára KIR áttétekben?",
+                        options: ["Soha nem hatékonyak a vér-agy gát miatt.", "Számos új generációs célzott szer jó BBB penetrációval rendelkezik és jelentős intrakraniális hatékonyságot mutat.", "Csak a primer tumorra hatnak, az áttétekre nem.", "Minden agyi áttétre ugyanaz a célzott terápia hatásos."],
+                        answer: 1,
+                        explanation: "Számos újabb generációs célzott szer (pl. tirozin-kináz gátlók) képes áthatolni a vér-agy gáton és szignifikáns intrakraniális választ kiváltani, különösen specifikus molekuláris alterációk (pl. EGFR, ALK, BRAF) esetén."
+                    },
+                    {
+                        question: "Mi a metasztatikus epidurális gerincvelő kompresszió (MESCC) leggyakoribb és legelső tünete?",
+                        options: ["Láz", "Hirtelen bénulás", "Fájdalom (hát- vagy nyakfájdalom)", "Bőrkiütés"],
+                        answer: 2,
+                        explanation: "A fájdalom a MESCC leggyakoribb (83-96%) és gyakran legelső tünete. Jellemzően tompa, mély, éjszaka vagy fekvésre fokozódó fájdalomról van szó."
+                    },
+                    {
+                        question: "Miért csökken a teljes agyi sugárkezelés (WBRT) szerepe az agyi áttétek kezelésében?",
+                        options: ["Mert nem hatékony.", "Mert túl drága.", "A jelentős neurokognitív mellékhatásai (pl. memóriazavar) miatt.", "Mert a betegek nem tolerálják."],
+                        answer: 2,
+                        explanation: "A WBRT szerepe csökkenőben van a jelentős neurokognitív mellékhatásai miatt. Ahol lehetséges, a fókuszáltabb kezelések, mint az SRS, előnyben részesítendők."
+                    },
+                    {
+                        question: "Melyik daganattípusra jellemző leginkább a csontáttét a gerincbe?",
+                        options: ["Melanoma", "Agydaganat", "Emlő-, tüdő-, prosztatarák", "Vastagbélrák"],
+                        answer: 2,
+                        explanation: "A gerinc a csontáttétek leggyakoribb lokalizációja, és leggyakrabban az emlő-, tüdő- és prosztatarák ad ide áttétet."
+                    },
+                    {
+                        question: "Mi a 'dural tail' jel az MRI-n?",
+                        options: ["A glioma infiltratív nyúlványa.", "A meningeomához közeli dura kontraszthalmozása.", "Vérzés jele a dura mater alatt.", "A gerincvelő alsó végének elváltozása."],
+                        answer: 1,
+                        explanation: "A 'dural tail' jel a meningeomák egyik jellegzetes MRI jele, ami a daganathoz csatlakozó, megvastagodott és kontrasztot halmozó dura maternek felel meg."
+                    },
+                    {
+                        question: "Milyen célt szolgál a liquor cerebrospinalis (CSF) citológiai vizsgálata?",
+                        options: ["A koponyaűri nyomás mérését.", "Malignus sejtek kimutatását, ami a leptomeningealis metasztázis (LMD) diagnózisának aranystandardja.", "A liquor fehérjetartalmának mérését.", "Vírusok kimutatását."],
+                        answer: 1,
+                        explanation: "A malignus sejtek kimutatása a CSF-ben az LMD diagnózisának aranystandardja, bár az első mintavétel szenzitivitása alacsony lehet."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a gliomákra és meningeomákra?",
+                        options: ["A gliomák intra-axiálisak, a meningeomák extra-axiálisak.", "A meningeomák általában jobb prognózisúak, mint a magas grádusú gliomák.", "Mindkét daganattípus kezelésében a temozolomid az elsődleges kemoterápia.", "Mindkettő okozhat görcsrohamokat."],
+                        answer: 2,
+                        explanation: "A temozolomid a glioblasztóma és más magas grádusú gliomák standard kemoterápiája. A meningeomák kezelésében a kemoterápiának korlátozott szerepe van, általában csak refrakter, magas grádusú esetekben jön szóba."
+                    },
+                    {
+                        question: "Miért fontos a multidiszciplináris team szerepe az agydaganatok kezelésében?",
+                        options: ["Mert így több orvos tudja ugyanazt a beteget kezelni.", "Mert a komplex diagnosztikai és terápiás döntésekhez több szakterület (idegsebészet, onkológia, radiológia stb.) összehangolt munkája szükséges.", "Mert ez csökkenti a kórházi költségeket.", "Nincs különösebb jelentősége."],
+                        answer: 1,
+                        explanation: "Az agydaganatok kezelése komplex, több szakterület szoros együttműködését igényli a legmegfelelőbb, egyénre szabott kezelési stratégia kialakításához."
+                    },
+                    {
+                        question: "Milyen típusú daganatok kezelésében bizonyultak hatékonynak a BRAF/MEK-gátlók?",
+                        options: ["Minden meningeomában", "IDH-mutáns astrocytomákban", "BRAF V600E mutációt hordozó daganatokban (pl. egyes gliomák, melanomák)", "Minden agyi áttétben"],
+                        answer: 2,
+                        explanation: "A BRAF/MEK-gátlók célzott terápiák, amelyek a BRAF V600E mutációt hordozó daganatokban hatékonyak, beleértve bizonyos agydaganat-típusokat is."
+                    }
+                ]
+            },
+            "165": {
+                title: "165. Sella környéki térfoglaló folyamatok",
+                questions: [
+                    {
+                        question: "Melyik a leggyakoribb térfoglaló folyamat a sella régióban?",
+                        options: ["Craniopharyngioma", "Meningeoma", "Hypophysis adenoma", "Rathke-tasak ciszta"],
+                        answer: 2,
+                        explanation: "A hypophysis adenomák messze a leggyakoribb daganatok a sellaris régióban, az összes intrakraniális daganat mintegy 10-15%-át teszik ki."
+                    },
+                    {
+                        question: "Milyen jellegzetes látótérkiesést okoz a chiasma opticum középvonali kompressziója?",
+                        options: ["Homonym hemianopsia", "Bitemporalis hemianopsia", "Centrális scotoma", "Kérgi vakság"],
+                        answer: 1,
+                        explanation: "Mivel a retina nasalis feléről származó rostok (amelyek a temporalis látóteret reprezentálják) kereszteződnek a chiasmában, a középvonali kompresszió tipikusan bitemporalis hemianopsiát, azaz a kétoldali temporalis (külső) látótérfél kiesését okozza."
+                    },
+                    {
+                        question: "Melyik agyideg sérül leggyakrabban a sinus cavernosus érintettsége esetén?",
+                        options: ["N. opticus (II.)", "N. oculomotorius (III.)", "N. trochlearis (IV.)", "N. abducens (VI.)"],
+                        answer: 3,
+                        explanation: "A VI. agyideg (nervus abducens) a sinus cavernosuson belül szabadabban helyezkedik el, ezért a leginkább sérülékeny a kompresszióval szemben, ami a szem kifelé tekintésének gyengeségét és kettőslátást okoz."
+                    },
+                    {
+                        question: "Mi a prolaktinóma elsődleges kezelési módja?",
+                        options: ["Azonnali műtét", "Sugárterápia", "Gyógyszeres terápia dopamin agonistákkal", "Megfigyelés"],
+                        answer: 2,
+                        explanation: "A prolaktinómák primer kezelése a gyógyszeres terápia dopamin agonistákkal (pl. cabergolin, bromocriptin), amelyek gátolják a prolaktin termelését és gyakran a tumor méretét is csökkentik."
+                    },
+                    {
+                        question: "Mire utal a 'stalk effect' (nyél-effektus)?",
+                        options: ["A prolaktinóma direkt hormontermelésére.", "A hypophysisnyél kompressziója miatti mérsékelt hyperprolactinaemiára.", "A hypophysis hátsó lebenyének károsodására.", "A tumor gyors növekedésére."],
+                        answer: 1,
+                        explanation: "A 'stalk effect' a hypophysisnyél kompressziója miatt alakul ki, ami gátolja a dopamin (prolaktin-gátló faktor) eljutását a hypophysisbe, így mérsékelten megemelkedik a prolaktin szintje. Fontos elkülöníteni a valódi prolaktinómától."
+                    },
+                    {
+                        question: "Melyik hormon túltermelése okozza a Cushing-kórt?",
+                        options: ["Növekedési hormon (GH)", "Prolaktin (PRL)", "Adrenokortikotrop hormon (ACTH)", "Pajzsmirigy-stimuláló hormon (TSH)"],
+                        answer: 2,
+                        explanation: "A Cushing-kór a hypophysis ACTH-t termelő adenomája által okozott állapot, ahol a túlzott ACTH termelés a mellékveséket fokozott kortizoltermelésre serkenti."
+                    },
+                    {
+                        question: "Melyik vizsgálat a legpontosabb a Cushing-kór centrális (hypophysis) és ectopiás ACTH-forrásának elkülönítésére?",
+                        options: ["Agyi MRI", "Mellkas CT", "Petrosus sinus inferior bilateralis katéterezése (IPSS)", "24 órás vizelet kortizol mérés"],
+                        answer: 2,
+                        explanation: "Az IPSS egy invazív, de a legpontosabb módszer a hypophysis eredetű és az ectopiás (pl. tüdődaganat általi) ACTH-termelés elkülönítésére, mivel közvetlenül a hypophysisből elvezető vénákból vesz vérmintát."
+                    },
+                    {
+                        question: "Milyen tünetek jellemzik az acromegaliát?",
+                        options: ["Alacsony növés és súlyvesztés.", "Akralis (kéz, láb, arc) megnagyobbodás, durva arcvonások, ízületi fájdalmak.", "Hirtelen látásvesztés és fejfájás.", "Fokozott szomjúság és vizeletürítés."],
+                        answer: 1,
+                        explanation: "Az acromegalia a növekedési hormon (GH) felnőttkori túltermelése miatt alakul ki, ami az akralis részek (kéz, láb, áll, orr) megnagyobbodásához, a lágyrészek duzzanatához és jellegzetes, durva arcvonásokhoz vezet."
+                    },
+                    {
+                        question: "Melyik a legjobb szűrővizsgálat acromegalia gyanúja esetén?",
+                        options: ["Random GH szint mérés", "Szérum IGF-1 szint mérés", "Koponya röntgen", "Vizeletvizsgálat"],
+                        answer: 1,
+                        explanation: "Mivel a GH termelése pulzatilis, egyetlen mérés nem megbízható. Az IGF-1 szintje viszont stabilabb és jól korrelál a 24 órás GH termeléssel, ezért ez a legjobb szűrővizsgálat."
+                    },
+                    {
+                        question: "Milyen szövettani altípusai vannak a craniopharyngiomáknak és melyikhez társul BRAF V600E mutáció?",
+                        options: ["Adamanthinomatosus és papillaris; a papillaris típushoz.", "Szolid és cisztás; a cisztás típushoz.", "Benignus és malignus; a malignus típushoz.", "Gyermekkori és felnőttkori; a felnőttkori típushoz."],
+                        answer: 0,
+                        explanation: "A craniopharyngiomáknak két fő szövettani altípusa van: az adamanthinomatosus (gyermekkorban gyakoribb) és a papillaris (felnőttkorban gyakoribb). A papillaris craniopharyngiomára jellemző a BRAF V600E mutáció jelenléte."
+                    },
+                    {
+                        question: "Mi a leggyakoribb tünete a Rathke-tasak cisztáknak (RCC)?",
+                        options: ["Láz", "Görcsrohamok", "Fejfájás", "Halláscsökkenés"],
+                        answer: 2,
+                        explanation: "Bár a legtöbb RCC tünetmentes, ha panaszt okoznak, a fejfájás a leggyakoribb tünet, amely a műtétre kerülő betegek 40-60%-ában jelen van."
+                    },
+                    {
+                        question: "Melyik állítás igaz a lymphocytás hypophysitisre?",
+                        options: ["Mindig daganatos elfajulást mutat.", "Gyakran a terhesség alatt vagy a postpartum időszakban jelentkezik.", "Kizárólag férfiakban fordul elő.", "A kezelése mindig sebészi."],
+                        answer: 1,
+                        explanation: "A lymphocytás hypophysitis klasszikusan fiatal nőket érint, és gyakran a terhesség utolsó trimeszterében vagy a szülés utáni időszakban manifesztálódik."
+                    },
+                    {
+                        question: "Mi a chordoma?",
+                        options: ["Jóindulatú porcdaganat.", "A hypophysis hátsó lebenyének daganata.", "Ritka, lassan növő, de lokálisan agresszív csontdaganat, amely a notochord maradványaiból indul ki.", "Az agyhártya daganata."],
+                        answer: 2,
+                        explanation: "A chordomák ritka, de malignus csontdaganatok, amelyek az embryonális gerinchúr (notochord) maradványaiból indulnak ki, leggyakrabban a koponyaalapon (clivus) és a keresztcsontnál."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb hormonhiány immunellenőrzőpont-gátló (ICI) indukálta hypophysitisben?",
+                        options: ["Növekedési hormon (GH) hiány", "Prolaktin hiány", "ACTH- és/vagy TSH-hiány", "Diabetes insipidus (ADH-hiány)"],
+                        answer: 2,
+                        explanation: "Az ICI-indukálta hypophysitisben a leggyakrabban és legkorábban az ACTH-mellékvesekéreg és a TSH-pajzsmirigy tengely károsodik, ami másodlagos mellékvesekéreg-elégtelenséghez és hypothyreosishoz vezet."
+                    },
+                    {
+                        question: "Milyen képalkotó jel utalhat meningeomára a sella régióban?",
+                        options: ["Cisztás elváltozás ponttal a közepén.", "Pillangó alakú, gyűrűs halmozást mutató lézió.", "A clivus destrukciója.", "Dura-alapú, intenzíven kontrasztanyagot halmozó képlet, 'dural tail' jellel."],
+                        answer: 3,
+                        explanation: "A meningeomákra jellemző az intenzív, homogén kontraszthalmozás, a dura materhez való széles alapú illeszkedés, és gyakran a 'dural tail' (durális farok) jel, ami a daganathoz közeli dura megvastagodását és halmozását jelenti."
+                    },
+                    {
+                        question: "Mi a kezelési stratégiája a tünetmentes, incidentálisan felfedezett Rathke-tasak cisztáknak?",
+                        options: ["Azonnali műtét", "Sugárterápia", "Gyógyszeres kezelés", "Konzervatív menedzsment, radiológiai és klinikai követéssel."],
+                        answer: 3,
+                        explanation: "Tünetmentes, kisméretű RCC-k esetén elegendő a megfigyelés, amely rendszeres képalkotó (MR) és klinikai kontrollt jelent."
+                    },
+                    {
+                        question: "Melyik daganat okoz leggyakrabban diabetes insipidust a sella régióban?",
+                        options: ["Hypophysis mikroadenoma", "Meningeoma", "Suprasellaris germinoma", "Prolactinoma"],
+                        answer: 2,
+                        explanation: "A suprasellaris germinomák egyik leggyakoribb és legkorábbi tünete a diabetes insipidus (DI), a hypophysisnyél vagy a hypothalamus infiltrációja miatt."
+                    },
+                    {
+                        question: "Milyen szövettani jel specifikus a chordomákra?",
+                        options: ["Psammoma testek", "Physaliphor (buborékos) sejtek és brachyury pozitivitás", "Keratin gyöngyök", "Homer-Wright rozetták"],
+                        answer: 1,
+                        explanation: "A chordomák szövettanilag jellegzetes physaliphor (buborékos citoplazmájú) sejteket tartalmaznak, és a brachyury (TBXT) nukleáris pozitivitás specifikus markernek számít."
+                    },
+                    {
+                        question: "Mi a 'maximális biztonságos reszekció' elvének lényege craniopharyngiomák műtétjénél?",
+                        options: ["A daganatot mindenáron, teljesen el kell távolítani.", "A cél a tumoreltávolítás mellett a funkciók, különösen a hypothalamus és a látópályák megőrzése.", "Csak a daganat cisztás részét kell eltávolítani.", "A műtétet mindig két lépésben kell végezni."],
+                        answer: 1,
+                        explanation: "Ez a modern szemlélet a funkciók (látás, hypothalamicus funkciók) megőrzését helyezi előtérbe a teljes tumoreltávolítással szemben, ha az utóbbi súlyos, irreverzibilis károsodással járna. A maradék tumort sugárterápiával lehet kezelni."
+                    },
+                    {
+                        question: "Melyik állítás igaz az IgG4-asszociált hypophysitisre?",
+                        options: ["Kizárólag a hypophysist érinti.", "Gyakran egy szisztémás, fibro-inflammatorikus betegség (IgG4-RD) része.", "A szérum IgG4 szint mindig magas.", "A kezelése mindig sebészi."],
+                        answer: 1,
+                        explanation: "Az IgG4-asszociált hypophysitis az IgG4-rokon betegség (IgG4-RD) egyik lehetséges manifesztációja, amely több szervet is érinthet. A diagnózishoz fontos más szervek érintettségének keresése is."
+                    }
+                ]
+            },
+            "166": {
+                title: "166. Neurofibromatosis és más neurocutan szindrómák",
+                questions: [
+                    {
+                        question: "Melyik a leggyakoribb neurokután szindróma?",
+                        options: ["Tuberous Sclerosis Complex (TSC)", "Neurofibromatózis 1-es típus (NF1)", "Sturge-Weber Szindróma (SWS)", "Von Hippel-Lindau Kór (VHL)"],
+                        answer: 1,
+                        explanation: "Az NF1, más néven Von Recklinghausen-kór, a leggyakoribb neurokután szindróma, prevalenciája körülbelül 1:3000 élveszületésre tehető."
+                    },
+                    {
+                        question: "Mi a 'két-találatos' (two-hit) hipotézis lényege a tumorszuppresszor génekkel kapcsolatban?",
+                        options: ["A tumorképződéshez két különböző daganatnak kell egyszerre kialakulnia.", "A tumorképződéshez a tumorszuppresszor gén mindkét kópiájának mutációt kell szenvednie.", "A betegnek két különböző genetikai betegséget kell örökölnie.", "A daganatot kétszer kell kezelni a gyógyuláshoz."],
+                        answer: 1,
+                        explanation: "A Knudson-féle 'két-találatos' hipotézis szerint a tumorképződéshez egy tumorszuppresszor gén mindkét alléljának inaktiválódnia kell. Az első 'találat' (mutáció) gyakran öröklött, a második pedig szomatikusan, az élet során következik be."
+                    },
+                    {
+                        question: "Melyik állítás NEM tartozik az NF1 diagnosztikai kritériumai közé?",
+                        options: ["Legalább hat café-au-lait folt.", "Kétoldali vesztibuláris schwannoma.", "Axilláris szeplősödés (Crowe-jel).", "Opticus glioma."],
+                        answer: 1,
+                        explanation: "A kétoldali vesztibuláris schwannoma az NF2-asszociált schwannomatózis (korábban NF2) diagnosztikus fémjele, nem pedig az NF1-é."
+                    },
+                    {
+                        question: "Mi a plexiform neurofibroma és mi a legfőbb veszélye?",
+                        options: ["Egy jóindulatú bőrelváltozás, ami csak kozmetikai problémát okoz.", "Egy veleszületett, idegfonatok mentén növő tumor NF1-ben, amelyből malignus perifériás ideghüvely tumor (MPNST) alakulhat ki.", "Az agy jóindulatú daganata.", "A szem szivárványhártyájának elváltozása."],
+                        answer: 1,
+                        explanation: "A plexiform neurofibromák (PNF) az NF1 specifikus, veleszületett tumorai. Legfőbb veszélyük, hogy malignusan transzformálódhatnak, és a rendkívül agresszív MPNST alakulhat ki belőlük (az élethosszig tartó kockázat 10-12%)."
+                    },
+                    {
+                        question: "Melyik célzott terápia hatékony az inoperábilis, tüneteket okozó plexiform neurofibromák kezelésében?",
+                        options: ["Bevacizumab", "mTOR-gátlók", "MEK-gátlók (pl. selumetinib)", "Sugárterápia"],
+                        answer: 2,
+                        explanation: "A MEK-gátlók, mint a selumetinib, a kórosan aktív RAS/MAPK jelátviteli útvonalat célozzák, és bizonyítottan képesek csökkenteni a PNF-ek méretét és enyhíteni a kapcsolódó tüneteket."
+                    },
+                    {
+                        question: "Mi az NF2-asszociált schwannomatózis (korábban NF2) meghatározó klinikai jellemzője?",
+                        options: ["Multiplex neurofibromák", "Tanulási zavarok", "Kétoldali vesztibuláris schwannomák", "Lisch-csomók"],
+                        answer: 2,
+                        explanation: "Az NF2-asszociált schwannomatózis diagnosztikus fémjele a kétoldali vesztibuláris schwannoma (hallóideg-daganat), ami halláscsökkenéshez és egyensúlyzavarokhoz vezet."
+                    },
+                    {
+                        question: "Melyik gén mutációja okozza a Tuberous Sclerosis Complexet (TSC)?",
+                        options: ["NF1 vagy NF2", "TSC1 vagy TSC2", "VHL", "GNAQ"],
+                        answer: 1,
+                        explanation: "A TSC-t a TSC1 (hamartin) vagy a TSC2 (tuberin) gének mutációi okozzák, amelyek az mTOR jelátviteli útvonal kóros aktivációjához vezetnek."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport forradalmasította a TSC kezelését?",
+                        options: ["Antibiotikumok", "MEK-gátlók", "mTOR-gátlók (pl. everolimus)", "Kemoterápia"],
+                        answer: 2,
+                        explanation: "Az mTOR-gátlók, mint az everolimus vagy sirolimus, célzottan a TSC patomechanizmusának központi elemét, a kórosan aktív mTOR útvonalat gátolják, és hatékonyak a TSC-hez társuló tumorok (pl. SEGA, angiomyolipoma) kezelésében."
+                    },
+                    {
+                        question: "Mi a Sturge-Weber Szindróma (SWS) klasszikus klinikai triásza?",
+                        options: ["Café-au-lait foltok, neurofibromák, opticus glioma.", "Kétoldali VS, meningeomák, cataracta.", "Arcüregi 'portói bor' folt, leptomeningealis angiomatosis, glaukóma.", "Hemangioblastomák, veserák, phaeochromocytoma."],
+                        answer: 2,
+                        explanation: "Az SWS klasszikus tünetegyüttese az arcon, általában a nervus trigeminus első ágának ellátási területén elhelyezkedő 'portói bor' folt (naevus flammeus), az agy felszínén lévő érmalformáció (leptomeningealis angiomatosis) és a szemnyomás-fokozódás (glaukóma)."
+                    },
+                    {
+                        question: "Melyik kórképre jellemzőek a központi idegrendszeri hemangioblastomák és a világossejtes vesekarcinóma (RCC) fokozott kockázata?",
+                        options: ["NF1", "TSC", "SWS", "Von Hippel-Lindau Kór (VHL)"],
+                        answer: 3,
+                        explanation: "A VHL-kór egy örökletes tumorszindróma, amelyre jellemző a KIR hemangioblastomáinak (főként a kisagyban és a gerincvelőben), a retina angiomáinak, és a világossejtes veseráknak a kialakulása."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb intrakraniális daganat felnőttkorban?",
+                        options: ["Primer agydaganatok", "Agyi áttétek (metasztázisok)", "Meningeomák", "Hypophysis adenomák"],
+                        answer: 1,
+                        explanation: "Az agyi áttétek a leggyakoribb intrakraniális tumorok felnőttkorban, körülbelül tízszer gyakoribbak, mint az elsődleges agydaganatok."
+                    },
+                    {
+                        question: "Miért nevezik a központi idegrendszert (KIR) néha 'menedékhelynek' (sanctuary site) a daganatos betegségekben?",
+                        options: ["Mert a daganatsejtek itt tudnak elrejtőzni az immunrendszer elől.", "Mert a hatékony szisztémás terápiák (pl. kemoterápia) rosszul jutnak át a vér-agy gáton, így a daganatsejtek itt túlélhetnek.", "Mert a KIR-ben a daganatok lassabban nőnek.", "Mert a KIR-t nem lehet sugárkezelni."],
+                        answer: 1,
+                        explanation: "A KIR-t 'menedékhelynek' nevezik, mert a vér-agy gát megakadályozza sok szisztémás daganatellenes szer bejutását, így a daganatsejtek itt túlélhetnek és növekedhetnek, miközben a test többi részén a kezelés hatékony."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az NF1-re?",
+                        options: ["A betegeknek gyakran vannak tanulási nehézségeik.", "Az intellektuális képességek általában nem érintettek.", "A kórkép teljes penetranciájú, de változó expresszivitású.", "Az esetek fele de novo mutáció eredménye."],
+                        answer: 1,
+                        explanation: "Az NF1-es betegek 60-75%-át érintik tanulási zavarok és viselkedési problémák, mint az ADHD. Az intellektus általában normális az NF2-asszociált schwannomatózisban."
+                    },
+                    {
+                        question: "Mi a leptomeningeális metasztázis (LM)?",
+                        options: ["A daganat áttéte a koponyacsontba.", "A daganatsejtek szóródása az agy-gerincvelői folyadékban (CSF) és az agyhártyákon.", "Az agyállományon belüli szoliter áttét.", "A gerincvelőbe adott áttét."],
+                        answer: 1,
+                        explanation: "A leptomeningeális metasztázisok (LM) a rákos sejteknek a primer daganatból a leptomeningeális térbe (az agy-gerincvelői folyadékba) történő terjedését és ottani növekedését jelentik."
+                    },
+                    {
+                        question: "Milyen szövődményre utaló 'red flag' tünetekre kell figyelni plexiform neurofibroma esetén?",
+                        options: ["A bőr elszíneződése a tumor felett.", "Új, tartós vagy éjszakai fájdalom, a tumor gyors növekedése vagy megkeményedése.", "A tumor méretének csökkenése.", "A café-au-lait foltok számának növekedése."],
+                        answer: 1,
+                        explanation: "Ezek a 'red flag' tünetek a plexiform neurofibroma malignus transzformációjára, azaz MPNST kialakulására utalhatnak, ami azonnali kivizsgálást igényel."
+                    },
+                    {
+                        question: "Melyik kórképhez társulnak a Lisch-csomók?",
+                        options: ["NF1", "NF2-asszociált schwannomatózis", "TSC", "SWS"],
+                        answer: 0,
+                        explanation: "A Lisch-csomók az írisz pigmentált hamartomái, amelyek az NF1-es felnőttek több mint 90%-ánál jelen vannak és fontos diagnosztikai kritériumot jelentenek."
+                    },
+                    {
+                        question: "Mi a SEGA (subependymalis óriássejtes astrocytoma)?",
+                        options: ["Az NF1-re jellemző agydaganat.", "A TSC-ben előforduló, a kamrák falán növő tumor, amely hydrocephalust okozhat.", "A VHL-kór egyik vesedaganata.", "A meningeomák egy agresszív formája."],
+                        answer: 1,
+                        explanation: "A SEGA a Tuberous Sclerosis Complex (TSC) egyik jellegzetes agyi tumora, amely a subependymalis nodulusokból fejlődhet ki és a foramen Monro elzárásával hydrocephalust okozhat."
+                    },
+                    {
+                        question: "Milyen genetikai mechanizmus áll a Sturge-Weber Szindróma hátterében?",
+                        options: ["Öröklött NF1 mutáció", "Öröklött TSC2 mutáció", "Szomatikus mozaik GNAQ mutáció", "De novo NF2 mutáció"],
+                        answer: 2,
+                        explanation: "Az SWS nem örökletes, hanem egy korai embrionális fejlődés során bekövetkező szomatikus mozaik mutáció eredménye a GNAQ génben."
+                    },
+                    {
+                        question: "Melyik állítás igaz a nem-NF2 schwannomatózisokra?",
+                        options: ["Meghatározó tünetük a kétoldali hallásvesztés.", "A leggyakoribb tünetük a krónikus fájdalom.", "Mindig rosszindulatú daganatokkal járnak.", "Kizárólag gyermekkorban jelentkeznek."],
+                        answer: 1,
+                        explanation: "A nem-NF2 schwannomatózisok leggyakoribb és leginkább életminőséget rontó tünete a krónikus, gyakran súlyos fájdalom. A kétoldali vesztibuláris schwannoma nem jellemző rájuk."
+                    },
+                    {
+                        question: "Milyen szűrővizsgálat javasolt NF1-es nőknek a fokozott emlőrák kockázat miatt?",
+                        options: ["Nincs szükség szűrésre.", "Éves mammográfia 50 éves kortól.", "Éves mammográfia 30 éves kortól, és kontrasztanyagos emlő MRI megfontolása 30-50 év között.", "Csak önvizsgálat."],
+                        answer: 2,
+                        explanation: "Az NF1-es nőknél fokozott az emlőrák kockázata, különösen fiatalabb korban. Ezért 30 éves kortól szorosabb szűrés javasolt, amely magában foglalja az éves mammográfiát és esetenként az emlő MRI-t is."
+                    }
+                ]
+            }
+        };
+
+        // DOM Elements
+        const topicSelectionScreen = document.getElementById('topic-selection');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        
+        const progressBar = document.getElementById('progress-bar');
+
+        const scoreText = document.getElementById('score-text');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const mainMenuBtn = document.getElementById('main-menu-btn');
+
+        // State
+        let currentTopic = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz(topicId) {
+            currentTopic = topicId;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            const topicDataKey = topicId === "163-164" ? "163" : topicId;
+            questions = shuffleArray([...quizData[topicDataKey].questions]);
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTitle.textContent = quizData[topicDataKey].title;
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            feedbackContainer.classList.add('hidden');
+            const questionData = questions[currentQuestionIndex];
+
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            questionText.textContent = `${currentQuestionIndex + 1}. ${questionData.question}`;
+            optionsContainer.innerHTML = '';
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'p-4', 'text-left', 'border-2', 'border-slate-300', 'rounded-lg', 'quiz-option');
+                button.dataset.index = index;
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const selectedIndex = parseInt(selectedButton.dataset.index);
+            const correctIndex = questions[currentQuestionIndex].answer;
+
+            // Disable all options after one is clicked
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.removeEventListener('click', selectAnswer);
+                btn.disabled = true;
+            });
+
+            if (selectedIndex === correctIndex) {
+                selectedButton.classList.add('correct');
+                score++;
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Highlight the correct answer
+                optionsContainer.children[correctIndex].classList.add('correct');
+            }
+
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            feedbackContainer.classList.remove('hidden');
+
+            if (currentQuestionIndex === questions.length - 1) {
+                nextQuestionBtn.textContent = 'Eredmények megtekintése';
+            } else {
+                nextQuestionBtn.textContent = 'Következő kérdés';
+            }
+        }
+
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreText.textContent = `Eredményed: ${score} / ${questions.length}`;
+        }
+
+        function goBackToMenu() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.topic-btn').forEach(button => {
+            button.addEventListener('click', () => startQuiz(button.dataset.topic));
+        });
+
+        nextQuestionBtn.addEventListener('click', handleNextQuestion);
+        backToMenuBtn.addEventListener('click', goBackToMenu);
+        restartQuizBtn.addEventListener('click', () => startQuiz(currentTopic));
+        mainMenuBtn.addEventListener('click', goBackToMenu);
+
+    </script>
+</body>
+</html>

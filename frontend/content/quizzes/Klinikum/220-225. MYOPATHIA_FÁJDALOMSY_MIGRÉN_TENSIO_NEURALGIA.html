@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Új Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/100</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Myopathiák",
+                questions: [
+                    {
+                        question: "Melyik gyulladásos myopathia jár a leggyakrabban jellegzetes bőrtünetekkel, mint a Gottron-papulák és a heliotrop kiütés?",
+                        options: ["Polymyositis (PM)", "Inklúziós testes myositis (IBM)", "Nekrotizáló autoimmun myopathia (NAM)", "Dermatomyositis (DM)"],
+                        answer: "Dermatomyositis (DM)",
+                        explanation: "A dermatomyositis egy autoimmun betegség, amelyet a proximális izomgyengeség mellett jellegzetes bőrtünetek kísérnek, mint a szemhéjak lilás elszíneződése (heliotrop kiütés) és az ízületek feletti lilásvörös plakkok (Gottron-papulák)."
+                    },
+                    {
+                        question: "Melyik myopathia típusra jellemző az aszimmetrikus gyengeség, amely a combfeszítő (quadriceps) és az ujjhajlító izmokat érinti, és jellemzően 50 év felett kezdődik?",
+                        options: ["Dermatomyositis", "Polymyositis", "Inklúziós testes myositis (IBM)", "Sztatin-indukált myopathia"],
+                        answer: "Inklúziós testes myositis (IBM)",
+                        explanation: "Az IBM egy lassan progrediáló, degeneratív izombetegség, amelynek jellegzetes klinikai képe az aszimmetrikus gyengeség, ami a quadriceps és az ujjak mély hajlító izmait érinti. Jellemzően rosszul reagál az immunszuppresszív terápiára."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb gyógyszer-indukált myopathia?",
+                        options: ["Klorokin myopathia", "Kolchicin myopathia", "Glükokortikoid-indukált myopathia", "Zidovudin myopathia"],
+                        answer: "Glükokortikoid-indukált myopathia",
+                        explanation: "A glükokortikoidok (szteroidok) hosszú távú szedése a leggyakoribb oka a gyógyszer által kiváltott myopathiának. Jellemzője a fájdalmatlan, proximális izomgyengeség és a normális CK szint."
+                    },
+                    {
+                        question: "Mi a 'második szél' jelenség a McArdle-kórban (GSD V)?",
+                        options: ["A tünetek hirtelen, végleges megszűnése.", "A kezdeti terheléses fájdalom és fáradtság enyhülése egy rövid pihenő után.", "A légzés hirtelen felgyorsulása.", "A beteg hirtelen energialöketet kap edzés közben."],
+                        answer: "A kezdeti terheléses fájdalom és fáradtság enyhülése egy rövid pihenő után.",
+                        explanation: "McArdle-kórban az izom nem tudja felhasználni a glikogént. Intenzív mozgás kezdetén ez fájdalmat okoz. Rövid pihenő után azonban a szervezet átáll a zsírsavak és a vérből származó glükóz felhasználására, ami enyhíti a tüneteket - ez a 'második szél'."
+                    },
+                    {
+                        question: "Melyik laboratóriumi lelet a legjellemzőbb a polymyositisre?",
+                        options: ["Normális CK szint", "Jelentősen, akár 50-szeresére emelkedett kreatin-kináz (CK) szint", "Alacsony vércukorszint", "Pozitív anti-Mi-2 antitest"],
+                        answer: "Jelentősen, akár 50-szeresére emelkedett kreatin-kináz (CK) szint",
+                        explanation: "A polymyositis aktív fázisában az izomrostok gyulladása és pusztulása miatt nagy mennyiségű CK enzim kerül a véráramba, így a rendkívül magas CK szint a betegség egyik fő laboratóriumi ismérve."
+                    },
+                    {
+                        question: "Milyen szövettani elváltozás utal leginkább dermatomyositisre az izombiopsziában?",
+                        options: ["Endomysialis gyulladásos infiltrátum", "Rimmed vacuolumok", "Perifascicularis atrófia", "Ragged red fibers"],
+                        answer: "Perifascicularis atrófia",
+                        explanation: "A perifascicularis atrófia, azaz az izomkötegek (fasciculusok) szélén lévő rostok sorvadása, a dermatomyositis jellegzetes, szinte patognomonikus szövettani jele, ami a kapillárisok károsodására utal."
+                    },
+                    {
+                        question: "Melyik kórkép kezelésében játszik központi szerepet a magas szénhidrát- és alacsony zsírtartalmú diéta, valamint az éhezés elkerülése?",
+                        options: ["Dermatomyositis", "Karnitin-palmitoiltranszferáz (CPT) hiány", "Hypothyreosis okozta myopathia", "Alkoholos myopathia"],
+                        answer: "Karnitin-palmitoiltranszferáz (CPT) hiány",
+                        explanation: "CPT hiányban a szervezet nem tudja hatékonyan felhasználni a hosszú láncú zsírsavakat energiaként. A kezelés alapja a zsíranyagcsere terhelésének elkerülése, ami magas szénhidrátbevitellel és a tartós éhezés kerülésével érhető el."
+                    },
+                    {
+                        question: "Mi a 'ragged red fibers' (cafatos vörös rostok) jelentősége az izombiopsziában?",
+                        options: ["Akut izomsérülésre utalnak.", "A mitokondriális myopathiák jellegzetes, bár nem specifikus jelei.", "A gyulladásos myopathiákra jellemzőek.", "Normális lelet időseknél."],
+                        answer: "A mitokondriális myopathiák jellegzetes, bár nem specifikus jelei.",
+                        explanation: "A 'ragged red fibers' kórosan felszaporodott, diszfunkcionális mitokondriumok halmazai az izomrostokban. Ez a lelet a mitokondriális energia-anyagcsere zavarára, azaz mitokondriális myopathiára utal."
+                    },
+                    {
+                        question: "Melyik állítás igaz a sztatin-indukált myopathiára?",
+                        options: ["Mindig súlyos, visszafordíthatatlan izomkárosodást okoz.", "A CK szint mindig normális marad.", "A tünetek a sztatin elhagyása után általában javulnak.", "Csak a hidrofób sztatinok okozhatják."],
+                        answer: "A tünetek a sztatin elhagyása után általában javulnak.",
+                        explanation: "A legtöbb esetben a sztatin által kiváltott izompanaszok (fájdalom, gyengeség) és a CK-emelkedés a gyógyszer elhagyását követő hetekben-hónapokban rendeződnek. Kivételt képez a ritka nekrotizáló autoimmun myopathia, ami immunszuppresszív kezelést igényel."
+                    },
+                    {
+                        question: "Milyen típusú izomrostokat érint elsősorban a glükokortikoid-indukált myopathia?",
+                        options: ["I-es típusú (lassú) rostokat", "II-es típusú (gyors) rostokat, különösen a IIb típust", "Minden rosttípust egyformán", "Csak a szívizom rostjait"],
+                        answer: "II-es típusú (gyors) rostokat, különösen a IIb típust",
+                        explanation: "A kortikoszteroidok katabolikus hatása leginkább a gyors-összehúzódású, glikolitikus IIb típusú izomrostokat érinti, ami ezek szelektív atrófiájához vezet. Ez magyarázza a proximális izmok gyengeségét."
+                    },
+                    {
+                        question: "Melyik myopathia társul gyakran intersticiális tüdőbetegséggel (ILD) és az anti-Jo-1 antitest pozitivitásával?",
+                        options: ["Inklúziós testes myositis", "Antisynthetase szindróma", "Pompe-kór", "Akromegália myopathia"],
+                        answer: "Antisynthetase szindróma",
+                        explanation: "Az antisynthetase szindróma a gyulladásos myopathiák egy alcsoportja, amelyet a myositis, a súlyos intersticiális tüdőbetegség, az ízületi gyulladás, a Raynaud-jelenség és az anti-Jo-1 (vagy más antisynthetase) antitestek jelenléte jellemez."
+                    },
+                    {
+                        question: "Melyik betegségben diagnosztikus értékű a Jordan-anomália (lipidcseppek a leukocitákban) kimutatása?",
+                        options: ["McArdle-kór", "Dermatomyositis", "Neutrális lipid tárolási betegség myopathiával (NLSDM)", "Cushing-szindróma"],
+                        answer: "Neutrális lipid tárolási betegség myopathiával (NLSDM)",
+                        explanation: "A Jordan-anomália a perifériás vérkenetben látható, a granulociták citoplazmájában lévő lipid vakuólumokat jelenti. Ez a lelet az NLSDM diagnosztikus ismérve."
+                    },
+                    {
+                        question: "Milyen kezelés hatékony a Pompe-kórban?",
+                        options: ["Magas fehérjetartalmú diéta", "Enzimpótló terápia (ERT)", "Kortikoszteroidok", "Sztatinok"],
+                        answer: "Enzimpótló terápia (ERT)",
+                        explanation: "A Pompe-kórt a savas alfa-glükozidáz (GAA) enzim hiánya okozza. Az enzimpótló terápia során rekombináns humán GAA enzimet adnak intravénásan, ami pótolja a hiányzó enzimet és csökkenti a glikogén felhalmozódását a sejtekben."
+                    },
+                    {
+                        question: "Melyik myopathia okozhat akut, fájdalmas izomduzzanatot és rhabdomyolysist nagy mennyiségű alkohol fogyasztása után?",
+                        options: ["Krónikus alkoholos myopathia", "Akut alkoholos myopathia", "Diabeteses myopathia", "Thyrotoxic myopathia"],
+                        answer: "Akut alkoholos myopathia",
+                        explanation: "Az akut alkoholos myopathia egy ritkább, de súlyos állapot, amelyet hirtelen fellépő, erős izomfájdalom, duzzanat és izomlebomlás (rhabdomyolysis) jellemez, jellemzően egy nagy ivászatot követően."
+                    },
+                    {
+                        question: "Melyik gyógyszer okozhat vacuolaris myopathiát és myotoniás kisüléseket az EMG-n?",
+                        options: ["Prednizon", "Atorvastatin", "Klorokin/Hidroxiklorokin", "Zidovudin"],
+                        answer: "Klorokin/Hidroxiklorokin",
+                        explanation: "A klorokin és hidroxiklorokin kumulatív dózisban toxikus myopathiát okozhat, amelynek jellegzetes szövettani képe a vacuolaris elváltozás, az EMG-n pedig a myopathiás jelek mellett myotoniás kisülések is megjelenhetnek."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a fájdalmatlan, szimmetrikus, proximális izomgyengeség normális CK szint mellett?",
+                        options: ["Polymyositis", "Glükokortikoid-indukált myopathia", "Nekrotizáló autoimmun myopathia", "Duchenne izomdystrophia"],
+                        answer: "Glükokortikoid-indukált myopathia",
+                        explanation: "A szteroid myopathia klasszikus képe a fájdalom nélküli, lassan kialakuló proximális gyengeség, amely mellett a CK szint jellemzően normális, megnehezítve a diagnózist és elkülönítve a gyulladásos myopathiáktól."
+                    },
+                    {
+                        question: "Mi a diabeteses myopathia legvalószínűbb patomechanizmusa?",
+                        options: ["Autoimmun gyulladás", "Direkt glükóz toxicitás", "Izominfarktus vascularis betegség miatt", "Genetikai hajlam"],
+                        answer: "Izominfarktus vascularis betegség miatt",
+                        explanation: "A diabeteses myopathia hátterében valószínűleg a diabétesz okozta érkárosodás (mikroangiopathia) áll, ami az izmokat ellátó kiserek elzáródásához és következményes izominfarktushoz vezet."
+                    },
+                    {
+                        question: "Milyen típusú terhelés váltja ki leginkább a tüneteket a glikogén tárolási betegségekben?",
+                        options: ["Hosszan tartó, alacsony intenzitású aerob mozgás", "Rövid ideig tartó, nagy intenzitású, anaerob terhelés", "Mentális terhelés", "Hideg expozíció"],
+                        answer: "Rövid ideig tartó, nagy intenzitású, anaerob terhelés",
+                        explanation: "A glikogenózisokban az izom nem tudja gyorsan mobilizálni a glikogént. Az intenzív, rövid erőkifejtések (pl. sprint, súlyemelés) nagymértékben támaszkodnak erre az energiaforrásra, ezért ezek váltják ki leginkább a tüneteket (fájdalom, görcsök)."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a gyulladásos myopathiákra?",
+                        options: ["Autoimmun eredetűek.", "Gyakran emelkedett a CK szint.", "A kezelésük alapja az immunszuppresszió.", "Mindig szimmetrikus gyengeséget okoznak."],
+                        answer: "Mindig szimmetrikus gyengeséget okoznak.",
+                        explanation: "Bár a polymyositis és a dermatomyositis jellemzően szimmetrikus gyengeséget okoz, az inklúziós testes myositis (IBM) gyakran aszimmetrikus izomgyengeséggel és -sorvadással jár, ami fontos differenciáldiagnosztikai bélyeg."
+                    },
+                    {
+                        question: "Melyik endokrin myopathia járhat hirtelen, átmeneti bénulással és alacsony káliumszinttel?",
+                        options: ["Hypothyreosis", "Cushing-szindróma", "Thyrotoxic periodikus paralízis", "Akromegália"],
+                        answer: "Thyrotoxic periodikus paralízis",
+                        explanation: "A thyrotoxic periodikus paralízis a hyperthyreosis egy ritka, de súlyos szövődménye, amelyet hirtelen kialakuló, átmeneti izombénulási rohamok jellemeznek, melyeket a kálium sejtekbe történő hirtelen beáramlása és az ebből adódó hypokalaemia vált ki."
+                    }
+                ]
+            },
+            {
+                topic: "Fájdalomszindrómák kezelése",
+                questions: [
+                    {
+                        question: "Mi a fájdalom IASP (Nemzetközi Fájdalomkutatási Társaság) általi definíciójának lényege?",
+                        options: ["Kizárólag a szövetkárosodás által kiváltott objektív jelenség.", "Kellemetlen szenzoros és emocionális élmény, amely aktuális vagy potenciális szövetkárosodáshoz társul.", "Csak az idegrendszer sérülésekor fellépő érzet.", "A fájdalomcsillapítókra adott válasz."],
+                        answer: "Kellemetlen szenzoros és emocionális élmény, amely aktuális vagy potenciális szövetkárosodáshoz társul.",
+                        explanation: "Az IASP definíciója hangsúlyozza, hogy a fájdalom egy komplex, szubjektív élmény, amelynek nemcsak érzékszervi, hanem érzelmi komponensei is vannak, és nem feltétlenül arányos a tényleges szöveti károsodással."
+                    },
+                    {
+                        question: "Melyik fájdalomtípusra jellemző az égő, bizsergő, nyilalló jelleg, amit a szomatoszenzoros idegrendszer sérülése okoz?",
+                        options: ["Nociceptív fájdalom", "Nociplasztikus fájdalom", "Pszichogén fájdalom", "Neuropátiás fájdalom"],
+                        answer: "Neuropátiás fájdalom",
+                        explanation: "A neuropátiás fájdalom közvetlenül az idegrendszer (perifériás vagy központi) sérüléséből vagy betegségéből ered, és jellegzetes, a nociceptív fájdalomtól eltérő minőségű (pl. égő, áramütésszerű) panaszokat okoz."
+                    },
+                    {
+                        question: "Mi a WHO fájdalomcsillapító létrájának alapelve?",
+                        options: ["A legerősebb fájdalomcsillapítóval kell kezdeni a kezelést.", "Lépcsőzetes megközelítés, ahol a kezelést a fájdalom erősségéhez igazítják, az enyhébb szerektől az erősebbek felé haladva.", "Kizárólag opioidok használata.", "Csak nem-gyógyszeres terápiák alkalmazása."],
+                        answer: "Lépcsőzetes megközelítés, ahol a kezelést a fájdalom erősségéhez igazítják, az enyhébb szerektől az erősebbek felé haladva.",
+                        explanation: "A WHO létra egy lépcsőzetes terápiás sémát javasol: enyhe fájdalomra nem-opioidokat, közepesre gyenge opioidokat, erősre pedig erős opioidokat, gyakran adjuváns szerekkel kiegészítve."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport számít első vonalbeli kezelésnek a neuropátiás fájdalomra?",
+                        options: ["Nem-szteroid gyulladáscsökkentők (NSAID-ok)", "Paracetamol", "Antikonvulzívumok (pl. gabapentin, pregabalin) és bizonyos antidepresszánsok (pl. duloxetin, amitriptilin)", "Erős opioidok"],
+                        answer: "Antikonvulzívumok (pl. gabapentin, pregabalin) és bizonyos antidepresszánsok (pl. duloxetin, amitriptilin)",
+                        explanation: "A neuropátiás fájdalom patomechanizmusa eltér a nociceptív fájdalométól. A központi idegrendszeri szenzitizáció és a kóros idegi aktivitás miatt az antikonvulzívumok és az antidepresszánsok hatékonyabbak, mint a hagyományos fájdalomcsillapítók."
+                    },
+                    {
+                        question: "Mi a multimodális fájdalomterápia lényege?",
+                        options: ["Egyetlen, nagy dózisú gyógyszer alkalmazása.", "Különböző fájdalomcsillapító szerek és módszerek (gyógyszeres, nem-gyógyszeres) együttes alkalmazása.", "Kizárólag sebészeti beavatkozások.", "Csak pszichoterápia."],
+                        answer: "Különböző fájdalomcsillapító szerek és módszerek (gyógyszeres, nem-gyógyszeres) együttes alkalmazása.",
+                        explanation: "A multimodális terápia a fájdalom különböző útvonalait és mechanizmusait célozza meg egyszerre több módszerrel, ami szinergikus hatást eredményez, és lehetővé teszi az egyes gyógyszerek dózisának csökkentését, így mérsékelve a mellékhatásokat."
+                    },
+                    {
+                        question: "Melyik állítás igaz a krónikus fájdalomra?",
+                        options: ["Mindig egyértelműen azonosítható szöveti károsodás okozza.", "Általában 1-2 hét alatt magától elmúlik.", "Egy komplex állapot, ahol a fájdalom a kiváltó ok megszűnése után is fennmarad, és pszichoszociális tényezők is szerepet játszanak.", "Csak idős korban fordul elő."],
+                        answer: "Egy komplex állapot, ahol a fájdalom a kiváltó ok megszűnése után is fennmarad, és pszichoszociális tényezők is szerepet játszanak.",
+                        explanation: "A krónikus fájdalom (amely 3-6 hónapnál tovább tart) már nem csupán egy tünet, hanem önálló betegséggé válik, ahol az idegrendszer tartós változásai (centrális szenzitizáció) és pszichoszociális tényezők (stressz, depresszió) is fenntartják a fájdalomélményt."
+                    },
+                    {
+                        question: "Mire szolgál a TENS (Transzkután Elektromos Idegstimuláció) kezelés?",
+                        options: ["Az izmok erősítésére.", "A fájdalomjelek blokkolására vagy módosítására alacsony feszültségű elektromos árammal.", "A gyulladás közvetlen csökkentésére.", "A bőr hőmérsékletének emelésére."],
+                        answer: "A fájdalomjelek blokkolására vagy módosítására alacsony feszültségű elektromos árammal.",
+                        explanation: "A TENS egy nem-invazív fizioterápiás eljárás, amely a bőrre helyezett elektródákon keresztül juttat elektromos impulzusokat az idegekhez, ami a kapu-kontroll elmélet alapján csökkentheti a fájdalomérzetet."
+                    },
+                    {
+                        question: "Mi a nociplasztikus fájdalom?",
+                        options: ["Gyulladás okozta fájdalom.", "A csontokból eredő fájdalom.", "Megváltozott nocicepcióból eredő fájdalom, egyértelmű szöveti vagy idegrendszeri károsodás nélkül.", "Csak a belső szervek fájdalma."],
+                        answer: "Megváltozott nocicepcióból eredő fájdalom, egyértelmű szöveti vagy idegrendszeri károsodás nélkül.",
+                        explanation: "A nociplasztikus fájdalom egy viszonylag új kategória, amely a központi idegrendszeri fájdalomfeldolgozás zavarára utal (centrális szenzitizáció). Ilyenkor a fájdalomérzet fokozott vagy spontán, anélkül, hogy perifériás károsodás azt indokolná. Tipikus példája a fibromyalgia."
+                    },
+                    {
+                        question: "Melyik skála használatos leggyakrabban a fájdalom intenzitásának mérésére a klinikai gyakorlatban?",
+                        options: ["McGill Fájdalom Kérdőív", "Brief Pain Inventory", "Vizuális Analóg Skála (VAS) vagy Numerikus Értékelő Skála (NRS)", "Wong-Baker FACES Skála"],
+                        answer: "Vizuális Analóg Skála (VAS) vagy Numerikus Értékelő Skála (NRS)",
+                        explanation: "A VAS és az NRS (0-10 skála) egyszerű, gyors és széles körben használt eszközök a fájdalom szubjektív intenzitásának számszerűsítésére és a kezelés hatékonyságának követésére."
+                    },
+                    {
+                        question: "Milyen típusú fájdalomcsillapítók a nem-szteroid gyulladáscsökkentők (NSAID-ok)?",
+                        options: ["Opioidok", "Adjuváns szerek", "A COX enzimeket gátló, gyulladáscsökkentő és fájdalomcsillapító hatású szerek", "Helyi érzéstelenítők"],
+                        answer: "A COX enzimeket gátló, gyulladáscsökkentő és fájdalomcsillapító hatású szerek",
+                        explanation: "Az NSAID-ok (pl. ibuprofen, diclofenac) a ciklooxigenáz (COX) enzimek gátlásán keresztül csökkentik a prosztaglandinok termelődését, amelyek kulcsszerepet játszanak a gyulladás és a fájdalom kialakulásában."
+                    },
+                    {
+                        question: "Melyik intervenciós fájdalomterápiás eljárás során roncsolják a fájdalmat közvetítő idegszálakat hő segítségével?",
+                        options: ["Idegblokád", "Gerincvelő stimuláció (SCS)", "Rádiófrekvenciás abláció (RFA)", "Intratekális pumpa beültetés"],
+                        answer: "Rádiófrekvenciás abláció (RFA)",
+                        explanation: "Az RFA során egy speciális tűn keresztül rádiófrekvenciás árammal hőt generálnak az ideg mellett, ami az ideg koagulációját (roncsolását) okozza, így megszakítva a fájdalomjelek továbbítását. Leggyakrabban gerinc kisízületi fájdalmaknál alkalmazzák."
+                    },
+                    {
+                        question: "Mi a fájdalom biopszichoszociális modelljének a lényege?",
+                        options: ["A fájdalom kizárólag biológiai okokra vezethető vissza.", "A fájdalomélményt biológiai, pszichológiai és szociális tényezők komplex kölcsönhatása alakítja.", "A fájdalom mindig egy pszichés probléma manifesztációja.", "A fájdalmat a társadalmi elvárások határozzák meg."],
+                        answer: "A fájdalomélményt biológiai, pszichológiai és szociális tényezők komplex kölcsönhatása alakítja.",
+                        explanation: "Ez a modell elismeri, hogy a fájdalom nem izolált fizikai érzet, hanem az egyén gondolatai, érzelmei, megküzdési stratégiái (pszichológiai) és társas környezete (szociális) is jelentősen befolyásolják, a biológiai tényezők mellett."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a paracetamolra?",
+                        options: ["Hatékony fájdalom- és lázcsillapító.", "Jelentős gyulladáscsökkentő hatása van.", "Túladagolása súlyos májkárosodást okozhat.", "Gyakran használják kombinált készítményekben."],
+                        answer: "Jelentős gyulladáscsökkentő hatása van.",
+                        explanation: "A paracetamolnak kiváló fájdalom- és lázcsillapító hatása van, de a perifériás gyulladáscsökkentő hatása elhanyagolható, ellentétben az NSAID-okkal. Ezért gyulladásos fájdalmakban kevésbé hatékony."
+                    },
+                    {
+                        question: "Mi a fájdalomnapló vezetésének legfőbb haszna?",
+                        options: ["Csak a betegnek segít levezetni a feszültséget.", "Segít objektíven rögzíteni a fájdalom mintázatát, erősségét és a lehetséges kiváltó tényezőket, ami segíti az orvost a diagnózisban és a kezelés beállításában.", "Helyettesíti az orvosi vizsgálatot.", "Biztosítja, hogy a beteg több gyógyszert kapjon."],
+                        answer: "Segít objektíven rögzíteni a fájdalom mintázatát, erősségét és a lehetséges kiváltó tényezőket, ami segíti az orvost a diagnózisban és a kezelés beállításában.",
+                        explanation: "A fájdalomnapló segít a szubjektív panaszok strukturált, objektív adatokká alakításában, feltárva a fájdalom időbeli lefolyását, a provokáló faktorokat és a kezelésre adott választ, ami felbecsülhetetlen információ a terápia optimalizálásához."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás a legalkalmasabb a lágyrészek (pl. porckorong, ideggyök) vizsgálatára derékfájás esetén?",
+                        options: ["Röntgen", "CT", "MRI", "Ultrahang"],
+                        answer: "MRI",
+                        explanation: "Az MRI (mágneses rezonancia képalkotás) kiváló lágyrész-kontraszttal rendelkezik, így a legalkalmasabb a porckorongok, ideggyökök, a gerincvelő és a környező szalagok, izmok állapotának részletes felmérésére."
+                    },
+                    {
+                        question: "Mi a fájdalom katasztrofizálás?",
+                        options: ["A fájdalom pontos, objektív leírása.", "A fájdalommal kapcsolatos túlzottan negatív gondolkodási séma, amely magában foglalja a tehetetlenség érzését és a fájdalomra való folyamatos fókuszálást.", "A fájdalom sikeres kezelése.", "A fájdalom figyelmen kívül hagyása."],
+                        answer: "A fájdalommal kapcsolatos túlzottan negatív gondolkodási séma, amely magában foglalja a tehetetlenség érzését és a fájdalomra való folyamatos fókuszálást.",
+                        explanation: "A katasztrofizálás egy maladaptív kognitív-affektív válasz a fájdalomra, ami bizonyítottan rontja a fájdalomélményt, fokozza a rokkantságot és rontja a kezelés kimenetelét. A kognitív viselkedésterápia (KVT) egyik fő célpontja."
+                    },
+                    {
+                        question: "Melyik nem-gyógyszeres módszer bizonyítottan hatékony a krónikus fájdalom kezelésében?",
+                        options: ["Tartós ágynyugalom", "Aktív, felügyelt mozgásterápia (gyógytorna)", "Mágnesterápia", "Kristályterápia"],
+                        answer: "Aktív, felügyelt mozgásterápia (gyógytorna)",
+                        explanation: "Számos evidencia támasztja alá, hogy a rendszeres, megfelelően adagolt testmozgás és gyógytorna az egyik leghatékonyabb nem-gyógyszeres módszer a krónikus fájdalom (különösen a mozgásszervi fájdalmak) kezelésére, a funkció javítására és a fájdalom csökkentésére."
+                    },
+                    {
+                        question: "Milyen típusú fájdalomcsillapító a tramadol?",
+                        options: ["Tiszta NSAID", "Gyenge, centrális hatású szintetikus opioid, amely a noradrenalin és szerotonin rendszerre is hat", "Erős, tiszta opioid agonista", "Helyi érzéstelenítő"],
+                        answer: "Gyenge, centrális hatású szintetikus opioid, amely a noradrenalin és szerotonin rendszerre is hat",
+                        explanation: "A tramadol egy atípusos, kettős hatásmechanizmusú fájdalomcsillapító. Gyenge affinitással kötődik a μ-opioid receptorokhoz, emellett gátolja a noradrenalin és szerotonin visszavételét, ami hozzájárul a fájdalomcsillapító hatáshoz. Függőségi potenciálja alacsonyabb, mint a klasszikus opioidoké."
+                    },
+                    {
+                        question: "Melyik állítás igaz az adjuváns analgetikumokra?",
+                        options: ["Ezek az elsődlegesen választandó szerek minden fájdalomtípusra.", "Olyan gyógyszerek, amelyeket eredetileg nem fájdalomcsillapításra fejlesztettek ki, de bizonyos fájdalomállapotokban (főleg neuropátiás) hatékonyak.", "Ezek az opioidok egy másik neve.", "Csak injekció formájában léteznek."],
+                        answer: "Olyan gyógyszerek, amelyeket eredetileg nem fájdalomcsillapításra fejlesztettek ki, de bizonyos fájdalomállapotokban (főleg neuropátiás) hatékonyak.",
+                        explanation: "Az adjuváns (vagy ko-analgetikum) gyógyszerek, mint az antidepresszánsok és antikonvulzívumok, önmagukban is fájdalomcsillapító hatással bírnak specifikus, főként neuropátiás fájdalmak esetén, és gyakran kombinálják őket más fájdalomcsillapítókkal."
+                    },
+                    {
+                        question: "Melyik intervenciós eljárás során juttatnak gyógyszert közvetlenül a gerincvelő körüli folyadéktérbe?",
+                        options: ["Rádiófrekvenciás abláció", "Gerincvelő stimuláció", "Intratekális pumpa", "Epidurális szteroid injekció"],
+                        answer: "Intratekális pumpa",
+                        explanation: "Az intratekális pumpa egy beültetett eszköz, amely egy katéteren keresztül nagyon kis dózisú gyógyszert (pl. morfint, baclofent) juttat közvetlenül a cerebrospinális folyadékba, így célzott és erős fájdalomcsillapítást érve el minimális szisztémás mellékhatással. Főként súlyos, daganatos vagy spasztikus fájdalmak esetén alkalmazzák."
+                    }
+                ]
+            },
+            {
+                topic: "Migrén",
+                questions: [
+                    {
+                        question: "Mi a migrén legjellemzőbb fájdalomkaraktere az ICHD-3 kritériumok szerint?",
+                        options: ["Tompa, szorító", "Éles, nyilalló", "Egyoldali, lüktető", "Kétoldali, nyomó"],
+                        answer: "Egyoldali, lüktető",
+                        explanation: "A klasszikus migrénes fejfájás jellemzően féloldali, lüktető vagy pulzáló jellegű, közepes vagy súlyos intenzitású, és a fizikai aktivitás súlyosbítja."
+                    },
+                    {
+                        question: "Melyik neuropeptid játszik kulcsszerepet a migrén patofiziológiájában?",
+                        options: ["Szerotonin", "Dopamin", "Kalcitonin gén-rokon peptid (CGRP)", "Endorfin"],
+                        answer: "Kalcitonin gén-rokon peptid (CGRP)",
+                        explanation: "A CGRP egy erős értágító neuropeptid, amely a trigeminovaszkuláris rendszer aktivációja során szabadul fel. Szintje a migrénes roham alatt megemelkedik, és kulcsszerepet játszik a fájdalom és a neurogén gyulladás kialakulásában. A modern migrénterápiák jelentős része a CGRP rendszer gátlására irányul."
+                    },
+                    {
+                        question: "Mi a migrénes aura leggyakoribb formája?",
+                        options: ["Motoros aura (gyengeség)", "Szenzoros aura (zsibbadás)", "Vizuális aura (villogó fények, sötét foltok, cikk-cakk vonalak)", "Beszédzavar (afázia)"],
+                        answer: "Vizuális aura (villogó fények, sötét foltok, cikk-cakk vonalak)",
+                        explanation: "A migrénes aurák több mint 90%-a vizuális jellegű. Jellemző a látótérben megjelenő pozitív (pl. villogás, csillagok) vagy negatív (pl. látótérkiesés, sötét foltok) jelenségek, amelyek fokozatosan terjednek és általában 60 percen belül megszűnnek."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport számít a közepesen súlyos és súlyos migrénes rohamok specifikus, első vonalbeli kezelésének?",
+                        options: ["Paracetamol", "NSAID-ok", "Triptánok", "Opioidok"],
+                        answer: "Triptánok",
+                        explanation: "A triptánok (pl. sumatriptan) szerotonin (5-HT1B/1D) receptor agonisták, amelyeket specifikusan a migrénes rohamok kezelésére fejlesztettek ki. Hatékonyan enyhítik a fejfájást és a kísérő tüneteket (hányinger, fényérzékenység)."
+                    },
+                    {
+                        question: "Mi a krónikus migrén definíciója az ICHD-3 szerint?",
+                        options: ["Bármilyen fejfájás, ami több mint 3 hónapja tart.", "Fejfájás, amely havonta 15 vagy több napon jelentkezik, több mint 3 hónapon át, és ebből legalább 8 nap migrénes jellegű.", "Nagyon erős intenzitású migrénes rohamok.", "Migrén, amely nem reagál a triptánokra."],
+                        answer: "Fejfájás, amely havonta 15 vagy több napon jelentkezik, több mint 3 hónapon át, és ebből legalább 8 nap migrénes jellegű.",
+                        explanation: "A krónikus migrén egy súlyos állapot, amelyet a fejfájásos napok magas száma definiál, megkülönböztetve az epizodikus migréntől. A diagnózishoz a fejfájásos napoknak legalább felén migrénes karakterisztikával kell bírniuk."
+                    },
+                    {
+                        question: "Milyen neurológiai jelenséget tartanak a migrénes aura hátterében álló mechanizmusnak?",
+                        options: ["Fokális agyi ischaemia", "Kortikális terjedő depresszió (CSD)", "Generalizált epilepsziás roham", "Agytörzsi reflexek fokozódása"],
+                        answer: "Kortikális terjedő depresszió (CSD)",
+                        explanation: "A CSD egy lassan, az agykérgen végigterjedő, átmeneti idegsejt-depolarizációs és -gátlási hullám. Ez a neurofiziológiai esemény felelős a migrénes aura fokozatosan kialakuló és terjedő neurológiai tüneteiért."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport NEM használatos a migrén megelőző (preventív) kezelésére?",
+                        options: ["Béta-blokkolók", "Antiepileptikumok (pl. topiramát)", "Triptánok", "CGRP-ellenes monoklonális antitestek"],
+                        answer: "Triptánok",
+                        explanation: "A triptánok rohamoldó szerek, amelyeket a már kialakult migrénes roham kezelésére használnak. Rendszeres, megelőző célú szedésük gyógyszer-túlfogyasztás okozta fejfájáshoz (MOH) vezethet, ezért profilaxisra nem alkalmasak."
+                    },
+                    {
+                        question: "Mi a gyógyszer-túlfogyasztás okozta fejfájás (MOH)?",
+                        options: ["A fájdalomcsillapítókra adott allergiás reakció.", "A fájdalomcsillapítók túlzott használata által kiváltott vagy fenntartott krónikus fejfájás.", "A fejfájás, ami a gyógyszer elhagyásakor jelentkezik.", "A gyógyszerek hatástalansága."],
+                        answer: "A fájdalomcsillapítók túlzott használata által kiváltott vagy fenntartott krónikus fejfájás.",
+                        explanation: "Az MOH egy másodlagos fejfájás, amely akkor alakul ki, ha egy primer fejfájásban (pl. migrén) szenvedő beteg túl gyakran (általában havonta 10-15 napnál többször) használ akut rohamoldó gyógyszereket. Ez egy ördögi kört hoz létre."
+                    },
+                    {
+                        question: "Melyik nem-farmakológiai módszer bizonyítottan hatékony a migrén kezelésében?",
+                        options: ["Hosszú ideig tartó ágynyugalom", "Szigorú diéta mindenféle trigger elkerülésével", "Rendszeres aerob testmozgás és stresszkezelési technikák", "Nagy dózisú C-vitamin"],
+                        answer: "Rendszeres aerob testmozgás és stresszkezelési technikák",
+                        explanation: "Az életmódbeli tényezőknek kulcsszerepük van. A rendszeres testmozgás, a megfelelő alváshigiénia és a stresszkezelő technikák (pl. relaxáció, biofeedback, kognitív viselkedésterápia) bizonyítottan csökkentik a migrénes rohamok gyakoriságát és súlyosságát."
+                    },
+                    {
+                        question: "Melyik állítás igaz a gepantokra?",
+                        options: ["Ezek a triptánok egy erősebb változatai.", "Kis molekulájú CGRP receptor antagonisták, amelyek nem okoznak érszűkületet.", "Kizárólag a migrén megelőzésére használhatók.", "Erős opioid fájdalomcsillapítók."],
+                        answer: "Kis molekulájú CGRP receptor antagonisták, amelyek nem okoznak érszűkületet.",
+                        explanation: "A gepantok a legújabb generációs, specifikus migrénellenes szerek. A CGRP receptor blokkolásával hatnak, de a triptánokkal ellentétben nem okoznak érszűkületet, így kedvezőbb a kardiovaszkuláris biztonságossági profiljuk. Akut és preventív kezelésre is használatosak."
+                    },
+                    {
+                        question: "Mi a migrén prodroma fázisa?",
+                        options: ["A fejfájást közvetlenül megelőző aura.", "A fejfájás utáni kimerültség állapota.", "A rohamot órákkal vagy napokkal megelőző, nem specifikus tünetek (pl. hangulatváltozás, ásítozás, sóvárgás).", "A fejfájás csúcspontja."],
+                        answer: "A rohamot órákkal vagy napokkal megelőző, nem specifikus tünetek (pl. hangulatváltozás, ásítozás, sóvárgás).",
+                        explanation: "A prodroma a migrén első fázisa, amely a betegek több mint felénél jelentkezik. A finom, előrejelző tünetek felismerése segíthet a roham korai kezelésében."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a migrénes fejfájásra?",
+                        options: ["A fizikai aktivitás jellemzően súlyosbítja.", "Gyakran kíséri hányinger és/vagy hányás.", "A betegek gyakran fény- és hangérzékenyek.", "A fájdalom mindig a fej mindkét oldalán jelentkezik."],
+                        answer: "A fájdalom mindig a fej mindkét oldalán jelentkezik.",
+                        explanation: "A migrén klasszikusan egyoldali (unilaterális) fejfájás, bár előfordulhat, hogy oldalt vált, vagy kétoldalivá válik a roham során. A kétoldali kezdet inkább a tenziós fejfájásra jellemző."
+                    },
+                    {
+                        question: "Milyen típusú gyógyszerek a CGRP-ellenes monoklonális antitestek?",
+                        options: ["Naponta szedendő tabletták.", "Akut rohamoldó orrspray-k.", "Hosszú hatástartamú, megelőző célú injekciós terápiák.", "Helyileg alkalmazott krémek."],
+                        answer: "Hosszú hatástartamú, megelőző célú injekciós terápiák.",
+                        explanation: "Az erenumab, fremanezumab, galcanezumab és eptinezumab olyan monoklonális antitestek, amelyeket havonta vagy negyedévente adnak injekcióban a migrén megelőzésére. Specifikusan a CGRP útvonalat célozzák."
+                    },
+                    {
+                        question: "Melyik 'vörös zászló' (red flag) tünet esetén kell súlyos, másodlagos okra gyanakodni fejfájás esetén?",
+                        options: ["Enyhe, kétoldali, nyomó fájdalom.", "Hirtelen, 'villámcsapásszerű' fejfájás.", "Fizikai aktivitásra enyhülő fejfájás.", "Hányinger nélküli fejfájás."],
+                        answer: "Hirtelen, 'villámcsapásszerű' fejfájás.",
+                        explanation: "A hirtelen, rendkívül erős, ún. 'thunderclap' fejfájás vészjelzés, ami subarachnoidealis vérzésre (SAV) utalhat, és azonnali orvosi kivizsgálást igényel."
+                    },
+                    {
+                        question: "Mi a csendes migrén (migraine without headache)?",
+                        options: ["Nagyon enyhe intenzitású migrén.", "Migrénes aura jelenség, amelyet nem követ fejfájás.", "A migrén, amely alvás közben jelentkezik.", "A migrén, amelyre a beteg nem panaszkodik."],
+                        answer: "Migrénes aura jelenség, amelyet nem követ fejfájás.",
+                        explanation: "Ritkán előfordul, hogy a beteg megtapasztalja a jellegzetes aura tüneteket (pl. látászavar), de a tipikus fejfájás fázis elmarad. Ezt nevezik csendes migrénnek vagy acephalgic migrénnek."
+                    },
+                    {
+                        question: "Melyik hormonális állapot NEM ismert migrén trigger?",
+                        options: ["Menstruáció", "Terhesség", "Pajzsmirigy-túlműködés", "Orális fogamzásgátlók szedése"],
+                        answer: "Pajzsmirigy-túlműködés",
+                        explanation: "A női nemi hormonok, különösen az ösztrogénszint ingadozása, ismert migrén provokáló tényező. A menstruáció, a terhesség (főleg az első trimeszter) és a fogamzásgátlók mind befolyásolhatják a rohamok gyakoriságát. A pajzsmirigy-betegségek nem számítanak tipikus migrén triggernek."
+                    },
+                    {
+                        question: "Milyen szerepet játszik a fejfájásnapló a migrén kezelésében?",
+                        options: ["Nincs gyakorlati haszna.", "Segít a rohamok gyakoriságának, a tüneteknek és a lehetséges triggereknek a nyomon követésében.", "Helyettesíti a preventív gyógyszereket.", "Csak a gyógyszer-mellékhatások rögzítésére szolgál."],
+                        answer: "Segít a rohamok gyakoriságának, a tüneteknek és a lehetséges triggereknek a nyomon követésében.",
+                        explanation: "A fejfájásnapló egy rendkívül hasznos eszköz a beteg és az orvos számára is. Segít azonosítani a rohamokat kiváltó tényezőket, felmérni a rohamok gyakoriságát és súlyosságát, valamint értékelni a kezelés hatékonyságát."
+                    },
+                    {
+                        question: "Melyik állítás igaz a migrén és a stroke kapcsolatára?",
+                        options: ["A migrén soha nem növeli a stroke kockázatát.", "Az aurás migrén, különösen dohányzó és fogamzásgátlót szedő nőknél, kismértékben növeli az iszkémiás stroke kockázatát.", "Minden migrénes roham egy mini-stroke.", "A stroke megelőzi a migrént."],
+                        answer: "Az aurás migrén, különösen dohányzó és fogamzásgátlót szedő nőknél, kismértékben növeli az iszkémiás stroke kockázatát.",
+                        explanation: "Epidemiológiai vizsgálatok kimutatták, hogy az aurával járó migrén egy független, bár alacsony rizikófaktora az iszkémiás stroke-nak, különösen ha más vaszkuláris kockázati tényezők is jelen vannak."
+                    },
+                    {
+                        question: "Melyik kezelési módszer a Botox (botulinum toxin) injekció?",
+                        options: ["Akut rohamkezelés", "Epizodikus migrén megelőzése", "Krónikus migrén megelőzése", "Tenziós fejfájás kezelése"],
+                        answer: "Krónikus migrén megelőzése",
+                        explanation: "A Botox injekciós kezelés egy hatékony és elfogadott preventív terápia a krónikus migrénben (≥15 fejfájásos nap/hónap) szenvedő betegek számára. A homlok, halánték és tarkó meghatározott pontjaiba adják."
+                    },
+                    {
+                        question: "Mi a posztdróma fázis a migrénben?",
+                        options: ["A fejfájás csúcspontja.", "A rohamot követő, gyakran kimerültséggel, koncentrációs zavarral járó időszak.", "A fejfájás előtti aura.", "A migrén krónikussá válása."],
+                        answer: "A rohamot követő, gyakran kimerültséggel, koncentrációs zavarral járó időszak.",
+                        explanation: "A posztdróma a migrénes roham utolsó fázisa, amely a fájdalom megszűnése után akár 24-48 óráig is eltarthat. A betegek gyakran 'másnaposnak', fáradtnak, dekoncentráltnak érzik magukat."
+                    }
+                ]
+            },
+            {
+                topic: "Tenziós és Cluster fejfájás; Neuralgiák",
+                questions: [
+                    {
+                        question: "Melyik a leggyakoribb primer fejfájás típus?",
+                        options: ["Migrén", "Cluster fejfájás", "Tenziós típusú fejfájás (TTH)", "Trigeminus neuralgia"],
+                        answer: "Tenziós típusú fejfájás (TTH)",
+                        explanation: "A tenziós típusú fejfájás a leggyakoribb fejfájás, a felnőtt lakosság jelentős részét érinti élete során. Jellemzően enyhe vagy közepes intenzitású."
+                    },
+                    {
+                        question: "Mi a tenziós fejfájás jellegzetes fájdalomkaraktere?",
+                        options: ["Egyoldali, lüktető", "Kétoldali, nyomó, szorító ('abroncsszerű')", "Éles, áramütésszerű", "Rohamokban jelentkező, kínzó"],
+                        answer: "Kétoldali, nyomó, szorító ('abroncsszerű')",
+                        explanation: "A TTH-t leggyakrabban egy kétoldali, a fej körül szorító, nyomó jellegű, nem pulzáló fájdalomként írják le, amely enyhe vagy közepes erősségű."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Cluster fejfájásra (CH)?",
+                        options: ["Gyakori, enyhe fejfájás", "Ritka, de rendkívül súlyos, szigorúan egyoldali, autonóm tünetekkel járó fejfájás", "Mindig kétoldali", "Fizikai aktivitásra enyhül"],
+                        answer: "Ritka, de rendkívül súlyos, szigorúan egyoldali, autonóm tünetekkel járó fejfájás",
+                        explanation: "A CH a trigemino-autonóm fejfájások csoportjába tartozik. Jellemzője a periódusokban (clusterekben) jelentkező, elviselhetetlenül erős, szigorúan féloldali, szem körüli fájdalom, amit azonos oldali autonóm tünetek (könnyezés, orrfolyás, ptosis) kísérnek."
+                    },
+                    {
+                        question: "Mi a Cluster fejfájás rohamának leghatékonyabb akut kezelése?",
+                        options: ["Paracetamol tabletta", "Nagy dózisú ibuprofen", "100%-os oxigén belélegzése maszkon keresztül", "Meleg borogatás"],
+                        answer: "100%-os oxigén belélegzése maszkon keresztül",
+                        explanation: "A tiszta (100%-os) oxigén belélegzése nagy áramlási sebességgel (12-15 L/perc) az egyik leggyorsabb és leghatékonyabb rohamoldó terápia CH esetén, a betegek többségénél 15-20 percen belül enyhülést hoz."
+                    },
+                    {
+                        question: "Mi a neuralgia definíciója?",
+                        options: ["Tompa, izom eredetű fájdalom", "Egy ideg lefutása mentén jelentkező, hirtelen, éles, sokkoló fájdalom", "Gyulladásos ízületi fájdalom", "Pszichés eredetű fájdalom"],
+                        answer: "Egy ideg lefutása mentén jelentkező, hirtelen, éles, sokkoló fájdalom",
+                        explanation: "A neuralgia egy specifikus típusú neuropátiás fájdalom, amelyet egy perifériás ideg irritációja vagy károsodása okoz, és jellegzetesen az ideg ellátási területén jelentkező, rövid, de rendkívül intenzív, áramütésszerű fájdalomrohamok jellemeznek."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb neuralgia típus?",
+                        options: ["Glossopharyngealis neuralgia", "Occipitalis neuralgia", "Posztherpeszes neuralgia", "Trigeminus neuralgia (TN)"],
+                        answer: "Trigeminus neuralgia (TN)",
+                        explanation: "A trigeminus neuralgia a leggyakrabban előforduló arcfájdalom szindróma és a leggyakoribb neuralgia, amely az V. agyideg (nervus trigeminus) egy vagy több ágát érinti."
+                    },
+                    {
+                        question: "Mi a trigeminus neuralgia első vonalbeli gyógyszeres kezelése?",
+                        options: ["Opioidok", "NSAID-ok", "Antiepileptikumok (pl. carbamazepin)", "Béta-blokkolók"],
+                        answer: "Antiepileptikumok (pl. carbamazepin)",
+                        explanation: "A TN patofiziológiájában az idegsejtek kóros, spontán kisülései játszanak szerepet. Az antiepileptikumok, mint a carbamazepin és az oxcarbazepine, az ioncsatornák blokkolásával stabilizálják az idegmembránt és gátolják ezeket a kisüléseket, így hatékonyan csökkentik a fájdalomrohamokat."
+                    },
+                    {
+                        question: "Melyik állítás NEM jellemző a tenziós típusú fejfájásra?",
+                        options: ["A fájdalom enyhe vagy közepes intenzitású", "A fizikai aktivitás súlyosbítja", "A fájdalom kétoldali, szorító jellegű", "Súlyos hányinger vagy hányás nem kíséri"],
+                        answer: "A fizikai aktivitás súlyosbítja",
+                        explanation: "A TTH egyik fontos diagnosztikai kritériuma, ami a migréntől is elkülöníti, hogy a rutin fizikai aktivitás (pl. séta) nem ront a fájdalmon. A migrénes fejfájás ezzel szemben jellemzően fokozódik mozgásra."
+                    },
+                    {
+                        question: "Melyik agyi struktúra játszik kulcsszerepet a Cluster fejfájás patofiziológiájában?",
+                        options: ["Agykéreg", "Kisagy", "Hypothalamus", "Hippocampus"],
+                        answer: "Hypothalamus",
+                        explanation: "Funkcionális képalkotó vizsgálatok kimutatták a posterior hypothalamus aktivációját a CH rohamok alatt. Ez az agyterület felelős a cirkadián ritmus szabályozásáért, ami magyarázhatja a rohamok jellegzetes napi és szezonális periodicitását."
+                    },
+                    {
+                        question: "Mi a mikrovaszkuláris dekompresszió (MVD)?",
+                        options: ["Egy gyógyszeres terápia", "Egyfajta pszichoterápia", "Egy sebészeti eljárás, ahol az ideget nyomó eret eltávolítják az idegtől", "Egy diagnosztikai képalkotó eljárás"],
+                        answer: "Egy sebészeti eljárás, ahol az ideget nyomó eret eltávolítják az idegtől",
+                        explanation: "Az MVD a trigeminus neuralgia leghatékonyabb sebészeti kezelése. A műtét során a neurosebész egy kis teflon szivacsot helyez az ideg és a kompressziót okozó ér közé, így megszüntetve az irritációt."
+                    },
+                    {
+                        question: "Milyen autonóm tünetek kísérik a Cluster fejfájást?",
+                        options: ["Szájszárazság és székrekedés", "Izzadás az egész testen", "A fájdalommal azonos oldali könnyezés, orrfolyás, pupillaszűkület (miosis)", "Vérnyomásesés és ájulás"],
+                        answer: "A fájdalommal azonos oldali könnyezés, orrfolyás, pupillaszűkület (miosis)",
+                        explanation: "A CH-t a trigemino-autonóm reflex aktivációja okozza, ami a fájdalommal azonos oldalon jellegzetes paraszimpatikus tüneteket (könnyezés, orrdugulás/orrfolyás) és szimpatikus gátlási tüneteket (ptosis, miosis) eredményez."
+                    },
+                    {
+                        question: "Melyik gyógyszer a krónikus tenziós fejfájás leghatékonyabb megelőző terápiája?",
+                        options: ["Sumatriptan", "Propranolol", "Amitriptilin", "Ibuprofen"],
+                        answer: "Amitriptilin",
+                        explanation: "A triciklikus antidepresszánsok, különösen az amitriptilin, a leghatékonyabb és legtöbbet vizsgált gyógyszerek a krónikus TTH megelőzésére, valószínűleg a centrális fájdalomfeldolgozásra gyakorolt hatásuk miatt."
+                    },
+                    {
+                        question: "Mi váltja ki leggyakrabban a trigeminus neuralgia rohamait?",
+                        options: ["Erős zaj", "Intenzív fizikai edzés", "Ártalmatlan ingerek, mint az arc érintése, borotválkozás, fogmosás", "Bizonyos ételek fogyasztása"],
+                        answer: "Ártalmatlan ingerek, mint az arc érintése, borotválkozás, fogmosás",
+                        explanation: "A TN egyik legjellemzőbb vonása, hogy a rendkívül heves fájdalomrohamokat teljesen banális, a trigger zónát érő ingerek (pl. hideg szél, érintés, rágás) provokálják."
+                    },
+                    {
+                        question: "Milyen súlyos szövődménye lehet a glossopharyngealis neuralgiának?",
+                        options: ["Látásvesztés", "Halláskárosodás", "Bradycardia és syncope (ájulás)", "Végtagbénulás"],
+                        answer: "Bradycardia és syncope (ájulás)",
+                        explanation: "Ritka, de súlyos esetekben a IX. agyideg (glossopharyngeus) irritációja átterjedhet a közeli X. agyidegre (vagus), ami a szívritmus veszélyes lelassulását (bradycardia) és ájulást (syncope) okozhat. Ezt vagoglossopharyngealis neuralgiának nevezik."
+                    },
+                    {
+                        question: "Melyik fejfájás típusra jellemző a motoros nyugtalanság a roham alatt?",
+                        options: ["Migrén", "Tenziós fejfájás", "Cluster fejfájás", "Szinuszos fejfájás"],
+                        answer: "Cluster fejfájás",
+                        explanation: "Ellentétben a migrénes betegekkel, akik inkább egy sötét, csendes szobában feküdnének, a cluster fejfájásban szenvedők a kínzó fájdalom miatt jellemzően nyugtalanok, járkálnak, ringatóznak, nem találják a helyüket."
+                    },
+                    {
+                        question: "Melyik ideg érintett az occipitalis neuralgiában?",
+                        options: ["Nervus trigeminus", "Nervus facialis", "Nervus occipitalis major és/vagy minor", "Nervus vagus"],
+                        answer: "Nervus occipitalis major és/vagy minor",
+                        explanation: "Az occipitalis neuralgia a nyakszirt és a fej hátsó részének beidegzéséért felelős occipitalis idegek irritációja vagy kompressziója által okozott fájdalom."
+                    },
+                    {
+                        question: "Melyik állítás igaz a perzisztáló idiopátiás arcfájdalomra (PIFP)?",
+                        options: ["Mindig egyértelmű neurológiai deficit kíséri.", "A fájdalom nem követi egy adott ideg lefutását és a neurológiai vizsgálat normális.", "Könnyen kezelhető hagyományos fájdalomcsillapítókkal.", "Mindig trauma okozza."],
+                        answer: "A fájdalom nem követi egy adott ideg lefutását és a neurológiai vizsgálat normális.",
+                        explanation: "A PIFP egy nehezen diagnosztizálható krónikus fájdalomzavar, amelyet a rosszul lokalizált, atípusos eloszlású arcfájdalom és az objektív neurológiai jelek hiánya jellemez. Diagnózisa kizárásos alapon történik."
+                    },
+                    {
+                        question: "Mi a temporomandibuláris rendellenesség (TMD) leggyakoribb tünete?",
+                        options: ["Fülzúgás", "Fájdalom a rágóizmokban és/vagy az állkapocsízületben", "Fogfájás", "Nyelési nehézség"],
+                        answer: "Fájdalom a rágóizmokban és/vagy az állkapocsízületben",
+                        explanation: "A TMD az állkapocsízületet és a rágóizmokat érintő állapotok csoportja. A leggyakoribb panasz a fájdalom, amelyet az ízület mozgáskorlátozottsága és az ízületi hangok (kattogás) kísérhetnek."
+                    },
+                    {
+                        question: "Milyen kezelés NEM javasolt a trigeminus neuralgia esetén?",
+                        options: ["Carbamazepin", "Mikrovaszkuláris dekompresszió (MVD)", "Hagyományos fájdalomcsillapítók (NSAID-ok, paracetamol)", "Oxcarbazepine"],
+                        answer: "Hagyományos fájdalomcsillapítók (NSAID-ok, paracetamol)",
+                        explanation: "A trigeminus neuralgia neuropátiás fájdalom, amelynek patomechanizmusa az idegsejtek kóros kisülése. Emiatt a hagyományos, gyulladáscsökkentő vagy nociceptív fájdalomra ható szerek jellemzően hatástalanok. A kezelés alapját az antiepileptikumok képezik."
+                    },
+                    {
+                        question: "Melyik állapotra kell gondolni, ha egy fiatal betegnél (40 év alatt) trigeminus neuralgia jelentkezik?",
+                        options: ["Agydaganat", "Sclerosis multiplex (SM)", "Magas vérnyomás", "Fogászati probléma"],
+                        answer: "Sclerosis multiplex (SM)",
+                        explanation: "Bár a TN leggyakrabban idősebb korban, érkompresszió miatt alakul ki, fiatal korban való megjelenése 'vörös zászló', és felveti a sclerosis multiplex gyanúját, ahol a demyelinizációs plakkok okozzák az ideg irritációját."
+                    }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

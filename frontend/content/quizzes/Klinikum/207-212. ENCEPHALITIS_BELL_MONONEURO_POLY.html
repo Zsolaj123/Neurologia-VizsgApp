@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/100</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Encephalitisek klinikai tünetei",
+                questions: [
+                    {
+                        question: "Mi a legfőbb különbség az encephalitis és a meningitis között?",
+                        options: [
+                            "Az encephalitis mindig vírusos, a meningitis mindig bakteriális.",
+                            "Az encephalitis közvetlenül az agy parenchymáját (agyszövetét) károsítja, míg a meningitis elsősorban az agyhártyákat.",
+                            "A meningitis mindig okoz görcsrohamokat, az encephalitis nem.",
+                            "Az encephalitis kevésbé súlyos, mint a meningitis."
+                        ],
+                        answer: "Az encephalitis közvetlenül az agy parenchymáját (agyszövetét) károsítja, míg a meningitis elsősorban az agyhártyákat.",
+                        explanation: "Az encephalitis az agy parenchymájának gyulladása, ami neurológiai diszfunkcióval jár. Ezzel szemben a meningitis az agyhártyák gyulladása, és a tudatzavar vagy fokális neurológiai deficit kevésbé jellemző, hacsak nem szövődik encephalitisszel (meningoencephalitis)."
+                    },
+                    {
+                        question: "Mi a sporadikus vírusos encephalitis leggyakoribb azonosítható oka?",
+                        options: [
+                            "West Nile vírus",
+                            "Varicella-zoster vírus",
+                            "Herpes Simplex Vírus (HSV-1)",
+                            "Enterovírusok"
+                        ],
+                        answer: "Herpes Simplex Vírus (HSV-1)",
+                        explanation: "A Herpes Simplex Vírus (HSV-1) a leggyakoribb azonosítható oka a sporadikus, nem epidemikus vírusos encephalitisnek, különösen felnőttekben."
+                    },
+                    {
+                        question: "Melyik tünet utal leginkább encephalitisre a meningitisszel szemben?",
+                        options: [
+                            "Láz",
+                            "Fejfájás",
+                            "Megváltozott mentális állapot vagy neurológiai diszfunkció",
+                            "Nyaki merevség"
+                        ],
+                        answer: "Megváltozott mentális állapot vagy neurológiai diszfunkció",
+                        explanation: "Az encephalitis fő jellemzője, amely megkülönbözteti a meningitistől, a megváltozott mentális állapot vagy neurológiai diszfunkció, mint például zavartság, letargia, személyiségváltozások vagy kóma, az agyszövet közvetlen érintettsége miatt."
+                    },
+                    {
+                        question: "Melyik agyterületet érinti tipikusan a Herpes Simplex Vírus (HSV) encephalitis?",
+                        options: [
+                            "A kisagyat",
+                            "A bazális ganglionokat",
+                            "A temporális lebenyeket és a limbikus rendszert",
+                            "Az agytörzset"
+                        ],
+                        answer: "A temporális lebenyeket és a limbikus rendszert",
+                        explanation: "A HSV encephalitis tipikusan a temporális lebenyeket (egy- vagy kétoldalúan) és a szomszédos limbikus rendszereket támadja meg, ami jellegzetes neuropszichiátriai tünetekhez (pl. amnézia, viselkedésváltozás) vezet."
+                    },
+                    {
+                        question: "Mi jellemző az autoimmun encephalitis (AE) lefolyására a fertőző formákhoz képest?",
+                        options: [
+                            "Mindig lázzal jár.",
+                            "A tünetek általában gyorsabban, órák alatt alakulnak ki.",
+                            "A tünetek általában lassabban, hetek-hónapok alatt fejlődnek ki.",
+                            "Soha nem okoz görcsrohamokat."
+                        ],
+                        answer: "A tünetek általában lassabban, hetek-hónapok alatt fejlődnek ki.",
+                        explanation: "Az autoimmun encephalitis tünetei általában szubakut módon, hetektől hónapokig terjedő időszak alatt alakulnak ki és fejlődnek, ami lassabb lefolyást jelent a legtöbb akut fertőző encephalitishez képest."
+                    },
+                    {
+                        question: "Melyik diagnosztikai vizsgálat az arany standard az encephalitis értékelésében?",
+                        options: [
+                            "Koponya CT",
+                            "Lumbálpunkció (CSF analízis)",
+                            "Agyi MRI",
+                            "Elektroenkefalográfia (EEG)"
+                        ],
+                        answer: "Agyi MRI",
+                        explanation: "Az agyi MRI a legérzékenyebb neuroképalkotó teszt és az encephalitis értékelésének aranystandardja. Képes kimutatni a gyulladásra, ödémára vagy vérzésre utaló finom jeleket az agyszövetben."
+                    },
+                    {
+                        question: "Milyen kezelést kell azonnal elkezdeni minden encephalitis gyanús betegnél az IDSA ajánlása szerint?",
+                        options: [
+                            "Széles spektrumú antibiotikumokat",
+                            "Kortikoszteroidokat",
+                            "Intravénás Acyclovirt",
+                            "Plazmaferézist"
+                        ],
+                        answer: "Intravénás Acyclovirt",
+                        explanation: "Az Infectious Diseases Society of America (IDSA) ajánlása szerint az acyclovirt azonnal el kell kezdeni minden encephalitis gyanús betegnél, a diagnosztikai vizsgálatok eredményeire nem várva. Ennek oka, hogy a HSV encephalitis a leggyakoribb kezelhető ok, és a kezeletlenség súlyos, maradandó károsodáshoz vezethet."
+                    },
+                    {
+                        question: "Milyen jellegzetes tünetek utalhatnak anti-NMDAR encephalitisre?",
+                        options: [
+                            "Csak enyhe fejfájás és láz.",
+                            "Kiemelkedő pszichiátriai tünetek (pszichózis), memóriazavar és kóros mozgások.",
+                            "Főként a látás elvesztése.",
+                            "Hirtelen kialakuló, petyhüdt bénulás a végtagokban."
+                        ],
+                        answer: "Kiemelkedő pszichiátriai tünetek (pszichózis), memóriazavar és kóros mozgások.",
+                        explanation: "Az anti-NMDAR encephalitis gyakran szubakut lefolyással és kiemelkedő neuropszichiátriai tünetekkel (pl. pszichózis, paranoia, viselkedésváltozás), memóriazavarral, refrakter görcsrohamokkal és jellegzetes kóros mozgásokkal (pl. száj-arc diszkinézia) jár."
+                    },
+                    {
+                        question: "Mi a liquor (CSF) vizsgálat tipikus lelete vírusos encephalitis esetén?",
+                        options: [
+                            "Magas fehérjeszint, alacsony glükózszint, neutrofil túlsúly.",
+                            "Normál fehérje- és glükózszint, nincs sejtszaporulat.",
+                            "Emelkedett fehérjeszint, normál glükózszint, limfocita túlsúlyú pleocytosis.",
+                            "Alacsony nyitónyomás és vörösvértestek jelenléte."
+                        ],
+                        answer: "Emelkedett fehérjeszint, normál glükózszint, limfocita túlsúlyú pleocytosis.",
+                        explanation: "Vírusos encephalitisben a liquorban (CSF) jellemzően limfocita túlsúlyú sejtszaporulat (pleocytosis), emelkedett fehérjekoncentráció és normális glükózszint figyelhető meg."
+                    },
+                    {
+                        question: "Milyen epidemiológiai jellemzője van az arbovírus encephalitiseknek?",
+                        options: [
+                            "Egész évben egyenletesen fordulnak elő.",
+                            "Főként télen, zárt közösségekben terjednek.",
+                            "Szezonális (tavasz, nyár, kora ősz) és földrajzilag kötött előfordulásúak.",
+                            "Kizárólag csecsemőket érintenek."
+                        ],
+                        answer: "Szezonális (tavasz, nyár, kora ősz) és földrajzilag kötött előfordulásúak.",
+                        explanation: "Az arbovírusokat ízeltlábúak (szúnyogok, kullancsok) terjesztik, ezért előfordulásuk szezonális (jellemzően a melegebb hónapokban) és az adott kórokozót hordozó vektor földrajzi elterjedéséhez kötött."
+                    },
+                    {
+                        question: "Mi az akut disszeminált encephalomyelitis (ADEM) leggyakoribb kiváltó oka?",
+                        options: [
+                            "Genetikai hajlam.",
+                            "Daganatos megbetegedés.",
+                            "Fertőzés (vírusos/bakteriális) vagy ritkán oltás utáni immunválasz.",
+                            "Nehézfém-mérgezés."
+                        ],
+                        answer: "Fertőzés (vírusos/bakteriális) vagy ritkán oltás utáni immunválasz.",
+                        explanation: "Az ADEM egy posztinfekciós autoimmun állapot, amelyet leggyakrabban egy megelőző vírusos vagy bakteriális fertőzésre adott, tévesen az idegrendszert (specifikusan a mielinhüvelyt) támadó immunválasz vált ki."
+                    },
+                    {
+                        question: "Milyen szerepe van az elektroenkefalográfiának (EEG) az encephalitis diagnosztikájában?",
+                        options: [
+                            "Specifikusan azonosítja a kórokozó vírust.",
+                            "Kimutatja a görcsaktivitást, beleértve a nem konvulzív status epilepticust.",
+                            "Helyettesíti az MRI vizsgálatot.",
+                            "Csak a betegség prognózisának meghatározására szolgál."
+                        ],
+                        answer: "Kimutatja a görcsaktivitást, beleértve a nem konvulzív status epilepticust.",
+                        explanation: "Az EEG rendkívül hasznos a görcsroham-aktivitás azonosításában és monitorozásában, ami gyakori szövődmény. Különösen fontos a nem konvulzív status epilepticus kimutatására zavart tudatú betegeknél, ahol a rohamoknak nincsenek külső jelei."
+                    },
+                    {
+                        question: "Mi a legfontosabb különbség az encephalitis és a toxikus/metabolikus encephalopathia között?",
+                        options: [
+                            "Az encephalopathia mindig lázzal jár.",
+                            "Az encephalitisben hiányoznak a KIR-gyulladás jelei.",
+                            "Az encephalopathiában hiányoznak a KIR-gyulladás jelei (pl. CSF pleocytosis).",
+                            "Az encephalopathia csak időseket érint."
+                        ],
+                        answer: "Az encephalopathiában hiányoznak a KIR-gyulladás jelei (pl. CSF pleocytosis).",
+                        explanation: "Míg mindkét állapot megváltozott mentális állapottal jár, az encephalitist az agy parenchymájának gyulladása okozza, ami kimutatható a liquorban (pleocytosis) vagy az MRI-n. Ezzel szemben az encephalopathia az agy diffúz diszfunkciója gyulladás nélkül, amit szisztémás okok (pl. máj-, veseelégtelenség, mérgezés) váltanak ki."
+                    },
+                    {
+                        question: "Milyen hosszú távú szövődmény a leggyakoribb súlyos encephalitis után?",
+                        options: [
+                            "Teljes és gyors felépülés.",
+                            "Csak enyhe, átmeneti fejfájás.",
+                            "Tartós kognitív károsodás, memóriaproblémák és személyiségváltozások.",
+                            "Fokozott fizikai erőnlét."
+                        ],
+                        answer: "Tartós kognitív károsodás, memóriaproblémák és személyiségváltozások.",
+                        explanation: "A súlyos encephalitis után gyakoriak a maradandó neurológiai és neuropszichiátriai következmények, mint a memóriazavar, koncentrációs nehézségek, személyiség- és viselkedésváltozások, valamint a tartós fáradtság."
+                    },
+                    {
+                        question: "Milyen tünetek jellemzőek csecsemőkori encephalitis esetén?",
+                        options: [
+                            "Fokozott étvágy és nyugodt alvás.",
+                            "A kutacsok elődomborodása, irritabilitás és rossz táplálkozás.",
+                            "Gyors nyelvi fejlődés.",
+                            "Normális testhőmérséklet."
+                        ],
+                        answer: "A kutacsok elődomborodása, irritabilitás és rossz táplálkozás.",
+                        explanation: "Csecsemőknél a tünetek eltérőek és nehezebben felismerhetők lehetnek. Jellemző a koponya lágy pontjainak (kutacs) elődomborodása (a megnövekedett koponyaűri nyomás jele), az ingerlékenység, a rossz táplálkozás és a testi merevség."
+                    },
+                    {
+                        question: "Mikor indokolt megismételni a lumbálpunkciót HSV encephalitis gyanúja esetén?",
+                        options: [
+                            "Soha nem kell megismételni.",
+                            "Ha a betegnek magas láza van.",
+                            "Ha a kezdeti CSF PCR teszt negatív, de a klinikai gyanú továbbra is erős.",
+                            "Ha az MRI pozitív."
+                        ],
+                        answer: "Ha a kezdeti CSF PCR teszt negatív, de a klinikai gyanú továbbra is erős.",
+                        explanation: "A HSV kimutatására szolgáló PCR teszt a betegség korai szakaszában (első 72 óra) hamisan negatív lehet. Ha a klinikai kép erősen HSV encephalitisre utal, az IDSA irányelvek javasolják a lumbálpunkció megismétlését 3-7 nap múlva."
+                    },
+                    {
+                        question: "Melyik kategóriába tartozik a Rasmussen-encephalitis?",
+                        options: [
+                            "Gyakori, felnőttkori bakteriális encephalitis.",
+                            "Ritka, krónikus, gyermekeket érintő autoimmun encephalitis.",
+                            "Szúnyog által terjesztett vírusos encephalitis.",
+                            "Gombás fertőzés okozta encephalitis."
+                        ],
+                        answer: "Ritka, krónikus, gyermekeket érintő autoimmun encephalitis.",
+                        explanation: "A Rasmussen-encephalitis egy ritka, krónikus gyulladásos neurológiai betegség, amely általában gyermekeket érint, és az agy egyik féltekéjének progresszív károsodásához, súlyos görcsrohamokhoz és funkcióvesztéshez vezet."
+                    },
+                    {
+                        question: "Mi a Klüver-Bucy szindróma, amely előfordulhat HSV encephalitis szövődményeként?",
+                        options: [
+                            "A végtagok teljes bénulása.",
+                            "Súlyos beszédzavar.",
+                            "Viselkedési rendellenességek, mint hiperszexualitás, vizuális agnózia és orális tendenciák.",
+                            "A hallás teljes elvesztése."
+                        ],
+                        answer: "Viselkedési rendellenességek, mint hiperszexualitás, vizuális agnózia és orális tendenciák.",
+                        explanation: "A Klüver-Bucy szindróma egy ritka neuropszichiátriai állapot, amelyet a temporális lebenyek, különösen az amygdala kétoldali károsodása okoz. Jellemző tünetei a gátlástalanság, memóriazavar, tárgyak szájba vétele, és érzelmi változások, melyek a HSV encephalitis temporális lebeny affinitása miatt alakulhatnak ki."
+                    },
+                    {
+                        question: "Milyen kezelési stratégiát alkalmaznak első vonalban autoimmun encephalitis esetén?",
+                        options: [
+                            "Antivirális szereket.",
+                            "Antibiotikumokat.",
+                            "Immunszuppressziót (pl. kortikoszteroidok, IVIg, plazmaferézis).",
+                            "Kizárólag tüneti kezelést."
+                        ],
+                        answer: "Immunszuppressziót (pl. kortikoszteroidok, IVIg, plazmaferézis).",
+                        explanation: "Mivel az autoimmun encephalitis hátterében az immunrendszer téves működése áll, a kezelés célja az agyi gyulladás csökkentése immunszuppresszív vagy immunmoduláló terápiákkal, mint a kortikoszteroidok, intravénás immunglobulin (IVIg) vagy a plazmacsere."
+                    },
+                    {
+                        question: "Melyik állítás igaz a bakteriális encephalitisre?",
+                        options: [
+                            "Ez a leggyakoribb encephalitis típus.",
+                            "Gyakran a bakteriális meningitis szövődményeként alakul ki.",
+                            "A tünetei jelentősen eltérnek a meningitis tüneteitől.",
+                            "Kezelése általában antivirális szerekkel történik."
+                        ],
+                        answer: "Gyakran a bakteriális meningitis szövődményeként alakul ki.",
+                        explanation: "A bakteriális encephalitis ritkább, mint a vírusos, és gyakran a bakteriális meningitis szövődményeként (meningoencephalitis) vagy helyi fertőzések (pl. fülgyulladás) továbbterjedéseként jön létre. Tünetei jelentősen átfednek a bakteriális meningitisével."
+                    }
+                ]
+            },
+            {
+                topic: "Bell-féle paresis és kezelése",
+                questions: [
+                    {
+                        question: "Mi a Bell-paresis definíciója?",
+                        options: [
+                            "Az arc mindkét oldalát érintő krónikus izomgyengeség.",
+                            "A 7. agyideg (nervus facialis) hirtelen fellépő, ismeretlen eredetű (idiopátiás) bénulása.",
+                            "A stroke egy enyhe formája, amely csak az arcot érinti.",
+                            "Vírusos fertőzés okozta végleges arcideg-károsodás."
+                        ],
+                        answer: "A 7. agyideg (nervus facialis) hirtelen fellépő, ismeretlen eredetű (idiopátiás) bénulása.",
+                        explanation: "A Bell-paresis, vagy idiopátiás perifériás arcbénulás, a 7. agyideg (nervus facialis) akut, megmagyarázhatatlan, jellemzően egyoldali diszfunkciója."
+                    },
+                    {
+                        question: "Melyik vírus reaktivációját tartják a Bell-paresis legvalószínűbb okának?",
+                        options: [
+                            "Influenza B vírus",
+                            "Herpes Simplex Vírus (HSV-1)",
+                            "Citomegalovírus (CMV)",
+                            "Epstein-Barr vírus (EBV)"
+                        ],
+                        answer: "Herpes Simplex Vírus (HSV-1)",
+                        explanation: "Bár a Bell-paresis oka hivatalosan idiopátiás, a legelfogadottabb elmélet szerint a Herpes simplex vírus (HSV-1) reaktivációja áll a háttérben, ami az ideg gyulladásához és duzzanatához vezet."
+                    },
+                    {
+                        question: "Mi a legfontosabb klinikai jel, ami segít elkülöníteni a Bell-paresist a stroke-tól?",
+                        options: [
+                            "A bénulás hirtelen kezdete.",
+                            "A homlokizmok érintettsége (homlokráncolás képtelensége).",
+                            "A fül mögötti fájdalom jelenléte.",
+                            "Az ízérzés megváltozása."
+                        ],
+                        answer: "A homlokizmok érintettsége (homlokráncolás képtelensége).",
+                        explanation: "Stroke esetén a központi bénulás jellemzően kíméli a homlokizmokat a kétoldali agykérgi beidegzés miatt (a beteg tudja ráncolni a homlokát). Ezzel szemben a Bell-paresis (perifériás bénulás) az arc teljes azonos oldalát érinti, beleértve a homlokot is."
+                    },
+                    {
+                        question: "Milyen időkereten belül a leghatékonyabb elkezdeni a kortikoszteroid kezelést Bell-paresis esetén?",
+                        options: [
+                            "Az első héten belül.",
+                            "Az első 72 órán belül.",
+                            "Bármikor a tünetek fennállása alatt.",
+                            "Csak ha a bénulás teljes."
+                        ],
+                        answer: "Az első 72 órán belül.",
+                        explanation: "A kortikoszteroidok hatékonysága jelentősen megnő, ha a terápiát a tünetek kezdetétől számított 72 órán belül megkezdik. Ez a kritikus ablak, amikor a gyulladásos folyamat még visszafordítható, mielőtt maradandó idegkárosodás alakulna ki."
+                    },
+                    {
+                        question: "Mi a szemvédelem legfontosabb célja Bell-paresisben?",
+                        options: [
+                            "A látásélesség javítása.",
+                            "A könnytermelés csökkentése.",
+                            "A szaruhártya kiszáradásának és károsodásának megelőzése.",
+                            "A szem körüli ráncok elkerülése."
+                        ],
+                        answer: "A szaruhártya kiszáradásának és károsodásának megelőzése.",
+                        explanation: "A szemhéj elégtelen záródása miatt a szaruhártya ki van téve a kiszáradásnak, ami irritációhoz, fekélyhez és súlyos esetben látásvesztéshez vezethet. A szemvédelem (műkönny, kenőcs, éjszakai tapasz) ennek megelőzésére szolgál."
+                    },
+                    {
+                        question: "Melyik állítás igaz az antivirális szerek szerepére a Bell-paresis kezelésében?",
+                        options: [
+                            "Önmagukban hatékonyabbak, mint a szteroidok.",
+                            "Minden esetben kötelező adni őket.",
+                            "Szerepük vitatott, a nagy klinikai vizsgálatok nem igazolták egyértelműen a hozzáadott előnyüket a szteroidok mellett.",
+                            "Csak a betegség krónikus fázisában hatásosak."
+                        ],
+                        answer: "Szerepük vitatott, a nagy klinikai vizsgálatok nem igazolták egyértelműen a hozzáadott előnyüket a szteroidok mellett.",
+                        explanation: "Az antivirális szerek (pl. aciclovir, valaciclovir) szerepe ellentmondásos. Bár a feltételezett vírusos eredet miatt logikusnak tűnik az alkalmazásuk, a nagy, randomizált, kontrollált vizsgálatok nem mutattak ki szignifikáns további előnyt a kortikoszteroidokhoz képest."
+                    },
+                    {
+                        question: "Mi a szinkinézis, a Bell-paresis egyik lehetséges hosszú távú szövődménye?",
+                        options: [
+                            "Az arcizmok teljes sorvadása.",
+                            "Kóros, akaratlan együttmozgások az arcon (pl. mosolygáskor becsukódik a szem).",
+                            "Krónikus, erős arcfájdalom.",
+                            "Az arc teljes érzéketlensége."
+                        ],
+                        answer: "Kóros, akaratlan együttmozgások az arcon (pl. mosolygáskor becsukódik a szem).",
+                        explanation: "A szinkinézis az arcideg hibás regenerációja miatt alakul ki. Az idegrostok rossz izmokhoz nőnek vissza, így egy akaratlagos mozgás (pl. szem becsukása) egy másik, akaratlan mozgást (pl. szájzug emelkedése) vált ki."
+                    },
+                    {
+                        question: "Milyen tünet utalhat a nervus facialis károsodására a geniculatum ganglionhoz proximálisan?",
+                        options: [
+                            "Csak a szájzug lógása.",
+                            "A homlokráncolás képtelensége.",
+                            "Hyperacusis (fokozott hangérzékenység) és ízérzésvesztés.",
+                            "Fokozott nyálfolyás."
+                        ],
+                        answer: "Hyperacusis (fokozott hangérzékenység) és ízérzésvesztés.",
+                        explanation: "Az arcideg a stapedius izmot (hangtompítás) és a nyelv elülső kétharmadának ízérzését ellátó rostokat is tartalmazza. Ezen funkciók kiesése (hyperacusis, ízérzésvesztés) arra utal, hogy a károsodás az ideg azon szakaszán van, mielőtt ezek az ágak leválnának róla, azaz a geniculatum ganglionhoz közel vagy attól proximálisabban."
+                    },
+                    {
+                        question: "Milyen esetben indokolt képalkotó vizsgálat (MRI/CT) Bell-paresis gyanúja esetén?",
+                        options: [
+                            "Minden esetben rutinszerűen el kell végezni.",
+                            "Csak ha a beteg 40 év feletti.",
+                            "Ha a tünetek atípusosak, fokozatosan progrediálnak, vagy más agyideg is érintett.",
+                            "Ha a betegnek magas a vérnyomása."
+                        ],
+                        answer: "Ha a tünetek atípusosak, fokozatosan progrediálnak, vagy más agyideg is érintett.",
+                        explanation: "Rutin képalkotó vizsgálat nem szükséges. Azonban indokolt, ha a klinikai kép nem tipikus Bell-paresisre utal, például a tünetek lassan, hetek alatt rosszabbodnak, vagy ha más neurológiai deficit is jelen van, ami strukturális okra (pl. daganat, stroke) utalhat."
+                    },
+                    {
+                        question: "Mi a 'krokodilkönny-szindróma'?",
+                        options: [
+                            "A szem extrém szárazsága.",
+                            "Evés közben jelentkező akaratlan könnyezés.",
+                            "Folyamatos, csillapíthatatlan sírás.",
+                            "A könny összetételének megváltozása."
+                        ],
+                        answer: "Evés közben jelentkező akaratlan könnyezés.",
+                        explanation: "A krokodilkönny-szindróma (gustatolacrimalis reflex) a Bell-paresis egy ritka, késői szövődménye, amit szintén az ideg hibás regenerációja okoz. A nyálmirigyeket beidegző rostok tévesen a könnymirigyekhez nőnek vissza, így az evés (ami nyáltermelést váltana ki) könnyezést indukál."
+                    },
+                    {
+                        question: "Melyik kockázati tényező növeli a Bell-paresis kialakulásának esélyét?",
+                        options: [
+                            "Alacsony testtömeg.",
+                            "Terhesség, különösen a harmadik trimeszterben.",
+                            "Rendszeres sportolás.",
+                            "Fiatal életkor (15 év alatt)."
+                        ],
+                        answer: "Terhesség, különösen a harmadik trimeszterben.",
+                        explanation: "A terhesség, főleg a harmadik trimeszter és a szülés utáni első hét, egy ismert kockázati tényező a Bell-paresis kialakulására. Egyéb rizikófaktorok a cukorbetegség, magas vérnyomás és felső légúti fertőzések."
+                    },
+                    {
+                        question: "Milyen prognosztikai jelentősége van, ha a javulás jelei 3 héten belül megjelennek?",
+                        options: [
+                            "Ez rossz prognózist jelez.",
+                            "Nincs prognosztikai jelentősége.",
+                            "Nagyobb a valószínűsége a teljes és szövődménymentes felépülésnek.",
+                            "Ez a szinkinézis kialakulásának biztos jele."
+                        ],
+                        answer: "Nagyobb a valószínűsége a teljes és szövődménymentes felépülésnek.",
+                        explanation: "A felépülés sebessége fontos prognosztikai tényező. Azok a betegek, akiknél a javulás korán, az első 3 héten belül megkezdődik, sokkal nagyobb eséllyel gyógyulnak meg teljesen."
+                    },
+                    {
+                        question: "Mi a Ramsay Hunt szindróma?",
+                        options: [
+                            "A Bell-paresis egy másik neve.",
+                            "A kétoldali arcbénulás.",
+                            "A varicella-zoster vírus által okozott arcbénulás, ami hólyagos kiütéssel jár a fülön.",
+                            "Daganat okozta arcbénulás."
+                        ],
+                        answer: "A varicella-zoster vírus által okozott arcbénulás, ami hólyagos kiütéssel jár a fülön.",
+                        explanation: "A Ramsay Hunt szindróma (herpes zoster oticus) a varicella-zoster vírus (övsömör vírusa) reaktivációja a 7. agyidegben. Jellemzően súlyosabb arcbénulással, fülfájdalommal és jellegzetes, hólyagos kiütéssel jár a fülkagylón vagy a hallójáratban. Fontos differenciáldiagnosztikai entitás."
+                    },
+                    {
+                        question: "Milyen szerepe van az elektromiográfiának (EMG) a Bell-paresisben?",
+                        options: [
+                            "Azonosítja a kiváltó vírust.",
+                            "Segít meghatározni az idegkárosodás mértékét és a felépülés esélyeit.",
+                            "Kizárja a stroke lehetőségét.",
+                            "A kezelés hatékonyságát méri."
+                        ],
+                        answer: "Segít meghatározni az idegkárosodás mértékét és a felépülés esélyeit.",
+                        explanation: "Az EMG és az idegvezetési vizsgálatok (NCS/ENOG) segítenek felmérni az idegkárosodás súlyosságát (axonális degeneráció mértékét). Ez prognosztikai információval szolgál: a súlyosabb károsodás lassabb, kevésbé teljes felépülést jelez, és indokolhatja a sebészeti dekompresszió mérlegelését."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a Bell-paresisre?",
+                        options: [
+                            "A leggyakoribb oka az akut arcbénulásnak.",
+                            "A tünetek általában 48-72 órán belül elérik a maximumukat.",
+                            "A diagnózis kizárásos alapon történik.",
+                            "A betegek kevesebb mint 20%-a épül fel teljesen."
+                        ],
+                        answer: "A betegek kevesebb mint 20%-a épül fel teljesen.",
+                        explanation: "Ez az állítás hamis. A Bell-paresis prognózisa általában jó. A betegek többsége, körülbelül 70-85%-a, teljesen felépül, különösen korai kortikoszteroid kezeléssel."
+                    },
+                    {
+                        question: "Mi a sebészeti dekompresszió jelenlegi státusza a Bell-paresis kezelésében?",
+                        options: [
+                            "Minden betegnél első vonalbeli kezelés.",
+                            "Szerepe vitatott és csak nagyon specifikus, súlyos esetekben jön szóba.",
+                            "Már nem alkalmazott, elavult eljárás.",
+                            "Csak a szinkinézis kezelésére használják."
+                        ],
+                        answer: "Szerepe vitatott és csak nagyon specifikus, súlyos esetekben jön szóba.",
+                        explanation: "A sebészeti dekompresszió szerepe továbbra is vitatott. A legtöbb irányelv nem ajánlja rutinszerűen a kockázatok (pl. halláskárosodás) miatt. Csak súlyos, teljes bénulással járó esetekben, elektrofiziológiailag igazolt súlyos idegdegeneráció esetén, a tünetek kezdetétől számított 14 napon belül jöhet szóba a mérlegelése."
+                    },
+                    {
+                        question: "Milyen fizioterápiás módszer a Mime terápia?",
+                        options: [
+                            "Elektromos izomstimuláció.",
+                            "Az arcizmok masszírozása.",
+                            "Az arcizmok funkciójának és a szinkinézis enyhítésének javítására összpontosító terápia.",
+                            "Akupunktúrás kezelés."
+                        ],
+                        answer: "Az arcizmok funkciójának és a szinkinézis enyhítésének javítására összpontosító terápia.",
+                        explanation: "A Mime terápia egy speciális fizioterápiás módszer, amely az arcizmok tudatos kontrolljának, koordinációjának és szimmetriájának javítására fókuszál, különösen a szinkinézis enyhítése céljából."
+                    },
+                    {
+                        question: "Melyik nem a Bell-paresis jellemző tünete?",
+                        options: [
+                            "Az arc egyik oldalának zsibbadásának szubjektív érzése.",
+                            "Nyálfolyás az érintett oldalról.",
+                            "Kettős látás.",
+                            "Fejfájás."
+                        ],
+                        answer: "Kettős látás.",
+                        explanation: "A kettős látás (diplopia) általában a szemmozgató idegek (III., IV., VI. agyideg) károsodására utal, és nem jellemző a 7. agyideg izolált bénulására, mint amilyen a Bell-paresis. A többi felsorolt tünet előfordulhat."
+                    },
+                    {
+                        question: "Mi a Bell-jelenség?",
+                        options: [
+                            "A fül mögötti fájdalom.",
+                            "A szemgolyó akaratlan felfelé és kifelé fordulása a szemhéj csukásának kísérletekor.",
+                            "Az arcizmok rángatózása.",
+                            "A hangok felerősödött érzékelése."
+                        ],
+                        answer: "A szemgolyó akaratlan felfelé és kifelé fordulása a szemhéj csukásának kísérletekor.",
+                        explanation: "A Bell-jelenség egy normális védekező reflex. Bell-paresisben, amikor a beteg megpróbálja becsukni a szemét, de az orbicularis oculi izom gyengesége miatt nem sikerül, ez a felfelé forduló szemmozgás láthatóvá válik. Hiánya rosszabb prognózist jelez a szaruhártya-károsodás szempontjából."
+                    },
+                    {
+                        question: "Milyen életkorban a leggyakoribb a Bell-paresis?",
+                        options: [
+                            "Csecsemőkorban.",
+                            "Gyermekkorban.",
+                            "Bármely életkorban előfordulhat, de a 40 év felettiek körében gyakoribb.",
+                            "Kizárólag időskorban."
+                        ],
+                        answer: "Bármely életkorban előfordulhat, de a 40 év felettiek körében gyakoribb.",
+                        explanation: "Bár a Bell-paresis bármely életkorban előfordulhat, a kockázat növekszik az életkorral, és a 40 év feletti korosztályban gyakoribb."
+                    }
+                ]
+            },
+            {
+                topic: "Felső végtagi mononeuropathiák",
+                questions: [
+                    {
+                        question: "Mi a leggyakoribb felső végtagi mononeuropathia?",
+                        options: [
+                            "Könyökízületi ulnaris neuropathia",
+                            "Radiális neuropathia",
+                            "Kéztőalagút-szindróma (CTS)",
+                            "Pronator teres szindróma"
+                        ],
+                        answer: "Kéztőalagút-szindróma (CTS)",
+                        explanation: "A kéztőalagút-szindróma, amely a nervus medianus kompresszióját jelenti a csuklóban, a leggyakoribb kompressziós neuropathia a felső végtagon."
+                    },
+                    {
+                        question: "Melyik ideg érintett a kéztőalagút-szindrómában?",
+                        options: [
+                            "Nervus ulnaris",
+                            "Nervus radialis",
+                            "Nervus medianus",
+                            "Nervus musculocutaneus"
+                        ],
+                        answer: "Nervus medianus",
+                        explanation: "A kéztőalagút-szindróma a nervus medianus (középideg) kompressziója miatt alakul ki, ahogy az áthalad a csuklóban lévő szűk kéztőalagúton."
+                    },
+                    {
+                        question: "Melyik tünet a legjellemzőbb a kéztőalagút-szindrómára?",
+                        options: [
+                            "Fájdalom a könyökben.",
+                            "Éjszaka rosszabbodó zsibbadás és bizsergés a hüvelyk-, mutató- és középső ujjban.",
+                            "A kisujj gyengesége.",
+                            "A csukló kinyújtásának képtelensége."
+                        ],
+                        answer: "Éjszaka rosszabbodó zsibbadás és bizsergés a hüvelyk-, mutató- és középső ujjban.",
+                        explanation: "A CTS klasszikus tünete az éjszaka jelentkező vagy fokozódó fájdalom, zsibbadás és paresztézia (bizsergés) a nervus medianus által ellátott területen (első 3,5 ujj), ami gyakran felébreszti a beteget."
+                    },
+                    {
+                        question: "Mi a \"csuklócsüngés\" (wrist drop) oka?",
+                        options: [
+                            "A nervus medianus sérülése a csuklóban.",
+                            "A nervus ulnaris kompressziója a könyökben.",
+                            "A nervus radialis sérülése, leggyakrabban a felkaron.",
+                            "A plexus brachialis sérülése."
+                        ],
+                        answer: "A nervus radialis sérülése, leggyakrabban a felkaron.",
+                        explanation: "A csuklócsüngés a csukló- és ujjfeszítő izmok bénulásának következménye, amelyet a nervus radialis (orsócsonti ideg) károsodása okoz. Ez tipikusan a felkarcsont spirális barázdájában (sulcus nervi radialis) történő kompresszió miatt alakul ki."
+                    },
+                    {
+                        question: "Mely ujjakban okoz érzészavart a könyökízületi ulnaris neuropathia (cubitalis alagút szindróma)?",
+                        options: [
+                            "A hüvelyk- és mutatóujjban.",
+                            "A mutató- és középső ujjban.",
+                            "A kisujjban és a gyűrűsujj ulnaris (kisujj felőli) felében.",
+                            "Az összes ujjban."
+                        ],
+                        answer: "A kisujjban és a gyűrűsujj ulnaris (kisujj felőli) felében.",
+                        explanation: "A nervus ulnaris (singcsonti ideg) a kisujjat és a gyűrűsujj fele részét idegzi be szenzorosan. Kompressziója a könyöknél ebben az eloszlásban okoz zsibbadást és bizsergést."
+                    },
+                    {
+                        question: "Melyik provokációs teszt a legérzékenyebb a kéztőalagút-szindróma diagnosztizálására?",
+                        options: [
+                            "Tinel-jel",
+                            "Phalen-teszt",
+                            "Durkan-teszt (kéztőalagút kompressziós teszt)",
+                            "Finkelstein-teszt"
+                        ],
+                        answer: "Durkan-teszt (kéztőalagút kompressziós teszt)",
+                        explanation: "A Durkan-teszt, amely során a vizsgáló közvetlen nyomást gyakorol a kéztőalagútra, a legérzékenyebb klinikai provokációs teszt a CTS diagnózisában."
+                    },
+                    {
+                        question: "Mi a \"Saturday Night Palsy\"?",
+                        options: [
+                            "A nervus medianus kompressziója.",
+                            "A nervus ulnaris kompressziója.",
+                            "A nervus radialis akut kompressziós neuropathiája.",
+                            "Egyfajta migrén."
+                        ],
+                        answer: "A nervus radialis akut kompressziós neuropathiája.",
+                        explanation: "A \"Saturday Night Palsy\" a nervus radialis kompressziójának klasszikus példája, amely akkor alakul ki, ha valaki mélyen alszik a karján (pl. szék karfáján), és a felkarcsontnak nyomja az ideget. Ez csuklócsüngéshez vezet."
+                    },
+                    {
+                        question: "Milyen kezelés javasolt első vonalban enyhe vagy közepes kéztőalagút-szindróma esetén?",
+                        options: [
+                            "Azonnali műtét.",
+                            "Erős fájdalomcsillapítók.",
+                            "Éjszakai csuklósín viselése és tevékenység módosítása.",
+                            "Rendszeres jegelés."
+                        ],
+                        answer: "Éjszakai csuklósín viselése és tevékenység módosítása.",
+                        explanation: "A konzervatív kezelés az elsődleges. Az éjszakai sín a csuklót semleges helyzetben tartja, csökkentve az idegre nehezedő nyomást alvás közben, ami a tünetek enyhüléséhez vezet."
+                    },
+                    {
+                        question: "Milyen izomcsoport gyengesége és sorvadása jellemző súlyos, krónikus kéztőalagút-szindrómában?",
+                        options: [
+                            "A kézháti izmok (interosseusok).",
+                            "A hüvelykpárna izmai (thenar izmok).",
+                            "A kisujjpárna izmai (hypothenar izmok).",
+                            "Az alkar hajlító izmai."
+                        ],
+                        answer: "A hüvelykpárna izmai (thenar izmok).",
+                        explanation: "A nervus medianus motoros ága idegzi be a thenar izmokat. Hosszan tartó, súlyos kompresszió esetén ezek az izmok elgyengülnek és sorvadásnak (atrófia) indulnak."
+                    },
+                    {
+                        question: "Mi a Froment-jel, ami pozitív lehet súlyos ulnaris neuropathia esetén?",
+                        options: [
+                            "A csukló lecsüngése.",
+                            "A hüvelykujj hajlítása egy papírlap megtartásakor.",
+                            "Bizsergés az ideg kopogtatásakor.",
+                            "Fájdalom a könyök hajlításakor."
+                        ],
+                        answer: "A hüvelykujj hajlítása egy papírlap megtartásakor.",
+                        explanation: "A Froment-jel a nervus ulnaris által beidegzett adductor pollicis izom gyengeségét teszteli. A betegnek egy papírlapot kell tartania a hüvelyk- és mutatóujja között. Ha az adductor gyenge, a beteg kompenzálásként a nervus medianus által beidegzett flexor pollicis longus izommal behajlítja a hüvelykujját."
+                    },
+                    {
+                        question: "Melyik állapot NEM tartozik a felső végtagi mononeuropathiák kockázati tényezői közé?",
+                        options: [
+                            "Diabetes mellitus",
+                            "Rheumatoid arthritis",
+                            "Terhesség",
+                            "Magas koleszterinszint"
+                        ],
+                        answer: "Magas koleszterinszint",
+                        explanation: "A diabetes, a rheumatoid arthritis és a terhesség (a folyadék-visszatartás miatt) ismert kockázati tényezői a kompressziós neuropathiáknak, mint a CTS. A magas koleszterinszint önmagában nem közvetlen rizikófaktor."
+                    },
+                    {
+                        question: "Milyen tanácsot adna egy cubitalis alagút szindrómás betegnek a tünetek enyhítésére?",
+                        options: [
+                            "Aludjon behajlított könyökkel.",
+                            "Gyakran támaszkodjon a könyökére.",
+                            "Kerülje a hosszan tartó könyökhajlítást és viseljen éjszakai sínt nyújtott helyzetben.",
+                            "Viseljen szoros órát vagy karkötőt."
+                        ],
+                        answer: "Kerülje a hosszan tartó könyökhajlítást és viseljen éjszakai sínt nyújtott helyzetben.",
+                        explanation: "A könyök hajlítása növeli a nyomást az ulnaris idegre a cubitalis alagútban. A tünetek enyhítése érdekében kerülni kell a provokáló testhelyzeteket, és az éjszakai sín segít a könyököt nyújtott, tehermentesített pozícióban tartani."
+                    },
+                    {
+                        question: "Mi a Wartenberg-szindróma?",
+                        options: [
+                            "A nervus medianus kompressziója a könyöknél.",
+                            "A nervus radialis tisztán szenzoros ágának becsípődése a disztális alkaron.",
+                            "A nervus ulnaris sérülése a csuklóban.",
+                            "Az egész plexus brachialis gyulladása."
+                        ],
+                        answer: "A nervus radialis tisztán szenzoros ágának becsípődése a disztális alkaron.",
+                        explanation: "A Wartenberg-szindróma a nervus radialis felületes ágának kompressziója, ami zsibbadást és bizsergést okoz a kézhát radiális oldalán és az első 3,5 ujj háti felszínén, de motoros gyengeséget (csuklócsüngést) nem."
+                    },
+                    {
+                        question: "Milyen prognosztikai értéke van a kortikoszteroid injekcióra adott átmeneti javulásnak CTS esetén?",
+                        options: [
+                            "Azt jelzi, hogy a műtét sikertelen lesz.",
+                            "Nincs prognosztikai értéke.",
+                            "Jó előrejelzője a műtéti sikernek.",
+                            "Azt jelzi, hogy a betegnek ulnaris neuropathiája is van."
+                        ],
+                        answer: "Jó előrejelzője a műtéti sikernek.",
+                        explanation: "Ha a kéztőalagútba adott szteroid injekció átmenetileg enyhíti a tüneteket, az jó prognosztikai jel. Azt mutatja, hogy a tüneteket valóban a kompresszió és gyulladás okozza, így a sebészi felszabadítás, ami tartósan megszünteti a nyomást, valószínűleg sikeres lesz."
+                    },
+                    {
+                        question: "Melyik vizsgálat kulcsfontosságú a mononeuropathia diagnózisának megerősítésében és a súlyosság felmérésében?",
+                        options: [
+                            "Vérvétel",
+                            "Röntgen",
+                            "Elektrodiagnosztikai vizsgálatok (EMG/NCS)",
+                            "CT-vizsgálat"
+                        ],
+                        answer: "Elektrodiagnosztikai vizsgálatok (EMG/NCS)",
+                        explanation: "Az EMG (elektromiográfia) és az NCS (idegvezetési vizsgálat) objektíven mérik az idegek és izmok működését. Segítenek megerősíteni a diagnózist, pontosan lokalizálni a károsodás helyét, felmérni annak súlyosságát (axonális vs. demyelinizációs), és prognózist adni."
+                    },
+                    {
+                        question: "Melyik állítás igaz a mononeuropathia multiplex-re?",
+                        options: [
+                            "Ez a kéztőalagút-szindróma egy másik neve.",
+                            "Egyetlen ideg súlyos, teljes károsodását jelenti.",
+                            "Több, nem összefüggő perifériás ideg egyidejű vagy egymás utáni károsodása.",
+                            "Mindig genetikai eredetű."
+                        ],
+                        answer: "Több, nem összefüggő perifériás ideg egyidejű vagy egymás utáni károsodása.",
+                        explanation: "A mononeuropathia multiplex (vagy mononeuritis multiplex) egy olyan állapot, ahol több, különálló perifériás ideg érintett a test különböző részein. Ez gyakran szisztémás betegségre, például vasculitisre utal."
+                    },
+                    {
+                        question: "Milyen kéztartás alakulhat ki súlyos, krónikus ulnaris neuropathia esetén?",
+                        options: [
+                            "Csuklócsüngés",
+                            "Majomkéz (thenar atrófia)",
+                            "Karmos kéztartás (claw hand)",
+                            "Eskükéz"
+                        ],
+                        answer: "Karmos kéztartás (claw hand)",
+                        explanation: "A nervus ulnaris idegzi be a kéz legtöbb kisizmát (interosseusok, lumbricalisok III-IV). Ezeknek az izmoknak a bénulása miatt felborul az egyensúly a hajlítók és feszítők között, ami a 4. és 5. ujj jellegzetes, karmos tartásához vezet."
+                    },
+                    {
+                        question: "Mikor indokolt műtéti kezelés a kompressziós neuropathiákban?",
+                        options: [
+                            "Már az első tünetek megjelenésekor.",
+                            "Ha a konzervatív kezelés (sínek, injekciók, terápia) hatástalan, vagy ha súlyos, progrediáló neurológiai deficit (pl. izomsorvadás) van jelen.",
+                            "Soha nem indokolt, mert túl kockázatos.",
+                            "Csak ha a beteg kéri."
+                        ],
+                        answer: "Ha a konzervatív kezelés (sínek, injekciók, terápia) hatástalan, vagy ha súlyos, progrediáló neurológiai deficit (pl. izomsorvadás) van jelen.",
+                        explanation: "A műtéti felszabadítás általában akkor jön szóba, ha a konzervatív terápiák nem hoznak javulást, a tünetek súlyosak, vagy ha már a motoros funkciók is károsodtak (izomgyengeség, atrófia), ami a maradandó idegkárosodás veszélyét jelzi."
+                    },
+                    {
+                        question: "A \"Honeymoon Palsy\" melyik ideg kompressziójára utal?",
+                        options: [
+                            "Nervus medianus",
+                            "Nervus ulnaris",
+                            "Nervus radialis",
+                            "Nervus axillaris"
+                        ],
+                        answer: "Nervus radialis",
+                        explanation: "A \"Honeymoon Palsy\" a \"Saturday Night Palsy\"-hoz hasonlóan a nervus radialis kompresszióját jelenti, ami akkor fordul elő, ha valakinek a partnere a karján alszik el, nyomást gyakorolva az idegre a felkaron."
+                    },
+                    {
+                        question: "Miért fontos a differenciáldiagnózis a mononeuropathiák és a cervicalis radiculopathia között?",
+                        options: [
+                            "Mert a kezelésük teljesen megegyezik.",
+                            "Mert a tüneteik (pl. karba sugárzó zsibbadás) átfedhetnek, de a kiváltó ok (perifériás ideg kompresszió vs. nyaki gerincvelői ideggyök nyomás) és a kezelés eltérő.",
+                            "Mert a radiculopathia soha nem okoz gyengeséget.",
+                            "Mert a mononeuropathiák mindig súlyosabbak."
+                        ],
+                        answer: "Mert a tüneteik (pl. karba sugárzó zsibbadás) átfedhetnek, de a kiváltó ok (perifériás ideg kompresszió vs. nyaki gerincvelői ideggyök nyomás) és a kezelés eltérő.",
+                        explanation: "A nyaki porckorongsérv okozta ideggyöki nyomás (radiculopathia) hasonló zsibbadást és gyengeséget okozhat a karban, mint egy perifériás mononeuropathia. A pontos diagnózis elengedhetetlen, mert a kezelés alapvetően más: az egyik esetben a perifériás alagutat kell felszabadítani, a másikban a nyaki gerincet kell kezelni."
+                    }
+                ]
+            },
+            {
+                topic: "Alsó végtagi mononeuropathiák",
+                questions: [
+                    {
+                        question: "Mi az alsó végtag leggyakoribb kompressziós neuropathiája?",
+                        options: [
+                            "Ischiadicus neuropathia",
+                            "Femorális neuropathia",
+                            "Peroneális neuropathia",
+                            "Tarsalis alagút szindróma"
+                        ],
+                        answer: "Peroneális neuropathia",
+                        explanation: "A peroneális neuropathia, amely a nervus peroneus communis kompresszióját jelenti a fibulafejecsnél, az alsó végtag leggyakrabban előforduló mononeuropathiája."
+                    },
+                    {
+                        question: "Melyik klinikai tünet a legjellemzőbb a peroneális neuropathia esetén?",
+                        options: [
+                            "A térd kinyújtásának képtelensége.",
+                            "Lábfej lógás (foot drop) és \"csapó\" járás.",
+                            "Égő fájdalom a talpon.",
+                            "Zsibbadás a comb elülső részén."
+                        ],
+                        answer: "Lábfej lógás (foot drop) és \"csapó\" járás.",
+                        explanation: "A nervus peroneus a lábfej és a lábujjak emeléséért (dorsiflexio) felelős izmokat idegzi be. Károsodása a lábfej lógásához (foot drop) vezet, ami miatt a betegnek magasabbra kell emelnie a térdét járáskor, hogy ne akadjon be a lábfeje (szteppázó vagy csapó járás)."
+                    },
+                    {
+                        question: "Mi a meralgia paresthetica?",
+                        options: [
+                            "A nervus ischiadicus gyulladása.",
+                            "A nervus cutaneus femoris lateralis kompressziója.",
+                            "A térdízület kopása.",
+                            "A lábfej izmainak gyengesége."
+                        ],
+                        answer: "A nervus cutaneus femoris lateralis kompressziója.",
+                        explanation: "A meralgia paresthetica egy tisztán szenzoros szindróma, amelyet a comb külső-elülső részének érzéséért felelős nervus cutaneus femoris lateralis becsípődése okoz, leggyakrabban a lágyékszalag alatt."
+                    },
+                    {
+                        question: "Melyik állítás igaz a meralgia paresthetica tüneteire?",
+                        options: [
+                            "Mindig izomgyengeséggel jár.",
+                            "Égő fájdalmat és zsibbadást okoz a comb külső oldalán, de motoros kiesés nincs.",
+                            "A tünetek a lábfejben a legerősebbek.",
+                            "Mindig kétoldali."
+                        ],
+                        answer: "Égő fájdalmat és zsibbadást okoz a comb külső oldalán, de motoros kiesés nincs.",
+                        explanation: "Mivel a nervus cutaneus femoris lateralis egy tisztán érző ideg, a kompressziója csak szenzoros tüneteket okoz (fájdalom, zsibbadás, bizsergés) a comb anterolaterális részén, izomgyengeséget nem."
+                    },
+                    {
+                        question: "Mi az isiász (lumbalis radiculopathia) leggyakoribb oka?",
+                        options: [
+                            "Piriformis szindróma",
+                            "Porckorongsérv (herniated disc) a lumbális gerincben",
+                            "Medencei tumor",
+                            "Csípőízületi kopás"
+                        ],
+                        answer: "Porckorongsérv (herniated disc) a lumbális gerincben",
+                        explanation: "Az isiász leggyakoribb oka egy lumbális (ágyéki) porckorongsérv, amely nyomást gyakorol a gerincvelőből kilépő ideggyökökre, amelyek később a nervus ischiadicust alkotják."
+                    },
+                    {
+                        question: "Melyik fizikális vizsgálati jel pozitív leggyakrabban isiász esetén?",
+                        options: [
+                            "Tinel-jel a bokánál",
+                            "Phalen-teszt",
+                            "Lasègue-jel (Straight Leg Raise teszt)",
+                            "Babinski-jel"
+                        ],
+                        answer: "Lasègue-jel (Straight Leg Raise teszt)",
+                        explanation: "A Lasègue-jel egy provokációs teszt, amely során a vizsgáló fekvő helyzetben felemeli a beteg nyújtott lábát. Pozitív, ha ez a mozdulat a jellegzetes, lábba sugárzó fájdalmat váltja ki, ami az ideggyök feszülésére és irritációjára utal."
+                    },
+                    {
+                        question: "Mi a tarsalis alagút szindróma?",
+                        options: [
+                            "A nervus peroneus kompressziója a térdnél.",
+                            "A nervus tibialis posterior kompressziója a boka belső oldalán.",
+                            "A lábboltozat süllyedése.",
+                            "A sarokcsont gyulladása."
+                        ],
+                        answer: "A nervus tibialis posterior kompressziója a boka belső oldalán.",
+                        explanation: "A tarsalis alagút szindróma a nervus tibialis posterior becsípődése a boka mediális (belső) oldalán található tarsalis alagútban, ami a talpban okoz tüneteket."
+                    },
+                    {
+                        question: "Milyen tünetek jellemzőek a tarsalis alagút szindrómára?",
+                        options: [
+                            "Lábfejcsüngés.",
+                            "Égő, szúró fájdalom és zsibbadás a talpon és a sarokban.",
+                            "Fájdalom a nagylábujj alapízületében.",
+                            "A vádli izmainak görcse."
+                        ],
+                        answer: "Égő, szúró fájdalom és zsibbadás a talpon és a sarokban.",
+                        explanation: "A nervus tibialis a talp érző és motoros beidegzéséért felelős. Kompressziója égő, szúró jellegű fájdalmat és paresztéziát (zsibbadást, bizsergést) okoz a talpi felszínen, ami terhelésre fokozódik."
+                    },
+                    {
+                        question: "Melyik ideg károsodása okozhatja a térd \"megroggyanását\" és nehézséget a lépcsőn lefelé járásnál?",
+                        options: [
+                            "Nervus peroneus",
+                            "Nervus tibialis",
+                            "Nervus femoralis",
+                            "Nervus ischiadicus"
+                        ],
+                        answer: "Nervus femoralis",
+                        explanation: "A nervus femoralis (combideg) idegzi be a quadriceps femoris izmot, ami a térd feszítéséért felelős. Ennek az idegnek a károsodása a quadriceps gyengeségéhez vezet, ami a térd instabilitását, \"megroggyanását\" okozza, különösen terhelés alatt, mint a lépcsőn lefelé járás."
+                    },
+                    {
+                        question: "Melyik iatrogén (orvosi beavatkozás okozta) tényező ismert kockázata a femorális neuropathiának?",
+                        options: [
+                            "Térdprotézis műtét.",
+                            "Femorális artériába történő katéter behelyezése.",
+                            "Lumbálpunkció.",
+                            "Visszérműtét."
+                        ],
+                        answer: "Femorális artériába történő katéter behelyezése.",
+                        explanation: "A nervus femoralis közvetlenül a femorális artéria mellett halad a lágyékhajlatban. Az artériába történő katéterezés (pl. szívkatéterezés során) vagy az utána kialakuló hematóma (vérömleny) közvetlenül sértheti vagy nyomhatja az ideget."
+                    },
+                    {
+                        question: "Melyik állapotot kell sürgősen kizárni, ha egy beteg hirtelen vizeletretencióval és csökkent anális szfinkter tónussal jelentkezik isiász-szerű tünetek mellett?",
+                        options: [
+                            "Piriformis szindróma",
+                            "Cauda equina szindróma",
+                            "Meralgia paresthetica",
+                            "Tarsalis alagút szindróma"
+                        ],
+                        answer: "Cauda equina szindróma",
+                        explanation: "A cauda equina szindróma egy neurológiai vészhelyzet, amelyet a lumbális gerinccsatorna alsó végén lévő ideggyökök (cauda equina) súlyos kompressziója okoz. A vizelet- és székletürítési zavarok, valamint a gáttáji érzéskiesés (nyeregtáji anesztézia) azonnali sebészeti beavatkozást igényelnek a maradandó bénulás elkerülése érdekében."
+                    },
+                    {
+                        question: "Melyik kockázati tényező hajlamosít a meralgia paresthetica kialakulására?",
+                        options: [
+                            "Magas termet.",
+                            "Lúdtalp.",
+                            "Elhízás és szűk ruházat viselése.",
+                            "Gyakori futás."
+                        ],
+                        answer: "Elhízás és szűk ruházat viselése.",
+                        explanation: "Az elhízás (a megnövekedett hasi nyomás miatt) és a szűk ruhák, övek (külső kompresszió) mind növelik a nyomást a lágyékszalagra, ami a nervus cutaneus femoris lateralis becsípődéséhez vezethet."
+                    },
+                    {
+                        question: "Hol található a nervus peroneus communis leggyakoribb kompressziójának helye?",
+                        options: [
+                            "A boka külső oldalán.",
+                            "A térdhajlatban.",
+                            "A fibulafejecsnél (a térd külső oldalán).",
+                            "A csípőízületnél."
+                        ],
+                        answer: "A fibulafejecsnél (a térd külső oldalán).",
+                        explanation: "A nervus peroneus communis a térd külső oldalán, közvetlenül a fibula (szárkapocscsont) fejecse mögött halad, ahol nagyon felületesen helyezkedik el. Ez az anatómiai pozíció teszi különösen sérülékennyé a külső nyomással szemben (pl. lábkeresztezés, gipsz)."
+                    },
+                    {
+                        question: "Milyen diagnosztikai módszer erősítheti meg a meralgia paresthetica diagnózisát, ha a klinikai kép nem egyértelmű?",
+                        options: [
+                            "Gerinc MRI.",
+                            "Diagnosztikus idegblokk.",
+                            "Vérvétel.",
+                            "Koponya CT."
+                        ],
+                        answer: "Diagnosztikus idegblokk.",
+                        explanation: "A diagnosztikus idegblokk során helyi érzéstelenítőt injektálnak az ideg köré a lágyékszalagnál. Ha a beteg tünetei (fájdalom, zsibbadás) átmenetileg megszűnnek, az megerősíti, hogy a problémát valóban ennek az idegnek a kompressziója okozza."
+                    },
+                    {
+                        question: "Melyik ideg károsodása NEM okoz motoros gyengeséget?",
+                        options: [
+                            "Nervus peroneus communis",
+                            "Nervus femoralis",
+                            "Nervus cutaneus femoris lateralis",
+                            "Nervus tibialis"
+                        ],
+                        answer: "Nervus cutaneus femoris lateralis",
+                        explanation: "A nervus cutaneus femoris lateralis egy tisztán szenzoros (érző) ideg, így a károsodása csak érzészavarokat (fájdalom, zsibbadás) okoz, izomgyengeséget nem."
+                    },
+                    {
+                        question: "Mi a piriformis szindróma?",
+                        options: [
+                            "A nervus femoralis kompressziója.",
+                            "A nervus ischiadicus kompressziója a piriformis izom által a fenéktájon.",
+                            "A piriformis izom szakadása.",
+                            "A gerincvelő gyulladása."
+                        ],
+                        answer: "A nervus ischiadicus kompressziója a piriformis izom által a fenéktájon.",
+                        explanation: "A piriformis szindróma egy funkcionális állapot, ahol a feszes vagy görcsös piriformis izom nyomást gyakorol az alatta vagy rajta keresztül futó nervus ischiadicusra, isiász-szerű tüneteket okozva gerincprobléma nélkül."
+                    },
+                    {
+                        question: "Melyik szisztémás betegség a perifériás neuropathiák leggyakoribb azonosítható oka?",
+                        options: [
+                            "Rheumatoid arthritis",
+                            "Lupus",
+                            "Diabetes mellitus",
+                            "Hypothyreosis"
+                        ],
+                        answer: "Diabetes mellitus",
+                        explanation: "A diabetes mellitus a leggyakoribb szisztémás ok, amely perifériás idegkárosodáshoz vezet, beleértve a mononeuropathiákat is. A magas vércukorszint károsítja az idegeket ellátó kisereket és közvetlenül az idegsejteket is."
+                    },
+                    {
+                        question: "Milyen járásmintázatot eredményez a quadriceps izom gyengesége?",
+                        options: [
+                            "Csapó járás (slapping gait)",
+                            "Kacsázó járás (waddling gait)",
+                            "A térd hátrafeszítése (genu recurvatum) vagy a comb kézzel való megtámasztása a stabilitás érdekében.",
+                            "Apró, csoszogó lépések."
+                        ],
+                        answer: "A térd hátrafeszítése (genu recurvatum) vagy a comb kézzel való megtámasztása a stabilitás érdekében.",
+                        explanation: "A quadriceps gyengesége miatt a térd instabillá válik. A beteg kompenzálásként járás közben hátrafeszíti a térdét, hogy a testsúly a térdízület közepe elé essen, így passzívan stabilizálja azt, vagy a kezével nyomja hátra a combját."
+                    },
+                    {
+                        question: "Mi a Tinel-jel a tarsalis alagút szindróma vizsgálatakor?",
+                        options: [
+                            "A lábfej erőltetett hajlítása.",
+                            "A boka belső oldalán az ideg fölötti terület kopogtatása, ami a talpba sugárzó bizsergést vált ki.",
+                            "A lábujjakra állás.",
+                            "A vádli összenyomása."
+                        ],
+                        answer: "A boka belső oldalán az ideg fölötti terület kopogtatása, ami a talpba sugárzó bizsergést vált ki.",
+                        explanation: "A Tinel-jel egy provokációs teszt, ahol az irritált ideg (esetünkben a nervus tibialis) enyhe kopogtatása a beidegzési területén (a talpon) áramütésszerű érzést, zsibbadást vagy fájdalmat vált ki."
+                    },
+                    {
+                        question: "Melyik mononeuropathia kockázatát növeli a litotómia (kőmetsző) pozíció műtétek során?",
+                        options: [
+                            "Peroneális neuropathia",
+                            "Femorális neuropathia",
+                            "Tarsalis alagút szindróma",
+                            "Meralgia paresthetica"
+                        ],
+                        answer: "Femorális neuropathia",
+                        explanation: "A litotómia pozícióban a csípő extrém hajlítása és kiforgatása megnyújthatja és összenyomhatja a nervus femoralist a lágyékszalag alatt, ami posztoperatív femorális neuropathiához vezethet."
+                    }
+                ]
+            },
+            {
+                topic: "Polyneuropathiák diagnózisa és kezelése",
+                questions: [
+                    {
+                        question: "Mi a polyneuropathia (PNP) definíciója?",
+                        options: [
+                            "Egyetlen perifériás ideg károsodása.",
+                            "A központi idegrendszer betegsége.",
+                            "Több perifériás ideg szimmetrikus károsodása vagy diszfunkciója.",
+                            "Az izmok elsődleges betegsége."
+                        ],
+                        answer: "Több perifériás ideg szimmetrikus károsodása vagy diszfunkciója.",
+                        explanation: "A polyneuropathia a perifériás idegrendszer generalizált, jellemzően szimmetrikus betegsége, amely több ideget érint, ellentétben a mononeuropathiával, ami csak egyet."
+                    },
+                    {
+                        question: "Milyen a polyneuropathia tüneteinek tipikus eloszlása?",
+                        options: [
+                            "Foltos, aszimmetrikus eloszlás.",
+                            "Csak a törzset érinti.",
+                            "Hosszúságfüggő, \"kesztyű-zokni\" eloszlás.",
+                            "Csak az arcot érinti."
+                        ],
+                        answer: "Hosszúságfüggő, \"kesztyű-zokni\" eloszlás.",
+                        explanation: "A legtöbb polyneuropathia hosszúságfüggő, ami azt jelenti, hogy a leghosszabb idegrostok (a lábfejben és a kézben végződőek) károsodnak először. Ez okozza a jellegzetes, a zokni és kesztyű által fedett területekre lokalizálódó tüneteket."
+                    },
+                    {
+                        question: "Mi a polyneuropathia leggyakoribb oka a fejlett világban?",
+                        options: [
+                            "Alkoholizmus",
+                            "HIV fertőzés",
+                            "Diabetes mellitus",
+                            "B12-vitamin hiány"
+                        ],
+                        answer: "Diabetes mellitus",
+                        explanation: "A diabetes mellitus a szerzett polyneuropathia messze leggyakoribb oka. A cukorbetegek körülbelül 50%-ánál alakul ki valamilyen fokú idegkárosodás."
+                    },
+                    {
+                        question: "Milyen alapvető különbség van az axonális és a demyelinizáló polyneuropathia között az idegvezetési vizsgálat (NCS) során?",
+                        options: [
+                            "Az axonális típusnál a vezetési sebesség lassul, a demyelinizálónál az amplitúdó csökken.",
+                            "Nincs különbség, az NCS mindkettőt egyformán mutatja.",
+                            "Az axonális típusnál az amplitúdó csökken, míg a demyelinizálónál a vezetési sebesség lassul.",
+                            "Az axonális típus csak a motoros, a demyelinizáló csak a szenzoros rostokat érinti."
+                        ],
+                        answer: "Az axonális típusnál az amplitúdó csökken, míg a demyelinizálónál a vezetési sebesség lassul.",
+                        explanation: "Az NCS kulcsfontosságú a két fő patofiziológiai típus elkülönítésében. Az axonkárosodás (axonális) az idegimpulzust továbbító rostok számának csökkenéséhez vezet, ami a válasz amplitúdójának csökkenését okozza. A mielinhüvely károsodása (demyelinizáció) lelassítja az ingerületvezetést, ami a vezetési sebesség csökkenésében és a latenciák megnyúlásában nyilvánul meg."
+                    },
+                    {
+                        question: "Melyik a Guillain-Barré Szindróma (GBS) legjellemzőbb klinikai képe?",
+                        options: [
+                            "Lassan, évek alatt kialakuló zsibbadás a lábakon.",
+                            "Akut, gyorsan felszálló, szimmetrikus petyhüdt bénulás areflexiával.",
+                            "Krónikus, aszimmetrikus fájdalom.",
+                            "Csak az arcizmokat érintő gyengeség."
+                        ],
+                        answer: "Akut, gyorsan felszálló, szimmetrikus petyhüdt bénulás areflexiával.",
+                        explanation: "A GBS egy akut gyulladásos demyelinizáló polyradiculoneuropathia, amelyet a napok-hetek alatt gyorsan progrediáló, az alsó végtagokról felfelé terjedő szimmetrikus izomgyengeség és a reflexek kiesése jellemez. Neurológiai vészhelyzetnek számít."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport NEM számít első vonalbeli szernek a neuropátiás fájdalom kezelésében?",
+                        options: [
+                            "Gabapentinoidok (pl. pregabalin, gabapentin)",
+                            "SNRI antidepresszánsok (pl. duloxetin)",
+                            "Opioidok (pl. morfin, oxycodon)",
+                            "Triciklikus antidepresszánsok (pl. amitriptilin)"
+                        ],
+                        answer: "Opioidok (pl. morfin, oxycodon)",
+                        explanation: "Bár hatékony fájdalomcsillapítók, az opioidok a magas függőségi potenciál és a jelentős mellékhatásprofil miatt általában nem javasoltak első vonalbeli kezelésként a krónikus neuropátiás fájdalomra. Az elsődlegesen választandó szerek az antikonvulzívumok és bizonyos antidepresszánsok."
+                    },
+                    {
+                        question: "Milyen laboratóriumi vizsgálatokat javasol az AAN a legmagasabb diagnosztikai hozammal polyneuropathia kivizsgálásakor?",
+                        options: [
+                            "Teljes körű genetikai panel.",
+                            "Glükóz, B12-vitamin és szérum fehérje elektroforézis (SPEP).",
+                            "Nehézfém szűrés minden betegnél.",
+                            "Liquorvizsgálat minden esetben."
+                        ],
+                        answer: "Glükóz, B12-vitamin és szérum fehérje elektroforézis (SPEP).",
+                        explanation: "Az Amerikai Neurológiai Akadémia (AAN) irányelvei szerint a diabetes, a B12-vitamin hiány és a paraproteinaemiák (pl. MGUS, myeloma) a leggyakoribb azonosítható és kezelhető okok, ezért ezen állapotok szűrése a legköltséghatékonyabb első lépés."
+                    },
+                    {
+                        question: "Mi a krónikus gyulladásos demyelinizáló polyradiculoneuropathia (CIDP) kezelésének alapja?",
+                        options: [
+                            "Kizárólag gyógytorna.",
+                            "Hosszú távú antibiotikum kúra.",
+                            "Immunmoduláló terápia (pl. kortikoszteroidok, IVIg, plazmaferézis).",
+                            "B-vitamin komplex."
+                        ],
+                        answer: "Immunmoduláló terápia (pl. kortikoszteroidok, IVIg, plazmaferézis).",
+                        explanation: "A CIDP a GBS krónikus megfelelője, egy autoimmun betegség, ahol az immunrendszer a perifériás idegek mielinhüvelyét támadja. A kezelés célja az immunválasz elnyomása vagy módosítása, erre szolgálnak a kortikoszteroidok, az intravénás immunglobulin (IVIg) és a plazmacsere."
+                    },
+                    {
+                        question: "Mikor indokolt idegbiopsziát végezni polyneuropathia esetén?",
+                        options: [
+                            "Minden esetben a diagnózis felállításához.",
+                            "Csak ha a beteg kéri.",
+                            "Ha a non-invazív vizsgálatok nem adnak egyértelmű diagnózist, és kezelhető állapot (pl. vasculitis, amyloidosis) gyanúja merül fel.",
+                            "Csak genetikai betegségek gyanújakor."
+                        ],
+                        answer: "Ha a non-invazív vizsgálatok nem adnak egyértelmű diagnózist, és kezelhető állapot (pl. vasculitis, amyloidosis) gyanúja merül fel.",
+                        explanation: "Az idegbiopszia egy invazív eljárás, ezért csak specifikus esetekben indokolt. Akkor van rá szükség, ha a kevésbé invazív tesztek nem vezettek eredményre, de a klinikai kép alapján olyan, szövettani mintavételt igénylő, de kezelhető betegség (pl. érgyulladás, amyloid lerakódás) gyanúja áll fenn, amelynek igazolása megváltoztatná a terápiát."
+                    },
+                    {
+                        question: "Melyik örökletes betegség a leggyakoribb polyneuropathia típus?",
+                        options: [
+                            "Porphyria",
+                            "Charcot-Marie-Tooth (CMT) betegség",
+                            "Fabry-kór",
+                            "Spinalis izomatrófia (SMA)"
+                        ],
+                        answer: "Charcot-Marie-Tooth (CMT) betegség",
+                        explanation: "A Charcot-Marie-Tooth betegség a leggyakoribb örökletes perifériás neuropathia. Jellemzője a lassan progrediáló, disztális izomgyengeség és -sorvadás, ami lábdeformitásokhoz (pl. pes cavus - magas lábboltozat) vezet."
+                    },
+                    {
+                        question: "Milyen típusú idegrostokat érint a \"kisrost neuropathia\"?",
+                        options: [
+                            "A vastag, mielinizált motoros rostokat.",
+                            "A vékony, enyhén vagy nem mielinizált rostokat, amelyek a fájdalmat és a hőmérsékletet érzékelik.",
+                            "Kizárólag a propriocepcióért felelős rostokat.",
+                            "Az autonóm idegrendszer összes rostját."
+                        ],
+                        answer: "A vékony, enyhén vagy nem mielinizált rostokat, amelyek a fájdalmat és a hőmérsékletet érzékelik.",
+                        explanation: "A kisrost neuropathia a vékony A-delta és C típusú idegrostokat érinti, amelyek a fájdalom- és hőérzetért, valamint az autonóm funkciók egy részéért felelősek. Jellemző tünete az égő fájdalom. Fontos, hogy a standard NCS vizsgálat ezt a típust nem mutatja ki."
+                    },
+                    {
+                        question: "Mi az albuminocytologicus disszociáció a liquorban, és mely betegségekre jellemző?",
+                        options: [
+                            "Alacsony fehérje- és magas sejtszám, bakteriális fertőzésre utal.",
+                            "Magas fehérjeszint normális vagy enyhén emelkedett sejtszám mellett, gyulladásos demyelinizáló polyneuropathiákra (GBS, CIDP) jellemző.",
+                            "Vörösvértestek jelenléte, agyvérzésre utal.",
+                            "Alacsony glükózszint, gombás fertőzésre utal."
+                        ],
+                        answer: "Magas fehérjeszint normális vagy enyhén emelkedett sejtszám mellett, gyulladásos demyelinizáló polyneuropathiákra (GBS, CIDP) jellemző.",
+                        explanation: "Az albuminocytologicus disszociáció azt jelenti, hogy a liquor fehérjetartalma jelentősen megemelkedik, miközben a sejtszám normális marad. Ez a lelet klasszikusan a GBS-re és a CIDP-re jellemző, és a vér-ideg gát károsodására utal, ami lehetővé teszi a fehérjék (pl. albumin) bejutását a liquorba anélkül, hogy jelentős gyulladásos sejtes beszűrődés történne."
+                    },
+                    {
+                        question: "Melyik vitamin túladagolása okozhat szenzoros polyneuropathiát?",
+                        options: [
+                            "C-vitamin",
+                            "D-vitamin",
+                            "B6-vitamin (piridoxin)",
+                            "B1-vitamin (tiamin)"
+                        ],
+                        answer: "B6-vitamin (piridoxin)",
+                        explanation: "Bár a B6-vitamin hiánya is okozhat neuropathiát, a túlzott, hosszú távú bevitele (jellemzően étrend-kiegészítők formájában) toxikus hatású lehet, és súlyos, tisztán szenzoros axonális neuropathiát eredményezhet."
+                    },
+                    {
+                        question: "Mi a vasculitises neuropathia jellegzetes klinikai megjelenése?",
+                        options: [
+                            "Lassan progrediáló, szimmetrikus zsibbadás.",
+                            "Fájdalmas, akut vagy szubakut, aszimmetrikus, lépcsőzetesen jelentkező (mononeuritis multiplex).",
+                            "Tisztán motoros, fájdalmatlan gyengeség.",
+                            "Csak autonóm tünetek."
+                        ],
+                        answer: "Fájdalmas, akut vagy szubakut, aszimmetrikus, lépcsőzetesen jelentkező (mononeuritis multiplex).",
+                        explanation: "A vasculitis (érgyulladás) az idegeket ellátó kiserek elzáródását okozza, ami ideginfarktushoz vezet. Mivel ez a folyamat véletlenszerűen érintheti a különböző idegeket, a klinikai kép tipikusan egy fájdalmas mononeuritis multiplex: több, különálló ideg károsodik aszimmetrikusan, egymás után."
+                    },
+                    {
+                        question: "Milyen szerepe van a fizikoterápiának a polyneuropathiás betegek ellátásában?",
+                        options: [
+                            "Nincs szerepe, mert az idegkárosodás visszafordíthatatlan.",
+                            "Csak a fájdalomcsillapításra korlátozódik.",
+                            "Javítja az izomerőt, az egyensúlyt, megelőzi a kontraktúrákat és segít a funkcionális képességek megőrzésében.",
+                            "Helyettesíti a gyógyszeres kezelést."
+                        ],
+                        answer: "Javítja az izomerőt, az egyensúlyt, megelőzi a kontraktúrákat és segít a funkcionális képességek megőrzésében.",
+                        explanation: "A fizikoterápia a polyneuropathiás betegek kezelésének elengedhetetlen része. Célja a motoros funkciók (erő, egyensúly, koordináció) javítása, az izmok rövidülésének (kontraktúrák) megelőzése, az esések kockázatának csökkentése és a betegek segítése a mindennapi tevékenységekhez való alkalmazkodásban."
+                    },
+                    {
+                        question: "Melyik állítás igaz a kriptogén (idiopátiás) polyneuropathiára?",
+                        options: [
+                            "Ez a leggyakoribb típus a fiatalok körében.",
+                            "A betegek jelentős részénél (kb. 25%) alapos kivizsgálás után sem található meg a kiváltó ok.",
+                            "Mindig gyorsan, halálos kimenetellel jár.",
+                            "Könnyen kezelhető B-vitaminokkal."
+                        ],
+                        answer: "A betegek jelentős részénél (kb. 25%) alapos kivizsgálás után sem található meg a kiváltó ok.",
+                        explanation: "Sajnos a polyneuropathiás esetek egy jelentős hányadában, még a legkörültekintőbb kivizsgálás ellenére sem sikerül azonosítani a konkrét kiváltó okot. Ezeket az eseteket nevezzük kriptogénnek vagy idiopátiásnak."
+                    },
+                    {
+                        question: "Mi a paraneoplasiás szindróma okozta neuropathia?",
+                        options: [
+                            "A daganat közvetlen nyomása által okozott idegkárosodás.",
+                            "A kemoterápia mellékhatása.",
+                            "A szervezet daganatra adott immunválasza, amely tévesen az idegrendszert is megtámadja.",
+                            "A daganatos beteg alultápláltsága miatti vitaminhiány."
+                        ],
+                        answer: "A szervezet daganatra adott immunválasza, amely tévesen az idegrendszert is megtámadja.",
+                        explanation: "A paraneoplasiás szindrómák olyan ritka kórképek, amelyeket nem a daganat közvetlen terjedése vagy áttéte, hanem a szervezetnek a daganat ellen termelt antitestjei okoznak, melyek keresztreakcióba lépnek az idegrendszer saját fehérjéivel."
+                    },
+                    {
+                        question: "Melyik új, FDA által jóváhagyott gyógyszer működik neonatális Fc-receptor blokkolóként a CIDP kezelésében?",
+                        options: [
+                            "Rituximab",
+                            "Acyclovir",
+                            "Vyvgart Hytrulo (Efgartigimod alfa)",
+                            "Prednisolon"
+                        ],
+                        answer: "Vyvgart Hytrulo (Efgartigimod alfa)",
+                        explanation: "A Vyvgart Hytrulo egy új, célzott terápia, amelyet 2024-ben hagytak jóvá felnőtt CIDP kezelésére. A neonatális Fc-receptort (FcRn) gátolja, ami a patogén IgG antitestek lebontásához vezet, így csökkenti azok szintjét a keringésben és enyhíti az autoimmun folyamatot."
+                    },
+                    {
+                        question: "Milyen alapvető tanácsot kell adni a lábápolással kapcsolatban egy szenzoros polyneuropathiás betegnek?",
+                        options: [
+                            "Járjon minél többet mezítláb, hogy erősítse a talpát.",
+                            "Naponta ellenőrizze a lábát sérülések, sebek után, és viseljen mindig kényelmes, zárt cipőt.",
+                            "Ne használjon semmilyen krémet a lábára.",
+                            "A kisebb sebeket hagyja figyelmen kívül, mert úgyis lassan gyógyulnak."
+                        ],
+                        answer: "Naponta ellenőrizze a lábát sérülések, sebek után, és viseljen mindig kényelmes, zárt cipőt.",
+                        explanation: "A szenzoros neuropathia miatt a beteg nem érzi a kisebb sérüléseket, vágásokat, vízhólyagokat a lábán. Ezek észrevétlenek maradhatnak, elfertőződhetnek és súlyos, nehezen gyógyuló fekélyekhez vezethetnek. A napi önvizsgálat és a láb védelme a sérülésektől (megfelelő cipő) kritikus fontosságú."
+                    },
+                    {
+                        question: "Mi a fő különbség a GBS és a CIDP között?",
+                        options: [
+                            "A GBS axonális, a CIDP demyelinizációs.",
+                            "A GBS egy akut, monofázisos betegség, míg a CIDP krónikus és gyakran relapszáló-remittáló vagy progrediáló lefolyású.",
+                            "A GBS-t mindig vírus okozza, a CIDP-t mindig baktérium.",
+                            "A GBS csak a motoros, a CIDP csak a szenzoros rostokat érinti."
+                        ],
+                        answer: "A GBS egy akut, monofázisos betegség, míg a CIDP krónikus és gyakran relapszáló-remittáló vagy progrediáló lefolyású.",
+                        explanation: "Bár mindkettő gyulladásos demyelinizáló polyneuropathia, a legfontosabb különbség az időbeli lefolyásuk. A GBS egy akut, gyorsan lezajló betegség, amely után a betegek többsége felépül. A CIDP ezzel szemben egy krónikus, hosszan tartó állapot, amely folyamatos kezelést igényel a progresszió megakadályozására."
+                    }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

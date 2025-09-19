@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Kvíz - 2. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.correct {
+            background-color: #10B981; /* Emerald-500 */
+            color: white;
+            border-color: #059669; /* Emerald-600 */
+        }
+        .quiz-option.incorrect {
+            background-color: #EF4444; /* Red-500 */
+            color: white;
+            border-color: #DC2626; /* Red-600 */
+        }
+        .quiz-option:not(.disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection -->
+        <div id="topic-selection" class="text-center">
+            <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Neurológiai Kvíz - 2. rész</h1>
+            <p class="text-lg mb-8 text-gray-600 dark:text-gray-400">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quiz-interface" class="hidden">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-gray-900 dark:text-white">Téma</h2>
+                    <div id="score" class="text-lg font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-1 rounded-full">Pontszám: 0 / 0</div>
+                </div>
+                <div id="progress-bar-container" class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-xl font-medium mb-6 text-gray-800 dark:text-gray-200"></p>
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="hidden mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Magyarázat</h3>
+                    <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="back-to-topics" class="py-2 px-5 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Témakörök</button>
+                    <button id="next-question" class="py-2 px-5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Score Screen -->
+        <div id="final-score-screen" class="hidden text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">A kvíz vége!</h2>
+            <p class="text-xl mb-6 text-gray-700 dark:text-gray-300">A pontszámod a(z) <span id="final-topic-title" class="font-semibold"></span> témakörben:</p>
+            <p id="final-score" class="text-6xl font-bold mb-8 text-blue-600 dark:text-blue-400">0 / 20</p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Újra</button>
+                <button id="change-topic" class="py-3 px-6 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Másik téma</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            'izomgyengeseg': {
+                title: 'Izomgyengeség neurológiai okai',
+                questions: [
+                    {
+                        question: "Mi a különbség a parézis és a plégia között?",
+                        options: ["A parézis a felső, a plégia az alsó végtagot érinti.", "A parézis részleges, a plégia teljes izomerő-vesztést jelent.", "A parézis centrális, a plégia perifériás eredetű.", "Nincs különbség, szinonimák."],
+                        correct: 1,
+                        explanation: "A parézis az izomerő csökkenését (inkomplett erővesztés), míg a plégia vagy paralízis az izomerő teljes elvesztését (komplett bénulás) jelenti."
+                    },
+                    {
+                        question: "Melyik elnevezés jelöli a test egyik oldalának (kar és láb) gyengeségét?",
+                        options: ["Monoparézis", "Paraparézis", "Hemiparézis", "Quadriparézis"],
+                        correct: 2,
+                        explanation: "A hemiparézis a test egyik felének gyengeségét jelenti. Gyakran stroke következménye, és az agyi lézióval ellentétes testfélen jelentkezik."
+                    },
+                    {
+                        question: "Mi jellemző a felső motoneuron (UMN) károsodás okozta gyengeségre?",
+                        options: ["Petyhüdt tónus, areflexia, korai atrófia.", "Spasztikus tónus, hyperreflexia, kóros reflexek.", "Fasciculatiók és izomgörcsök.", "Csak a disztális izmokat érinti."],
+                        correct: 1,
+                        explanation: "A felső motoneuron (centrális) laesio jellegzetes tünetei a spasztikus izomtónus-fokozódás, a fokozott mélyreflexek (hyperreflexia) és a kóros reflexek (pl. Babinski-jel) megjelenése."
+                    },
+                    {
+                        question: "Melyik betegségre jellemző a fluktuáló, terhelésre fokozódó, pihenésre javuló izomgyengeség, ami gyakran a szemizmokat érinti először?",
+                        options: ["Amyotrophiás lateralis sclerosis (ALS)", "Guillain-Barré szindróma (GBS)", "Myasthenia Gravis (MG)", "Duchenne izomdisztrófia"],
+                        correct: 2,
+                        explanation: "A Myasthenia Gravis kardinális tünete a fáradékonyság, azaz a fluktuáló izomgyengeség, amely ismételt terhelésre fokozódik és pihenésre javul. Gyakoriak a szemtünetek (ptosis, diplopia)."
+                    },
+                    {
+                        question: "Melyik tünetegyüttesre jellemző a szimmetrikus, felszálló petyhüdt bénulás és areflexia, ami gyakran egy fertőzést követően alakul ki?",
+                        options: ["Stroke", "Sclerosis multiplex", "Guillain-Barré szindróma", "Parkinson-kór"],
+                        correct: 2,
+                        explanation: "A Guillain-Barré szindróma egy akut autoimmun polyradiculoneuropathia, melynek klasszikus tünete a lábakban kezdődő, szimmetrikusan, felfelé terjedő petyhüdt bénulás és a reflexek kiesése (areflexia)."
+                    },
+                    {
+                        question: "Az amyotrophiás lateralis sclerosis (ALS) mely idegrendszeri struktúrákat érinti?",
+                        options: ["Csak a perifériás idegeket.", "Csak a kisagyat.", "Mind a felső, mind az alsó motoneuronokat.", "Csak az érzőpályákat."],
+                        correct: 2,
+                        explanation: "Az ALS egy motoneuron-betegség, amely mind a felső (az agykéregben lévő), mind az alsó (az agytörzsben és gerincvelőben lévő) motoneuronok pusztulásával jár, ezért kevert (spasztikus és petyhüdt) tünetek jellemzik."
+                    },
+                    {
+                        question: "Mi a Gowers-jel, ami a Duchenne izomdisztrófiára jellemző?",
+                        options: ["A lábujjak legyezőszerű szétterpesztése.", "A gyermek a kezeit használva 'mászik fel' a saját lábán, hogy felálljon.", "Kacsázó járás.", "A vádli izmainak sorvadása."],
+                        correct: 1,
+                        explanation: "A Gowers-jel a proximális (csípő- és comb-) izmok gyengeségének a jele. A beteg a földről való felálláshoz a kezeire támaszkodik, és azokat a lábain 'léptetve' tolja fel magát álló helyzetbe."
+                    },
+                    {
+                        question: "Az izomrángások (fasciculatiók) és a korai, kifejezett izomatrófia melyik típusú károsodásra utalnak?",
+                        options: ["Felső motoneuron (centrális) laesio", "Alsó motoneuron (perifériás) laesio", "Kisagyi laesio", "Bazális ganglion laesio"],
+                        correct: 1,
+                        explanation: "A fasciculatiók és a korai, kifejezett izomsorvadás (atrófia) az alsó motoneuron (LMN) károsodásának klasszikus jelei, a denervált izmok spontán aktivitása és pusztulása miatt."
+                    },
+                    {
+                        question: "Melyik myopathiára jellemző a lassan progrediáló, aszimmetrikus gyengeség, ami különösen a combfeszítő (quadriceps) és az ujjhajlító izmokat érinti?",
+                        options: ["Polymyositis", "Dermatomyositis", "Inclusion Body Myositis (Zárványtestes myositis)", "Duchenne izomdisztrófia"],
+                        correct: 2,
+                        explanation: "A zárványtestes myositis (IBM) az 50 év feletti leggyakoribb myopathia, jellegzetes aszimmetrikus gyengeségmintázattal, ami a quadriceps és az alkar ujjhajlító izmait preferenciálisan érinti."
+                    },
+                    {
+                        question: "Mi az oka a 'gyengeség' érzetének Parkinson-kórban?",
+                        options: ["Az izomrostok direkt károsodása.", "A perifériás idegek demyelinizációja.", "A mozgáslassulás (bradykinesia) és izommerevség (rigiditás).", "Az acetilkolin receptorok blokkolása."],
+                        correct: 2,
+                        explanation: "Parkinson-kórban a gyengeség érzete nem valódi erővesztésből, hanem a bazális ganglionok diszfunkciója miatti mozgáskontroll-zavarokból, elsősorban a mozgáslassulásból (bradykinesia) és izommerevségből (rigiditás) fakad."
+                    },
+                    {
+                        question: "A stroke okozta hemiparesis melyik oldalon jelentkezik az agyi lézióhoz képest?",
+                        options: ["Ugyanazon az oldalon (ipsilateralis).", "Az ellenkező oldalon (contralateralis).", "Mindkét oldalon.", "Nem lehet megjósolni."],
+                        correct: 1,
+                        explanation: "A motoros pályák (kortikospinális pálya) a nyúltvelőben kereszteződnek, ezért az egyik agyféltekét érintő stroke az ellenkező (contralateralis) testfélen okoz gyengeséget."
+                    },
+                    {
+                        question: "A Lambert-Eaton myastheniás szindrómát (LEMS) melyik struktúra elleni antitestek okozzák?",
+                        options: ["Posztszinaptikus acetilkolin receptorok", "Preszinaptikus feszültségfüggő kalciumcsatornák", "Myelinhüvely", "Izomrostok"],
+                        correct: 1,
+                        explanation: "A LEMS-ben az immunrendszer a preszinaptikus idegvégződés feszültségfüggő kalciumcsatornái (VGCC) ellen termel antitesteket, ami gátolja az acetilkolin felszabadulását."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a 'kesztyű-harisnya' eloszlású érzészavarral társuló disztális izomgyengeség?",
+                        options: ["Myasthenia Gravis", "Sclerosis Multiplex", "Diabeteszes polyneuropathia", "Stroke"],
+                        correct: 2,
+                        explanation: "A disztális szimmetrikus polyneuropathia, ami a diabetes mellitus leggyakoribb idegrendszeri szövődménye, jellegzetesen 'kesztyű-harisnya' eloszlású érzészavarral és előrehaladott esetben a disztális izmok (pl. lábfej) gyengeségével jár."
+                    },
+                    {
+                        question: "Mi a monoplégia?",
+                        options: ["Mind a négy végtag bénulása.", "A testfél bénulása.", "Egyetlen végtag teljes bénulása.", "Mindkét alsó végtag bénulása."],
+                        correct: 2,
+                        explanation: "A monoplégia egyetlen végtag (egy kar vagy egy láb) teljes bénulását (izomerő-vesztését) jelenti."
+                    },
+                    {
+                        question: "A spaszticitás, a hyperreflexia és a Babinski-jel együttesen mire utalnak?",
+                        options: ["Perifériás idegsérülésre", "Izombetegségre", "Felső motoneuron (UMN) károsodásra", "Neuromuszkuláris junkció zavarára"],
+                        correct: 2,
+                        explanation: "Ez a klasszikus tünet-triász a felső motoneuron (centrális) károsodásának a jele, ami a pyramispálya sérülésekor alakul ki a leszálló gátló pályák kiesése miatt."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a hirtelen kialakuló hemiparézisnek?",
+                        options: ["Agydaganat", "Sclerosis multiplex", "Stroke", "Guillain-Barré szindróma"],
+                        correct: 2,
+                        explanation: "A stroke (agyi érkatasztrófa) a hirtelen kezdetű, féloldali izomgyengeség (hemiparesis) messze leggyakoribb oka."
+                    },
+                    {
+                        question: "A paraparézis mely testrészek gyengeségét jelenti?",
+                        options: ["Mindkét kar", "Mindkét láb", "Az arc és a kar", "A törzs izmai"],
+                        correct: 1,
+                        explanation: "A paraparézis mindkét alsó végtag gyengeségét jelenti, ami tipikusan a gerincvelő mellkasi vagy ágyéki szakaszának károsodására utal."
+                    },
+                    {
+                        question: "Milyen típusú gyengeség jellemző az elsődleges izombetegségekre (myopathiák)?",
+                        options: ["Aszimmetrikus, disztális gyengeség", "Szimmetrikus, proximális gyengeség", "Fluktuáló gyengeség", "Csak az arcizmok gyengesége"],
+                        correct: 1,
+                        explanation: "A legtöbb myopathia, mint az izomdisztrófiák vagy a gyulladásos myopathiák, jellemzően szimmetrikus, proximális (vállöv, medenceöv) izomgyengeséggel jár."
+                    },
+                    {
+                        question: "Milyen hatással van a szteroid kezelés az izomerőre hosszú távon?",
+                        options: ["Erősíti az izmokat.", "Nincs hatása.", "Szteroid myopathiát okozhat, ami proximális gyengeséggel jár.", "Csak a szemizmokat gyengíti."],
+                        correct: 2,
+                        explanation: "A hosszan tartó, nagy dózisú kortikoszteroid kezelés egyik mellékhatása a szteroid myopathia, ami a proximális (csípő, vállöv) izmok gyengeségét okozhatja."
+                    },
+                    {
+                        question: "Melyik állítás igaz a diffúz axonális sérülésre (DAI)?",
+                        options: ["Csak enyhe fejsérülésnél fordul elő.", "Az idegrostok (axonok) kiterjedt szakadását jelenti, ami súlyos agykárosodást okoz.", "Kizárólag a gerincvelőt érinti.", "Mindig teljes gyógyulással jár."],
+                        correct: 1,
+                        explanation: "A diffúz axonális sérülés (DAI) egy súlyos traumás agysérülés, ahol a rotációs erők az axonok kiterjedt, mikroszkopikus szakadását okozzák, ami gyakran kómához és súlyos, maradandó neurológiai károsodáshoz, beleértve az izomgyengeséget, vezet."
+                    }
+                ]
+            },
+            'erzeszavarok': {
+                title: 'Érzészavarok',
+                questions: [
+                    {
+                        question: "Melyik fogalom jelenti a csökkent érzékelést?",
+                        options: ["Anaesthesia", "Hyperaesthesia", "Hypaesthesia", "Paraesthesia"],
+                        correct: 2,
+                        explanation: "A hypaesthesia csökkent érzékelést jelent egy adott ingerre, például a beteg kevésbé érzi a tapintást vagy a szúrást."
+                    },
+                    {
+                        question: "Mi a paraesthesia?",
+                        options: ["Az érzékelés teljes hiánya.", "Fokozott, fájdalmas érzékenység.", "Abnormális, nem fájdalmas érzés, mint a zsibbadás vagy hangyamászás.", "Képtelenség a hőmérséklet érzékelésére."],
+                        correct: 2,
+                        explanation: "A paraesthesia egy abnormális, spontán vagy kiváltott érzésminőség, amely nem jár fájdalommal. Tipikus példái a zsibbadás, bizsergés, hangyamászás."
+                    },
+                    {
+                        question: "Melyik felszálló érzőpálya felelős a fájdalom és hőérzés továbbításáért?",
+                        options: ["Tractus corticospinalis", "Tractus spinocerebellaris", "Hátsó köteg – Lemniscus Medialis rendszer", "Tractus spinothalamicus (Anterolateralis rendszer)"],
+                        correct: 3,
+                        explanation: "A spinothalamicus pályarendszer (anterolateralis rendszer) a protopathiás érzéskvalitások, mint a fájdalom és a hőmérséklet továbbításáért felelős."
+                    },
+                    {
+                        question: "Melyik érzésféleség tartozik az epikritikus (gnosztikus) kvalitások közé?",
+                        options: ["Fájdalomérzés", "Hőérzés", "Vibrációérzés", "Durva tapintás"],
+                        correct: 2,
+                        explanation: "Az epikritikus érzésféleségek a finomabb, diszkriminatív érzeteket foglalják magukban, mint a finom tapintás, vibrációérzés, és a propriocepció."
+                    },
+                    {
+                        question: "Hol történik a spinothalamicus pálya rostjainak kereszteződése?",
+                        options: ["Az agykéregben", "A thalamusban", "A nyúltvelőben", "A gerincvelőben, a belépési szinthez közel"],
+                        correct: 3,
+                        explanation: "A spinothalamicus pálya másodrendű neuronjainak axonjai a gerincvelőben, a belépési szint felett 1-2 szegmentummal, az elülső fehér commissurában kereszteződnek az ellenkező oldalra."
+                    },
+                    {
+                        question: "Melyik eszköz a legalkalmasabb a vibrációérzés vizsgálatára?",
+                        options: ["Reflexkalapács", "Vattapamacs", "Kalibrált hangvilla (128 Hz)", "Hideg-meleg kémcsövek"],
+                        correct: 2,
+                        explanation: "A vibrációérzést standardizáltan egy 128 Hz-es hangvillával vizsgáljuk, amelyet csontos kiemelkedésekre helyezünk."
+                    },
+                    {
+                        question: "Mi az astereognosis?",
+                        options: ["A bőrre rajzolt jelek felismerésének képtelensége.", "Tárgyak tapintás útján, csukott szemmel való felismerésének zavara.", "Az ízületi helyzetérzés elvesztése.", "Két pont egyidejű érintésének egyként való észlelése."],
+                        correct: 1,
+                        explanation: "Az astereognosis egy magasabb rendű, kérgi eredetű érzészavar, amely a tárgyak tapintás útján történő felismerésének képtelenségét jelenti, ép elemi érzőfunkciók mellett."
+                    },
+                    {
+                        question: "A testből származó szomatoszenzoros információk a thalamus melyik magjában kapcsolódnak át?",
+                        options: ["Ventralis posteromedialis (VPM) mag", "Ventralis posterolateralis (VPL) mag", "Corpus geniculatum laterale", "Corpus geniculatum mediale"],
+                        correct: 1,
+                        explanation: "A testből (törzs, végtagok) származó érzőpályák a thalamus ventralis posterolateralis (VPL) magjában végződnek és kapcsolódnak át, mielőtt a kéregbe vetülnének. (A VPM az arc területéről kap információt.)"
+                    },
+                    {
+                        question: "Milyen típusú érzészavart okoz leggyakrabban a perifériás polyneuropathia?",
+                        options: ["Köpenyszerű érzészavar", "'Kesztyű-harisnya' eloszlású érzészavar", "Féloldali érzészavar", "Dermatomális érzészavar"],
+                        correct: 1,
+                        explanation: "A polyneuropathiákra a szimmetrikus, disztális túlsúlyú, 'kesztyű-harisnya' eloszlású érzészavar a legjellemzőbb, ami a leghosszabb idegek károsodásával magyarázható."
+                    },
+                    {
+                        question: "Melyik idegrost típus szállítja leggyorsabban az ingerületet?",
+                        options: ["Vékonyan mielinizált A-delta rostok", "Velőhüvely nélküli C-rostok", "Vastag, erősen mielinizált A-alfa és A-béta rostok", "Minden rosttípus azonos sebességgel vezet."],
+                        correct: 2,
+                        explanation: "Az ingerületvezetési sebesség arányos az axon átmérőjével és a myelinizáció mértékével. A vastag, erősen mielinizált A-alfa és A-béta rostok vezetik a leggyorsabban az ingerületet, ezek szállítják a finom tapintást és propriocepciót."
+                    },
+                    {
+                        question: "Mit jelent a dysaesthesia?",
+                        options: ["Kellemetlen, gyakran fájdalmas jellegű abnormális érzés.", "Spontán zsibbadás.", "Az érzékelés teljes hiánya.", "Fokozott érzékenység a tapintásra."],
+                        correct: 0,
+                        explanation: "A dysaesthesia egy kellemetlen, gyakran fájdalmas jellegű abnormális érzés, amely spontán vagy inger által kiváltott lehet. Lényegében a paraesthesia kellemetlen, fájdalmas változata."
+                    },
+                    {
+                        question: "Hol helyezkedik el a primer szomatoszenzoros kéreg?",
+                        options: ["A frontális lebenyben, a gyrus precentralisban.", "A parietális lebenyben, a gyrus postcentralisban.", "Az occipitális lebenyben.", "A temporális lebenyben."],
+                        correct: 1,
+                        explanation: "A primer szomatoszenzoros kéreg, ahol az érzetek tudatosulnak, az agy parietális (fali) lebenyében, a gyrus postcentralisban található."
+                    },
+                    {
+                        question: "Melyik pályarendszer felelős a propriocepció (ízületi helyzet- és mozgásérzés) továbbításáért?",
+                        options: ["Tractus spinothalamicus", "Tractus corticospinalis", "Hátsó köteg – Lemniscus Medialis rendszer", "Tractus spinocerebellaris"],
+                        correct: 2,
+                        explanation: "A tudatos propriocepciót a hátsó köteg – lemniscus medialis pályarendszer szállítja, ami az epikritikus érzésféleségek közé tartozik."
+                    },
+                    {
+                        question: "Mi az allodynia?",
+                        options: ["Fokozott fájdalomérzet egy fájdalmas ingerre.", "Normálisan fájdalmatlan inger (pl. enyhe érintés) fájdalmat vált ki.", "Spontán, égető fájdalom.", "A fájdalomérzés teljes hiánya."],
+                        correct: 1,
+                        explanation: "Az allodynia egy kóros állapot, amikor egy normálisan nem fájdalmas inger, mint például a bőr finom érintése, fájdalmat vált ki. Gyakori neuropathiás fájdalom szindrómákban."
+                    },
+                    {
+                        question: "Egy porckorongsérv által okozott ideggyök-nyomás milyen eloszlású érzészavart okoz?",
+                        options: ["Hemiszenzoros", "Kesztyű-harisnya", "Dermatomális", "Köpenyszerű"],
+                        correct: 2,
+                        explanation: "A radiculopathia (ideggyök-károsodás), mint a porckorongsérv, az adott gerincvelői gyök által beidegzett bőrsávban, azaz egy specifikus dermatomában okoz érzészavart."
+                    },
+                    {
+                        question: "Melyik állítás igaz a hátsó köteg pályáira?",
+                        options: ["A gerincvelőben kereszteződnek.", "Fájdalom-ingerületet szállítanak.", "Azonos oldalon szállnak fel a gerincvelőben és a nyúltvelőben kereszteződnek.", "A sejttestjeik a gerincvelő hátsó szarvában vannak."],
+                        correct: 2,
+                        explanation: "A hátsó köteg pályáinak fontos anatómiai jellegzetessége, hogy a gerincvelőbe való belépés után az azonos oldalon szállnak fel a nyúltvelőig, és csak ott, a nucleus gracilis/cuneatusban való átkapcsolódás után kereszteződnek az ellenoldalra."
+                    },
+                    {
+                        question: "A hőérzés vizsgálata melyik érzésféleség csoportba tartozik?",
+                        options: ["Epikritikus", "Protopathiás", "Proprioceptív", "Diszkriminatív"],
+                        correct: 1,
+                        explanation: "A hőérzés (hideg és meleg) a fájdalommal és a durva tapintással együtt a protopathiás (vitális) érzésféleségek közé tartozik, melyeket a spinothalamicus pálya szállít."
+                    },
+                    {
+                        question: "Milyen típusú receptorok felelősek a fájdalomérzékelésért?",
+                        options: ["Mechanoreceptorok", "Proprioceptorok", "Termoreceptorok", "Nociceptorok"],
+                        correct: 3,
+                        explanation: "A nociceptorok olyan specializált idegvégződések, amelyek a potenciálisan szövetkárosító, fájdalmas ingereket detektálják."
+                    },
+                    {
+                        question: "A felszálló érzőpályák többsége melyik agyi struktúrában kapcsolódik át, mielőtt az agykéregbe érne?",
+                        options: ["Hypothalamus", "Kisagy", "Thalamus", "Hippocampus"],
+                        correct: 2,
+                        explanation: "A thalamus az agy központi 'átkapcsoló állomása'. Az érzőpályák túlnyomó többsége (kivéve a szaglást) itt kapcsolódik át, mielőtt az agykéreg megfelelő területeire vetülne."
+                    },
+                    {
+                        question: "Mi a grafaesthesia?",
+                        options: ["A tárgyak súlyának megbecslése.", "A bőrre írt jelek, számok felismerésének képessége csukott szemmel.", "A vibráció érzékelése.", "A fájdalom lokalizálásának képessége."],
+                        correct: 1,
+                        explanation: "A grafaesthesia egy magasabb rendű, kérgi funkció, ami a bőrre (pl. tenyérre) írt egyszerű jelek, betűk vagy számok felismerését jelenti tapintás alapján, vizuális kontroll nélkül."
+                    }
+                ]
+            },
+            'disszocialt_erzes': {
+                title: 'Disszociált érzészavarok',
+                questions: [
+                    {
+                        question: "Mi a disszociált érzészavar lényege?",
+                        options: ["Minden érzéskvalitás egyformán kiesik.", "Egyes érzésféleségek (pl. fájdalom, hő) kiesnek, míg mások (pl. tapintás) ugyanazon a területen megmaradnak.", "Az érzészavar csak a test egyik felét érinti.", "Az érzészavar fluktuáló jellegű."],
+                        correct: 1,
+                        explanation: "A disszociált érzészavar azt jelenti, hogy az érzéskvalitások 'szétválnak': a protopathiás (fájdalom, hő) és az epikritikus (finom tapintás, propriocepció) érzések szelektíven károsodnak az eltérő anatómiai pályájuk miatt."
+                    },
+                    {
+                        question: "Melyik kórképre jellemző a 'köpenyszerű' disszociált érzészavar a vállakon és a felső végtagokon?",
+                        options: ["Brown-Séquard szindróma", "Wallenberg szindróma", "Syringomyelia", "Polyneuropathia"],
+                        correct: 2,
+                        explanation: "A syringomyelia esetén a gerincvelő közepén kialakuló üreg (syrinx) a kereszteződő spinothalamicus rostokat károsítja, ami jellegzetes, 'köpenyszerű' fájdalom- és hőérzéskiesést okoz, míg a hátsó kötegi funkciók megkíméltek maradnak."
+                    },
+                    {
+                        question: "Milyen érzészavart okoz a Brown-Séquard szindróma (gerincvelő féloldali léziója) a lézióval ELLENTÉTES oldalon?",
+                        options: ["Finom tapintás és propriocepció kiesése.", "Teljes érzéskiesés.", "Fájdalom- és hőérzés kiesése.", "Nincs érzészavar az ellenkező oldalon."],
+                        correct: 2,
+                        explanation: "A Brown-Séquard szindrómában az ellenkező (kontralaterális) oldalon a fájdalom- és hőérzés esik ki, mivel a spinothalamicus pálya már a gerincvelőben átkereszteződött, és a lézió ezt a felszálló pályát károsítja."
+                    },
+                    {
+                        question: "Milyen érzészavart okoz a Brown-Séquard szindróma a lézióval AZONOS oldalon?",
+                        options: ["Fájdalom- és hőérzés kiesése.", "Csak hőérzés kiesése.", "Finom tapintás, vibráció és propriocepció kiesése.", "Csak motoros bénulás, érzészavar nélkül."],
+                        correct: 2,
+                        explanation: "A lézióval azonos (ipszilaterális) oldalon a hátsó köteg sérül, ami még nem kereszteződött. Ezért az epikritikus érzések (finom tapintás, vibráció, propriocepció) esnek ki, a motoros bénulás mellett."
+                    },
+                    {
+                        question: "A Wallenberg szindróma (laterális medulláris szindróma) milyen jellegzetes 'keresztezett' érzészavart okoz?",
+                        options: ["Azonos oldali arc és test érzészavara.", "Ellenkező oldali arc és test érzészavara.", "Azonos oldali arc és ellenkező oldali test fájdalom- és hőérzéskiesése.", "Azonos oldali test és ellenkező oldali arc fájdalom- és hőérzéskiesése."],
+                        correct: 2,
+                        explanation: "A Wallenberg szindróma jellegzetes keresztezett érzészavart okoz: az arc azonos (ipszilaterális) oldalán (a leszálló n.V. pálya károsodása miatt) és a test ellenkező (kontralaterális) oldalán (a spinothalamicus pálya károsodása miatt) esik ki a fájdalom- és hőérzés."
+                    },
+                    {
+                        question: "Melyik artéria elzáródása okozza leggyakrabban a Wallenberg szindrómát?",
+                        options: ["Arteria cerebri media (MCA)", "Arteria basilaris", "Arteria cerebelli posterior inferior (PICA)", "Arteria spinalis anterior"],
+                        correct: 2,
+                        explanation: "A Wallenberg szindróma a nyúltvelő lateralis részének infarktusa, melyet leggyakrabban az arteria cerebelli posterior inferior (PICA), ritkábban az arteria vertebralis elzáródása okoz."
+                    },
+                    {
+                        question: "Az Arteria Spinalis Anterior szindróma esetén mely érzéskvalitások maradnak meg a lézió szintje alatt?",
+                        options: ["Fájdalom és hőérzés.", "Finom tapintás, vibráció és propriocepció.", "Minden érzéskvalitás kiesik.", "Csak a durva tapintás."],
+                        correct: 1,
+                        explanation: "Ebben a szindrómában a gerincvelő elülső kétharmada károsodik, ami a motoros pályák és a spinothalamicus pályák sérülésével jár. A hátsó kötegek, melyeket más artéria lát el, megkíméltek, így az általuk szállított epikritikus érzések (tapintás, vibráció, propriocepció) megmaradnak."
+                    },
+                    {
+                        question: "Mi a disszociált érzészavarok anatómiai alapja?",
+                        options: ["A perifériás receptorok eltérő érzékenysége.", "A két fő felszálló érzőpálya eltérő anatómiai lefutása és kereszteződési szintje.", "Az agykéreg eltérő feldolgozási sebessége.", "A thalamus gátló működése."],
+                        correct: 1,
+                        explanation: "A disszociáció alapja, hogy a fájdalmat/hőt szállító spinothalamicus pálya már a gerincvelőben kereszteződik, míg a tapintást/propriocepciót szállító hátsó köteg csak a nyúltvelőben. Ez az anatómiai elkülönülés teszi lehetővé a szelektív károsodásukat."
+                    },
+                    {
+                        question: "Melyik vizsgálati módszer a legfontosabb a syringomyelia diagnózisának megerősítésére?",
+                        options: ["Lumbálpunkció", "Elektromiográfia (EMG)", "Mágneses Rezonancia Képalkotás (MRI)", "Koponya röntgen"],
+                        correct: 2,
+                        explanation: "Az MRI a legmegbízhatóbb módszer a syringomyelia diagnosztikájában, mivel nagy felbontással képes ábrázolni a gerincvelőben lévő folyadékkal telt üreget (syrinx) és annak kiterjedését."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a klasszikus Wallenberg szindrómára?",
+                        options: ["Vertigo (szédülés)", "Dysphagia (nyelészavar)", "Végtagbénulás (hemiplegia)", "Ipsilateralis Horner-szindróma"],
+                        correct: 2,
+                        explanation: "A klasszikus Wallenberg szindrómában a lézió a nyúltvelő lateralis részére korlátozódik, ami megkíméli a medialisabban futó pyramispályát. Emiatt a végtagbénulás tipikusan nem része a tünetegyüttesnek."
+                    },
+                    {
+                        question: "A finom, diszkriminatív tapintást szállító idegrostok a gerincvelő melyik részén szállnak fel?",
+                        options: ["Oldalsó köteg", "Elülső köteg", "Hátsó köteg", "Centrális szürkeállomány"],
+                        correct: 2,
+                        explanation: "A finom tapintás, vibráció és propriocepció rostjai a gerincvelő hátsó kötegében (fasciculus gracilis és cuneatus) szállnak fel azonos oldalon, átkapcsolódás nélkül."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a fájdalom- és hőérzés kiesése mellett a kéz kisizmainak sorvadása és gyengesége?",
+                        options: ["Perifériás neuropathia", "Syringomyelia", "Myasthenia Gravis", "Akut stroke"],
+                        correct: 1,
+                        explanation: "Syringomyelia esetén a centrális üreg (syrinx) a kereszteződő spinothalamicus rostok mellett az elülső szarvi motoneuronokat is komprimálhatja, ami a disszociált érzészavar mellett az adott szegmentumhoz tartozó izmok (pl. kéz kisizmai) atrophiáját és gyengeségét okozza."
+                    },
+                    {
+                        question: "A disszociált érzészavar jelenléte melyik idegrendszeri struktúra károsodására utal leginkább?",
+                        options: ["Perifériás idegek", "Izmok", "Központi idegrendszer (gerincvelő, agytörzs)", "Agykéreg"],
+                        correct: 2,
+                        explanation: "A disszociált érzészavar a különböző érzőpályák anatómiai szétválása miatt csak a központi idegrendszeren belüli, specifikus helyen lévő léziók esetén jön létre."
+                    },
+                    {
+                        question: "Az Arteria Spinalis Anterior szindróma milyen motoros tünettel jár?",
+                        options: ["Egyoldali petyhüdt bénulás", "Kétoldali spasztikus bénulás", "Kétoldali petyhüdt, majd spasztikus bénulás", "Nincs motoros tünet"],
+                        correct: 2,
+                        explanation: "Az ASA szindróma a gerincvelő elülső részének károsodását okozza, ami a leszálló motoros pályákat is érinti. Ezért a lézió szintje alatt kétoldali bénulás alakul ki, ami akut fázisban (spinális sokk) petyhüdt, majd később spasztikussá válik."
+                    },
+                    {
+                        question: "Melyik struktúra sérülése okozza a 'keresztezett' jellegű érzészavart Wallenberg szindrómában?",
+                        options: ["Csak a spinothalamicus pálya", "Csak a hátsó köteg", "A spinothalamicus pálya ÉS a leszálló trigeminus pálya", "A pyramispálya és a spinothalamicus pálya"],
+                        correct: 2,
+                        explanation: "A 'keresztezett' jelleg abból adódik, hogy a lézió egyszerre károsítja a test ellenoldaláról érkező fájdalom/hő rostokat (spinothalamicus pálya) és az arc azonos oldaláról érkező fájdalom/hő rostokat (leszálló n.V. pálya)."
+                    },
+                    {
+                        question: "Igaz vagy hamis: A Brown-Séquard szindróma mindig komplett gerincvelő-átvágást jelent.",
+                        options: ["Igaz", "Hamis"],
+                        correct: 1,
+                        explanation: "Hamis. A klasszikus Brown-Séquard szindróma a gerincvelő féloldali károsodását (hemiszekció) írja le, de a klinikai gyakorlatban gyakrabban fordulnak elő inkomplett, részleges formák."
+                    },
+                    {
+                        question: "A syringomyelia általában melyik gerincvelői szakaszon kezdődik?",
+                        options: ["Lumbalis (ágyéki)", "Sacralis (keresztcsonti)", "Cervicalis (nyaki)", "Thoracalis (háti)"],
+                        correct: 2,
+                        explanation: "A syringomyelia leggyakrabban a cervicalis (nyaki) gerincvelői szakaszon, a canalis centralis környékén alakul ki."
+                    },
+                    {
+                        question: "Mi a Lissauer-pálya szerepe?",
+                        options: ["A motoros parancsok továbbítása.", "Az elsődleges fájdalom- és hőérző rostok fel- és leszállása 1-2 szegmentumnyit a gerincvelőben.", "A proprioceptív információk szállítása.", "A reflexek gátlása."],
+                        correct: 1,
+                        explanation: "A Lissauer-pálya (tractus dorsolateralis) lehetővé teszi, hogy a belépő vékony (fájdalom, hő) rostok egy-két szegmentummal feljebb vagy lejjebb is haladjanak, mielőtt átkapcsolódnak. Ez magyarázza, hogy az érzéskiesés határa miért van gyakran lejjebb, mint a lézió tényleges szintje."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a hátsó köteg-lemniscus medialis rendszerre?",
+                        options: ["Az epikritikus érzéseket szállítja.", "Rostjai vastagok és mielinizáltak.", "A gerincvelőben azonos oldalon száll fel.", "A másodrendű neuronjai a gerincvelő hátsó szarvában vannak."],
+                        correct: 3,
+                        explanation: "A hátsó köteg-lemniscus medialis rendszer másodrendű neuronjai nem a gerincvelőben, hanem a nyúltvelőben, a nucleus gracilis és cuneatusban helyezkednek el."
+                    },
+                    {
+                        question: "Melyik betegségben a legjellemzőbb a disszociált érzészavar?",
+                        options: ["Diabeteszes polyneuropathia", "Myasthenia gravis", "Syringomyelia", "Parkinson-kór"],
+                        correct: 2,
+                        explanation: "Bár több kórképben is előfordulhat, a syringomyelia a 'tankönyvi' példája a disszociált érzészavarnak a jellegzetes, a spinothalamicus kereszteződés károsodásából adódó köpenyszerű fájdalom- és hőérzéskiesés miatt."
+                    }
+                ]
+            },
+            'reflexek': {
+                title: 'Reflexeltérések',
+                questions: [
+                    {
+                        question: "Mi a Babinski-jel, és mire utal?",
+                        options: ["A lábujjak talp felé hajlása; normális válasz.", "Az öregujj hátrahajlása a talp ingerlésére; pyramispálya-károsodásra utal.", "A térdkalács ritmikus mozgása; izomgyengeség jele.", "Az Achilles-ín reflexének hiánya; alsó motoneuron károsodás jele."],
+                        correct: 1,
+                        explanation: "A Babinski-jel a talp ingerlésekor kiváltott kóros reflex, ahol az öregujj lassan, tónusosan hátrahajlik (dorsalflexió). Ez a felső motoneuron, azaz a pyramispálya sérülésének egyik legfontosabb klinikai jele."
+                    },
+                    {
+                        question: "Melyik állítás igaz a felső motoneuron (centrális) laesio okozta reflexeltérésekre?",
+                        options: ["A mélyreflexek kiesnek, a hasreflexek fokozottak.", "A mélyreflexek fokozottak, a hasreflexek kiesnek, kóros reflexek jelennek meg.", "Minden reflex normális marad.", "Csak a mélyreflexek esnek ki."],
+                        correct: 1,
+                        explanation: "Felső motoneuron (UMN) károsodás esetén a mélyreflexek felszabadulnak a gátlás alól és fokozódnak (hyperreflexia), a felületes reflexek (pl. hasreflex) kiesnek, és kóros (pyramis) jelek, mint a Babinski-jel, jelennek meg."
+                    },
+                    {
+                        question: "Milyen típusú reflex a patellareflex (térdreflex)?",
+                        options: ["Poliszinaptikus felületes reflex", "Monoszinaptikus mélyreflex (sajátreflex)", "Kóros (pyramis) reflex", "Vegetatív reflex"],
+                        correct: 1,
+                        explanation: "A patellareflex egy nyújtási reflex, ami a legegyszerűbb, monoszinaptikus reflexíven alapul. Az afferens és efferens neuron között csak egyetlen szinapszis van, ami gyors választ tesz lehetővé."
+                    },
+                    {
+                        question: "Melyik ideggyökök felelősek elsősorban az Achilles-reflexért?",
+                        options: ["L2-L4", "C5-C6", "S1-S2", "Th8-Th10"],
+                        correct: 2,
+                        explanation: "Az Achilles-reflex (bokareflex) kiváltása az S1 és S2 gerincvelői szegmentumok és az azokhoz tartozó ideggyökök épségét teszteli."
+                    },
+                    {
+                        question: "Mi a clonus?",
+                        options: ["Egyetlen, gyors izomrángás.", "Akaratlan, ritmikus, sorozatos izomösszehúzódás, amit az izom hirtelen megnyújtása vált ki.", "Az izomtónus teljes hiánya.", "Fájdalmas izomgörcs."],
+                        correct: 1,
+                        explanation: "A clonus a nyújtási reflex kóros fokozódásának jele, egy önfenntartó, ritmikus izomösszehúzódás-elernyedés sorozat. Jelenléte súlyos felső motoneuron károsodásra utal."
+                    },
+                    {
+                        question: "Mi a Jendrassik-műfogás célja a reflexvizsgálat során?",
+                        options: ["A kóros reflexek elnyomása.", "A fájdalom csökkentése.", "A renyhe vagy nehezen kiváltható mélyreflexek facilitálása (erősítése).", "A beteg éberségi szintjének tesztelése."],
+                        correct: 2,
+                        explanation: "A Jendrassik-műfogást (pl. kezek összekulcsolása és széthúzása) arra használjuk, hogy a renyhe mélyreflexeket megerősítsük, és elkülönítsük a valódi hyporeflexiát a nem megfelelő ellazulás miatti gyenge választól."
+                    },
+                    {
+                        question: "Melyik reflexeltérés jellemző az alsó motoneuron (perifériás) laesióra?",
+                        options: ["Hyperreflexia és clonus", "Hyporeflexia vagy areflexia", "Babinski-jel", "Fokozott hasreflexek"],
+                        correct: 1,
+                        explanation: "Alsó motoneuron (LMN) károsodás esetén a reflexív efferens szára sérül, ami a mélyreflexek csökkenéséhez (hyporeflexia) vagy teljes hiányához (areflexia) vezet az érintett területen."
+                    },
+                    {
+                        question: "A Hoffmann-jel és a Trömner-jel melyik testrészen vizsgálható pyramisjelek?",
+                        options: ["Alsó végtag", "Felső végtag", "Arc", "Törzs"],
+                        correct: 1,
+                        explanation: "A Hoffmann-jel és a Trömner-jel az ujjak megpöccintésével kiváltható kóros reflexek, amelyek a felső végtagokat beidegző pyramispálya károsodására utalnak."
+                    },
+                    {
+                        question: "Melyik állítás igaz a hasreflexekre?",
+                        options: ["Felső motoneuron sérülésnél fokozódnak.", "Kiesésük, különösen ha egyoldali, pyramispálya-laesióra utal.", "Monoszinaptikus reflexek.", "Csak csecsemőkorban válthatók ki."],
+                        correct: 1,
+                        explanation: "A hasreflexek felületes, poliszinaptikus reflexek. A pyramispálya normálisan facilitálja őket, ezért a pálya sérülésekor a reflexek renyhévé válnak vagy kiesnek. Az egyoldali kiesés különösen informatív."
+                    },
+                    {
+                        question: "Milyen neurológiai állapotban lehet fiziológiás a Babinski-jel?",
+                        options: ["Idős korban", "Alvás közben", "Kb. 2 éves korig csecsemőknél", "Soha nem fiziológiás."],
+                        correct: 2,
+                        explanation: "A Babinski-jel kb. 2 éves korig fiziológiás lehet, mivel a pyramispálya myelinizációja (velőhüvelyesedése) még nem fejeződött be, így a gátló kontrollja sem teljes."
+                    },
+                    {
+                        question: "Mely agyidegek közvetítik a corneareflexet?",
+                        options: ["Afferens: N. Opticus (II), Efferens: N. Oculomotorius (III)", "Afferens: N. Trigeminus (V), Efferens: N. Facialis (VII)", "Afferens: N. Facialis (VII), Efferens: N. Trigeminus (V)", "Mindkét szárat a N. Oculomotorius (III) közvetíti"],
+                        correct: 1,
+                        explanation: "A corneareflex egy agytörzsi reflex. Az afferens (érző) szárát a n. trigeminus (V.), az efferens (mozgató) szárát pedig a n. facialis (VII.) alkotja, ami a szemhéjak zárását eredményezi."
+                    },
+                    {
+                        question: "Mi a 'néma talp' jelenségének klinikai jelentősége?",
+                        options: ["Normális lelet.", "Perifériás idegsérülésre utal.", "Szintén pyramispálya-károsodásra utalhat, különösen ha egyoldali.", "A beteg nem kooperál."],
+                        correct: 2,
+                        explanation: "Ha a talp ingerlésére semmilyen válasz nem váltható ki (sem flexiós, sem extensiós), azt 'néma talpnak' nevezzük. Ez, különösen ha egyoldalúan jelentkezik, szintén a pyramispálya károsodásának jele lehet."
+                    },
+                    {
+                        question: "Milyen reflexeltérés jellemző a spinális sokk állapotára (pl. akut gerincvelő-sérülés után)?",
+                        options: ["Azonnali hyperreflexia és clonus", "Átmeneti areflexia a laesio szintje alatt", "Fokozott felületes reflexek", "Változatlan reflexek"],
+                        correct: 1,
+                        explanation: "Akut, súlyos felső motoneuron laesio (pl. gerincvelő harántsérülés) után a kezdeti fázisban ún. spinális sokk alakul ki, amelyet a laesio alatti területeken petyhüdt bénulás és areflexia (a reflexek teljes hiánya) jellemez."
+                    },
+                    {
+                        question: "A mélyreflexek 4+ értékelése a reflex-skálán mit jelent?",
+                        options: ["Normális választ", "Csökkent választ", "Fokozott választ clonus nélkül", "Igen élénk választ, amelyhez clonus társul"],
+                        correct: 3,
+                        explanation: "A reflex-skálán a 4+ a legmagasabb fokozat, ami kórosan fokozott, igen élénk reflexválaszt jelez, amelyhez clonus (ritmikus izomösszehúzódás) is társul."
+                    },
+                    {
+                        question: "Melyik kóros reflex váltható ki a vádli megszorításával?",
+                        options: ["Oppenheim-jel", "Chaddock-jel", "Gordon-jel", "Schaefer-jel"],
+                        correct: 2,
+                        explanation: "A Gordon-jel a Babinski-jel egy ekvivalense, amelyet a vádli izomzatának határozott megszorításával lehet kiváltani. Kóros esetben a válasz az öregujj hátrahajlása."
+                    },
+                    {
+                        question: "Melyik NEM az alsó motoneuron (perifériás) laesio jele?",
+                        options: ["Izomatrófia", "Hypotonia", "Fasciculatio", "Spaszticitás"],
+                        correct: 3,
+                        explanation: "A spaszticitás (fokozott izomtónus, merevség) a felső motoneuron (centrális) laesio jellegzetes tünete. Az alsó motoneuron károsodásra a hypotonia (petyhüdtség) jellemző."
+                    },
+                    {
+                        question: "Mi a reflexív afferens szára?",
+                        options: ["A végrehajtó izom.", "Az érzőneuron nyúlványa, ami az ingert a központ felé vezeti.", "A mozgatóneuron nyúlványa.", "A szinapszis a gerincvelőben."],
+                        correct: 1,
+                        explanation: "A reflexív afferens (centripetális) szára az érzőneuron, amely a receptor által felvett ingert a reflexközpont (gerincvelő vagy agytörzs) felé szállítja."
+                    },
+                    {
+                        question: "A Rossolimo-jel kiváltásakor milyen választ tekintünk kórosnak?",
+                        options: ["A lábujjak hátrahajlása (dorsalflexió).", "A lábujjak talp felé hajlása (plantárflexió).", "A lábfej befelé fordulása.", "Nincs válasz."],
+                        correct: 1,
+                        explanation: "A Rossolimo-jel kóros válasza a lábujjak gyors, rövid plantárflexiója (talp felé hajlása) az ujjbegyekre mért gyors ütésre. Ez is a pyramispálya-károsodás egyik jele."
+                    },
+                    {
+                        question: "Melyik reflexvizsgálat ad információt az L2-L4 gerincvelői szegmentumokról?",
+                        options: ["Achilles-reflex", "Tricepsreflex", "Patellareflex", "Hasreflex"],
+                        correct: 2,
+                        explanation: "A patellareflex (térdreflex) elsősorban az L2-L4 (főként L3-L4) gerincvelői szegmentumok és ideggyökök épségét tükrözi."
+                    },
+                    {
+                        question: "Melyik állítás írja le helyesen a centrális és perifériás bénulás közti különbséget az izomatrófia szempontjából?",
+                        options: ["Centrálisnál korai és súlyos, perifériásnál nincs.", "Mindkettőnél egyforma mértékű.", "Centrálisnál nincs vagy csak késői, inaktivitásos, míg perifériásnál korai és kifejezett.", "Perifériásnál nincs, centrálisnál mindig van."],
+                        correct: 2,
+                        explanation: "Perifériás (LMN) laesiónál a denerváció miatt korai és kifejezett izomsorvadás (atrófia) alakul ki. Centrális (UMN) laesiónál az izmok beidegzése megmarad, így atrófia nem, vagy csak későn, a nemhasználat miatt (inaktivitásos atrófia) jelentkezik."
+                    }
+                ]
+            },
+            'kisagy': {
+                title: 'A kisagy károsodása',
+                questions: [
+                    {
+                        question: "Mi a kisagyi károsodás legfőbb, kardinális tünete?",
+                        options: ["Izomgyengeség (parézis)", "Érzészavar", "Ataxia (mozgáskoordinációs zavar)", "Memóriazavar"],
+                        correct: 2,
+                        explanation: "Az ataxia, vagyis az akaratlagos mozgások koordinációjának, összerendezettségének zavara a kisagyi károsodás legjellemzőbb tünete."
+                    },
+                    {
+                        question: "Melyik tünetre utal a 'skandáló beszéd' (scanning speech) kifejezés?",
+                        options: ["Afázia", "Dysphagia", "Cerebelláris dysarthria", "Apraxia"],
+                        correct: 2,
+                        explanation: "A 'skandáló beszéd' a cerebelláris dysarthria egyik formája, ahol a beszéd lassú, tagolt, a szótagok szétesnek, és a hangsúlyozás szabálytalan, ami a beszédszervek koordinációs zavarára utal."
+                    },
+                    {
+                        question: "Milyen irányúak a tünetek egy féloldali kisagyi lézió esetén a lézióhoz képest?",
+                        options: ["Ellenoldali (kontralaterális)", "Azonos oldali (ipszilaterális)", "Mindig kétoldaliak", "Keresztezettek"],
+                        correct: 1,
+                        explanation: "A kisagyi pályák anatómiai elrendeződése miatt (kétszeres kereszteződés vagy annak hiánya) a kisagy egyik féltekéjének károsodása jellemzően az azonos (ipszilaterális) oldali végtagokon és testfélen okoz tüneteket."
+                    },
+                    {
+                        question: "Mi a dysmetria?",
+                        options: ["Gyors, váltakozó mozgások nehezítettsége.", "A mozgások távolságának, irányának és erejének pontatlan megítélése.", "Akaratlan, ritmikus szemmozgás.", "Csökkent izomtónus."],
+                        correct: 1,
+                        explanation: "A dysmetria a célirányos mozgások pontatlanságát jelenti, ami vagy a célon való túllövésben (hipermetria), vagy a cél elérése előtti megállásban (hipometria) nyilvánul meg."
+                    },
+                    {
+                        question: "A törzsataxia (állás és járás bizonytalansága) a kisagy melyik részének károsodására utal elsősorban?",
+                        options: ["Laterális hemisphaeriumok (neocerebellum)", "Vermis és lobulus flocculonodularis (archicerebellum)", "Nucleus dentatus", "Pedunculus cerebellaris superior"],
+                        correct: 1,
+                        explanation: "A törzsataxia, ami az egyensúly és a testtartás zavarát jelenti, tipikusan a kisagy középvonali struktúráinak, a vermisnek (spinocerebellum) és a lobulus flocculonodularisnak (vestibulocerebellum) a károsodására utal."
+                    },
+                    {
+                        question: "Melyik állítás jellemző az intenciós tremorra?",
+                        options: ["Nyugalomban a legerősebb.", "Célirányos mozgás közben, a célhoz közeledve fokozódik.", "Gyors, finom hullámú remegés.", "Mindig a fej remegését jelenti."],
+                        correct: 1,
+                        explanation: "Az intenciós tremor célirányos mozgás során jelentkező, a célhoz közeledve fokozódó (crescendo) jellegű, durva, alacsony frekvenciájú remegés, ami a kisagyi pályák (főleg a dentato-rubro-thalamo-corticalis kör) sérülésének jele."
+                    },
+                    {
+                        question: "Mi a dysdiadochokinesia?",
+                        options: ["Nyelési zavar", "Beszédzavar", "Gyors, alternáló mozgások kivitelezésének nehezítettsége", "Írászavar"],
+                        correct: 2,
+                        explanation: "A dysdiadochokinesia a gyors, egymással ellentétes irányú mozgások (pl. alkar pronáció-szupináció) kivitelezésének zavara. A mozgások lelassulnak, darabossá, szabálytalanná válnak."
+                    },
+                    {
+                        question: "A Wallenberg szindrómát melyik ér elzáródása okozza leggyakrabban, ami a kisagyat is ellátja?",
+                        options: ["Arteria cerebri anterior", "Arteria cerebelli posterior inferior (PICA)", "Arteria carotis interna", "Arteria cerebri media"],
+                        correct: 1,
+                        explanation: "A Wallenberg szindrómát a nyúltvelő lateralis részének és a kisagy alsó-hátsó részének vérellátási zavara okozza, amit leggyakrabban a PICA elzáródása idéz elő."
+                    },
+                    {
+                        question: "Mi az a Cerebelláris Kognitív Affektív Szindróma (CCAS)?",
+                        options: ["Csak a motoros tanulás zavara.", "A kisagyi károsodás okozta kognitív (pl. végrehajtó funkciók) és affektív (érzelmi) zavarok együttese.", "A kisagyi tumorok egy típusa.", "Súlyos, generalizált ataxia."],
+                        correct: 1,
+                        explanation: "A CCAS (Schmahmann-szindróma) egy tünetegyüttes, amely a kisagyi károsodás nem-motoros következményeit foglalja magába, mint a végrehajtó funkciók, a téri tájékozódás, a nyelv és az érzelmi szabályozás zavarai."
+                    },
+                    {
+                        question: "A Friedreich-ataxia milyen öröklésmenetű betegség?",
+                        options: ["Autoszomális domináns", "Autoszomális recesszív", "X-kromoszómához kötött", "Nem örökletes"],
+                        correct: 1,
+                        explanation: "A Friedreich-ataxia a leggyakoribb autoszomális recesszív öröklődésű ataxia, amit az FXN gén GAA repeat expanziója okoz, frataxin fehérje hiányt eredményezve."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb malignus gyermekkori agydaganat, ami tipikusan a kisagy vermiséből indul ki?",
+                        options: ["Astrocytoma", "Glioblastoma", "Medulloblastoma", "Meningeoma"],
+                        correct: 2,
+                        explanation: "A medulloblastoma a leggyakoribb rosszindulatú gyermekkori agydaganat, ami jellemzően a kisagy féregállományából (vermis) indul ki és a negyedik agykamrába terjedve hydrocephalust okozhat."
+                    },
+                    {
+                        question: "Mi a 'DANISH' mnemonik 'N' betűjének jelentése a kisagyi tünetek között?",
+                        options: ["Neuropathia", "Nehézség", "Nausea (hányinger)", "Nystagmus"],
+                        correct: 3,
+                        explanation: "A DANISH mozaikszó a főbb cerebelláris motoros tüneteket foglalja össze: Dysdiadochokinesia, Ataxia, Nystagmus, Intention tremor, Speech (slurred/scanning), Hypotonia. Az 'N' a nystagmust jelöli."
+                    },
+                    {
+                        question: "A Romberg-próba során hogyan viselkedik egy tiszta cerebelláris ataxiás beteg?",
+                        options: ["Csak csukott szemmel dől el.", "Már nyitott szemmel is instabil, és a szem becsukása ezt alig rontja.", "Tökéletesen stabil marad.", "Mindig előre dől."],
+                        correct: 1,
+                        explanation: "Tiszta cerebelláris ataxia esetén a beteg már nyitott szemmel is instabil (a kisagyi koordinációs zavar miatt), és mivel az egyensúlyzavar nem a propriocepció hiányából fakad, a vizuális kontroll kiesése (szem becsukása) ezt nem, vagy csak kismértékben fokozza."
+                    },
+                    {
+                        question: "Melyik kórképre jellemző a progresszív cerebelláris ataxia és a jellegzetesen nagyon lassú szakkadikus szemmozgások?",
+                        options: ["SCA1", "SCA2", "SCA3", "SCA6"],
+                        correct: 1,
+                        explanation: "A spinocerebelláris ataxia 2-es típusának (SCA2) egyik legkorábbi és legjellegzetesebb tünete a feltűnően lelassult szakkadikus szemmozgás, a progrediáló ataxia mellett."
+                    },
+                    {
+                        question: "Melyik a kisagykéreg egyetlen kimeneti (efferens) neuron típusa?",
+                        options: ["Szemcsesejt", "Purkinje-sejt", "Kosársejt", "Golgi-sejt"],
+                        correct: 1,
+                        explanation: "A Purkinje-sejtek a kisagykéreg egyetlen efferens neuronjai. Ezek nagyméretű, gátló (GABAerg) neuronok, amelyek a mély kisagyi magvakra vetítenek, modulálva a kisagy kimenetét."
+                    },
+                    {
+                        question: "Az 'ingareflex' (pendular reflex) melyik kisagyi tünet megnyilvánulása?",
+                        options: ["Ataxia", "Dysmetria", "Hypotonia", "Intenciós tremor"],
+                        correct: 2,
+                        explanation: "A hypotonia (csökkent izomtónus) egyik jele az ingareflex. A mélyreflex (pl. patellareflex) kiváltásakor a végtag a normálisnál többször, tehetetlenül kileng, mert a tónustalan izmok nem fékezik le a mozgást."
+                    },
+                    {
+                        question: "Az ataxia-telangiectasia (Louis-Bar szindróma) melyik gén mutációjához köthető?",
+                        options: ["FXN", "ATXN1", "ATM", "CACNA1A"],
+                        correct: 2,
+                        explanation: "Az ataxia-telangiectasiát az ATM (Ataxia Telangiectasia Mutated) gén mutációi okozzák. Ez a gén a DNS-hibajavító mechanizmusokban játszik kulcsszerepet."
+                    },
+                    {
+                        question: "Melyik kisagyi kocsány (pedunculus) szállítja a legtöbb afferens információt a nagyagykéregből (a hídon keresztül)?",
+                        options: ["Pedunculus cerebellaris superior", "Pedunculus cerebellaris medius", "Pedunculus cerebellaris inferior", "Mindhárom egyformán"],
+                        correct: 1,
+                        explanation: "A pedunculus cerebellaris medius (brachium pontis) a legnagyobb a három közül, és szinte kizárólag afferens (corticopontocerebellaris) rostokat tartalmaz, amelyek a mozgástervezéssel kapcsolatos információkat közvetítik a nagyagykéregből a kisagyba."
+                    },
+                    {
+                        question: "Milyen terápiás lehetőség van az epizodikus ataxia 2-es típusának (EA2) kezelésére?",
+                        options: ["Sebészeti beavatkozás", "Acetazolamid", "Nagy dózisú B-vitamin", "Fizikoterápia nem segít"],
+                        correct: 1,
+                        explanation: "Az EA2 epizódjainak gyakoriságát és súlyosságát gyakran hatékonyan lehet csökkenteni acetazolamid (egy karboanhidráz-gátló) adásával."
+                    },
+                    {
+                        question: "Mi a 'gondolkodás dysmetriája' elmélet lényege?",
+                        options: ["A gondolkodás lelassulása kisagyi károsodásban.", "A kisagy motoros koordinációs elvei (pl. időzítés, pontosság) kiterjednek a kognitív és affektív folyamatokra is.", "A betegek képtelenek a metaforikus gondolkodásra.", "A kisagyi károsodás mindig súlyos demenciát okoz."],
+                        correct: 1,
+                        explanation: "A 'gondolkodás dysmetriája' (Schmahmann) elmélete szerint a CCAS nem-motoros tünetei úgy is felfoghatók, mint a gondolatok és érzelmek koordinációs zavara, ami analóg a motoros dysmetriával. A kisagy univerzális számítási algoritmusokat alkalmaz a mozgás és a gondolkodás szabályozására is."
+                    }
+                ]
+            }
+        };
+
+        const app = {
+            // DOM Elements
+            topicSelectionScreen: document.getElementById('topic-selection'),
+            quizInterfaceScreen: document.getElementById('quiz-interface'),
+            finalScoreScreen: document.getElementById('final-score-screen'),
+            
+            topicContainer: document.querySelector('#topic-selection .grid'),
+            quizTitle: document.getElementById('quiz-title'),
+            scoreDisplay: document.getElementById('score'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationText: document.getElementById('explanation-text'),
+            
+            backToTopicsBtn: document.getElementById('back-to-topics'),
+            nextQuestionBtn: document.getElementById('next-question'),
+            
+            finalTopicTitle: document.getElementById('final-topic-title'),
+            finalScoreDisplay: document.getElementById('final-score'),
+            restartQuizBtn: document.getElementById('restart-quiz'),
+            changeTopicBtn: document.getElementById('change-topic'),
+
+            // State
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            questions: [],
+
+            init() {
+                this.renderTopicSelection();
+                this.addEventListeners();
+            },
+
+            addEventListeners() {
+                this.backToTopicsBtn.addEventListener('click', () => this.showScreen('topics'));
+                this.nextQuestionBtn.addEventListener('click', () => this.nextQuestion());
+                this.restartQuizBtn.addEventListener('click', () => this.startQuiz(this.currentTopic));
+                this.changeTopicBtn.addEventListener('click', () => this.showScreen('topics'));
+            },
+
+            renderTopicSelection() {
+                this.topicContainer.innerHTML = '';
+                Object.keys(quizData).forEach(key => {
+                    const topic = quizData[key];
+                    const button = document.createElement('button');
+                    button.className = "p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 text-left";
+                    button.innerHTML = `
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${topic.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">${topic.questions.length} kérdés</p>
+                    `;
+                    button.addEventListener('click', () => this.startQuiz(key));
+                    this.topicContainer.appendChild(button);
+                });
+            },
+
+            startQuiz(topicKey) {
+                this.currentTopic = topicKey;
+                this.questions = this.shuffleArray([...quizData[topicKey].questions]);
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.quizTitle.textContent = quizData[topicKey].title;
+                this.updateScore();
+                this.displayQuestion();
+                this.showScreen('quiz');
+            },
+
+            displayQuestion() {
+                this.explanationContainer.classList.add('hidden');
+                this.nextQuestionBtn.classList.add('disabled');
+                
+                if (this.currentQuestionIndex >= this.questions.length) {
+                    this.showFinalScore();
+                    return;
+                }
+
+                const question = this.questions[this.currentQuestionIndex];
+                this.questionText.textContent = question.question;
+                this.optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = "w-full text-left p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent quiz-option";
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.addEventListener('click', (e) => this.selectAnswer(e));
+                    this.optionsContainer.appendChild(button);
+                });
+
+                this.updateProgressBar();
+            },
+
+            selectAnswer(e) {
+                const selectedButton = e.target;
+                const selectedIndex = parseInt(selectedButton.dataset.index);
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedIndex === question.correct;
+
+                if (isCorrect) {
+                    this.score++;
+                    selectedButton.classList.add('correct');
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    // Highlight the correct answer
+                    const correctButton = this.optionsContainer.querySelector(`[data-index='${question.correct}']`);
+                    correctButton.classList.add('correct');
+                }
+
+                this.explanationText.textContent = question.explanation;
+                this.explanationContainer.classList.remove('hidden');
+                
+                Array.from(this.optionsContainer.children).forEach(btn => btn.classList.add('disabled'));
+                
+                this.nextQuestionBtn.classList.remove('disabled');
+                this.updateScore();
+            },
+
+            nextQuestion() {
+                this.currentQuestionIndex++;
+                this.displayQuestion();
+            },
+
+            updateScore() {
+                this.scoreDisplay.textContent = `Pontszám: ${this.score} / ${this.questions.length}`;
+            },
+
+            updateProgressBar() {
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            },
+
+            showFinalScore() {
+                this.finalTopicTitle.textContent = quizData[this.currentTopic].title;
+                this.finalScoreDisplay.textContent = `${this.score} / ${this.questions.length}`;
+                this.showScreen('final');
+            },
+
+            showScreen(screen) {
+                this.topicSelectionScreen.classList.add('hidden');
+                this.quizInterfaceScreen.classList.add('hidden');
+                this.finalScoreScreen.classList.add('hidden');
+
+                if (screen === 'topics') {
+                    this.topicSelectionScreen.classList.remove('hidden');
+                } else if (screen === 'quiz') {
+                    this.quizInterfaceScreen.classList.remove('hidden');
+                } else if (screen === 'final') {
+                    this.finalScoreScreen.classList.remove('hidden');
+                }
+            },
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        };
+
+        app.init();
+    </script>
+
+</body>
+</html>

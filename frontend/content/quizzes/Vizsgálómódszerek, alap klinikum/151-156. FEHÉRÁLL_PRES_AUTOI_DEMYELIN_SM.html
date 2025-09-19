@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option:hover {
+            background-color: #ecfdf5; /* light green */
+            border-color: #10b981; /* green */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* lighter green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        .explanation {
+            border-left: 4px solid #34d399; /* green */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="bg-white p-8 rounded-2xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold mb-2 text-slate-900">Interaktív Neurológia Teszt</h1>
+            <p class="text-slate-600 mb-8">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button data-topic="151" class="topic-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">151. Multiplex agyi fehérállományi károsodások</button>
+                <button data-topic="152" class="topic-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">152. Posterior leukoencephalopathia szindróma (PRES)</button>
+                <button data-topic="153" class="topic-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">153. Autoimmun encephalitisek</button>
+                <button data-topic="154" class="topic-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">154. Demyelinisatios és dysmyelinisatios betegségek</button>
+                <button data-topic="155" class="topic-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">155-156. A sclerosis multiplex és kezelése</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-xl font-bold text-slate-900">Téma Címe</h2>
+                    <button id="back-to-menu" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg text-sm">Vissza a menübe</button>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-emerald-500 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="feedback-container" class="mt-6 hidden">
+                    <div id="explanation-box" class="explanation bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-slate-800 mb-2">Magyarázat</h3>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                    <button id="next-question-btn" class="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-slate-900">Eredmények</h2>
+                <p id="score-text" class="text-xl mb-6 text-slate-700"></p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition">Újrapróbálkozás</button>
+                    <button id="main-menu-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition">Főmenü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+            "151": {
+                title: "151. Multiplex agyi fehérállományi károsodások elkülönítése",
+                questions: [
+                    {
+                        question: "Melyik képalkotó szekvencia a legérzékenyebb a fehérállományi léziók (WML) kimutatására?",
+                        options: ["T1-súlyozott", "CT angiográfia", "T2-súlyozott és FLAIR", "Natív CT"],
+                        answer: 2,
+                        explanation: "A fehérállományi léziók leginkább a T2-súlyozott és a FLAIR (Fluid-Attenuated Inversion Recovery) MRI szekvenciákon jelennek meg magas jelintenzitású területekként, mivel ezek érzékenyek a szöveti víztartalom növekedésére."
+                    },
+                    {
+                        question: "Mi a 'Dawson-ujjak' jelenség az MRI-n és melyik betegségre jellemző?",
+                        options: ["A kamrákra merőleges, ovoid léziók, jellemzően Sclerosis Multiplexre (MS).", "Pillangó alakú daganat, jellemzően glioblastomára.", "Koncentrikus, hagymalevélszerű léziók, jellemzően Baló-féle szklerózisra.", "A corpus callosum spleniumának léziója, jellemzően MERS-re."],
+                        answer: 0,
+                        explanation: "A Dawson-ujjak a kamrákra merőleges, ovoid, periventrikuláris léziók, amelyek igen jellemzőek a Sclerosis Multiplexre."
+                    },
+                    {
+                        question: "Mire utal a gadolínium kontrasztanyagot halmozó lézió az agyi MRI-n?",
+                        options: ["Krónikus, inaktív hegesedésre.", "A vér-agy gát sérülésére és aktív gyulladásos folyamatra.", "Normális agyszövetre.", "Zsírtartalmú elváltozásra."],
+                        answer: 1,
+                        explanation: "A kontrasztanyag halmozása a vér-agy gát károsodását és az aktív kóros folyamatot (pl. gyulladás, neoplázia) jelzi, mivel a kontrasztanyag kilép az érpályából a kóros szövetbe."
+                    },
+                    {
+                        question: "Melyik betegségre utal, ha a liquorban CSF-specifikus oligoklonális IgG sávok (OCB-k) mutathatók ki?",
+                        options: ["Vaszkuláris eredetű fehérállomány-károsodás", "Akut Disszeminált Encephalomyelitis (ADEM)", "Sclerosis Multiplex (MS)", "Progresszív Multifokális Leukoencephalopathia (PML)"],
+                        answer: 2,
+                        explanation: "A CSF-specifikus OCB-k (amelyek csak a liquorban, de a szérumban nem mutathatók ki) az intrathecalis IgG szintézis jelei, és az MS betegek több mint 95%-ában pozitívak, így fontos diagnosztikus markert jelentenek."
+                    },
+                    {
+                        question: "Mi a fő különbség az ADEM és az MS MRI képe között?",
+                        options: ["Az ADEM léziók kisebbek és kevesebben vannak.", "Az MS-ben soha nincs kontraszthalmozás.", "Az ADEM léziók általában egy időben keletkeznek, míg az MS-ben különböző korú léziók láthatók.", "Az ADEM soha nem érinti a szürkeállományt."],
+                        answer: 2,
+                        explanation: "Az ADEM-re jellemző, hogy a léziók általában egy időben keletkeznek (monofázisos betegség), míg az MS-re az időbeli disszemináció, azaz a különböző korú (pl. halmozó és nem halmozó) léziók együttes jelenléte a jellemző."
+                    },
+                    {
+                        question: "Melyik betegségre jellemző a longitudinálisan extenzív transzverz myelitis (LETM)?",
+                        options: ["Sclerosis Multiplex (MS)", "Neuromyelitis Optica Spektrum Betegség (NMOSD)", "Progresszív Multifokális Leukoencephalopathia (PML)", "CADASIL"],
+                        answer: 1,
+                        explanation: "A longitudinálisan extenzív transzverz myelitis (LETM), amely legalább 3 gerincvelői szegmentumra kiterjedő gyulladást jelent, az NMOSD egyik radiológiai fémjele."
+                    },
+                    {
+                        question: "Milyen kórokozó okozza a Progresszív Multifokális Leukoencephalopathiát (PML)?",
+                        options: ["Herpes Simplex Vírus (HSV)", "Epstein-Barr Vírus (EBV)", "JC polyomavírus", "Borrelia burgdorferi"],
+                        answer: 2,
+                        explanation: "A PML-t a John Cunningham (JC) polyomavírus reaktivációja okozza súlyosan immunszupprimált egyénekben."
+                    },
+                    {
+                        question: "Melyik genetikai betegségre jellemző az anterior temporális pólusok és az externális kapszula MRI érintettsége?",
+                        options: ["Metakromatikus leukodystrophia (MLD)", "CADASIL", "X-hez kötött adrenoleukodystrophia (X-ALD)", "Alexander-betegség"],
+                        answer: 1,
+                        explanation: "A CADASIL egy örökletes kisérbetegség, amelyre jellegzetes az anterior temporális és externális kapszula érintettsége az MRI-n."
+                    },
+                    {
+                        question: "Mi jellemző a liquorleletre ADEM esetén?",
+                        options: ["Mindig normális.", "Magas sejtszám neutrofil dominanciával.", "Limfocitás pleocytosis és emelkedett fehérje, de az OCB-k általában hiányoznak vagy átmenetiek.", "Kizárólag OCB pozitivitás."],
+                        answer: 2,
+                        explanation: "ADEM esetén a liquorban gyakran limfocitás pleocytosis és emelkedett fehérje-koncentráció mutatható ki, de az oligoklonális sávok (OCB-k) általában hiányoznak vagy nem CSF-specifikusak."
+                    },
+                    {
+                        question: "Melyik betegség diagnózisát erősíti meg az Aquaporin-4 (AQP4-IgG) antitest kimutatása?",
+                        options: ["Sclerosis Multiplex (MS)", "Akut Disszeminált Encephalomyelitis (ADEM)", "Neuromyelitis Optica Spektrum Betegség (NMOSD)", "Neurosarcoidosis"],
+                        answer: 2,
+                        explanation: "Az aquaporin-4 (AQP4) vízcsatorna fehérje elleni autoantitestek (AQP4-IgG) kimutatása az NMOSD diagnosztikus markere."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a fehérállományi léziókra (WML)?",
+                        options: ["Mindig súlyos klinikai tüneteket okoznak.", "Kimutatásukra az MRI a legérzékenyebb módszer.", "Növelhetik a stroke és a demencia kockázatát.", "Gyakran a kisérbetegség radiológiai markerei."],
+                        answer: 0,
+                        explanation: "Nem minden fehérállományi lézió okoz tünetet. Különösen kisméretű és kevés számú léziók incidentális leletként is előfordulhatnak, bár jelenlétük hosszú távon kockázati tényezőt jelenthet."
+                    },
+                    {
+                        question: "Mi a 'fekete lyuk' (black hole) az MRI-n és mire utal?",
+                        options: ["Aktív, gyulladásos lézió.", "Krónikus, súlyos axonvesztéssel járó lézió, ami T1-súlyozott képeken hipointenzív.", "Vérzés jele.", "Cisztás elváltozás."],
+                        answer: 1,
+                        explanation: "A 'fekete lyukak' krónikus, axonvesztéssel és szöveti destrukcióval járó léziók, amelyek T1-súlyozott képeken hipointenzív (sötét) foltokként jelennek meg, és súlyosabb, irreverzibilis károsodásra utalnak."
+                    },
+                    {
+                        question: "Melyik betegségre jellemzőek a 'nyitott gyűrűs' kontraszthalmozást mutató, daganatszerű léziók?",
+                        options: ["Agytályog", "Glioblastoma", "Tumefaktív Sclerosis Multiplex", "PML"],
+                        answer: 2,
+                        explanation: "A tumefaktív (daganatszerű) MS léziókra gyakran a 'nyitott gyűrű' (a kamra vagy a kéreg felé nyitott) halmozás jellemző, ami segít elkülöníteni más, zárt gyűrűt mutató elváltozásoktól."
+                    },
+                    {
+                        question: "Milyen típusú fehérállomány-károsodás jellemző az ozmotikus demielinizációs szindrómára?",
+                        options: ["Fokális kortikális léziók", "Pontin és extrapontin mielinolízis", "Diffúz agyi atrófia", "Periventrikuláris léziók"],
+                        answer: 1,
+                        explanation: "Az ozmotikus demielinizációs szindróma (ODS), amelyet leggyakrabban a hyponatraemia túl gyors korrekciója vált ki, jellegzetes pontin (hídi) és extrapontin mielinolízist okozhat."
+                    },
+                    {
+                        question: "Melyik fehérállományi betegségre jellemző a szimmetrikus, pillangó-szerű elváltozás a corpus callosumban?",
+                        options: ["Sclerosis Multiplex", "ADEM", "Glioblastoma multiforme ('pillangó glioma') vagy limfóma", "PML"],
+                        answer: 2,
+                        explanation: "A corpus callosumon áthúzódó, szimmetrikus, pillangó alakú lézió jellegzetes lehet a glioblastoma multiforméra vagy a centrális idegrendszeri limfómára."
+                    },
+                    {
+                        question: "Mi a Fazekas skála célja?",
+                        options: ["Az SM aktivitásának mérése.", "A fehérállományi hiperintenzitások kiterjedésének és súlyosságának radiológiai pontozása.", "A liquor sejtszámának osztályozása.", "A kognitív hanyatlás mértékének felmérése."],
+                        answer: 1,
+                        explanation: "A Fazekas skála egy széles körben használt radiológiai pontozórendszer, amely a T2-súlyozott vagy FLAIR MRI képeken látható fehérállományi hiperintenzitások kiterjedését és súlyosságát kvantifikálja periventrikuláris és mély fehérállományi régiókban."
+                    },
+                    {
+                        question: "Mi a fő különbség a primer és szekunder demielinizációs betegségek között?",
+                        options: ["A primer mindig súlyosabb.", "A szekunder mindig genetikai eredetű.", "A primer idiopátiás (pl. autoimmun), míg a szekunder ismert kiváltó ok (pl. fertőzés, iszkémia) következménye.", "A primer csak a KIR-t, a szekunder csak a PIR-t érinti."],
+                        answer: 2,
+                        explanation: "A primer demyelinizációs betegségek idiopátiás gyulladásos kórképek (pl. MS), míg a szekunder formák ismert kiváltó ok, mint fertőzés, iszkémia vagy toxikus ártalom következtében alakulnak ki."
+                    },
+                    {
+                        question: "Milyen klinikai tünetegyüttes utal Susac szindrómára?",
+                        options: ["Opticus neuritis és myelitis.", "Encephalopathia, retina artéria elzáródások és szenzorineurális halláscsökkenés.", "Gyorsan progrediáló demencia és myoclonus.", "Láz, fejfájás és tarkókötöttség."],
+                        answer: 1,
+                        explanation: "A Susac szindróma egy ritka mikroangiopátia, amelyet az encephalopathia, a retina artéria elzáródások (látászavar) és a szenzorineurális halláscsökkenés klasszikus triásza jellemez."
+                    },
+                    {
+                        question: "Mikor indokolt agyi biopszia elvégzése multiplex fehérállományi léziók esetén?",
+                        options: ["Minden esetben ez az első lépés.", "Soha nem indokolt, túl kockázatos.", "Ritkán, atipikus, progrediáló léziók esetén, ha más módszerekkel nem sikerül diagnózist felállítani.", "Csak ha a beteg 50 év alatti."],
+                        answer: 2,
+                        explanation: "Az agyi biopszia invazivitása miatt csak végső esetben szükséges, de indokolt lehet atipikus, progrediáló, térfoglaló jellegű léziók esetén, ha más módszerekkel (MRI, liquor, szerológia) nem sikerül egyértelmű diagnózist felállítani."
+                    },
+                    {
+                        question: "Melyik állítás igaz a diffúzió-súlyozott képalkotás (DWI) hasznosságára a fehérállományi léziók elkülönítésében?",
+                        options: ["Minden fehérállományi lézió diffúziórestrikciót mutat.", "A DWI nem hasznos a fehérállomány vizsgálatában.", "Segít elkülöníteni az akut iszkémiás léziókat (restrikció) a legtöbb krónikus vagy vazogén ödémás léziótól (nincs restrikció).", "Csak a vérzések kimutatására alkalmas."],
+                        answer: 2,
+                        explanation: "A DWI kulcsfontosságú a differenciáldiagnózisban, mert az akut iszkémiás léziók (stroke) citotoxikus ödémával és jellegzetes diffúziórestrikcióval járnak, míg a legtöbb krónikus vagy vazogén ödémával járó fehérállományi lézió (pl. PRES, legtöbb MS plakk) nem mutat valódi diffúziórestrikciót."
+                    }
+                ]
+            },
+            "152": {
+                title: "152. Posterior leukoencephalopathia szindróma (PRES)",
+                questions: [
+                    {
+                        question: "Mi a PRES (Posterior Reversible Encephalopathy Syndrome) lényege?",
+                        options: ["Egy krónikus, lassan progrediáló neurodegeneratív betegség.", "Egy akut vagy szubakut neurológiai tünetegyüttes, amelyet jellemzően reverzibilis, posterior dominanciájú vazogén ödéma okoz.", "Az agyi artériák gyulladásos megbetegedése.", "Az agy fertőzéses megbetegedése."],
+                        answer: 1,
+                        explanation: "A PRES egy klinikai-radiológiai entitás, amelyet 'elsősorban az agy hátsó (poszterior) területein... kialakuló, jellemzően reverzibilis vazogén ödéma jellemez'."
+                    },
+                    {
+                        question: "Melyik NEM tartozik a PRES leggyakoribb klinikai tünetei közé?",
+                        options: ["Fejfájás", "Görcsrohamok", "Lassan progrediáló izomatrófia", "Tudatzavar és látászavarok"],
+                        answer: 2,
+                        explanation: "A PRES jellemző tünetegyüttese a fejfájás, görcsrohamok, tudatzavar (encephalopathia) és látászavarok. A lassan progrediáló izomatrófia nem jellemző erre az akut szindrómára."
+                    },
+                    {
+                        question: "Melyik a PRES leggyakoribb kiváltó oka?",
+                        options: ["Fejtrauma", "Alacsony vérnyomás", "Akut, súlyos vérnyomás-emelkedés (hipertónia)", "Diabetes mellitus"],
+                        answer: 2,
+                        explanation: "Az 'egyik leggyakoribb kiváltó tényező az akut, súlyos vérnyomás-emelkedés (hipertóniás krízis)'."
+                    },
+                    {
+                        question: "Melyik képalkotó módszer a legérzékenyebb a PRES diagnosztizálására?",
+                        options: ["Koponya CT", "Koponya röntgen", "Agyi MRI (különösen T2/FLAIR szekvenciákkal)", "SPECT"],
+                        answer: 2,
+                        explanation: "Az 'MRI a legérzékenyebb képalkotó módszer a PRES által okozott agyi elváltozások kimutatására', különösen a T2-súlyozott és FLAIR szekvenciák, amelyek a vazogén ödémát hiperintenzív területként ábrázolják."
+                    },
+                    {
+                        question: "Mi a PLES/PRES patofiziológiájának két fő elmélete?",
+                        options: ["Genetikai mutáció és vírusfertőzés", "Hiperperfúziós ('breakthrough') és endoteliális diszfunkciós elmélet", "Autoimmun és neurodegeneratív elmélet", "Traumás és toxikus elmélet"],
+                        answer: 1,
+                        explanation: "A két fő elmélet a 'cerebrális autoreguláció zavara és hiperperfúziós (\"breakthrough\") elmélet' (főleg hipertóniában) és az 'endoteliális diszfunkció, toxicitás és vazospazmus elmélet' (főleg normotenziós esetekben)."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport alkalmazása hozható gyakran összefüggésbe a PRES kialakulásával?",
+                        options: ["Fájdalomcsillapítók (NSAID-ok)", "Antibiotikumok", "Citotoxikus és immunszuppresszív gyógyszerek (pl. cyclosporin, tacrolimus)", "Vitaminok"],
+                        answer: 2,
+                        explanation: "Számos gyógyszer, különösen a 'transzplantációk során alkalmazott immunszuppresszánsok (pl. cyclosporin, tacrolimus), kemoterápiás szerek' hozhatók összefüggésbe a PRES kialakulásával."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy betegnél gyógyszer-indukált PRES gyanúja merül fel?",
+                        options: ["A gyógyszer dózisának emelése.", "Az adott szer azonnali elhagyása vagy dózisának jelentős csökkentése.", "További gyógyszerek hozzáadása a terápiához.", "Nincs teendő, a tünetek spontán megszűnnek."],
+                        answer: 1,
+                        explanation: "Ha a PRES kialakulását citotoxikus vagy immunszuppresszív gyógyszer váltotta ki, 'az adott szer azonnali elhagyása vagy dózisának jelentős csökkentése szükséges'."
+                    },
+                    {
+                        question: "Mi a különbség a PRES-re jellemző vazogén ödéma és az iszkémiás stroke-ra jellemző citotoxikus ödéma között a DWI/ADC MRI képeken?",
+                        options: ["Nincs különbség, mindkettő diffúziórestrikciót mutat.", "A vazogén ödéma általában nem mutat diffúziórestrikciót (ADC magas), míg a citotoxikus ödéma igen (ADC alacsony).", "A citotoxikus ödéma soha nem látszik a DWI-n.", "A vazogén ödéma mindig kontrasztanyagot halmoz, a citotoxikus soha."],
+                        answer: 1,
+                        explanation: "A PRES-re jellemző vazogén ödéma általában nem mutat diffúziórestrikciót, és az ADC mapon magas jelintenzitással jár. Ezzel szemben az akut iszkémiás stroke-ra jellemző citotoxikus ödéma diffúziórestrikciót okoz (DWI magas, ADC alacsony)."
+                    },
+                    {
+                        question: "Melyik agyi terület a leggyakrabban érintett PRES esetén?",
+                        options: ["Agytörzs és bazális ganglionok", "Corpus callosum", "Parietális és occipitális lebenyek", "Temporális lebenyek"],
+                        answer: 2,
+                        explanation: "A leggyakrabban érintett területek a 'parietális és occipitális lebenyek', ami a szindróma 'posterior' jellegét adja."
+                    },
+                    {
+                        question: "Mi a PLES/PRES kezelésének alapköve?",
+                        options: ["Azonnali sebészi beavatkozás.", "Hosszú távú antiepileptikus kezelés.", "A kiváltó ok gyors azonosítása és kezelése, valamint szupportív terápia.", "Nagy dózisú szteroid terápia."],
+                        answer: 2,
+                        explanation: "A PLES/PRES kezelésének alapköve a 'kiváltó ok gyors azonosítása és megszüntetése vagy kezelése, valamint a szupportív terápia'. Nincs specifikus gyógymód magára a szindrómára."
+                    },
+                    {
+                        question: "Melyik állítás igaz a PRES prognózisára?",
+                        options: ["Mindig halálos kimenetelű.", "Általában jó prognózisú, a tünetek és a radiológiai eltérések többsége reverzibilis.", "Mindig maradandó, súlyos neurológiai károsodással jár.", "A prognózis független a kezelés gyorsaságától."],
+                        answer: 1,
+                        explanation: "A PRES 'általában jó prognózisú kórkép. A klinikai tünetek és a radiológiai elváltozások többsége napokon vagy heteken belül teljes mértékben vagy jelentősen visszafejlődik', ha a kezelés időben megtörténik."
+                    },
+                    {
+                        question: "Melyik tényező jelezhet rosszabb prognózist PRES esetén?",
+                        options: ["A beteg fiatal kora.", "Normális vérnyomás a felvételkor.", "Diffúziórestrikció (citotoxikus ödéma) jelenléte az MRI-n.", "A tünetek gyors javulása."],
+                        answer: 2,
+                        explanation: "A rossz prognózist jelző faktorok közé tartozik a 'kiterjedt citotoxikus ödéma (diffúziórestrikció) jelenléte az MRI-n', ami irreverzibilis károsodásra, infarktusra utalhat."
+                    },
+                    {
+                        question: "Milyen szerepe van a lumbalpunctiónak a PRES diagnosztikájában?",
+                        options: ["Minden esetben kötelező elvégezni.", "A liquorlelet mindig specifikus eltérést mutat.", "Rendszerint nem szükséges, csak más kórképek (pl. encephalitis) kizárására.", "A liquornyomás mérése a legfontosabb."],
+                        answer: 2,
+                        explanation: "A lumbalpunctio 'rutinszerű elvégzése általában nem szükséges'. 'Elsősorban akkor jön szóba, ha infekció (pl. encephalitis, meningitis) vagy egyéb központi idegrendszeri gyulladásos folyamat gyanúja merül fel a differenciáldiagnózis során'."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a PRES-re?",
+                        options: ["A szürkeállomány soha nem érintett, kizárólag a fehérállomány károsodik.", "Gyakran társul eclampsiához.", "A tünetek általában reverzibilisek.", "Görcsrohamok gyakran előfordulnak."],
+                        answer: 0,
+                        explanation: "A 'leukoencephalopathia' elnevezés 'encephalopathiára' történő módosítása azt a felismerést tükrözi, hogy 'a kóros folyamat nem kizárólag a fehérállományt érinti, hanem a szürkeállomány is gyakran károsodik'."
+                    },
+                    {
+                        question: "Mi a teendő a vérnyomással hipertóniás krízis okozta PRES esetén?",
+                        options: ["A lehető legmagasabban kell tartani a perfúzió érdekében.", "Azonnal a normális érték alá kell csökkenteni.", "Fokozatosan és kontrolláltan kell csökkenteni, elkerülve a drasztikus esést.", "A vérnyomáskezelés nem fontos."],
+                        answer: 2,
+                        explanation: "A vérnyomás 'fokozatos és kontrollált csökkentése szükséges', a cél általában a középartériás nyomás 20-25%-os csökkentése az első néhány órában, 'kerülve a túl gyors és drasztikus vérnyomásesést'."
+                    },
+                    {
+                        question: "Milyen látászavar a legjellemzőbb PRES esetén?",
+                        options: ["Színtévesztés", "Kettőslátás", "Kortikális vakság", "Féloldali látótérkiesés (hemianopsia)"],
+                        answer: 2,
+                        explanation: "A látászavarok közül a 'kortikális vakság (a szemészeti vizsgálat normális lelete mellett a beteg nem lát)' egy jellegzetes, bár nem kizárólagos tünete a PRES-nek, ami az occipitális lebenyek érintettségére utal."
+                    },
+                    {
+                        question: "Miért sérülékenyebbek az agy hátsó (posterior) területei PRES esetén?",
+                        options: ["Mert itt a legvékonyabb a koponyacsont.", "Mert az agy hátsó keringési területei gyengébb szimpatikus beidegzéssel rendelkeznek.", "Mert itt található a legtöbb agyi véna.", "Mert itt a legmagasabb a vérnyomás."],
+                        answer: 1,
+                        explanation: "A posterior lokalizáció egyik magyarázata, hogy 'az agy hátsó keringési területei... gyengébb szimpatikus beidegzéssel rendelkeznek', ami csökkenti az autoregulációs választ a hirtelen vérnyomás-emelkedésre."
+                    },
+                    {
+                        question: "Előfordulhat-e vérzéses szövődmény PRES esetén?",
+                        options: ["Soha, a PRES mindig tisztán ödémás.", "Igen, intraparenchymás hematóma vagy szubarachnoidális vérzés is kísérheti.", "Csak mikroszkopikus vérzések fordulhatnak elő.", "Csak ha a beteg antikoagulánst szed."],
+                        answer: 1,
+                        explanation: "Vérzéses szövődmények, mint 'intraparenchymás hematóma, szubarachnoidális vérzés vagy petechiális bevérzések, az esetek kb. 5-30%-ában kísérhetik a PLES/PRES-t'."
+                    },
+                    {
+                        question: "Melyik állítás írja le legjobban a PLES/PRES és a stroke differenciáldiagnózisát?",
+                        options: ["A tünetek alapján mindig egyértelműen elkülöníthető.", "Az MRI DWI/ADC szekvenciák kulcsfontosságúak a citotoxikus (stroke) és vazogén (PRES) ödéma elkülönítésében.", "A CT vizsgálat elegendő a kettő elkülönítésére.", "A liquorvizsgálat a legfontosabb."],
+                        answer: 1,
+                        explanation: "Az elkülönítésben 'kulcsfontosságú az MRI DWI/ADC szekvenciák értékelése: a PLES/PRES-re jellemző vazogén ödéma általában nem mutat diffúziórestrikciót, míg az akut ischaemiás stroke citotoxikus ödémával és következményes diffúziórestrikcióval jár'."
+                    },
+                    {
+                        question: "Mi a teendő görcsrohamok esetén PRES-ben?",
+                        options: ["Nem kell kezelni, spontán elmúlnak.", "Azonnali koponyaműtét szükséges.", "Intravénás antiepileptikumok (pl. benzodiazepinek) adása.", "Nagy dózisú szteroid adása."],
+                        answer: 2,
+                        explanation: "Akut görcsrohamok esetén 'intravénás antiepileptikumok (általában benzodiazepinek, pl. diazepam, lorazepam) adandók'."
+                    }
+                ]
+            },
+            "153": {
+                title: "153. Autoimmun encephalitisek",
+                questions: [
+                    {
+                        question: "Mi az autoimmun encephalitis (AE) alapvető patofiziológiája?",
+                        options: ["Az agy direkt vírusos fertőzése.", "Az immunrendszer kóros válasza, amely célzottan a neuronális fehérjék ellen irányul.", "Genetikai hiba a myelin képződésében.", "Az agyi erek elmeszesedése."],
+                        answer: 1,
+                        explanation: "Az AE 'az agy gyulladásos megbetegedéseinek egy csoportját jelöli, amelyet az immunrendszer kóros válasza jellemez, célzottan a neuronális sejtfelszíni, szinaptikus vagy intracelluláris fehérjék ellen'."
+                    },
+                    {
+                        question: "Milyen a jellemző időbeli lefolyása az AE tüneteinek?",
+                        options: ["Krónikus, évek alatt lassan progrediáló.", "Szubakut, azaz gyors progresszió hetek vagy kevesebb mint 3 hónap alatt.", "Hiperakut, percek alatt kialakuló.", "Mindig veleszületett."],
+                        answer: 1,
+                        explanation: "Az AE 'jellemzően szubakut kezdetű (gyors progresszió, kevesebb mint 3 hónap alatt) neuropszichiátriai tünetekkel jelentkezik'."
+                    },
+                    {
+                        question: "Melyik AE típus társul a leggyakrabban ovariális teratómához?",
+                        options: ["Anti-LGI1 encephalitis", "Anti-CASPR2 encephalitis", "Anti-NMDA Receptor Encephalitis", "GAD65 asszociált szindrómák"],
+                        answer: 2,
+                        explanation: "Az Anti-NMDAR Encephalitis 'gyakran asszociálódik ovariális teratómákkal, különösen fiatal nők esetében'."
+                    },
+                    {
+                        question: "Milyen jellegzetes, rövid, gyakori mozgászavar utalhat anti-LGI1 encephalitisre?",
+                        options: ["Generalizált tónusos-klónusos rohamok", "Myoclonus", "Faciobrachiális disztóniás rohamok (FBDS)", "Parkinsonos tremor"],
+                        answer: 2,
+                        explanation: "Nagyon jellegzetesek a 'faciobrachiális dystoniás rohamok (FBDS) – gyakori, rövid, az azonos oldali arc és kar, esetenként a láb dystoniás mozgásai', amelyek gyakran megelőzik a kognitív hanyatlást."
+                    },
+                    {
+                        question: "Melyik állítás igaz a szeronegatív autoimmun encephalitisre?",
+                        options: ["Ez azt jelenti, hogy a betegnek nincs autoimmun betegsége.", "A betegeknél nem mutathatók ki ismert autoantitestek, de a klinikai kép AE-re utal.", "Ez egy enyhébb, kezelést nem igénylő forma.", "A szeronegatív AE mindig rosszabb prognózisú."],
+                        answer: 1,
+                        explanation: "A betegek jelentős részénél, akiknél az AE klinikai képe fennáll, 'nem mutathatók ki ismert autoantitestek (szeronegatív autoimmun encephalitis)'. A diagnózis ilyenkor a klinikai kritériumokon és a terápiás válaszon alapul."
+                    },
+                    {
+                        question: "Mi a Graus és mtsai. által javasolt 'lehetséges AE' diagnózisának egyik alapfeltétele?",
+                        options: ["Legalább egy évig tartó tünetek.", "Szubakut kezdetű (<3 hónap) memóriazavar, megváltozott mentális állapot vagy pszichiátriai tünetek.", "Pozitív családi anamnézis.", "Normális MRI és EEG lelet."],
+                        answer: 1,
+                        explanation: "A 'lehetséges AE' kritériumai között szerepel a 'szubakut kezdet (kevesebb mint 3 hónap alatti gyors progresszió) munkamemória zavarokkal..., megváltozott mentális állapottal..., vagy pszichiátriai tünetekkel'."
+                    },
+                    {
+                        question: "Melyik vizsgálat a legfontosabb az AE diagnózisának megerősítésére?",
+                        options: ["Koponya CT", "Vérkép", "Szérum és/vagy liquor autoantitest vizsgálat", "Neuropszichológiai teszt"],
+                        answer: 2,
+                        explanation: "A diagnózis megerősítéséhez elengedhetetlen a specifikus antineuronális antitestek kimutatása szérumból és/vagy liquorból."
+                    },
+                    {
+                        question: "Milyen jellegzetes EEG mintázat utalhat anti-NMDAR encephalitisre?",
+                        options: ["Burst-szuppresszió", "Trifázisos hullámok", "'Extrém delta brush' minta", "PLEDs"],
+                        answer: 2,
+                        explanation: "Anti-NMDAR encephalitis esetén az EEG mutathat 'extrém delta brush'-t, ami egy ritmikus delta aktivitásra szuperponált gyors (béta) aktivitást jelent, és nagyon specifikus erre a kórképre."
+                    },
+                    {
+                        question: "Mi az elsővonalbeli immunterápia autoimmun encephalitis esetén?",
+                        options: ["Hosszú távú antibiotikum kúra.", "Kizárólag tüneti kezelés.", "Kortikoszteroidok, intravénás immunglobulin (IVIG) és/vagy plazmaferézis (PLEX).", "Alacsony dózisú kemoterápia."],
+                        answer: 2,
+                        explanation: "Az elsővonalbeli immunterápiák célja a gyulladás gyors csökkentése. Ide tartoznak a 'nagy dózisú intravénás metilprednizolon', az 'intravénás immunglobulin (IVIG)' és a 'plazmaferézis (PLEX)'."
+                    },
+                    {
+                        question: "Melyik másodvonalbeli terápia célozza a B-sejteket és egyre gyakrabban használják refrakter AE esetén?",
+                        options: ["Ciklofoszfamid", "Azatioprin", "Rituximab", "Metotrexát"],
+                        answer: 2,
+                        explanation: "A Rituximab egy anti-CD20 monoklonális antitest, amely 'depletálja a B-sejteket', és hatékony másodvonalbeli szer refrakter esetekben, például NMDAR-AE-ben."
+                    },
+                    {
+                        question: "Melyik betegség társul gyakran GAD65 asszociált neurológiai szindrómákhoz?",
+                        options: ["Rheumatoid arthritis", "1-es típusú diabetes mellitus (T1DM)", "Crohn-betegség", "Szisztémás lupus erythematosus (SLE)"],
+                        answer: 1,
+                        explanation: "A GAD65 asszociált szindrómák 'gyakran társulnak más autoimmun betegségekkel', különösen az '1-es típusú diabetes mellitusszal'."
+                    },
+                    {
+                        question: "Melyik állítás igaz az anti-LGI1 és anti-CASPR2 antitestekre?",
+                        options: ["Mindkettő a GABA receptorokat célozza.", "Mindkettő a feszültségfüggő káliumcsatorna (VGKC) komplex részét képező fehérjék ellen irányul.", "Mindkettő mindig daganathoz társul.", "Mindkettő csak gyermekekben fordul elő."],
+                        answer: 1,
+                        explanation: "Az anti-LGI1 és anti-CASPR2 antitestek a feszültségfüggő káliumcsatorna (VGKC) komplex részét képező fehérjék ellen irányulnak, és a korábbi 'VGKC-komplex antitest' kategóriát váltották fel."
+                    },
+                    {
+                        question: "Miért fontos a tumor eltávolítása paraneopláziás AE esetén?",
+                        options: ["Mert a tumor mindig jóindulatú.", "Mert a tumor eltávolítása megszünteti az autoimmun folyamat forrását és javítja a prognózist.", "Mert a tumor nyomja az agyat.", "Nincs jelentősége, csak az immunterápia számít."],
+                        answer: 1,
+                        explanation: "Paraneopláziás szindróma esetén a tumor eltávolítása 'kritikus fontosságú', mivel 'a tumor eltávolításával kezelt betegek gyakran gyorsabban reagálnak és kevesebb másodvonalbeli terápiára szorulnak'."
+                    },
+                    {
+                        question: "Milyen neurológiai tünetegyüttes jellemző a Stiff-Person Szindrómára?",
+                        options: ["Fokozatosan kialakuló demencia.", "Progresszív izommerevség és fájdalmas izomgörcsök.", "Visszatérő látóideg-gyulladás.", "Hirtelen kialakuló bénulás."],
+                        answer: 1,
+                        explanation: "A Stiff-Person Szindróma (SPS) egy ritka neurológiai rendellenesség, amelyet a törzs és a végtagok progresszív izommerevsége és fájdalmas görcsei jellemeznek. Gyakran GAD65 antitestekkel társul."
+                    },
+                    {
+                        question: "Milyen hosszú távú következményekkel kell számolni AE után, még jó funkcionális felépülés esetén is?",
+                        options: ["Nincsenek hosszú távú következmények.", "Kizárólag motoros problémák maradnak.", "Gyakoriak a tartós kognitív deficitek, pszichiátriai problémák és a fáradékonyság.", "A betegek mindig teljesen tünetmentessé válnak."],
+                        answer: 2,
+                        explanation: "Sok beteg 'továbbra is szenved jelentős és tartós kognitív, pszichiátriai és pszichoszociális károsodásoktól, amelyek befolyásolják az életminőséget', még akkor is, ha a durva funkcionális skálákon (pl. mRS) jó eredményt érnek el."
+                    },
+                    {
+                        question: "Melyik AE típusra jellemző a perifériás idegrendszeri hiperexcitabilitás (neuromyotonia)?",
+                        options: ["Anti-NMDAR encephalitis", "Anti-LGI1 encephalitis", "Anti-CASPR2 encephalitis", "Anti-GAD65 encephalitis"],
+                        answer: 2,
+                        explanation: "Az anti-CASPR2 encephalitis klinikai képének egyik jellegzetes komponense a 'perifériás ideg hiperexcitabilitás (PNH)', ami neuromyotoniát, izomrángásokat és görcsöket okozhat."
+                    },
+                    {
+                        question: "Miért fontos a szérum és a liquor egyidejű vizsgálata antitestekre?",
+                        options: ["Mert olcsóbb, mint külön-külön vizsgálni.", "Mert a két minta összekeverve ad pontosabb eredményt.", "Mert egyes antitestek csak az egyikben, vagy eltérő koncentrációban mutathatók ki, így maximalizálható a diagnosztikai hozam.", "Mert ez a jogszabályi előírás."],
+                        answer: 2,
+                        explanation: "A szérum és a liquor egyidejű vizsgálata azért javasolt, mert 'egyes antitestek érzékenyebbek/specifikusabbak az egyik vagy másik testfolyadékban'. Például az anti-NMDAR a liquorból, míg az anti-LGI1 a szérumból mutatható ki nagyobb érzékenységgel."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az autoimmun encephalitisekre?",
+                        options: ["A korai diagnózis és kezelés javítja a kimenetelt.", "A tünetek gyakran utánozhatnak primer pszichiátriai kórképeket.", "A kezelés alapja az immunterápia.", "Az agyi MRI mindig kimutatja a kóros elváltozásokat."],
+                        answer: 3,
+                        explanation: "Az agyi MRI az AE betegek jelentős részénél normális lehet, különösen a betegség korai szakaszában. Ezért a negatív MRI lelet nem zárja ki az autoimmun encephalitis diagnózisát."
+                    },
+                    {
+                        question: "Milyen új, célzottabb immunterápiás megközelítések vannak kutatás alatt az AE kezelésére?",
+                        options: ["Új típusú antibiotikumok.", "Nagyobb dózisú szteroidok.", "Sejtes immunterápiák, mint a CAR T-sejt terápia.", "Vitaminpótlás."],
+                        answer: 2,
+                        explanation: "A jövőbeli irányok közé tartoznak a célzottabb terápiák, mint a 'sejtes immunterápiák', például a CAR T-sejt terápia, amely a patogén B-sejtek specifikus eliminálását célozza."
+                    },
+                    {
+                        question: "Mi a LEARN tanulmány legfontosabb következtetése?",
+                        options: ["A rituximab hatástalan NMDAR encephalitisben.", "A mikofenolát-mofetil (MMF) adjuváns hosszútávú terápiaként csökkentette a relapszus kockázatát NMDAR encephalitisben.", "A plazmaferézis jobb, mint az IVIG.", "Az MMF hatástalan fenntartó kezelésként."],
+                        answer: 1,
+                        explanation: "A 2025-ös LEARN tanulmány kimutatta, hogy az MMF adjuváns hosszútávú terápiaként 'szignifikánsan csökkentette a relapszusok arányát és jól tolerálható volt', ami alátámasztja szerepét a fenntartó terápiában NMDAR encephalitis esetén."
+                    }
+                ]
+            },
+            "154": {
+                title: "154. Demyelinisatios és dysmielinisatios betegségek",
+                questions: [
+                    {
+                        question: "Mi a alapvető különbség a demyelinisatio és a dysmyelinisatio között?",
+                        options: ["A demyelinisatio a perifériás, a dysmyelinisatio a központi idegrendszert érinti.", "A demyelinisatio a korábban normális myelin pusztulása, míg a dysmyelinisatio a myelin hibás képződése.", "A demyelinisatio mindig genetikai, a dysmyelinisatio mindig szerzett.", "Nincs különbség, a két fogalom szinonima."],
+                        answer: 1,
+                        explanation: "A demyelinisatio 'korábban normálisan kialakult myelin elvesztését vagy pusztulását jelenti', míg a dysmyelinisatio 'a myelinhüvelyek hibás képződését, szerkezetét vagy fenntartását jelenti, általában... genetikai mutációk következtében'."
+                    },
+                    {
+                        question: "Melyik sejttípus felelős a myelin képzéséért a központi idegrendszerben (KIR)?",
+                        options: ["Schwann-sejtek", "Astrocyták", "Oligodendrocyták", "Mikrogliasejtek"],
+                        answer: 2,
+                        explanation: "A myelinhüvelyt a központi idegrendszerben (KIR) az 'oligodendrocyták' képzik, míg a perifériás idegrendszerben (PIR) a Schwann-sejtek."
+                    },
+                    {
+                        question: "Melyik betegség NEM tartozik a primer demyelinisatiós betegségek közé?",
+                        options: ["Sclerosis Multiplex (MS)", "Akut Disszeminált Encephalomyelitis (ADEM)", "Progresszív Multifokális Leukoencephalopathia (PML)", "Neuromyelitis Optica Spektrum Betegség (NMOSD)"],
+                        answer: 2,
+                        explanation: "A PML egy szekunder, fertőzéses (virális) demyelinisatiós betegség, amelyet a JC vírus okoz. Az MS, ADEM és NMOSD primer, autoimmun eredetű demyelinisatiós kórképek."
+                    },
+                    {
+                        question: "Mi a Guillain-Barré Szindróma (GBS) legjellemzőbb klinikai képe?",
+                        options: ["Lassan progrediáló, aszimmetrikus gyengeség.", "Gyorsan progrediáló, szimmetrikus, felszálló gyengeség és areflexia.", "Kizárólag érzészavarok a lábakon.", "Krónikus, hullámzó lefolyású izomgyengeség."],
+                        answer: 1,
+                        explanation: "A GBS-re jellemző a 'gyorsan progrediáló, meglehetősen szimmetrikus felszálló gyengeség (disztálistól proximális felé...)' és az 'areflexia vagy hyporeflexia'."
+                    },
+                    {
+                        question: "Milyen jellegzetes liquor lelet támasztja alá a GBS diagnózisát?",
+                        options: ["Magas sejtszám és alacsony fehérje.", "Oligoklonális bandák jelenléte.", "Albuminocitológiai disszociáció (emelkedett fehérje normál sejtszám mellett).", "Alacsony glükózszint."],
+                        answer: 2,
+                        explanation: "A GBS-re jellemző a liquorban az 'albuminocitológiai disszociáció (emelkedett fehérje normál vagy enyhén emelkedett fehérvérsejtszámmal)', amely tipikusan a betegség első hete után válik kimutathatóvá."
+                    },
+                    {
+                        question: "Melyik enzim hiánya okozza a Metachromasiás Leukodystrophiát (MLD)?",
+                        options: ["Galaktocerebrozidáz (GALC)", "Arilszulfatáz A (ARSA)", "Hexózaminidáz A", "Szfingomielináz"],
+                        answer: 1,
+                        explanation: "Az MLD-t az 'ARSA gén mutációi okozzák, ami arilszulfatáz A enzim hiányához vezet', és szulfatidok felhalmozódását eredményezi."
+                    },
+                    {
+                        question: "Melyik toxikus metabolit felhalmozódása felelős a Krabbe-betegség súlyos tüneteiért?",
+                        options: ["Szulfatidok", "Nagyon hosszú láncú zsírsavak (VLCFA)", "Pszichozin", "Gangliozidok"],
+                        answer: 2,
+                        explanation: "A Krabbe-betegségben a GALC enzim hiánya a 'citotoxikus metabolit, a pszichozin (galaktozilszfingozin) felhalmozódásához' vezet, ami különösen mérgező az oligodendrocitákra."
+                    },
+                    {
+                        question: "Melyik gén mutációja okozza az X-kötött Adrenoleukodystrophiát (X-ALD)?",
+                        options: ["ARSA", "GALC", "ABCD1", "NOTCH3"],
+                        answer: 2,
+                        explanation: "Az X-ALD-t az 'ABCD1 gén mutációi okozzák, amely az ALD fehérjét (ALDP), egy peroxiszomális transzportert kódolja'."
+                    },
+                    {
+                        question: "Milyen kezelés hatástalan Guillain-Barré Szindrómában?",
+                        options: ["Intravénás Immunglobulin (IVIG)", "Plazmaferézis (PLEX)", "Kortikoszteroidok", "Szupportív terápia"],
+                        answer: 2,
+                        explanation: "Míg az IVIG és a plazmaferézis hatékonyak a GBS kezelésében, a 'kortikoszteroidok NEM hatékonyak' ebben a betegségben."
+                    },
+                    {
+                        question: "Mi a fő különbség a GBS és a CIDP (Krónikus Gyulladásos Demyelinisatiós Polyneuropathia) között?",
+                        options: ["A GBS a KIR-t, a CIDP a PIR-t érinti.", "A GBS általában monofázisos, míg a CIDP krónikus, progresszív vagy relapszáló lefolyású.", "A GBS-t mindig vírus, a CIDP-t mindig baktérium okozza.", "A GBS-re hatásos az IVIG, a CIDP-re nem."],
+                        answer: 1,
+                        explanation: "A CIDP a GBS krónikus megfelelőjének tekinthető. Míg a GBS akut és monofázisos, a CIDP 'progresszív vagy relapszáló-remittáló gyengeséggel és szenzoros veszteséggel jár, amely legalább 2 hónap alatt alakul ki'."
+                    },
+                    {
+                        question: "Melyik leukodystrophia kezelésére érhető el jóváhagyott génterápia?",
+                        options: ["Kizárólag Krabbe-betegség", "Metachromasiás Leukodystrophia (MLD) és Adrenoleukodystrophia (ALD)", "Minden leukodystrophiára", "Egyikre sem"],
+                        answer: 1,
+                        explanation: "A génterápia (pl. atidarsagene autotemcel/Libmeldy MLD-re, elivaldogene autotemcel/Skysona ALD-re) jóváhagyott kezelés ezen betegségek specifikus, korai stádiumú formáira."
+                    },
+                    {
+                        question: "Mi a Miller Fisher Szindróma klasszikus tünettriásza?",
+                        options: ["Láz, fejfájás, tarkókötöttség", "Ophthalmoplegia (szemmozgásbénulás), ataxia, areflexia", "Demencia, myoclonus, ataxia", "Gyengeség, érzészavar, fájdalom"],
+                        answer: 1,
+                        explanation: "A Miller Fisher Szindróma, a GBS egyik variánsa, a következő klasszikus triásszal jellemezhető: ophthalmoplegia (szemmozgásbénulás), ataxia (koordinációs zavar) és areflexia (reflexkiesés). Gyakran társul anti-GQ1b antitestekkel."
+                    },
+                    {
+                        question: "Melyik állítás igaz a leukodystrophiákra?",
+                        options: ["Mindig felnőttkorban kezdődnek.", "Mindig szerzett, nem genetikai betegségek.", "A KIR fehérállományát érintő, örökletes rendellenességek heterogén csoportja.", "Könnyen gyógyíthatók immunszuppresszánsokkal."],
+                        answer: 2,
+                        explanation: "A leukodystrophiák 'a KIR fehérállományát elsődlegesen érintő, örökletes rendellenességek heterogén csoportja', amelyeket abnormális myelinfejlődés jellemez."
+                    },
+                    {
+                        question: "Milyen következménnyel jár a myelin axonális támogatásának elvesztése demyelinisatio során?",
+                        options: ["Az ingerületvezetés felgyorsulásával.", "Másodlagos axonális degenerációval.", "Új idegsejtek képződésével.", "Nincs semmilyen következménye az axonokra."],
+                        answer: 1,
+                        explanation: "A myelin nemcsak szigetel, hanem metabolikus támogatást is nyújt az axonoknak. Ennek elvesztése 'idővel másodlagos axonális degenerációt is okozhat', ami a maradandó rokkantság egyik fő oka."
+                    },
+                    {
+                        question: "Milyen típusú perifériás neuropathiát okoz az MLD?",
+                        options: ["Tisztán motoros, axonális", "Demyelinisatiós", "Tisztán szenzoros, vékonyrost", "Nem okoz perifériás neuropathiát"],
+                        answer: 1,
+                        explanation: "A Metachromasiás Leukodystrophia (MLD) klinikai képének része a perifériás neuropathia, és az idegvezetési vizsgálatok 'demyelinisatiós perifériás neuropathia' jeleit mutatják ki."
+                    },
+                    {
+                        question: "Melyik leukodystrophia esetén kulcsfontosságú a mellékvese funkciójának rendszeres ellenőrzése?",
+                        options: ["Krabbe-betegség", "Metachromasiás Leukodystrophia (MLD)", "X-kötött Adrenoleukodystrophia (X-ALD)", "Canavan-betegség"],
+                        answer: 2,
+                        explanation: "Az X-ALD-ben a VLCFA-k felhalmozódnak a mellékvesekéregben is, ami mellékvese-elégtelenséghez (Addison-kórhoz) vezethet. Ezért a mellékvese funkciójának tesztelése a diagnózis és a követés része."
+                    },
+                    {
+                        question: "Miért kritikus a korai, akár preszimptomatikus diagnózis a leukodystrophiák egy részében?",
+                        options: ["Mert a tünetek ijesztőek a család számára.", "Mert a leghatékonyabb kezelések (HSCT, génterápia) csak a súlyos, irreverzibilis agykárosodás előtt hatásosak.", "Mert a gyógyszerek csak a betegség elején olcsók.", "Mert a diagnózis után a betegek speciális diétát kezdhetnek."],
+                        answer: 1,
+                        explanation: "A korai diagnózis azért kritikus, mert a leghatékonyabb, betegségmódosító beavatkozások, mint a hematopoetikus őssejt transzplantáció (HSCT) vagy a génterápia, csak a betegség nagyon korai, preszimptomatikus vagy enyhén szimptomatikus szakaszában képesek megállítani a progressziót."
+                    },
+                    {
+                        question: "Mi a 'molekuláris mimikri' szerepe a GBS patogenezisében?",
+                        options: ["A vírusok utánozzák az idegsejtek működését.", "A szervezet immunrendszere a fertőző ágensre adott válaszként olyan antitesteket termel, amelyek keresztreagálnak a perifériás idegek komponenseivel.", "A baktériumok direkt módon károsítják a myelint.", "A szervezet lemásolja a kórokozó genetikai anyagát."],
+                        answer: 1,
+                        explanation: "A molekuláris mimikri a GBS kulcsmechanizmusa, ahol 'a mikrobiális antigének elleni antitestek keresztreagálnak a perifériás idegek komponenseivel (gangliozidok)', tévesen autoimmun támadást indítva."
+                    },
+                    {
+                        question: "Melyik állítás igaz a demyelinisatio és a dysmyelinisatio terápiás megközelítésére?",
+                        options: ["Mindkettőt ugyanúgy, immunszuppresszánsokkal kezelik.", "A demyelinisatiót általában immunterápiával, míg a dysmyelinisatiót (ha lehetséges) gén- vagy enzimpótló terápiával kezelik.", "A dysmyelinisatiót mindig könnyebb kezelni.", "Egyikre sincs semmilyen kezelés."],
+                        answer: 1,
+                        explanation: "A két állapot alapvetően eltérő terápiát igényel. A szerzett demyelinisatio (pl. SM, GBS) kezelése az immunrendszer modulálására irányul, míg a genetikai alapú dysmyelinisatio (leukodystrophiák) esetén a cél a hiányzó enzim pótlása vagy a hibás gén korrekciója (pl. HSCT, génterápia)."
+                    },
+                    {
+                        question: "Milyen típusú MRI mintázat utalhat hypomyelinisatióra?",
+                        options: ["T1-súlyozott képeken hipointenzív (sötét) fehérállomány.", "T1-súlyozott képeken izo- vagy hiperintenzív (a kéreghez hasonló vagy világosabb) fehérállomány.", "Mindig kontrasztanyagot halmozó léziók.", "Kizárólag a szürkeállományt érintő elváltozások."],
+                        answer: 1,
+                        explanation: "A hypomyelinisatiós leukodystrophiákra jellemző, hogy a T1-súlyozott képeken a fehérállomány a normálisnál kevésbé sötét, azaz izo- vagy akár hiperintenzív a szürkeállományhoz képest, ami a myelin hiányát tükrözi."
+                    }
+                ]
+            },
+            "155": {
+                title: "155-156. A sclerosis multiplex és kezelése",
+                questions: [
+                    {
+                        question: "Mi a sclerosis multiplex (SM) alapvető patofiziológiai jellemzője?",
+                        options: ["Az agyi erek elmeszesedése.", "Az agy és a gerincvelő idegsejtjeit szigetelő mielinhüvely autoimmun eredetű károsodása.", "A perifériás idegek vírusos fertőzése.", "Az agy daganatos megbetegedése."],
+                        answer: 1,
+                        explanation: "Az SM 'egy autoimmun betegség, amelynek következtében károsodik az agy és a gerincvelő idegsejtjeit szigetelő mielinhüvely'. A folyamatban gyulladás, demielinizáció és axonkárosodás egyaránt szerepet játszik."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb klinikai lefolyási forma az SM kezdetén?",
+                        options: ["Primer Progresszív (PPMS)", "Szekunder Progresszív (SPMS)", "Relapszáló-Remittáló (RRMS)", "Klinikailag Izolált Szindróma (CIS)"],
+                        answer: 2,
+                        explanation: "A Relapszáló-Remittáló Sclerosis Multiplex (RRMS) 'a leggyakoribb forma, a betegek körülbelül 85%-a ezzel a típussal indul'."
+                    },
+                    {
+                        question: "Mi a McDonald kritériumok célja az SM diagnosztikájában?",
+                        options: ["A betegség súlyosságának pontozása.", "A kezelésre adott válasz mérése.", "Az idegrendszeri károsodások térbeli és időbeli disszeminációjának igazolása.", "A rehabilitációs potenciál felmérése."],
+                        answer: 2,
+                        explanation: "A McDonald kritériumok célja 'a diagnózis felállítása, amelynek kulcsfontosságú eleme az idegrendszeri károsodások (léziók) térbeli (DIS) és időbeli (DIT) disszeminációjának, azaz szóródásának igazolása'."
+                    },
+                    {
+                        question: "Milyen szerepet játszanak az oligoklonális sávok (OCB-k) a 2017-es McDonald kritériumokban?",
+                        options: ["Nincs szerepük.", "Jelenlétük kizárja az SM diagnózisát.", "Bizonyos esetekben (pl. CIS) a jelenlétük helyettesítheti az időbeli disszemináció MRI-vel történő igazolását.", "Csak a progresszív formák diagnózisában fontosak."],
+                        answer: 2,
+                        explanation: "A 2017-es revízió fontos újítása, hogy CIS esetén 'a DIT helyettesíthető a liquorban kimutatott CSF-specifikus oligoklonális sávokkal (OCB)', ami felgyorsíthatja a diagnózist."
+                    },
+                    {
+                        question: "Mi az akut SM relapszus (shub) standard kezelése?",
+                        options: ["Antibiotikumok", "Nagy dózisú kortikoszteroidok", "Fájdalomcsillapítók", "Hosszú távú immunszuppresszió"],
+                        answer: 1,
+                        explanation: "A funkcionális károsodással járó shubok kezelésére 'általában nagy dózisú kortikoszteroidokat alkalmaznak, leggyakrabban metilprednizolont', hogy csökkentsék az akut gyulladást."
+                    },
+                    {
+                        question: "Melyik állítás igaz a betegséglefolyást módosító terápiákra (DMT-k)?",
+                        options: ["Meggyógyítják az SM-et.", "Céljuk a relapszusok megelőzése és a rokkantság progressziójának lassítása.", "Csak a progresszív formákban hatásosak.", "Minden betegnek ugyanazt a DMT-t kell kapnia."],
+                        answer: 1,
+                        explanation: "A DMT-k 'elsődleges célja a gyulladásos betegségaktivitás csökkentése: a klinikai relapszusok számának és súlyosságának mérséklése, az új MRI léziók kialakulásának gátlása, és ezen keresztül a rokkantság hosszú távú progressziójának lassítása'."
+                    },
+                    {
+                        question: "Melyik DMT volt az első, amelyet primer progresszív SM (PPMS) kezelésére is jóváhagytak?",
+                        options: ["Interferon-béta", "Natalizumab", "Fingolimod", "Ocrelizumab"],
+                        answer: 3,
+                        explanation: "Az Ocrelizumab, egy anti-CD20 monoklonális antitest, 'az első hatékony terápiaként került törzskönyvezésre primer progresszív SM-ben (PPMS) is', ami áttörést jelentett."
+                    },
+                    {
+                        question: "Mi a natalizumab (Tysabri) kezelés legrettegettebb, bár ritka mellékhatása?",
+                        options: ["Hajhullás", "Progresszív multifokális leukoenkefalopátia (PML)", "Magas vérnyomás", "Másodlagos autoimmun betegségek"],
+                        answer: 1,
+                        explanation: "A natalizumab kezelés egyik legsúlyosabb lehetséges mellékhatása a PML, egy JC vírus által okozott agyi fertőzés. A kockázat felméréséhez a JCV antitest státusz rendszeres monitorozása szükséges."
+                    },
+                    {
+                        question: "Mi az Uhthoff-fenomén?",
+                        options: ["A nyak előrehajtására jelentkező áramütésszerű érzés.", "A testhőmérséklet emelkedésére a neurológiai tünetek átmeneti rosszabbodása.", "A szemmozgások fájdalmassága.", "A relapszusok utáni tartós fáradtság."],
+                        answer: 1,
+                        explanation: "Az Uhthoff-fenomén az, amikor 'a testhőmérséklet emelkedése (pl. láz, meleg fürdő, fizikai megerőltetés) átmenetileg rontja a neurológiai tüneteket'."
+                    },
+                    {
+                        question: "Melyik tüneti kezelésre használt gyógyszer javíthatja a járásképességet SM-ben?",
+                        options: ["Baklofen", "Amantadin", "Fampridin", "Oxybutynin"],
+                        answer: 2,
+                        explanation: "A fampridin hatóanyagú gyógyszer 'javíthatja a járássebességet bizonyos SM betegeknél' azáltal, hogy javítja az ingerületvezetést a demielinizált axonokon."
+                    },
+                    {
+                        question: "Milyen szerepe van a B-sejteknek az SM patogenezisében?",
+                        options: ["Nincs szerepük, az SM tisztán T-sejt mediált betegség.", "Kizárólag antitesteket termelnek.", "Komplex szerepük van, beleértve az antigénprezentációt és a pro-inflammatorikus citokinek termelését is.", "Védelmet nyújtanak a myelin ellen."],
+                        answer: 2,
+                        explanation: "A B-sejt depletáló terápiák sikere rávilágított a B-limfociták 'komplex szerepére az SM patogenezisében, amely túlmutat az egyszerű antitesttermelésen, és magában foglalja például az antigénprezentációt és a pro-inflammatorikus citokinek termelését is'."
+                    },
+                    {
+                        question: "Mi a fő különbség az RRMS és az SPMS között?",
+                        options: ["Az RRMS mindig súlyosabb.", "Az RRMS-ben vannak relapszusok és remissziók, míg az SPMS-ben a rokkantság a relapszusoktól függetlenül is fokozatosan rosszabbodik.", "Az SPMS csak férfiaknál fordul elő.", "Az RRMS-t lehet kezelni, az SPMS-t nem."],
+                        answer: 1,
+                        explanation: "Az RRMS-t relapszusok és remissziók jellemzik, míg az SPMS 'az RRMS-t követően, évekkel később alakul ki', és 'a rokkantság fokozatosan, a relapszusoktól függetlenül is progrediál'."
+                    },
+                    {
+                        question: "Melyik életmódbeli tényező pótlása javasolt általánosan SM betegeknek?",
+                        options: ["C-vitamin", "Vas", "D-vitamin", "Kalcium"],
+                        answer: 2,
+                        explanation: "Számos vizsgálat igazolta, hogy az alacsony D-vitamin szint rosszabb betegségaktivitással jár, ezért 'a D-vitamin szintjének ellenőrzése és szükség esetén pótlása általánosan javasolt SM betegek számára'."
+                    },
+                    {
+                        question: "Mire utal a liquorban az IgG index emelkedése?",
+                        options: ["A vér-agy gát sérülésére.", "A központi idegrendszeren belüli (intrathecalis) IgG termelésre.", "Szisztémás fertőzésre.", "Agydaganatra."],
+                        answer: 1,
+                        explanation: "Az emelkedett IgG index, hasonlóan az OCB-khez, az 'intratekális IgG szintézisre utal', ami a KIR-en belüli lokalizált immunválasz jele."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport hatásmechanizmusa a limfociták visszatartása a nyirokcsomókban?",
+                        options: ["Interferon-béták", "Szfingozin-1-foszfát (S1P) Receptor Modulátorok", "Fumarátok", "Anti-CD20 antitestek"],
+                        answer: 1,
+                        explanation: "Az S1P receptor modulátorok (pl. fingolimod, siponimod) megakadályozzák, hogy a limfociták elhagyják a nyirokcsomókat, így csökkentve a KIR-be jutó gyulladásos sejtek számát."
+                    },
+                    {
+                        question: "Mi a 'láthatatlan' tünetek jelentősége az SM-ben?",
+                        options: ["Nincs jelentőségük, mert nem látszanak.", "Ezek a legkönnyebben kezelhető tünetek.", "Jelentősen ronthatják az életminőséget (pl. fáradékonyság, kognitív zavarok), még ha a fizikális rokkantság csekély is.", "Csak a progresszív formákban jelentkeznek."],
+                        answer: 2,
+                        explanation: "A 'láthatatlan' tünetek, mint a fáradékonyság és a kognitív zavarok, 'rendkívüli mértékben ronthatják a beteg életminőségét, munkaképességét és szociális kapcsolatait', ezért aktív keresésük és kezelésük kiemelt fontosságú."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az alemtuzumab kezelésre?",
+                        options: ["Mély és tartós limfocita depléciót okoz.", "Magas hatékonyságú RRMS kezelésére használják.", "Kockázata a másodlagos autoimmun betegségek kialakulása.", "Nincs szükség a beteg szoros monitorozására a kezelés után."],
+                        answer: 3,
+                        explanation: "Az alemtuzumab kezelés után 'szoros, több éves monitorozás szükséges' a potenciális súlyos mellékhatások, különösen a másodlagos autoimmun betegségek (pl. pajzsmirigybetegség, ITP) korai felismerése érdekében."
+                    },
+                    {
+                        question: "Mi a fő különbség a CIS és az RRMS között?",
+                        options: ["A CIS mindig súlyosabb.", "A CIS az első klinikai epizód, míg az RRMS diagnózisához már igazolni kell a betegség időbeli és térbeli terjedését.", "A CIS-t nem kell kezelni, az RRMS-t mindig.", "A CIS csak a látóideget érinti."],
+                        answer: 1,
+                        explanation: "A CIS 'a betegség első, ... neurológiai tünetegyüttese'. Önmagában még nem definitív SM. Az RRMS diagnózisához már bizonyítani kell a léziók időbeli és térbeli disszeminációját a McDonald kritériumok szerint."
+                    },
+                    {
+                        question: "Melyik gyógyszeres kezelés javasolt a spaszticitás enyhítésére SM-ben?",
+                        options: ["Amantadin", "Paracetamol", "Baklofen", "Fampridin"],
+                        answer: 2,
+                        explanation: "A spaszticitás (izommerevség, izomgörcsök) kezelésére gyógyszeresen 'baklofen, tizanidin, diazepam, gabapentin' alkalmazható, gyógytornával kombinálva."
+                    },
+                    {
+                        question: "Miért fontos a dohányzás elhagyása SM betegeknél?",
+                        options: ["Mert a dohányzás javítja a kognitív funkciókat.", "Mert a dohányzás bizonyítottan negatív prognosztikai faktor, és ronthatja a betegség progresszióját.", "Mert a dohányzás csökkenti a fáradékonyságot.", "Nincs különösebb jelentősége."],
+                        answer: 1,
+                        explanation: "A 'dohányzás ismert negatív prognosztikai faktor, növeli az SM kialakulásának kockázatát és feltehetően kedvezőtlenül befolyásolja a betegség progresszióját is'. Ezért elhagyása erősen javasolt."
+                    }
+                ]
+            }
+        };
+
+        // DOM Elements
+        const topicSelectionScreen = document.getElementById('topic-selection');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        
+        const progressBar = document.getElementById('progress-bar');
+
+        const scoreText = document.getElementById('score-text');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const mainMenuBtn = document.getElementById('main-menu-btn');
+
+        // State
+        let currentTopic = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz(topicId) {
+            currentTopic = topicId;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            // A 155-156-os témakörhöz a 155-ös adatokat használjuk
+            const topicDataKey = topicId === "155-156" ? "155" : topicId;
+            questions = shuffleArray([...quizData[topicDataKey].questions]);
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTitle.textContent = quizData[topicDataKey].title;
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            feedbackContainer.classList.add('hidden');
+            const questionData = questions[currentQuestionIndex];
+
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            questionText.textContent = `${currentQuestionIndex + 1}. ${questionData.question}`;
+            optionsContainer.innerHTML = '';
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'p-4', 'text-left', 'border-2', 'border-slate-300', 'rounded-lg', 'quiz-option');
+                button.dataset.index = index;
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const selectedIndex = parseInt(selectedButton.dataset.index);
+            const correctIndex = questions[currentQuestionIndex].answer;
+
+            // Disable all options after one is clicked
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.removeEventListener('click', selectAnswer);
+                btn.disabled = true;
+            });
+
+            if (selectedIndex === correctIndex) {
+                selectedButton.classList.add('correct');
+                score++;
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Highlight the correct answer
+                optionsContainer.children[correctIndex].classList.add('correct');
+            }
+
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            feedbackContainer.classList.remove('hidden');
+
+            if (currentQuestionIndex === questions.length - 1) {
+                nextQuestionBtn.textContent = 'Eredmények megtekintése';
+            } else {
+                nextQuestionBtn.textContent = 'Következő kérdés';
+            }
+        }
+
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreText.textContent = `Eredményed: ${score} / ${questions.length}`;
+        }
+
+        function goBackToMenu() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.topic-btn').forEach(button => {
+            button.addEventListener('click', () => startQuiz(button.dataset.topic));
+        });
+
+        nextQuestionBtn.addEventListener('click', handleNextQuestion);
+        backToMenuBtn.addEventListener('click', goBackToMenu);
+        restartQuizBtn.addEventListener('click', () => startQuiz(currentTopic));
+        mainMenuBtn.addEventListener('click', goBackToMenu);
+
+    </script>
+</body>
+</html>

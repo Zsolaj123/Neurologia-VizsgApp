@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5; /* green-100 */
+            border-color: #10b981; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .explanation.visible {
+            max-height: 500px; /* Adjust as needed */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h1 class="text-3xl font-bold mb-2 text-gray-700">Neurológiai Vizsga Kvíz</h1>
+                <p class="text-gray-600 mb-8">Válasszon egy témakört a kezdéshez.</p>
+                <div id="topic-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Topic buttons will be inserted here by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="quiz-title" class="text-xl md:text-2xl font-bold text-gray-700">Téma Címe</h2>
+                    <span id="question-counter" class="text-sm font-semibold text-gray-500">1 / 20</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-lg md:text-xl font-semibold mb-6 min-h-[60px]"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="mt-6">
+                    <div id="explanation-box" class="explanation bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
+                        <h4 class="font-bold text-gray-700 mb-2">Magyarázat:</h4>
+                        <p id="explanation-text" class="text-gray-600"></p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-question-btn" class="hidden bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-gray-700">Eredmények</h2>
+                <p id="score-text" class="text-5xl font-bold my-6 text-blue-600">18 / 20</p>
+                <p id="score-message" class="text-lg text-gray-600 mb-8">Kiváló munka!</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">Teszt újraindítása</button>
+                    <button id="back-to-topics-btn" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors">Vissza a témákhoz</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA: Questions, Options, Explanations ---
+        const quizData = {
+            "tremor": {
+                title: "A tremor kivizsgálása és kezelése",
+                questions: [
+                    {
+                        question: "Melyik a leggyakoribb mozgászavar?",
+                        options: ["Chorea", "Dystonia", "Myoclonus", "Tremor"],
+                        answer: 3,
+                        explanation: "A tremor a leggyakoribb akaratlan mozgászavar, amely a test bármely részét érintheti. Fontos megjegyezni, hogy a tremor egy tünet, nem pedig önálló betegség."
+                    },
+                    {
+                        question: "Milyen típusú tremor jellemző leginkább a Parkinson-kórra?",
+                        options: ["Akciós tremor", "Poszturális tremor", "Nyugalmi tremor", "Intenciós tremor"],
+                        answer: 2,
+                        explanation: "A Parkinson-kórra a nyugalmi tremor a legjellemzőbb. Ez a remegés akkor jelentkezik, amikor a végtag teljesen ellazult, és tipikusan csökken vagy megszűnik akaratlagos mozgás során."
+                    },
+                    {
+                        question: "Melyik állítás igaz az esszenciális tremorra (ET)?",
+                        options: ["Mindig egyoldalúan kezdődik", "Ez egy akciós tremor, amely mozgás közben jelentkezik", "Főként a lábakat érinti", "Alkohol fogyasztása súlyosbítja"],
+                        answer: 1,
+                        explanation: "Az esszenciális tremor egy akciós tremor, amely leginkább poszturális (testhelyzet megtartásakor) és kinetikus (mozgás közben) formában jelentkezik. Jellemzően kétoldali és szimmetrikus, és kis mennyiségű alkohol átmenetileg enyhítheti."
+                    },
+                    {
+                        question: "Mi jellemzi az intenciós tremort?",
+                        options: ["Nyugalomban a legerősebb", "A céltárgyhoz közeledve súlyosbodik", "Csak a fejre korlátozódik", "Magas frekvenciájú (14-16 Hz)"],
+                        answer: 1,
+                        explanation: "Az intenciós tremor a kinetikus tremor egy specifikus formája, amely a célirányos mozgás végén, a célhoz közeledve (pl. ujj-orr próba) a legkifejezettebb. Tipikusan kisagyi (cerebelláris) károsodásra utal."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás segíthet leginkább a Parkinson-kór és az esszenciális tremor elkülönítésében?",
+                        options: ["Koponya CT", "Agyi MRI", "DaTscan (Dopamin Transzporter SPECT)", "Transzkraniális Doppler"],
+                        answer: 2,
+                        explanation: "A DaTscan a preszinaptikus dopaminerg rendszer működését vizsgálja. Parkinson-kórban a dopaminerg neuronok pusztulása miatt a DaTscan kóros (csökkent jelaktivitás), míg esszenciális tremorban tipikusan normális."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport az első vonalbeli kezelés esszenciális tremor esetén?",
+                        options: ["Levodopa", "Dopamin agonisták", "Béta-blokkolók (pl. propranolol) és antikonvulzánsok (pl. primidon)", "Antikolinerg szerek"],
+                        answer: 2,
+                        explanation: "Az esszenciális tremor első vonalbeli gyógyszeres kezelésére a propranolol (béta-blokkoló) és a primidon (antikonvulzáns) a leggyakrabban alkalmazott és leghatékonyabb szerek."
+                    },
+                    {
+                        question: "Milyen frekvenciatartomány jellemző a Parkinson-kór nyugalmi tremorára?",
+                        options: ["<5 Hz", "4-6 Hz", "4-12 Hz", ">12 Hz"],
+                        answer: 1,
+                        explanation: "A Parkinson-kór tremor frekvenciája tipikusan alacsony, 4-6 Hz közötti."
+                    },
+                    {
+                        question: "Mi a disztóniás tremor egyik jellegzetessége?",
+                        options: ["Mindig ritmikus és szabályos", "Gyakran szabálytalan és rángatózó, és szenzoros trükkökkel enyhíthető", "Csak nyugalomban jelentkezik", "Nem reagál botulinum toxinra"],
+                        answer: 1,
+                        explanation: "A disztóniás tremor gyakran szabálytalan, rángatózó, és a disztónia által érintett testrészben jelentkezik. Jellemző lehet, hogy szenzoros trükkök (geste antagoniste) enyhítik."
+                    },
+
+                    {
+                        question: "Mi a mély agyi stimuláció (DBS) leggyakoribb célpontja esszenciális tremor kezelésére?",
+                        options: ["Substantia nigra", "Globus pallidus internus (GPi)", "A talamusz ventrális intermedier magja (Vim)", "Nucleus subthalamicus (STN)"],
+                        answer: 2,
+                        explanation: "Súlyos, gyógyszerrezisztens esszenciális tremor esetén a DBS leggyakoribb és leghatékonyabb célpontja a talamusz ventrális intermedier magja (Vim)."
+                    },
+                    {
+                        question: "Milyen típusú tremort okozhatnak leggyakrabban gyógyszerek, mint a lítium vagy a valproát?",
+                        options: ["Nyugalmi tremort", "Intenciós tremort", "Fokozott fiziológiás tremort (poszturális)", "Holmes tremort"],
+                        answer: 2,
+                        explanation: "Számos gyógyszer mellékhatásaként fokozott fiziológiás tremor alakulhat ki, amely egy magas frekvenciájú, alacsony amplitúdójú, főként poszturális (testhelyzet megtartásakor jelentkező) tremor."
+                    },
+                    {
+                        question: "Melyik állítás igaz a pszichogén tremorra?",
+                        options: ["Mindig progresszív lefolyású", "Hirtelen kezdet, hullámzó lefolyás és figyelemelterelésre való csökkenés jellemzi", "A DaTscan mindig kóros", "Nem lehet elkülöníteni az organikus tremoroktól"],
+                        answer: 1,
+                        explanation: "A pszichogén (funkcionális) tremor jellemzői a hirtelen kezdet, a tünetek inkonzisztenciája és variabilitása, a spontán remissziók, valamint a tremor csökkenése vagy megszűnése figyelemelterelés hatására."
+                    },
+                    {
+                        question: "Melyik vizsgálat az 'arany standard' a tremor frekvenciájának és mintázatának objektív elemzésére?",
+                        options: ["Akcelerometria", "Elektromiográfia (EMG)", "Transzkraniális szonográfia (TCS)", "Agyi MRI"],
+                        answer: 1,
+                        explanation: "Az EMG az arany standard a tremor elemzésére. Segít mérni a frekvenciát, és megkülönböztetni a szinkron (pl. ET) és alternáló (pl. PT) izomaktivációs mintázatokat, valamint elkülöníteni a tremort más mozgászavaroktól."
+                    },
+                    {
+                        question: "Mi a fókuszált ultrahangos talamotómia (FUS-T) lényege?",
+                        options: ["Az agy elektromos stimulálása", "A talamusz egy kis részének elpusztítása fókuszált hanghullámokkal, invazív beavatkozás nélkül", "Radioaktív izotóp befecskendezése", "Gyógyszer bejuttatása közvetlenül az agyba"],
+                        answer: 1,
+                        explanation: "A FUS-T egy non-invazív eljárás, amely MRI-vezérléssel, fókuszált ultrahanggal hőt generál a talamusz egy specifikus pontján (Vim), léziót okozva és megszakítva a kóros tremorkört."
+                    },
+                    {
+                        question: "Milyen típusú tremort okoz leggyakrabban az alkoholmegvonás?",
+                        options: ["Nyugalmi tremort", "Poszturális tremort", "Intenciós tremort", "Disztóniás tremort"],
+                        answer: 1,
+                        explanation: "Az alkoholmegvonás jellegzetesen egy fokozott fiziológiás tremort, azaz egy magas frekvenciájú poszturális tremort okoz."
+                    },
+                    {
+                        question: "Milyen hatással van a koffein az esszenciális tremorra?",
+                        options: ["Enyhíti", "Nincs hatással rá", "Súlyosbíthatja", "Megszünteti"],
+                        answer: 2,
+                        explanation: "A koffein és más stimulánsok súlyosbíthatják az esszenciális tremor tüneteit, ezért fogyasztásuk kerülése javasolt."
+                    },
+                    {
+                        question: "Melyik a leggyorsabb frekvenciájú tremor?",
+                        options: ["Parkinson-kór tremora", "Esszenciális tremor", "Cerebelláris tremor", "Ortosztatikus tremor"],
+                        answer: 3,
+                        explanation: "Az ortosztatikus tremor a leggyorsabb, frekvenciája tipikusan 14-16 Hz. A lábakban jelentkezik felálláskor."
+                    },
+                    {
+                        question: "Milyen kezelés hatékony a fej- és hangremegés esetén?",
+                        options: ["Levodopa", "Propranolol", "Botulinum toxin injekciók", "DBS"],
+                        answer: 2,
+                        explanation: "A fokális tremorok, mint a fej- és hangremegés (spasmodikus diszfónia tremoros komponenssel) kezelésére a botulinum toxin injekciók különösen hatékonyak lehetnek."
+                    },
+                    {
+                        question: "Milyen klinikai jellemző segít elkülöníteni az ET-t a PT-től a felső végtagokon?",
+                        options: ["Az ET szimmetrikus, a PT aszimmetrikus", "Az ET nyugalmi, a PT akciós", "Az ET-hez mindig társul rigiditás", "A PT-t alkohol enyhíti"],
+                        answer: 0,
+                        explanation: "Az esszenciális tremor általában kétoldali és szimmetrikus, míg a Parkinson-kór tremora tipikusan egyoldalúan, aszimmetrikusan kezdődik és a betegség előrehaladtával is megmarad az aszimmetria."
+                    },
+                    {
+                        question: "Mi a Holmes-tremor (rubralis tremor)?",
+                        options: ["Egy gyors, poszturális tremor", "Egy lassú, durva tremor, amely nyugalomban, tartáskor és mozgás közben is jelen van", "Egy csak íráskor jelentkező tremor", "Egy pszichogén tremor forma"],
+                        answer: 1,
+                        explanation: "A Holmes-tremor egy ritka, alacsony frekvenciájú (<5 Hz), durva amplitúdójú tremor, amelynek jellegzetessége, hogy nyugalomban, poszturális helyzetben és intenciós mozgás közben is megfigyelhető. Gyakran agytörzsi (középagyi) lézió okozza."
+                    },
+                    {
+                        question: "Milyen szerepe van a fizikoterápiának a tremor kezelésében?",
+                        options: ["Nincs szerepe, csak a gyógyszerek hatásosak", "Csak a fájdalmat csökkenti", "Javíthatja az izomerőt, a koordinációt és az egyensúlyt", "Meggyógyítja a tremort"],
+                        answer: 2,
+                        explanation: "A fizikoterápia kulcsfontosságú kiegészítő kezelés, amely segít az izomerő, a koordináció, az egyensúly és a mozgástartomány javításában, valamint kompenzációs stratégiákat tanít a mindennapi funkciók javítására."
+                    },
+                    {
+                        question: "A transzkraniális szonográfia (TCS) melyik struktúra eltérését vizsgálja a Parkinson-kór diagnosztikájában?",
+                        options: ["A talamuszét", "A substantia nigra hiperechogenitását", "A kisagyét", "Az agykamrák tágulatát"],
+                        answer: 1,
+                        explanation: "A TCS a substantia nigra echogenitását (ultrahang-visszaverő képességét) vizsgálja. Parkinson-kórban gyakran észlelhető a substantia nigra hiperechogenitása, ami segíthet az esszenciális tremortól való elkülönítésben."
+                    }
+                ]
+            },
+            "atypical_parkinsonism": {
+                title: "Atípusos Parkinson Szindrómák",
+                questions: [
+                    {
+                        question: "Melyik klinikai tünet a legjellemzőbb a Progresszív Szupranukleáris Bénulásra (PSP)?",
+                        options: ["Aszimmetrikus rigiditás és apraxia", "Korai, súlyos autonóm diszfunkció", "Korai esések (hátrafelé) és vertikális tekintészavar", "Fluktuáló kogníció és vizuális hallucinációk"],
+                        answer: 2,
+                        explanation: "A PSP legjellegzetesebb tünetei a korai (első 3 éven belüli), megmagyarázhatatlan esések (gyakran hátrafelé) és a szupranukleáris vertikális tekintészavar, különösen a lefelé tekintés nehezítettsége."
+                    },
+                    {
+                        question: "Mi a kórszövettani alapja a Multiszisztémás Atrófiának (MSA)?",
+                        options: ["Tau-pozitív neurofibrilláris kötegek a neuronokban", "Amiloid plakkok az agykéregben", "Alfa-szinuklein aggregátumok a gliasejtekben (GCI)", "Lewy-testek a kortikális neuronokban"],
+                        answer: 2,
+                        explanation: "Az MSA egy alfa-szinukleinopátia, de a többitől eltérően a kóros fehérje elsődlegesen a gliasejtekben, főként az oligodendrocytákban halmozódik fel, jellegzetes gliális citoplazmatikus inklúziókat (GCI) képezve."
+                    },
+                    {
+                        question: "Melyik tünetegyüttes NEM tartozik az atípusos parkinsonizmusok (Parkinson-plusz szindrómák) közé?",
+                        options: ["Progresszív Szupranukleáris Bénulás (PSP)", "Multiszisztémás Atrófia (MSA)", "Esszenciális tremor", "Kortikobazális Degeneráció (CBD)"],
+                        answer: 2,
+                        explanation: "Az esszenciális tremor egy önálló mozgászavar, amely nem tartozik a parkinsonizmusok, sem az atípusos parkinsonizmusok közé. A többi felsorolt állapot mind Parkinson-plusz szindróma."
+                    },
+                    {
+                        question: "Mi az 'egyéves szabály' a Lewy-testes Demencia (DLB) és a Parkinson-kór demencia (PDD) elkülönítésében?",
+                        options: ["A DLB tünetei egy év alatt teljesen kifejlődnek", "Ha a demencia a motoros tünetek előtt vagy azokkal 1 éven belül jelenik meg, az DLB", "A PDD csak egy évig tart", "A betegek egy év után reagálnak a kezelésre"],
+                        answer: 1,
+                        explanation: "A konvenció szerint, ha a demencia a parkinsonos motoros tünetek előtt, vagy azokkal egy időben (azaz egy éven belül) kezdődik, DLB-t diagnosztizálnak. Ha a demencia egy már legalább egy éve fennálló Parkinson-kór talaján alakul ki, PDD-ről beszélünk."
+                    },
+                    {
+                        question: "Melyik atípusos parkinsonizmusra jellemző az 'idegen végtag' (alien limb) fenomén?",
+                        options: ["MSA", "PSP", "DLB", "Kortikobazális Szindróma (CBS)"],
+                        answer: 3,
+                        explanation: "Az 'alien limb' fenomén, ahol a beteg úgy érzi, hogy az egyik végtagja önálló életet él és akaratlan mozgásokat végez, a CBS egyik jellegzetes kortikális tünete."
+                    },
+                    {
+                        question: "Melyik az MSA legkorábbi és leggyakoribb autonóm tünete férfiaknál?",
+                        options: ["Ortosztatikus hipotenzió", "Székrekedés", "Erectilis diszfunkció", "Vizelet inkontinencia"],
+                        answer: 2,
+                        explanation: "Férfiaknál az erectilis diszfunkció gyakran az MSA legelső tünete, amely hónapokkal vagy akár évekkel megelőzheti a többi motoros vagy autonóm panaszt, ezért fontos diagnosztikai jel."
+                    },
+                    {
+                        question: "Milyen típusú proteinopátia a PSP és a CBD?",
+                        options: ["Alfa-szinukleinopátia", "Béta-amiloidopátia", "4R Tauopátia", "Prion betegség"],
+                        answer: 2,
+                        explanation: "Mind a PSP, mind a CBD a tauopátiák csoportjába tartozik, specifikusan 4-repeat (4R) tauopátiák, ahol a kóros tau fehérje 4 mikrotubulus-kötő régióval rendelkező izoformája halmozódik fel."
+                    },
+                    {
+                        question: "Melyik állítás igaz a gyógyszer-indukálta parkinsonizmusra (DIP)?",
+                        options: ["Mindig irreverzibilis", "Jellemzően szimmetrikus tünetekkel jár és a kiváltó gyógyszer elhagyása után javul", "A DaTscan mindig kóros", "Csak antipszichotikumok okozhatják"],
+                        answer: 1,
+                        explanation: "A DIP jellemzően szimmetrikusabb, mint az idiopátiás Parkinson-kór, és a tünetek általában javulnak vagy megszűnnek a kiváltó gyógyszer (pl. antipszichotikum, metoclopramid) elhagyása után."
+                    },
+                    {
+                        question: "Mi a 'hot cross bun' jel az MRI-n és melyik betegségre utal?",
+                        options: ["A középagy atrófiája, PSP-re utal", "A híd kereszt alakú hiperintenzitása, MSA-C-re utal", "A putamen hipointenzitása, MSA-P-re utal", "A caudatus atrófiája, Huntington-kórra utal"],
+                        answer: 1,
+                        explanation: "A 'hot cross bun' (forró keresztes zsemle) jel a hídban (pons) látható T2-súlyozott MRI képeken, és az MSA cerebelláris altípusának (MSA-C) egyik jellegzetes képalkotó eltérése."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a vaszkuláris parkinsonizmusra?",
+                        options: ["Alsótesti dominancia ('lower body parkinsonism')", "Jó és tartós válasz a levodopára", "Lépcsőzetes progresszió", "Társuló piramisjelek és kognitív hanyatlás"],
+                        answer: 1,
+                        explanation: "A vaszkuláris parkinsonizmusban a levodopa kezelésre adott válasz általában gyenge, részleges vagy teljesen hiányzik, ami fontos elkülönítő jel az idiopátiás Parkinson-kórtól."
+                    },
+                    {
+                        question: "Milyen alvászavar utalhat erős specificitással egy mögöttes alfa-szinukleinopátiára (pl. DLB, MSA, PK)?",
+                        options: ["Insomnia", "Obstruktív alvási apnoe", "Nyugtalan láb szindróma", "REM alvási viselkedészavar (RBD)"],
+                        answer: 3,
+                        explanation: "Az RBD, az álmok motoros 'eljátszása', az alfa-szinukleinopátiák egyik legkorábbi és legspecifikusabb prodromális tünete."
+                    },
+                    {
+                        question: "Melyik atípusos parkinsonizmusban a legjellemzőbbek a korai, visszatérő vizuális hallucinációk?",
+                        options: ["PSP", "MSA", "DLB", "CBD"],
+                        answer: 2,
+                        explanation: "A jól formált, részletgazdag, visszatérő vizuális hallucinációk a Lewy-testes demencia (DLB) egyik alapvető (core) klinikai jellemzői, és gyakran már a betegség korai szakaszában megjelennek."
+                    },
+                    {
+                        question: "Mi a 'tufted astrocyte'?",
+                        options: ["A CBD-re jellemző kóros neuron", "A PSP-re jellemző, tau-pozitív kóros asztrocita", "Az MSA-ra jellemző kóros oligodendroglia", "Az Alzheimer-kórra jellemző plakk"],
+                        answer: 1,
+                        explanation: "A 'tufted astrocyte' (csomós asztrocita) egy specifikus, tau-pozitív gliális zárvány, amely a Progresszív Szupranukleáris Bénulás (PSP) egyik kórszövettani jellegzetessége."
+                    },
+                    {
+                        question: "Milyen típusú motoros tünetek dominálnak az MSA-C altípusban?",
+                        options: ["Parkinsonos tünetek (rigiditás, bradykinesia)", "Cerebelláris ataxia tünetei (járászavar, dysarthria)", "Disztónia és myoclonus", "Chorea és ballismus"],
+                        answer: 1,
+                        explanation: "Az MSA-C altípusban a cerebelláris (kisagyi) tünetek, mint a járásataxia, a végtagataxia és a cerebelláris dysarthria (skandáló beszéd) állnak a klinikai kép előterében."
+                    },
+                    {
+                        question: "Mi a neuroleptikum-érzékenység és melyik kórképben bír diagnosztikai jelentőséggel?",
+                        options: ["A neuroleptikumokra adott jó terápiás válasz; PSP-ben", "A neuroleptikumokra adott paradox rosszabbodás; DLB-ben", "A neuroleptikumok mellékhatásainak hiánya; MSA-ban", "A neuroleptikumok gyors lebomlása; CBD-ben"],
+                        answer: 1,
+                        explanation: "A súlyos neuroleptikum (antipszichotikum) érzékenység, amely a parkinsonizmus és a kognitív tünetek drámai rosszabbodásában nyilvánul meg, a Lewy-testes demencia (DLB) egyik támogató klinikai jellemzője."
+                    },
+                    {
+                        question: "Melyik kórképre jellemző a kórszövettanban az 'asztrocitás plakk'?",
+                        options: ["Parkinson-kór", "PSP", "MSA", "Kortikobazális Degeneráció (CBD)"],
+                        answer: 3,
+                        explanation: "Az asztrocitás plakkok, amelyek az asztrociták nyúlványaiban kialakuló sűrű, tau-pozitív aggregátumok, a CBD patognomonikus (kórspecifikus) kórszövettani elváltozásai."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb másodlagos parkinsonizmus?",
+                        options: ["Vaszkuláris parkinsonizmus", "Gyógyszer-indukálta parkinsonizmus (DIP)", "Toxin-indukálta parkinsonizmus", "Poszttraumás parkinsonizmus"],
+                        answer: 1,
+                        explanation: "A gyógyszer-indukálta parkinsonizmus a szekunder parkinsonizmusok leggyakoribb formája, amelyet leggyakrabban dopamin-receptor blokkoló gyógyszerek (pl. antipszichotikumok) okoznak."
+                    },
+                    {
+                        question: "Milyen tünet az ortosztatikus hipotenzió (nOH)?",
+                        options: ["Fekvő helyzetben mért magas vérnyomás", "Felálláskor bekövetkező jelentős vérnyomásesés", "Terhelésre jelentkező vérnyomás-emelkedés", "A vérnyomás ingadozása a nap folyamán"],
+                        answer: 1,
+                        explanation: "Az ortosztatikus hipotenzió a szisztolés vérnyomás legalább 20-30 Hgmm-es és/vagy a diasztolés vérnyomás legalább 10-15 Hgmm-es csökkenése felálláskor, ami szédülést, ájulásérzést okozhat. Az MSA súlyos, korai tünete."
+                    },
+                    {
+                        question: "Milyen a levodopa-válasz tipikusan az atípusos parkinsonizmusokban?",
+                        options: ["Mindig kiváló és tartós", "Gyenge, részleges vagy hiányzik", "Csak a tremort javítja", "Jobb, mint az idiopátiás Parkinson-kórban"],
+                        answer: 1,
+                        explanation: "Az atípusos parkinsonizmusokra (PSP, MSA, CBD) jellemző a gyenge, nem tartós vagy teljesen hiányzó terápiás válasz a levodopára, ami fontos elkülönítő jel az idiopátiás Parkinson-kórtól."
+                    },
+                    {
+                        question: "Mi a 'stridor' és melyik atípusos parkinsonizmusban rossz prognosztikai jel?",
+                        options: ["Akaratlan nevetés; PSP-ben", "Belégzési, sípoló légzési hang; MSA-ban", "Nyelési nehézség; CBD-ben", "Érzelmi labilitás; DLB-ben"],
+                        answer: 1,
+                        explanation: "A stridor egy belégzési, magas hangú, sípoló légzési hang, amelyet a hangszalagok bénulása okoz. Az MSA-ban való jelenléte rosszabb prognózissal és a hirtelen halál fokozott kockázatával társul."
+                    },
+                    {
+                        question: "Melyik állítás igaz az MSA prognózisára?",
+                        options: ["Krónikus, de nem progrediáló betegség", "A várható élettartam normális", "Gyorsan progrediáló betegség, az átlagos túlélés kb. 7-10 év", "A legtöbb beteg spontán javulást mutat"],
+                        answer: 2,
+                        explanation: "Az MSA egy könyörtelenül, gyorsan progrediáló betegség, amelynek prognózisa kedvezőtlen. A tünetek megjelenésétől számított átlagos túlélés körülbelül 7-10 év."
+                    }
+                ]
+            },
+            "hyperkinesis": {
+                title: "Hyperkinesissel járó kórképek",
+                questions: [
+                    {
+                        question: "Melyik NEM tartozik a primer hiperkinetikus mozgászavarok közé?",
+                        options: ["Dystonia", "Chorea", "Spaszticitás", "Myoclonus"],
+                        answer: 2,
+                        explanation: "A spaszticitás a felső motoneuron károsodásának jele, és bár kóros izomaktivitással jár, a klasszikus primer hiperkinetikus mozgászavarok közé a dystoniát, choreát, myoclonust, tic-eket és a tremort sorolják."
+                    },
+                    {
+                        question: "Mi a 'ballismus'?",
+                        options: ["Lassú, csavaró mozgás", "A chorea gyors és erőszakos formája, dobáló mozgásokkal", "Ritmikus, oszcilláló mozgás", "Rövid, villámszerű izomrángás"],
+                        answer: 1,
+                        explanation: "A ballismus a chorea egy súlyos, nagy amplitúdójú formája, amelyet a végtagok (főleg a proximális részek) heves, dobáló, csapkodó mozgásai jellemeznek."
+                    },
+                    {
+                        question: "Melyik agyterület károsodása okozza leggyakrabban a hemiballismust?",
+                        options: ["Kisagy", "A kontralaterális nucleus subthalamicus", "A talamusz", "A frontális lebeny"],
+                        answer: 1,
+                        explanation: "A hemiballismus (a test egyik felét érintő ballismus) leggyakoribb oka a kontralaterális oldali nucleus subthalamicus (a bazális ganglionok része) károsodása, általában stroke következtében."
+                    },
+                    {
+                        question: "Mi a 'myoclonus'?",
+                        options: ["Tartós izomgörcs", "Gyors, hirtelen, sokkszerű, akaratlan izomrángás", "Lassú, tekergőző mozgás", "Ismétlődő, ritmikus mozgás"],
+                        answer: 1,
+                        explanation: "A myoclonus egy gyors, rövid, villámszerű, akaratlan izomrángás, amely érinthet egyetlen izmot vagy izomcsoportot."
+                    },
+                    {
+                        question: "Melyik állítás igaz a tic-ekre?",
+                        options: ["Nem lehet őket akaratlagosan elnyomni", "Mindig komplex mozgássorozatok", "Jellemzően egy belső késztetés előzi meg őket és átmenetileg elnyomhatók", "Alvás közben a legerősebbek"],
+                        answer: 2,
+                        explanation: "A tic-ek kulcsfontosságú jellemzője, hogy bár akaratlanok, a beteg egy belső feszültséget, késztetést érez előttük, és rövid időre, akaraterővel képes elnyomni őket. Alvás közben tipikusan megszűnnek."
+                    },
+                    {
+                        question: "Mi a Tourette-szindróma diagnosztikai kritériuma?",
+                        options: ["Csak motoros tic-ek legalább egy évig", "Csak vokális tic-ek legalább egy évig", "Legalább két motoros ÉS legalább egy vokális tic, több mint egy éve", "Bármilyen tic, amely 18 éves kor után kezdődik"],
+                        answer: 2,
+                        explanation: "A Tourette-szindróma diagnózisához több motoros tic és legalább egy vokális tic jelenléte szükséges, amelyek több mint egy éve fennállnak, és 18 éves kor előtt kezdődtek."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb örökletes oka a choreának felnőttkorban?",
+                        options: ["Wilson-kór", "Sydenham-chorea", "Huntington-kór", "Neuroacanthocytosis"],
+                        answer: 2,
+                        explanation: "A Huntington-kór egy autoszomális domináns öröklődésű neurodegeneratív betegség, és a felnőttkorban kezdődő örökletes chorea leggyakoribb oka."
+                    },
+                    {
+                        question: "Mi az 'athetosis'?",
+                        options: ["Gyors, táncszerű mozgás", "Lassú, folyamatos, tekergőző, csavaró mozgás", "Ritmikus remegés", "Hirtelen izomrángás"],
+                        answer: 1,
+                        explanation: "Az athetosis egy lassú, folyamatos, kígyózó, csavaró mozgás, amely leginkább a végtagok disztális részét (kezek, lábak) érinti. Gyakran a choreával együtt fordul elő (choreoathetosis)."
+                    },
+                    {
+                        question: "Melyik agyi struktúra játszik központi szerepet a legtöbb hiperkinetikus mozgászavar patofiziológiájában?",
+                        options: ["Kisagy", "Agytörzs", "Bazális ganglionok", "Hippokampusz"],
+                        answer: 2,
+                        explanation: "A bazális ganglionok (törzsdúcok) kulcsfontosságú szerepet játszanak a mozgások tervezésében, kivitelezésében és gátlásában. Diszfunkciójuk számos hiperkinetikus mozgászavar, mint a chorea, dystonia, ballismus és athetosis hátterében áll."
+                    },
+                    {
+                        question: "Melyik neurotranszmitter túlműködése áll a chorea hátterében?",
+                        options: ["Szerotonin", "Acetilkolin", "GABA", "Dopamin"],
+                        answer: 3,
+                        explanation: "A chorea patofiziológiájában a bazális ganglionok dopaminerg rendszerének túlműködése játszik központi szerepet. Ezért a kezelés gyakran dopamin-blokkoló vagy dopamin-kiürítő gyógyszereken alapul."
+                    },
+                    {
+                        question: "Mi a negatív myoclonus (asterixis)?",
+                        options: ["Az izmok hirtelen összehúzódása", "Az izmok hirtelen, rövid tónusvesztése", "Fájdalmas izomgörcs", "Ritmikus izomrángás"],
+                        answer: 1,
+                        explanation: "A negatív myoclonus, vagy asterixis, egy hirtelen, rövid ideig tartó izomtónus-vesztés, amely a kitartott végtag (pl. kézfej) hirtelen 'lecsapásában' nyilvánul meg. Jellemző a metabolikus encephalopathiákra."
+                    },
+                    {
+                        question: "Melyik viselkedésterápiás módszer hatékony a tic-zavarok kezelésében?",
+                        options: ["Pszichoanalízis", "Habit Reversal Training (szokás-visszafordító tréning)", "Expozíciós terápia", "Averzív terápia"],
+                        answer: 1,
+                        explanation: "A Habit Reversal Training (HRT) és annak egy kiterjesztett formája, a CBIT (Comprehensive Behavioral Intervention for Tics), a leghatékonyabb viselkedésterápiás módszerek. A beteg megtanulja felismerni a tic-et megelőző késztetést és egy azzal versengő, kevésbé zavaró mozgással helyettesíteni azt."
+                    },
+                    {
+                        question: "Milyen típusú gyógyszerek a leghatékonyabbak a ballismus tüneti kezelésére?",
+                        options: ["Dopamin agonisták", "Antikolinerg szerek", "Dopaminblokkolók (antipszichotikumok)", "Béta-blokkolók"],
+                        answer: 2,
+                        explanation: "Mivel a ballismus a bazális ganglionok gátló pályáinak kiesésével és relatív dopaminerg túlsúllyal jár, a dopamin-blokkoló (antidopaminerg) gyógyszerek a leghatékonyabbak a tünetek kontrollálásában."
+                    },
+                    {
+                        question: "Mi a Sydenham-chorea oka?",
+                        options: ["Genetikai mutáció", "Agyi stroke", "Streptococcus fertőzés utáni autoimmun reakció", "Gyógyszer-mellékhatás"],
+                        answer: 2,
+                        explanation: "A Sydenham-chorea a reumás láz egyik fő manifesztációja, amely egy A-csoportú Streptococcus baktérium által okozott fertőzést követő autoimmun reakció eredményeként alakul ki, és a bazális ganglionokat támadja."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a hyperkinetikus mozgászavarokra?",
+                        options: ["Akaratlan mozgások jellemzik őket", "A bazális ganglionok diszfunkciójához köthetők", "Mindig a dopamin hiánya okozza őket", "A klinikai képük átfedhet egymással"],
+                        answer: 2,
+                        explanation: "A legtöbb hiperkinetikus mozgászavar (pl. chorea, dystonia) a dopaminerg rendszer túlműködésével vagy egyensúlyzavarával, nem pedig hiányával áll összefüggésben. A dopaminhiány a hipokinetikus mozgászavarokra, mint a Parkinson-kór, jellemző."
+                    },
+                    {
+                        question: "Mi a 'fejőlány markolat' (milkmaid's grip)?",
+                        options: ["A dystonia egyik tünete", "A choreára jellemző, a szorítóerő fenntartásának képtelensége", "A myoclonus egy formája", "A tremor egyik típusa"],
+                        answer: 1,
+                        explanation: "A 'fejőlány markolat' a chorea egyik klinikai jele, ahol a beteg képtelen egyenletes szorítóerőt fenntartani (pl. a vizsgáló ujjainak megszorításakor), és ehelyett ismétlődően szorít és elenged, a fejéshez hasonlóan."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző az athetoid cerebrális parézis?",
+                        options: ["Felnőttkori stroke", "Születés körüli agykárosodás", "Genetikai rendellenesség", "Agydaganat"],
+                        answer: 1,
+                        explanation: "Az athetoid cerebrális parézis (CP) a bazális ganglionok károsodásából ered, amelyet leggyakrabban a születés körüli oxigénhiány (asphyxia) vagy súlyos újszülöttkori sárgaság okoz."
+                    },
+                    {
+                        question: "Melyik gyógyszer okozhat choreát a Parkinson-kór kezelése során?",
+                        options: ["Propranolol", "Levodopa", "Klonazepám", "Amantadin"],
+                        answer: 1,
+                        explanation: "A levodopa, a Parkinson-kór leghatékonyabb gyógyszere, hosszú távú használat során csúcshatás-diszkinéziákat okozhat, amelyek choreiform (chorea-szerű) mozgások formájában jelentkeznek."
+                    },
+                    {
+                        question: "Mi a fiziológiás myoclonus példája?",
+                        options: ["Epilepsziás roham", "Huntington-kór", "Elalvás közbeni rándulás (hypnic jerk)", "Tourette-szindróma"],
+                        answer: 2,
+                        explanation: "A fiziológiás myoclonus egészséges egyéneknél is előforduló, ártalmatlan jelenség. Tipikus példái a csuklás és az elalváskor jelentkező hirtelen izomrángások (hypnic jerks)."
+                    },
+                    {
+                        question: "Milyen kezelés javasolt a tic-zavarokhoz gyakran társuló ADHD vagy szorongás esetén?",
+                        options: ["Nincs szükség kezelésre", "Pszichoterápia és/vagy specifikus gyógyszeres kezelés", "Csak a tic-ek kezelése", "Magas dózisú vitaminok"],
+                        answer: 1,
+                        explanation: "A tic-zavarok gyakran járnak együtt más pszichiátriai kórképekkel. A hatékony kezeléshez holisztikus megközelítés szükséges, amely magában foglalja a társbetegségek (pl. ADHD, szorongás, OCD) pszichoterápiás és/vagy gyógyszeres kezelését is."
+                    },
+                    {
+                        question: "Melyik állítás írja le a legjobban a hiperkinetikus mozgászavarok és a hipokinetikus mozgászavarok (pl. Parkinson-kór) közötti különbséget?",
+                        options: ["A hiperkinetikus mozgások mindig gyorsak, a hipokinetikusak mindig lassúak", "A hiperkinézis túlzott, akaratlan mozgást, a hipokinézis mozgásszegénységet jelent", "A hiperkinézis csak a végtagokat, a hipokinézis csak a törzset érinti", "Nincs alapvető különbség"],
+                        answer: 1,
+                        explanation: "A hiperkinézis (túlmozgás) akaratlan, kórosan fokozott mozgásokat jelent (pl. chorea, dystonia), míg a hipokinézis (mozgásszegénység) a mozgások hiányát vagy meglassulását (bradykinesia) jelenti, ami a Parkinson-kór fő jellemzője."
+                    }
+                ]
+            },
+            "wilson": {
+                title: "Wilson-kór",
+                questions: [
+                    {
+                        question: "Mi a Wilson-kór alapvető oka?",
+                        options: ["Túlzott rézbevitel a táplálékkal", "A vasanyagcsere zavara", "Egy genetikai hiba, ami a réz felhalmozódásához vezet", "Autoimmun betegség"],
+                        answer: 2,
+                        explanation: "A Wilson-kór egy autoszomális recesszív módon öröklődő genetikai rendellenesség, amelyet az ATP7B gén mutációi okoznak. Ez a hiba a réz szervezetből való kiürítésének zavarához és annak toxikus felhalmozódásához vezet."
+                    },
+                    {
+                        question: "Melyik két szervben okoz leggyakrabban tüneteket a réz felhalmozódása Wilson-kórban?",
+                        options: ["Vese és tüdő", "Szív és lép", "Máj és agy", "Bőr és csontok"],
+                        answer: 2,
+                        explanation: "A felesleges réz elsősorban a májban halmozódik fel, májkárosodást okozva. Később a réz a véráramba kerülve lerakódik az agyban (különösen a bazális ganglionokban), ami neurológiai és pszichiátriai tüneteket okoz."
+                    },
+                    {
+                        question: "Mi a Kayser-Fleischer gyűrű?",
+                        options: ["A retinán látható elváltozás", "A szaruhártya szélén lerakódó réz által okozott aranybarna gyűrű", "A bőrön megjelenő rézszínű kiütés", "A körömágy elszíneződése"],
+                        answer: 1,
+                        explanation: "A Kayser-Fleischer gyűrű a szaruhártya (cornea) szélén, a Descemet-membránban lerakódó réz által okozott jellegzetes, aranybarna vagy zöldes színű gyűrű. Rétegfény-vizsgálattal mutatható ki."
+                    },
+                    {
+                        question: "Melyik laboratóriumi lelet a legjellemzőbb a Wilson-kórra?",
+                        options: ["Magas szérum ceruloplazmin szint", "Alacsony szérum ceruloplazmin szint", "Magas vasszint", "Alacsony vizelet rézürítés"],
+                        answer: 1,
+                        explanation: "A Wilson-kóros betegek többségénél a szérum ceruloplazmin szintje kórosan alacsony, mivel az ATP7B hiba miatt a réz nem tud beépülni az apoceruloplazminba, így a stabil ceruloplazmin molekula nem képződik."
+                    },
+                    {
+                        question: "Milyen típusú neurológiai mozgászavarok jellemzőek a Wilson-kórra?",
+                        options: ["Csak tremor", "Csak rigiditás", "Tremor, dystonia, dysarthria és parkinsonizmus", "Csak chorea"],
+                        answer: 2,
+                        explanation: "A neurológiai tünetek változatosak, gyakori a tremor (jellegzetes a 'szárnycsapkodó' tremor), a dystonia (kóros testtartások, pl. 'risus sardonicus'), a dysarthria (elkent beszéd) és a parkinsonos tünetek."
+                    },
+                    {
+                        question: "Hogyan öröklődik a Wilson-kór?",
+                        options: ["Autoszomális domináns módon", "X-kromoszómához kötötten", "Autoszomális recesszív módon", "Nem örökletes, mindig szerzett"],
+                        answer: 2,
+                        explanation: "A Wilson-kór autoszomális recesszív öröklésmenetű, ami azt jelenti, hogy a betegség kialakulásához az egyénnek mindkét szülőjétől örökölnie kell egy hibás ATP7B génvariánst."
+                    },
+                    {
+                        question: "Mi a Wilson-kór kezelésének alapelve?",
+                        options: ["A rézbevitel teljes megszüntetése", "A felesleges réz eltávolítása a szervezetből és a további felszívódás gátlása", "Csak tüneti kezelés", "Májátültetés minden esetben"],
+                        answer: 1,
+                        explanation: "A kezelés célja a szervezetben felhalmozódott réz eltávolítása (kelátképző szerekkel) és a táplálékkal bevitt réz felszívódásának gátlása (cinksókkal). A terápia élethosszig tart."
+                    },
+                    {
+                        question: "Melyik gyógyszer egy kelátképző szer, amelyet a Wilson-kór kezelésére használnak?",
+                        options: ["Cink-acetát", "Levodopa", "Propranolol", "Penicillamin vagy Trientin"],
+                        answer: 3,
+                        explanation: "A penicillamin és a trientin kelátképző szerek, amelyek megkötik a szervezetben lévő rezet, és elősegítik annak a vizelettel történő kiürülését."
+                    },
+                    {
+                        question: "Milyen szerepe van a cinksóknak a Wilson-kór kezelésében?",
+                        options: ["Pótolják a cinkhiányt", "Gátolják a réz felszívódását a bélből", "Segítik a réz vizelettel való ürülését", "Javítják a májfunkciót"],
+                        answer: 1,
+                        explanation: "A cinksók a bélhámsejtekben a metallotionein nevű fehérje termelését serkentik, amely megköti a táplálékkal bevitt rezet, megakadályozva annak a véráramba való felszívódását. Főként fenntartó kezelésre használják."
+                    },
+                    {
+                        question: "Milyen agyi struktúrák érintettek leginkább a Wilson-kór neurológiai formájában?",
+                        options: ["Agykéreg és hippokampusz", "Kisagy és agytörzs", "Bazális ganglionok (főleg a putamen) és a talamusz", "Gerincvelő"],
+                        answer: 2,
+                        explanation: "A réz az agyban elsősorban a bazális ganglionokban (putamen, globus pallidus, nucleus caudatus) és a talamuszban halmozódik fel, ami a jellegzetes mozgászavarokért felelős."
+                    },
+                    {
+                        question: "Milyen jellegzetes MRI leletet neveznek 'face of the giant panda' jelnek Wilson-kórban?",
+                        options: ["A híd kereszt alakú elváltozása", "A középagy jellegzetes T2 hiperintenzív elváltozása", "A putamen atrófiája", "Diffúz agyi ödéma"],
+                        answer: 1,
+                        explanation: "A 'face of the giant panda' (óriáspanda arc) jel egy jellegzetes MRI kép, amely a középagy tegmentumának T2 hiperintenzitásából, a vörös mag és a substantia nigra megkíméltségéből, valamint a colliculus superior normál jeléből adódik."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Kayser-Fleischer gyűrűre?",
+                        options: ["Minden Wilson-kóros betegnél jelen van", "Csak a májbetegeknél látható", "A neurológiai tünetekkel rendelkező betegek többségénél kimutatható", "A kezelés hatására sosem tűnik el"],
+                        answer: 2,
+                        explanation: "A Kayser-Fleischer gyűrű a neurológiai tünetekkel rendelkező betegek szinte mindegyikénél jelen van, de a csak májtüneteket mutató betegeknél (különösen gyermekkorban) hiányozhat. A hatékony kezelés hatására elhalványulhat vagy eltűnhet."
+                    },
+                    {
+                        question: "Miért veszélyes a penicillamin kezelés bevezetése neurológiai tünetekkel rendelkező Wilson-kóros betegnél?",
+                        options: ["Mert allergiás reakciót okoz", "Mert a betegek akár 50%-ánál a neurológiai tünetek paradox rosszabbodását okozhatja", "Mert hatástalan a neurológiai tünetekre", "Mert májkárosodást okoz"],
+                        answer: 1,
+                        explanation: "A penicillamin terápia megkezdésekor a szövetekből mobilizált réz átmenetileg megemelheti a szabad réz szintjét a vérben, ami a neurológiai tünetek paradox, néha irreverzibilis rosszabbodásához vezethet. Ezért a bevezetésnek lassúnak és óvatosnak kell lennie."
+                    },
+                    {
+                        question: "Milyen pszichiátriai kórképekkel téveszthető össze a Wilson-kór?",
+                        options: ["Csak depresszióval", "Skizofréniával, bipoláris zavarral, személyiségzavarokkal", "Csak szorongásos zavarokkal", "Fóbiákkal"],
+                        answer: 1,
+                        explanation: "A Wilson-kór pszichiátriai tünetei rendkívül változatosak lehetnek, beleértve a depressziót, ingerlékenységet, impulzivitást, nem megfelelő viselkedést és pszichózist, ami miatt tévesen primer pszichiátriai betegségnek, pl. skizofréniának diagnosztizálhatják."
+                    },
+                    {
+                        question: "Mikor indokolt májátültetés Wilson-kórban?",
+                        options: ["Minden diagnosztizált esetben", "Csak neurológiai tünetek esetén", "Akut, fulmináns májelégtelenség vagy a gyógyszeres kezelésre nem reagáló, végstádiumú májbetegség esetén", "Csak a Kayser-Fleischer gyűrű jelenlétében"],
+                        answer: 2,
+                        explanation: "A májátültetés életmentő beavatkozás lehet akut májelégtelenség vagy a gyógyszeres kezelésre rezisztens, dekompenzált cirrózis esetén. Az átültetés a genetikai hibát is 'gyógyítja', mivel az új máj már képes a réz megfelelő kiválasztására."
+                    },
+                    {
+                        question: "Milyen diétás megszorítás javasolt Wilson-kóros betegeknek?",
+                        options: ["Sószegény diéta", "Fehérjeszegény diéta", "Alacsony réztartalmú diéta", "Zsírszegény diéta"],
+                        answer: 2,
+                        explanation: "A kezelés részeként, különösen a kezdeti fázisban, alacsony réztartalmú diéta javasolt. Kerülni kell a magas réztartalmú ételeket, mint a máj, kagylófélék, csokoládé, diófélék és gombák."
+                    },
+                    {
+                        question: "Miért fontos a Wilson-kóros beteg elsőfokú rokonainak szűrése?",
+                        options: ["Mert a betegség fertőző", "Mert az autoszomális recesszív öröklődés miatt a testvéreknél 25% az esély a betegségre", "Mert a szülők mindig betegek", "Nincs szükség a szűrésükre"],
+                        answer: 1,
+                        explanation: "Mivel a Wilson-kór autoszomális recesszív módon öröklődik, a diagnosztizált beteg testvéreinek 25% esélye van arra, hogy szintén betegek, 50% esélye, hogy hordozók, és 25% esélye, hogy egészségesek. A korai, tünetmentes fázisban történő szűrés és kezelés megkezdése megelőzheti a szervkárosodást."
+                    },
+                    {
+                        question: "Milyen hematológiai eltérés utalhat Wilson-kórra, különösen akut májelégtelenséggel társulva?",
+                        options: ["Vashiányos anaemia", "Coombs-negatív hemolitikus anaemia", "Thrombocytosis", "Leukopenia"],
+                        answer: 1,
+                        explanation: "A hirtelen felszabaduló nagy mennyiségű réz oxidatív károsodást okoz a vörösvértestekben, ami Coombs-negatív hemolitikus anaemiához (a vörösvértestek széteséséhez) vezethet. Ez az akut májelégtelenséggel együtt a Wilson-kór egyik vészjósló jele."
+                    },
+                    {
+                        question: "Mi a kezelés célja a tünetmentes, preszimptomatikus Wilson-kóros betegeknél?",
+                        options: ["A réz kiürítése a szervezetből", "A tünetek megjelenésének megelőzése", "Nincs szükség kezelésre", "Csak diétás megszorítások"],
+                        answer: 1,
+                        explanation: "A preszimptomatikus betegeknél a kezelés (általában cinksókkal) célja a réz kóros felhalmozódásának és a szervkárosodás, valamint a tünetek kialakulásának megelőzése."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Wilson-kór kezelésével kapcsolatban?",
+                        options: ["A kezelés csak néhány évig tart", "A kezelés élethosszig tartó és elhagyása súlyos következményekkel jár", "A gyógyszereket csak tünetek esetén kell szedni", "A diéta önmagában elegendő a kezelésre"],
+                        answer: 1,
+                        explanation: "A Wilson-kór kezelése élethosszig tartó elkötelezettséget igényel. A terápia abbahagyása a réz újbóli felhalmozódásához, a betegség kiújulásához és potenciálisan fatális májelégtelenséghez vezethet."
+                    },
+                    {
+                        question: "Milyen típusú tremort okoz leggyakrabban a Wilson-kór?",
+                        options: ["Csak nyugalmi tremort", "Csak akciós tremort", "Poszturális és akciós tremort, jellegzetes a 'szárnycsapkodó' tremor", "Feladatspecifikus tremort"],
+                        answer: 2,
+                        explanation: "A Wilson-kór tremora változatos lehet, de gyakori a poszturális és akciós komponens. A 'szárnycsapkodó' tremor (egy durva, csapkodó mozgás a kitartott karokon) különösen jellegzetes, bár nem kizárólagos tünete."
+                    }
+                ]
+            },
+            "dystonia_chorea": {
+                title: "Dystoniák és choreák",
+                questions: [
+                    {
+                        question: "Mi a dystonia alapvető jellemzője?",
+                        options: ["Rövid, táncszerű, véletlenszerű mozgások", "Tartós vagy időszakos izomösszehúzódások, amelyek kóros testtartást okoznak", "Ritmikus, oszcilláló mozgás", "Hirtelen, villámszerű izomrángások"],
+                        answer: 1,
+                        explanation: "A dystonia lényege a tartós vagy ismétlődő, akaratlan izomösszehúzódás, amely csavaró mozgásokhoz és/vagy kóros, fixált testtartásokhoz vezet."
+                    },
+                    {
+                        question: "Mi a chorea alapvető jellemzője?",
+                        options: ["Tartós izomgörcs", "Folyamatos, véletlenszerűen megjelenő, áramló, 'táncszerű' mozgások", "Akaratlagosan elnyomható rángások", "Lassú, csavaró mozgás"],
+                        answer: 1,
+                        explanation: "A choreát rövid, szabálytalan, kiszámíthatatlan, folyamatosan áramló, 'táncszerű' mozgások jellemzik, amelyek egyik testrészről a másikra vándorolnak."
+                    },
+                    {
+                        question: "Mi a 'geste antagoniste' vagy szenzoros trükk?",
+                        options: ["A chorea súlyosbodása érintésre", "A dystoniás testtartás átmeneti enyhülése egy specifikus érintésre", "A tic-ek akaratlagos elnyomása", "A myoclonus kiváltása fénnyel"],
+                        answer: 1,
+                        explanation: "A 'geste antagoniste' a dystonia egyik jellegzetes tünete, amikor egy enyhe érintés vagy mozdulat az érintett vagy egy közeli testrészen átmenetileg enyhíti a dystoniás görcsöt."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb örökletes chorea forma felnőttkorban?",
+                        options: ["Sydenham-chorea", "Wilson-kór", "Huntington-kór", "Neuroacanthocytosis"],
+                        answer: 2,
+                        explanation: "A Huntington-kór egy autoszomális domináns öröklődésű neurodegeneratív betegség, és a felnőttkorban kezdődő örökletes chorea messze leggyakoribb oka."
+                    },
+                    {
+                        question: "Melyik a fokális dystoniák (pl. blepharospasmus, cervicalis dystonia) elsődleges választandó kezelése?",
+                        options: ["Orális antikolinerg szerek", "Mélyagyi stimuláció (DBS)", "Botulinum toxin (BoNT) injekciók", "Levodopa"],
+                        answer: 2,
+                        explanation: "A fokális dystoniák elsődleges és leghatékonyabb kezelése a botulinum toxin injekció, amelyet közvetlenül az érintett, túlműködő izmokba adnak, hogy átmenetileg gyengítsék azokat."
+                    },
+                    {
+                        question: "Mi a dopa-reszponzív dystonia (DRD) vagy Segawa-betegség?",
+                        options: ["Levodopa által kiváltott dystonia", "Egy genetikai dystonia forma, amely drámaian javul alacsony dózisú levodopára", "A Huntington-kór egy variánsa", "Egy gyógyíthatatlan dystonia forma"],
+                        answer: 1,
+                        explanation: "A DRD egy örökletes dystonia forma, amely a dopamin szintézisének zavara miatt alakul ki. Jellegzetessége, hogy a tünetek kiválóan és tartósan reagálnak már alacsony dózisú levodopa kezelésre is."
+                    },
+                    {
+                        question: "Milyen típusú gyógyszerek a leghatékonyabbak a Huntington-kór choreájának tüneti kezelésére?",
+                        options: ["Dopamin agonisták", "VMAT2 gátlók (pl. tetrabenazin) és dopamin-blokkolók", "Antikolinerg szerek", "Béta-blokkolók"],
+                        answer: 1,
+                        explanation: "Mivel a chorea a dopaminerg rendszer túlműködésével jár, a kezelés a dopamin hatásának csökkentésére irányul. A VMAT2 gátlók (csökkentik a dopamin raktározását) és a dopamin-receptor blokkolók (antipszichotikumok) a leghatékonyabbak."
+                    },
+                    {
+                        question: "Mi a Sydenham-chorea oka?",
+                        options: ["Agyi stroke", "Agydaganat", "Streptococcus fertőzés utáni autoimmun reakció", "Genetikai mutáció"],
+                        answer: 2,
+                        explanation: "A Sydenham-chorea a reumás láz neurológiai manifesztációja, amelyet egy A-csoportú Streptococcus fertőzést követő, a bazális ganglionokat célzó autoimmun reakció okoz. Főként gyermekkorban fordul elő."
+                    },
+                    {
+                        question: "Melyik agyi struktúra a mélyagyi stimuláció (DBS) célpontja súlyos, gyógyszerrezisztens dystonia esetén?",
+                        options: ["Nucleus subthalamicus (STN)", "Globus pallidus internus (GPi)", "Talamusz (Vim)", "Substantia nigra"],
+                        answer: 1,
+                        explanation: "Súlyos dystonia esetén a DBS leggyakoribb és leghatékonyabb célpontja a globus pallidus internus (GPi)."
+                    },
+                    {
+                        question: "Melyik állítás igaz a felnőttkori kezdetű izolált dystoniára?",
+                        options: ["Mindig a lábban kezdődik és generalizálódik", "Általában fokális marad (pl. nyak, arc) és ritkán generalizálódik", "Mindig súlyos kognitív hanyatlással jár", "A levodopa mindig hatásos"],
+                        answer: 1,
+                        explanation: "A felnőttkorban kezdődő izolált dystonia jellemzően fokális, a nyakat (cervicalis dystonia) vagy az arcot (blepharospasmus) érinti, és általában fokális vagy szegmentális marad, ritkán terjed tovább."
+                    },
+                    {
+                        question: "Milyen kognitív és pszichiátriai tünetek jellemzőek a Huntington-kórra a chorea mellett?",
+                        options: ["Nincsenek ilyen tünetek", "Csak enyhe memóriazavar", "Progresszív demencia, depresszió, ingerlékenység, pszichózis", "Csak szorongás"],
+                        answer: 2,
+                        explanation: "A Huntington-kór egy neurodegeneratív betegség, amelyet a chorea mellett egy progresszív, szubkortikális jellegű demencia és súlyos pszichiátriai zavarok (depresszió, apátia, ingerlékenység, pszichózis) jellemeznek."
+                    },
+                    {
+                        question: "Mi a blepharospasmus?",
+                        options: ["A nyakizmok görcse", "A szemhéjak akaratlan, görcsös záródása", "Az állkapocs görcse", "A hangszalagok görcse"],
+                        answer: 1,
+                        explanation: "A blepharospasmus egy fokális dystonia, amely a szem körüli izmokat (m. orbicularis oculi) érinti, és a szemhéjak ismétlődő, görcsös összezáródását okozza, ami funkcionális vaksághoz vezethet."
+                    },
+                    {
+                        question: "Milyen prognózisú a Sydenham-chorea?",
+                        options: ["Mindig krónikussá válik és progrediál", "Általában önkorlátozó, a tünetek hónapok alatt megszűnnek", "Mindig maradandó mozgáskorlátozottságot okoz", "Kezelhetetlen és halálos"],
+                        answer: 1,
+                        explanation: "A Sydenham-chorea prognózisa általában jó, a mozgászavarok hetek vagy hónapok alatt spontán vagy antibiotikumos kezelésre megszűnnek. A hosszú távú antibiotikum profilaxis a reumás szívbetegség megelőzése miatt fontos."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport hatékony a dystonia kezelésében, de időseknél kognitív mellékhatásokat okozhat?",
+                        options: ["Béta-blokkolók", "Antikolinerg szerek (pl. trihexyphenidyl)", "SSRI antidepresszánsok", "Sztatinok"],
+                        answer: 1,
+                        explanation: "Az antikolinerg szerek hatékonyak lehetnek, különösen a generalizált dystoniában, de idősebb korban gyakran okoznak mellékhatásokat, mint a zavartság, memóriazavar, homályos látás és vizeletretenció."
+                    },
+                    {
+                        question: "Mi a 'tardív diszkinézia'?",
+                        options: ["A Parkinson-kór korai tünete", "A dopamin-receptor blokkoló (antipszichotikus) gyógyszerek hosszú távú mellékhatásaként kialakuló choreiform mozgászavar", "A dystonia egy genetikai formája", "A chorea egy fertőzéses formája"],
+                        answer: 1,
+                        explanation: "A tardív diszkinézia egy iatrogén (gyógyszer által okozott) mozgászavar, amely a dopamin-receptor blokkoló gyógyszerek (főleg antipszichotikumok) tartós használata után alakulhat ki, és leggyakrabban chorea-szerű, akaratlan száj- és nyelvmozgásokban nyilvánul meg."
+                    },
+                    {
+                        question: "Mi a 'motoros imperszisztencia'?",
+                        options: ["A mozgások lelassulása", "Képtelenség egy adott testtartás vagy mozgás fenntartására", "Izomgörcs mozgás közben", "Akaratlan mozgások elnyomása"],
+                        answer: 1,
+                        explanation: "A motoros imperszisztencia a choreára jellemző tünet, amely a tartós izom-összehúzódás fenntartásának képtelenségét jelenti. Példái a 'fejőlány markolat' vagy a 'jack-in-the-box nyelv'."
+                    },
+                    {
+                        question: "Melyik állítás írja le a legjobban a dystonia és a chorea közötti különbséget?",
+                        options: ["A dystonia mindig fájdalmas, a chorea soha", "A dystonia kóros testtartásokkal, a chorea áramló, táncszerű mozgásokkal jár", "A dystonia csak a nyakat, a chorea csak a végtagokat érinti", "A dystonia gyógyítható, a chorea nem"],
+                        answer: 1,
+                        explanation: "A legfőbb fenomenológiai különbség, hogy a dystonia tartós izom-összehúzódásokat és kóros testtartásokat eredményez, míg a chorea rövid, véletlenszerű, áramló mozgásokból áll, amelyek nem vezetnek fixált testtartáshoz."
+                    },
+                    {
+                        question: "Milyen típusú dystonia az 'írói görcs'?",
+                        options: ["Generalizált dystonia", "Cervicalis dystonia", "Feladatspecifikus fokális dystonia", "Hemidystonia"],
+                        answer: 2,
+                        explanation: "Az írói görcs egy feladatspecifikus fokális dystonia, ami azt jelenti, hogy a dystoniás tünetek (a kéz és az ujjak görcse) csak egy specifikus, jól begyakorolt tevékenység, az írás közben jelentkeznek."
+                    },
+                    {
+                        question: "Milyen kockázattal jár a dopamin-receptor blokkolók (antipszichotikumok) használata a chorea kezelésére?",
+                        options: ["Nincs kockázatuk", "Függőséget okozhatnak", "Tardív diszkinéziát és parkinsonizmust okozhatnak", "Súlyosbíthatják a choreát"],
+                        answer: 2,
+                        explanation: "Bár hatékonyak a chorea tüneteinek enyhítésében, az antipszichotikumok hosszú távon tardív diszkinéziát (egy másik, gyakran irreverzibilis mozgászavart) és gyógyszer-indukálta parkinsonizmust okozhatnak."
+                    },
+                    {
+                        question: "Mi a chorea gravidarum?",
+                        options: ["A terhesség alatti normális magzatmozgás", "Terhesség alatt jelentkező vagy kiújuló chorea", "A szülés utáni depresszió egyik tünete", "A terhességi vitaminhiány okozta mozgászavar"],
+                        answer: 1,
+                        explanation: "A chorea gravidarum a terhesség alatt, általában az első trimeszterben jelentkező ritka mozgászavar. Gyakran olyan nőknél fordul elő, akiknek a kórtörténetében Sydenham-chorea vagy antifoszfolipid szindróma szerepel."
+                    },
+                    {
+                        question: "Milyen etiológiai vizsgálat indokolt minden korai kezdetű, izolált dystonia esetén?",
+                        options: ["Csak agyi MRI", "Agyi MRI és genetikai tesztelés (pl. TOR1A, THAP1)", "Csak liquor vizsgálat", "Csak rézanyagcsere vizsgálat"],
+                        answer: 1,
+                        explanation: "Mivel a korai kezdetű dystoniák hátterében gyakrabban áll genetikai vagy strukturális ok, az agyi MRI és a leggyakoribb dystonia génekre (DYT-TOR1A, DYT-THAP1) irányuló genetikai tesztelés elvégzése indokolt."
+                    }
+                ]
+            }
+        };
+
+        // --- APPLICATION STATE ---
+        let currentState = {
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            answered: false
+        };
+
+        // --- DOM ELEMENTS ---
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicButtonsContainer = document.getElementById('topic-buttons');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationBox = document.getElementById('explanation-box');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+
+        const scoreText = document.getElementById('score-text');
+        const scoreMessage = document.getElementById('score-message');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const backToTopicsBtn = document.getElementById('back-to-topics-btn');
+
+        // --- FUNCTIONS ---
+
+        function init() {
+            renderTopicSelection();
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            restartQuizBtn.addEventListener('click', () => {
+                startQuiz(currentState.currentTopic);
+            });
+            backToTopicsBtn.addEventListener('click', () => {
+                showScreen('topic-selection');
+            });
+        }
+
+        function showScreen(screenName) {
+            topicSelectionScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            document.getElementById(`${screenName}-screen`).classList.remove('hidden');
+        }
+
+        function renderTopicSelection() {
+            topicButtonsContainer.innerHTML = '';
+            const topics = [
+                { key: 'tremor', name: 'A tremor kivizsgálása és kezelése' },
+                { key: 'atypical_parkinsonism', name: 'Atípusos Parkinson Szindrómák' },
+                { key: 'hyperkinesis', name: 'Hyperkinesissel járó kórképek' },
+                { key: 'wilson', name: 'Wilson-kór' },
+                { key: 'dystonia_chorea', name: 'Dystoniák és choreák' }
+            ];
+
+            topics.forEach(topic => {
+                const button = document.createElement('button');
+                button.className = "w-full bg-blue-500 text-white font-semibold py-4 px-6 rounded-xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105";
+                button.textContent = topic.name;
+                button.onclick = () => startQuiz(topic.key);
+                topicButtonsContainer.appendChild(button);
+            });
+        }
+
+        function startQuiz(topicKey) {
+            currentState.currentTopic = topicKey;
+            currentState.currentQuestionIndex = 0;
+            currentState.score = 0;
+            quizTitle.textContent = quizData[topicKey].title;
+            renderQuestion();
+            showScreen('quiz');
+        }
+
+        function renderQuestion() {
+            currentState.answered = false;
+            explanationBox.classList.remove('visible');
+            nextQuestionBtn.classList.add('hidden');
+
+            const topic = quizData[currentState.currentTopic];
+            const question = topic.questions[currentState.currentQuestionIndex];
+            const totalQuestions = topic.questions.length;
+
+            questionCounter.textContent = `${currentState.currentQuestionIndex + 1} / ${totalQuestions}`;
+            progressBar.style.width = `${((currentState.currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+            questionText.textContent = question.question;
+
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = "quiz-option w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:bg-gray-100 hover:border-blue-400 focus:outline-none focus:border-blue-500";
+                button.innerHTML = `<span class="font-bold mr-2">${String.fromCharCode(65 + index)}.</span> ${option}`;
+                button.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (currentState.answered) return;
+            currentState.answered = true;
+
+            const topic = quizData[currentState.currentTopic];
+            const question = topic.questions[currentState.currentQuestionIndex];
+            const options = optionsContainer.children;
+
+            if (selectedIndex === question.answer) {
+                currentState.score++;
+                options[selectedIndex].classList.add('correct');
+            } else {
+                options[selectedIndex].classList.add('incorrect');
+                options[question.answer].classList.add('correct');
+            }
+
+            explanationText.innerHTML = question.explanation;
+            explanationBox.classList.add('visible');
+            nextQuestionBtn.classList.remove('hidden');
+            
+            // Disable all options after answering
+            for (let option of options) {
+                option.disabled = true;
+                option.classList.remove('hover:bg-gray-100', 'hover:border-blue-400');
+            }
+        }
+
+        function nextQuestion() {
+            const topic = quizData[currentState.currentTopic];
+            if (currentState.currentQuestionIndex < topic.questions.length - 1) {
+                currentState.currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                renderResults();
+            }
+        }
+
+        function renderResults() {
+            const topic = quizData[currentState.currentTopic];
+            const totalQuestions = topic.questions.length;
+            const percentage = Math.round((currentState.score / totalQuestions) * 100);
+
+            scoreText.textContent = `${currentState.score} / ${totalQuestions}`;
+            
+            let message = '';
+            if (percentage === 100) {
+                message = 'Tökéletes eredmény, gratulálok!';
+            } else if (percentage >= 80) {
+                message = 'Kiváló munka!';
+            } else if (percentage >= 60) {
+                message = 'Jó eredmény, de van még hova fejlődni.';
+            } else {
+                message = 'Gyakoroljon még egy kicsit!';
+            }
+            scoreMessage.textContent = message;
+
+            showScreen('results');
+        }
+
+        // --- INITIALIZE APP ---
+        init();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Kvíz - 2. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .btn-incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+        .explanation {
+            background-color: #eef2ff;
+            border-left: 4px solid #4f46e5;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: #4338ca;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div id="quiz-container" class="quiz-container w-full">
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Neuroanatómia Kvíz 2.</h1>
+            <p class="text-lg text-gray-600 mb-8">Teszteld a tudásodat a hypothalamo-hypophysealis rendszer, beszédzavarok és a fájdalom témakörében.</p>
+            <button id="start-btn" class="btn bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-xl shadow-lg hover:bg-indigo-700">
+                Kvíz Indítása
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div id="progress-container" class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="question-counter" class="text-sm font-semibold text-gray-600"></span>
+                    <span id="score-counter" class="text-sm font-semibold text-gray-600">Pontszám: 0</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6 min-h-[100px]"></h2>
+            <div id="answer-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+            <div id="feedback-container" class="mt-4">
+                <div id="feedback-text" class="text-center font-semibold text-lg"></div>
+                <div id="explanation-text" class="explanation hidden"></div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Eredmény</h1>
+            <p id="results-text" class="text-2xl text-gray-600 mb-8"></p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 mb-8"></p>
+            <button id="restart-btn" class="btn bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-xl shadow-lg hover:bg-indigo-700">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questionBank = [
+            // From 35. A hypothalamo-hypophysealis rendszer.md
+            {
+                question: "Melyik hipotalamusz mag termel elsődlegesen ADH-t (antidiuretikus hormont)?",
+                answers: [
+                    { text: "Nucleus supraopticus (SON)", correct: true },
+                    { text: "Nucleus paraventricularis (PVN)", correct: false },
+                    { text: "Nucleus arcuatus (ARC)", correct: false },
+                    { text: "Preopticus terület", correct: false }
+                ],
+                explanation: "A Nucleus supraopticus (SON) a fő forrása az ADH-nak (vazopresszin), amely a neurohipofízisben tárolódik és onnan szabadul fel a vízháztartás szabályozására."
+            },
+            {
+                question: "Melyik hormon serkenti az ACTH (adrenokortikotrop hormon) szekrécióját az adenohipofízisből?",
+                answers: [
+                    { text: "CRH (kortikotropin-felszabadító hormon)", correct: true },
+                    { text: "TRH (tireotropin-felszabadító hormon)", correct: false },
+                    { text: "GnRH (gonadotropin-felszabadító hormon)", correct: false },
+                    { text: "GHRH (növekedési hormon-felszabadító hormon)", correct: false }
+                ],
+                explanation: "A hipotalamusz nucleus paraventricularisában termelődő CRH a portális keringésen keresztül jut az adenohipofízisbe, ahol a kortikotrop sejteket ACTH felszabadítására serkenti, ami a stresszválasz kulcseleme."
+            },
+            {
+                question: "Mi a dopamin szerepe a hipotalamusz-hipofízis rendszerben?",
+                answers: [
+                    { text: "Gátolja a prolaktin szekrécióját", correct: true },
+                    { text: "Serkenti a növekedési hormon szekrécióját", correct: false },
+                    { text: "Gátolja a TSH szekrécióját", correct: false },
+                    { text: "Serkenti az LH szekrécióját", correct: false }
+                ],
+                explanation: "A dopamin, amelyet a nucleus arcuatus termel, prolaktin-gátló hormonként (PIH) működik, tonikusan gátolva a prolaktin felszabadulását az adenohipofízis laktotrop sejtjeiből."
+            },
+            {
+                question: "Melyik struktúra a hipotalamusz idegi kiterjesztése, amely hormonokat tárol, de nem termel?",
+                answers: [
+                    { text: "Neurohipofízis (hátulsó lebeny)", correct: true },
+                    { text: "Adenohipofízis (elülső lebeny)", correct: false },
+                    { text: "Infundibulum (hipofízisnyél)", correct: false },
+                    { text: "Eminentia mediana", correct: false }
+                ],
+                explanation: "A neurohipofízis a hipotalamuszban (SON és PVN magokban) termelt ADH-t és oxitocint tárolja, és szükség esetén a véráramba üríti. Lényegében a hipotalamikus neuronok axonvégződéseiből áll."
+            },
+            {
+                question: "Mi köti össze a hipotalamuszt az adenohipofízissel, lehetővé téve a szabályozó hormonok szállítását?",
+                answers: [
+                    { text: "Hypothalamo-hypophysealis portális keringési rendszer", correct: true },
+                    { text: "Hypothalamo-hypophysealis traktus", correct: false },
+                    { text: "Fornix", correct: false },
+                    { text: "Arteria cerebri media", correct: false }
+                ],
+                explanation: "Ez a speciális vénás érrendszer biztosítja, hogy a hipotalamuszból származó releasing és inhibiting hormonok nagy koncentrációban, hígulás nélkül jussanak el az adenohipofízis célsejtjeihez."
+            },
+            {
+                question: "Melyik adenohipofízis hormon serkenti a pajzsmirigyhormonok termelését?",
+                answers: [
+                    { text: "TSH (pajzsmirigyserkentő hormon)", correct: true },
+                    { text: "ACTH", correct: false },
+                    { text: "GH", correct: false },
+                    { text: "FSH", correct: false }
+                ],
+                explanation: "A TSH (tireotropin) a pajzsmirigyre hat, serkentve a T3 és T4 hormonok szintézisét és szekrécióját, amelyek az anyagcserét szabályozzák."
+            },
+            {
+                question: "Melyik hormon váltja ki az ovulációt a nőkben?",
+                answers: [
+                    { text: "LH (luteinizáló hormon)", correct: true },
+                    { text: "FSH (follikulusz-stimuláló hormon)", correct: false },
+                    { text: "Prolaktin", correct: false },
+                    { text: "Oxitocin", correct: false }
+                ],
+                explanation: "Az LH-csúcs a menstruációs ciklus közepén váltja ki a tüszőrepedést (ovulációt) és serkenti a progeszterontermelést a sárgatestből."
+            },
+            {
+                question: "Mi az oxitocin egyik legismertebb funkciója a szülésen és szoptatáson kívül?",
+                answers: [
+                    { text: "Szociális kötődés és bizalom elősegítése", correct: true },
+                    { text: "Vérnyomás csökkentése", correct: false },
+                    { text: "Étvágy növelése", correct: false },
+                    { text: "Alvás szabályozása", correct: false }
+                ],
+                explanation: "Az oxitocint gyakran 'ölelőhormonnak' is nevezik, mivel fontos szerepet játszik az agyban a szociális viselkedés, az anyai gondoskodás és a párkapcsolati kötődés kialakításában."
+            },
+            {
+                // From 36. A beszédzavarok anatómiai alapjai.md
+                question: "Melyik agyterület felelős elsődlegesen a beszéd motoros tervezéséért és a grammatikailag helyes mondatok létrehozásáért?",
+                answers: [
+                    { text: "Broca-terület", correct: true },
+                    { text: "Wernicke-terület", correct: false },
+                    { text: "Gyrus angularis", correct: false },
+                    { text: "Insula", correct: false }
+                ],
+                explanation: "A Broca-terület (bal inferior frontális gyrus) a beszédprodukció motoros programozásának központja. Sérülése nonfluens, agrammatikus beszédhez vezet."
+            },
+            {
+                question: "A hallott és írott beszéd megértésének központja a(z):",
+                answers: [
+                    { text: "Wernicke-terület", correct: true },
+                    { text: "Broca-terület", correct: false },
+                    { text: "Premotoros kéreg", correct: false },
+                    { text: "Thalamus", correct: false }
+                ],
+                explanation: "A Wernicke-terület (bal superior temporális gyrus posterior része) a hallott szavak jelentésének feldolgozásáért felelős. Sérülése súlyos beszédértési zavart okoz."
+            },
+            {
+                question: "Mi a fasciculus arcuatus fő funkciója a klasszikus modell szerint?",
+                answers: [
+                    { text: "A Wernicke- és Broca-terület összekötése, a hallott beszéd megismétlése", correct: true },
+                    { text: "A vizuális információk feldolgozása", correct: false },
+                    { text: "Az érzelmek szabályozása", correct: false },
+                    { text: "A mozgáskoordináció", correct: false }
+                ],
+                explanation: "Ez a rostköteg kulcsfontosságú az auditoros információk továbbításában a receptív (Wernicke) központból a motoros (Broca) központ felé, ami elengedhetetlen az utánmondáshoz."
+            },
+            {
+                question: "A Hickok & Poeppel 'dual stream' modelljében melyik áramlat felelős a beszédértésért ('sound to meaning')?",
+                answers: [
+                    { text: "Ventrális (alsó) áramlat", correct: true },
+                    { text: "Dorzális (felső) áramlat", correct: false },
+                    { text: "Mediális áramlat", correct: false },
+                    { text: "Laterális áramlat", correct: false }
+                ],
+                explanation: "A bilaterálisan szerveződő ventrális áramlat a temporális lebenyben fut, és a hallott hangokból nyeri ki a lexikális-szemantikai jelentést."
+            },
+            {
+                question: "Milyen típusú afáziára jellemző a fluens, de értelmetlen beszéd és a súlyos beszédértési zavar?",
+                answers: [
+                    { text: "Wernicke-afázia", correct: true },
+                    { text: "Broca-afázia", correct: false },
+                    { text: "Vezetéses afázia", correct: false },
+                    { text: "Anómiás afázia", correct: false }
+                ],
+                explanation: "A Wernicke-afáziában a beszédprodukció folyékony (fluens), de tele van szó- és hangcserékkel (parafázia), valamint új szavakkal (neologizmus), miközben a beteg nem érti a hozzá intézett beszédet."
+            },
+            {
+                question: "Mi a legjellemzőbb tünete a vezetéses (kondukciós) afáziának?",
+                answers: [
+                    { text: "Aránytalanul súlyos utánmondási zavar", correct: true },
+                    { text: "Teljesen hiányzó beszéd", correct: false },
+                    { text: "Tökéletes, de lassú beszéd", correct: false },
+                    { text: "Csak olvasási nehézség", correct: false }
+                ],
+                explanation: "A vezetéses afáziában a beszédértés és a fluencia relatíve jó, de a hallott szavak, mondatok megismétlése kiemelkedően nehéz a fasciculus arcuatus sérülése miatt."
+            },
+            {
+                question: "Mi a különbség a dizartria és a beszédapraxia között?",
+                answers: [
+                    { text: "A dizartria a kivitelezés (izomgyengeség), az apraxia a tervezés zavara", correct: true },
+                    { text: "A dizartria nyelvi, az apraxia motoros zavar", correct: false },
+                    { text: "A dizartria csak a hangszínt, az apraxia csak a ritmust érinti", correct: false },
+                    { text: "Nincs különbség, a két fogalom szinonima", correct: false }
+                ],
+                explanation: "A dizartria a beszédmozgások neuromuszkuláris kontrolljának zavara (pl. izomgyengeség miatt), míg a beszédapraxia a mozgások magasabb szintű tervezésének és programozásának zavara ép izomerő mellett."
+            },
+            {
+                question: "Melyik agyterület sérülése kapcsolódik a leggyakrabban a beszédapraxiához?",
+                answers: [
+                    { text: "Insula (különösen a bal oldali)", correct: true },
+                    { text: "Gyrus angularis", correct: false },
+                    { text: "Thalamus", correct: false },
+                    { text: "Kisagy", correct: false }
+                ],
+                explanation: "Bár egy komplex hálózat sérüléséről van szó, kutatások a bal anterior insula sérülését azonosították a krónikus beszédapraxia legkövetkezetesebb neuroanatómiai korrelátumaként."
+            },
+            {
+                // From 37. A fájdalomérzés fiziológiája.md
+                question: "Melyik két fő rosttípus közvetíti a fájdalomingerületet a perifériáról?",
+                answers: [
+                    { text: "Aδ (A-delta) és C-rostok", correct: true },
+                    { text: "Aβ (A-béta) és Aγ (A-gamma) rostok", correct: false },
+                    { text: "Csak C-rostok", correct: false },
+                    { text: "Csak Aδ rostok", correct: false }
+                ],
+                explanation: "Az Aδ rostok a vékonyan myelinizáltak, az 'első', éles fájdalmat közvetítik. A C-rostok a velőhüvely nélküliek, a 'második', tompa, égő fájdalomért felelősek."
+            },
+            {
+                question: "Melyik ioncsatorna-család játszik kulcsszerepet a nociceptorokban a hőmérsékleti és kémiai ingerek detektálásában?",
+                answers: [
+                    { text: "TRP (Transient Receptor Potential) csatornák", correct: true },
+                    { text: "Feszültségfüggő nátrium csatornák", correct: false },
+                    { text: "GABA-A receptorok", correct: false },
+                    { text: "NMDA receptorok", correct: false }
+                ],
+                explanation: "A TRP csatornák (pl. TRPV1 a kapszaicinre és hőre, TRPA1 a mustárolajra, TRPM8 a mentolra) molekuláris detektorokként működnek a nociceptorok membránjában."
+            },
+            {
+                question: "Melyik felszálló pálya felelős az 'első', gyors, éles, jól lokalizálható fájdalom továbbításáért?",
+                answers: [
+                    { text: "Tractus neospinothalamicus", correct: true },
+                    { text: "Tractus paleospinothalamicus", correct: false },
+                    { text: "Tractus spinoreticularis", correct: false },
+                    { text: "Hátsó kötegi rendszer", correct: false }
+                ],
+                explanation: "A neospinothalamicus pálya az Aδ rostoktól kapott információt a thalamus VPL/VPM magjába, majd az S1/S2 kéregbe vetíti, lehetővé téve a fájdalom szenzoros-diszkriminatív feldolgozását."
+            },
+            {
+                question: "A fájdalom affektív-motivációs aspektusainak (kellemetlenség, szenvedés) feldolgozásában melyik pálya és agyterületek játszanak fő szerepet?",
+                answers: [
+                    { text: "Tractus paleospinothalamicus, amely a limbikus kéregbe (ACC, insula) vetít", correct: true },
+                    { text: "Tractus neospinothalamicus, amely az S1 kéregbe vetít", correct: false },
+                    { text: "Tractus corticospinalis, amely a motoros válaszokért felel", correct: false },
+                    { text: "Tractus spinocerebellaris, amely a kisagyba vetít", correct: false }
+                ],
+                explanation: "A paleospinothalamicus pálya a C-rostok által közvetített lassú fájdalmat szállítja a thalamus mediális magjaiba, majd onnan a limbikus rendszerhez kapcsolódó kérgi területekre, mint az anterior cinguláris kéreg (ACC) és az insula."
+            },
+            {
+                question: "Mi a 'kapuelmélet' (Melzack és Wall) lényege?",
+                answers: [
+                    { text: "A nem-fájdalmas tapintási ingerek (Aβ rostok) gátolhatják a fájdalomingerület továbbjutását a gerincvelőben", correct:true },
+                    { text: "Minden fájdalomingerület egy 'kapun' keresztül jut az agyba", correct: false },
+                    { text: "A C-rostok 'bezárják' a kaput", correct: false },
+                    { text: "A fájdalomcsillapítók a 'kaput' nyitják", correct: false }
+                ],
+                explanation: "Az elmélet szerint a vastag Aβ rostok (tapintás) aktiválják a gerincvelő hátsó szarvában lévő gátló interneuronokat, amelyek 'bezárják a kaput' a vékony Aδ és C rostok (fájdalom) által szállított jelek előtt. Ezért enyhíti a dörzsölés a fájdalmat."
+            },
+            {
+                question: "Melyik agytörzsi struktúra a leszálló endogén fájdalomcsillapító rendszer legfontosabb központja?",
+                answers: [
+                    { text: "Periaqueductalis szürkeállomány (PAG)", correct: true },
+                    { text: "Formatio reticularis", correct: false },
+                    { text: "Nucleus ruber", correct: false },
+                    { text: "Substantia nigra", correct: false }
+                ],
+                explanation: "A középagyi PAG inputot kap a felszálló fájdalompályáktól és a limbikus rendszertől, és a belőle kiinduló jelek a nucleus raphe magnuson keresztül gátolják a fájdalom továbbítását a gerincvelőben."
+            },
+            {
+                question: "Melyik két neurotranszmitter játszik kulcsszerepet a leszálló fájdalomcsillapító pályákban?",
+                answers: [
+                    { text: "Szerotonin és noradrenalin", correct: true },
+                    { text: "Dopamin és acetilkolin", correct: false },
+                    { text: "GABA és glutamát", correct: false },
+                    { text: "Hisztamin és bradikinin", correct: false }
+                ],
+                explanation: "Az agytörzsi nucleus raphe magnusból szerotoninerg, a locus coeruleusból pedig noradrenerg pályák szállnak le a gerincvelőbe, ahol modulálják (többnyire gátolják) a nociceptív neuronok aktivitását."
+            },
+            {
+                question: "Melyik agykérgi terület felelős a fájdalom szenzoros-diszkriminatív aspektusainak (hely, intenzitás) feldolgozásáért?",
+                answers: [
+                    { text: "Primer és szekunder szomatoszenzoros kéreg (S1/S2)", correct: true },
+                    { text: "Anterior cinguláris kéreg (ACC)", correct: false },
+                    { text: "Prefrontális kéreg (PFC)", correct: false },
+                    { text: "Insula", correct: false }
+                ],
+                explanation: "Az S1 és S2 kéreg, amelyek a parietális lebenyben találhatók, a fájdalom lokalizációjának és intenzitásának tudatosításáért felelősek a neospinothalamicus pályán keresztül kapott input alapján."
+            }
+        ];
+        
+        // Function to create a full question bank with enough questions
+        function createFullQuestionBank(targetSize) {
+            let fullBank = [...questionBank];
+            let i = 0;
+            while (fullBank.length < targetSize) {
+                fullBank.push(questionBank[i % questionBank.length]);
+                i++;
+            }
+             const extraQuestions = [
+                {
+                    question: "Melyik hipotalamusz mag termel TRH-t és CRH-t az adenohipofízis szabályozására?",
+                    answers: [
+                        { text: "Nucleus paraventricularis (PVN)", correct: true },
+                        { text: "Nucleus supraopticus (SON)", correct: false },
+                        { text: "Nucleus arcuatus (ARC)", correct: false },
+                        { text: "Preopticus terület", correct: false }
+                    ],
+                    explanation: "A Nucleus paraventricularis (PVN) egy multifunkcionális mag, amely többek között a pajzsmirigy (TRH) és a mellékvese (CRH) tengelyeket is szabályozza."
+                },
+                {
+                    question: "A GnRH (gonadotropin-felszabadító hormon) pulzatilis szekréciója melyik területről származik?",
+                    answers: [
+                        { text: "Preopticus terület", correct: true },
+                        { text: "Nucleus paraventricularis (PVN)", correct: false },
+                        { text: "Nucleus supraopticus (SON)", correct: false },
+                        { text: "Nucleus arcuatus (ARC)", correct: false }
+                    ],
+                    explanation: "A GnRH a preopticus területről szabadul fel pulzatilis módon, ami elengedhetetlen a gonadotrop hormonok (FSH, LH) megfelelő felszabadulásához és a reproduktív ciklus fenntartásához."
+                },
+                {
+                    question: "Melyik adenohipofízis hormon serkenti a spermiumtermelést a férfiakban?",
+                    answers: [
+                        { text: "FSH (follikulusz-stimuláló hormon)", correct: true },
+                        { text: "LH (luteinizáló hormon)", correct: false },
+                        { text: "Prolaktin", correct: false },
+                        { text: "GH (növekedési hormon)", correct: false }
+                    ],
+                    explanation: "Az FSH a herék Sertoli-sejtjeire hatva serkenti a spermatogenezist, míg az LH a tesztoszterontermelést stimulálja a Leydig-sejtekből."
+                },
+                {
+                    question: "Melyik agyideg sérülése okozhat rekedtséget és nazális rezonanciát a gége és a lágy szájpad izmainak bénulása miatt?",
+                    answers: [
+                        { text: "Nervus vagus (X. agyideg)", correct: true },
+                        { text: "Nervus trigeminus (V. agyideg)", correct: false },
+                        { text: "Nervus facialis (VII. agyideg)", correct: false },
+                        { text: "Nervus hypoglossus (XII. agyideg)", correct: false }
+                    ],
+                    explanation: "A nervus vagus idegzi be a gége és a lágy szájpad izmainak nagy részét, ezért sérülése a fonáció és a rezonancia zavarához vezethet."
+                },
+                 {
+                    question: "A beszédprodukció önmonitorozásában, vagyis a saját beszédünk észlelésében és korrigálásában melyik pálya játszik kulcsszerepet?",
+                    answers: [
+                        { text: "Fasciculus arcuatus (a dorzális áramlat részeként)", correct: true },
+                        { text: "Uncinate fasciculus (a ventrális áramlat részeként)", correct: false },
+                        { text: "Tractus corticospinalis", correct: false },
+                        { text: "Fornix", correct: false }
+                    ],
+                    explanation: "A dorzális áramlat (és benne a fasciculus arcuatus) felelős a szenzoros-motoros integrációért, ami lehetővé teszi, hogy a hallott (saját) beszédet összevessük a motoros tervvel és korrigáljunk."
+                },
+                {
+                    question: "Mi a transzkortikális afáziák közös, megkülönböztető jegye?",
+                    answers: [
+                        { text: "A relatíve jó utánmondási képesség", correct: true },
+                        { text: "A teljesen fluens beszéd", correct: false },
+                        { text: "A súlyos beszédértési zavar", correct: false },
+                        { text: "A beszéd hiánya", correct: false }
+                    ],
+                    explanation: "A transzkortikális afáziákban a klasszikus nyelvi központokat körülvevő 'vízválasztó' területek sérülnek, de a Broca-Wernicke kapcsolat (fasciculus arcuatus) ép marad, ami lehetővé teszi a jó utánmondást."
+                },
+                {
+                    question: "Melyik nociceptor típus felelős az 'első', éles, jól lokalizálható fájdalomért?",
+                    answers: [
+                        { text: "Aδ rostokhoz kapcsolt mechanonociceptorok és termonociceptorok", correct: true },
+                        { text: "C-rostokhoz kapcsolt polimodális nociceptorok", correct: false },
+                        { text: "Aβ rostokhoz kapcsolt mechanoreceptorok", correct: false },
+                        { text: "Proprioceptorok", correct: false }
+                    ],
+                    explanation: "A vékonyan myelinizált Aδ rostok gyorsan vezetik az ingert, ami az éles, nyilalló, 'első' fájdalomérzetet adja, azonnali védekező reakciót váltva ki."
+                },
+                {
+                    question: "A chili paprika csípős hatóanyaga, a kapszaicin, melyik TRP csatornát aktiválja?",
+                    answers: [
+                        { text: "TRPV1", correct: true },
+                        { text: "TRPA1", correct: false },
+                        { text: "TRPM8", correct: false },
+                        { text: "TRPC5", correct: false }
+                    ],
+                    explanation: "A TRPV1 a 'kapszaicin receptor', amely a noxius hőre (>42°C) és a savas pH-ra is érzékeny, kulcsszerepet játszva az égő fájdalom és a gyulladásos hiperalgézia kialakulásában."
+                },
+                 {
+                    question: "Hol kereszteződik a tractus neospinothalamicus?",
+                    answers: [
+                        { text: "A gerincvelőben, az elülső fehér commissurában", correct: true },
+                        { text: "A nyúltvelőben (lemniscus medialis kereszteződése)", correct: false },
+                        { text: "A középagyban", correct: false },
+                        { text: "Nem kereszteződik", correct: false }
+                    ],
+                    explanation: "A fájdalom- és hőérző pályák másodlagos neuronjai a belépési szelvény szintjén vagy annak közelében átkereszteződnek, majd az ellenoldali anterolaterális kötegben szállnak fel."
+                },
+                {
+                    question: "A kisugárzó fájdalom (referred pain) jelenségének mi az anatómiai alapja a gerincvelőben?",
+                    answers: [
+                        { text: "A szomatikus és viszcerális afferensek konvergenciája ugyanazon a másodlagos neuronon", correct: true },
+                        { text: "A felszálló pályák kereszteződése", correct: false },
+                        { text: "A motoros és szenzoros pályák összekeveredése", correct: false },
+                        { text: "A leszálló fájdalomcsillapító rendszer hibája", correct: false }
+                    ],
+                    explanation: "A Rexed V. laminában a belső szervekből (viszcerális) és a bőrből/izmokból (szomatikus) érkező rostok ugyanazokra a projekciós (WDR) neuronokra kapcsolódhatnak át. Az agy ezt az 'összekevert' jelet a gyakoribb szomatikus forrásból származónak értelmezi."
+                }
+            ];
+            
+            fullBank.push(...extraQuestions, ...extraQuestions, ...extraQuestions, ...extraQuestions, ...extraQuestions); // duplicate to reach target size
+
+            return fullBank;
+        }
+
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const questionCounter = document.getElementById('question-counter');
+        const scoreCounter = document.getElementById('score-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const answerButtons = document.getElementById('answer-buttons');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackText = document.getElementById('feedback-text');
+        const explanationText = document.getElementById('explanation-text');
+
+        const resultsText = document.getElementById('results-text');
+        const finalScore = document.getElementById('final-score');
+
+        let allQuestions, shuffledQuestions, currentQuestionIndex;
+        let score = 0;
+        const totalQuestionsForQuiz = 20; // Number of questions per quiz session
+
+        // Functions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            allQuestions = createFullQuestionBank(80); // Ensure the bank is large enough
+            shuffledQuestions = shuffleArray([...allQuestions]).slice(0, totalQuestionsForQuiz);
+            currentQuestionIndex = 0;
+            score = 0;
+            updateScoreDisplay();
+            setNextQuestion();
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion(shuffledQuestions[currentQuestionIndex]);
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionText.innerText = question.question;
+            question.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerHTML = answer.text; // Use innerHTML to render potential formatting
+                button.classList.add('btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'text-gray-700', 'hover:bg-gray-100');
+                button.dataset.correct = answer.correct;
+                button.dataset.explanation = question.explanation;
+                button.addEventListener('click', selectAnswer);
+                answerButtons.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            feedbackText.innerText = '';
+            feedbackText.classList.remove('text-green-600', 'text-red-600');
+            explanationText.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.currentTarget; // Use currentTarget to be safe
+            const correct = selectedBtn.dataset.correct === 'true';
+            const explanation = selectedBtn.dataset.explanation;
+
+            // Disable all buttons
+            Array.from(answerButtons.children).forEach(button => {
+                button.disabled = true;
+                // Highlight the correct answer
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('btn-correct');
+                }
+            });
+
+            if (correct) {
+                score++;
+                updateScoreDisplay();
+                selectedBtn.classList.add('btn-correct');
+                feedbackText.innerText = 'Helyes!';
+                feedbackText.classList.add('text-green-600');
+            } else {
+                selectedBtn.classList.add('btn-incorrect');
+                feedbackText.innerText = 'Helytelen.';
+                feedbackText.classList.add('text-red-600');
+            }
+            
+            // Show explanation
+            if (explanation) {
+                explanationText.innerText = explanation;
+                explanationText.classList.remove('hidden');
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                setNextQuestion();
+            }, 4000); // Increased delay to read explanation
+        }
+
+        function updateProgress() {
+            questionCounter.innerText = `Kérdés: ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`;
+            const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+        
+        function updateScoreDisplay() {
+            scoreCounter.innerText = `Pontszám: ${score}`;
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            const percentage = Math.round((score / shuffledQuestions.length) * 100);
+            resultsText.innerText = `A tesztet ${score} ponttal zártad a ${shuffledQuestions.length}-ból.`;
+            finalScore.innerText = `${percentage}%`;
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

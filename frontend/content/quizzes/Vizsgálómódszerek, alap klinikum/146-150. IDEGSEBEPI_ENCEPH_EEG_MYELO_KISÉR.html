@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option:hover {
+            background-color: #f0f9ff; /* light blue */
+            border-color: #3b82f6; /* blue */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* light green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        .explanation {
+            border-left: 4px solid #60a5fa; /* blue */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="bg-white p-8 rounded-2xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold mb-2 text-slate-900">Interaktív Neurológia Teszt</h1>
+            <p class="text-slate-600 mb-8">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button data-topic="146" class="topic-btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">146. Idegsebészeti beavatkozások epilepsziában</button>
+                <button data-topic="147" class="topic-btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">147. Encephalopathiák</button>
+                <button data-topic="148" class="topic-btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">148. Organikus és metabolikus idegrendszeri károsodások EEG jelei</button>
+                <button data-topic="149" class="topic-btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">149. Myelopathiák</button>
+                <button data-topic="150" class="topic-btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">150. Idegrendszeri kisérbetegségek</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-xl font-bold text-slate-900">Téma Címe</h2>
+                    <button id="back-to-menu" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg text-sm">Vissza a menübe</button>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="feedback-container" class="mt-6 hidden">
+                    <div id="explanation-box" class="explanation bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-slate-800 mb-2">Magyarázat</h3>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                    <button id="next-question-btn" class="w-full mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg transition">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-slate-900">Eredmények</h2>
+                <p id="score-text" class="text-xl mb-6 text-slate-700"></p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg transition">Újrapróbálkozás</button>
+                    <button id="main-menu-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition">Főmenü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+            "146": {
+                title: "146. Idegsebészeti beavatkozások epilepsziában",
+                questions: [
+                    {
+                        question: "Mi a reszektív sebészet célja az epilepszia kezelésében?",
+                        options: [
+                            "Az agyi idegpályák átvágása a rohamterjedés megállítására.",
+                            "Az epileptogén zóna teljes eltávolítása a rohammentesség elérése érdekében.",
+                            "Az agy elektromos stimulálása a rohamok csökkentésére.",
+                            "A rohamok tüneteinek gyógyszeres enyhítése."
+                        ],
+                        answer: 1,
+                        explanation: "A reszektív sebészet célja 'az epileptogén zóna – az agykéreg azon minimális területe, amelynek eltávolítása rohammentességet eredményez – teljes eltávolítása'."
+                    },
+                    {
+                        question: "Melyik a leggyakrabban végzett reszektív műtét, különösen hippokampusz szklerózissal társuló esetekben?",
+                        options: [
+                            "Corpus callosotomia",
+                            "Hemiszferektómia",
+                            "Temporális lebenyműtét (Temporal Lobectomy)",
+                            "Multiplex szubpiális transzekció (MST)"
+                        ],
+                        answer: 2,
+                        explanation: "A temporális lebenyműtét 'a leggyakrabban végzett reszektív műtét, különösen a mediális temporális lebeny epilepszia (MTLE) eseteiben, amely gyakran hippokampusz szklerózissal társul'."
+                    },
+                    {
+                        question: "Milyen esetben indikált a hemiszferektómia?",
+                        options: [
+                            "Enyhe, gyógyszerre jól reagáló fokális epilepsziában.",
+                            "Súlyos, gyógyszerrezisztens epilepsziában, amely egyetlen agyfélteke több területéről indul ki.",
+                            "Időskori, újonnan diagnosztizált epilepsziában.",
+                            "Kizárólag a corpus callosumot érintő epilepsziában."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A hemiszferektómia indikált 'súlyos, gyógyszerrezisztens epilepszia, amely egyetlen agyfélteke több területéről indul ki, gyakran születéskor vagy kora csecsemőkorban fennálló állapotok miatt'."
+                    },
+                    {
+                        question: "Mi a corpus callosotomia elsődleges célja?",
+                        options: [
+                            "A teljes rohammentesség elérése.",
+                            "A rohamok terjedésének megállítása a két agyfélteke között, különösen atóniás rohamok (drop attacks) esetén.",
+                            "A rohamfókusz eltávolítása.",
+                            "A memória funkciók javítása."
+                        ],
+                        answer: 1,
+                        explanation: "A corpus callosotomia egy palliatív eljárás, amelynek célja 'a rohamok terjedésének megállítása az idegpályák átvágásával'. Különösen hatékony 'atóniás rohamok (drop attacks) és tónusos rohamok esetén'."
+                    },
+                    {
+                        question: "Mikor alkalmazzák a multiplex szubpiális transzekciót (MST)?",
+                        options: [
+                            "Generalizált epilepsziákban.",
+                            "Ha a rohamfókusz könnyen eltávolítható.",
+                            "Fokális epilepszia esetén, amely eloquens kéregből (pl. motoros, nyelvi területek) ered.",
+                            "Ha a beteg nem egyezik bele a nyitott műtétbe."
+                        ],
+                        answer: 2,
+                        explanation: "Az MST-t 'fokális epilepszia esetén, amely eloquens kéregből (pl. motoros, szenzoros, nyelvi területek) ered, ahol a reszekció elfogadhatatlan neurológiai deficitet okozna'."
+                    },
+                    {
+                        question: "Melyik neuromodulációs eljárás működik 'zárt hurkú' rendszerként, észleli és megszakítja a rohamaktivitást?",
+                        options: [
+                            "Vagus Ideg Stimuláció (VNS)",
+                            "Mély Agyi Stimuláció (DBS)",
+                            "Reszponzív Neurostimuláció (RNS)",
+                            "Transzkraniális Mágneses Stimuláció (TMS)"
+                        ],
+                        answer: 2,
+                        explanation: "A Reszponzív Neurostimuláció (RNS) egy 'zárt hurkú rendszer', amely 'figyeli az agyi elektromos aktivitást... Ha kóros... aktivitást észlel, rövid elektromos impulzusokat ad le a rohamaktivitás megszakítására'."
+                    },
+                    {
+                        question: "Melyik mély agyi struktúra a leggyakoribb célpontja a mély agyi stimulációnak (DBS) epilepsziában?",
+                        options: [
+                            "Amygdala",
+                            "Hippocampus",
+                            "A talamusz elülső magja (ANT)",
+                            "Substantia nigra"
+                        ],
+                        answer: 2,
+                        explanation: "Epilepszia esetén a DBS gyakori célpontja 'a talamusz elülső magja (ANT)'."
+                    },
+                    {
+                        question: "Milyen kockázattal jár a temporális lebenyműtét, különösen a domináns oldalon?",
+                        options: [
+                            "Teljes bénulás",
+                            "Látás elvesztése",
+                            "Memória- és nyelvi zavarok (pl. anómia)",
+                            "Halláskárosodás"
+                        ],
+                        answer: 2,
+                        explanation: "A temporális lebenyműtét kockázatai közé tartozik a 'memóriazavar (különösen verbális memória a domináns temporális lebeny reszekciója esetén)..., nyelvi zavarok (anómia)'."
+                    },
+                    {
+                        question: "Mi a lézer intersticiális termoterápia (LITT) lényege?",
+                        options: [
+                            "Az agy hűtése a rohamok megelőzésére.",
+                            "MRI-vezérelt lézerenergia használata az epileptogén fókusz elpusztítására (ablációjára).",
+                            "A koponya lézeres megnyitása a műtéthez.",
+                            "Az agyi erek lézeres tágítása."
+                        ],
+                        answer: 1,
+                        explanation: "A LITT során 'MRI-vezérelt sztereotaktikus lézerszálat' helyeznek a célszövetbe, és 'lézerenergiát juttatnak be a szövet felmelegítésére és ablációjára'."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Vagus Ideg Stimulációra (VNS)?",
+                        options: [
+                            "Általában teljes rohammentességet eredményez.",
+                            "A jobb oldali vagus ideget stimulálják.",
+                            "Egy palliatív eljárás, amelynek hatékonysága idővel javulhat.",
+                            "Nincsenek ismert mellékhatásai."
+                        ],
+        
+                        answer: 2,
+                        explanation: "A VNS egy palliatív eljárás, amely nem a rohammentességet, hanem a rohamok számának csökkentését célozza. A hatékonysága 'idővel javulhat', és a bal oldali vagus ideget stimulálják. Mellékhatásai (pl. rekedtség, köhögés) gyakoriak."
+                    },
+                    {
+                        question: "Mi a léziónektómia?",
+                        options: [
+                            "Az egész agylebeny eltávolítása.",
+                            "Egy specifikus, jól körülírt strukturális agyi lézió (pl. tumor, cavernoma) eltávolítása.",
+                            "Az agykéreg egy részének leválasztása.",
+                            "Az agy hűtéses kezelése."
+                        ],
+                        answer: 1,
+                        explanation: "A léziónektómia 'egy specifikus, jól körülírt strukturális agyi lézió eltávolítása, amelyet a rohamok okaként azonosítottak'."
+                    },
+                    {
+                        question: "Milyen technológiai újítás segíti elsősorban a SEEG elektródák pontos beültetését?",
+                        options: [
+                            "Mesterséges intelligencia",
+                            "Robot-asszisztált sebészet",
+                            "3D nyomtatás",
+                            "Lézeres vágás"
+                        ],
+                        answer: 1,
+                        explanation: "A robot-asszisztált sebészetet 'elsősorban sztereotaktikus eljárásokhoz, különösen SEEG elektróda beültetéshez' használják, mivel 'növelik a pontosságot és a hatékonyságot'."
+                    },
+                    {
+                        question: "Milyen típusú rohamok esetén különösen hatékony a corpus callosotomia?",
+                        options: [
+                            "Fokális, tudatzavar nélküli rohamok.",
+                            "Absence rohamok.",
+                            "Atóniás rohamok (drop attacks).",
+                            "Temporális lebeny rohamok."
+                        ],
+        
+                        answer: 2,
+                        explanation: "A corpus callosotomia 'elsősorban gyógyszeres kezelésre nem reagáló generalizált rohamok, különösen atóniás rohamok (drop attacks) és tónusos rohamok esetén' hatékony."
+                    },
+                    {
+                        question: "Mi a funkcionális hemiszferektómia és az anatómiai közötti fő különbség?",
+                        options: [
+                            "Nincs különbség.",
+                            "A funkcionális során több agyszövetet távolítanak el.",
+                            "A funkcionális során az agyféltekét leválasztják, de kevesebb szövetet távolítanak el, csökkentve a komplikációk (pl. hidrokefalusz) kockázatát.",
+                            "A funkcionális csak neuromodulációt jelent."
+                        ],
+                        answer: 2,
+                        explanation: "A funkcionális hemiszferektómia 'a beteg agyfélteke leválasztása az egészségesről, kevesebb agyszövet eltávolításával', célja 'azonos rohamkontroll elérése alacsonyabb komplikációs rátával'."
+                    },
+                    {
+                        question: "Mi a diszkonnekciós szindróma, ami a corpus callosotomia után alakulhat ki?",
+                        options: [
+                            "A beteg nem ismeri fel a családtagjait.",
+                            "A két agyfélteke közötti kommunikáció zavara, pl. a nem domináns kéz apraxiája.",
+                            "Súlyos memóriavesztés.",
+                            "Teljes beszédképtelenség."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A corpus callosotomia kockázata a diszkonnekciós szindróma, amelynek tünetei lehetnek 'a nem domináns kéz apraxiája, idegen kéz szindróma, kétkezes koordinációs nehézségek'."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás kulcsfontosságú a reszektív műtétek előtti kivizsgálásban a strukturális abnormalitások azonosítására?",
+                        options: [
+                            "EEG",
+                            "Koponya röntgen",
+                            "Nagy felbontású MRI epilepszia-protokollal",
+                            "PET"
+                        ],
+                        answer: 2,
+                        explanation: "A 'nagy felbontású MRI epilepszia-specifikus protokollokkal' kulcsfontosságú a strukturális abnormalitások, mint a hippokampusz szklerózis vagy kérgi diszpláziák azonosítására."
+                    },
+                    {
+                        question: "Milyen előnnyel járhat a LITT a nyitott temporális lebenyműtéthez képest?",
+                        options: [
+                            "Magasabb rohammentességi arány.",
+                            "Jobb memória- és megnevezési funkciók megőrzése.",
+                            "Nincs semmilyen kockázata.",
+                            "Nem igényel képalkotó vezérlést."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A LITT egyik fő előnye a 'jobb memória- és megnevezési funkciók megőrzése a nyitott reszekcióhoz képest mTLE esetén', bár a rohammentességi arány kissé alacsonyabb lehet."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a neuromodulációs eljárásokra (VNS, DBS, RNS)?",
+                        options: [
+                            "Általában palliatívak, a rohamok számának csökkentését célozzák.",
+                            "Akkor jönnek szóba, ha a beteg nem alkalmas reszektív műtétre.",
+                            "Mindig teljes rohammentességet eredményeznek.",
+                            "Elektromos stimulációt alkalmaznak az agyi aktivitás módosítására."
+                        ],
+                        answer: 2,
+                        explanation: "A neuromodulációs eljárások 'általában palliatívak, nem kuratívak', és ritkán okoznak teljes rohammentességet. Céljuk a rohamok gyakoriságának és súlyosságának csökkentése."
+                    },
+                    {
+                        question: "Mi a fő indikációja a kvadráns diszkonnekciónak?",
+                        options: [
+                            "Generalizált epilepszia.",
+                            "Kétoldali, szimmetrikus rohamfókuszok.",
+                            "Olyan epileptogén fókusz, amely egy agyfélteke egy kvadránsában helyezkedik el.",
+                            "Kizárólag hipotalamikus hamartómák."
+                        ],
+                        answer: 2,
+                        explanation: "A kvadráns diszkonnekciókat 'olyan betegek esetében... alkalmazzák, akiknél az epileptogén fókusz egy agyfélteke egy kvadránsában (pl. anterior vagy poszterior) helyezkedik el'."
+                    },
+                    {
+                        question: "Milyen új, félig invazív stimulációs módszert fejlesztenek magyar kutatók?",
+                        options: [
+                            "Agyba ültethető chipet, ami gyógyszert bocsát ki.",
+                            "Fejbőr alá ültetett elektródákat, amelyek felismerik és stimulációval megszakítják a rohamokat.",
+                            "Mágneses sisakot, ami gátolja a rohamokat.",
+                            "Ultrahangos terápiát a rohamfókusz elpusztítására."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Magyar kutatók egy félig invazív módszert fejlesztenek, amely 'a fejbőr alá (a koponyacsontot nem áthatolóan) ültetett elektródákat foglal magában, amelyek felismerik a rohamok elektromos jeleit, és célzott, időzített elektromos stimulációt adnak le'."
+                    }
+                ]
+            },
+            "147": {
+                title: "147. Encephalopathiák",
+                questions: [
+                    {
+                        question: "Mi az encephalopathia általános definíciója?",
+                        options: [
+                            "Az agy primer gyulladása.",
+                            "Az agy normális működésének átmeneti vagy tartós károsodása, ami diffúz agyi diszfunkciót okoz.",
+                            "Kizárólag az agyi ereket érintő betegség.",
+                            "Az agy daganatos megbetegedése."
+                        ],
+                        answer: 1,
+                        explanation: "Az encephalopathia 'az agy azon állapotát jelöli, amelyben az agy normális működése átmenetileg vagy tartósan károsodik'. Ez egy gyűjtőfogalom a diffúz agyi diszfunkcióra."
+                    },
+                    {
+                        question: "Mi a legfontosabb különbség az encephalopathia és az encephalitis között?",
+                        options: [
+                            "Nincs különbség, a két fogalom szinonima.",
+                            "Az encephalitis mindig bakteriális, az encephalopathia mindig vírusos.",
+                            "Az encephalitis primer agyi gyulladást jelent, míg az encephalopathia egy tágabb, nem feltétlenül gyulladásos agyi működészavar.",
+                            "Az encephalopathia mindig reverzibilis, az encephalitis soha."
+                        ],
+                        answer: 2,
+                        explanation: "Az alapvető különbség, hogy 'az encephalitis primer agyi gyulladást jelent, míg az encephalopathia egy tágabb mentális állapot, amely különböző agyi problémákból fakad'."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb és legjellemzőbb EEG eltérés metabolikus encephalopathiákban?",
+                        options: [
+                            "Fokális tüskehullámok",
+                            "A normál háttérfrekvencia általános lassulása",
+                            "Normális, éber EEG minta",
+                            "Burst-szuppressziós minta"
+                        ],
+                        answer: 1,
+                        explanation: "Az EEG eltérések közül 'a legjellemzőbb lelet a normál háttérfrekvencia általános lassulása'."
+                    },
+                    {
+                        question: "Mi a hepatikus encephalopathia (HE) leggyakoribb oka?",
+                        options: [
+                            "Veseelégtelenség",
+                            "Súlyos fertőzés",
+                            "Máj elégtelen működése és/vagy portoszisztémás söntképződés",
+                            "Magas vérnyomás"
+                        ],
+                        answer: 2,
+                        explanation: "A hepatikus encephalopathia 'a máj elégtelen működéséhez és/vagy a portális keringés zavarához (portoszisztémás söntképződéshez) társuló' neuropszichiátriai tünetegyüttes."
+                    },
+                    {
+                        question: "Mi az asterixis ('flapping tremor')?",
+                        options: [
+                            "Akaratlagos kézremegés.",
+                            "A poszturális tónus rövid, akaratlan elvesztése, ami negatív myoclonusnak felel meg.",
+                            "Epilepsziás roham egyik formája.",
+                            "A szem akaratlan, ritmikus mozgása."
+                        ],
+                        answer: 1,
+                        explanation: "Az asterixis 'egy negatív myoclonus, amely a poszturális tónus elvesztésével jár. Leggyakrabban a csukló kinyújtott, dorsalflektált helyzetben tartásakor figyelhető meg (\"flapping\")'."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ a vér ammóniaszintjére hepatikus encephalopathiában?",
+                        options: [
+                            "Mindig tökéletesen korrelál a tünetek súlyosságával.",
+                            "A normális ammóniaszint kizárja a HE diagnózisát.",
+                            "Nem mutat szoros korrelációt a HE súlyosságával, és a normális szint sem zárja ki a diagnózist.",
+                            "Csak a HE végső stádiumában emelkedik meg."
+                        ],
+                        answer: 2,
+                        explanation: "Fontos tudni, hogy a vér ammóniaszintje 'nem mutat szoros korrelációt a HE súlyossági fokával, és a normális ammóniaszint sem zárja ki egyértelműen a HE lehetőségét'."
+                    },
+                    {
+                        question: "Mi a Wernicke encephalopathia (WE) oka?",
+                        options: [
+                            "B12-vitamin hiány",
+                            "Tiamin (B1-vitamin) hiány",
+                            "Folsavhiány",
+                            "C-vitamin hiány"
+                        ],
+                        answer: 1,
+                        explanation: "A Wernicke encephalopathia 'egy akut neuropszichiátriai szindróma, amelyet a tiamin (B1-vitamin) hiánya okoz'."
+                    },
+                    {
+                        question: "Mi a helyes eljárás, ha egy alultáplált, alkoholbeteg betegnek glükóz infúziót kell adni?",
+                        options: [
+                            "A glükózt a lehető leggyorsabban be kell adni, a vitaminpótlás ráér később.",
+                            "A tiamint (B1-vitamin) a glükóz adása ELŐTT vagy azzal EGYIDŐBEN kell beadni.",
+                            "A glükóz adása kontraindikált ilyen betegeknél.",
+                            "Először B12-vitamint kell adni, majd utána a glükózt."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Kritikus fontosságú, hogy 'a tiamint glükóz adása előtt adják be, mivel a glükóz metabolizmusa felhasználja a szervezet maradék tiaminkészleteit, és ezáltal ronthatja a beteg állapotát'."
+                    },
+                    {
+                        question: "Melyik betegségre jellemző a gyorsan progrediáló demencia, myoclonus, és az EEG-n periodikusan ismétlődő éles hullám komplexusok (PSWC)?",
+                        options: [
+                            "Alzheimer-kór",
+                            "Hashimoto encephalopathia",
+                            "Creutzfeldt-Jakob betegség (CJD)",
+                            "Posterior Reverzibilis Encephalopathia Szindróma (PRES)"
+                        ],
+                        answer: 2,
+                        explanation: "A sporadikus Creutzfeldt-Jakob betegségre (sCJD) jellemző a 'gyorsan progrediáló demencia', a 'myoclonusok', és az EEG-n a 'periodikusan ismétlődő éles hullám komplexek (PSWC)'."
+                    },
+                    {
+                        question: "Mi a Posterior Reverzibilis Encephalopathia Szindróma (PRES) jellegzetes MRI lelete?",
+                        options: [
+                            "Szimmetrikus thalamikus léziók.",
+                            "A corpus callosum spleniumának reverzibilis léziója.",
+                            "Szimmetrikus, kétoldali vazogén ödéma a parieto-occipitális régiók fehérállományában.",
+                            "Diffúz agyi atrófia."
+                        ],
+                        answer: 2,
+                        explanation: "A PRES esetén az MRI 'tipikusan szimmetrikus, kétoldali vazogén ödéma látható a parieto-occipitális régiók fehérállományában'."
+                    },
+                    {
+                        question: "Melyik állítás igaz a krónikus traumás encephalopathiára (CTE)?",
+                        options: [
+                            "Egyetlen súlyos fejsérülés okozza.",
+                            "A tünetek azonnal a sérülés után jelentkeznek.",
+                            "Ismétlődő fejsérülések (akár szubkonkusszív ütések) következtében kialakuló progresszív neurodegeneratív betegség.",
+                            "Könnyen gyógyítható gyógyszerekkel."
+                        ],
+                        answer: 2,
+                        explanation: "A CTE 'egy progresszív neurodegeneratív betegség, amely ismétlődő fejsérülések – mind az agyrázkódások..., mind a szubkonkusszív... fejet ért ütődések – következtében alakul ki'."
+                    },
+                    {
+                        question: "Mi a hipertóniás encephalopathia kezelésének alapelve?",
+                        options: [
+                            "A vérnyomás azonnali normalizálása a lehető leggyorsabban.",
+                            "A vérnyomás óvatos, fokozatos és kontrollált csökkentése az agyi hipoperfúzió elkerülése érdekében.",
+                            "Kizárólag folyadékpótlás.",
+                            "Azonnali sebészi beavatkozás."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A terápia sarokköve 'a vérnyomás óvatos, fokozatos és kontrollált csökkentése, annak érdekében, hogy elkerüljük az agyi hipoperfúziót és az ischaemiás károsodást'. Az első órában a csökkentés nem haladhatja meg a 25%-ot."
+                    },
+                    {
+                        question: "Melyik autoimmun encephalopathia forma társul leggyakrabban ovarium teratomához fiatal nőknél?",
+                        options: [
+                            "Anti-LGI1 encephalitis",
+                            "Anti-NMDA Receptor Encephalitis",
+                            "Hashimoto encephalopathia",
+                            "Anti-GAD65 encephalitis"
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az Anti-NMDA Receptor Encephalitis 'gyakran paraneoplasiás eredetű, leggyakrabban ovarium teratomához (dermoid ciszta) társul fiatal nőknél'."
+                    },
+                    {
+                        question: "Mi a 'foetor hepaticus'?",
+                        options: [
+                            "A máj megnagyobbodása.",
+                            "Jellegzetes bőrtünet májbetegségben.",
+                            "Dohos-édeskés lehelet, ami hepatikus encephalopathiára jellemző.",
+                            "A máj gyulladásos állapota."
+                        ],
+                        answer: 2,
+                        explanation: "A foetor hepaticus egy 'dohos-édeskés lehelet', ami a hepatikus encephalopathia egyik jellegzetes tünete."
+                    },
+                    {
+                        question: "Melyik állapotra jellemzőek a faciobrachiális disztóniás rohamok (FBDS)?",
+                        options: [
+                            "Uraemiás encephalopathia",
+                            "Anti-LGI1 antitestekhez társuló encephalitis",
+                            "Wernicke encephalopathia",
+                            "Prion betegség"
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az Anti-LGI1 antitestekhez társuló encephalitisre jellemzőek a 'jellegzetes, rövid, gyakori, stereotyp mozgászavarok, az ún. faciobrachiális disztóniás rohamok (FBDS)'."
+                    },
+                    {
+                        question: "Mi az epilepsziás encephalopathia lényege?",
+                        options: [
+                            "Minden epilepsziás betegnél kialakuló kognitív hanyatlás.",
+                            "Az állapot, ahol maga az epileptiform agyi aktivitás hozzájárul a kognitív és viselkedési funkciók progresszív romlásához.",
+                            "Az epilepszia sebészi kezelésének egyik szövődménye.",
+                            "Az epilepszia gyógyszeres kezelésének mellékhatása."
+                        ],
+                        answer: 1,
+                        explanation: "Az epilepsziás encephalopathiák 'olyan állapotokat jelölnek, ahol maga az epileptiform agyi aktivitás... hozzájárul a kognitív és viselkedési funkciók progresszív romlásához'."
+                    },
+                    {
+                        question: "Melyik kórképben jellemző a liquorban az oligoklonális IgG bandák jelenléte?",
+                        options: [
+                            "Hepatikus encephalopathia",
+                            "Autoimmun encephalopathiák (pl. limbikus encephalitis)",
+                            "Uraemiás encephalopathia",
+                            "Wernicke encephalopathia"
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az autoimmun encephalitisek diagnózisában fontos a liquorvizsgálat, ahol 'oligoklonális IgG csíkok jelenléte' is előfordulhat, ami a központi idegrendszeri gyulladásra utal."
+                    },
+                    {
+                        question: "Milyen típusú neurológiai tünetek dominálnak a krónikus traumás encephalopathia (CTE) korai, fiatal felnőttkorban kezdődő formájában?",
+                        options: [
+                            "Súlyos motoros bénulás.",
+                            "Pszichiátriai és viselkedési tünetek (pl. depresszió, ingerlékenység, impulzivitás).",
+                            "Memóriazavar és demencia.",
+                            "Látásvesztés."
+                        ],
+                        answer: 1,
+                        explanation: "A CTE korai, fiatal felnőttkorban kezdődő formáját 'inkább pszichiátriai és viselkedési tünetek dominálnak', míg a későbbi formában a kognitív hanyatlás kerül előtérbe."
+                    },
+                    {
+                        question: "Melyik gyógyszer okozhat jellegzetes 'phenytoin flap'-ként ismert asterixist toxikus szint esetén?",
+                        options: [
+                            "Lítium",
+                            "Phenytoin",
+                            "Metoclopramid",
+                            "Cefalosporinok"
+                        ],
+                        answer: 1,
+                        explanation: "A 'phenytoin flap' jelensége, azaz az asterixis megjelenése, a phenytoin toxicitás egyik ismert jele."
+                    },
+                    {
+                        question: "Mi a definitív diagnózisa a prion betegségeknek, mint a CJD?",
+                        options: [
+                            "Kizárólag az MRI lelet alapján.",
+                            "A liquor 14-3-3 fehérje szintje alapján.",
+                            "Csak agybiopsziával vagy post mortem neuropatológiai vizsgálattal lehetséges.",
+                            "Az EEG-n látható PSWC-k alapján."
+                        ],
+        
+                        answer: 2,
+                        explanation: "Bár az MRI, EEG és liquor vizsgálatok erősen sugallhatják a diagnózist, a 'definitív diagnózis csak agybiopsziával vagy post mortem neuropatológiai vizsgálattal lehetséges'."
+                    }
+                ]
+            },
+            "148": {
+                title: "148. Organikus és metabolikus idegrendszeri károsodások EEG jelei",
+                questions: [
+                    {
+                        question: "Melyik a leggyakrabban észlelt fokális EEG abnormalitás strukturális agyi lézió (pl. tumor, stroke) esetén?",
+                        options: [
+                            "Fokális tüskehullám-aktivitás",
+                            "Fokális polimorf delta aktivitás (PDA)",
+                            "Fokális béta aktivitás",
+                            "Normális EEG"
+                        ],
+                        answer: 1,
+                        explanation: "A 'polimorf delta aktivitás (PDA) a leggyakrabban észlelt fokális lassulási forma', ami általában körülírt strukturális lézióra utal."
+                    },
+                    {
+                        question: "Mire utalnak a periodikus lateralizált epileptiform kisülések (PLEDs/LPDs)?",
+                        options: [
+                            "Normális alvási mintázatra.",
+                            "Akut vagy szubakut, általában a szürke-fehérállomány határát érintő agyi sérülésre, fokozott görcskészséggel.",
+                            "Enyhe, reverzibilis metabolikus zavarra.",
+                            "Pszichogén, nem epilepsziás eseményre."
+                        ],
+                        answer: 1,
+                        explanation: "A PLEDs/LPDs 'jellegzetes EEG mintázatot képviselnek, melyet ismétlődő, sztereotip, epileptiform morfémák alkotnak'. Hátterükben 'leggyakrabban akut vagy szubakut agyi sérülések állnak', és 'fokozott görcskészségre' utalnak."
+                    },
+                    {
+                        question: "Melyik betegséghez társul leggyakrabban a PLEDs/LPDs EEG mintázat?",
+                        options: [
+                            "Alzheimer-kór",
+                            "Iszkémiás stroke",
+                            "Migrén",
+                            "Depresszió"
+                        ],
+                        answer: 1,
+                        explanation: "A PLEDs/LPDs etiológiai hátterében 'leggyakrabban akut vagy szubakut agyi sérülések állnak, mint például az iszkémiás stroke (leggyakoribb ok)'."
+                    },
+                    {
+                        question: "Mi a leggyakoribb, de nem specifikus EEG jele a diffúz metabolikus encephalopathiáknak?",
+                        options: [
+                            "Generalizált tüske-hullám kisülések",
+                            "A háttértevékenység generalizált lassulása",
+                            "Fokozott béta aktivitás",
+                            "Normális alfa ritmus"
+                        ],
+                        answer: 1,
+                        explanation: "A 'generalizált, folytonos vagy intermittáló lassulás a leggyakoribb EEG eltérés, amely diffúz enkefalopátiákban megfigyelhető'."
+                    },
+                    {
+                        question: "Milyen morfológiai jellemzői vannak a trifázisos hullámoknak (TWs)?",
+                        options: [
+                            "Alacsony amplitúdójú, gyors, szabálytalan hullámok.",
+                            "Magas amplitúdójú, három fázisból álló (negatív-pozitív-negatív) komplexek.",
+                            "Szinuszos, 10 Hz-es hullámok.",
+                            "Rövid, éles tüskék sorozata."
+                        ],
+                        answer: 1,
+                        explanation: "A trifázisos hullámok 'magas amplitúdójú... éles kontúrú hullámok, melyek három jól elkülöníthető fázisból állnak. Az első fázis egy... negatív deflexió, ezt követi a legmagasabb amplitúdójú, felszínpozitív fő fázis, majd egy... negatív deflexió'."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ a trifázisos hullámokra (TWs)?",
+                        options: [
+                            "Kizárólag hepatikus encephalopathiában fordulnak elő.",
+                            "Nem specifikus mintázat, amely számos metabolikus zavarban és néha strukturális lézióknál is megjelenhet.",
+                            "Mindig jó prognózist jeleznek.",
+                            "Normális, éber állapotban is megfigyelhetők."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Bár klasszikusan a hepatikus encephalopathiához társítják, ma már ismert, hogy a TWs 'nem specifikus mintázat, és számos különböző metabolikus zavarban... sőt esetenként strukturális agyi léziók mellett is előfordulhatnak'."
+                    },
+                    {
+                        question: "Mire utal a burst-szuppressziós (BS) EEG minta?",
+                        options: [
+                            "Enyhe álmosságra.",
+                            "Súlyos agyi diszfunkcióra, mély kómára.",
+                            "Fokozott figyelemre.",
+                            "Normális REM alvásra."
+                        ],
+                        answer: 1,
+                        explanation: "A burst-szuppressziós (BS) minta 'egy súlyos agyi diszfunkciót jelző EEG kép, melyet periodikusan váltakozó, nagy amplitúdójú... aktivitási csomagok (burstök) és... szuppresszió' jellemeznek. Leggyakrabban mély kóma áll a hátterében."
+                    },
+                    {
+                        question: "Melyik kórképben a legjellegzetesebb EEG eltérés a periodikusan ismétlődő éles hullám komplexek (PSWC) megjelenése?",
+                        options: [
+                            "Traumás agysérülés",
+                            "Alzheimer-kór",
+                            "Sporadikus Creutzfeldt-Jakob kór (sCJD)",
+                            "Stroke"
+                        ],
+                        answer: 2,
+                        explanation: "A sporadikus CJD esetén 'a legjellegzetesebb EEG eltérés a periodikusan ismétlődő éles hullám komplexek (PSWC) megjelenése'."
+                    },
+                    {
+                        question: "Hogyan változik az EEG Alzheimer-kór előrehaladtával?",
+                        options: [
+                            "Az EEG végig normális marad.",
+                            "A háttértevékenység egyre gyorsabbá válik.",
+                            "Jellemző a háttértevékenység generalizált lassulása, az alfa aktivitás csökkenése és a theta/delta aktivitás növekedése.",
+                            "Mindig fokális tüskék jelennek meg."
+                        ],
+                        answer: 2,
+                        explanation: "Alzheimer-kór későbbi stádiumaiban 'jellemző a háttértevékenység generalizált lassulása: a posterior domináns ritmus (PDR) frekvenciája csökken, az alfa aktivitás mennyisége... redukálódik, míg a... theta és delta aktivitás mennyisége... növekszik'."
+                    },
+                    {
+                        question: "Milyen EEG eltérés jellemző enyhe traumás agysérülés (agyrázkódás) után?",
+                        options: [
+                            "Azonnali és tartós burst-szuppresszió.",
+                            "Nincs soha EEG eltérés.",
+                            "A posterior domináns ritmus (PDR) lassulása és a diffúz theta aktivitás mennyiségének növekedése.",
+                            "Kizárólag PLEDs mintázat."
+                        ],
+        
+                        answer: 2,
+                        explanation: "Enyhe TBI (concussio) után 'gyakori a posterior domináns ritmus (PDR) lassulása és a diffúz theta aktivitás mennyiségének növekedése'."
+                    },
+                    {
+                        question: "Milyen EEG mintázat társulhat herpes simplex enkefalitiszhez (HSE)?",
+                        options: [
+                            "Normális EEG",
+                            "Kizárólag generalizált lassulás",
+                            "Periodikus lateralizált epileptiform kisülések (PLEDs/LPDs), gyakran temporális fókusszal",
+                            "Alfa kóma"
+                        ],
+                        answer: 2,
+                        explanation: "A PLEDs/LPDs egyik gyakori oka a herpes simplex enkefalitisz (HSE), amely tipikusan a temporális lebenyeket érinti, így az EEG-n is gyakran temporális hangsúlyú periodikus kisülések láthatók."
+                    },
+                    {
+                        question: "Mi a FIRDA (Frontal Intermittent Rhythmic Delta Activity) klinikai jelentősége?",
+                        options: [
+                            "Mindig középvonali agydaganatra utal.",
+                            "Normális éber állapotban is előfordul.",
+                            "Nem specifikus lelet, amely számos encephalopathiás állapotban megjelenhet.",
+                            "Kizárólag epilepsziában látható."
+                        ],
+        
+                        answer: 2,
+                        explanation: "A FIRDA korábban a középvonali patológiák jelének számított, de ma már 'nem specifikus leletként ismert, mely számos enkefalopátiás állapotban (toxikus, metabolikus, infekciós, neoplaztikus, sőt epileptikus etiológiák esetén is) megjelenhet'."
+                    },
+                    {
+                        question: "Milyen EEG eltérés várható súlyos hipoglikémiában?",
+                        options: [
+                            "Fokozott béta aktivitás",
+                            "Generalizált lassulás, majd tüske aktivitás, végül az EEG ellaposodása",
+                            "Fokális PLEDs",
+                            "Normális alvási mintázatok"
+                        ],
+                        answer: 1,
+                        explanation: "Súlyosbodó hipoglikémia esetén a 'generalizált lassulást abnormális tüske aktivitás, majd végül az EEG ellaposodása (szuppressziója vagy akár elektrocerebrális inaktivitás) követheti'."
+                    },
+                    {
+                        question: "Melyik állítás igaz az EEG prognosztikai értékére anoxiás-isémiás agykárosodás után?",
+                        options: [
+                            "Az EEG-nek nincs prognosztikai értéke.",
+                            "A reaktív, alvási orsókat tartalmazó EEG jó prognózist jelez.",
+                            "A burst-szuppressziós minta és az alfa kóma általában jó prognózist jelez.",
+                            "Csak a PLEDs-ek jelenléte számít."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A kedvező prognózis jelei közé tartozik a megmaradt reaktivitás és a normál alvási mintázatok (spindles, K-komplexek) jelenléte. Ezzel szemben a burst-szuppresszió és a nem reaktív alfa kóma rossz kimenetelt jelez."
+                    },
+                    {
+                        question: "Hogyan segíthet az EEG a non-konvulzív status epilepticus (NCSE) diagnózisában?",
+                        options: [
+                            "Az EEG nem alkalmas NCSE kimutatására.",
+                            "Az EEG kimutathatja a folyamatos, szubklinikai epileptiform aktivitást, ami az NCSE-t igazolja.",
+                            "Az NCSE-ben az EEG mindig normális.",
+                            "Csak a háttértevékenység lassulása látható."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az EEG 'segít... a non-konvulzív státusz epilepticus (NCSE) kizárásában vagy megerősítésében', mivel képes detektálni a klinikai görcsökkel nem járó, de folyamatosan zajló epilepsziás agyi aktivitást."
+                    },
+                    {
+                        question: "Milyen EEG eltérést okozhat a benzodiazepin vagy barbiturát túladagolás?",
+                        options: [
+                            "A háttértevékenység lassulását.",
+                            "Túlzott mennyiségű, generalizált gyors (béta) aktivitást.",
+                            "Fokális tüskéket.",
+                            "Trifázisos hullámokat."
+                        ],
+                        answer: 1,
+                        explanation: "Benzodiazepin- vagy barbiturát-asszociált állapotokban 'éppen ellenkezőleg, a gyors béta aktivitás bőséges lehet', ami eltér a legtöbb metabolikus encephalopathiára jellemző lassulástól."
+                    },
+                    {
+                        question: "Mi jellemzi az alfa kóma EEG mintázatát?",
+                        options: [
+                            "Diffúz, monoton, nem reaktív 8-13 Hz-es aktivitás.",
+                            "Fokális, reaktív 8-13 Hz-es aktivitás.",
+                            "Alacsony amplitúdójú, lassú aktivitás.",
+                            "Periodikusan ismétlődő tüskék."
+                        ],
+        
+                        answer: 0,
+                        explanation: "Az alfa kóma egy 'diffúz, monoton, nem reaktív, 8-13 Hz aktivitás', ami súlyos agykárosodásra utal, és nem tévesztendő össze a normális, reaktív alfa ritmussal."
+                    },
+                    {
+                        question: "Mi a fő különbség az organikus és metabolikus károsodások EEG jelei között általánosságban?",
+                        options: [
+                            "Nincs különbség, az EEG jelek azonosak.",
+                            "Az organikus károsodások gyakrabban okoznak fokális/aszimmetrikus eltéréseket, míg a metabolikusak inkább generalizált, szimmetrikus lassulást.",
+                            "A metabolikus károsodások mindig gyorsabb EEG aktivitással járnak.",
+                            "Az organikus károsodások EEG jelei mindig reverzibilisek, a metabolikusaké soha."
+                        ],
+                        answer: 1,
+                        explanation: "Általános szabályként az organikus, strukturális léziók gyakrabban okoznak fokális vagy aszimmetrikus jeleket (pl. fokális lassulás, PLEDs), míg a szisztémás metabolikus zavarok inkább diffúz, generalizált, szimmetrikus eltéréseket (pl. generalizált lassulás, TWs)."
+                    },
+                    {
+                        question: "Milyen EEG eltérésre számíthatunk egy kiterjedt, akut iszkémiás stroke esetén?",
+                        options: [
+                            "Normális EEG-re.",
+                            "Fokális lassulásra (PDA) az érintett terület felett, esetleg PLEDs-ekkel.",
+                            "Kizárólag generalizált béta aktivitásra.",
+                            "Kizárólag trifázisos hullámokra."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Akut stroke-ban 'az egyik leggyakoribb EEG lelet a károsodott agyterület felett megjelenő fokális, általában polimorf delta aktivitás'. Emellett PLEDs/LPDs is gyakran társulhat hozzá."
+                    },
+                    {
+                        question: "Mi az EEG reaktivitás és mi a jelentősége kómás betegeknél?",
+                        options: [
+                            "A beteg reakciója az EEG vizsgálatra, nincs jelentősége.",
+                            "Az EEG kép változása külső ingerekre (pl. hang, fájdalom); megléte általában kedvezőbb prognózist jelez.",
+                            "Az EEG kép változatlansága külső ingerekre, ami jó prognózist jelez.",
+                            "A rohamok provokálhatósága fényingerléssel."
+                        ],
+                        answer: 1,
+                        explanation: "Az EEG reaktivitása az agyi elektromos tevékenység változása külső ingerekre. Kómás állapotokban a reaktivitás megléte azt jelzi, hogy az agy még képes feldolgozni a bejövő információkat, ami általában kedvezőbb kimenetellel társul, mint a teljesen reaktivitásmentes EEG."
+                    }
+                ]
+            },
+            "149": {
+                title: "149. Myelopathiák",
+                questions: [
+                    {
+                        question: "Mi a myelopathia definíciója?",
+                        options: [
+                            "A perifériás idegek gyulladása.",
+                            "A gerincvelőt érintő bármely neurológiai természetű funkciózavar vagy károsodás.",
+                            "Az agy vérellátási zavara.",
+                            "Az izmok betegsége."
+                        ],
+                        answer: 1,
+                        explanation: "A myelopathia 'egy gyűjtőfogalom, amely a gerincvelőt érintő bármely neurológiai természetű funkciózavart vagy károsodást jelöli'."
+                    },
+                    {
+                        question: "Melyik a felnőttkori, nem traumás eredetű gerincvelő-sérülések vezető oka?",
+                        options: [
+                            "Transzverzális myelitis",
+                            "Gerincvelő-infarktus",
+                            "Cervikális spondyloticus myelopathia (CSM)",
+                            "B12-vitamin hiány"
+                        ],
+                        answer: 2,
+                        explanation: "A 'cervikális spondyloticus myelopathia (CSM) a felnőttkori, nem traumás eredetű gerincvelő-sérülések vezető oka'."
+                    },
+                    {
+                        question: "Mely tünetek utalnak felső motoneuron (piramispálya) lézióra myelopathiában?",
+                        options: [
+                            "Petyhüdt bénulás és areflexia.",
+                            "Izomatrófia és fasciculatio.",
+                            "Spaszticitás, hyperreflexia és kóros reflexek (pl. Babinski-jel).",
+                            "Normális izomtónus és reflexek."
+                        ],
+                        answer: 2,
+                        explanation: "A felső motoneuron lézió tünetei közé tartozik az 'izomgyengeség..., a fokozott izomtónus (spaszticitás), az élénk vagy kórosan fokozott sajátreflexek (hiperreflexia), valamint a kóros (patológiás) reflexek megjelenése, mint például a Babinski-jel'."
+                    },
+                    {
+                        question: "Mi a Lhermitte-jel?",
+                        options: [
+                            "Fájdalmas izomgörcs a lábban.",
+                            "A nyak előrehajlításakor a gerinc mentén a végtagokba sugárzó, áramütésszerű érzés.",
+                            "A szem akaratlan, ritmikus mozgása.",
+                            "A kéz ügyetlensége."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A Lhermitte-jel 'a nyak előrehajlításakor a gerinc mentén a végtagokba sugárzó, áramütésszerű érzés', ami a hátsó kötegek irritációjára utal."
+                    },
+                    {
+                        question: "Melyik a választandó ('gold standard') képalkotó módszer a myelopathia okának tisztázására?",
+                        options: [
+                            "Röntgen",
+                            "CT",
+                            "Mágneses Rezonancia Képalkotás (MRI)",
+                            "Ultrahang"
+                        ],
+                        answer: 2,
+                        explanation: "Az 'MRI a választandó (\"gold standard\") módszer a gerincvelő és az azt körülvevő struktúrák részletes morfológiai megjelenítésére'."
+                    },
+                    {
+                        question: "Milyen célt szolgálnak a motoros kiváltott potenciál (MEP) vizsgálatok myelopathiában?",
+                        options: [
+                            "Az érzőpályák működésének vizsgálatát.",
+                            "A motoros pályák (kortikospinális pálya) funkcionális integritásának mérését.",
+                            "A gerincvelő vérellátásának felmérését.",
+                            "A liquor cerebrospinalis összetételének elemzését."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A MEP vizsgálat 'a motoros pályák (kortikospinális pálya) integritását méri', objektív információt nyújtva a funkcionális károsodásról."
+                    },
+                    {
+                        question: "Melyik myelopathia típusban kulcsfontosságú a liquor cerebrospinalis vizsgálata?",
+                        options: [
+                            "Kompressziós myelopathiákban",
+                            "Gyulladásos és infekciózus myelopathiákban",
+                            "Minden esetben felesleges.",
+                            "Csak traumás esetekben."
+                        ],
+                        answer: 1,
+                        explanation: "A liquorvizsgálat 'alapvető diagnosztikai eszköz bizonyos típusú myelopathiák, különösen a gyulladásos és infekciózus eredetűek esetében'."
+                    },
+                    {
+                        question: "Mi a funikuláris myelosis (szubakut kombinált degeneráció) oka?",
+                        options: [
+                            "Rézhiány",
+                            "B12-vitamin hiány",
+                            "Magas vérnyomás",
+                            "Gerincvelő kompresszió"
+                        ],
+                        answer: 1,
+                        explanation: "A funikuláris myelosis 'B12-vitamin hiány okozta' myelopathia, amely a gerincvelő hátsó és oldalsó kötegeit károsítja."
+                    },
+                    {
+                        question: "Mi a klinikai képe az Arteria Spinalis Anterior Szindrómának (ASAS)?",
+                        options: [
+                            "Izolált érzészavar a hátsó kötegi funkciókban.",
+                            "Motoros bénulás és a fájdalom-/hőérzés kiesése a lézió szintje alatt, megtartott helyzet- és vibrációérzéssel.",
+                            "Lassan progrediáló gyengeség és zsibbadás.",
+                            "Kizárólag nyaki fájdalom."
+                        ],
+                        answer: 1,
+                        explanation: "Az ASAS klinikai képére jellemző a 'motoros deficit... paraplegia vagy tetraplegia', valamint a 'disszociált érzészavar: a fájdalom- és hőérzés kiesik a lézió szintje alatt', miközben a 'hátsó kötegi funkciók... jellemzően megtartottak'."
+                    },
+                    {
+                        question: "Mi a leggyakoribb gerincvelői vaszkuláris malformáció?",
+                        options: [
+                            "Cavernoma",
+                            "Intramedulláris AVM",
+                            "Spinális durális arteriovenózus fisztula (sDAVF)",
+                            "Aneurysma"
+                        ],
+        
+                        answer: 2,
+                        explanation: "A 'spinális durális arteriovenózus fisztulák (sDAVF) a leggyakoribb gerincvelői vaszkuláris malformációk'."
+                    },
+                    {
+                        question: "Melyik állítás igaz a transzverzális myelitisre (TM)?",
+                        options: [
+                            "Mindig egy lassan, évek alatt kialakuló betegség.",
+                            "A gerincvelő egy vagy több szomszédos szegmentumának fokális gyulladása.",
+                            "Soha nem jár gyulladásos jelekkel a liquorban.",
+                            "Kizárólag bakteriális fertőzés okozhatja."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A transzverzális myelitis (TM) 'a gerincvelő egy vagy több szomszédos szegmentumának fokális gyulladása', ami demyelinizációhoz és axonális károsodáshoz vezet."
+                    },
+                    {
+                        question: "Melyik antitest kimutatása kulcsfontosságú a neuromyelitis optica spektrum betegség (NMOSD) diagnózisában?",
+                        options: [
+                            "Anti-MOG antitest",
+                            "Anti-Hu antitest",
+                            "Aquaporin-4 (AQP4) antitest",
+                            "Anti-NMDA receptor antitest"
+                        ],
+        
+                        answer: 2,
+                        explanation: "Az NMOSD diagnózisában kulcsfontosságú a specifikus autoantitest, az 'aquaporin-4 (AQP4)-IgG' kimutatása."
+                    },
+                    {
+                        question: "Milyen tünetek jellemzik a conus medullaris szindrómát?",
+                        options: [
+                            "Kizárólag alsó motoneuron tünetek.",
+                            "Kizárólag felső motoneuron tünetek.",
+                            "Korai és súlyos hólyag-, bél- és szexuális diszfunkció, valamint nyeregtáji érzészavar.",
+                            "Főként a felső végtagokat érintő gyengeség."
+                        ],
+                        answer: 2,
+                        explanation: "A conus medullaris szindrómára jellemző a 'korai és súlyos hólyag- és bélműködési zavar', a 'nyeregtáji (S3-S5) érzészavar', valamint a vegyes felső és alsó motoneuron jelek."
+                    },
+                    {
+                        question: "Mikor indokolt sebészi beavatkozás cervicalis spondyloticus myelopathia (CSM) esetén?",
+                        options: [
+                            "Minden enyhe esetben azonnal.",
+                            "Soha, a CSM-et mindig konzervatívan kell kezelni.",
+                            "Közepesen súlyos, súlyos, valamint progrediáló myelopathia esetén.",
+                            "Csak ha a beteg 70 év feletti."
+                        ],
+                        answer: 2,
+                        explanation: "'Közepesen súlyos és súlyos, valamint progrediáló myelopathia esetén a választandó kezelési mód a sebészi dekompresszió'."
+                    },
+                    {
+                        question: "Mi a laminoplastica műtét lényege?",
+                        options: [
+                            "A csigolyaívek teljes eltávolítása.",
+                            "A csigolyaívek 'ajtószerű' felnyitása a gerinccsatorna tágítására.",
+                            "A porckorongsérv eltávolítása.",
+                            "Két csigolya összecsontosítása."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A laminoplastica során a 'csigolyaívek \"ajtószerű\" felnyitása és rögzítése tágabb helyzetben' történik, 'a gerinccsatorna átmérőjének növelése céljából'."
+                    },
+                    {
+                        question: "Milyen gyógyszereket alkalmaznak a myelopathiához társuló neuropátiás fájdalom kezelésére?",
+                        options: [
+                            "Kizárólag opioidokat.",
+                            "Nem-szteroid gyulladáscsökkentőket (NSAID).",
+                            "Antikonvulzívumokat (pl. gabapentin, pregabalin) és antidepresszánsokat (pl. amitriptylin, duloxetin).",
+                            "Izomrelaxánsokat."
+                        ],
+                        answer: 2,
+                        explanation: "A neuropátiás fájdalom kezelésére 'antikonvulzívumok (pl. gabapentin, pregabalin), triciklikus antidepresszánsok..., szerotonin-noradrenalin visszavétel gátlók (SNRI-k...)' használatosak."
+                    },
+                    {
+                        question: "Mi a rehabilitáció elsődleges célja myelopathia után?",
+                        options: [
+                            "A teljes anatómiai gyógyulás elérése.",
+                            "A beteg funkcionális képességeinek maximalizálása és az életminőség javítása.",
+                            "A betegség okának megszüntetése.",
+                            "A gyógyszeres kezelés teljes elhagyása."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A rehabilitáció célja 'a beteg funkcionális képességeinek maximalizálása, az önellátás javítása, az életminőség növelése, valamint a másodlagos szövődmények megelőzése és kezelése'."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a spinális durális arteriovenózus fisztulákra (sDAVF)?",
+                        options: [
+                            "A leggyakoribb gerincvelői vaszkuláris malformáció.",
+                            "Jellemzően akut, hirtelen kialakuló tüneteket okoz.",
+                            "Gyakran lassan progrediáló myelopathiát okoz a krónikus vénás hypertensio révén.",
+                            "Kezelés nélkül rossz prognózisú, gyakran járásképtelenséghez vezet."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az sDAVF-re a 'lassan progrediáló kezdet' a gyakoribb, ami 'fokozatosan súlyosbodó' tünetekkel jár. Az akut kezdet inkább az AVM megrepedésére jellemző."
+                    },
+                    {
+                        question: "Miért sérülékenyebb az arteria spinalis anterior (ASA) az ischaemiával szemben?",
+                        options: [
+                            "Mert kisebb az átmérője, mint a posterior artériáknak.",
+                            "Mert kevésbé hatékony kollaterális keringéssel rendelkezik.",
+                            "Mert a gerincvelő elülső része kevésbé fontos.",
+                            "Mert gyakrabban éri trauma."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az ASA 'kevésbé robusztus', 'kevésbé hatékony kollaterális keringéssel rendelkezik, ami fokozott sérülékenységet eredményezhet bizonyos vaszkuláris patológiák esetén'."
+                    },
+                    {
+                        question: "Melyik vizsgálat a 'gold standard' a gerincvelői AVM-ek diagnosztikájában?",
+                        options: [
+                            "MRI",
+                            "CT-myelographia",
+                            "Digitális Szubtrakciós Angiográfia (DSA)",
+                            "Elektromiográfia (EMG)"
+                        ],
+                        answer: 2,
+                        explanation: "A Digitális Szubtrakciós Angiográfia (DSA) 'továbbra is a \"gold standard\" vizsgálat a gerincvelői AVM-ek diagnosztikájában', mivel lehetővé teszi a malformáció pontos anatómiai feltérképezését."
+                    }
+                ]
+            },
+            "150": {
+                title: "150. Idegrendszeri kisérbetegségek",
+                questions: [
+                    {
+                        question: "Melyik a két fő típusa a stroke-nak?",
+                        options: [
+                            "Artériás és vénás",
+                            "Akut és krónikus",
+                            "Iszkémiás és vérzéses",
+                            "Fokális és generalizált"
+                        ],
+                        answer: 2,
+                        explanation: "A cerebrovaszkuláris betegségeket 'patomechanizmusuk alapján két fő csoportra oszthatjuk: az iszkémiás stroke-ra... és a vérzéses stroke-ra'."
+                    },
+                    {
+                        question: "Melyik állítás igaz a stroke modern, szöveti alapú definíciójára?",
+                        options: [
+                            "A stroke-ot a tünetek 24 órán túli fennállása definiálja.",
+                            "A stroke jellemzője a permanens sejthalál, nem pedig a tünetek időtartama.",
+                            "A stroke csak akkor diagnosztizálható, ha a beteg elveszti az eszméletét.",
+                            "A stroke mindig visszafordítható agykárosodást jelent."
+                        ],
+                        answer: 1,
+                        explanation: "Az AHA/ASA definíciója kiemeli, hogy 'a stroke jellemzője a permanens sejthalál, nem pedig a tünetek időtartama'."
+                    },
+                    {
+                        question: "Mi a TOAST klasszifikáció célja?",
+                        options: [
+                            "A stroke súlyosságának felmérése.",
+                            "Az iszkémiás stroke etiológia alapú osztályozása.",
+                            "A vérzéses stroke típusainak elkülönítése.",
+                            "A rehabilitációs potenciál becslése."
+                        ],
+                        answer: 1,
+                        explanation: "A TOAST klasszifikáció 'az iszkémiás stroke etiológiájának rendszerezésére szolgál', öt fő kategóriát különböztetve meg."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a kardioembolizációs (CE) stroke-nak?",
+                        options: [
+                            "Magas vérnyomás",
+                            "Pitvarfibrilláció",
+                            "Diabetes mellitus",
+                            "Magas koleszterinszint"
+                        ],
+                        answer: 1,
+                        explanation: "A kardioembolizáció leggyakoribb oka a 'pitvarfibrilláció', amely során a szív pitvaraiból származó vérrögök sodródhatnak az agyi keringésbe."
+                    },
+                    {
+                        question: "Milyen klinikai tünetegyüttes jellemző az arteria cerebri media (ACM) ellátási területének stroke-jára?",
+                        options: [
+                            "Ellenoldali hemiparesis (főleg az alsó végtagon), vizeletinkontinencia.",
+                            "Ellenoldali hemiparesis (főleg az arcon és a felső végtagon), domináns oldalon afázia.",
+                            "Ellenoldali homonim hemianopia, memóriazavar.",
+                            "Agyidegtünetek, vertigo, ataxia."
+                        ],
+                        answer: 1,
+                        explanation: "Az ACM stroke-ra jellemző az 'ellenoldali hemiparesist... amely jellemzően az arcot és a felső végtagot súlyosabban érinti', valamint domináns féltekei károsodás esetén az 'afázia'."
+                    },
+                    {
+                        question: "Mi az első és legfontosabb képalkotó vizsgálat akut stroke gyanúja esetén?",
+                        options: [
+                            "Natív Koponya CT",
+                            "Diffúzió-súlyozott MRI (DWI)",
+                            "CT Angiográfia (CTA)",
+                            "Digitális Szubtrakciós Angiográfia (DSA)"
+                        ],
+                        answer: 0,
+                        explanation: "Az akut stroke kivizsgálásának 'első és legfontosabb lépése' a Natív Koponya CT, mivel 'gyorsan elérhető, és megbízhatóan kizárja vagy megerősíti az intracranialis vérzést'."
+                    },
+                    {
+                        question: "Mi a diffúzió-súlyozott MRI (DWI) jelentősége akut iszkémiás stroke-ban?",
+                        options: [
+                            "Kimutatja a koponyán belüli vérzést.",
+                            "Az akut iszkémia legérzékenyebb kimutatási módja, már percekkel az elzáródás után pozitív lehet.",
+                            "Az agyi erek lefutását ábrázolja.",
+                            "Az agyi ödéma mértékét méri."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A DWI 'az akut iszkémia legérzékenyebb kimutatási módja. Már percekkel az érelzáródás után kórosan magas jelet ad az érintett területen'."
+                    },
+                    {
+                        question: "Mire utal a DWI-PWI mismatch?",
+                        options: [
+                            "Kiterjedt agyvérzésre.",
+                            "Az iszkémiás penumbra (még megmenthető agyszövet) jelenlétére.",
+                            "A stroke krónikus voltára.",
+                            "Technikai hibára a vizsgálat során."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A DWI-PWI mismatch, ahol 'a PWI-n látható hipoperfundált terület nagyobb, mint a DWI-n látható infarktusmag', 'az iszkémiás penumbra jelenlétére utal'."
+                    },
+                    {
+                        question: "Mi az intravénás trombolízis (IVT) időablaka a legtöbb esetben?",
+                        options: [
+                            "A tünetek kezdetétől számított 1 óra.",
+                            "A tünetek kezdetétől számított 3 óra (bizonyos esetekben 4.5 óráig kiterjeszthető).",
+                            "A tünetek kezdetétől számított 6 óra.",
+                            "A tünetek kezdetétől számított 24 óra."
+                        ],
+                        answer: 1,
+                        explanation: "Az IVT időablaka szigorú: 'a tünetek kezdetétől számított 3 órán belül, bizonyos szelektált esetekben... 4.5 óráig kiterjeszthető'."
+                    },
+                    {
+                        question: "Milyen esetben jön szóba a mechanikus trombektómia (MT)?",
+                        options: [
+                            "Minden iszkémiás stroke esetén.",
+                            "Nagy agyi artéria elzáródása (LVO) esetén.",
+                            "Kizárólag vérzéses stroke esetén.",
+                            "Csak ha a beteg elmúlt 80 éves."
+                        ],
+                        answer: 1,
+                        explanation: "A mechanikus trombektómia 'nagy agyi artéria elzáródása (Large Vessel Occlusion, LVO) esetén... választandó rekanalizációs eljárás'."
+                    },
+                    {
+                        question: "Mi a leggyakoribb oka a spontán (nem traumás) intracerebrális vérzésnek (ICH)?",
+                        options: [
+                            "Agyi érmalformáció",
+                            "Krónikus magas vérnyomás",
+                            "Véralvadási zavar",
+                            "Agydaganat"
+                        ],
+                        answer: 1,
+                        explanation: "A spontán ICH 'leggyakoribb oka a krónikus magas vérnyomás', amely a kis, perforáló artériák falának károsodásához vezet."
+                    },
+                    {
+                        question: "Mire utal a 'spot sign' a CTA vizsgálaton ICH esetén?",
+                        options: [
+                            "Régi, elmeszesedett hematómára.",
+                            "Aktív vérzésre, kontrasztanyag-extravazációra a hematómán belül.",
+                            "Agyi daganatra a vérzés mellett.",
+                            "Vénás trombózisra."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A 'spot sign' a hematómán belül... megjelenő, kontrasztanyagot halmozó pontszerű terület, amely 'aktív vérzést, kontrasztanyag-extravazációt jelez'. Jelenléte a hematóma növekedésének prediktora."
+                    },
+                    {
+                        question: "Mi a subarachnoidealis vérzés (SAH) legjellemzőbb tünete?",
+                        options: [
+                            "Fokozatosan erősödő, tompa fejfájás.",
+                            "Hirtelen, extrém erős, 'üstdobütés-szerű' fejfájás.",
+                            "Féloldali végtaggyengeség.",
+                            "Látótérkiesés."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A SAH klasszikus vezető tünete a 'hirtelen, extrém erős, \"üstdobütés-szerű\" vagy \"életem legrosszabb\" fejfájása'."
+                    },
+                    {
+                        question: "Mi a spontán SAH leggyakoribb oka?",
+                        options: [
+                            "Magas vérnyomás",
+                            "Fejtrauma",
+                            "Intracranialis aneurysma megrepedése",
+                            "Agyi AVM megrepedése"
+                        ],
+        
+                        answer: 2,
+                        explanation: "A spontán SAH leggyakoribb oka (az esetek kb. 85%-ában) egy 'intracranialis aneurysma megrepedése (rupturája)'."
+                    },
+                    {
+                        question: "Melyik gyógyszer adása kötelező minden aneurysmatikus SAH betegnek a késői cerebrális iszkémia (DCI) megelőzésére?",
+                        options: [
+                            "Aspirin",
+                            "Nimodipin",
+                            "Heparin",
+                            "Mannitol"
+                        ],
+                        answer: 1,
+                        explanation: "A nimodipin, egy kalcium-csatorna blokkoló, 'minden aSAH betegnek per os... kell adni... a DCI megelőzésére és a kimenetel javítására'."
+                    },
+                    {
+                        question: "Mi a tranziens iszkémiás attack (TIA) klinikai jelentősége?",
+                        options: [
+                            "Nincs klinikai jelentősége, jóindulatú esemény.",
+                            "A fenyegető stroke fontos előjelének tekintendő.",
+                            "Mindig migrénes aurát jelez.",
+                            "A vérzéses stroke előjele."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A TIA klinikai jelentősége óriási, mivel 'a fenyegető stroke fontos előjelének tekintendő'. A TIA után a stroke kockázata jelentősen megnő."
+                    },
+                    {
+                        question: "Mi a leggyakoribb rizikófaktora az agyi vénás sinus trombózisnak (CVST) fiatal nőknél?",
+                        options: [
+                            "Dohányzás",
+                            "Magas vérnyomás",
+                            "Orális fogamzásgátlók szedése",
+                            "Diabetes mellitus"
+                        ],
+        
+                        answer: 2,
+                        explanation: "A CVST gyakran fiatalabbakat, különösen nőket érint. A nőkre specifikus rizikófaktorok között szerepel az 'orális fogamzásgátlók szedése (az esetek 54-71%-ában), terhesség és gyermekágy'."
+                    },
+                    {
+                        question: "Melyik genetikai betegségre jellemző a NOTCH3 gén mutációja, a migrénes aura és a subcorticalis iszkémiás epizódok?",
+                        options: [
+                            "CARASIL",
+                            "Moya-moya betegség",
+                            "CADASIL",
+                            "Fabry-kór"
+                        ],
+        
+                        answer: 2,
+                        explanation: "A CADASIL (Cerebral Autosomal Dominant Arteriopathy with Subcortical Infarcts and Leukoencephalopathy) a 'NOTCH3' gén mutációja által okozott örökletes kisérbetegség, melyre jellemző a migrén aurával és a visszatérő stroke-szerű epizódok."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb tünete a CVST-nek?",
+                        options: [
+                            "Láz",
+                            "Fejfájás",
+                            "Hasi fájdalom",
+                            "Bőrkiütés"
+                        ],
+                        answer: 1,
+                        explanation: "A fejfájás 'a leggyakoribb tünet (az esetek közel 90%-ában)' CVST esetén. Lehet fokozatosan rosszabbodó vagy hirtelen, és gyakran nem reagál a szokásos fájdalomcsillapítókra."
+                    },
+                    {
+                        question: "Milyen kezelés indokolt a legtöbb CVST esetben?",
+                        options: [
+                            "Thrombocyta-aggregáció gátló kezelés",
+                            "Antikoaguláns kezelés (pl. heparin, majd orális antikoaguláns)",
+                            "Vérnyomáscsökkentők",
+                            "Kizárólag megfigyelés"
+                        ],
+        
+                        answer: 1,
+                        explanation: "A CVST akut kezelésének alapja az antikoaguláns terápia (kezdetben általában heparin, majd orális antikoaguláns), még akkor is, ha másodlagos vénás vérzés van jelen, mivel a cél a trombus továbbterjedésének megakadályozása és a vénás elfolyás javítása."
+                    }
+                ]
+            }
+        };
+
+        // DOM Elements
+        const topicSelectionScreen = document.getElementById('topic-selection');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        
+        const progressBar = document.getElementById('progress-bar');
+
+        const scoreText = document.getElementById('score-text');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const mainMenuBtn = document.getElementById('main-menu-btn');
+
+        // State
+        let currentTopic = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz(topicId) {
+            currentTopic = topicId;
+            currentQuestionIndex = 0;
+            score = 0;
+            questions = shuffleArray([...quizData[topicId].questions]);
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTitle.textContent = quizData[topicId].title;
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            feedbackContainer.classList.add('hidden');
+            const questionData = questions[currentQuestionIndex];
+
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressBar.classList.remove('bg-blue-600');
+            progressBar.classList.add('bg-purple-600');
+
+
+            questionText.textContent = `${currentQuestionIndex + 1}. ${questionData.question}`;
+            optionsContainer.innerHTML = '';
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'p-4', 'text-left', 'border-2', 'border-slate-300', 'rounded-lg', 'quiz-option');
+                button.dataset.index = index;
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const selectedIndex = parseInt(selectedButton.dataset.index);
+            const correctIndex = questions[currentQuestionIndex].answer;
+
+            // Disable all options after one is clicked
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.removeEventListener('click', selectAnswer);
+                btn.disabled = true;
+            });
+
+            if (selectedIndex === correctIndex) {
+                selectedButton.classList.add('correct');
+                score++;
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Highlight the correct answer
+                optionsContainer.children[correctIndex].classList.add('correct');
+            }
+
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            feedbackContainer.classList.remove('hidden');
+
+            if (currentQuestionIndex === questions.length - 1) {
+                nextQuestionBtn.textContent = 'Eredmények megtekintése';
+            } else {
+                nextQuestionBtn.textContent = 'Következő kérdés';
+            }
+        }
+
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreText.textContent = `Eredményed: ${score} / ${questions.length}`;
+        }
+
+        function goBackToMenu() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.topic-btn').forEach(button => {
+            button.addEventListener('click', () => startQuiz(button.dataset.topic));
+        });
+
+        nextQuestionBtn.addEventListener('click', handleNextQuestion);
+        backToMenuBtn.addEventListener('click', goBackToMenu);
+        restartQuizBtn.addEventListener('click', () => startQuiz(currentTopic));
+        mainMenuBtn.addEventListener('click', goBackToMenu);
+
+    </script>
+</body>
+</html>

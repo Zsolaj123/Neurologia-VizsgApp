@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Kvíz: Középagy, Szemmozgatók és Tekintésvezérlés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Dinamikus Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Középagy, Szemmozgató Rendszer és Tekintésvezérlés</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- A kérdések dinamikusan itt jelennek meg -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- A részletes eredmények itt jelennek meg -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        // Bővített kérdés adatbázis
+        const fullQuizData = [
+            // Kérdések a III. agyidegről
+            { question: "Melyik két fő magból ered a N. Oculomotorius (III. agyideg) a középagyban?", answers: { a: "Nucleus ruber és Substantia nigra", b: "Fő motoros mag és Edinger-Westphal mag", c: "Colliculus superior és inferior", d: "Nucleus nervi trochlearis és PPRF" }, correctAnswer: "b", explanation: "A III. agyideg a szomatikus funkciókért felelős fő motoros magból (nucleus nervi oculomotorii) és a paraszimpatikus funkciókért (pupillaszűkítés, akkomodáció) felelős Edinger-Westphal magból ered." },
+            { question: "Mi okozza a 'down and out' szemállást III. agyidegbénulás esetén?", answers: { a: "A m. rectus superior túlműködése", b: "Az összes szemizom együttes bénulása", c: "A m. rectus lateralis (VI.) és m. obliquus superior (IV.) ellensúlyozatlan működése", d: "A pupillaszűkítő izom görcse" }, correctAnswer: "c", explanation: "Mivel a III. agyideg által beidegzett legtöbb szemizom megbénul, a VI. agyideg által mozgatott oldalsó egyenes izom és a IV. agyideg által mozgatott felső ferde izom ellensúlyozatlanul húzza a szemet lefelé és kifelé." },
+            { question: "Melyik artéria aneurizmája okoz leggyakrabban fájdalmas, nem pupillakímélő III. agyidegbénulást?", answers: { a: "A. cerebri anterior", b: "A. cerebri media", c: "A. basilaris", d: "A. communicans posterior (PCoA)" }, correctAnswer: "d", explanation: "A PCoA szoros anatómiai közelségben van a III. agyideggel, és egy aneurizma miatti kompresszió gyakran érinti az ideg felszínén futó paraszimpatikus rostokat, mydriasist (tág pupillát) okozva." },
+            // Kérdések a IV. agyidegről
+            { question: "Milyen irányú kettőslátás a legjellemzőbb IV. agyidegbénulás esetén?", answers: { a: "Tisztán horizontális", b: "Tisztán vertikális", c: "Vertikális és torzionális (koszorúirányú)", d: "Nincs kettőslátás, csak homályos látás" }, correctAnswer: "c", explanation: "A m. obliquus superior komplex mozgása (depresszió, intorsio, abdukció) miatt bénulásakor a kettőslátás vertikális és torzionális (a képek 'ferdén állnak') is, különösen lefelé és befelé tekintéskor." },
+            { question: "Melyik állítás igaz a N. Trochlearis (IV.) magjának elhelyezkedésére és rostjainak lefutására?", answers: { a: "A híd ventrális részén helyezkedik el, és rostjai keresztezetlenül lépnek ki.", b: "A középagyban a colliculi inferiores szintjében van, és rostjai teljes mértékben kereszteződnek.", c: "A nyúltvelőben található, és a fossa interpeduncularisban lép ki.", d: "A középagyban a colliculi superiores szintjében van, és az agytörzs ventrális felszínén lép ki." }, correctAnswer: "b", explanation: "A trochlearis mag a középagyban, a colliculi inferiores szintjében található. Rostjai egyedülálló módon az agytörzsön belül teljesen átkereszteződnek, mielőtt a dorsalis felszínen kilépnének." },
+            // Kérdések a VI. agyidegről
+            { question: "Miért nevezhető a VI. agyidegbénulás néha 'hamis lokalizációs jelnek'?", answers: { a: "Mert a tünetek spontán javulhatnak.", b: "Mert a bénulást gyakran pszichés okok váltják ki.", c: "Mert hosszú koponyaűri lefutása miatt generalizált koponyaűri nyomásfokozódás is okozhatja, nem csak egy fokális lézió.", d: "Mert a tünetei összetéveszthetők a III. agyideg bénulásával." }, correctAnswer: "c", explanation: "Hosszú, sérülékeny intrakraniális lefutása miatt a VI. agyideg könnyen károsodhat diffúz, emelkedett koponyaűri nyomás miatt is. Így a bénulása nem feltétlenül jelöli ki pontosan a primer patológia helyét." },
+            { question: "Mi a különbség a N. Abducens IDEG és a N. Abducens MAG sérülése között?", answers: { a: "Nincs különbség, a tünetek azonosak.", b: "Az ideg sérülése tekintésbénulást, a mag sérülése izolált izomgyengeséget okoz.", c: "Az ideg sérülése izolált m. rectus lateralis bénulást, míg a mag sérülése ipszilaterális tekintésbénulást okoz.", d: "Az ideg sérülése kétoldali, a mag sérülése egyoldali tünetekkel jár." }, correctAnswer: "c", explanation: "Az abducens mag interneuronokat is tartalmaz, amelyek az MLF-en keresztül a horizontális tekintést koordinálják. Ezért a mag sérülése az egész konjugált tekintést bénítja azonos oldalra. Az ideg sérülése csak az általa beidegzett egyetlen izmot, a m. rectus lateralist érinti." },
+            // Supranukleáris kontroll
+            { question: "Melyik agytörzsi központ felelős a vertikális és torzionális szakkádok generálásáért?", answers: { a: "PPRF", b: "riMLF", c: "MLF", d: "Superior colliculus" }, correctAnswer: "b", explanation: "A Rosztrális Interszticiális MLF Magja (riMLF) a középagyban a vertikális és torzionális tekintés elsődleges agytörzsi generátora, míg a PPRF a horizontális tekintésé." },
+            { question: "A kisagy melyik része felelős elsődlegesen a szakkádok pontosságának (metrikájának) kalibrálásáért?", answers: { a: "Flocculus és paraflocculus", b: "Nodulus és uvula", c: "Okulomotoros vermis és nucleus fastigii", d: "Tonsillák" }, correctAnswer: "c", explanation: "Míg a vestibulocerebellum (flocculus/paraflocculus, nodulus/uvula) a tekintetstabilizáló reflexekért (pl. VOR) felel, addig az okulomotoros vermis és a hozzá kapcsolódó nucleus fastigii a tekintetváltó mozgások, mint a szakkádok, pontosságának (hypermetria/hypometria) korrekcióját végzi." },
+            { question: "Melyik struktúrapár képvisel párhuzamos, de funkcionálisan eltérő pályákat a szakkádgenerálásban?", answers: { a: "PPRF és riMLF", b: "Superior Colliculus és Frontális Tekintőmező (FEF)", c: "Nucleus ruber és Substantia nigra", d: "MLF és tractus tectospinalis" }, correctAnswer: "b", explanation: "A Superior Colliculus a gyors, inger-vezérelt (reflexszerű) szakkádokért, míg a Frontális Tekintőmező (FEF) a belsőleg irányított, akaratlagos szakkádokért felelős. Kölcsönhatásban állnak, de részben függetlenül is működhetnek." },
+            // Mesencephalon
+            { question: "Melyik struktúra köti össze a colliculus inferiort a corpus geniculatum medialéval?", answers: { a: "Brachium colliculi superior", b: "Pedunculus cerebellaris superior", c: "Brachium colliculi inferior", d: "Lemniscus lateralis" }, correctAnswer: "c", explanation: "A brachium colliculi inferior az a pályarendszer, amely a középagyi hallási központot (colliculus inferior) köti össze a thalamus hallási relémagjával (corpus geniculatum mediale)." },
+            { question: "A crus cerebriben hol helyezkednek el a tractus corticospinalis és corticobulbaris rostjai?", answers: { a: "A mediális harmadban", b: "A középső kb. háromötödnyi részben", c: "A laterális harmadban", d: "Dorzálisan, a tegmentum mellett" }, correctAnswer: "b", explanation: "A crus cerebriben a rostok szomatotopikusan rendeződnek. A középső, legnagyobb részt a pyramispálya (corticospinalis) és a corticobulbaris rostok foglalják el, melyeket mediálisan a frontopontin, laterálisan pedig a temporo-parieto-occipitopontin rostok fognak közre." },
+            { question: "Mi a periaqueductalis szürkeállomány (PAG) egyik legfontosabb, leszálló pályákon keresztül megvalósuló funkciója?", answers: { a: "Mozgásindítás", b: "Fájdalommoduláció (analgézia)", c: "Vizuális reflexek", d: "Hallási információ feldolgozása" }, correctAnswer: "b", explanation: "A PAG a leszálló fájdalomcsillapító rendszer kulcsfontosságú központja. Ingerlése erős analgéziát vált ki azáltal, hogy a raphe magokon és más struktúrákon keresztül gátolja a fájdalomérző jelek továbbítását a gerincvelő szintjén." },
+            { question: "Melyik neurotranszmittert termelik elsődlegesen a középagyi raphe magok (pl. Nucleus Raphe Dorsalis)?", answers: { a: "Dopamin", b: "Noradrenalin", c: "Szerotonin", d: "Acetilkolin" }, correctAnswer: "c", explanation: "A középagyi (rostrális) raphe magok az agy fő szerotoninforrásai, és kiterjedt projekciókat küldenek az egész előagyba, alapvetően befolyásolva a hangulatot, alvást és kogníciót." },
+            { question: "Mi a Claude-szindróma két fő komponense?", answers: { a: "Ipszilaterális VI. agyidegbénulás és kontralaterális hemiparesis", b: "Ipszilaterális III. agyidegbénulás és kontralaterális ataxia/tremor", c: "Bilaterális ptosis és ophthalmoplegia", d: "Vertikális tekintésbénulás és konvergencia-retrakciós nystagmus" }, correctAnswer: "b", explanation: "A Claude-szindróma a középagyi tegmentum dorzomediális részének léziója, ami egyszerre érinti a III. agyideg rostjait/magját (ipszilaterális bénulás) és a nucleus ruber/pedunculus cerebellaris superior rostjait (kontralaterális cerebelláris tünetek)." },
+            { question: "Melyik felszálló érzőpálya végződik a thalamus nucleus ventralis posteromedialisában (VPM)?", answers: { a: "Lemniscus medialis", b: "Lemniscus spinalis", c: "Lemniscus lateralis", d: "Lemniscus trigeminalis" }, correctAnswer: "d", explanation: "A VPM mag az arc és fej területéről származó szenzoros információk (fájdalom, hő, tapintás) thalamikus reléállomása, melyeket a lemniscus trigeminalis szállít. Ezzel szemben a testből származó információk (lemniscus medialis/spinalis) a VPL magban végződnek." },
+            { question: "A tractus rubrospinalis melyik tegmentalis kereszteződésben megy át az ellenoldalra?", answers: { a: "Meynert-féle dorsalis tegmentalis kereszteződés", b: "Forel-féle ventrális tegmentalis kereszteződés", c: "Decussatio pyramidum", d: "Decussatio lemniscorum medialium" }, correctAnswer: "b", explanation: "A tractus rubrospinalis a nucleus ruberből eredése után a Forel-féle ventrális tegmentalis decussatióban kereszteződik. A Meynert-féle kereszteződés a tractus tectospinalishoz tartozik." },
+            { question: "Melyik sejtcsoport alkotja az A9-es dopaminerg sejtcsoportot?", answers: { a: "Area tegmentalis ventralis (VTA)", b: "Nucleus raphe dorsalis", c: "Substantia nigra, pars compacta (SNc)", d: "Locus coeruleus" }, correctAnswer: "c", explanation: "A dopaminerg sejtcsoportok anatómiai klasszifikációja szerint az A9-es csoport a substantia nigra pars compacta, míg az A10-es csoport a VTA." },
+            { question: "Melyik állítás írja le helyesen a vestibulo-okuláris reflex (VOR) működését?", answers: { a: "Akaratlagos szemmozgás egy álló tárgy felé.", b: "Reflex, amely stabilizálja a tekintetet a fejmozgások során, a fejmozgással ellentétes irányú szemmozgással.", c: "A szemek diszkonjugált mozgása közeli tárgyra fókuszáláskor.", d: "Gyors, ugró szemmozgás két fixációs pont között." }, correctAnswer: "b", explanation: "A VOR egy alapvető tekintetstabilizáló reflex, amely biztosítja, hogy a kép a retinán stabil maradjon a fej mozgatása közben azáltal, hogy a szem a fejjel ellentétes irányba és azonos sebességgel mozog. Működésében a vesztibuláris magok és az MLF kulcsfontosságúak." },
+            { question: "Mi a Substantia Nigra Pars Reticulata (SNr) fő kimeneti célpontja és neurotranszmittere?", answers: { a: "Célpont: Striatum; Neurotranszmitter: Dopamin", b: "Célpont: Thalamus (motoros magok); Neurotranszmitter: GABA", c: "Célpont: Agykéreg; Neurotranszmitter: Glutamát", d: "Célpont: Gerincvelő; Neurotranszmitter: Szerotonin" }, correctAnswer: "b", explanation: "Az SNr a bazális ganglionok egyik fő kimeneti struktúrája, amely gátló (GABAerg) rostokat küld a thalamus motoros magjaihoz (VA/VL), ezáltal részt vesz a nem kívánt mozgások elnyomásában." },
+            { question: "Melyik agytörzsi szinten történik a lemniscus medialis rostjainak kereszteződése?", answers: { a: "Gerincvelő, a belépési szegmentumban", b: "Középagy, az aquaeductus cerebri szintjében", c: "Nyúltvelő (medulla oblongata)", d: "Híd (pons)" }, correctAnswer: "c", explanation: "A hátsó kötegi rendszer rostjai a nucleus gracilisban és cuneatusban kapcsolódnak át a nyúltvelőben. Az innen induló másodrendű neuronok (fibrae arcuatae internae) alkotják a szenzoros kereszteződést (decussatio lemniscorum medialium) a nyúltvelőben." },
+            { question: "Melyik kérgi terület NEM számít a tractus corticopontinus fő eredési helyének?", answers: { a: "Frontális lebeny", b: "Parietális lebeny", c: "Temporális lebeny", d: "Primer látókéreg (Brodmann 17)" }, correctAnswer: "d", explanation: "A corticopontin pálya rendkívül kiterjedt kérgi területekről gyűjt össze információt (frontális, parietális, temporális, occipitális asszociációs areák), de a primer érző- és mozgatókérgek (mint a primer látókéreg) kevésbé járulnak hozzá. A pálya a mozgástervezéshez kapcsolódó információt továbbítja a kisagy felé." },
+            { question: "A Millard-Gubler-szindróma a pons ventrális laesiója. Mely tünetek jellemzik?", answers: { a: "Ipszilaterális III. és IV. agyidegbénulás, kontralaterális hemiparesis", b: "Ipszilaterális VI. és VII. agyidegbénulás, kontralaterális hemiparesis", c: "Csak kontralaterális hemiparesis és hemiataxia", d: "Ipszilaterális arcérzészavar és kontralaterális végtaggyengeség" }, correctAnswer: "b", explanation: "A Millard-Gubler szindróma a híd ventrális részének károsodása, ami érinti a kilépő VI. (abducens) és VII. (facialis) agyidegeket (ipszilaterális tünetek) és az áthaladó pyramispályát (kontralaterális hemiparesis)." },
+            { question: "A Skew deviation (ferde szemállás) mely terület károsodására utal leginkább?", answers: { a: "Frontális tekintőmező", b: "Bazális ganglionok", c: "Vesztibuláris pályák vagy a pretectalis/tectalis régió", d: "A nervus opticus chiasmája" }, correctAnswer: "c", explanation: "A skew deviation, ahol a szemek vertikálisan eltérnek egymástól, a vesztibuláris rendszer (különösen az otolithikus bemenetek) és az agytörzs közötti kapcsolatok aszimmetrikus zavarára utal. Gyakran társul agytörzsi, különösen tectalis vagy pretectalis léziókhoz." },
+            { question: "Melyik magcsoport tartozik a Mesencephalic Locomotor Region (MLR) részéhez és játszik szerepet a járás ritmusának generálásában?", answers: { a: "Nucleus ruber és VTA", b: "Pedunculopontine Nucleus (PPN) és Cuneiform Nucleus (CnF)", c: "Colliculi superiores et inferiores", d: "Edinger-Westphal mag és oculomotorius mag" }, correctAnswer: "b", explanation: "A PPN és a CnF a középagyi retikuláris formáció részei, és együttesen alkotják az MLR-t, amely kulcsfontosságú a mozgásindításban, különösen a ritmikus mozgások, mint a járás, kontrolljában." },
+            { question: "Melyik szindrómára jellemző a konvergencia-retrakciós nystagmus felfelé tekintési kísérletre?", answers: { a: "Weber-szindróma", b: "Benedikt-szindróma", c: "Parinaud-szindróma", d: "Internuclearis ophthalmoplegia" }, correctAnswer: "c", explanation: "A konvergencia-retrakciós nystagmus a Parinaud-szindróma egyik klasszikus, patognomonikus jele, a felfelé tekintés bénulása és a fény-közeli disszociáció mellett." },
+            { question: "Milyen típusú neuronokat tartalmaz a Substantia Nigra pars compacta (SNc) és a pars reticulata (SNr)?", answers: { a: "SNc: GABAerg; SNr: Dopaminerg", b: "SNc: Szerotonerg; SNr: Kolinerg", c: "SNc: Dopaminerg; SNr: GABAerg", d: "Mindkettő tisztán dopaminerg." }, correctAnswer: "c", explanation: "A substantia nigra funkcionálisan két részre oszlik: a pars compacta (SNc) dopaminerg neuronokat tartalmaz, amelyek a nigrostriatalis pályát alkotják, míg a pars reticulata (SNr) gátló (GABAerg) neuronokból áll, és a bazális ganglionok egyik kimeneti állomása." },
+            { question: "Az 'omnipause' neuronok hol helyezkednek el és mi a funkciójuk a szakkádok során?", answers: { a: "A colliculus superiorban, és a szakkádokat indítják.", b: "A hídban (nucleus raphe interpositus), és a fixáció alatt gátolják a szakkádgenerátorokat.", c: "A kisagyban, és a szakkádok pontosságát kalibrálják.", d: "A frontális tekintőmezőben, és a szakkádok célpontját választják ki." }, correctAnswer: "b", explanation: "Az omnipause neuronok a fixáció alatt tónusosan aktívak, és gátolják a burst neuronokat a PPRF-ben és az riMLF-ben. Szakkádok alatt 'elhallgatnak', ezzel engedélyezve a szemmozgás létrejöttét, lényegében kapuzó funkciót látnak el." },
+            { question: "Melyik felszálló pálya NEM tartozik a klasszikus lemniscus rendszerhez a középagyban?", answers: { a: "Lemniscus medialis", b: "Tractus spinotectalis", c: "Lemniscus lateralis", d: "Lemniscus trigeminalis" }, correctAnswer: "b", explanation: "A lemniscus medialis (hátsó köteg), spinalis (anterolaterális rendszer része), lateralis (hallópálya) és trigeminalis (arcérzés) a fő felszálló érző kötegek. A tractus spinotectalis szintén egy felszálló pálya, de a fájdalomingerre adott orientációs reflexekben játszik szerepet, és a tectumhoz (colliculus superior) fut, nem a thalamus specifikus relémagjaihoz, mint a lemniscusok." },
+            { question: "Melyik agyideg felelős a m. levator palpebrae superioris beidegzéséért?", answers: { a: "N. opticus (II.)", b: "N. oculomotorius (III.)", c: "N. facialis (VII.)", d: "N. trigeminus (V.)" }, correctAnswer: "b", explanation: "A felső szemhéj emeléséért felelős izmot, a m. levator palpebrae superiorist a III. agyideg (nervus oculomotorius) idegzi be. Ennek bénulása okozza a ptosist." },
+            { question: "Melyik a leggyakoribb oka a szerzett, izolált IV. agyidegbénulásnak?", answers: { a: "Diabetes mellitus", b: "Agytörzsi stroke", c: "Fejsérülés", d: "Sclerosis multiplex" }, correctAnswer: "c", explanation: "Hosszú, vékony lefutása és az agytörzs dorsalis felszínén való rögzítetlensége miatt a IV. agyideg különösen sérülékeny traumák során. Ez a szerzett bénulás leggyakoribb etiológiája." },
+            { question: "A Foville-szindróma a pons tegmentumának laesiója. Mely tünetek jellemzik?", answers: { a: "Azonos oldali arcparézis és tekintésbénulás", b: "Ellenoldali arcparézis és tekintésbénulás", c: "Csak kétoldali végtaggyengeség", d: "Hallásvesztés és szédülés" }, correctAnswer: "a", explanation: "A Foville-szindróma a híd dorsalis (tegmentalis) részének károsodása, ami érinti a VI. és VII. agyidegek magvait vagy fasciculusait (ipszilaterális tekintésbénulást és arcbénulást okozva). Társulhat hozzá ellenoldali hemiparesis is." },
+            { question: "Melyik struktúrán keresztül lépnek be a kisagyba a tractus corticopontinus pályájának folytatását képező pontocerebellaris rostok?", answers: { a: "Pedunculus cerebellaris superior", b: "Pedunculus cerebellaris medius", c: "Pedunculus cerebellaris inferior", d: "Corpus callosum" }, correctAnswer: "b", explanation: "Az agykéregből a hídi magokhoz futó corticopontin pálya a hídban átkapcsolódik. Az innen induló pontocerebellaris rostok a pedunculus cerebellaris mediuson (középső kisagykaron) keresztül érik el a kisagyat, hatalmas mennyiségű információt szállítva a mozgástervezéshez." },
+            { question: "Melyik állítás írja le a fény-közeli disszociáció jelenségét?", answers: { a: "A pupilla fényre szűkül, de közeli tárgyra fókuszáláskor nem.", b: "A pupilla sem fényre, sem közeli tárgyra nem reagál.", c: "A pupilla tág és teljesen fénymerev.", d: "A pupilla nem, vagy csak renyhén reagál fényre, de konvergenciára normálisan szűkül." }, correctAnswer: "d", explanation: "A fény-közeli disszociáció azt jelenti, hogy a pupilla fényreflexe károsodott, de az akkomodációs/konvergencia reakció (amely szintén pupillaszűküléssel jár) megtartott. Ez a pretectalis régió sérülésére utal, és a Parinaud-szindróma klasszikus tünete." },
+            { question: "Mi a colliculus superiorok fő funkciója?", answers: { a: "Akaratlagos mozgások tervezése", b: "Hallási reflexek központja", c: "Vizuális reflexek és a szakkadikus szemmozgások irányítása", d: "A fájdalomérzet modulálása" }, correctAnswer: "c", explanation: "A colliculus superiorok a tectum részei, és a vizuális rendszer fontos reflexközpontjai. Kulcsszerepet játszanak a vizuális ingerekre adott orientációs reflexekben és a gyors, ugró (szakkadikus) szemmozgások generálásában." },
+            { question: "Melyik mag látja el a m. ciliarist, amely az akkomodációért felelős?", answers: { a: "Fő oculomotorius mag", b: "Edinger-Westphal mag", c: "Trochlearis mag", d: "Abducens mag" }, correctAnswer: "b", explanation: "A m. ciliaris (sugárizom) a szemlencse görbületét változtatja a közeli fókuszáláshoz (akkomodáció). Beidegzését a III. agyideg paraszimpatikus része, az Edinger-Westphal magból eredő rostok biztosítják a ganglion ciliaren keresztüli átkapcsolódás után." },
+            { question: "Melyik leszálló motoros pálya felelős elsődlegesen a finom, precíziós ujjmozgásokért?", answers: { a: "Tractus rubrospinalis", b: "Tractus tectospinalis", c: "Tractus corticospinalis lateralis", d: "Tractus vestibulospinalis" }, correctAnswer: "c", explanation: "A tractus corticospinalis (pyramispálya), különösen annak oldalsó, kereszteződött része (lateralis), a legfontosabb pálya az akaratlagos, főként a distalis végtagizmokat igénylő, ügyes mozgások kivitelezésében." },
+            { question: "Melyik szindróma NEM tartozik a klasszikus középagyi szindrómák közé?", answers: { a: "Weber-szindróma", b: "Wallenberg-szindróma", c: "Benedikt-szindróma", d: "Claude-szindróma" }, correctAnswer: "b", explanation: "A Wallenberg-szindróma (laterális medulláris szindróma) a nyúltvelő (medulla oblongata) oldalsó részének károsodása, nem a középagyé. A Weber, Benedikt és Claude szindrómák mind a középagy különböző területeinek lézióira utalnak." },
+            { question: "Mi a 'Top of the basilar' szindróma egyik jellegzetes tünete a tudatzavar mellett?", answers: { a: "Izolált lábgyengeség", b: "Vertikális tekintészavar és kóros pupillareakciók", c: "Csak az arc egyik felének zsibbadása", d: "Teljes süketség" }, correctAnswer: "b", explanation: "Az arteria basilaris csúcsának elzáródása a középagy, a thalamus és a temporo-occipitális lebenyek vérellátását veszélyezteti. Ez gyakran okoz vertikális tekintészavart (a középagyi tekintésközpontok iszkémiája miatt), kóros pupillareakciókat, látótérkiesést és tudatzavart." },
+            { question: "Melyik struktúrában történik a hanglokalizációhoz szükséges binaurális (kétfülű) információk elsődleges integrációja az agytörzsben?", answers: { a: "Corpus geniculatum mediale", b: "Colliculus inferior", c: "Superior olivaris komplexum", d: "Primer hallókéreg" }, correctAnswer: "b", explanation: "Bár a superior olivaris komplexum már végez binaurális feldolgozást, a colliculus inferior az első olyan agyi struktúra, ahol a hangforrás horizontális és vertikális irányának meghatározásához szükséges adatok mindkét fülből konvergálnak és komplexen integrálódnak." },
+            { question: "Melyik állítás HAMIS a tractus corticobulbaris beidegzésével kapcsolatban?", answers: { a: "A legtöbb motoros agyidegmagot bilaterálisan idegzi be.", b: "A n. facialis alsó arcizmokat ellátó magrésze főként kontralaterális beidegzést kap.", c: "A pálya a crus cerebri laterális harmadában fut.", d: "Felelős a rágás, a mimika és a nyelés akaratlagos kontrolljáért." }, correctAnswer: "c", explanation: "A tractus corticobulbaris a crus cerebri középső részén, a corticospinalis rostoktól mediálisan halad. A laterális harmadban a temporo-parieto-occipitopontin rostok futnak. A többi állítás igaz." },
+            { question: "Mi a kisagyi nodulus és ventrális uvula fő szerepe a tekintés szabályozásában?", answers: { a: "Szakkádok pontosságának kalibrálása", b: "Akaratlagos követő mozgások indítása", c: "A VOR időkonstansának és térbeli orientációjának szabályozása", d: "A pupilla méretének beállítása" }, correctAnswer: "c", explanation: "A nodulus és uvula a vestibulocerebellum részei, és főként az otolithikus jelek feldolgozásában, a VOR időtartamát befolyásoló 'velocity storage' mechanizmusban, és a VOR tengelyének térbeli orientációjában játszanak szerepet. Léziójuk speciális nystagmus formákhoz vezethet (pl. PAN, downbeat nystagmus)." },
+            { question: "A progresszív supranukleáris parézis (PSP) korai stádiumában melyik irányú tekintés zavara a legjellemzőbb?", answers: { a: "Felfelé tekintés", b: "Horizontális tekintés", c: "Lefelé tekintés", d: "Konvergencia" }, correctAnswer: "c", explanation: "A PSP egyik klasszikus korai jele a lefelé irányuló szakkádok és követő mozgások jelentős lelassulása és nehezítettsége, ami később teljes lefelé tekintés bénulássá progrediálhat." },
+            { question: "Melyik magterületet tekintik a REM alvási fázis generálásának egyik kulcsfontosságú központjának?", answers: { a: "Nucleus ruber", b: "Substantia nigra", c: "Nucleus raphe dorsalis", d: "Pedunculopontine Nucleus (PPN)" }, correctAnswer: "d", explanation: "A PPN, mint a retikuláris formáció és az ARAS része, nemcsak a mozgásban és az ébrenlétben, hanem az alvás-ébrenlét ciklus szabályozásában is fontos szerepet játszik, különösen a REM alvás generálásában." },
+            { question: "Melyik agytörzsi pályán keresztül szállítódik a nociceptív (fájdalom) információ a periaqueductalis szürkeállományhoz (PAG)?", answers: { a: "Tractus corticospinalis", b: "Lemniscus medialis", c: "Tractus spinomesencephalicus", d: "Fasciculus longitudinalis medialis" }, correctAnswer: "c", explanation: "A tractus spinomesencephalicus az anterolaterális rendszer egyik komponense, amely a gerincvelőből fájdalommal kapcsolatos információkat szállít közvetlenül a középagyba, többek között a PAG-hoz, aktiválva ezzel a leszálló fájdalomcsillapító rendszert." },
+            { question: "Milyen típusú információt szállít a lemniscus medialis?", answers: { a: "Fájdalom és hőmérséklet", b: "Durva tapintás és nyomás", c: "Finom, diszkriminatív tapintás, vibráció és tudatos propriocepció", d: "Hallási információ" }, correctAnswer: "c", explanation: "A lemniscus medialis a hátsó kötegi rendszer folytatása, amely a magasan differenciált szenzoros modalitásokat, mint a finom tapintás, vibráció és tudatos propriocepció, közvetíti a thalamus VPL magjához." },
+            { question: "Az agykéreg melyik területe felelős elsődlegesen a szemmozgások komplexebb, memóriából irányított szekvenciáinak tervezéséért?", answers: { a: "Frontális Tekintőmező (FEF)", b: "Parietális Tekintőmező (PEF)", c: "Szupplementer Tekintőmező (SEF)", d: "Dorsolaterális Prefrontális Kéreg (DLPFC)" }, correctAnswer: "c", explanation: "Míg a FEF az akaratlagos szakkádokért, a PEF pedig a reflexszerűekért felelős, az SEF specializáltabb feladatokat lát el, mint például a szemmozgások sorozatának tervezése és a memóriából irányított mozgások végrehajtása." },
+            { question: "Melyik a colliculus inferior legfontosabb kimeneti célpontja?", answers: { a: "Primer hallókéreg", b: "Colliculus superior", c: "Corpus geniculatum mediale (CGM)", d: "Nucleus ruber" }, correctAnswer: "c", explanation: "A colliculus inferiorban feldolgozott hallási információ a brachium colliculi inferioron keresztül a thalamus hallási reléállomásához, a CGM-hez jut, ahonnan az információ a primer hallókéregbe projiciálódik." },
+            { question: "Melyik állítás írja le a 'downbeat nystagmus'-t és mely terület léziójára utalhat?", answers: { a: "Felfelé ütő nystagmus; a híd károsodására utal.", b: "Lefelé ütő nystagmus; a kisagyi flocculus/nodulus vagy a cervicomedullaris junkció károsodására utal.", c: "Forgó nystagmus; az MLF károsodására utal.", d: "Horizontális nystagmus; a perifériás vesztibuláris rendszer károsodására utal." }, correctAnswer: "b", explanation: "A downbeat nystagmus (ahol a gyors fázis lefelé irányul) egy centrális típusú nystagmus, amely tipikusan a vestibulocerebellum (flocculus, nodulus, uvula) vagy a nyúltvelő-gerincvelő átmenet (cervicomedullaris junkció) léziójának jele." },
+            { question: "Melyik struktúrát NEM idegzi be a N. oculomotorius (III.)?", answers: { a: "M. rectus medialis", b: "M. obliquus superior", c: "M. sphincter pupillae", d: "M. rectus inferior" }, correctAnswer: "b", explanation: "A m. obliquus superiort a IV. agyideg (n. trochlearis) idegzi be. A többi felsorolt izmot a III. agyideg látja el." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                // Ha minden kérdés volt, reseteljük a használt indexeket
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Kezdeti kvíz felépítése
+        startNewRound();
+    </script>
+</body>
+</html>

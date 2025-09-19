@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt - 4. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.selected {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Neurológia Tesztek - 4. rész</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy témakört a tudása teszteléséhez.</p>
+            <div id="topic-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <p id="progress-text" class="text-slate-500"></p>
+                </div>
+                <button id="back-to-topics" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2 px-4 border border-slate-300 rounded-lg shadow-sm">Vissza</button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+                
+                <div id="feedback-container" class="mt-6">
+                    <div id="explanation" class="explanation p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                        <h4 class="font-bold mb-2">Magyarázat</h4>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="next-button" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h2>
+            <p id="score-text" class="text-xl text-slate-600 mb-2"></p>
+            <p id="score-percentage" class="text-4xl font-bold text-blue-600 mb-6"></p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Újra</button>
+                <button id="back-to-topics-from-results" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 border border-slate-300 rounded-lg shadow-sm">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            "tia_strategia": {
+                title: "Vizsgálati stratégia TIA esetén",
+                questions: [
+                    {
+                        question: "Mi a TIA (Tranziens Ischaemiás Attack) modern, szövetalapú definíciójának lényege?",
+                        options: ["A tünetek kevesebb mint 24 óráig tartanak.", "A tünetek pontosan 1 óráig tartanak.", "Átmeneti neurológiai diszfunkció, amely nem jár akut, képalkotóval kimutatható infarktussal.", "Bármilyen átmeneti rosszullét."],
+                        answer: "Átmeneti neurológiai diszfunkció, amely nem jár akut, képalkotóval kimutatható infarktussal.",
+                        explanation: "Míg a régi definíció időalapú volt (24 órán belüli tünetmentesség), a modern, szövetalapú megközelítés a képalkotó (főleg DWI-MRI) leletre fókuszál: TIA-ról beszélünk, ha a tünetek elmúlnak és nincs kimutatható permanens agykárosodás."
+                    },
+                    {
+                        question: "Mire szolgál az ABCD2 pontrendszer?",
+                        options: ["A TIA utáni korai stroke kockázatának becslésére.", "A TIA kezelésének kiválasztására.", "A TIA diagnózisának megerősítésére.", "A rehabilitációs potenciál felmérésére."],
+                        answer: "A TIA utáni korai stroke kockázatának becslésére.",
+                        explanation: "Az ABCD2 pontrendszer (Age, Blood pressure, Clinical features, Duration, Diabetes) segít a klinikusnak felmérni a TIA-t követő rövid távú (2, 7, 90 napos) stroke kockázatot, és iránymutatást ad a kivizsgálás sürgősségére."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás a legérzékenyebb egy TIA utáni kis, akut ischaemiás laesio kimutatására?",
+                        options: ["Natív koponya CT", "Koponya röntgen", "Diffúzió-súlyozott MRI (DWI)", "Transcraniális Doppler (TCD)"],
+                        answer: "Diffúzió-súlyozott MRI (DWI)",
+                        explanation: "A DWI rendkívül érzékeny a korai citotoxikus ödémára, így képes kimutatni a kis, akut infarktusokat, még akkor is, ha a klinikai tünetek már megszűntek. Egy klinikailag TIA-nak tűnő esetben a DWI pozitivitás valójában stroke-ot igazol."
+                    },
+                    {
+                        question: "Mi a TIA-n átesett beteg kivizsgálásának legfőbb célja?",
+                        options: ["Csak a tünetek dokumentálása.", "Az etiológia (kiváltó ok) tisztázása a célzott másodlagos prevenció érdekében.", "A beteg megnyugtatása.", "A kórházi tartózkodás indoklása."],
+                        answer: "Az etiológia (kiváltó ok) tisztázása a célzott másodlagos prevenció érdekében.",
+                        explanation: "A TIA kivizsgálásának célja a háttérben álló ok (pl. carotis stenosis, pitvarfibrilláció) azonosítása, mert a másodlagos prevenciós kezelés (pl. műtét, véralvadásgátló) ettől függ."
+                    },
+                    {
+                        question: "Mikor indokolt sürgős carotis revaszkularizáció (endarterectomia vagy stentelés) TIA után?",
+                        options: ["Minden TIA esetén.", "Ha a tünetekkel összefüggésbe hozható, hemodinamikailag szignifikáns carotis stenosis igazolódik.", "Csak ha a beteg 70 év feletti.", "Soha nem indokolt TIA után."],
+                        answer: "Ha a tünetekkel összefüggésbe hozható, hemodinamikailag szignifikáns carotis stenosis igazolódik.",
+                        explanation: "Tünetes, súlyos carotis stenosis esetén a stroke kockázata nagyon magas, ezért a szűkület korai (ideálisan 2 héten belüli) megszüntetése javasolt a további események megelőzésére."
+                    },
+                    {
+                        question: "Miért van szükség tartós EKG monitorozásra (pl. Holter) TIA után?",
+                        options: ["A szív méretének megállapítására.", "A rejtett, paroxizmális (rohamokban jelentkező) pitvarfibrilláció kimutatására.", "A vérnyomás mérésére.", "A légzésszám követésére."],
+                        answer: "A rejtett, paroxizmális (rohamokban jelentkező) pitvarfibrilláció kimutatására.",
+                        explanation: "A pitvarfibrilláció gyakran csak időszakosan jelentkezik és tünetmentes, így a rutin EKG nem mutatja ki. A tartós monitorozás növeli a detektálás esélyét, ami alapvetően megváltoztatja a prevenciós kezelést (antikoaguláció szükséges)."
+                    },
+                    {
+                        question: "Melyik állítás igaz az ABCD2 pontrendszerre?",
+                        options: ["A 0-3 pontszám magas kockázatot jelez.", "A féloldali gyengeség 1 pontot ér.", "A 60 perc feletti tüneti időtartam 2 pontot ér.", "Nem veszi figyelembe a cukorbetegséget."],
+                        answer: "A 60 perc feletti tüneti időtartam 2 pontot ér.",
+                        explanation: "Az ABCD2 pontrendszerben a ≥60 perces időtartam 2 pontot, a 10-59 perc 1 pontot ér. A féloldali gyengeség szintén 2 pontot ér, míg a beszédzavar gyengeség nélkül 1 pontot."
+                    },
+                    {
+                        question: "Melyik vizsgálat alkalmasabb a bal pitvari fülcsében lévő trombus vagy egy PFO kimutatására?",
+                        options: ["Transthoracalis echocardiographia (TTE)", "Transoesophagealis echocardiographia (TEE)", "Mellkasröntgen", "Nyaki ér ultrahang"],
+                        answer: "Transoesophagealis echocardiographia (TEE)",
+                        explanation: "A TEE (nyelőcsövön keresztül végzett szívultrahang) jobb felbontást és rálátást biztosít a szív hátsó struktúráira, így sokkal érzékenyebb a bal pitvari fülcse trombus, a PFO és az aortaív plakkjainak kimutatására, mint a TTE."
+                    },
+                    {
+                        question: "Mi a teendő TIA gyanúja esetén?",
+                        options: ["Várni, amíg a tünetek elmúlnak.", "Háziorvoshoz menni másnap.", "Azonnal mentőt hívni és sürgősségi osztályra menni.", "Bevinni egy fájdalomcsillapítót."],
+                        answer: "Azonnal mentőt hívni és sürgősségi osztályra menni.",
+                        explanation: "A TIA orvosi vészhelyzet a magas korai stroke kockázat miatt. Azonnali kivizsgálást és kezelést igényel, ezért haladéktalanul sürgősségi ellátást kell kérni."
+                    },
+                    {
+                        question: "Milyen laborvizsgálat elengedhetetlen a TIA kezdeti értékelésekor a tüneteket utánzó állapotok kizárására?",
+                        options: ["Vércsoport meghatározás", "Vércukorszint mérés", "Hormonszintek mérése", "Tumormarkerek vizsgálata"],
+                        answer: "Vércukorszint mérés",
+                        explanation: "A hypoglykaemia (alacsony vércukorszint) és a hyperglykaemia (magas vércukorszint) is okozhat a TIA-hoz hasonló neurológiai tüneteket, ezért a vércukorszint gyors ellenőrzése alapvető fontosságú."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a TIA-ra?",
+                        options: ["Figyelmeztető jel egy közelgő stroke-ra.", "A tünetek általában kevesebb mint egy óráig tartanak.", "A kivizsgálás célja az etiológia tisztázása.", "Soha nem igényel kórházi ellátást."],
+                        answer: "Soha nem igényel kórházi ellátást.",
+                        explanation: "A magas kockázatú TIA (pl. magas ABCD2 pontszám, ismert súlyos érbetegség) sürgős kórházi felvételt és kivizsgálást igényel a stroke megelőzése érdekében."
+                    },
+                    {
+                        question: "Mi a szerepe a thrombophilia panel vizsgálatának TIA esetén?",
+                        options: ["Minden TIA betegnél rutinszerűen el kell végezni.", "Fiatal (<50 év), ismeretlen eredetű TIA/stroke esetén indokolt a véralvadási zavarok keresésére.", "Csak a vérzéses stroke okát mutatja ki.", "A koleszterinszintet méri."],
+                        answer: "Fiatal (<50 év), ismeretlen eredetű TIA/stroke esetén indokolt a véralvadási zavarok keresésére.",
+                        explanation: "A thrombophilia (fokozott véralvadási hajlam) szűrése nem rutin vizsgálat, de megfontolandó fiatal betegeknél, ha más, gyakoribb okot (pl. atherosclerosis, kardioembolizáció) nem találnak."
+                    },
+                    {
+                        question: "Milyen gyógyszeres kezelés javasolt azonnal TIA után, ha a vérzést kizárták?",
+                        options: ["Véralvadásgátló (antikoaguláns)", "Vérlemezke-aggregáció gátló (pl. aszpirin)", "Antibiotikum", "Fájdalomcsillapító"],
+                        answer: "Vérlemezke-aggregáció gátló (pl. aszpirin)",
+                        explanation: "Ha nincs kardioemboliás forrás (pl. pitvarfibrilláció), a másodlagos prevenció alapja a thrombocyta-aggregáció gátló kezelés, amelyet a TIA után a lehető leghamarabb el kell kezdeni."
+                    },
+                    {
+                        question: "A TIA-n átesett betegek hány százalékánál alakul ki stroke 90 napon belül?",
+                        options: ["Kevesebb mint 1%", "1-2%", "Kb. 10-18%", "Több mint 50%"],
+                        answer: "Kb. 10-18%",
+                        explanation: "A TIA egy komoly rizikófaktor. A statisztikák szerint a betegek 10-18%-a szenved el stroke-ot a TIA-t követő 3 hónapon belül, és a kockázat az első napokban a legmagasabb."
+                    },
+                    {
+                        question: "Milyen képalkotó lelet NEM utal TIA-ra, hanem stroke-ra?",
+                        options: ["Normális natív CT", "Normális FLAIR MRI", "Akut restrikció a DWI szekvencián", "Nincs szignifikáns stenosis a CTA-n"],
+                        answer: "Akut restrikció a DWI szekvencián",
+                        explanation: "A diffúzió-súlyozott (DWI) MRI-n látható jellegzetes jel (diffúziós restrikció) akut, irreverzibilis szöveti károsodást, azaz infarktust jelez. Ha ez jelen van, a diagnózis stroke, még akkor is, ha a tünetek elmúltak."
+                    },
+                    {
+                        question: "Milyen életmódbeli tanács a legfontosabb a TIA utáni másodlagos prevencióban?",
+                        options: ["A C-vitamin bevitel növelése", "A dohányzás elhagyása, egészséges étrend, rendszeres mozgás", "Több alvás", "Kevesebb kávé fogyasztása"],
+                        answer: "A dohányzás elhagyása, egészséges étrend, rendszeres mozgás",
+                        explanation: "Az életmódbeli változtatások, mint a dohányzás abbahagyása, a mediterrán típusú étrend és a rendszeres fizikai aktivitás, alapvető fontosságúak a vaszkuláris rizikófaktorok kontrollálásában és a további stroke-ok megelőzésében."
+                    },
+                    {
+                        question: "Mi a 'TIA mimik'?",
+                        options: ["A TIA egy enyhe formája.", "Olyan állapot, amelynek tünetei a TIA-t utánozzák, de nem agyi ischaemia okozza.", "A TIA utáni depresszió.", "A TIA-t megelőző tünet."],
+                        answer: "Olyan állapot, amelynek tünetei a TIA-t utánozzák, de nem agyi ischaemia okozza.",
+                        explanation: "A TIA mimikek olyan kórképek (pl. migrénes aura, fokális epilepsziás roham, hypoglykaemia), amelyek átmeneti neurológiai tüneteket okoznak, de a háttérben nem agyi vérellátási zavar áll. A kivizsgálás során ezeket ki kell zárni."
+                    },
+                    {
+                        question: "A post-TIA stroke-ok hány százaléka lenne megelőzhető megfelelő kivizsgálással és kezeléssel?",
+                        options: ["Kb. 20%", "Kb. 40%", "Kb. 60%", "Kb. 80%"],
+                        answer: "Kb. 80%",
+                        explanation: "A TIA utáni gyors és célzott kivizsgálással, valamint a megfelelő másodlagos prevenciós kezelés (pl. vérlemezke-gátlók, antikoagulánsok, carotis műtét) beállításával a kiújuló stroke-ok nagy része, akár 80%-a is megelőzhető lenne."
+                    },
+                    {
+                        question: "Melyik állítás igaz a TIA és a stroke tüneteire?",
+                        options: ["A TIA tünetei mindig enyhébbek.", "A stroke tünetei mindig súlyosabbak.", "A kezdeti tünetek azonosak lehetnek, a különbség az időtartamban és a maradandó károsodásban van.", "A TIA soha nem okoz beszédzavart."],
+                        answer: "A kezdeti tünetek azonosak lehetnek, a különbség az időtartamban és a maradandó károsodásban van.",
+                        explanation: "A TIA és a stroke kezdeti klinikai képe megkülönböztethetetlen lehet. A döntő különbség az, hogy a TIA tünetei elmúlnak és (definíció szerint) nem hagynak hátra permanens agykárosodást, míg a stroke igen."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy TIA-n átesett betegnél pitvarfibrillációt diagnosztizálnak?",
+                        options: ["Aspirint kell adni neki.", "Orális antikoaguláns (véralvadásgátló) kezelést kell beállítani.", "Nincs teendő.", "Szívműtétet kell végezni."],
+                        answer: "Orális antikoaguláns (véralvadásgátló) kezelést kell beállítani.",
+                        explanation: "Pitvarfibrilláció esetén a stroke megelőzésének alapja az antikoaguláns terápia, amely hatékonyabban előzi meg a szívben képződő vérrögök kialakulását, mint a vérlemezke-gátlók (pl. aszpirin)."
+                    }
+                ]
+            },
+            "kardioembolias_stroke": {
+                title: "A cardioemboliás stroke",
+                questions: [
+                    {
+                        question: "Mi a kardioemboliás stroke (CES) definíciója?",
+                        options: ["Az agyban helyben képződő vérrög okozta stroke.", "A szívből származó embólus által okozott agyi érelzáródás.", "Az agy kisereinek betegsége.", "Agyi vérzés."],
+                        answer: "A szívből származó embólus által okozott agyi érelzáródás.",
+                        explanation: "A kardioemboliás stroke lényege, hogy a szívben (vagy a nagyerek kezdeti szakaszán) képződött vérrög vagy más anyag a vérárammal az agyba jut, és ott érelzáródást okoz."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a kardioemboliás stroke-nak?",
+                        options: ["Szívtumor (myxoma)", "Pitvarfibrilláció (AFib)", "Infektív endocarditis", "Nyitott foramen ovale (PFO)"],
+                        answer: "Pitvarfibrilláció (AFib)",
+                        explanation: "A pitvarfibrilláció messze a leggyakoribb kardiális embóliaforrás, amely a CES eseteinek jelentős részéért, egyes adatok szerint akár feléért is felelős."
+                    },
+                    {
+                        question: "Hol képződik a legtöbb trombus pitvarfibrilláció esetén?",
+                        options: ["A jobb kamrában", "A bal pitvari fülcsében (LAA)", "Az aorta billentyűn", "A tüdővénákban"],
+                        answer: "A bal pitvari fülcsében (LAA)",
+                        explanation: "A pitvarfibrilláció okozta vérpangás miatt a trombusok több mint 90%-a a bal pitvari fülcsében, egy kis, zsákszerű kitüremkedésben képződik."
+                    },
+                    {
+                        question: "Milyen klinikai kezdet jellemző leginkább a kardioemboliás stroke-ra?",
+                        options: ["Lassan, napok alatt progrediáló tünetek", "Hirtelen, maximális neurológiai deficittel járó kezdet", "Fluktuáló, átmeneti tünetek", "Csak fejfájás"],
+                        answer: "Hirtelen, maximális neurológiai deficittel járó kezdet",
+                        explanation: "Mivel az embólus hirtelen zárja el az eret, a tünetek jellemzően azonnal, maximális súlyossággal jelentkeznek, ellentétben a lassan növekvő trombus okozta stroke-kal."
+                    },
+                    {
+                        question: "Melyik állítás igaz a kardioemboliás stroke prognózisára?",
+                        options: ["Általában enyhébb kimenetelű, mint más stroke típusok.", "Általában súlyosabb kimenetelű, magasabb mortalitással és rekurrencia-rátával.", "A prognózis mindig kiváló.", "Nincs különbség a prognózisban más típusokhoz képest."],
+                        answer: "Általában súlyosabb kimenetelű, magasabb mortalitással és rekurrencia-rátával.",
+                        explanation: "A kardiális eredetű embólusok gyakran nagyobbak és nagyobb ereket zárnak el, ami kiterjedtebb infarktushoz, súlyosabb neurológiai deficitekhez és rosszabb kimenetelhez vezet."
+                    },
+                    {
+                        question: "Mi a másodlagos prevenció alapköve pitvarfibrilláció okozta stroke után?",
+                        options: ["Vérlemezke-aggregáció gátló kezelés (pl. aszpirin)", "Orális antikoaguláns (véralvadásgátló) kezelés", "Statin terápia önmagában", "Vérnyomáscsökkentő kezelés önmagában"],
+                        answer: "Orális antikoaguláns (véralvadásgátló) kezelés",
+                        explanation: "Pitvarfibrillációban a trombusképződés megelőzésére a leghatékonyabbak az antikoagulánsok (DOAC-ok vagy VKA-k), amelyek a véralvadási kaszkádot gátolják."
+                    },
+                    {
+                        question: "Mikor javasolt az antikoaguláns kezelés megkezdése egy akut kardioemboliás stroke után?",
+                        options: ["Azonnal, a sürgősségi osztályon.", "Mindig csak 1 hónap után.", "Az időzítés egyéni mérlegelést igényel, figyelembe véve a stroke súlyosságát és a vérzéses átalakulás kockázatát.", "Soha nem szabad elkezdeni."],
+                        answer: "Az időzítés egyéni mérlegelést igényel, figyelembe véve a stroke súlyosságát és a vérzéses átalakulás kockázatát.",
+                        explanation: "Az antikoaguláció időzítése kényes egyensúlyozás az újabb embólia megelőzése és az infarktus bevérzésének kockázata között. A döntés a stroke méretétől és a beteg állapotától függ, általában néhány naptól 2 hétig terjedő halasztással."
+                    },
+                    {
+                        question: "Mi a paradox embólia?",
+                        options: ["Amikor az embólus a tüdőbe kerül.", "Amikor egy vénás rendszerből származó trombus egy szív-söntön (pl. PFO) keresztül az artériás keringésbe jut.", "Amikor az embólus feloldódik.", "Amikor az embólus a szívben marad."],
+                        answer: "Amikor egy vénás rendszerből származó trombus egy szív-söntön (pl. PFO) keresztül az artériás keringésbe jut.",
+                        explanation: "Paradox embólia esetén egy, a mélyvénákban képződött vérrög egy nyitott foramen ovale-n (PFO) keresztül átjut a szív jobb feléből a balba, és onnan az agyba sodródhat."
+                    },
+                    {
+                        question: "Milyen képalkotó mintázat utalhat erősen kardioemboliás eredetre?",
+                        options: ["Egyetlen, kis, mélyen fekvő lacunaris infarktus.", "Multiplex, különböző artériás területeket érintő, egyidejű infarktusok.", "Csak a fehérállomány károsodása.", "Agytörzsi határterületi infarktus."],
+                        answer: "Multiplex, különböző artériás területeket érintő, egyidejű infarktusok.",
+                        explanation: "Ha egy embólus a szívből indul, a vérárammal szétágazhat, és egyszerre több, egymástól távol eső agyi érterületen is okozhat elzáródást. Ez a mintázat nagyon szuggesztív a kardioemboliás forrásra."
+                    },
+                    {
+                        question: "Milyen szövődményt okozhat az infektív endocarditis a központi idegrendszerben?",
+                        options: ["Csak fejfájást.", "Szeptikus embóliát, ami stroke-hoz és mykotikus aneurizmák kialakulásához vezethet.", "Csak lázat.", "Csak szívritmuszavart."],
+                        answer: "Szeptikus embóliát, ami stroke-hoz és mykotikus aneurizmák kialakulásához vezethet.",
+                        explanation: "Infektív endocarditisben a szívbillentyűkön lévő fertőzött vegetációkról szeptikus embólusok szakadhatnak le. Ezek nemcsak érelzáródást, hanem az érfal gyulladását és kóros tágulatát (mykotikus aneurizma) is okozhatják, ami később megrepedhet."
+                    },
+                    {
+                        question: "Melyik állítás igaz a DOAC-ok és a warfarin összehasonlításában NVAF esetén?",
+                        options: ["A warfarin biztonságosabb.", "A DOAC-ok jelentősen alacsonyabb intracranialis vérzési kockázattal járnak.", "A DOAC-ok kevésbé hatékonyak.", "A DOAC-ok állandó INR ellenőrzést igényelnek."],
+                        answer: "A DOAC-ok jelentősen alacsonyabb intracranialis vérzési kockázattal járnak.",
+                        explanation: "A direkt orális antikoagulánsok (DOAC) egyik legfőbb előnye a K-vitamin antagonistákkal (VKA, pl. warfarin) szemben a szignifikánsan alacsonyabb agyvérzéses szövődményráta, ami biztonságosabbá teszi őket."
+                    },
+                    {
+                        question: "Mikor alakul ki leggyakrabban balkamrai trombus (LVT)?",
+                        options: ["Stabil angina pectorisban.", "Magas vérnyomás esetén.", "Kiterjedt, elülső fali szívinfarktus után.", "Egészséges szívben."],
+                        answer: "Kiterjedt, elülső fali szívinfarktus után.",
+                        explanation: "Szívinfarktus után a károsodott, rosszul mozgó szívfalon (különösen a bal kamra csúcsában) a vér pang, ami elősegíti a trombusképződést. Ez az LVT az AMI egy súlyos, embóliás szövődménye lehet."
+                    },
+                    {
+                        question: "Melyik billentyűbetegség NEM számít major kardioemboliás forrásnak?",
+                        options: ["Reumás mitrális stenosis", "Mechanikus műbillentyű", "Infektív endocarditis", "Enyhe mitrális billentyű prolapsus önmagában"],
+                        answer: "Enyhe mitrális billentyű prolapsus önmagában",
+                        explanation: "Az enyhe, nem degenerálódott mitrális prolapsus általában jóindulatú, és önmagában alacsony stroke kockázatot jelent, ellentétben a másik három állapottal, amelyek magas kockázatú embóliaforrások."
+                    },
+                    {
+                        question: "Mi a CHA2DS2-VASc pontrendszer célja?",
+                        options: ["A stroke súlyosságának felmérése.", "A pitvarfibrilláló betegek stroke kockázatának becslése az antikoaguláns terápia indikációjának eldöntéséhez.", "A vérzéses kockázat felmérése.", "A szívelégtelenség diagnosztizálása."],
+                        answer: "A pitvarfibrilláló betegek stroke kockázatának becslése az antikoaguláns terápia indikációjának eldöntéséhez.",
+                        explanation: "Ez a pontrendszer a klinikai rizikófaktorok (szívelégtelenség, hypertonia, életkor, diabetes, korábbi stroke, vaszkuláris betegség, nem) alapján segít megbecsülni az egyén éves stroke kockázatát, és eldönteni, hogy szüksége van-e véralvadásgátló kezelésre."
+                    },
+                    {
+                        question: "Melyik állítás igaz a 'kriptogén stroke' és a kardioembolizáció kapcsolatára?",
+                        options: ["A kettőnek semmi köze egymáshoz.", "A kriptogén stroke-ok egy jelentős része valójában fel nem ismert kardioemboliás forrásból (pl. paroxizmális AFib) ered.", "Minden kriptogén stroke kardioemboliás.", "A kardioemboliás stroke soha nem lehet kriptogén."],
+                        answer: "A kriptogén stroke-ok egy jelentős része valójában fel nem ismert kardioemboliás forrásból (pl. paroxizmális AFib) ered.",
+                        explanation: "A 'kriptogén' (ismeretlen eredetű) diagnózis gyakran a rejtett, nehezen detektálható kardiális embóliaforrások miatt születik. A kivizsgálás kiterjesztésével (pl. tartós EKG) ezek egy része azonosítható."
+                    },
+                    {
+                        question: "Milyen képalkotó lelet teszi valószínűtlenné a kardioemboliás eredetet?",
+                        options: ["Multiplex, két agyféltekét érintő infarktusok.", "Egy nagy, kortikális infarktus.", "Egy klasszikus, kis, mélyen fekvő lacunaris infarktus.", "Az infarktus vérzéses átalakulása."],
+                        answer: "Egy klasszikus, kis, mélyen fekvő lacunaris infarktus.",
+                        explanation: "A lacunaris infarktusok a kiserek betegségének (pl. lipohyalinosis) következményei, és nagyon ritkán okozza őket kardioembolizáció. Jelenlétük a kisérbetegség diagnózisát valószínűsíti."
+                    },
+                    {
+                        question: "Melyik biomarker szintjének emelkedése utalhat kardiális eredetre stroke esetén?",
+                        options: ["Troponin", "NT-proBNP", "D-dimer", "Mindhárom"],
+                        answer: "NT-proBNP",
+                        explanation: "Bár a troponin szívizom-sérülést, a D-dimer pedig trombus-lebomlást jelez, az NT-proBNP (B-típusú natriuretikus peptid prohormonja) emelkedett szintje specifikusabban utal a szív terhelésére (pl. szívelégtelenség, pitvarfibrilláció), így segíthet a kardioemboliás forrás valószínűsítésében."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy fiatal, kriptogén stroke-os betegnél PFO-t találnak?",
+                        options: ["Azonnal meg kell műteni.", "A PFO zárása megfontolandó, ha a stroke valószínűleg a PFO-val kapcsolatos, egyéni mérlegelés alapján.", "Mindig csak gyógyszeres kezelés javasolt.", "Nincs teendő, a PFO ártalmatlan."],
+                        answer: "A PFO zárása megfontolandó, ha a stroke valószínűleg a PFO-val kapcsolatos, egyéni mérlegelés alapján.",
+                        explanation: "A PFO zárásának haszna nem egyértelmű minden esetben. A döntés a beteg életkorától, a stroke jellegétől és a PFO anatómiai jellemzőitől függ (RoPE score). Szelektált esetekben a zárás hatékonyabb lehet a gyógyszeres kezelésnél."
+                    },
+                    {
+                        question: "Milyen típusú műbillentyű hordozza a legmagasabb tromboembóliás kockázatot?",
+                        options: ["Biológiai aorta billentyű", "Biológiai mitrális billentyű", "Mechanikus billentyű", "Mindegyik egyformán"],
+                        answer: "Mechanikus billentyű",
+                        explanation: "A mechanikus műbillentyűk idegen anyagból készülnek, ami erősen trombogén. Ezért a beültetésük után élethosszig tartó, hatékony antikoaguláns kezelés szükséges a tromboembóliás szövődmények megelőzésére."
+                    },
+                    {
+                        question: "Milyen klinikai jelenség utalhat az embólus vándorlására és az ér rekanalizációjára?",
+                        options: ["A tünetek folyamatos rosszabbodása.", "A 'spectacular shrinking deficit', azaz a tünetek gyors, drámai javulása.", "A láz megjelenése.", "A vérnyomás emelkedése."],
+                        answer: "A 'spectacular shrinking deficit', azaz a tünetek gyors, drámai javulása.",
+                        explanation: "Ha az elzáródást okozó embólus kisebb darabokra esik szét vagy tovább sodródik egy disztálisabb, kisebb jelentőségű érbe, a keringés helyreállhat az eredetileg elzárt területen, ami a neurológiai tünetek gyors és jelentős javulását eredményezheti."
+                    }
+                ]
+            },
+            "agyi_ischemiak_kezelese": {
+                title: "Agyi ischemiák kezelése",
+                questions: [
+                    {
+                        question: "Mi az akut iszkémiás stroke reperfúziós terápiájának elsődleges célja?",
+                        options: ["A vérnyomás csökkentése", "A lázcsillapítás", "Az elzáródott agyi érben a véráramlás mielőbbi helyreállítása", "A vércukorszint normalizálása"],
+                        answer: "Az elzáródott agyi érben a véráramlás mielőbbi helyreállítása",
+                        explanation: "A reperfúziós terápia (trombolízis, trombektómia) célja az érelzáródás megszüntetése, hogy a veszélyeztetett, de még megmenthető agyszövet (penumbra) vérellátása helyreálljon, és a maradandó károsodás minimalizálódjon."
+                    },
+                    {
+                        question: "Mi a standard időablak az intravénás trombolízis (IVT) alkalmazására alteplase-zal?",
+                        options: ["A tünetek kezdetétől számított 1 óra", "A tünetek kezdetétől számított 4.5 óra", "A tünetek kezdetétől számított 6 óra", "A tünetek kezdetétől számított 24 óra"],
+                        answer: "A tünetek kezdetétől számított 4.5 óra",
+                        explanation: "Az intravénás alteplase adása a legtöbb beteg számára a tünetek kezdetétől számított 4.5 órán belül javasolt, amennyiben a befogadási és kizárási kritériumok teljesülnek."
+                    },
+                    {
+                        question: "Milyen dózisban alkalmazzák az alteplase-t (rt-PA) iszkémiás stroke-ban?",
+                        options: ["Fix 100 mg", "0.9 mg/testtömegkg (maximum 90 mg)", "1.5 mg/testtömegkg", "Testsúlytól független"],
+                        answer: "0.9 mg/testtömegkg (maximum 90 mg)",
+                        explanation: "A standard dózis 0.9 mg/kg, de a teljes adag nem haladhatja meg a 90 mg-ot. Ennek 10%-át adják be bólusban, a maradék 90%-ot pedig 60 perces infúzióban."
+                    },
+                    {
+                        question: "Mi a mechanikus trombektómia (EVT) lényege?",
+                        options: ["Gyógyszeres vérrögoldás.", "A vérrög katéteres úton történő mechanikus eltávolítása az agyi artériából.", "A koponya megnyitásával végzett műtét.", "A vérnyomás emelése."],
+                        answer: "A vérrög katéteres úton történő mechanikus eltávolítása az agyi artériából.",
+                        explanation: "Az EVT során egy vékony katétert vezetnek fel az artériás rendszeren keresztül az elzáródott agyi érig, és egy speciális eszközzel (stent retriever vagy aspirációs katéter) eltávolítják a vérrögöt."
+                    },
+                    {
+                        question: "Milyen esetekben jön szóba a mechanikus trombektómia?",
+                        options: ["Minden iszkémiás stroke esetén.", "Csak kisér-elzáródásokban.", "Nagy agyi artéria (LVO) elzáródása esetén.", "Csak vérzéses stroke-ban."],
+                        answer: "Nagy agyi artéria (LVO) elzáródása esetén.",
+                        explanation: "A trombektómia a nagy agyi artériák (pl. a. carotis interna, a. cerebri media M1/M2 szakasza) elzáródása esetén hatékony, ahol a nagy vérrögöt az intravénás trombolízis önmagában gyakran nem képes feloldani."
+                    },
+                    {
+                        question: "Mi az 'idő agy' (time is brain) elv lényege?",
+                        options: ["Az agy idővel regenerálódik.", "Az agyi funkciók idővel javulnak.", "Az iszkémiás stroke-ban minden perc késlekedés idegsejtek millióinak elvesztésével jár.", "Az idősebb agy lassabban károsodik."],
+                        answer: "Az iszkémiás stroke-ban minden perc késlekedés idegsejtek millióinak elvesztésével jár.",
+                        explanation: "Ez az elv hangsúlyozza, hogy az idő kritikus tényező. Minél hamarabb állítják helyre a keringést, annál több agyszövet menthető meg, ezért a tünetek észlelésekor azonnal cselekedni kell."
+                    },
+                    {
+                        question: "Mi a 'permisszív hypertonia' fogalma akut iszkémiás stroke-ban?",
+                        options: ["A vérnyomás agresszív csökkentése.", "A vérnyomás enyhén emelkedett szinten tartásának megengedése a penumbra perfúziójának javítása érdekében.", "A vérnyomás figyelmen kívül hagyása.", "A vérnyomás gyógyszeres emelése."],
+                        answer: "A vérnyomás enyhén emelkedett szinten tartásának megengedése a penumbra perfúziójának javítása érdekében.",
+                        explanation: "Ha a beteg nem kap trombolízist, az enyhén magasabb vérnyomás segíthet a kollaterális keringésen keresztül a veszélyeztetett agyterület (penumbra) vérellátásának fenntartásában. Ezért a vérnyomást csak extrém magas értékek (>220/120 Hgmm) esetén csökkentik."
+                    },
+                    {
+                        question: "Milyen vérnyomás célértéket kell tartani az intravénás trombolízis utáni első 24 órában?",
+                        options: ["<220/120 Hgmm", "<180/105 Hgmm", "<160/100 Hgmm", "<140/90 Hgmm"],
+                        answer: "<180/105 Hgmm",
+                        explanation: "A trombolízis után a vérzéses szövődmények kockázatának csökkentése érdekében a vérnyomást szigorúbban kell kontrollálni, a célérték az első 24 órában <180/105 Hgmm."
+                    },
+                    {
+                        question: "Mi a malignus MCA szindróma és mi a kezelése?",
+                        options: ["Egy ritka agydaganat.", "Agyi fertőzés.", "Az arteria cerebri media infarktusa utáni súlyos, életveszélyes agyödéma; kezelése a dekompresszív hemikraniektómia.", "Az ACM aneurizmája."],
+                        answer: "Az arteria cerebri media infarktusa utáni súlyos, életveszélyes agyödéma; kezelése a dekompresszív hemikraniektómia.",
+                        explanation: "Kiterjedt ACM infarktus esetén a duzzanat (ödéma) olyan mértékű lehet, hogy a koponyaűri nyomás kritikusan megemelkedik. A dekompresszív hemikraniektómia (a koponyacsont egy részének ideiglenes eltávolítása) életmentő lehet a nyomás csökkentésével."
+                    },
+                    {
+                        question: "Mi a TICI score?",
+                        options: ["A stroke súlyosságát mérő skála.", "A rehabilitációs potenciált becslő pontrendszer.", "A mechanikus trombektómia utáni reperfúzió mértékét osztályozó skála.", "A vérzéses kockázatot felmérő pontrendszer."],
+                        answer: "A mechanikus trombektómia utáni reperfúzió mértékét osztályozó skála.",
+                        explanation: "A TICI (Thrombolysis in Cerebral Infarction) score angiográfiásan értékeli, hogy a trombektómia után milyen mértékben sikerült helyreállítani a véráramlást az elzáródott érterületen. A TICI 2b/3 a sikeres reperfúziót jelenti."
+                    },
+                    {
+                        question: "Milyen gyógyszert kap a beteg a stroke utáni másodlagos prevencióra, ha az ok nem kardioemboliás?",
+                        options: ["Véralvadásgátlót (antikoaguláns)", "Vérlemezke-aggregáció gátlót (antiplatelet)", "Antibiotikumot", "Vízhajtót"],
+                        answer: "Vérlemezke-aggregáció gátlót (antiplatelet)",
+                        explanation: "A nem szív eredetű (pl. atheroscleroticus) iszkémiás stroke megelőzésére a thrombocyta-aggregáció gátlók (pl. aszpirin, clopidogrel) a standard kezelés."
+                    },
+                    {
+                        question: "Mi a 'wake-up stroke' és miért jelent terápiás kihívást?",
+                        options: ["Alvás közben jelentkező stroke, ahol a tünetek kezdetének időpontja ismeretlen.", "Nagyon enyhe stroke.", "Mindig vérzéses stroke.", "Csak időseket érintő stroke."],
+                        answer: "Alvás közben jelentkező stroke, ahol a tünetek kezdetének időpontja ismeretlen.",
+                        explanation: "Ébredési stroke esetén nem tudjuk, mikor kezdődtek a tünetek, így a standard időablakok nem alkalmazhatók. Ilyenkor a fejlett képalkotás (pl. DWI-FLAIR mismatch) segíthet eldönteni, hogy a beteg még profitálhat-e a reperfúziós terápiából."
+                    },
+                    {
+                        question: "Mi a tenecteplase (TNK) előnye az alteplase-zal (rt-PA) szemben?",
+                        options: ["Hatékonyabb.", "Olcsóbb.", "Egyszerűbb az adagolása (egyszeri bólus).", "Kevesebb mellékhatása van."],
+                        answer: "Egyszerűbb az adagolása (egyszeri bólus).",
+                        explanation: "A tenecteplase-t egyetlen intravénás bólusban lehet beadni, szemben az alteplase egyórás infúziójával, ami leegyszerűsíti és meggyorsítja a kezelést, különösen a betegszállítás során."
+                    },
+                    {
+                        question: "Mi az elsődleges képalkotó vizsgálat akut stroke gyanúja esetén?",
+                        options: ["MRI", "Ultrahang", "Natív koponya CT", "PET CT"],
+                        answer: "Natív koponya CT",
+                        explanation: "A sürgősségi ellátásban az első lépés egy gyors natív CT, amely megbízhatóan és gyorsan kizárja a koponyaűri vérzést, ami elengedhetetlen a trombolízis megkezdése előtt."
+                    },
+                    {
+                        question: "Milyen terápia javasolt a stroke utáni dysphagia (nyelészavar) kezelésére?",
+                        options: ["Gyógyszeres kezelés", "Logopédiai terápia (nyelésterápia)", "Fizikoterápia", "Pszichoterápia"],
+                        answer: "Logopédiai terápia (nyelésterápia)",
+                        explanation: "A dysphagia kezelése a logopédus feladata, aki felméri a nyelés biztonságosságát, és speciális diétát, kompenzációs technikákat, valamint a nyelőizmokat erősítő gyakorlatokat javasol az aspiráció megelőzésére."
+                    },
+                    {
+                        question: "Mikor indokolt a dekompresszív hemikraniektómia?",
+                        options: ["Minden stroke esetén.", "Kiterjedt, malignus agyi infarktus okozta életveszélyes agyödéma esetén.", "Kisebb, lacunaris infarktusoknál.", "Csak TIA esetén."],
+                        answer: "Kiterjedt, malignus agyi infarktus okozta életveszélyes agyödéma esetén.",
+                        explanation: "Ez egy életmentő műtét, amelyet akkor végeznek, ha a nagy kiterjedésű infarktus utáni agyduzzanat olyan mértékű koponyaűri nyomásfokozódást okoz, ami az agytörzs beékelődésével és halállal fenyeget."
+                    },
+                    {
+                        question: "Mi a szerepe a statinoknak a stroke másodlagos prevenciójában?",
+                        options: ["Csak a vérnyomást csökkentik.", "Csökkentik az LDL-koleszterin szintet és stabilizálják az atheroscleroticus plakkokat.", "Véralvadásgátló hatásúak.", "Nincs szerepük."],
+                        answer: "Csökkentik az LDL-koleszterin szintet és stabilizálják az atheroscleroticus plakkokat.",
+                        explanation: "A statinok az LDL-szint csökkentésén túl gyulladáscsökkentő és plakkstabilizáló (pleiotróp) hatásokkal is rendelkeznek, így alapvető gyógyszerek az atheroscleroticus stroke másodlagos megelőzésében."
+                    },
+                    {
+                        question: "Mi a vérzéses transzformáció?",
+                        options: ["A stroke gyógyulása.", "Az iszkémiás infarktus területének másodlagos bevérzése.", "A vérzéses stroke átalakulása iszkémiássá.", "Egyfajta rehabilitációs technika."],
+                        answer: "Az iszkémiás infarktus területének másodlagos bevérzése.",
+                        explanation: "Az iszkémia során károsodott érfal áteresztővé válhat, különösen a reperfúzió után, ami az infarktusos területen belüli kisebb-nagyobb bevérzésekhez vezethet. Ez a trombolízis egyik legrettegettebb szövődménye."
+                    },
+                    {
+                        question: "Milyen esetben preferálják a direkt orális antikoagulánsokat (DOAC) a warfarinnal szemben pitvarfibrillációban?",
+                        options: ["Soha", "Mindig", "A legtöbb nem-valvuláris pitvarfibrilláció esetén, a kedvezőbb biztonsági profil miatt.", "Csak mechanikus műbillentyű esetén."],
+                        answer: "A legtöbb nem-valvuláris pitvarfibrilláció esetén, a kedvezőbb biztonsági profil miatt.",
+                        explanation: "A DOAC-ok (pl. apixaban, rivaroxaban) előnye, hogy kevesebb agyvérzést okoznak és nem igényelnek rendszeres INR-ellenőrzést, ezért a legtöbb esetben előnyben részesítik őket a warfarinnal szemben (kivéve pl. mechanikus műbillentyű)."
+                    },
+                    {
+                        question: "Mi a stroke-ellátás legfontosabb szervezeti egysége a kórházban?",
+                        options: ["A büfé", "A Stroke Unit (Stroke Osztály)", "A sebészeti osztály", "A bőrgyógyászat"],
+                        answer: "A Stroke Unit (Stroke Osztály)",
+                        explanation: "A Stroke Unit egy specializált osztály, ahol egy multidiszciplináris team (neurológus, szakápoló, gyógytornász, logopédus stb.) végzi a stroke-os betegek akut ellátását és korai rehabilitációját. Bizonyított, hogy a Stroke Uniton történő kezelés javítja a betegek kimenetelét."
+                    }
+                ]
+            },
+            "fiatalkori_stroke": {
+                title: "Cerebrovascularis betegségek fiatalkorban",
+                questions: [
+                    {
+                        question: "Mi a fiatalkori stroke leggyakrabban elfogadott korcsoport-meghatározása?",
+                        options: ["10-25 év", "18-50 év", "40-60 év", "Csak 20 év alatt"],
+                        answer: "18-50 év",
+                        explanation: "Bár a definíciók változhatnak, a legtöbb szakirodalom a 18 és 50 év közötti korosztályt tekinti a fiatalkori stroke populációjának."
+                    },
+                    {
+                        question: "Melyik a két leggyakoribb oka az iszkémiás stroke-nak fiatal felnőtteknél?",
+                        options: ["Nagyér-atherosclerosis és lacunaris infarktus", "Kardioembolizáció és artériás disszekció", "Vasculitis és migrén", "Drogabúzus és fogamzásgátlók"],
+                        answer: "Kardioembolizáció és artériás disszekció",
+                        explanation: "Ellentétben az idősebb korosztállyal, ahol az atherosclerosis dominál, fiataloknál a szívből eredő embóliák (gyakran PFO-n keresztül) és a nyaki artériák disszekciója (falának beszakadása) a két vezető ok."
+                    },
+                    {
+                        question: "Mi az artériás disszekció?",
+                        options: ["Az artéria teljes elszakadása.", "Az artéria falának rétegei közötti bevérzés, ami szűkületet vagy elzáródást okoz.", "Az artéria görcsös összehúzódása.", "Az artéria meszesedése."],
+                        answer: "Az artéria falának rétegei közötti bevérzés, ami szűkületet vagy elzáródást okoz.",
+                        explanation: "Disszekció során az ér belső rétege (intima) megreped, és a vér a fal rétegei közé áramlik, intramurális hematómát képezve. Ez szűkítheti vagy elzárhatja az eret, illetve embóliaforrásként is szolgálhat."
+                    },
+                    {
+                        question: "Milyen tünetek utalhatnak nyaki artéria disszekcióra a neurológiai kiesési tünetek mellett?",
+                        options: ["Láz és hidegrázás", "Hasi fájdalom", "Hirtelen kialakuló nyaki vagy fejfájdalom, Horner-szindróma", "Bőrkiütés"],
+                        answer: "Hirtelen kialakuló nyaki vagy fejfájdalom, Horner-szindróma",
+                        explanation: "A disszekció gyakran lokális tünetekkel, mint a hirtelen, éles nyaki vagy fejfájdalom, kezdődik. A carotis disszekció a szimpatikus fonat sérülése miatt Horner-szindrómát (miosis, ptosis, anhidrosis) is okozhat."
+                    },
+                    {
+                        question: "Mi a PFO (Patent Foramen Ovale) szerepe a fiatalkori stroke-ban?",
+                        options: ["Nincs szerepe.", "A PFO egy nyílás a pitvari sövényen, amelyen keresztül paradox embólia történhet.", "A PFO mindig agyvérzést okoz.", "A PFO a szívbillentyűk betegsége."],
+                        answer: "A PFO egy nyílás a pitvari sövényen, amelyen keresztül paradox embólia történhet.",
+                        explanation: "A PFO lehetővé teszi, hogy a vénás rendszerből származó vérrögök átjussanak az artériás keringésbe, és agyi érelzáródást okozzanak. Ez különösen fontos a kriptogén stroke-ok hátterében fiataloknál."
+                    },
+                    {
+                        question: "Mi a CADASIL?",
+                        options: ["Egyfajta szívritmuszavar.", "Egy örökletes, a NOTCH3 gén mutációja által okozott agyi kisérbetegség.", "Egy gyógyszer a stroke kezelésére.", "Egy rehabilitációs módszer."],
+                        answer: "Egy örökletes, a NOTCH3 gén mutációja által okozott agyi kisérbetegség.",
+                        explanation: "A CADASIL egy ritka genetikai betegség, amely ismétlődő szubkortikális (lacunaris) stroke-okhoz, migrénhez és korai demenciához vezet, jellemzően fiatal- vagy középkorban."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a nem-traumás subarachnoidalis vérzésnek (SAH) fiatal felnőtteknél?",
+                        options: ["Magas vérnyomás", "Agyi aneurizma ruptúrája", "Véralvadási zavar", "Agydaganat"],
+                        answer: "Agyi aneurizma ruptúrája",
+                        explanation: "Hasonlóan az idősebb korosztályhoz, fiataloknál is a subarachnoidalis vérzést leggyakrabban egy veleszületett vagy szerzett agyi értágulat (aneurizma) megrepedése okozza."
+                    },
+                    {
+                        question: "Hogyan növelik a kokain és amfetaminok a stroke kockázatát?",
+                        options: ["Csökkentik a vérnyomást.", "Akut, súlyos vérnyomás-emelkedést, érgörcsöt és vasculitist okozhatnak.", "Javítják a véralvadást.", "Védik az érfalat."],
+                        answer: "Akut, súlyos vérnyomás-emelkedést, érgörcsöt és vasculitist okozhatnak.",
+                        explanation: "Ezek a stimuláns szerek extrém módon megterhelik az érrendszert, ami mind ischaemiás (érszűkület, trombózis), mind vérzéses (érrepedés) stroke-hoz vezethet."
+                    },
+                    {
+                        question: "Mi a Fabry-kór és hogyan okoz stroke-ot?",
+                        options: ["Egy autoimmun betegség.", "Egy X-kromoszómához kötött lizoszomális tárolási betegség, amely vasculopathiát okoz.", "Egyfajta májbetegség.", "Egy tüdőbetegség."],
+                        answer: "Egy X-kromoszómához kötött lizoszomális tárolási betegség, amely vasculopathiát okoz.",
+                        explanation: "Fabry-kórban egy enzimhiány miatt kóros zsírok halmozódnak fel az érfalban, ami az erek károsodásához (vasculopathia) és korai stroke-hoz vezethet."
+                    },
+                    {
+                        question: "Melyik állítás igaz a fiatalkori stroke epidemiológiájára?",
+                        options: ["Az incidenciája csökkenőben van.", "Az incidenciája növekvő tendenciát mutat világszerte.", "Csak a fejlődő országokat érinti.", "Rendkívül ritka, elhanyagolható probléma."],
+                        answer: "Az incidenciája növekvő tendenciát mutat világszerte.",
+                        explanation: "Aggasztó tendencia, hogy az elmúlt évtizedekben a fiatal felnőtt korosztályban (18-50 év) nő a stroke-esetek száma, ami valószínűleg a diagnosztika fejlődésének és az életmódbeli rizikófaktorok korábbi megjelenésének tudható be."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy fiatal, kriptogén stroke-os betegnél PFO-t és pitvari septum aneurizmát találnak?",
+                        options: ["Nincs teendő.", "Csak aszpirin adása.", "Megfontolandó a PFO katéteres zárása a másodlagos prevenció érdekében.", "Mindig szívműtét szükséges."],
+                        answer: "Megfontolandó a PFO katéteres zárása a másodlagos prevenció érdekében.",
+                        explanation: "Magas kockázatú PFO (pl. nagy sönt, pitvari septum aneurizmával társulva) esetén, ha más okot nem találnak, a PFO zárása hatékonyabb lehet a stroke kiújulásának megelőzésében, mint a gyógyszeres kezelés."
+                    },
+                    {
+                        question: "Milyen típusú fejfájás lehet a subarachnoidalis vérzés vagy disszekció bevezető tünete?",
+                        options: ["Enyhe, tompa fejfájás", "Lassan fokozódó fejfájás", "Hirtelen, ütésszerű ('thunderclap') fejfájás", "Csak reggeli fejfájás"],
+                        answer: "Hirtelen, ütésszerű ('thunderclap') fejfájás",
+                        explanation: "Az 'életem legrosszabb fejfájása'-ként leírt, hirtelen, rendkívül erős fejfájás a subarachnoidalis vérzés klasszikus tünete, de előfordulhat disszekció vagy RCVS esetén is."
+                    },
+                    {
+                        question: "Melyik NEM tipikus oka a fiatalkori intracerebralis vérzésnek (ICH)?",
+                        options: ["Arteriovenózus malformáció (AVM)", "Cavernoma", "Cerebrális amyloid angiopathia (CAA)", "Drogabúzus (kokain)"],
+                        answer: "Cerebrális amyloid angiopathia (CAA)",
+                        explanation: "A CAA az agyi kiserek falában lerakódó amyloid miatti vérzés, ami szinte kizárólag az idősebb korosztály betegsége. Fiataloknál az AVM, cavernoma, drogok vagy a hypertonia a gyakoribb okok."
+                    },
+                    {
+                        question: "Milyen szerepe van a terhességnek a stroke kockázatában?",
+                        options: ["Csökkenti a kockázatot.", "Növeli a stroke kockázatát a hormonális és hemodinamikai változások, valamint a fokozott véralvadási készség miatt.", "Nincs hatással a kockázatra.", "Csak a szülés utáni első napon van kockázat."],
+                        answer: "Növeli a stroke kockázatát a hormonális és hemodinamikai változások, valamint a fokozott véralvadási készség miatt.",
+                        explanation: "A terhesség és a szülés utáni időszak (postpartum) egy prothrombotikus állapot, ami mind a vénás (pl. agyi vénás trombózis), mind az artériás stroke kockázatát megnöveli."
+                    },
+                    {
+                        question: "Mi a 'kriptogén stroke'?",
+                        options: ["Egy nagyon enyhe stroke.", "Egy stroke, aminek az okát az alapos kivizsgálás után sem sikerül azonosítani.", "Mindig szív eredetű stroke.", "A stroke egy genetikai formája."],
+                        answer: "Egy stroke, aminek az okát az alapos kivizsgálás után sem sikerül azonosítani.",
+                        explanation: "A kriptogén stroke diagnózisát akkor állítják fel, ha a rutin és kiterjesztett vizsgálatok sem találnak egyértelmű okot az agyi infarktus hátterében. Fiataloknál ez az arány különösen magas."
+                    },
+                    {
+                        question: "Melyik állítás igaz a fiatalkori stroke utáni munkába való visszatérésre?",
+                        options: ["Mindenki problémamentesen visszatér a munkájába.", "A jó fizikai felépülés garantálja a sikeres munkába állást.", "Gyakran nehézkes a 'láthatatlan' következmények (kognitív zavarok, fáradékonyság) miatt.", "A fiatalok soha nem tudnak újra dolgozni."],
+                        answer: "Gyakran nehézkes a 'láthatatlan' következmények (kognitív zavarok, fáradékonyság) miatt.",
+                        explanation: "Sok fiatal stroke-túlélő küzd kognitív nehézségekkel, krónikus fáradtsággal és pszichés problémákkal, amelyek a jó fizikai állapot ellenére is megnehezítik a munkába való sikeres visszailleszkedést."
+                    },
+                    {
+                        question: "Milyen vizsgálat a legfontosabb vasculitis gyanúja esetén?",
+                        options: ["Csak vérvétel", "Koponya CT", "Digitális szubtrakciós angiográfia (DSA) és/vagy nagy felbontású érfal MRI", "EEG"],
+                        answer: "Digitális szubtrakciós angiográfia (DSA) és/vagy nagy felbontású érfal MRI",
+                        explanation: "Vasculitis (érgyulladás) gyanújakor az érfalak részletes vizsgálata szükséges. A DSA a klasszikus 'arany standard', de a modern, nagy felbontású érfal MRI is képes kimutatni az érfal gyulladásos megvastagodását."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb örökletes véralvadási zavar, ami növelheti a stroke kockázatát?",
+                        options: ["Hemofília", "Protein C hiány", "Faktor V Leiden mutáció", "von Willebrand betegség"],
+                        answer: "Faktor V Leiden mutáció",
+                        explanation: "A Faktor V Leiden mutáció a leggyakoribb örökletes thrombophilia, amely fokozott vénás trombózishajlamot okoz, és bizonyos esetekben (pl. PFO-val kombinálva) növelheti az artériás stroke kockázatát is."
+                    },
+                    {
+                        question: "A fiatalkori stroke kezelése miben különbözik az időskoritól?",
+                        options: ["Nincs különbség.", "Az akut reperfúziós terápia alapelvei hasonlóak, de a másodlagos prevenció sokkal inkább etiológia-specifikus.", "Fiataloknál soha nem alkalmaznak trombolízist.", "Fiataloknál mindig műtét szükséges."],
+                        answer: "Az akut reperfúziós terápia alapelvei hasonlóak, de a másodlagos prevenció sokkal inkább etiológia-specifikus.",
+                        explanation: "Míg az akut ellátás (IVT, EVT) indikációi nagyrészt azonosak, a másodlagos prevenció a fiatalkori stroke sokszínű etiológiája miatt sokkal változatosabb és célzottabb kezelést igényel (pl. PFO zárás, immunszuppresszió vasculitisben, stb.)."
+                    },
+                    {
+                        question: "Milyen hosszú távú következménnyel kell számolni a fiatalkori stroke után?",
+                        options: ["Teljes és maradéktalan gyógyulás minden esetben.", "Csak fizikai korlátozottsággal.", "Fokozott mortalitással, a stroke kiújulásának kockázatával, valamint kognitív és pszichoszociális problémákkal.", "Csak a munkaképesség átmeneti csökkenésével."],
+                        answer: "Fokozott mortalitással, a stroke kiújulásának kockázatával, valamint kognitív és pszichoszociális problémákkal.",
+                        explanation: "A jó fizikai felépülés ellenére a fiatal stroke-túlélők hosszú távú halálozási és stroke-kiújulási kockázata magasabb, és gyakran küzdenek tartós kognitív, pszichés és szociális nehézségekkel."
+                    }
+                ]
+            },
+            "koagulopatiak": {
+                title: "Coagulopathiák",
+                questions: [
+                    {
+                        question: "Mi a primer hemosztázis legfőbb sejtes eleme?",
+                        options: ["Vörösvértestek", "Fehérvérsejtek", "Vérlemezkék (trombociták)", "Endothelsejtek"],
+                        answer: "Vérlemezkék (trombociták)",
+                        explanation: "A primer hemosztázis során az érsérülés helyén a vérlemezkék tapadnak ki és aggregálódnak, létrehozva a kezdeti, laza sejtes dugót."
+                    },
+                    {
+                        question: "Melyik véralvadási faktor hiánya okozza a Hemofília A-t?",
+                        options: ["VII-es faktor", "VIII-as faktor", "IX-es faktor", "X-es faktor"],
+                        answer: "VIII-as faktor",
+                        explanation: "A Hemofília A, a leggyakoribb súlyos, örökletes vérzékenység, a VIII-as véralvadási faktor hiánya vagy csökkent aktivitása miatt alakul ki."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb örökletes véralvadási zavar, amely fokozott trombózishajlammal (trombofília) jár?",
+                        options: ["Protein C hiány", "Antitrombin hiány", "Faktor V Leiden mutáció", "Hemofília B"],
+                        answer: "Faktor V Leiden mutáció",
+                        explanation: "A Faktor V Leiden mutáció a leggyakoribb örökletes trombofília a kaukázusi populációban, amely az V. faktor APC-rezisztenciáját okozza, így növelve a vénás trombózis kockázatát."
+                    },
+                    {
+                        question: "Mi az antifoszfolipid szindróma (APS) lényege?",
+                        options: ["Egy vérzékenységgel járó állapot.", "Egy autoimmun betegség, amelyben autoantitestek fokozzák a vérrögképződést.", "A vérlemezkék számának csökkenése.", "A máj betegsége."],
+                        answer: "Egy autoimmun betegség, amelyben autoantitestek fokozzák a vérrögképződést.",
+                        explanation: "Az APS egy szerzett trombofília, ahol a szervezet a sejtmembránok foszfolipidjeihez kötődő fehérjék ellen termel antitesteket, ami artériás és vénás trombózisokra, valamint terhességi komplikációkra hajlamosít."
+                    },
+                    {
+                        question: "Melyik vitamin hiánya okozhat szerzett vérzékenységet a véralvadási faktorok szintézisének zavara miatt?",
+                        options: ["C-vitamin", "D-vitamin", "B12-vitamin", "K-vitamin"],
+                        answer: "K-vitamin",
+                        explanation: "A K-vitamin elengedhetetlen a májban termelődő II, VII, IX és X véralvadási faktorok, valamint a Protein C és S aktiválásához. Hiánya vérzékenységet okoz."
+                    },
+                    {
+                        question: "Mi a disszeminált intravaszkuláris koaguláció (DIC) paradoxona?",
+                        options: ["Csak vérzékenységet okoz.", "Csak trombózist okoz.", "A véralvadási rendszer kóros, szisztémás aktivációja, ami egyszerre vezet mikrotrombus-képződéshez és a faktorok felhasználódása miatti súlyos vérzékenységhez.", "Nem befolyásolja a véralvadást."],
+                        answer: "A véralvadási rendszer kóros, szisztémás aktivációja, ami egyszerre vezet mikrotrombus-képződéshez és a faktorok felhasználódása miatti súlyos vérzékenységhez.",
+                        explanation: "A DIC egy életveszélyes állapot, amelyben a generalizált véralvadás miatt a véralvadási faktorok és a vérlemezkék 'elfogynak', így a kiterjedt trombózis mellett paradox módon súlyos vérzéses szövődmények is kialakulnak."
+                    },
+                    {
+                        question: "Melyik laboratóriumi tesztet használják a warfarin (Syncumar) kezelés monitorozására?",
+                        options: ["Vérkép", "Aktivált parciális tromboplasztin idő (APTI)", "Prothrombin idő / INR (International Normalized Ratio)", "Vércukorszint"],
+                        answer: "Prothrombin idő / INR (International Normalized Ratio)",
+                        explanation: "A warfarin a K-vitamin függő faktorok (külső út) gátlásán keresztül hat. Hatékonyságát a prothrombin idővel, illetve annak standardizált formájával, az INR-rel monitorozzák."
+                    },
+                    {
+                        question: "Melyik neurológiai szövődmény a legveszélyesebb súlyos hemofíliában?",
+                        options: ["Fejfájás", "Szédülés", "Intracranialis vérzés (agyvérzés)", "Perifériás neuropátia"],
+                        answer: "Intracranialis vérzés (agyvérzés)",
+                        explanation: "A spontán vagy minimális trauma hatására bekövetkező agyvérzés a hemofília legsúlyosabb, életveszélyes szövődménye."
+                    },
+                    {
+                        question: "Milyen típusú véralvadási zavart okoz a súlyos májbetegség (pl. cirrhosis)?",
+                        options: ["Csak fokozott trombózishajlamot.", "Csak vérzékenységet a faktorok csökkent termelése miatt.", "Komplex zavart, amelyben a vérzékenység és a trombózishajlam is fokozott lehet.", "Nem okoz véralvadási zavart."],
+                        answer: "Komplex zavart, amelyben a vérzékenység és a trombózishajlam is fokozott lehet.",
+                        explanation: "Bár a májelégtelenség a prokoaguláns faktorok csökkent termelése miatt vérzékenységet okoz, az antikoaguláns faktorok (pl. Protein C/S) termelése is csökken, és a keringési viszonyok is megváltoznak, ami egy komplex, néha paradox módon trombózisra is hajlamosító állapotot eredményez."
+                    },
+                    {
+                        question: "Mi a Heparin-indukált thrombocytopenia (HIT) lényege?",
+                        options: ["A heparin direkt toxikus hatása a vérlemezkékre.", "Egy immunológiai reakció, ahol a heparin-PF4 komplex ellen termelődő antitestek paradox módon trombózist okoznak a thrombocytopenia mellett.", "A vérlemezkék számának növekedése heparin hatására.", "A heparin túladagolása."],
+                        answer: "Egy immunológiai reakció, ahol a heparin-PF4 komplex ellen termelődő antitestek paradox módon trombózist okoznak a thrombocytopenia mellett.",
+                        explanation: "A HIT II. típusa egy súlyos, immunmediált szövődmény, ahol az antitestek aktiválják a vérlemezkéket, ami a számuk csökkenése ellenére súlyos artériás és vénás trombózisokhoz vezet."
+                    },
+                    {
+                        question: "Melyik állítás igaz a von Willebrand-betegségre?",
+                        options: ["Csak férfiakat érint.", "A véralvadási kaszkád utolsó lépését gátolja.", "A leggyakoribb örökletes vérzékenység, amely a vérlemezkék tapadási zavarával jár.", "Mindig súlyos, spontán ízületi vérzéseket okoz."],
+                        answer: "A leggyakoribb örökletes vérzékenység, amely a vérlemezkék tapadási zavarával jár.",
+                        explanation: "A von Willebrand-faktor (vWF) hiánya vagy diszfunkciója a primer hemosztázist károsítja, mivel a vWF szükséges a vérlemezkék sérült érfalhoz való tapadásához. Ez a leggyakoribb veleszületett vérzékenység."
+                    },
+                    {
+                        question: "Melyik neurológiai kórkép társulhat gyakran az antifoszfolipid szindrómához?",
+                        options: ["Alzheimer-kór", "Parkinson-kór", "Ischaemiás stroke vagy TIA", "Agydaganat"],
+                        answer: "Ischaemiás stroke vagy TIA",
+                        explanation: "Az APS egy szerzett autoimmun trombofília, amelynek egyik leggyakoribb és legjellegzetesebb manifesztációja az artériás trombózis, ami az agyban iszkémiás stroke-ot vagy TIA-t okozhat, gyakran fiatal korban."
+                    },
+                    {
+                        question: "Mi a teendő warfarin túladagolás okozta súlyos agyvérzés esetén?",
+                        options: ["Több warfarint adni.", "Azonnali K-vitamin és prothrombin komplex koncentrátum (PCC) adása.", "Csak megfigyelés.", "Vérlemezke transzfúzió."],
+                        answer: "Azonnali K-vitamin és prothrombin komplex koncentrátum (PCC) adása.",
+                        explanation: "A warfarin hatásának gyors felfüggesztésére K-vitamint (ami a faktorok szintéziséhez kell) és PCC-t (ami a hiányzó, aktív faktorokat pótolja) kell adni a vérzés megállítása érdekében."
+                    },
+                    {
+                        question: "Milyen típusú trombózisra hajlamosít leginkább a Faktor V Leiden mutáció?",
+                        options: ["Artériás trombózis (pl. szívinfarktus)", "Mélyvénás trombózis (DVT) és tüdőembólia (PE)", "Kapilláris trombózis", "Agyi vénás trombózis"],
+                        answer: "Mélyvénás trombózis (DVT) és tüdőembólia (PE)",
+                        explanation: "A Faktor V Leiden mutáció elsősorban a vénás tromboembóliás események kockázatát növeli szignifikánsan. Az artériás trombózisokkal való kapcsolata gyengébb és vitatottabb."
+                    },
+                    {
+                        question: "Hogyan okozhat a trombocitózis (magas vérlemezkeszám) neurológiai tüneteket?",
+                        options: ["Csökkenti a vér viszkozitását.", "Fokozott trombózishajlam révén agyi infarktust vagy TIA-t okozhat.", "Gátolja a véralvadást.", "Csak fejfájást okoz."],
+                        answer: "Fokozott trombózishajlam révén agyi infarktust vagy TIA-t okozhat.",
+                        explanation: "A túlzottan magas vérlemezkeszám (különösen az esszenciális trombocitémiában) növeli a vérrögképződés kockázatát az artériás és vénás rendszerben, ami az agyban iszkémiás eseményekhez vezethet."
+                    },
+                    {
+                        question: "Mi a fibrinolízis?",
+                        options: ["A vérrögképződés folyamata.", "A vérrög feloldásának folyamata.", "A vérlemezkék termelődése.", "A vörösvértestek szétesése."],
+                        answer: "A vérrög feloldásának folyamata.",
+                        explanation: "A fibrinolízis a hemosztázis természetes ellenszabályozó folyamata, amely a plazmin enzim segítségével lebontja a fibrinhálót és feloldja a már feleslegessé vált vérrögöket."
+                    },
+                    {
+                        question: "Melyik állítás igaz a hemofíliára?",
+                        options: ["Mindig enyhe lefolyású.", "Gyakrabban érinti a nőket.", "Az A és B típus X-kromoszómához kötötten öröklődik.", "Nem okoz ízületi problémákat."],
+                        answer: "Az A és B típus X-kromoszómához kötötten öröklődik.",
+                        explanation: "A hemofília A és B génjei az X-kromoszómán helyezkednek el, ezért a betegség szinte kizárólag férfiakban manifesztálódik, míg a nők hordozók."
+                    },
+                    {
+                        question: "Melyik szerzett állapot vezethet K-vitamin hiányhoz és vérzékenységhez?",
+                        options: ["Túlzott napozás", "Hosszan tartó, széles spektrumú antibiotikum kezelés", "Magas fehérjebevitel", "Rendszeres testmozgás"],
+                        answer: "Hosszan tartó, széles spektrumú antibiotikum kezelés",
+                        explanation: "A széles spektrumú antibiotikumok kiirthatják a bélflórát, amely a K-vitamin egy részét termeli. Ez, különösen elégtelen táplálkozás mellett, K-vitamin hiányhoz és véralvadási zavarhoz vezethet."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb neurológiai manifesztációja a szerzett trombofíliáknak?",
+                        options: ["Perifériás neuropátia", "Epilepszia", "Ischaemiás stroke", "Agydaganat"],
+                        answer: "Ischaemiás stroke",
+                        explanation: "A szerzett, fokozott véralvadékonysággal járó állapotok (pl. APS, daganatok) leggyakoribb és legsúlyosabb neurológiai következménye az artériás vagy vénás trombózis okozta ischaemiás stroke."
+                    },
+                    {
+                        question: "Mi a kezelés alapja a legtöbb örökletes vérzékenység (pl. hemofília) esetén?",
+                        options: ["Vérlemezke transzfúzió", "A hiányzó véralvadási faktor pótlása", "Véralvadásgátló gyógyszerek", "Vas pótlás"],
+                        answer: "A hiányzó véralvadási faktor pótlása",
+                        explanation: "Ezekben a betegségekben a kezelés lényege a hiányzó faktor (pl. VIII-as vagy IX-es faktor) pótlása intravénásan, koncentrátumok formájában, akár a vérzés kezelésére, akár megelőzésére (profilaxis)."
+                    }
+                ]
+            }
+        };
+
+        const app = document.getElementById('app');
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizTitle = document.getElementById('quiz-title');
+        const progressText = document.getElementById('progress-text');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const explanationContainer = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreText = document.getElementById('score-text');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizButton = document.getElementById('restart-quiz');
+        const backToTopicsButton = document.getElementById('back-to-topics');
+        const backToTopicsFromResultsButton = document.getElementById('back-to-topics-from-results');
+
+        let currentQuizId = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function init() {
+            // Populate topic list
+            topicList.innerHTML = '';
+            for (const topicId in quizData) {
+                const topic = quizData[topicId];
+                const topicCard = document.createElement('div');
+                topicCard.className = 'bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-slate-200 hover:border-blue-500';
+                topicCard.innerHTML = `<h3 class="text-xl font-semibold text-slate-800">${topic.title}</h3>`;
+                topicCard.addEventListener('click', () => startQuiz(topicId));
+                topicList.appendChild(topicCard);
+            }
+
+            backToTopicsButton.addEventListener('click', showTopicSelection);
+            backToTopicsFromResultsButton.addEventListener('click', showTopicSelection);
+            nextButton.addEventListener('click', nextQuestion);
+            restartQuizButton.addEventListener('click', () => startQuiz(currentQuizId));
+        }
+
+        function startQuiz(topicId) {
+            currentQuizId = topicId;
+            questions = quizData[topicId].questions;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            quizTitle.textContent = quizData[topicId].title;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            resetState();
+            const questionData = questions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            progressText.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${questions.length}`;
+
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'w-full text-left p-4 bg-slate-100 rounded-lg hover:bg-slate-200 quiz-option border border-slate-200';
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextButton.disabled = true;
+            explanationContainer.style.maxHeight = '0';
+            explanationContainer.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            explanationContainer.classList.add('border-blue-500', 'bg-blue-50');
+
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correctAnswer = questions[currentQuestionIndex].answer;
+
+            // Disable all options
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (selectedButton.textContent === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-green-500', 'bg-green-50');
+            } else {
+                selectedButton.classList.add('incorrect');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-red-500', 'bg-red-50');
+            }
+            
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            explanationContainer.style.maxHeight = explanationContainer.scrollHeight + "px";
+
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            const percentage = Math.round((score / questions.length) * 100);
+            scoreText.textContent = `Helyes válaszok: ${score} / ${questions.length}`;
+            scorePercentage.textContent = `${percentage}%`;
+        }
+        
+        function showTopicSelection() {
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Initialize the app
+        init();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option:hover {
+            background-color: #fef3c7; /* light yellow */
+            border-color: #f59e0b; /* yellow */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* lighter green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        .explanation {
+            border-left: 4px solid #facc15; /* yellow */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="bg-white p-8 rounded-2xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold mb-2 text-slate-900">Interaktív Neurológia Teszt</h1>
+            <p class="text-slate-600 mb-8">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button data-topic="157" class="topic-btn bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">157. A gerincvelő gyulladásos betegségei</button>
+                <button data-topic="158" class="topic-btn bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">158. Guillain-Barré-szindróma és CIDP</button>
+                <button data-topic="159" class="topic-btn bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">159. Myasthenia gravis és annak therápiája</button>
+                <button data-topic="160" class="topic-btn bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105">160-161. Szteroid, plazmaferézis és IVIG kezelés</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-xl font-bold text-slate-900">Téma Címe</h2>
+                    <button id="back-to-menu" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg text-sm">Vissza a menübe</button>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-amber-500 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="feedback-container" class="mt-6 hidden">
+                    <div id="explanation-box" class="explanation bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-slate-800 mb-2">Magyarázat</h3>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                    <button id="next-question-btn" class="w-full mt-6 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+             <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-slate-900">Eredmények</h2>
+                <p id="score-text" class="text-xl mb-6 text-slate-700"></p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition">Újrapróbálkozás</button>
+                    <button id="main-menu-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition">Főmenü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+            "157": {
+                title: "157. A gerincvelő gyulladásos betegségei",
+                questions: [
+                    {
+                        question: "Mi a myelitis definíciója?",
+                        options: [
+                            "A gerincvelő kompressziója.",
+                            "A gerincvelő gyulladása.",
+                            "A gerincvelő vérellátási zavara.",
+                            "A gerincvelő daganatos megbetegedése."
+                        ],
+                        answer: 1,
+                        explanation: "A myelitis a gerincvelő gyulladását jelenti, amely az idegrendszer ezen kritikus részének funkciózavarához vezethet."
+                    },
+                    {
+                        question: "Melyik képalkotó mintázat jellemző a Neuromyelitis Optica Spektrum Zavarra (NMOSD)?",
+                        options: [
+                            "Rövid, aszimmetrikus léziók a gerincvelőben.",
+                            "Longitudinálisan extenzív transzverzális myelitis (LETM).",
+                            "Kizárólag az agyat érintő léziók.",
+                            "A gerincvelő hátsó kötegeinek izolált károsodása."
+                        ],
+                        answer: 1,
+                        explanation: "A LETM, azaz a legalább három összefüggő csigolyaszegmentumra kiterjedő gerincvelői lézió, különösen jellemző az NMOSD-re."
+                    },
+                    {
+                        question: "Melyik kórokozó okozhat akut flaccid myelitist (AFM), amely főként gyermekeket érint?",
+                        options: [
+                            "Herpes simplex vírus (HSV)",
+                            "Enterovírusok (pl. EV-D68)",
+                            "Borrelia burgdorferi",
+                            "Mycobacterium tuberculosis"
+                        ],
+                        answer: 1,
+                        explanation: "Az enterovírusok, különösen az EV-D68, a leggyakoribb kórokozók, amelyek akut flaccid myelitist (AFM) okoznak, ami hirtelen kialakuló, petyhüdt bénulással jár."
+                    },
+                    {
+                        question: "Mire utal a 'trident sign' (háromágú szigony jel) a gerincvelői MRI-n?",
+                        options: [
+                            "Sclerosis Multiplexre",
+                            "Gerincvelői infarktusra",
+                            "Neurosarcoidosisra",
+                            "Vírusos myelitisre"
+                        ],
+        
+                        answer: 2,
+                        explanation: "A 'trident sign' egy jellegzetes, intenzív, homogén subpialis kontraszthalmozási mintázat, amely neurosarcoidosisra utalhat."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ a transzverzális myelitis (TM) modern értelmezésére?",
+                        options: [
+                            "A TM mindig egy önálló, specifikus betegség.",
+                            "A TM gyakran egy tünetegyüttes, amely egy alapbetegség (pl. SM, NMOSD) első manifesztációja lehet.",
+                            "A TM diagnózisához nincs szükség képalkotó vizsgálatra.",
+                            "A TM mindig jóindulatú és teljes gyógyulással jár."
+                        ],
+                        answer: 1,
+                        explanation: "A modern neurológiai szemlélet szerint a TM gyakran egy szindróma, nem pedig egy önálló betegség, ezért alapos kivizsgálás szükséges a háttérben álló specifikus ok azonosítására."
+                    },
+                    {
+                        question: "Mi a standard elsődleges kezelés akut transzverzális myelitis esetén?",
+                        options: [
+                            "Antibiotikumok",
+                            "Nagy dózisú intravénás kortikoszteroidok",
+                            "Fájdalomcsillapítók",
+                            "Azonnali sebészi beavatkozás"
+                        ],
+                        answer: 1,
+                        explanation: "Az akut TM elsődleges kezelése a nagy dózisú intravénás kortikoszteroidok (pl. metilprednizolon) adása a gyulladás gyors csökkentésére."
+                    },
+                    {
+                        question: "Melyik antitest kimutatása kulcsfontosságú a MOGAD (MOG Antitest Asszociált Betegség) diagnózisában?",
+                        options: [
+                            "Anti-AQP4",
+                            "Anti-Hu",
+                            "Anti-MOG",
+                            "ANA"
+                        ],
+                        answer: 2,
+                        explanation: "A MOGAD diagnózisa a myelin oligodendrocyta glycoprotein (MOG) elleni IgG antitestek szérumból történő kimutatásán alapul."
+                    },
+                    {
+                        question: "Milyen gerincvelői régió érintettsége jellemző a B12-vitamin hiány okozta myelopathiára?",
+                        options: [
+                            "Elülső szarvak",
+                            "Teljes keresztmetszet",
+                            "Hátsó és lateralis kötegek",
+                            "Kizárólag a centrális kanális környéke"
+                        ],
+                        answer: 2,
+                        explanation: "A B12-vitamin hiány klasszikusan szubakut kombinált degenerációt okoz, amely a gerincvelő hátsó (mélyérzés) és lateralis (motoros) kötegeinek károsodásával jár."
+                    },
+                    {
+                        question: "Milyen klinikai tünetegyüttes jellemző a neuroszifilisz tabes dorsalis formájára?",
+                        options: [
+                            "Spasztikus paraparézis",
+                            "Szenzoros ataxia és lancináló fájdalmak a hátsó kötegek degenerációja miatt.",
+                            "Akut petyhüdt bénulás.",
+                            "Kizárólag hólyagdiszfunkció."
+                        ],
+                        answer: 1,
+                        explanation: "A tabes dorsalis a neuroszifilisz egyik formája, amelyet a gerincvelő hátsó kötegeinek degenerációja jellemez, ami szenzoros ataxiához (a helyzetérzés zavara miatti bizonytalan járás) és éles, szúró fájdalmakhoz vezet."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a spinális epidurális tályogra?",
+                        options: [
+                            "Gyakori kórokozója a Staphylococcus aureus.",
+                            "Klasszikus tünettriásza a hátfájás, láz és progrediáló neurológiai deficit.",
+                            "A kezelés általában konzervatív, antibiotikumokkal és pihenéssel.",
+                            "Sürgős sebészi drenázsra lehet szükség a gerincvelői kompresszió miatt."
+                        ],
+        
+                        answer: 2,
+                        explanation: "A spinális epidurális tályog neurológiai vészhelyzet. Bár az antibiotikum terápia elengedhetetlen, a gerincvelői kompresszió és a maradandó károsodás megelőzése érdekében gyakran sürgős sebészi beavatkozás (drenázs) szükséges. A kezelés tehát nem csupán konzervatív."
+                    },
+                    {
+                        question: "Milyen kórokozó okozza a schistosomiasist, amely myelitist is okozhat?",
+                        options: [
+                            "Baktérium",
+                            "Vírus",
+                            "Gomba",
+                            "Parazita (vérmétely)"
+                        ],
+                        answer: 3,
+                        explanation: "A schistosomiasist a Schistosoma fajok, egyfajta parazita vérmétely okozzák. A gerincvelői érintettség a parazita petéi által kiváltott granulomatózus gyulladás következménye."
+                    },
+                    {
+                        question: "Milyen jellegzetes MRI lelet utalhat MOGAD-ra az axiális gerincvelői képeken?",
+                        options: ["'Trident sign'", "Gyűrűs kontraszthalmozás", "'H-jel'", "Pillangó-szerű lézió"],
+                        answer: 2,
+                        explanation: "MOGAD esetén az axiális MRI képeken jellegzetes lehet a szürkeállomány pillangó alakját követő kontraszthalmozás, az úgynevezett 'H-jel'."
+                    },
+                    {
+                        question: "Mi a paraneoplasztikus myelitis lényege?",
+                        options: ["A daganat direkt ráterjedése a gerincvelőre.", "A kemoterápia mellékhatása.", "A szervezet daganatellenes immunválaszának keresztreakciója a gerincvelő struktúráival.", "A daganat által okozott gerincvelői kompresszió."],
+                        answer: 2,
+                        explanation: "A paraneoplasztikus myelitis nem a tumor direkt hatása, hanem egy immunológiai keresztreakció eredménye, ahol a daganat ellen termelt antitestek vagy T-sejtek tévesen a gerincvelőt is megtámadják."
+                    },
+                    {
+                        question: "Melyik állítás igaz az SM-re jellemző gerincvelői léziókra?",
+                        options: ["Mindig több mint 3 csigolyaszegmentumra kiterjednek.", "Tipikusan rövidek, aszimmetrikusak és a fehérállományban helyezkednek el.", "Mindig a gerincvelő teljes keresztmetszetét érintik.", "Soha nem halmoznak kontrasztanyagot."],
+                        answer: 1,
+                        explanation: "Az SM-re jellemző gerincvelői léziók 'tipikusan rövidek, általában 1-2 csigolyaszegmentum hosszúságúak, aszimmetrikusak, ovális alakúak, és főként a fehérállományban, gyakran a hátsó és lateralis kötegekben helyezkednek el'."
+                    },
+                    {
+                        question: "Melyik kórképben játszanak szerepet a HLA-B27 antigén és a sacroileitis?",
+                        options: ["SLE", "Sjögren-szindróma", "Spondylitis ankylopoetica (Bechterew-kór)", "Sarcoidosis"],
+                        answer: 2,
+                        explanation: "A spondylitis ankylopoetica (Bechterew-kór) egy krónikus gyulladásos betegség, amelyre jellemző a sacroiliacalis ízületek gyulladása (sacroileitis) és a HLA-B27 antigénnel való erős asszociáció."
+                    },
+                    {
+                        question: "Milyen típusú sejtes válasz jellemző a liquorban bakteriális meningitis esetén?",
+                        options: ["Lymphocytás pleocytosis", "Neutrofil granulocita túlsúly", "Eosinophil pleocytosis", "Nincs sejtszám-emelkedés"],
+                        answer: 1,
+                        explanation: "Bakteriális meningitisre és tályogra a liquorban a neutrofil granulociták túlsúlyával járó magas sejtszám (pleocytosis) jellemző."
+                    },
+                    {
+                        question: "Mi a leggyakoribb neurológiai szövődménye a Varicella-zoster vírus (VZV) reaktivációjának (övsömör)?",
+                        options: ["Encephalitis", "Myelitis", "Posztherpeszes neuralgia", "Aseptikus meningitis"],
+                        answer: 2,
+                        explanation: "Bár a VZV okozhat myelitist is, a reaktiváció (övsömör) messze leggyakoribb neurológiai szövődménye a posztherpeszes neuralgia, egy krónikus, idegi eredetű fájdalom szindróma."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a SLE-asszociált myelitisre?",
+                        options: ["Gyakran LETM formájában jelentkezik.", "Gyakran társul magas SLE betegségaktivitással.", "A kiújulás ritka, a prognózis általában kiváló.", "Az antifoszfolipid antitestek gyakran pozitívak."],
+                        answer: 2,
+                        explanation: "Az SLE-asszociált myelitis prognózisa változó, és a kiújulás gyakori, 'akár a betegek 50%-ánál is előfordulhat egy éven belül, még optimális kezelés mellett is'."
+                    },
+                    {
+                        question: "Milyen képalkotó módszer a legalkalmasabb gerincvelői tályog kimutatására?",
+                        options: ["Natív gerincröntgen", "Gerinc CT", "Kontrasztanyagos gerinc MRI", "Gerinc ultrahang"],
+                        answer: 2,
+                        explanation: "A kontrasztanyagos MRI a legérzékenyebb és legspecifikusabb módszer a gerincvelői tályogok kimutatására. A tályog jellegzetes gyűrűs kontraszthalmozást mutat, és az MRI jól ábrázolja a környező gerincvelői ödémát és az esetleges kompressziót is."
+                    },
+                    {
+                        question: "Melyik kórképben lehet a liquorban alacsony a glükózszint (hypoglycorrhachia)?",
+                        options: ["Sclerosis Multiplex", "Vírusos meningitis", "Tuberkulózus meningitis (TBM)", "Idiopátiás transzverzális myelitis"],
+                        answer: 2,
+                        explanation: "A csökkent liquorglükóz szint bakteriális, tuberkulotikus vagy gombás meningitisre utal, mivel a kórokozók és a gyulladásos sejtek felhasználják a glükózt. A TBM-re különösen jellemző."
+                    }
+                ]
+            },
+            "158": {
+                title: "158. Guillain-Barré-szindróma és CIDP",
+                questions: [
+                    {
+                        question: "Mi a legfontosabb különbség a Guillain-Barré-szindróma (GBS) és a krónikus inflammatoros demielinizációs polyneuropathia (CIDP) között?",
+                        options: ["A kiváltó kórokozó típusa.", "Az időbeli lefolyás (akut vs. krónikus).", "Az érintett idegek típusa (motoros vs. szenzoros).", "A kezelésre adott válasz."],
+                        answer: 1,
+                        explanation: "A GBS és a CIDP közötti alapvető különbség az időbeli lefolyásukban rejlik. A GBS egy akut, monofázisos betegség, míg a CIDP krónikus, elhúzódó, ahol a tünetek legalább 8 hétig fennállnak vagy progrediálnak."
+                    },
+                    {
+                        question: "Melyik kórokozó fertőzése előzi meg leggyakrabban a GBS kialakulását?",
+                        options: ["Epstein-Barr vírus", "Staphylococcus aureus", "Campylobacter jejuni", "Influenza vírus"],
+                        answer: 2,
+                        explanation: "A GBS kialakulását az esetek jelentős részében megelőző fertőzés, leggyakrabban a Campylobacter jejuni baktérium által okozott gyomor-bélhurut."
+                    },
+                    {
+                        question: "Mi a klasszikus tünete az akut inflammatoros demielinizációs polyneuropathiának (AIDP), a GBS leggyakoribb formájának?",
+                        options: ["Aszimmetrikus, disztális gyengeség.", "Szimmetrikus, felszálló petyhüdt bénulás.", "Kizárólag érzészavarok.", "Spasztikus izommerevség."],
+                        answer: 1,
+                        explanation: "Az AIDP-re a szimmetrikus, felszálló jellegű petyhüdt bénulás jellemző, amely általában a lábakban kezdődik és felfelé terjed."
+                    },
+                    {
+                        question: "Milyen jellegzetes liquor lelet támasztja alá a GBS diagnózisát?",
+                        options: ["Magas sejtszám és alacsony fehérje.", "Albuminocitológiai disszociáció.", "Oligoklonális bandák jelenléte.", "Alacsony glükózszint."],
+                        answer: 1,
+                        explanation: "A GBS diagnózisát a liquorban észlelt albuminocitológiai disszociáció támasztja alá, ami emelkedett fehérjekoncentrációt jelent normális vagy csak enyhén emelkedett sejtszám mellett."
+                    },
+                    {
+                        question: "Melyik kezelési mód NEM hatékony GBS esetén?",
+                        options: ["Intravénás immunglobulin (IVIG)", "Plazmaferézis (PLEX)", "Kortikoszteroidok", "Szupportív terápia (pl. légzéstámogatás)"],
+                        answer: 2,
+                        explanation: "Számos magas evidenciájú vizsgálat igazolta, hogy a kortikoszteroidok nem hatékonyak a GBS kezelésében, sőt, ronthatják a kimenetelt, ezért alkalmazásuk nem javasolt."
+                    },
+                    {
+                        question: "Mi a Miller Fisher szindróma (MFS) klasszikus tünettriásza?",
+                        options: ["Ophthalmoplegia, ataxia, areflexia.", "Láz, fejfájás, tudatzavar.", "Gyengeség, érzészavar, fájdalom.", "Demencia, myoclonus, ataxia."],
+                        answer: 0,
+                        explanation: "A Miller Fisher szindróma, a GBS egyik variánsa, a következő klasszikus triásszal jellemezhető: ophthalmoplegia (szemmozgató izmok bénulása), ataxia (koordinációs zavar) és areflexia (reflexkiesés)."
+                    },
+                    {
+                        question: "Mennyi ideig kell a tüneteknek fennállniuk vagy progrediálniuk a CIDP diagnózisához?",
+                        options: ["Legalább 24 óráig.", "Legalább 1 hétig.", "Legalább 4 hétig.", "Legalább 8 hétig."],
+                        answer: 3,
+                        explanation: "A CIDP diagnózisának egyik alapkritériuma, hogy a tünetek legalább 8 hétig fennálljanak vagy progrediáljanak, megkülönböztetve azt az akut GBS-től."
+                    },
+                    {
+                        question: "Melyik állítás igaz a CIDP kezelésére?",
+                        options: ["Mindig spontán gyógyul, nem igényel kezelést.", "A kezelés alapja a hosszú távú antibiotikum kúra.", "Gyakran igényel hosszú távú immunterápiát, mint a kortikoszteroidok, IVIG vagy más immunszuppresszánsok.", "A kezelés megegyezik a GBS kezelésével."],
+                        answer: 2,
+                        explanation: "A CIDP egy krónikus betegség, amely gyakran igényel hosszú távú, fenntartó immunterápiát (kortikoszteroidok, IVIG, egyéb immunszuppresszánsok) a betegség aktivitásának kontrollálására."
+                    },
+                    {
+                        question: "Mire utal az elektrofiziológiai vizsgálaton (ENG) a kondukciós blokk?",
+                        options: ["Az idegrost (axon) károsodására.", "Az idegrostot körülvevő myelinhüvely károsodására (demyelinizáció).", "Az izom betegségére.", "Normális idegvezetésre."],
+                        answer: 1,
+                        explanation: "A kondukciós blokk a demyelinizáció egyik jellegzetes elektrofiziológiai jele, ami azt jelenti, hogy az ingerületvezetés megszakad az ideg egy szakaszán a myelinhüvely károsodása miatt."
+                    },
+                    {
+                        question: "Melyik CIDP variánsra jellemző az aszimmetrikus, tisztán motoros gyengeség, és a szteroidokra való rossz terápiás válasz?",
+                        options: ["Tipikus CIDP", "Lewis-Sumner szindróma (MADSAM)", "Multifokális motoros neuropathia (MMN)", "Disztális (DADS) forma"],
+                        answer: 2,
+                        explanation: "A Multifokális motoros neuropathia (MMN) egy atipikus variáns, amelyet aszimmetrikus, tisztán motoros gyengeség jellemez, és fontos, hogy rosszul reagál a kortikoszteroidokra, míg az IVIG kezelésre jól."
+                    },
+                    {
+                        question: "Mi a GBS legrettegettebb, életveszélyes szövődménye?",
+                        options: ["Krónikus fájdalom", "Légzési elégtelenség", "Bőrkiütés", "Kognitív hanyatlás"],
+                        answer: 1,
+                        explanation: "A GBS egyik legrettegettebb szövődménye a légzőizmok gyengesége, ami légzési elégtelenséghez és gépi lélegeztetés szükségességéhez vezethet a betegek akár egyharmadánál."
+                    },
+                    {
+                        question: "Milyen új, non-invazív képalkotó módszer segíthet a GBS és a CIDP korai elkülönítésében?",
+                        options: ["Gerinc röntgen", "Koponya CT", "Idegi ultrahang (NUS)", "PET vizsgálat"],
+                        answer: 2,
+                        explanation: "Az idegi ultrahang (NUS) egy ígéretes módszer, amely képes kimutatni az idegek és ideggyökök megvastagodását, és specifikus mintázatai (pl. 'ultrasonic sensory sparing pattern' GBS-ben) segíthetnek a két kórkép elkülönítésében."
+                    },
+                    {
+                        question: "Melyik állítás igaz a GBS prognózisára?",
+                        options: ["A betegek többsége súlyos, maradandó rokkantsággal él.", "A GBS mindig halálos kimenetelű.", "A betegek többsége (kb. 70-80%) teljesen vagy közel teljesen felépül.", "A felépülés mindig gyors, néhány nap alatt lezajlik."],
+                        answer: 2,
+                        explanation: "A GBS prognózisa általában kedvező, a betegek többsége teljesen vagy közel teljesen felépül, bár a felépülési folyamat hónapokig vagy akár évekig is eltarthat."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy GBS-nek diagnosztizált beteg állapota 2 hónapon túl is tovább romlik?",
+                        options: ["Ez a normális lefolyás, nincs teendő.", "Meg kell ismételni az IVIG kúrát.", "Felül kell vizsgálni a diagnózist, és fontolóra kell venni az 'akut kezdetű CIDP' lehetőségét.", "Azonnal sebészeti beavatkozás szükséges."],
+                        answer: 2,
+                        explanation: "Ha egy kezdetben GBS-nek vélt eset nem a várt ütemben javul, vagy 2 hónapon túl ismételten rosszabbodik, felmerül az 'akut kezdetű CIDP' gyanúja, ami a diagnózis felülvizsgálatát és a terápia módosítását teheti szükségessé."
+                    },
+                    {
+                        question: "Milyen típusú fájdalomcsillapítók javasoltak a GBS-hez és CIDP-hez társuló neuropátiás fájdalomra?",
+                        options: ["Kizárólag nem-szteroid gyulladáscsökkentők (NSAID).", "Antidepresszánsok és antikonvulzívumok (pl. gabapentin, pregabalin).", "Izomrelaxánsok.", "Nincs hatékony fájdalomcsillapítás."],
+                        answer: 1,
+                        explanation: "A neuropátiás (idegi eredetű) fájdalom kezelésére speciális gyógyszerek, mint például bizonyos antidepresszánsok (pl. amitriptilin, duloxetin) és antikonvulzívumok (pl. gabapentin, pregabalin) a leghatékonyabbak."
+                    },
+                    {
+                        question: "Melyik állítás igaz a CIDP-re?",
+                        options: ["A betegek soha nem kerülnek remisszióba.", "A betegek egy része (kb. 26-40%) tartós remisszióba kerülhet.", "A CIDP mindig halálos.", "A CIDP csak a felső végtagokat érinti."],
+                        answer: 1,
+                        explanation: "Bár a CIDP krónikus betegség, a betegek egy része tartós, akár gyógyszermentes remisszióba kerülhet, míg mások folyamatos kezelést igényelnek."
+                    },
+                    {
+                        question: "A GBS melyik variánsa jár a legrosszabb prognózissal a felépülés szempontjából?",
+                        options: ["Akut Inflammatoros Demyelinizációs Polyneuropathia (AIDP)", "Miller Fisher Szindróma (MFS)", "Akut Motoros-Szenzoros Axonális Neuropathia (AMSAN)", "Tisztán szenzoros variáns"],
+                        answer: 2,
+                        explanation: "Az axonális károsodással járó formák, különösen az AMSAN, amely mind a motoros, mind a szenzoros axonokat súlyosan érinti, általában lassabb és kevésbé teljes felépüléssel társulnak, mint a primer demyelinizációs forma (AIDP)."
+                    },
+                    {
+                        question: "Melyik kezelés az elsődleges választás Multifokális Motoros Neuropathia (MMN) esetén?",
+                        options: ["Kortikoszteroidok", "Plazmaferézis", "Intravénás Immunglobulin (IVIG)", "Azathioprin"],
+                        answer: 2,
+                        explanation: "Az IVIG az MMN elsődleges, bizonyítottan hatékony kezelése. Fontos, hogy a kortikoszteroidok hatástalanok, sőt, ronthatják az állapotot."
+                    },
+                    {
+                        question: "Melyik antitest társul gyakran a disztális CIDP (DADS) variánshoz?",
+                        options: ["Anti-AChR", "Anti-GQ1b", "Anti-MAG", "Anti-NMDA"],
+                        answer: 2,
+                        explanation: "A disztális CIDP (DADS) gyakran társul IgM típusú monoklonális gammopathiával és anti-myelin asszociált glikoprotein (anti-MAG) ellenanyagok jelenlétével."
+                    },
+                    {
+                        question: "Miért fontos a betegek és hozzátartozóik oktatása a myastheniás krízis korai jeleiről?",
+                        options: ["Mert a betegek így maguk is beállíthatják a gyógyszereiket.", "Mert lehetővé teszi a korai orvosi beavatkozást és a súlyos légzési elégtelenség megelőzését.", "Mert a krízis otthon is kezelhető.", "Nincs különösebb jelentősége."],
+                        answer: 1,
+                        explanation: "A myastheniás krízis életveszélyes állapot. A korai figyelmeztető jelek (pl. fokozódó nehézlégzés, nyelési zavar) felismerése lehetővé teszi a beteg számára, hogy időben orvosi segítséget kérjen, megelőzve a teljes légzési elégtelenség kialakulását."
+                    }
+                ]
+            },
+            "159": {
+                title: "159. Myasthenia gravis és annak therápiája",
+                questions: [
+                    {
+                        question: "Mi a myasthenia gravis (MG) alapvető patomechanizmusa?",
+                        options: ["Az idegsejtek vírusos fertőzése.", "A neuromuszkuláris junkció (NMJ) autoimmun károsodása.", "Az izomrostok genetikai eredetű elfajulása.", "Az agyi erek elzáródása."],
+                        answer: 1,
+                        explanation: "A myasthenia gravis egy autoimmun betegség, amelynek során az immunrendszer a neuromuszkuláris junkció posztszinaptikus membránján lévő fehérjék (leggyakrabban az acetilkolin receptorok) ellen termel antitesteket."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb autoantitest, amelyet MG-s betegeknél kimutatnak?",
+                        options: ["Anti-MuSK", "Anti-LRP4", "Anti-AChR", "Anti-NMDA"],
+                        answer: 2,
+                        explanation: "A generalizált MG-s betegek körülbelül 85-90%-ánál mutathatók ki az acetilkolin receptorok (AChR) ellen termelődő IgG típusú autoantitestek."
+                    },
+                    {
+                        question: "Milyen elváltozás található meg a csecsemőmirigyben (thymus) az MG-s betegek jelentős részénél?",
+                        options: ["Ciszta", "Thymus hyperplasia vagy thymoma", "A csecsemőmirigy teljes hiánya", "Meszesedés"],
+                        answer: 1,
+                        explanation: "Az MG-s betegek kb. 70%-ánál thymus hyperplasia (megnagyobbodás), 10-15%-ánál pedig thymoma (daganat) figyelhető meg, ami alátámasztja a thymus központi szerepét a betegség patogenezisében."
+                    },
+                    {
+                        question: "Mit jelent az okuláris myasthenia gravis (OMG)?",
+                        options: ["A betegség súlyos, generalizált formája.", "Az izomgyengeség kizárólag a szemizmokra korlátozódik.", "Mindig thymomával társul.", "Kizárólag látászavarokat okoz, izomgyengeséget nem."],
+                        answer: 1,
+                        explanation: "Az okuláris MG (OMG) esetében az izomgyengeség kizárólag a szemizmokra (külső szemmozgató és szemhéjemelő izmok) korlátozódik, ptosist (szemhéjcsüngést) és diplopiát (kettőslátást) okozva."
+                    },
+                    {
+                        question: "Mi a myastheniás krízis?",
+                        options: ["A betegség hirtelen, spontán gyógyulása.", "A gyógyszeres kezelés egyik gyakori mellékhatása.", "Életveszélyes állapot, ahol a légzőizmok gyengesége akut légzési elégtelenséghez vezet.", "A betegség enyhe, csak szemtünetekkel járó formája."],
+                        answer: 2,
+                        explanation: "A myastheniás krízis a myasthenia gravis legsúlyosabb, életveszélyes szövődménye, amikor a légzőizmok gyengesége miatt a beteg gépi lélegeztetésre szorul."
+                    },
+                    {
+                        question: "Melyik a legérzékenyebb elektrofiziológiai vizsgálat az MG diagnosztizálására?",
+                        options: ["Repetitív idegingerlés (RNS)", "EEG", "Kiváltott potenciál vizsgálat", "Egyrost EMG (SFEMG)"],
+                        answer: 3,
+                        explanation: "A Single-fiber EMG (SFEMG) a legérzékenyebb elektrofiziológiai vizsgálat az MG diagnosztizálására, különösen enyhe vagy szeronegatív esetekben, mivel a neuromuszkuláris transzmisszió legkisebb zavarát is képes kimutatni (megnyúlt 'jitter')."
+                    },
+                    {
+                        question: "Hogyan hatnak a piridosztigmin (Mestinon) típusú gyógyszerek?",
+                        options: ["Elnyomják az immunrendszert.", "Gátolják az acetilkolint lebontó enzimet, így növelik az acetilkolin szintjét az NMJ-ben.", "Serkentik az új acetilkolin receptorok termelődését.", "Blokkolják a kóros autoantitesteket."],
+                        answer: 1,
+                        explanation: "A piridosztigmin és más acetilkolinészteráz-gátlók gátolják az acetilkolint lebontó enzimet, így az acetilkolin tovább tud hatni a szinaptikus résben, javítva az ingerületátvitelt. Ez egy tüneti kezelés."
+                    },
+                    {
+                        question: "Miért kell óvatosan, alacsony dózissal kezdeni a kortikoszteroid kezelést MG-ben?",
+                        options: ["Mert a magas dózis hatástalan.", "Mert a betegek kb. 20-40%-ánál a kezelés kezdeti szakaszában átmeneti, paradox gyengeség léphet fel.", "Mert a szteroidok allergiás reakciót okoznak.", "Mert a magas dózis függőséget okoz."],
+                        answer: 1,
+                        explanation: "A szteroidkezelés kezdetén, különösen magasabb dózisoknál, átmeneti paradox gyengeség, a myastheniás tünetek rosszabbodása léphet fel, ezért a kezelést alacsony dózissal és lassú emeléssel kell bevezetni."
+                    },
+                    {
+                        question: "Mikor indokolt a timektómia (csecsemőmirigy eltávolítása)?",
+                        options: ["Minden MG-s betegnél azonnal el kell végezni.", "Csak ha a beteg 70 év feletti.", "Thymoma esetén mindenképpen, valamint generalizált, AChR-pozitív, nem-thymomás MG-ben is ajánlott.", "Soha nem indokolt, elavult módszer."],
+                        answer: 2,
+                        explanation: "A timektómia minden thymomás MG betegnél kötelező. Emellett generalizált, AChR-pozitív, nem-thymomás MG-ben szenvedő, általában 60-65 év alatti betegeknél is ajánlott a remisszió esélyének növelése érdekében."
+                    },
+                    {
+                        question: "Melyik állítás igaz a MuSK-pozitív MG-re?",
+                        options: ["Mindig enyhe lefolyású.", "Gyakran jár bulbáris és légzőizom-érintettséggel, és rosszabbul reagálhat az AChE-gátlókra.", "A timektómia a leghatékonyabb kezelés erre a formára.", "Kizárólag szemtüneteket okoz."],
+                        answer: 1,
+                        explanation: "A MuSK-pozitív MG gyakrabban jár bulbáris (nyelési, beszéd) és légzőizom-érintettséggel, és a betegek gyakran kevésbé jól reagálnak a piridosztigminre, mint az AChR-pozitív betegek."
+                    },
+                    {
+                        question: "Melyik a két legfontosabb, gyorsan ható immunterápia myastheniás krízisben?",
+                        options: ["Kortikoszteroidok és azatioprin", "Plazmaferézis (PLEX) és Intravénás immunglobulin (IVIG)", "Rituximab és ciklofoszfamid", "Antibiotikumok és fájdalomcsillapítók"],
+                        answer: 1,
+                        explanation: "Myastheniás krízisben vagy súlyos exacerbációban a plazmaferézis (PLEX) és az intravénás immunglobulin (IVIG) a két választandó, gyorsan ható immunterápia, amelyek hatékonysága hasonló."
+                    },
+                    {
+                        question: "Mi a 'szteroid-megtakarító' (steroid-sparing) szerek, mint az azatioprin, célja?",
+                        options: ["A szteroidok hatásának fokozása.", "Lehetővé teszik a kortikoszteroid dózisának csökkentését vagy elhagyását, mérsékelve a mellékhatásokat.", "Helyettesítik a piridosztigmint.", "Kizárólag a szemtüneteket kezelik."],
+                        answer: 1,
+                        explanation: "A nem-szteroid immunszuppresszánsokat (pl. azatioprin) gyakran szteroid-megtakarító szerként használják, hogy a hosszú távú kortikoszteroid kezelés dózisát és ezzel mellékhatásait csökkenteni lehessen."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a myasthenia gravisra?",
+                        options: ["A tünetek terhelésre fokozódnak, pihenésre javulnak.", "Az érzőrendszer és a reflexek általában épek.", "A modern kezelésekkel a prognózis általában kedvező.", "Mindig progresszív és halálos kimenetelű."],
+                        answer: 3,
+                        explanation: "A modern terápiás lehetőségeknek köszönhetően a legtöbb MG-s beteg prognózisa kedvező, és várható élettartamuk megegyezik az átlagpopulációéval. A betegség nem feltétlenül progresszív, és a kezelésekkel jól kontrollálható."
+                    },
+                    {
+                        question: "Melyik új, célzott terápia gátolja a komplement rendszer C5 komponensét?",
+                        options: ["Rituximab", "Eculizumab", "Efgartigimod", "Piridosztigmin"],
+                        answer: 1,
+                        explanation: "Az Eculizumab egy komplement-gátló, amely a komplement kaszkád C5 komponensét célozza, megakadályozva a terminális komplement komplex kialakulását, ami az AChR-pozitív MG patogenezisében fontos."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoportot kell kerülni vagy csak nagy óvatossággal alkalmazni MG-s betegeknél?",
+                        options: ["Vitaminok", "Aminoglikozid antibiotikumok és béta-blokkolók", "Fájdalomcsillapítók (pl. paracetamol)", "Vaskészítmények"],
+                        answer: 1,
+                        explanation: "Számos gyógyszer ronthatja az MG tüneteit. Ilyenek például bizonyos antibiotikumok (aminoglikozidok, fluorokinolonok), béta-blokkolók, kinin-származékok, magnézium, és bizonyos anesztetikumok."
+                    },
+                    {
+                        question: "Mi a ptosis?",
+                        options: ["Kettőslátás", "Szemhéjcsüngés", "Szemtekerezgés", "Fényérzékenység"],
+                        answer: 1,
+                        explanation: "A ptosis a szemhéj kóros csüngését jelenti, ami az MG egyik leggyakoribb okuláris tünete a szemhéjemelő izom gyengesége miatt."
+                    },
+                    {
+                        question: "Milyen életkori eloszlást mutat az MG?",
+                        options: ["Kizárólag időskorban jelentkezik.", "Kizárólag gyermekkorban jelentkezik.", "Bimodális: nőkben fiatal felnőttkorban, férfiakban idősebb korban gyakoribb.", "Az életkor nem befolyásolja a gyakoriságot."],
+                        answer: 2,
+                        explanation: "Az MG jellemzően bimodális életkori eloszlást mutat: nők esetében a csúcs 20-40 év között, míg férfiaknál 50-70 év felett van."
+                    },
+                    {
+                        question: "Mi a decrementum a repetitív idegingerléses (RNS) vizsgálat során?",
+                        options: ["A motoros válasz amplitúdójának növekedése.", "A motoros válasz amplitúdójának fokozatos csökkenése.", "A vizsgálat során jelentkező fájdalom.", "Az ideg vezetési sebességének felgyorsulása."],
+                        answer: 1,
+                        explanation: "A decrementum az ismételt idegingerlés hatására a regisztrált motoros válasz (CMAP) amplitúdójának fokozatos csökkenése, ami a neuromuszkuláris transzmisszió kimerülését jelzi, és jellemző az MG-re."
+                    },
+                    {
+                        question: "Melyik állítás igaz a szeronegatív MG-re (SNMG)?",
+                        options: ["Ez a leggyakoribb MG forma.", "A betegeknek nincsenek tüneteik.", "A rutin tesztekkel (anti-AChR, anti-MuSK) nem mutatható ki specifikus autoantitest.", "Könnyebb diagnosztizálni, mint a szeropozitív formákat."],
+                        answer: 2,
+                        explanation: "Szeronegatív MG (SNMG) esetén a szokásos tesztekkel nem mutatható ki anti-AChR vagy anti-MuSK antitest. A diagnózis ilyenkor nagyobb kihívást jelent, és jobban támaszkodik a klinikai képre és az elektrofiziológiai vizsgálatokra."
+                    },
+                    {
+                        question: "Melyik új terápiás célpontot blokkolják az efgartigimod típusú gyógyszerek?",
+                        options: ["CD20 receptor", "Komplement C5", "Neonatális Fc receptor (FcRn)", "T-sejt receptor"],
+                        answer: 2,
+                        explanation: "Az efgartigimod és más hasonló szerek a neonatális Fc receptort (FcRn) blokkolják. Ez a receptor felelős az IgG antitestek hosszú felezési idejéért, így gátlásával felgyorsul a kóros autoantitestek lebomlása."
+                    }
+                ]
+            },
+            "160": {
+                title: "160-161. Szteroid, plazmaferézis és IVIG kezelés",
+                questions: [
+                    {
+                        question: "Melyik állítás NEM igaz a kortikoszteroidok neurológiai alkalmazására?",
+                        options: [
+                            "Erős gyulladáscsökkentő és immunszuppresszív hatásuk van.",
+                            "Csökkentik a vér-agy gát permeabilitását, így mérséklik az agyi ödémát.",
+                            "Hosszú távú, nagy dózisú alkalmazásuknak nincsenek mellékhatásai.",
+                            "Gyakran alkalmazzák őket autoimmun betegségek akut fellángolásainak kezelésére."
+                        ],
+                        answer: 2,
+                        explanation: "A kortikoszteroidok hosszú távú, nagy dózisú alkalmazása számos súlyos mellékhatással járhat, mint például osteoporosis, diabetes, súlygyarapodás és fertőzésekre való fokozott hajlam. Ezért a cél a legalacsonyabb hatásos dózis alkalmazása a lehető legrövidebb ideig."
+                    },
+                    {
+                        question: "Mi az elsődleges kezelés sclerosis multiplex (SM) akut relapszusa (shub) esetén?",
+                        options: [
+                            "Plazmaferézis",
+                            "Intravénás immunglobulin (IVIG)",
+                            "Nagy dózisú kortikoszteroidok (pl. metilprednizolon)",
+                            "Hosszú távú antibiotikum kúra"
+                        ],
+                        answer: 2,
+                        explanation: "Az akut SM schub standard kezelése a nagy dózisú kortikoszteroidok (leggyakrabban metilprednizolon) alkalmazása, amely felgyorsítja a klinikai tünetek javulását."
+                    },
+                    {
+                        question: "Melyik kórképben bizonyítottan HATÁSTALAN a kortikoszteroid kezelés?",
+                        options: [
+                            "Myasthenia Gravis",
+                            "Guillain-Barré Szindróma (GBS)",
+                            "Krónikus Inflammatoros Demyelinizációs Polyneuropathia (CIDP)",
+                            "Bell-parézis"
+                        ],
+                        answer: 1,
+                        explanation: "Számos, magas evidenciájú vizsgálat igazolta, hogy a kortikoszteroidok önmagukban nem hatásosak a GBS kezelésében, sőt, ronthatják a kimenetelt. Ez egy fontos negatív eredmény."
+                    },
+                    {
+                        question: "Mi a plazmaferézis (PLEX) alapvető hatásmechanizmusa?",
+                        options: [
+                            "A fehérvérsejtek számának növelése.",
+                            "A vörösvértestek cseréje.",
+                            "A plazma és a benne lévő kóros autoantitestek, immunkomplexek eltávolítása a keringésből.",
+                            "A vér hígítása sóoldattal."
+                        ],
+                        answer: 2,
+                        explanation: "A plazmaferézis egy extrakorporális eljárás, amelynek során a plazmát elválasztják a vér alakos elemeitől, és a kóros komponenseket tartalmazó plazmát pótlófolyadékkal helyettesítik."
+                    },
+                    {
+                        question: "Melyik két betegségben számít a plazmaferézis és az IVIG egyenértékű, első vonalbeli kezelésnek?",
+                        options: [
+                            "Sclerosis Multiplex és Myasthenia Gravis",
+                            "Guillain-Barré Szindróma és Krónikus Inflammatoros Demyelinizációs Polyneuropathia (CIDP)",
+                            "Alzheimer-kór és Parkinson-kór",
+                            "Agyi daganat és stroke"
+                        ],
+                        answer: 1,
+                        explanation: "Mind a GBS, mind a CIDP kezelésében az IVIG és a PLEX az első vonalbeli terápiás lehetőségek közé tartozik, hatékonyságuk hasonló."
+                    },
+                    {
+                        question: "Mire utal a citrát-toxicitás a plazmaferézis során?",
+                        options: [
+                            "Allergiás reakcióra a pótlófolyadékra.",
+                            "A centrális katéter fertőzésére.",
+                            "A véralvadásgátlóként használt citrát okozta hypocalcaemiára (alacsony kalciumszint).",
+                            "Magas vérnyomásra a kezelés alatt."
+                        ],
+        
+                        answer: 2,
+                        explanation: "A citrát, amelyet a véralvadás gátlására használnak a gépben, megkötheti a szérum kalciumot. Ez hypocalcaemiához vezethet, ami zsibbadást, paresztéziát és izomgörcsöket okozhat."
+                    },
+                    {
+                        question: "Mi az intravénás immunglobulin (IVIG) készítmény alapanyaga?",
+                        options: [
+                            "Szintetikus antitestek",
+                            "Állati eredetű szérum",
+                            "Több ezer egészséges donor összegyűjtött és tisztított humán plazmája",
+                            "Növényi kivonatok"
+                        ],
+                        answer: 2,
+                        explanation: "Az IVIG egy humán plazmából, több ezer egészséges donor vérének összegyűjtésével (poolozásával) készült, tisztított, koncentrált immunglobulin G (IgG) antitesteket tartalmazó készítmény."
+                    },
+                    {
+                        question: "Melyik állítás NEM tartozik az IVIG feltételezett hatásmechanizmusai közé?",
+                        options: [
+                            "Autoantitestek neutralizálása.",
+                            "A kóros immunsejtek direkt elpusztítása.",
+                            "A komplement rendszer gátlása.",
+                            "A gyulladásos citokinek termelésének modulálása."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az IVIG hatása komplex és immunmoduláló, de nem okozza a kóros immunsejtek direkt elpusztítását (citotoxicitását), ellentétben például a rituximabbal, ami a B-sejtek deplécióját okozza."
+                    },
+                    {
+                        question: "Melyik betegségben az IVIG az elsődleges, bizonyítottan hatékony kezelés?",
+                        options: [
+                            "Sclerosis Multiplex",
+                            "Myasthenia Gravis",
+                            "Multifokális Motoros Neuropathia (MMN)",
+                            "Duchenne Muscular Dystrophia"
+                        ],
+                        answer: 2,
+                        explanation: "Az IVIG az MMN elsődleges, bizonyítottan hatékony kezelése, amely jelentősen javítja az izomerőt és lassítja a betegség progresszióját."
+                    },
+                    {
+                        question: "Milyen súlyos, bár ritka mellékhatás kockázatára hívja fel a figyelmet az FDA 'fekete dobozos' figyelmeztetése az IVIG készítményekkel kapcsolatban?",
+                        options: [
+                            "Hajhullás",
+                            "Tromboembóliás események",
+                            "Súlygyarapodás",
+                            "Látászavarok"
+                        ],
+        
+                        answer: 1,
+                        explanation: "Az FDA 'fekete dobozos' figyelmeztetést adott ki az IVIg készítmények trombózisveszélyére, mivel növelhetik az artériás (stroke, szívinfarktus) és vénás (mélyvénás trombózis) események kockázatát, különösen prediszponált betegeknél."
+                    },
+                    {
+                        question: "Milyen adagolási séma javasolt Bell-parézis esetén?",
+                        options: [
+                            "Nagy dózisú intravénás szteroid 1 hónapig.",
+                            "A tünetek kezdetétől számított 72 órán belül elkezdett orális kortikoszteroid kezelés.",
+                            "Hosszú távú, alacsony dózisú szteroid.",
+                            "A szteroid kezelés nem hatékony."
+                        ],
+        
+                        answer: 1,
+                        explanation: "Bell-parézis esetén a tünetek kezdetétől számított 72 órán belül elkezdett orális kortikoszteroid kezelés (pl. prednizolon) szignifikánsan javítja a teljes felépülés esélyét."
+                    },
+                    {
+                        question: "Milyen célt szolgál a szteroidok adása agydaganatokhoz társuló ödéma esetén?",
+                        options: [
+                            "A daganat elpusztítását.",
+                            "A vasogén ödéma és a koponyaűri nyomásfokozódás csökkentését.",
+                            "A daganat növekedésének serkentését.",
+                            "A kemoterápia hatásának gátlását."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A kortikoszteroidok, elsősorban a dexametazon, alapvető szerei a primer vagy metasztatikus agydaganatokhoz társuló vasogén ödéma csökkentésének, ezáltal gyors tüneti enyhülést eredményezve."
+                    },
+                    {
+                        question: "Mikor jön szóba a plazmaferézis súlyos, akut SM relapszusban?",
+                        options: [
+                            "Első vonalbeli kezelésként.",
+                            "Másodvonalbeli kezelésként, ha a beteg nem reagál a nagy dózisú kortikoszteroid terápiára.",
+                            "Soha, mert hatástalan.",
+                            "Csak ha a betegnek magas a láza."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A PLEX másodvonalbeli kezelésként alkalmazható súlyos, akut SM relapszusokban, amelyek nem reagálnak a standard nagy dózisú kortikoszteroid terápiára (szteroidrezisztens schub)."
+                    },
+                    {
+                        question: "Mi a teendő myasthenia gravisos betegnél a szteroid kezelés bevezetésekor?",
+                        options: [
+                            "Azonnal a legmagasabb dózissal kell kezdeni.",
+                            "Alacsony dózissal kell kezdeni és lassan emelni, a kezdeti paradox gyengeség kockázata miatt.",
+                            "Mindig kombinálni kell plazmaferézissel.",
+                            "Csak kórházi körülmények között, intravénásan adható."
+                        ],
+        
+                        answer: 1,
+                        explanation: "A szteroidkezelést MG-ben általában alacsony dózisban kezdik és fokozatosan emelik, mivel a betegek egy részénél a kezelés kezdeti szakaszában átmeneti tüneti rosszabbodás léphet fel."
+                    },
+                    {
+                        question: "Milyen dózisú IVIG-t alkalmaznak általában indukciós kezelésként neurológiai kórképekben?",
+                        options: [
+                            "0.1 g/ttkg",
+                            "0.5 g/ttkg",
+                            "2 g/ttkg",
+                            "5 g/ttkg"
+                        ],
+                        answer: 2,
+                        explanation: "Az indukciós kezelés során a leggyakrabban alkalmazott összdózis 2 g/testtömegkilogramm (ttkg), amelyet általában 2-5 nap alatt, napi frakciókban adnak be."
+                    },
+                    {
+                        question: "Melyik állítás igaz a PLEX és az IVIG hatékonyságára GBS-ben?",
+                        options: ["A PLEX sokkal hatékonyabb.", "Az IVIG sokkal hatékonyabb.", "Mindkettő egyformán hatékony.", "Egyik sem hatékony."],
+                        answer: 2,
+                        explanation: "Számos vizsgálat igazolta, hogy a két módszer (IVIG és PLEX) hatékonysága hasonló a GBS kezelésében. A választás közöttük a helyi elérhetőségtől és a beteg egyéni jellemzőitől függ."
+                    },
+                    {
+                        question: "Melyik gyógyszer javasolt a Pneumocystis jirovecii pneumonia (PJP) profilaxisára hosszan tartó, magas dózisú szteroid kezelés mellett?",
+                        options: ["Penicillin", "Trimethoprim-szulfametoxazol", "Aspirin", "Paracetamol"],
+                        answer: 1,
+                        explanation: "Magas kockázatú, immunszupprimált betegeknél PJP profilaxis (pl. trimethoprim-szulfametoxazol) mérlegelendő a fertőzés megelőzésére."
+                    },
+                    {
+                        question: "Milyen szemészeti mellékhatása lehet a hosszú távú szteroid kezelésnek?",
+                        options: ["Látásélesség javulása", "Száraz szem", "Katarakta (szürkehályog) és glaucoma (zöldhályog)", "Színlátás zavara"],
+                        answer: 2,
+                        explanation: "A hosszú távú szteroid kezelés ismert szemészeti mellékhatásai a lencsehomály (posterior subcapsularis cataracta) és a szemnyomás-emelkedés (glaucoma) kialakulása."
+                    },
+                    {
+                        question: "Melyik kórképben lehet hatékonyabb a plazmaferézis, mint az IVIG, különösen MuSK-antitest pozitivitás esetén?",
+                        options: ["Sclerosis Multiplex", "Guillain-Barré Szindróma", "Myasthenia Gravis", "Autoimmun Encephalitis"],
+                        answer: 2,
+                        explanation: "Egyes adatok szerint a MuSK-antitest pozitív myasthenia gravisban a plazmaferézis hatékonyabb lehet, mint az IVIG."
+                    },
+                    {
+                        question: "Milyen megelőző intézkedés javasolt a szteroid-indukált csontritkulás kockázatának csökkentésére?",
+                        options: ["Fokozott sóbevitel", "A testmozgás kerülése", "Kalcium- és D-vitamin pótlás", "Magas zsírtartalmú étrend"],
+                        answer: 2,
+                        explanation: "A csontritkulás megelőzése érdekében kalcium- (kb. 1200 mg/nap) és D-vitamin- (kb. 800 NE/nap) pótlás, valamint rendszeres testmozgás javasolt a szteroid kezelés alatt."
+                    }
+                ]
+            }
+        };
+
+        // DOM Elements
+        const topicSelectionScreen = document.getElementById('topic-selection');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        
+        const progressBar = document.getElementById('progress-bar');
+
+        const scoreText = document.getElementById('score-text');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const mainMenuBtn = document.getElementById('main-menu-btn');
+
+        // State
+        let currentTopic = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz(topicId) {
+            currentTopic = topicId;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            const topicDataKey = topicId === "160-161" ? "160" : topicId;
+            questions = shuffleArray([...quizData[topicDataKey].questions]);
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTitle.textContent = quizData[topicDataKey].title;
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            feedbackContainer.classList.add('hidden');
+            const questionData = questions[currentQuestionIndex];
+
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            questionText.textContent = `${currentQuestionIndex + 1}. ${questionData.question}`;
+            optionsContainer.innerHTML = '';
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'p-4', 'text-left', 'border-2', 'border-slate-300', 'rounded-lg', 'quiz-option');
+                button.dataset.index = index;
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const selectedIndex = parseInt(selectedButton.dataset.index);
+            const correctIndex = questions[currentQuestionIndex].answer;
+
+            // Disable all options after one is clicked
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.removeEventListener('click', selectAnswer);
+                btn.disabled = true;
+            });
+
+            if (selectedIndex === correctIndex) {
+                selectedButton.classList.add('correct');
+                score++;
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Highlight the correct answer
+                optionsContainer.children[correctIndex].classList.add('correct');
+            }
+
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            feedbackContainer.classList.remove('hidden');
+
+            if (currentQuestionIndex === questions.length - 1) {
+                nextQuestionBtn.textContent = 'Eredmények megtekintése';
+            } else {
+                nextQuestionBtn.textContent = 'Következő kérdés';
+            }
+        }
+
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreText.textContent = `Eredményed: ${score} / ${questions.length}`;
+        }
+
+        function goBackToMenu() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.topic-btn').forEach(button => {
+            button.addEventListener('click', () => startQuiz(button.dataset.topic));
+        });
+
+        nextQuestionBtn.addEventListener('click', handleNextQuestion);
+        backToMenuBtn.addEventListener('click', goBackToMenu);
+        restartQuizBtn.addEventListener('click', () => startQuiz(currentTopic));
+        mainMenuBtn.addEventListener('click', goBackToMenu);
+
+    </script>
+</body>
+</html>

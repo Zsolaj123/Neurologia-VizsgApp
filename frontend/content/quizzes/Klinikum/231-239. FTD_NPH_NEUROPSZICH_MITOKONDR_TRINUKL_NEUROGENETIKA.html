@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Új Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/100</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Frontotemporális demenciák",
+                questions: [
+                    { question: "Melyik a frontotemporális demencia (FTD) leggyakoribb klinikai altípusa?", options: ["Szemantikus variáns PPA", "Nem-folyamatos variáns PPA", "Viselkedési variáns FTD (bvFTD)", "Logopenikus variáns PPA"], answer: "Viselkedési variáns FTD (bvFTD)", explanation: "A viselkedési variáns FTD (bvFTD) a leggyakoribb altípus, amelyet a személyiség és a viselkedés extrém változásai jellemeznek, mint például a gátlástalanság, apátia és az empátia elvesztése." },
+                    { question: "Mely agyterületek érintettek elsősorban az FTD-ben?", options: ["Parietális és occipitális lebenyek", "Frontális és temporális lebenyek", "Csak a hippocampus", "A kisagy és az agytörzs"], answer: "Frontális és temporális lebenyek", explanation: "Az FTD neve is utal a patológia helyére. A betegség az agy homlok- (frontális) és halánték- (temporális) lebenyeinek fokozatos sorvadásával jár, amelyek a személyiségért, viselkedésért és nyelvért felelősek." },
+                    { question: "Melyik kóros fehérje NEM jellemző az FTD patológiájára?", options: ["Tau", "TDP-43", "FUS", "Amiloid-béta"], answer: "Amiloid-béta", explanation: "Az FTD-t a tau, TDP-43 vagy FUS fehérjék kóros felhalmozódása jellemzi. Az amiloid-béta plakkok az Alzheimer-kór patológiai fémjelei, és az amiloid PET vizsgálat negatív eredménye segíthet az FTD és az AD elkülönítésében." },
+                    { question: "Mi a primer progresszív afázia (PPA) fő tünete?", options: ["Memóriavesztés", "Viselkedészavar", "Mozgászavar", "A nyelvi képességek progresszív romlása"], answer: "A nyelvi képességek progresszív romlása", explanation: "A PPA az FTD egyik fő klinikai szindrómája, ahol a betegség a nyelvi központok sorvadásával kezdődik, ami a beszédprodukció, a szótalálás vagy a szóértés fokozatos romlásához vezet." },
+                    { question: "Melyik génmutáció a leggyakoribb genetikai oka a familiáris FTD-nek és ALS-nek?", options: ["GRN", "MAPT", "C9ORF72", "APP"], answer: "C9ORF72", explanation: "A C9ORF72 génben található hexanukleotid (GGGGCC) ismétlődés-expanzió a leggyakoribb ismert genetikai oka mind a familiáris FTD-nek, mind az amiotrófiás laterálszklerózisnak (ALS), ami alátámasztja a két betegség közötti spektrum-koncepciót." },
+                    { question: "Milyen viselkedési tünet jellemző a bvFTD-re?", options: ["Fokozott szorongás és aggodalom", "Apátia és gátlástalanság", "Vizuális hallucinációk", "Rendszerezett téveszmék"], answer: "Apátia és gátlástalanság", explanation: "A bvFTD-t a személyiség drámai megváltozása jellemzi, ami a motiváció teljes elvesztésében (apátia) vagy a társadalmi normák figyelmen kívül hagyásában (gátlástalanság) nyilvánul meg." },
+                    { question: "Milyen képalkotó lelet támasztja alá a bvFTD diagnózisát?", options: ["Diffúz agyi atrófia", "A hippocampus szelektív sorvadása", "Aránytalan frontális és/vagy temporális lebeny atrófia", "Fehérállományi hiperintenzitások"], answer: "Aránytalan frontális és/vagy temporális lebeny atrófia", explanation: "Az agyi MRI vizsgálat jellegzetesen a frontális és/vagy temporális lebenyek sorvadását mutatja, ami megfelel a klinikai tünetekért felelős agyterületeknek." },
+                    { question: "Mi a szemantikus variánsú PPA (svPPA) fő jellemzője?", options: ["Akadozó, agrammatikus beszéd", "A szavak jelentésének és a tárgyak ismeretének elvesztése", "Mondatok ismétlésének nehézsége", "A beszéd motoros tervezésének zavara"], answer: "A szavak jelentésének és a tárgyak ismeretének elvesztése", explanation: "Az svPPA-ban a betegek elveszítik a szavak jelentését (szemantikus memória), ami megnevezi (anomia) és szóértési nehézségekben nyilvánul meg, miközben a beszédük folyékony és nyelvtanilag helyes marad." },
+                    { question: "Melyik állítás igaz az FTD kezelésére?", options: ["A kolinészteráz-gátlók rendkívül hatékonyak.", "Jelenleg nincs oki terápia, a kezelés tüneti.", "A memantin lassítja a progressziót.", "A sebészeti beavatkozás gyógyulást hoz."], answer: "Jelenleg nincs oki terápia, a kezelés tüneti.", explanation: "Sajnos jelenleg nincs olyan gyógyszer, amely megállítaná vagy lassítaná az FTD progresszióját. A kezelés a viselkedési és nyelvi tünetek enyhítésére, valamint a beteg és a gondozók életminőségének javítására összpontosít." },
+                    { question: "Melyik gyógyszercsoport használható a bvFTD viselkedési tüneteinek (pl. kényszeres viselkedés, gátlástalanság) kezelésére?", options: ["Benzodiazepinek", "Szelektív szerotonin visszavétel-gátlók (SSRI-k)", "Opioidok", "Stimulánsok"], answer: "Szelektív szerotonin visszavétel-gátlók (SSRI-k)", explanation: "Az SSRI-k, bár eredetileg antidepresszánsok, gyakran hatékonyak az FTD-vel járó viselkedési tünetek, mint a diszinhibíció, a kényszeres viselkedés és az agitáció kezelésében." },
+                    { question: "Milyen korban kezdődik leggyakrabban az FTD?", options: ["80 év felett", "70-80 év között", "45-65 év között", "Gyermekkorban"], answer: "45-65 év között", explanation: "Az FTD a korai kezdetű demenciák egyik leggyakoribb oka, a tünetek jellemzően 65 éves kor előtt, leggyakrabban 45 és 65 év között jelentkeznek." },
+                    { question: "Mi a Pick-test?", options: ["Amiloid-béta lerakódás", "Lewy-test", "A tau fehérjéből álló jellegzetes zárvány FTLD-tau patológia esetén", "Egy diagnosztikai képalkotó jel"], answer: "A tau fehérjéből álló jellegzetes zárvány FTLD-tau patológia esetén", explanation: "A Pick-testek gömb alakú, ezüsttel jól festődő (argyrophil) intracelluláris zárványok, amelyek hiperfoszforilált tau fehérjéből állnak, és a Pick-kór (az FTD egyik tauopátiás formája) jellegzetes szövettani leletei." },
+                    { question: "Melyik neuropszichológiai teszt kevésbé érzékeny az FTD korai felismerésére, mert főként a memóriát vizsgálja?", options: ["MMSE (Mini-Mental State Examination)", "Verbális fluencia teszt", "Stroop-teszt", "Wisconsin Card Sorting Test"], answer: "MMSE (Mini-Mental State Examination)", explanation: "Az MMSE főként az orientációt és a memóriát méri, amelyek az FTD korai szakaszában viszonylag megtartottak lehetnek. Ezért az MMSE pontszám félrevezetően normális lehet, miközben a betegnek már súlyos végrehajtó funkciós és viselkedési zavarai vannak." },
+                    { question: "Mi a logopenikus variánsú PPA (lvPPA) legvalószínűbb háttérpatológiája?", options: ["TDP-43 patológia", "Tau patológia (Pick-kór)", "Alzheimer-kór patológia", "Vaszkuláris károsodás"], answer: "Alzheimer-kór patológia", explanation: "Bár klinikailag a PPA spektrumba tartozik, az lvPPA eseteinek többségében a boncolás a jellegzetes Alzheimer-kór patológiát (amiloid plakkok és tau kötegek) igazolja, nem pedig FTLD-t. Ez egy fontos átfedés a két leggyakoribb demencia típus között." },
+                    { question: "Milyen szerepe van a genetikai tanácsadásnak az FTD-ben?", options: ["Nincs szerepe, mert a betegség soha nem örökletes.", "Csak a kezelés megtervezésében segít.", "Kulcsfontosságú a familiáris esetekben a kockázat felmérésére, a diagnózis megerősítésére és a családtervezés támogatására.", "Csak a betegség végstádiumában van jelentősége."], answer: "Kulcsfontosságú a familiáris esetekben a kockázat felmérésére, a diagnózis megerősítésére és a családtervezés támogatására.", explanation: "Mivel az FTD eseteinek jelentős része (akár 40%) familiáris, a genetikai tanácsadás elengedhetetlen a családtagok tájékoztatásához a betegség öröklődéséről, a prediktív tesztelés lehetőségeiről és annak pszichológiai következményeiről." },
+                    { question: "Melyik állítás igaz a viselkedési variánsú FTD-re?", options: ["A betegek mindig tisztában vannak a viselkedésük megváltozásával.", "A memóriazavar a legelső és legdominánsabb tünet.", "Gyakran tévesztik össze pszichiátriai kórképekkel.", "A tünetek gyorsan, napok alatt alakulnak ki."], answer: "Gyakran tévesztik össze pszichiátriai kórképekkel.", explanation: "A bvFTD korai tünetei, mint az apátia, a gátlástalanság vagy a kényszeres viselkedés, nagyon hasonlíthatnak a depresszió, a bipoláris zavar vagy az OCD tüneteire, ami gyakran vezet téves pszichiátriai diagnózishoz." },
+                    { question: "Mi a hyperoralitás az FTD kontextusában?", options: ["Túlzott beszédesség", "A szájüregi higiénia elhanyagolása", "Az étkezési szokások megváltozása, pl. túlevés, édességek preferálása, nem ehető tárgyak szájba vétele", "Nyelési nehézség"], answer: "Az étkezési szokások megváltozása, pl. túlevés, édességek preferálása, nem ehető tárgyak szájba vétele", explanation: "A hyperoralitás a bvFTD egyik jellegzetes tünete, ami a frontális gátlások elvesztésével magyarázható. A betegek kontrollálatlanul ehetnek, megváltozhat az ízlésük, és szokatlan tárgyakat vehetnek a szájukba." },
+                    { question: "Melyik FTD-hez társuló mozgászavar szindróma?", options: ["Myasthenia Gravis", "Guillain-Barré-szindróma", "Progresszív szupranukleáris bénulás (PSP)", "Huntington-kór"], answer: "Progresszív szupranukleáris bénulás (PSP)", explanation: "A PSP egy atipikus parkinson-szindróma, amely gyakran társul FTD patológiával (FTLD-tau). Jellemzője a testtartási instabilitás, a vertikális tekintészavar és a kognitív hanyatlás." },
+                    { question: "Miért fontos a neuropszichológiai vizsgálat az FTD diagnózisában?", options: ["Mert kimutatja a kóros fehérjéket.", "Mert objektíven méri a kognitív deficitek mintázatát, segítve az FTD és az AD elkülönítését.", "Mert helyettesíti az agyi képalkotást.", "Mert megjósolja a betegség lefolyását."], answer: "Mert objektíven méri a kognitív deficitek mintázatát, segítve az FTD és az AD elkülönítését.", explanation: "A neuropszichológiai tesztek részletesen feltárják a kognitív profilt. FTD-ben jellemzően a végrehajtó funkciók és a verbális fluencia károsodik jobban, míg AD-ben a memória. Ez a mintázat segít a differenciáldiagnózisban." },
+                    { question: "Melyik génterápiás megközelítés ígéretes a GRN-mutáció okozta FTD kezelésében?", options: ["A progranulin (PGRN) szintjének növelése", "A tau fehérje termelésének gátlása", "Az amiloid plakkok eltávolítása", "A dopaminszint növelése"], answer: "A progranulin (PGRN) szintjének növelése", explanation: "A GRN gén mutációi a progranulin fehérje hiányához vezetnek. A génterápiás kutatások (pl. Latozinemab) célja a PGRN szintjének helyreállítása az agyban, ami lassíthatja a neurodegenerációt." }
+                ]
+            },
+            {
+                topic: "Kezelhető demenciák és NPH",
+                questions: [
+                    { question: "Mi a normál nyomású hydrocephalus (NPH) klasszikus klinikai triásza?", options: ["Fejfájás, hányinger, látászavar", "Memóriazavar, apátia, agresszió", "Járászavar, kognitív hanyatlás, vizeletinkontinencia", "Remegés, merevség, lassúság"], answer: "Járászavar, kognitív hanyatlás, vizeletinkontinencia", explanation: "Az NPH klasszikus tünetegyüttese a Hakim-Adams triász, amely a járászavar ('mágneses járás'), a demencia (főként frontális típusú) és a vizeletinkontinencia együtteséből áll." },
+                    { question: "Melyik a leghatékonyabb kezelési mód az NPH-ra?", options: ["Gyógyszeres terápia (acetazolamid)", "Nagy dózisú vitaminpótlás", "Sebészeti beavatkozás (ventriculoperitonealis sönt beültetése)", "Intenzív fizikoterápia"], answer: "Sebészeti beavatkozás (ventriculoperitonealis sönt beültetése)", explanation: "Az NPH egyetlen hatékony kezelése a söntműtét, amely a felesleges agy-gerincvelői folyadékot (liquort) elvezeti az agykamrákból a hasüregbe, így csökkentve a nyomást és enyhítve a tüneteket." },
+                    { question: "Melyik diagnosztikai teszt a legjobb előrejelzője a söntműtét sikerességének NPH esetén?", options: ["Agyi MRI", "Nagy volumenű lumbálpunkció ('Tap Test')", "Neuropszichológiai tesztelés", "Vérvizsgálat"], answer: "Nagy volumenű lumbálpunkció ('Tap Test')", explanation: "A 'Tap Test' során 30-50 ml liquor lecsapolása történik. Ha a beteg tünetei, különösen a járászavara, a lecsapolás után átmenetileg és objektíven javulnak, az jó prognosztikai jel a söntműtét várható sikerességére nézve." },
+                    { question: "Melyik állítás igaz a 'reverzibilis demenciákra'?", options: ["Ezek a demencia leggyakoribb formái.", "A tünetek megfelelő kezeléssel javulhatnak vagy teljesen visszafordulhatnak.", "Mindig sebészeti beavatkozást igényelnek.", "A kognitív hanyatlás soha nem súlyos."], answer: "A tünetek megfelelő kezeléssel javulhatnak vagy teljesen visszafordulhatnak.", explanation: "A demencia-szerű tünetek egy részét kezelhető alapbetegségek okozzák. Ezen okok (pl. vitaminhiány, pajzsmirigy-alulműködés, fertőzések) időben történő felismerése és kezelése a kognitív funkciók javulását vagy teljes helyreállását eredményezheti." },
+                    { question: "Melyik vitamin hiánya okozhat demenciához hasonló tüneteket?", options: ["C-vitamin", "D-vitamin", "B12-vitamin", "A-vitamin"], answer: "B12-vitamin", explanation: "A B12-vitamin hiánya ismert oka a kognitív hanyatlásnak, memóriazavarnak és egyéb neurológiai tüneteknek, amelyek utánozhatják a demenciát. A hiányállapot pótlása visszafordíthatja ezeket a tüneteket." },
+                    { question: "Milyen endokrin betegség okozhat reverzibilis demenciát?", options: ["Cukorbetegség", "Hypothyreosis (pajzsmirigy-alulműködés)", "Akromegália", "Addison-kór"], answer: "Hypothyreosis (pajzsmirigy-alulműködés)", explanation: "A pajzsmirigy-alulműködés lelassítja az anyagcserét, ami kognitív lelassuláshoz, memóriaproblémákhoz és depressziószerű tünetekhez vezethet. A pajzsmirigyhormon pótlása helyreállíthatja a kognitív funkciókat." },
+                    { question: "Mi a 'mágneses járás'?", options: ["Gyors, aprózó léptekkel való járás.", "A lábak a padlóhoz tapadnak, a járásindítás nehezített, a lépések rövidek és csoszogóak.", "Széles alapú, bizonytalan, ataxiás járás.", "Féloldali, paretikus járás."], answer: "A lábak a padlóhoz tapadnak, a járásindítás nehezített, a lépések rövidek és csoszogóak.", explanation: "A 'mágneses járás' az NPH jellegzetes járászavara, amely a frontális lebeny és a bazális ganglionok közötti pályák károsodásából ered." },
+                    { question: "Milyen képalkotó jel utal NPH-ra az MRI-n?", options: ["Fokális agyi daganat", "A kamrák aránytalan tágulata a kérgi sulcusokhoz képest (DESH-jel)", "A hippocampus súlyos, izolált atrófiája", "Kiterjedt fehérállományi elváltozások"], answer: "A kamrák aránytalan tágulata a kérgi sulcusokhoz képest (DESH-jel)", explanation: "Az NPH-ban a kamrák kitágulnak a liquor felhalmozódása miatt, míg a felettük lévő agykéreg (különösen a vertexen) összeszűkül. Ez a disproporció (DESH: Disproportionately Enlarged Subarachnoid-space Hydrocephalus) az NPH egyik jellegzetes radiológiai jele." },
+                    { question: "Melyik fertőzés okozhat kezelhető demenciát?", options: ["Nátha", "Neurosyphilis", "Herpes zoster", "Influenza"], answer: "Neurosyphilis", explanation: "A szifilisz késői, harmadik stádiumában (neurosyphilis) a központi idegrendszert is megtámadhatja, progresszív demenciát, személyiségváltozást és neurológiai tüneteket okozva. A penicillin kezelés megállíthatja a progressziót és javíthat a tüneteken." },
+                    { question: "Milyen toxikus hatás vezethet alkohol-okozta demenciához?", options: ["Nehézfém-mérgezés", "Szén-monoxid mérgezés", "Az alkohol közvetlen neurotoxikus hatása és a tiamin (B1-vitamin) hiánya", "Gyógyszer-túladagolás"], answer: "Az alkohol közvetlen neurotoxikus hatása és a tiamin (B1-vitamin) hiánya", explanation: "A krónikus alkoholizmus kettős mechanizmussal károsítja az agyat: az alkohol direkt idegsejt-károsító, emellett a gyakori alultápláltság miatt kialakuló B1-vitamin hiány a Wernicke-Korsakoff szindrómához, egy súlyos amnesztikus állapothoz vezet." },
+                    { question: "A demenciás esetek hány százaléka lehet potenciálisan reverzibilis?", options: ["Kevesebb mint 1%", "Körülbelül 5%", "Akár 23%", "Több mint 50%"], answer: "Akár 23%", explanation: "Tanulmányok szerint a demenciaként diagnosztizált esetek egy jelentős része, akár 23%-a is, potenciálisan kezelhető és visszafordítható okokra vezethető vissza, ami hangsúlyozza az alapos kivizsgálás fontosságát." },
+                    { question: "Melyik tünete javul a leginkább az NPH-nak a söntműtét után?", options: ["Memória", "Járászavar", "Vizeletinkontinencia", "Személyiségváltozás"], answer: "Járászavar", explanation: "A klinikai tapasztalatok és vizsgálatok szerint a sönt beültetése után a leglátványosabb és leggyakoribb javulás a járászavarban figyelhető meg, a betegek akár 85-96%-ánál." },
+                    { question: "Mi a Hashimoto encephalopathia?", options: ["A pajzsmirigy daganata.", "Egy ritka, autoimmun, szteroidra jól reagáló encephalopathia, ami a Hashimoto thyreoiditishez társul.", "A jódhiány okozta kognitív zavar.", "A pajzsmirigy-túlműködés egy formája."], answer: "Egy ritka, autoimmun, szteroidra jól reagáló encephalopathia, ami a Hashimoto thyreoiditishez társul.", explanation: "Ez egy ritka, de kezelhető autoimmun állapot, amely kognitív hanyatlást, tudatzavarokat és görcsrohamokat okozhat. A diagnózis a magas anti-TPO antitest szinten és a szteroid kezelésre adott drámai válaszon alapul." },
+                    { question: "Melyik gyógyszercsoport mellékhatásaként léphet fel gyakran demenciát utánzó kognitív zavar időseknél?", options: ["Vérnyomáscsökkentők", "Antikolinerg hatású gyógyszerek", "Antibiotikumok", "Vitaminok"], answer: "Antikolinerg hatású gyógyszerek", explanation: "Számos gyógyszer (pl. bizonyos antidepresszánsok, antihisztaminok, inkontinencia elleni szerek) rendelkezik antikolinerg hatással, ami gátolja az acetilkolin működését. Időseknél ez zavartságot, memóriaproblémákat és delíriumot okozhat, ami demenciát utánoz." },
+                    { question: "Mi a krónikus szubdurális hematóma?", options: ["Agyi érfejlődési rendellenesség.", "Egy lassan növekvő vérömleny a dura mater alatt, ami nyomja az agyat.", "A gerincvelő vérzése.", "Egyfajta stroke."], answer: "Egy lassan növekvő vérömleny a dura mater alatt, ami nyomja az agyat.", explanation: "Különösen időseknél, akár enyhe fejsérülés után is kialakulhat egy lassan növekvő vérömleny az agy felszínén. Ez fokozatosan kognitív hanyatlást, járászavart és tudatzavart okozhat, ami kezelhető demenciaformának számít, mivel a hematóma sebészi eltávolítása teljes gyógyulást eredményezhet." },
+                    { question: "Milyen képalkotó jel NEM jellemző NPH-ra?", options: ["Tág agykamrák (ventriculomegalia)", "Szűk sulcusok a vertexen", "A corpus callosum szögének csökkenése", "A hippocampus súlyos, izolált atrófiája"], answer: "A hippocampus súlyos, izolált atrófiája", explanation: "A hippocampus izolált, kifejezett atrófiája az Alzheimer-kór jellegzetes radiológiai jele. NPH-ban a kamratágulat a domináns jel, a kérgi atrófia mértéke ehhez képest aránytalanul kisebb." },
+                    { question: "Milyen kockázata van a söntműtéteknek?", options: ["Nincs semmilyen kockázatuk.", "Fertőzés, vérzés, a sönt elzáródása vagy diszfunkciója.", "A demencia felgyorsulása.", "A látás azonnali elvesztése."], answer: "Fertőzés, vérzés, a sönt elzáródása vagy diszfunkciója.", explanation: "Bár a söntműtét hatékony, invazív beavatkozás, amelynek vannak kockázatai, mint a fertőzés, a subduralis hematóma (túlzott liquor elvezetés miatt), és a sönt elzáródása, ami miatt újabb műtétre lehet szükség." },
+                    { question: "Melyik állítás igaz a depresszió és a demencia kapcsolatára?", options: ["A depresszió soha nem okoz kognitív tüneteket.", "A súlyos depresszió demenciát utánozhat ('pseudodementia'), és a depresszió kezelésével a kognitív tünetek is javulnak.", "A demens betegek soha nem depressziósak.", "A kettő között nincs kapcsolat."], answer: "A súlyos depresszió demenciát utánozhat ('pseudodementia'), és a depresszió kezelésével a kognitív tünetek is javulnak.", explanation: "Időskori depresszióban gyakori a koncentráció, a figyelem és a memória zavara, ami demenciát utánozhat. Fontos a két állapot elkülönítése, mert a depresszió kezelhető, és a kezelés hatására a kognitív tünetek is rendeződhetnek." },
+                    { question: "Miért fontos a vaszkuláris kockázati tényezők kezelése a demencia megelőzésében?", options: ["Mert a magas vérnyomás javítja a memóriát.", "Mert a vaszkuláris károsodás nemcsak vaszkuláris demenciát, hanem az Alzheimer-kór kockázatát is növeli.", "Nincs jelentősége.", "Mert a sztatinok közvetlenül gyógyítják a demenciát."], answer: "Mert a vaszkuláris károsodás nemcsak vaszkuláris demenciát, hanem az Alzheimer-kór kockázatát is növeli.", explanation: "Az agyi érrendszer egészsége kulcsfontosságú az agy megfelelő működéséhez. A vaszkuláris kockázati tényezők (magas vérnyomás, cukorbetegség stb.) kezelése csökkenti a vaszkuláris demencia és a kevert demenciák kialakulásának esélyét." },
+                    { question: "Milyen típusú demenciára utal a liquorvizsgálat során normális tau-fehérje szint, de alacsony Aβ42 szint?", options: ["Tiszta Alzheimer-kór", "Frontotemporális demencia", "Normál nyomású hydrocephalus (NPH)", "Creutzfeldt-Jakob-kór"], answer: "Normál nyomású hydrocephalus (NPH)", explanation: "Bár az alacsony Aβ42 szint az Alzheimer-kórra is jellemző, NPH-ban a tau fehérjék szintje (a neuronpusztulás markerei) jellemzően normális marad. Ez a biomarker profil segíthet az NPH és az AD elkülönítésében, bár az átfedések gyakoriak." }
+                ]
+            },
+            {
+                topic: "Demenciák kezelése és neuropszichológia",
+                questions: [
+                    { question: "Melyik gyógyszercsoport képezi az Alzheimer-kór enyhe-közepes stádiumának alapvető tüneti kezelését?", options: ["Béta-blokkolók", "Kolinészteráz-gátlók", "Statinok", "Antibiotikumok"], answer: "Kolinészteráz-gátlók", explanation: "A kolinészteráz-gátlók (donepezil, rivasztigmin, galantamin) növelik az acetilkolin neurotranszmitter szintjét az agyban, ami átmenetileg javíthatja a kognitív funkciókat, különösen a betegség korai szakaszában." },
+                    { question: "Milyen hatásmechanizmussal működik a memantin?", options: ["Növeli a dopamin szintet.", "Gátolja az NMDA-receptorok túlzott aktivitását.", "Gátolja a COX-2 enzimet.", "Blokkolja a szerotonin visszavételt."], answer: "Gátolja az NMDA-receptorok túlzott aktivitását.", explanation: "A memantin egy NMDA-receptor antagonista, amely a glutamát neurotranszmitter által közvetített excitotoxicitást (idegsejt-károsodást) csökkenti, ami közepes-súlyos Alzheimer-kórban játszik szerepet." },
+                    { question: "Mi a lecanemab (Leqembi®) és a donanemab (Kisunla) fő célpontja az Alzheimer-kór kezelésében?", options: ["A tau-fehérje kötegek", "Az agyi gyulladás", "Az amiloid-béta plakkok", "A mitokondriális diszfunkció"], answer: "Az amiloid-béta plakkok", explanation: "Ezek az új, betegségmódosító monoklonális antitestek specifikusan az agyban felhalmozódott amiloid-béta plakkokhoz kötődnek és segítik azok eltávolítását, így lassítva a betegség progresszióját." },
+                    { question: "Mi az ARIA (Amyloid-Related Imaging Abnormalities)?", options: ["Egy új kognitív teszt.", "Az amiloid-ellenes terápiák mellékhatása, ami agyi ödémát vagy vérzést jelent.", "Az agyi atrófia mértékegysége.", "A demencia egy ritka genetikai formája."], answer: "Az amiloid-ellenes terápiák mellékhatása, ami agyi ödémát vagy vérzést jelent.", explanation: "Az ARIA az amiloid-eltávolító kezelések ismert és szoros monitorozást igénylő mellékhatása. Az ARIA-E (ödéma) és ARIA-H (mikrovérzés) az MRI-n látható elváltozások." },
+                    { question: "Melyik neuropszichológiai szűrőteszt érzékenyebb az enyhe kognitív zavar (MCI) kimutatására?", options: ["MMSE (Mini-Mental State Examination)", "Órarajzolási Teszt", "MoCA (Montreal Cognitive Assessment)", "Verbális fluencia teszt"], answer: "MoCA (Montreal Cognitive Assessment)", explanation: "A MoCA-t kifejezetten úgy tervezték, hogy érzékenyebb legyen az enyhe kognitív zavarok, különösen a végrehajtó funkciók és a figyelem enyhe deficitjeinek kimutatására, mint a hagyományos MMSE." },
+                    { question: "Milyen kognitív domént mér elsősorban az Órarajzolási Teszt?", options: ["Nyelvi képességeket", "Hosszú távú memóriát", "Vizuospaciális és végrehajtó funkciókat", "Figyelmet"], answer: "Vizuospaciális és végrehajtó funkciókat", explanation: "Az órarajzolás egy komplex feladat, amely megkívánja a vizuális észlelés, a térbeli elrendezés, a tervezés és a motoros kivitelezés integrációját, így elsősorban a parietális és frontális lebenyek működéséről ad információt." },
+                    { question: "Melyik állítás igaz a nem-farmakológiai terápiákra demenciában?", options: ["Nincs bizonyított hasznuk.", "Helyettesítik a gyógyszeres kezelést.", "Fontos szerepük van az életminőség javításában és a viselkedési tünetek kezelésében.", "Csak a betegség végső stádiumában hatékonyak."], answer: "Fontos szerepük van az életminőség javításában és a viselkedési tünetek kezelésében.", explanation: "A nem-gyógyszeres beavatkozások, mint a kognitív stimuláció, a fizikai aktivitás, a zene- vagy művészetterápia, a holisztikus demencia-ellátás elengedhetetlen részei, amelyek javítják a hangulatot, a funkciót és csökkentik a viselkedési problémákat." },
+                    { question: "Mi a realitásorientációs tréning (ROT) lényege?", options: ["A beteg múltbeli emlékeinek felidézése.", "A beteget támpontokkal segítik a térbeli és időbeli tájékozódásban.", "A beteg kognitív képességeinek tesztelése.", "A beteg elszigetelése a külvilágtól."], answer: "A beteget támpontokkal segítik a térbeli és időbeli tájékozódásban.", explanation: "A ROT célja a dezorientáció csökkentése azáltal, hogy a környezetben folyamatosan és következetesen ismétlik a releváns információkat (pl. nap, dátum, helyszín, személyek neve)." },
+                    { question: "Milyen típusú diéta bizonyítottan jótékony hatású a demencia megelőzésében?", options: ["Magas zsírtartalmú, ketogén diéta", "Mediterrán diéta", "Magas fehérjetartalmú diéta", "Folyadékdiéta"], answer: "Mediterrán diéta", explanation: "Számos tanulmány igazolja, hogy a gyümölcsökben, zöldségekben, teljes kiőrlésű gabonákban, halban és olívaolajban gazdag mediterrán étrend csökkenti a demencia és az Alzheimer-kór kialakulásának kockázatát." },
+                    { question: "Miért fontos a heteroanamnézis (gondozótól/családtagtól származó információ) a demencia diagnózisában?", options: ["Mert a beteg nem akar beszélni az orvossal.", "Mert a demens betegek belátása a saját állapotukba gyakran korlátozott vagy hiányzik.", "Mert a családtagok jobban ismerik a gyógyszereket.", "Felesleges, mert a beteg elmond mindent."], answer: "Mert a demens betegek belátása a saját állapotukba gyakran korlátozott vagy hiányzik.", explanation: "A demenciával gyakran együtt jár az anosognosia (betegségbelátás hiánya). A gondozók objektív információkat tudnak adni a tünetek kezdetéről, a mindennapi funkciók romlásáról és a viselkedésváltozásokról, ami elengedhetetlen a pontos diagnózishoz." },
+                    { question: "Melyik neuropszichológiai tesztbattéria képes jól differenciálni az FTD-t az AD-től?", options: ["MMSE", "MoCA", "CERAD-NB", "Órarajzolási Teszt"], answer: "CERAD-NB", explanation: "A CERAD-NB tesztbattéria profilja jellegzetes különbségeket mutat: FTD-ben a verbális fluencia tesztekben, míg AD-ben a memória altesztekben mutatkozik súlyosabb károsodás." },
+                    { question: "Milyen szerepe van a fizikai aktivitásnak a demencia kezelésében?", options: ["Nincs hatása a kognitív funkciókra.", "Javítja a kognitív funkciókat, csökkenti az esések kockázatát és javítja a hangulatot.", "Rontja a demencia tüneteit.", "Csak a betegség korai szakaszában ajánlott."], answer: "Javítja a kognitív funkciókat, csökkenti az esések kockázatát és javítja a hangulatot.", explanation: "A rendszeres testmozgás bizonyítottan jótékony hatású: javítja az agyi keringést és a neurotróf faktorok szintjét, ami lassíthatja a kognitív hanyatlást, emellett az egyensúly és az izomerő fenntartásával csökkenti az esések kockázatát." },
+                    { question: "Melyik gyógyszercsoportot kell óvatosan alkalmazni a Lewy-testes demenciában a súlyos mellékhatások kockázata miatt?", options: ["Kolinészteráz-gátlók", "Antipszichotikumok", "Antidepresszánsok", "Memantin"], answer: "Antipszichotikumok", explanation: "A DLB-s betegek rendkívül érzékenyek az antipszichotikumokra, amelyek súlyosbíthatják a parkinsonizmust, a kognitív zavarokat és a szedációt (neuroleptikus hiperszenzitivitás)." },
+                    { question: "Mi a gondozói kiégés (caregiver burnout)?", options: ["A demens beteg agresszív viselkedése.", "A gondozó fizikai, érzelmi és mentális kimerülése a hosszan tartó stressz és gondozási teher miatt.", "A gondozó által elkövetett hiba.", "A gondozó allergiás reakciója a gyógyszerekre."], answer: "A gondozó fizikai, érzelmi és mentális kimerülése a hosszan tartó stressz és gondozási teher miatt.", explanation: "A gondozói kiégés egy súlyos állapot, amely a demens betegek családtagjait és gondozóit érintheti. A megelőzése és kezelése (pl. támogató csoportok, tehermentesítő szolgáltatások) kulcsfontosságú a fenntartható otthoni ellátáshoz." },
+                    { question: "Melyik állítás igaz a tau-ellenes terápiákra?", options: ["Már széles körben elérhetőek a klinikai gyakorlatban.", "Az Alzheimer-kór kutatásának egyik legígéretesebb jövőbeli irányát képviselik.", "Csak a vaszkuláris demencia kezelésére hatásosak.", "Ugyanaz, mint az amiloid-ellenes terápia."], answer: "Az Alzheimer-kór kutatásának egyik legígéretesebb jövőbeli irányát képviselik.", explanation: "Mivel a tau-patológia terjedése szorosabban korrelál a klinikai hanyatlással, a tau-fehérjét célzó terápiák (vakcinák, antitestek) a demenciakutatás következő nagy reménységét jelentik." },
+                    { question: "Milyen célt szolgál az ergoterápia (foglalkozásterápia) demenciában?", options: ["A beteg memóriájának tesztelését.", "A betegek segítését a mindennapi tevékenységek (ADL) elvégzésében és az önállóság megőrzésében.", "A beteg gyógyszereinek beállítását.", "A beteg szociális programokon való részvételét."], answer: "A betegek segítését a mindennapi tevékenységek (ADL) elvégzésében és az önállóság megőrzésében.", explanation: "A foglalkozásterapeuta felméri a beteg funkcionális nehézségeit, és stratégiákat dolgoz ki (pl. környezet adaptálása, segédeszközök, feladatok egyszerűsítése) az önállóság és a biztonságos otthoni életvitel fenntartására." },
+                    { question: "Miért fontos a depresszió felismerése és kezelése demenciagyanús betegeknél?", options: ["Mert a depresszió felgyorsítja az amiloid-lerakódást.", "Mert a depresszió tünetei (apátia, koncentrációzavar, memóriaproblémák) utánozhatják a demenciát (pseudodementia).", "Mert a demens betegek soha nem lehetnek depressziósak.", "Mert az antidepresszánsok gyógyítják a demenciát."], answer: "Mert a depresszió tünetei (apátia, koncentrációzavar, memóriaproblémák) utánozhatják a demenciát (pseudodementia).", explanation: "A súlyos, kezeletlen depresszió kognitív zavarokat okozhat, ami demenciának tűnhet. A depresszió kezelésével ezek a tünetek javulhatnak, ezért a pontos diagnózis elengedhetetlen." },
+                    { question: "Az ACE-R tesztben a memória és a vizuospaciális képességek aránya melyik két demencia típus elkülönítésében segíthet?", options: ["FTD és VaD", "AD és DLB", "NPH és AD", "VaD és DLB"], answer: "AD és DLB", explanation: "Az Addenbrooke's Cognitive Examination-Revised (ACE-R) teszten a memória/vizuospaciális pontszámok aránya segíthet a differenciálásban: AD-ben a memória, míg DLB-ben a vizuospaciális funkciók károsodnak jellemzően súlyosabban." },
+                    { question: "Melyik állítás igaz a demencia prevenciójára?", options: ["A demencia nem megelőzhető.", "A módosítható rizikófaktorok (pl. magas vérnyomás, dohányzás) kezelése és az egészséges életmód csökkentheti a demencia kockázatát.", "Csak a genetikai tényezők számítanak.", "A prevenciót csak 80 év felett érdemes elkezdeni."], answer: "A módosítható rizikófaktorok (pl. magas vérnyomás, dohányzás) kezelése és az egészséges életmód csökkentheti a demencia kockázatát.", explanation: "Számos kutatás igazolja, hogy az életmódbeli tényezők és a vaszkuláris egészség megőrzése jelentősen hozzájárulhat a demencia kockázatának csökkentéséhez és a kognitív egészség fenntartásához." },
+                    { question: "Mi a legfőbb korlátja az új amiloid-ellenes antitesteknek?", options: ["Nem hatékonyak az amiloid eltávolításában.", "Csak tabletta formában érhetők el.", "Jelentős mellékhatás-kockázattal (ARIA) járnak és csak a korai stádiumban hatásosak.", "Túlságosan olcsók."], answer: "Jelentős mellékhatás-kockázattal (ARIA) járnak és csak a korai stádiumban hatásosak.", explanation: "Ezek a terápiák csak a betegség korai szakaszában, enyhe kognitív zavar vagy enyhe demencia esetén lassítják a progressziót. Emellett szoros MRI monitorozást igényelnek az ARIA (agyi ödéma/vérzés) kockázata miatt, és a kezelés költséges és megterhelő." }
+                ]
+            },
+            {
+                topic: "Mitokondriális és trinukleotid repeat betegségek",
+                questions: [
+                    { question: "Mi a mitokondriális betegségek alapvető patofiziológiai oka?", options: ["Autoimmun gyulladás", "A sejtek energiaellátásának (ATP-termelés) zavara", "Vírusfertőzés", "Kóros fehérje felhalmozódás a sejtmagban"], answer: "A sejtek energiaellátásának (ATP-termelés) zavara", explanation: "A mitokondriumok a sejtek 'erőművei'. Működési zavaruk az oxidatív foszforiláció hibájához és elégtelen energiatermeléshez vezet, ami leginkább a nagy energiaigényű szerveket (agy, szív, izom) érinti." },
+                    { question: "Hogyan öröklődnek a mitokondriális DNS-ben (mtDNS) lévő mutációk?", options: ["Autoszomális dominánsan", "Autoszomális recesszíven", "Kizárólag anyai ágon", "X-kromoszómához kötötten"], answer: "Kizárólag anyai ágon", explanation: "A petesejt tartalmazza a mitokondriumokat, a spermium nem. Ezért az mtDNS-ben kódolt betegségek kizárólag az anyától öröklődnek a gyermekeire." },
+                    { question: "Mi a 'heteroplazmia' jelensége a mitokondriális genetikában?", options: ["A sejtmagi és mitokondriális DNS keveredése.", "A mutáns és vad típusú mtDNS-másolatok együttes jelenléte egy sejten belül.", "A mitokondriumok teljes hiánya.", "A mitokondriális gének átrendeződése."], answer: "A mutáns és vad típusú mtDNS-másolatok együttes jelenléte egy sejten belül.", explanation: "A heteroplazmia azt jelenti, hogy egy sejtben a több ezer mtDNS kópia egy része mutáns, másik része normális. A tünetek súlyossága a mutáns mtDNS arányától függ (küszöbhatás), ami magyarázza a betegség változatos klinikai képét." },
+                    { question: "Melyik klinikai szindróma NEM tartozik a klasszikus mitokondriális betegségek közé?", options: ["MELAS", "MERRF", "Huntington-kór", "Leigh-szindróma"], answer: "Huntington-kór", explanation: "A MELAS, MERRF és a Leigh-szindróma klasszikus mitokondriális encephalomyopathiák. A Huntington-kór egy trinukleotid repeat expanziós betegség." },
+                    { question: "Mi a trinukleotid repeat expanziós betegségek közös genetikai oka?", options: ["Pontmutációk egy génben", "Nagy gén-deléciók", "Három (vagy több) nukleotidból álló szekvenciák kóros mértékű megismétlődése", "Kromoszómaszám-rendellenesség"], answer: "Három (vagy több) nukleotidból álló szekvenciák kóros mértékű megismétlődése", explanation: "Ezeket a betegségeket 'dinamikus mutációk' okozzák, ahol egy rövid DNS-szekvencia (leggyakrabban egy trinukleotid) száma egy bizonyos küszöbérték fölé nő, ami a gén működési zavarához vezet." },
+                    { question: "Mi az 'anticipáció' jelensége a trinukleotid repeat betegségekben?", options: ["A beteg előre megérzi a rohamok jöttét.", "A betegség tünetei generációról generációra enyhébbek lesznek.", "A betegség tünetei generációról generációra korábban és súlyosabb formában jelentkeznek.", "A betegség spontán gyógyulása."], answer: "A betegség tünetei generációról generációra korábban és súlyosabb formában jelentkeznek.", explanation: "Az instabil repeatek száma az öröklődés során tovább növekedhet. A hosszabb repeatszám általában korábbi betegségkezdettel és súlyosabb tünetekkel jár, ez az anticipáció." },
+                    { question: "Melyik betegségre jellemző a CAG repeat expanzió a huntingtin génben?", options: ["Myotoniás dystrophia", "Fragilis X szindróma", "Huntington-kór", "Friedreich-ataxia"], answer: "Huntington-kór", explanation: "A Huntington-kórt a HTT génben található CAG trinukleotid repeat kóros felszaporodása okozza, ami egy toxikus, poliglutamin (polyQ) traktust tartalmazó fehérje termelődéséhez vezet." },
+                    { question: "Mi a Friedreich-ataxia (FRDA) fő patomechanizmusa?", options: ["Toxikus RNS funkciónyerés", "Toxikus fehérje funkciónyerés", "Funkcióvesztés a frataxin fehérje hiánya miatt", "Mitokondriális DNS deléció"], answer: "Funkcióvesztés a frataxin fehérje hiánya miatt", explanation: "Az FRDA-t az FXN gén intronjában lévő GAA repeat expanzió okozza, ami gátolja a gén átíródását és a frataxin fehérje termelődését. A frataxin hiánya a mitokondriumok vashomeosztázisának zavarához és oxidatív stresszhez vezet." },
+                    { question: "Melyik betegségre jellemző a 'toxikus RNS' mechanizmus?", options: ["Huntington-kór", "Myotoniás dystrophia 1 (DM1)", "Friedreich-ataxia", "Leber-féle örökletes optikus neuropathia (LHON)"], answer: "Myotoniás dystrophia 1 (DM1)", explanation: "DM1-ben a DMPK gén 3' nem-kódoló régiójában lévő CTG expanzió egy kóros RNS-molekulát hoz létre, ami a sejtmagban felhalmozódva megköt fontos RNS-kötő fehérjéket, és ezzel számos gén szabályozását zavarja meg (RNS funkciónyerés)." },
+                    { question: "Milyen szövettani lelet utalhat mitokondriális myopathiára az izombiopsziában?", options: ["Perifascicularis atrófia", "'Ragged-red fibers' (cafatos vörös rostok)", "Rimmed vacuolumok", "Endomysialis gyulladásos infiltrátum"], answer: "'Ragged-red fibers' (cafatos vörös rostok)", explanation: "A 'ragged-red fibers' a kórosan felszaporodott mitokondriumok halmazai az izomrostok széli részein, amelyek a mitokondriális betegségek jellegzetes, bár nem teljesen specifikus szövettani jelei." },
+                    { question: "Melyik a leggyakoribb örökletes ataxia gyermekkorban?", options: ["Spinocerebelláris ataxia 1-es típus", "Huntington-kór", "Friedreich-ataxia", "Ataxia-telangiectasia"], answer: "Friedreich-ataxia", explanation: "A Friedreich-ataxia a leggyakrabban előforduló autoszomális recesszív ataxia, amely jellemzően pubertás előtt kezdődik, és a progresszív ataxia mellett kardiomiopátiával és diabétesszel is társul." },
+                    { question: "Mi a Fragilis X szindróma genetikai oka?", options: ["CAG expanzió", "CTG expanzió", "GAA expanzió", "CGG expanzió"], answer: "CGG expanzió", explanation: "A Fragilis X szindrómát az FMR1 gén 5' nem-kódoló régiójában található CGG trinukleotid repeat kóros felszaporodása okozza, ami a gén elcsendesedéséhez és az FMRP fehérje hiányához vezet." },
+                    { question: "Melyik betegségre jellemző a myoclonusos epilepszia és a cerebelláris ataxia?", options: ["MELAS", "MERRF", "KSS", "LHON"], answer: "MERRF", explanation: "A MERRF (Myoclonic Epilepsy with Ragged-Red Fibers) egy mitokondriális szindróma, amelynek névadó tünetei a myoclonus (akaratlan izomrángás), az epilepszia és az ataxia." },
+                    { question: "Milyen típusú öröklődésmenetet követ a Huntington-kór?", options: ["Autoszomális recesszív", "Autoszomális domináns", "X-kromoszómához kötött", "Anyai"], answer: "Autoszomális domináns", explanation: "A Huntington-kór autoszomális dominánsan öröklődik, ami azt jelenti, hogy egyetlen hibás génkópia is elegendő a betegség kialakulásához, és egy érintett szülő 50% eséllyel adja tovább a betegséget." },
+                    { question: "Melyik állítás igaz a mitokondriális betegségek kezelésére?", options: ["A génterápia már rutin klinikai gyakorlat.", "A legtöbb esetben a kezelés tüneti és támogató, pl. vitamin 'koktélokkal'.", "Az antibiotikumok hatékonyan gyógyítják.", "A betegség mindig spontán gyógyul."], answer: "A legtöbb esetben a kezelés tüneti és támogató, pl. vitamin 'koktélokkal'.", explanation: "Jelenleg nincs gyógyító terápia a legtöbb mitokondriális betegségre. A kezelés a tünetek enyhítésére és a szervi funkciók támogatására összpontosít, gyakran antioxidánsokat és kofaktorokat (pl. Q10 koenzim, riboflavin) tartalmazó 'koktélokkal'." },
+                    { question: "Melyik betegségre jellemző a chorea, a demencia és a pszichiátriai zavarok triásza?", options: ["Friedreich-ataxia", "Huntington-kór", "Myotoniás dystrophia", "Fragilis X szindróma"], answer: "Huntington-kór", explanation: "A Huntington-kór klasszikus klinikai képét a mozgászavarok (legjellemzőbben a chorea), a progresszív kognitív hanyatlás (demencia) és a viselkedési/pszichiátriai tünetek (depresszió, ingerlékenység) hármasa alkotja." },
+                    { question: "Mi a 'poliglutamin (polyQ) betegség'?", options: ["Olyan betegség, ahol a glutamin nevű aminosav hiányzik.", "A trinukleotid repeat betegségek egy alcsoportja, ahol a CAG repeat expanzió egy kórosan hosszú poliglutamin láncot eredményez a fehérjében.", "A mitokondriumok egy betegsége.", "A glutamát anyagcsere zavara."], answer: "A trinukleotid repeat betegségek egy alcsoportja, ahol a CAG repeat expanzió egy kórosan hosszú poliglutamin láncot eredményez a fehérjében.", explanation: "A polyQ betegségek (pl. Huntington-kór, spinocerebelláris ataxiák) patomechanizmusának lényege, hogy a kórosan hosszú poliglutamin szakasz a fehérjét instabillá teszi, ami hibás feltekeredéshez, aggregációhoz és neurotoxicitáshoz vezet." },
+                    { question: "Melyik betegségre jellemző a progresszív külső ophthalmoplegia (szemmozgászavar) és a retinitis pigmentosa?", options: ["MELAS", "MERRF", "Kearns-Sayre szindróma (KSS)", "Leigh szindróma"], answer: "Kearns-Sayre szindróma (KSS)", explanation: "A KSS egy mitokondriális deléciós szindróma, amelynek klasszikus tünetei a 20 éves kor előtt kezdődő progresszív külső ophthalmoplegia (PEO), a pigmentált retinopathia és a szív vezetési zavarai." },
+                    { question: "Milyen típusú mutáció okozza a Fragilis X-hez kapcsolódó Tremor/Ataxia Szindrómát (FXTAS)?", options: ["Teljes FMR1 gén mutáció", "FMR1 gén premutáció", "HTT gén expanzió", "FXN gén deléció"], answer: "FMR1 gén premutáció", explanation: "Míg a teljes CGG repeat expanzió az FMR1 génben Fragilis X szindrómát okoz, a rövidebb, ún. premutációs tartományba eső expanzió (55-200 ismétlődés) hordozóinál idősebb korban kialakulhat az FXTAS, egy neurodegeneratív tremor-ataxia szindróma. Ez a toxikus RNS funkciónyerés egyik példája." },
+                    { question: "Melyik állítás igaz a trinukleotid repeat betegségek diagnosztikájára?", options: ["A diagnózis alapja az izombiopszia.", "A genetikai tesztelés a diagnózis sarokköve.", "Az MRI vizsgálat mindig egyértelműen kimutatja a betegséget.", "A liquorvizsgálat a legfontosabb."], answer: "A genetikai tesztelés a diagnózis sarokköve.", explanation: "Mivel ezeket a betegségeket specifikus, jól definiált ismétlődéses expanziók okozzák, a molekuláris genetikai vizsgálat, amely kimutatja és megméri ezeket az expanziókat, a diagnózis megerősítésének 'arany standardja'." }
+                ]
+            },
+            {
+                topic: "Neurogenetika - demenciák és izombetegségek",
+                questions: [
+                    { question: "Melyik gén allélja a legjelentősebb genetikai kockázati tényező a késői kezdetű Alzheimer-kór (LOAD) esetében?", options: ["APP", "PSEN1", "APOE ε4", "MAPT"], answer: "APOE ε4", explanation: "Az Apolipoprotein E (APOE) gén ε4 allélja a sporadikus Alzheimer-kór legerősebb genetikai kockázati tényezője. Az allél jelenléte dózisfüggő módon növeli a betegség kialakulásának valószínűségét." },
+                    { question: "Melyik három gén mutációja okozza a korai kezdetű, familiáris Alzheimer-kórt (FAD)?", options: ["APOE, MAPT, GRN", "APP, PSEN1, PSEN2", "C9orf72, SOD1, TARDBP", "HTT, ATXN1, DMPK"], answer: "APP, PSEN1, PSEN2", explanation: "A korai kezdetű, autoszomális domináns öröklődésű Alzheimer-kórt az amiloid prekurzor protein (APP), a presenilin 1 (PSEN1) és a presenilin 2 (PSEN2) gének mutációi okozzák." },
+                    { question: "Melyik betegségre jellemző a dystrophin gén mutációja?", options: ["Gerincvelői izomsorvadás (SMA)", "Myotoniás dystrophia", "Duchenne és Becker izomdystrophia (DMD/BMD)", "Charcot-Marie-Tooth betegség (CMT)"], answer: "Duchenne és Becker izomdystrophia (DMD/BMD)", explanation: "A DMD és a BMD is a dystrophinopátiák közé tartozik, melyeket az X-kromoszómán található dystrophin gén mutációi okoznak, ami a dystrophin fehérje hiányához (DMD) vagy károsodásához (BMD) vezet." },
+                    { question: "Mi a genetikai oka a Gerincvelői Izomsorvadásnak (SMA)?", options: ["Az SMN1 gén mutációi", "A dystrophin gén deléciója", "A HTT gén CAG repeat expanziója", "A PMP22 gén duplikációja"], answer: "Az SMN1 gén mutációi", explanation: "Az SMA leggyakoribb formáját az SMN1 (Survival of Motor Neuron 1) gén homozigóta deléciója vagy mutációja okozza, ami az SMN fehérje hiányához és az alsó motoneuronok pusztulásához vezet." },
+                    { question: "Melyik génterápia forradalmasította az SMA kezelését?", options: ["Lecanemab", "Tofersen", "Nusinersen (Spinraza®) és Zolgensma®", "Eteplirsen"], answer: "Nusinersen (Spinraza®) és Zolgensma®", explanation: "Az SMA kezelésében áttörést hoztak a génterápiás megközelítések: a Nusinersen egy antiszensz oligonukleotid, amely az SMN2 gént módosítja, míg a Zolgensma egy génpótló terápia, amely egy funkcionális SMN1 gént juttat a sejtekbe." },
+                    { question: "Melyik állítás igaz a C9orf72 gén mutációjára?", options: ["Csak az Alzheimer-kórhoz kapcsolódik.", "A frontotemporális demencia (FTD) és az amiotrófiás laterálszklerózis (ALS) leggyakoribb genetikai oka.", "A Huntington-kórt okozza.", "Mindig enyhe lefolyású betegséget eredményez."], answer: "A frontotemporális demencia (FTD) és az amiotrófiás laterálszklerózis (ALS) leggyakoribb genetikai oka.", explanation: "A C9orf72 génben lévő hexanukleotid repeat expanzió az FTD és az ALS leggyakoribb közös genetikai oka, ami alátámasztja a két betegség közötti spektrum-koncepciót." },
+                    { question: "Mi a Charcot-Marie-Tooth (CMT) betegség leggyakoribb genetikai oka?", options: ["SMN1 deléció", "PMP22 gén duplikáció", "DMPK gén expanzió", "APOE ε4 allél"], answer: "PMP22 gén duplikáció", explanation: "A CMT1A altípus, amely a CMT leggyakoribb formája, a Perifériás Myelin Protein 22 (PMP22) gént tartalmazó kromoszómarégió duplikációja miatt alakul ki." },
+                    { question: "Mi az 'anticipáció' jelensége?", options: ["A betegség tüneteinek enyhülése a generációk során.", "A betegség tüneteinek korábbi megjelenése és súlyosbodása a következő generációkban.", "A genetikai teszt eredményének előrejelzése.", "A betegség spontán gyógyulása."], answer: "A betegség tüneteinek korábbi megjelenése és súlyosbodása a következő generációkban.", explanation: "Az anticipáció a dinamikus mutációkkal (pl. trinukleotid repeat expanziók) járó betegségekre jellemző, ahol az instabil ismétlődő szekvencia hossza generációról generációra nő, ami korábbi és súlyosabb klinikai képet eredményez." },
+                    { question: "Milyen szerepe van a neurogenetikának a diagnosztikában?", options: ["Helyettesíti a klinikai vizsgálatot.", "Lerövidítheti a diagnosztikai folyamatot és elkerülhetővé tehet invazív beavatkozásokat, mint az izombiopszia.", "Csak a kutatásban van jelentősége.", "Nincs hatással a kezelési döntésekre."], answer: "Lerövidítheti a diagnosztikai folyamatot és elkerülhetővé tehet invazív beavatkozásokat, mint az izombiopszia.", explanation: "A pontos genetikai diagnózis megerősítheti a klinikai gyanút, egyértelműsítheti az etiológiát, és sok esetben feleslegessé teszi a további, megterhelő diagnosztikai eljárásokat." },
+                    { question: "Melyik molekuláris diagnosztikai technika tette lehetővé a genetika 'aranykorát'?", options: ["Sanger-szekvenálás", "PCR", "Következő generációs szekvenálás (NGS)", "Western blot"], answer: "Következő generációs szekvenálás (NGS)", explanation: "Az NGS technológiák lehetővé teszik nagyszámú gén vagy akár a teljes genom gyors és költséghatékony szekvenálását, ami forradalmasította a betegségokozó gének azonosítását." },
+                    { question: "Milyen patomechanizmusra épülnek az exon-skipping terápiák DMD-ben?", options: ["A hiányzó dystrophin fehérje pótlására.", "A hibás génszakasz (exon) 'átugrására' az RNS-feldolgozás során, hogy egy rövidebb, de funkcionális fehérje termelődhessen.", "A gyulladás csökkentésére.", "Az izomsejtek regenerációjának serkentésére."], answer: "A hibás génszakasz (exon) 'átugrására' az RNS-feldolgozás során, hogy egy rövidebb, de funkcionális fehérje termelődhessen.", explanation: "Az exon-skipping terápiák (pl. eteplirsen) olyan antiszensz oligonukleotidok, amelyek az RNS-splicing folyamatát módosítva 'kihagyatják' a mutációt tartalmazó exont, helyreállítva az olvasási keretet és lehetővé téve egy csonka, de részlegesen működőképes dystrophin fehérje szintézisét." },
+                    { question: "Melyik állítás igaz a neurogenetikai betegségek öröklődésére?", options: ["Mindig autoszomális dominánsan öröklődnek.", "Csak X-kromoszómához kötötten öröklődnek.", "Az öröklődési mintázatok változatosak (domináns, recesszív, X-kötött, anyai) és gyakoriak a de novo mutációk.", "Soha nem öröklődnek, mindig sporadikusak."], answer: "Az öröklődési mintázatok változatosak (domináns, recesszív, X-kötött, anyai) és gyakoriak a de novo mutációk.", explanation: "A neurogenetikai betegségek rendkívül heterogének az öröklődésmenetüket tekintve. Emellett fontos, hogy sok esetben a mutáció újonnan, a betegben jelenik meg először (de novo), és nincs a családi kórtörténetben." },
+                    { question: "Mi a genetikai tanácsadás fő célja a nem kezelhető, késői kezdetű betegségek (pl. Huntington-kór) esetén?", options: ["A beteget rábeszélni a tesztelésre.", "Informált döntéshozatal támogatása a tesztelés lehetséges következményeiről, a családi kockázatokról és a reproduktív lehetőségekről.", "A betegség gyógyítása.", "A tünetek azonnali enyhítése."], answer: "Informált döntéshozatal támogatása a tesztelés lehetséges következményeiről, a családi kockázatokról és a reproduktív lehetőségekről.", explanation: "A genetikai tanácsadás egy komplex folyamat, amely segít az egyénnek és a családnak megérteni a genetikai információkat és azok pszichológiai, szociális és etikai vonzatait, hogy saját értékeik mentén hozhassanak döntéseket." },
+                    { question: "Melyik demencia típusra jellemző a MAPT gén mutációja?", options: ["Vaszkuláris demencia", "Lewy-testes demencia", "Frontotemporális demencia", "Alzheimer-kór"], answer: "Frontotemporális demencia", explanation: "A MAPT gén a tau fehérjét kódolja. Mutációi a familiáris FTD eseteinek 5-20%-áért felelősek, és tau-patológiához vezetnek." },
+                    { question: "Miért fontos a multidiszciplináris ellátás a genetikai izombetegségekben?", options: ["Mert a genetikus minden tünetet tud kezelni.", "Mert ezek a betegségek gyakran több szervrendszert is érintenek (pl. szív, tüdő, csontozat).", "Mert olcsóbb, mint az egyéni szakorvosi ellátás.", "Csak a diagnózis felállításához szükséges."], answer: "Mert ezek a betegségek gyakran több szervrendszert is érintenek (pl. szív, tüdő, csontozat).", explanation: "Az olyan betegségek, mint a DMD vagy a myotoniás dystrophia, nemcsak a vázizmokat, hanem a szívet, a légzőrendszert és más szerveket is érintik. A komplex ellátáshoz elengedhetetlen a különböző szakterületek (neurológus, kardiológus, pulmonológus, gyógytornász stb.) együttműködése." },
+                    { question: "Mi a Friedreich-ataxia (FRDA) genetikai háttere?", options: ["CAG repeat expanzió", "CTG repeat expanzió", "GAA repeat expanzió az FXN génben", "PMP22 deléció"], answer: "GAA repeat expanzió az FXN génben", explanation: "Az FRDA egy autoszomális recesszív betegség, amelyet az FXN gén első intronjában található GAA trinukleotid repeat kóros felszaporodása okoz, ami a frataxin fehérje hiányához vezet." },
+                    { question: "Melyik állítás igaz a teljes exom szekvenálásra (WES)?", options: ["Csak egyetlen gént vizsgál.", "A teljes genomot szekvenálja.", "A genom fehérjekódoló részeit (exonokat) szekvenálja, és segít új betegségokozó gének azonosításában.", "Egy egyszerű vérvizsgálat a fehérjeszintek mérésére."], answer: "A genom fehérjekódoló részeit (exonokat) szekvenálja, és segít új betegségokozó gének azonosításában.", explanation: "A WES egy hatékony NGS technika, amely a genom kb. 1-2%-át kitevő, de a legtöbb ismert betegségokozó mutációt tartalmazó exonokat elemzi. Különösen hasznos ritka, ismeretlen genetikai hátterű betegségek diagnosztikájában." },
+                    { question: "Milyen patomechanizmus jellemző a C9orf72-mutációra?", options: ["Csak funkcióvesztés (haploinszufficiencia)", "Csak toxikus fehérje termelődése", "Toxikus RNS képződés és kóros dipeptid fehérjék termelődése (RAN transzláció)", "A mitokondriális DNS károsodása"], answer: "Toxikus RNS képződés és kóros dipeptid fehérjék termelődése (RAN transzláció)", explanation: "A C9orf72 expanzió patomechanizmusa komplex, magában foglalja a géntermék csökkenését (haploinszufficiencia), a kóros ismétlődő szekvenciát tartalmazó RNS-molekulák toxikus hatását (RNS fókuszok), valamint ezen RNS-ekről történő kóros fehérjeszintézist (RAN transzláció)." },
+                    { question: "Melyik a leggyakoribb örökletes neuromuszkuláris betegség felnőttkorban?", options: ["Duchenne izomdystrophia", "Gerincvelői izomsorvadás (SMA)", "Myotoniás dystrophia", "Friedreich-ataxia"], answer: "Myotoniás dystrophia", explanation: "A myotoniás dystrophia (különösen a DM1) az európai populációkban a leggyakrabban előforduló, felnőttkorban manifesztálódó örökletes izombetegség." },
+                    { question: "Mi a génterápiák legnagyobb kihívása a központi idegrendszeri betegségekben?", options: ["A megfelelő gén azonosítása.", "A terápiás szerek átjuttatása a vér-agy gáton.", "A genetikai tesztelés költsége.", "A betegek bevonása a klinikai vizsgálatokba."], answer: "A terápiás szerek átjuttatása a vér-agy gáton.", explanation: "A vér-agy gát (BBB) egy szelektív barrier, amely megvédi az agyat a káros anyagoktól, de egyben gátolja a legtöbb gyógyszer, köztük a génterápiás vektorok bejutását is. Ennek a gátnak a leküzdése a neuroterápiák fejlesztésének egyik legnagyobb akadálya." }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Új Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/80</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Neuropathiás fájdalom",
+                questions: [
+                    { question: "Mi a neuropátiás fájdalom IASP definíciója?", options: ["A szomatoszenzoros idegrendszer léziója vagy betegsége által okozott fájdalom.", "Bármilyen krónikus fájdalom, ami 3 hónapnál tovább tart.", "Fájdalom, amit pszichés tényezők okoznak.", "A gyulladásos folyamatok által kiváltott fájdalom."], answer: "A szomatoszenzoros idegrendszer léziója vagy betegsége által okozott fájdalom.", explanation: "Az IASP definíciója szerint a neuropátiás fájdalom közvetlenül az érző idegrendszer sérüléséből vagy betegségéből ered." },
+                    { question: "Melyik a leggyakoribb oka a perifériás neuropátiás fájdalomnak?", options: ["Postherpeszes neuralgia", "Trigeminus neuralgia", "Fájdalmas diabeteses neuropathia", "Alkoholos neuropathia"], answer: "Fájdalmas diabeteses neuropathia", explanation: "A fájdalmas diabeteses neuropathia a leggyakoribb oka a neuropátiás fájdalomnak, a cukorbetegek jelentős részét érinti." },
+                    { question: "Mit jelent az allodynia?", options: ["Fokozott fájdalomérzet egy fájdalmas ingerre.", "Fájdalom olyan ingerre, amely normálisan nem vált ki fájdalmat.", "Kellemetlen, abnormális érzés.", "Az érzékelés teljes hiánya."], answer: "Fájdalom olyan ingerre, amely normálisan nem vált ki fájdalmat.", explanation: "Az allodynia a neuropátiás fájdalom egyik jellegzetes tünete, amikor egy ártalmatlan inger, mint a könnyű érintés, fájdalmat vált ki." },
+                    { question: "Mi a centrális szenzitizáció lényege a neuropátiás fájdalomban?", options: ["A perifériás idegek sérülése.", "A központi idegrendszer nociceptív neuronjainak fokozott válaszkészsége.", "Az izmok gyulladása.", "A bőr receptorainak károsodása."], answer: "A központi idegrendszer nociceptív neuronjainak fokozott válaszkészsége.", explanation: "A centrális szenzitizáció egy 'wind-up' jelenség, ahol a gerincvelői és agyi neuronok hiperexcitábilissá válnak, felerősítve a fájdalomjeleket még minimális perifériás ingerlésre is." },
+                    { question: "Melyik kérdőív használatos a neuropátiás fájdalom komponensének azonosítására?", options: ["Beck Depresszió Kérdőív", "Mini-Mental State Examination (MMSE)", "Douleur Neuropathique en 4 Questions (DN4)", "Wong-Baker FACES Skála"], answer: "Douleur Neuropathique en 4 Questions (DN4)", explanation: "A DN4 egy egyszerű, validált szűrőeszköz, amely tünetekre és klinikai jelekre kérdez rá, hogy segítse a neuropátiás fájdalom azonosítását. 4 vagy több pont erősen utal neuropátiás komponensre." },
+                    { question: "Melyik gyógyszercsoport NEM számít első vonalbeli szernek a neuropátiás fájdalom kezelésében?", options: ["Gabapentinoidok", "Triciklikus antidepresszánsok", "SNRI-k", "Opioidok"], answer: "Opioidok", explanation: "Bár hatékonyak, az opioidok a mellékhatásaik és a függőség kockázata miatt általában csak másod- vagy harmadvonalbeli kezelésként javasoltak, ha az elsődleges szerek hatástalanok." },
+                    { question: "Hogyan hatnak a gabapentinoidok (gabapentin, pregabalin)?", options: ["Közvetlenül a GABA receptorokhoz kötődnek.", "A feszültségfüggő kalciumcsatornák α2δ alegységéhez kötődve csökkentik a neurotranszmitterek felszabadulását.", "Gátolják a COX enzimeket.", "Blokkolják a szerotonin visszavételét."], answer: "A feszültségfüggő kalciumcsatornák α2δ alegységéhez kötődve csökkentik a neurotranszmitterek felszabadulását.", explanation: "A gabapentinoidok a preszinaptikus idegvégződések kalciumcsatornáihoz kötődve csökkentik az excitátoros neurotranszmitterek (pl. glutamát) felszabadulását, így mérsékelve a fájdalomjelek továbbítását." },
+                    { question: "Milyen típusú neuropátiás fájdalom kezelésére engedélyezett a kapszaicin 8%-os tapasz?", options: ["Bármilyen neuropátiás fájdalomra", "Postherpeszes neuralgia és diabeteses neuropathia", "Trigeminus neuralgia", "Centrális stroke utáni fájdalom"], answer: "Postherpeszes neuralgia és diabeteses neuropathia", explanation: "A magas koncentrációjú kapszaicin tapasz a TRPV1 receptorok deszenzitizációjával hat, és specifikusan a lokalizált perifériás neuropátiás fájdalmak, mint a PHN és a DPN kezelésére engedélyezett." },
+                    { question: "Milyen szerepe van a fizikoterápiának a neuropátiás fájdalom kezelésében?", options: ["Nincs szerepe, mert az idegkárosodás a probléma.", "Javítja az izomerőt, az egyensúlyt és csökkenti a merevséget.", "Helyettesíti a gyógyszeres kezelést.", "Csak passzív módszereket alkalmaz."], answer: "Javítja az izomerőt, az egyensúlyt és csökkenti a merevséget.", explanation: "A fizikoterápia a komplex kezelés fontos része, segít fenntartani a funkciót, javítani a mozgástartományt, erősíteni az izmokat és az egyensúlygyakorlatokkal csökkenteni az esések kockázatát." },
+                    { question: "Mi a gerincvelő stimuláció (SCS) lényege?", options: ["A gerincvelő hűtése.", "Gyógyszer bejuttatása a gerincvelőbe.", "Beültetett eszköz, amely elektromos impulzusokkal gátolja a fájdalomjelek agyba jutását.", "A gerincvelő sebészi átvágása."], answer: "Beültetett eszköz, amely elektromos impulzusokkal gátolja a fájdalomjelek agyba jutását.", explanation: "Az SCS egy neuromodulációs eljárás, ahol elektródákat ültetnek a gerincvelő epidurális terébe, hogy a fájdalomérzetet kellemes bizsergéssel (paresztézia) helyettesítsék, vagy gátolják a fájdalomjelek továbbítását." },
+                    { question: "Melyik vitamin hiánya okozhat perifériás neuropátiát?", options: ["C-vitamin", "D-vitamin", "A-vitamin", "B12-vitamin"], answer: "B12-vitamin", explanation: "A B12-vitamin hiánya ismert oka a perifériás neuropátiának, amely zsibbadással és bizsergéssel járhat a végtagokban." },
+                    { question: "Mi a posztherpeszes neuralgia (PHN)?", options: ["Az övsömör (herpes zoster) akut fázisában jelentkező fájdalom.", "Az övsömör kiütéseinek gyógyulása után is fennmaradó idegfájdalom.", "A herpes simplex vírus által okozott neuralgia.", "A bárányhimlő egy ritka szövődménye."], answer: "Az övsömör kiütéseinek gyógyulása után is fennmaradó idegfájdalom.", explanation: "A PHN az övsömör leggyakoribb krónikus szövődménye, ahol a fájdalom a bőrkiütések eltűnése után több mint 3 hónappal is fennáll az érintett ideg lefutása mentén." },
+                    { question: "Melyik kemoterápiás gyógyszercsoport NEM ismert arról, hogy perifériás neuropátiát okoz?", options: ["Platina alapú szerek", "Taxánok", "Penicillinek", "Vinka alkaloidok"], answer: "Penicillinek", explanation: "A platina-származékok, a taxánok és a vinka alkaloidok gyakran okoznak kemoterápia-indukált perifériás neuropátiát (CIPN), míg a penicillinek nem tartoznak a tipikus neurotoxikus szerek közé." },
+                    { question: "Mi a 'wind-up' jelenség?", options: ["A fájdalom csökkenése ismételt ingerlésre.", "A centrális szenzitizáció egyik megnyilvánulása, ahol az ismétlődő C-rost ingerlés egyre nagyobb választ vált ki a gerincvelői neuronokból.", "A perifériás idegek regenerációja.", "A fájdalomérzet teljes megszűnése."], answer: "A centrális szenzitizáció egyik megnyilvánulása, ahol az ismétlődő C-rost ingerlés egyre nagyobb választ vált ki a gerincvelői neuronokból.", explanation: "A 'wind-up' a centrális szenzitizáció egy alapvető elektrofiziológiai mechanizmusa, ami a fájdalom felerősödéséhez (hyperalgesia) vezet." },
+                    { question: "Melyik ioncsatorna-típus játszik kulcsszerepet az idegsejtek kóros, spontán aktivitásában neuropátiás fájdalom esetén?", options: ["Kloridcsatornák", "Káliumcsatornák", "Nátriumcsatornák (NaV)", "Kalciumcsatornák"], answer: "Nátriumcsatornák (NaV)", explanation: "A sérült idegrostokon a feszültségfüggő nátriumcsatornák (különösen a NaV1.7 és NaV1.8) felszaporodnak és működésük megváltozik, ami csökkenti az ingerületi küszöböt és spontán akciós potenciálok generálásához vezet." },
+                    { question: "Milyen típusú fájdalomcsillapító az amitriptilin?", options: ["Opioid", "NSAID", "Triciklikus antidepresszáns (TCA)", "Antikonvulzívum"], answer: "Triciklikus antidepresszáns (TCA)", explanation: "Az amitriptilin egy TCA, amelyet eredetileg depresszió kezelésére fejlesztettek ki, de alacsonyabb dózisban hatékonyan csökkenti a neuropátiás fájdalmat a szerotonin és noradrenalin visszavételének gátlásával." },
+                    { question: "Mire utal, ha egy betegnél a fájdalom mellett izomgyengeség is jelentkezik?", options: ["Tisztán szenzoros neuropathiára.", "Arra, hogy a károsodás a motoros idegrostokat is érinti.", "Myopathiára.", "Centrális fájdalomra."], answer: "Arra, hogy a károsodás a motoros idegrostokat is érinti.", explanation: "A neuropátiás fájdalom gyakran vegyes, szenzomotoros neuropathiákban fordul elő. Az izomgyengeség jelenléte azt jelzi, hogy a károsodás nemcsak az érző, hanem a mozgató rostokat is érinti." },
+                    { question: "Melyik állítás igaz a neuropátiás fájdalom kezelésére?", options: ["A legtöbb beteg teljes fájdalommentességet ér el egyetlen gyógyszerrel.", "A kezelés célja gyakran a fájdalom 30-50%-os csökkentése és a funkció javítása.", "A gyógyszeres kezelés mindig hatékonyabb, mint a nem-gyógyszeres.", "Az opioidok a legbiztonságosabb választás hosszú távon."], answer: "A kezelés célja gyakran a fájdalom 30-50%-os csökkentése és a funkció javítása.", explanation: "A neuropátiás fájdalom kezelése gyakran kihívást jelent. A teljes fájdalommentesség ritka, ezért a reális terápiás cél a fájdalom jelentős csökkentése, az életminőség és a funkcionális képességek javítása." },
+                    { question: "Mi a szerepe a kognitív viselkedésterápiának (KVT) a krónikus fájdalom kezelésében?", options: ["Közvetlenül az idegkárosodást gyógyítja.", "Segít a betegeknek megváltoztatni a fájdalommal kapcsolatos negatív gondolataikat és viselkedésüket, javítva a megküzdési stratégiákat.", "Helyettesíti a fájdalomcsillapítókat.", "Csak a fájdalom elterelésére szolgál."], answer: "Segít a betegeknek megváltoztatni a fájdalommal kapcsolatos negatív gondolataikat és viselkedésüket, javítva a megküzdési stratégiákat.", explanation: "A KVT a fájdalom pszichológiai komponensét célozza. Segít a fájdalom katasztrofizálásának csökkentésében, a megküzdési mechanizmusok fejlesztésében és az aktivitási szint növelésében, ami összességében javítja az életminőséget." },
+                    { question: "Melyik a legújabb, ígéretes terápiás célpont a neuropátiás fájdalom kutatásában?", options: ["Opioid receptorok", "COX enzimek", "Specifikus ioncsatorna altípusok (pl. NaV1.8, KV7)", "Szerotonin receptorok"], answer: "Specifikus ioncsatorna altípusok (pl. NaV1.8, KV7)", explanation: "A kutatások egyre inkább a fájdalom patofiziológiájában kulcsszerepet játszó specifikus ioncsatornák szelektív gátlására vagy aktiválására összpontosítanak, ami hatékonyabb és kevesebb mellékhatással járó kezelést ígér." }
+                ]
+            },
+            {
+                topic: "Pseudotumor cerebri",
+                questions: [
+                    { question: "Mi a pseudotumor cerebri (idiopátiás intrakraniális hipertónia - IIH) lényege?", options: ["Egy jóindulatú agydaganat.", "Az agy-gerincvelői folyadék (CSF) nyomásának megemelkedése nyilvánvaló ok nélkül.", "Agyi vénás trombózis.", "Súlyos migrénes fejfájás."], answer: "Az agy-gerincvelői folyadék (CSF) nyomásának megemelkedése nyilvánvaló ok nélkül.", explanation: "Az IIH-t a koponyaűri nyomás megemelkedése jellemzi, anélkül, hogy daganat, fertőzés vagy más strukturális elváltozás állna a háttérben. A 'pseudotumor' név a daganatot utánzó tünetekre utal." },
+                    { question: "Melyik demográfiai csoportban a leggyakoribb az IIH?", options: ["Idős férfiak", "Fiatal, fogamzóképes korú, elhízott nők", "Serdülő fiúk", "Gyermekek"], answer: "Fiatal, fogamzóképes korú, elhízott nők", explanation: "Az IIH aránytalanul gyakran érinti a fiatal, túlsúlyos nőket. Az elhízás a legerősebb és legkonzisztensebb kockázati tényező." },
+                    { question: "Mi az IIH legveszélyesebb szövődménye?", options: ["Krónikus fejfájás", "Pulzáló fülzúgás", "Tartós látásvesztés", "Depresszió"], answer: "Tartós látásvesztés", explanation: "A megemelkedett koponyaűri nyomás a látóidegfő (papilla) duzzanatát (papillaödéma) okozza, ami kezeletlenül az idegrostok maradandó károsodásához és vaksághoz vezethet. A látás megőrzése a kezelés elsődleges célja." },
+                    { question: "Melyik klinikai jel a legjellemzőbb az IIH-ra a szemfenéki vizsgálat során?", options: ["Retinavérzés", "Sárgafolt-degeneráció", "Papillaödéma", "Látóideg-sorvadás"], answer: "Papillaödéma", explanation: "A papillaödéma, a látóidegfő duzzanata, az emelkedett koponyaűri nyomás klasszikus jele és az IIH diagnózisának egyik sarokköve." },
+                    { question: "Milyen képalkotó vizsgálat elengedhetetlen az IIH diagnózisához más okok kizárására?", options: ["Koponya röntgen", "Hasi ultrahang", "Agyi MRI és MRV (mágneses rezonanciás venográfia)", "PET-CT"], answer: "Agyi MRI és MRV (mágneses rezonanciás venográfia)", explanation: "Az MRI és MRV vizsgálatok elengedhetetlenek az agydaganatok, a hydrocephalus és a vénás sinus trombózis kizárására, amelyek szintén okozhatnak koponyaűri nyomásfokozódást." },
+                    { question: "Mi a lumbálpunkció (LP) szerepe az IIH diagnosztikájában?", options: ["Csak a fejfájás enyhítésére szolgál.", "A koponyaűri nyomás mérésére és a liquor összetételének vizsgálatára.", "A gerincvelő sérüléseinek kimutatására.", "Nincs szerepe a diagnózisban."], answer: "A koponyaűri nyomás mérésére és a liquor összetételének vizsgálatára.", explanation: "Az LP során mért magas nyitó nyomás (>25 cmH₂O) megerősíti az intrakraniális hipertóniát, míg a normális liquorösszetétel segít kizárni a gyulladásos vagy fertőzéses okokat." },
+                    { question: "Melyik gyógyszer az elsődleges választás az IIH kezelésében?", options: ["Fájdalomcsillapítók", "Acetazolamid", "Béta-blokkolók", "Szteroidok"], answer: "Acetazolamid", explanation: "Az acetazolamid egy karboanhidráz-gátló, amely csökkenti az agy-gerincvelői folyadék (CSF) termelődését, így mérsékelve a koponyaűri nyomást. Ez a leggyakrabban alkalmazott gyógyszer IIH-ban." },
+                    { question: "Mi a leghatékonyabb hosszú távú kezelési stratégia elhízott IIH-s betegeknél?", options: ["Tartós gyógyszerszedés", "Rendszeres lumbálpunkció", "Testsúlycsökkentés", "Szemüveg viselése"], answer: "Testsúlycsökkentés", explanation: "Az elhízás és az IIH között szoros az összefüggés. Már 5-10%-os testsúlycsökkenés is jelentősen javíthatja a tüneteket és a papillaödémát, és hosszú távon a leghatékonyabb kezelési mód." },
+                    { question: "Milyen tünet a pulzáló tinnitus?", options: ["Magas hangú, sípoló fülzúgás.", "A szívveréssel szinkron, lüktető hang a fülben.", "A hallás teljes elvesztése.", "A hangok tompább érzékelése."], answer: "A szívveréssel szinkron, lüktető hang a fülben.", explanation: "A pulzáló tinnitus az IIH egy jellegzetes tünete, amelyet valószínűleg a megemelkedett nyomású CSF által a vénás sinusok falára átadott pulzáció okoz." },
+                    { question: "Melyik agyideg bénulása okozhat kettőslátást (diplopia) IIH-ban?", options: ["III. agyideg (nervus oculomotorius)", "IV. agyideg (nervus trochlearis)", "VI. agyideg (nervus abducens)", "VII. agyideg (nervus facialis)"], answer: "VI. agyideg (nervus abducens)", explanation: "A VI. agyidegnek hosszú intrakraniális lefutása van, ezért különösen sérülékeny a nyomásfokozódással szemben. Bénulása a szem kifelé tekintésének gyengeségét és ebből adódóan horizontális kettőslátást okoz." },
+                    { question: "Milyen képalkotó lelet NEM utal IIH-ra?", options: ["Üres sella turcica", "Kitágult látóideghüvely", "Kétoldali transversalis sinus stenosis", "Agyi daganat"], answer: "Agyi daganat", explanation: "Az IIH diagnózisa per exclusionem, azaz más okok kizárásán alapul. Ha a képalkotó vizsgálat daganatot mutat ki, az már nem idiopátiás, hanem szekunder intrakraniális hipertóniát jelent." },
+                    { question: "Mikor javasolt sebészeti beavatkozás IIH esetén?", options: ["Minden esetben az első választás.", "Csak a fejfájás enyhítésére.", "Súlyos, progrediáló látásromlás esetén, ha a konzervatív kezelés hatástalan.", "Ha a beteg elhízott."], answer: "Súlyos, progrediáló látásromlás esetén, ha a konzervatív kezelés hatástalan.", explanation: "A sebészeti beavatkozások (pl. látóideghüvely-fenesztráció, sönt beültetés) célja a látás megmentése. Akkor indokoltak, ha a gyógyszeres kezelés és a súlycsökkentés ellenére a látás tovább romlik." },
+                    { question: "Melyik gyógyszercsoport szedése ismert kockázati tényezője a szekunder intrakraniális hipertóniának?", options: ["Paracetamol", "Tetraciklin antibiotikumok", "Béta-blokkolók", "Statinok"], answer: "Tetraciklin antibiotikumok", explanation: "Bizonyos gyógyszerek, köztük a tetraciklin-származékok, a növekedési hormon és a túlzott A-vitamin bevitel, összefüggésbe hozhatók a koponyaűri nyomásfokozódás kialakulásával." },
+                    { question: "Mi a látóideghüvely-fenesztráció (ONSF) lényege?", options: ["A látóideg átvágása.", "Egy ablak vágása a látóideget körülvevő membránon a CSF elvezetésére.", "Egy sönt beültetése a látóideg mellé.", "A látóideg lézeres kezelése."], answer: "Egy ablak vágása a látóideget körülvevő membránon a CSF elvezetésére.", explanation: "Az ONSF egy sebészeti eljárás, amely során kis nyílásokat vágnak a látóideget körülvevő durahüvelyen, hogy a felesleges agy-gerincvelői folyadék (CSF) el tudjon távozni, így csökkentve a látóidegfőre nehezedő nyomást." },
+                    { question: "Melyik tünet súlyosbodik jellemzően reggelente vagy Valsalva-manőverre (pl. köhögés) IIH-ban?", options: ["Látásélesség", "Fejfájás", "Fülzúgás", "Kettőslátás"], answer: "Fejfájás", explanation: "A fekvő helyzet és az olyan manőverek, amelyek növelik a hasűri és mellkasi nyomást, tovább emelik a koponyaűri nyomást, ami a fejfájás reggeli vagy erőlködésre történő rosszabbodásához vezet." },
+                    { question: "Milyen diéta javasolt elhízott IIH-s betegeknek?", options: ["Magas zsírtartalmú, ketogén diéta", "Alacsony nátriumtartalmú, súlycsökkentő diéta", "Magas fehérjetartalmú diéta", "Folyadékmegszorítás"], answer: "Alacsony nátriumtartalmú, súlycsökkentő diéta", explanation: "A súlycsökkentés a kezelés sarokköve. Az alacsony kalória- és nátriumbevitel segít a testsúly és a folyadék-visszatartás csökkentésében, ami mérsékli a koponyaűri nyomást." },
+                    { question: "Milyen új gyógyszercsoport mutatott ígéretes eredményeket az IIH kezelésében, a súlycsökkentéstől függetlenül is?", options: ["Opioidok", "GLP-1 receptor agonisták", "Sztatinok", "Antipszichotikumok"], answer: "GLP-1 receptor agonisták", explanation: "Újabb vizsgálatok szerint a GLP-1 receptor agonisták (eredetileg diabétesz kezelésére használt szerek) a súlycsökkentő hatásukon túl, közvetlen mechanizmusokon keresztül is képesek csökkenteni a koponyaűri nyomást, ami új terápiás lehetőséget jelent." },
+                    { question: "Mi a módosított Dandy kritériumok szerepe?", options: ["A kezelés hatékonyságának mérésére szolgálnak.", "Az IIH diagnózisának felállítására szolgáló kritériumrendszer.", "A sebészeti beavatkozás indikációit határozzák meg.", "A beteg életminőségét mérik fel."], answer: "Az IIH diagnózisának felállítására szolgáló kritériumrendszer.", explanation: "A módosított Dandy kritériumok egy nemzetközileg elfogadott rendszer, amely meghatározza azokat a klinikai, képalkotó és liquorvizsgálati feltételeket, amelyeknek teljesülniük kell az idiopátiás intrakraniális hipertónia diagnózisához." },
+                    { question: "Milyen látótérkiesés a leggyakoribb IIH-ban?", options: ["Centrális scotoma (központi látótérkiesés)", "Bitemporális hemianopia", "Inferonasalis (alsó-belső) látótérkiesés", "Homonym hemianopia"], answer: "Inferonasalis (alsó-belső) látótérkiesés", explanation: "A papillaödéma okozta idegrost-károsodás leggyakrabban az alsó és belső (inferonasalis) látótérrészek kiesésével kezdődik, ami a látótérvizsgálat során jellegzetes mintázatot ad." },
+                    { question: "Melyik állítás NEM igaz az IIH-ra?", options: ["Gyakran jár papillaödémával.", "A kezelés elsődleges célja a látás megőrzése.", "A liquornyomás a lumbálpunkció során normális vagy alacsony.", "Az elhízás a legfontosabb módosítható kockázati tényező."], answer: "A liquornyomás a lumbálpunkció során normális vagy alacsony.", explanation: "Az IIH diagnózisának egyik kötelező kritériuma a megemelkedett nyitó liquornyomás (>25 cmH₂O felnőtteknél) a lumbálpunkció során." }
+                ]
+            },
+            {
+                topic: "Alzheimer-kór",
+                questions: [
+                    { question: "Mi az Alzheimer-kór két legfontosabb patológiai fémjele az agyban?", options: ["Lewy-testek és vaszkuláris léziók", "Amiloid-béta plakkok és neurofibrilláris tau kötegek", "Prion fehérjék és gyulladásos infiltrátumok", "Demyelinizáció és axonális károsodás"], answer: "Amiloid-béta plakkok és neurofibrilláris tau kötegek", explanation: "Az Alzheimer-kór definitív patológiai diagnózisát az extracelluláris amiloid-béta plakkok és az intracelluláris, hiperfoszforilált tau fehérjéből álló neurofibrilláris kötegek jelenléte adja az agyszövetben." },
+                    { question: "Melyik génvariáns a legjelentősebb genetikai kockázati tényező a késői kezdetű Alzheimer-kórra?", options: ["APP", "PSEN1", "APOE e4", "TREM2"], answer: "APOE e4", explanation: "Az apolipoprotein E (APOE) gén e4 allélja a legfontosabb genetikai rizikófaktor. Egy e4 kópia 2-3-szorosára, míg két kópia 8-12-szeresére növeli a betegség kialakulásának kockázatát." },
+                    { question: "Melyik kognitív funkció hanyatlik legjellemzőbben az Alzheimer-kór korai szakaszában?", options: ["Végrehajtó funkciók", "Nyelvi képességek", "Epizodikus memória (új információk megjegyzése)", "Vizuospaciális tájékozódás"], answer: "Epizodikus memória (új információk megjegyzése)", explanation: "Az Alzheimer-kór legkorábbi és legjellemzőbb tünete a friss eseményekre vonatkozó memória zavara (anterográd amnézia), ami a hippocampus és a mediális temporális lebeny korai érintettségére utal." },
+                    { question: "Milyen változások láthatók a liquorban (CSF) Alzheimer-kór esetén?", options: ["Emelkedett Aβ42 és csökkent tau szint", "Csökkent Aβ42 és emelkedett össz-tau (t-tau) és foszforilált-tau (p-tau) szint", "Normális Aβ42 és tau szintek", "Csak a fehérjeszint emelkedik"], answer: "Csökkent Aβ42 és emelkedett össz-tau (t-tau) és foszforilált-tau (p-tau) szint", explanation: "Az AK jellegzetes liquor biomarker-profilja a csökkent Aβ42 szint (mivel az lerakódik a plakkokban) és az emelkedett tau szintek (a neuronális károsodás és a köteg-képződés jeleként)." },
+                    { question: "Melyik gyógyszercsoportot használják az Alzheimer-kór enyhe-közepes stádiumának tüneti kezelésére?", options: ["Antipszichotikumok", "Kolinészteráz-gátlók", "Béta-blokkolók", "Statinok"], answer: "Kolinészteráz-gátlók", explanation: "A kolinészteráz-gátlók (donepezil, rivasztigmin, galantamin) növelik az acetilkolin neurotranszmitter szintjét az agyban, ami átmenetileg javíthatja a kognitív funkciókat és a mindennapi aktivitást." },
+                    { question: "Mi az ARIA (Amyloid-Related Imaging Abnormalities)?", options: ["Az Alzheimer-kór egy ritka formája.", "Az amiloid-ellenes terápiák egy potenciális mellékhatása, ami agyi ödémát vagy mikrohemorrhagiákat jelent.", "Egy új diagnosztikai képalkotó eljárás.", "A tau-patológia jele az MRI-n."], answer: "Az amiloid-ellenes terápiák egy potenciális mellékhatása, ami agyi ödémát vagy mikrohemorrhagiákat jelent.", explanation: "Az ARIA az amiloid-eltávolító immunterápiák (pl. lecanemab, donanemab) ismert és monitorozandó mellékhatása. Kockázata magasabb az APOE e4 hordozókban." },
+                    { question: "Melyik állítás igaz a fiatalabb korban kezdődő Alzheimer-kórra?", options: ["Mindig enyhébb lefolyású.", "Gyakran determinisztikus génmutációk (APP, PSEN1, PSEN2) okozzák.", "Ugyanazok a kockázati tényezői, mint a késői kezdetűnek.", "Soha nem jár amiloid-lerakódással."], answer: "Gyakran determinisztikus génmutációk (APP, PSEN1, PSEN2) okozzák.", explanation: "A 65 éves kor előtt kezdődő, ún. familiáris Alzheimer-kór eseteinek jelentős részét három gén (APP, PSEN1, PSEN2) autoszomális domináns mutációi okozzák, amelyek az amiloid-béta túltermeléséhez vezetnek." },
+                    { question: "Milyen szerepet játszik a tau-PET képalkotás az Alzheimer-kór diagnózisában?", options: ["Az agyi vérellátás mérésére szolgál.", "Az amiloid plakkok kimutatására szolgál.", "A neurofibrilláris kötegek agyi eloszlását és sűrűségét vizualizálja.", "Az agyi gyulladás mértékét mutatja."], answer: "A neurofibrilláris kötegek agyi eloszlását és sűrűségét vizualizálja.", explanation: "A tau-PET egy specifikus képalkotó eljárás, amely lehetővé teszi a tau-patológia in vivo kimutatását és lokalizálását, ami szorosan korrelál a kognitív hanyatlás mértékével." },
+                    { question: "Mi a 'kevert demencia' leggyakoribb formája?", options: ["Alzheimer-kór és Parkinson-kór", "Alzheimer-kór és vaszkuláris demencia", "Lewy-testes demencia és frontotemporális demencia", "Csak vaszkuláris és frontotemporális demencia"], answer: "Alzheimer-kór és vaszkuláris demencia", explanation: "Nagyon gyakori, különösen idősebb korban, hogy az Alzheimer-kór patológiai jelei mellett agyi érbetegség (pl. kisérbetegség, mikroinfarktusok) jelei is kimutathatók, ami együttesen járul hozzá a kognitív hanyatláshoz." },
+                    { question: "Melyik állítás NEM igaz az amiloid-ellenes monoklonális antitestekre (pl. lecanemab)?", options: ["Céljuk az agyi amiloid plakkok eltávolítása.", "Bizonyítottan lassítják a kognitív hanyatlást a korai stádiumú betegeknél.", "Teljesen visszafordítják az idegsejt-pusztulást és gyógyítják a betegséget.", "Kockázatokkal, például ARIA-val járhatnak."], answer: "Teljesen visszafordítják az idegsejt-pusztulást és gyógyítják a betegséget.", explanation: "Bár ezek a gyógyszerek mérsékelten lassítják a betegség progresszióját, nem képesek a már elpusztult idegsejteket helyreállítani vagy a betegséget teljesen meggyógyítani. A kezelés célja a hanyatlás ütemének csökkentése." },
+                    { question: "Milyen szerepet játszanak a mikrogliasejtek az Alzheimer-kórban?", options: ["Kizárólag védő szerepet, az amiloid eltakarításával.", "Kettős szerepet: korán védő, de krónikus aktivációjuk neuroinflammációt és károsodást okoz.", "Nem játszanak szerepet a betegségben.", "A tau fehérjét termelik."], answer: "Kettős szerepet: korán védő, de krónikus aktivációjuk neuroinflammációt és károsodást okoz.", explanation: "A mikroglia, az agy immunsejtjei, kezdetben próbálják eltávolítani az amiloidot, de a tartós aktiváció pro-inflammatorikus állapotot hoz létre, ami hozzájárul a neurodegenerációhoz." },
+                    { question: "Mi a memantin hatásmechanizmusa?", options: ["Növeli az acetilkolin szintjét.", "Gátolja a glutamát által közvetített excitotoxicitást az NMDA receptorokon.", "Eltávolítja a tau-kötegeket.", "Csökkenti a koleszterinszintet."], answer: "Gátolja a glutamát által közvetített excitotoxicitást az NMDA receptorokon.", explanation: "A memantin egy NMDA receptor antagonista, amely a glutamát neurotranszmitter túlzott aktivitását szabályozza. Ez a túlzott aktivitás (excitotoxicitás) hozzájárul az idegsejt-károsodáshoz közepes-súlyos Alzheimer-kórban." },
+                    { question: "Melyik állítás igaz az Alzheimer-kór prevalenciájára?", options: ["Az életkor előrehaladtával csökken.", "A férfiakat gyakrabban érinti, mint a nőket.", "Az életkor a legjelentősebb kockázati tényező, a prevalencia 65 év felett exponenciálisan nő.", "Az elmúlt 20 évben a halálozási aránya csökkent."], answer: "Az életkor a legjelentősebb kockázati tényező, a prevalencia 65 év felett exponenciálisan nő.", explanation: "Az Alzheimer-kór egy időskori betegség, kockázata az életkorral drámaian növekszik. Míg 65-74 év között viszonylag ritka, 85 év felett a populáció közel egyharmadát érinti." },
+                    { question: "Mi az 'allosztatikus terhelés' koncepciójának lényege az Alzheimer-kórral kapcsolatban?", options: ["Egy specifikus génmutáció.", "A szervezet kumulatív 'kopása' a krónikus stresszre adott válaszként, ami felgyorsítja az öregedést és a neurodegenerációt.", "Az amiloid plakkok súlya az agyban.", "A gondozókra nehezedő fizikai és érzelmi teher."], answer: "A szervezet kumulatív 'kopása' a krónikus stresszre adott válaszként, ami felgyorsítja az öregedést és a neurodegenerációt.", explanation: "Az allosztatikus terhelés egy elmélet, amely szerint a genetikai és környezeti stresszorok együttesen terhelik a szervezetet, és ez a krónikus terhelés hozzájárul az AD patológiájának kialakulásához." },
+                    { question: "Melyik viselkedési tünet NEM jellemző az Alzheimer-kór középső stádiumára?", options: ["Vizuális hallucinációk és paranoia", "Agitáció és nyugtalanság", "A betegség belátásának teljes megőrzése", "Kóborlás és eltévedés"], answer: "A betegség belátásának teljes megőrzése", explanation: "A betegség előrehaladtával a betegek belátása (insight) a saját állapotukkal kapcsolatban jellemzően csökken vagy teljesen elvész (anosognosia). A középső stádiumban már jellemzően nem ismerik fel a kognitív hanyatlásukat." },
+                    { question: "Melyik képalkotó eljárás mutatja ki a csökkent agyi anyagcserét Alzheimer-kórban?", options: ["CT", "MRI", "FDG-PET", "Amiloid-PET"], answer: "FDG-PET", explanation: "Az FDG-PET (fluorodeoxiglükóz-pozitronemissziós tomográfia) az agyi glükózmetabolizmust méri. Alzheimer-kórban jellegzetes mintázatot mutat a temporoparietális kéreg csökkent anyagcseréje." },
+                    { question: "Milyen típusú memóriazavar jellemző leginkább az Alzheimer-kórra?", options: ["Procedurális memória zavara (pl. biciklizés elfelejtése)", "Szemantikus memória zavara (pl. szavak jelentésének elfelejtése)", "Rövid távú, epizodikus memória zavara (pl. mit reggelizett)", "Távoli, gyermekkori emlékek elvesztése"], answer: "Rövid távú, epizodikus memória zavara (pl. mit reggelizett)", explanation: "Az AK a hippocampus korai károsodása miatt elsősorban az új emlékek rögzítésének és előhívásának képességét támadja, ezért a betegek a közelmúlt eseményeire emlékeznek a legkevésbé." },
+                    { question: "Melyik állítás igaz a nem-farmakológiai beavatkozásokra Alzheimer-kórban?", options: ["Nincs bizonyított hasznuk.", "Helyettesíthetik a gyógyszeres kezelést.", "Kiegészítő terápiaként fontos szerepük van az életminőség javításában és a viselkedési tünetek kezelésében.", "Csak a betegség legvégső stádiumában alkalmazhatók."], answer: "Kiegészítő terápiaként fontos szerepük van az életminőség javításában és a viselkedési tünetek kezelésében.", explanation: "A nem-gyógyszeres terápiák, mint a fizikai aktivitás, a kognitív tréning, a zene- vagy művészetterápia, elengedhetetlenek a holisztikus ellátásban. Segítenek a funkciók megőrzésében, a hangulat javításában és a viselkedési problémák kezelésében." },
+                    { question: "Miért fontos az APOE genotipizálás az amiloid-ellenes terápiák előtt?", options: ["Mert csak az APOE e4 hordozók kaphatják a kezelést.", "Mert az APOE e4 allél jelenléte jelentősen növeli az ARIA (agyi ödéma/vérzés) mellékhatás kockázatát.", "Mert az APOE e2 hordozóknál hatástalan a terápia.", "Mert a biztosító csak így fizeti a kezelést."], answer: "Mert az APOE e4 allél jelenléte jelentősen növeli az ARIA (agyi ödéma/vérzés) mellékhatás kockázatát.", explanation: "Klinikai vizsgálatok kimutatták, hogy az APOE e4 allél hordozása dózisfüggő módon növeli az ARIA kockázatát, ezért a genotipizálás elengedhetetlen a kockázatbecsléshez és a betegek megfelelő tájékoztatásához a kezelés megkezdése előtt." },
+                    { question: "Milyen jövőbeli terápiás irányt tartanak a legígéretesebbnek az amiloid-célzott kezelések mellett?", options: ["A tau-patológiát célzó terápiák", "Nagy dózisú vitaminok", "Antibiotikumok", "Hormonpótló kezelés"], answer: "A tau-patológiát célzó terápiák", explanation: "Mivel a tau-patológia terjedése szorosabban korrelál a klinikai hanyatlással, a tau-fehérje aggregációját gátló vagy az eltávolítását segítő terápiák (pl. antitestek, vakcinák) a gyógyszerfejlesztés következő nagy reménységét jelentik." }
+                ]
+            },
+            {
+                topic: "Nem-Alzheimer és Vaszkuláris Demencia",
+                questions: [
+                    { question: "Mi a vaszkuláris demencia (VaD) leggyakoribb oka?", options: ["Genetikai mutáció", "Az agy csökkent vérellátása (pl. stroke) miatti agykárosodás", "Prion fehérjék felhalmozódása", "Autoimmun gyulladás"], answer: "Az agy csökkent vérellátása (pl. stroke) miatti agykárosodás", explanation: "A vaszkuláris demencia az agyi érbetegségek következménye. Az agy vérellátásának zavara (pl. egy vagy több stroke, kisérbetegség) az idegsejtek pusztulásához és kognitív hanyatláshoz vezet." },
+                    { question: "Milyen progressziós mintázat jellemző leginkább a vaszkuláris demenciára?", options: ["Lassan, egyenletesen progrediáló", "Gyorsan, hetek alatt lezajló", "Lépcsőzetes hanyatlás", "Fluktuáló, napról napra változó"], answer: "Lépcsőzetes hanyatlás", explanation: "A VaD lefolyása gyakran lépcsőzetes, ami azt jelenti, hogy a kognitív állapot egy-egy újabb vaszkuláris esemény (stroke) után hirtelen romlik, majd egy ideig stabil maradhat." },
+                    { question: "Melyik kognitív terület károsodik gyakran korán és kiemelkedően vaszkuláris demenciában?", options: ["Epizodikus memória", "Nyelvi képességek", "Végrehajtó funkciók (tervezés, problémamegoldás)", "Arcfelismerés"], answer: "Végrehajtó funkciók (tervezés, problémamegoldás)", explanation: "Ellentétben az Alzheimer-kórral, ahol a memória a legkorábbi probléma, a VaD-ban gyakran a végrehajtó funkciók (tervezés, szervezés, a gondolkodás sebessége) károsodnak először, a frontális lebenyek és a szubkortikális pályák sérülése miatt." },
+                    { question: "Mi a Lewy-testes demencia (DLB) három kardinális tünete?", options: ["Memóriazavar, apátia, depresszió", "Fluktuáló kogníció, vizuális hallucinációk, parkinsonizmus", "Nyelvi zavar, viselkedésváltozás, izomgyengeség", "Chorea, demencia, pszichiátriai tünetek"], answer: "Fluktuáló kogníció, vizuális hallucinációk, parkinsonizmus", explanation: "A DLB diagnózisának alapját a demencia mellett a három fő tünet (core feature) közül legalább kettő megléte adja: a figyelem és éberség ingadozása, a visszatérő, részletgazdag vizuális hallucinációk, és a spontán kialakuló parkinsonizmus." },
+                    { question: "Milyen kóros fehérje felhalmozódása okozza a Lewy-testes demenciát és a Parkinson-kórt?", options: ["Amiloid-béta", "Tau", "Alfa-szinuklein", "Prion"], answer: "Alfa-szinuklein", explanation: "Mindkét betegség az alfa-szinukleinopathiák csoportjába tartozik, ahol az alfa-szinuklein fehérje kórosan feltekeredik és Lewy-testeknek nevezett zárványokat képez az idegsejtekben." },
+                    { question: "Mi az 'egyéves szabály' a DLB és a Parkinson-kór demencia (PDD) elkülönítésében?", options: ["A demencia egy éven belül halálhoz vezet.", "Ha a demencia a motoros tünetek előtt vagy azokkal egy éven belül jelentkezik, az DLB; ha több mint egy évvel utána, az PDD.", "A kezelést egy évig kell próbálni, mielőtt diagnózist mondanának.", "A betegnek évente kell kontrollra járnia."], answer: "Ha a demencia a motoros tünetek előtt vagy azokkal egy éven belül jelentkezik, az DLB; ha több mint egy évvel utána, az PDD.", explanation: "Ez egy klinikai megállapodáson alapuló szabály a két, patológiailag rokon állapot elkülönítésére. A tünetek megjelenésének sorrendje a döntő." },
+                    { question: "Melyik gyógyszercsoportra különösen érzékenyek a DLB-s betegek, ami súlyos mellékhatásokat okozhat?", options: ["Antibiotikumok", "Fájdalomcsillapítók", "Antipszichotikumok", "Véralvadásgátlók"], answer: "Antipszichotikumok", explanation: "A DLB-s betegek jelentős részénél súlyos neuroleptikus szenzitivitás lép fel, ami azt jelenti, hogy a tipikus antipszichotikumok (de néha az atípusosak is) drámaian ronthatják a parkinsonizmust, zavartságot, és akár halálos kimenetelűek is lehetnek." },
+                    { question: "Melyik agyterület sorvadása a legjellemzőbb a frontotemporális demenciában (FTD)?", options: ["Hippocampus és parietális lebeny", "Frontális (homlok) és temporális (halánték) lebenyek", "Occipitális lebeny", "Kisagy"], answer: "Frontális (homlok) és temporális (halánték) lebenyek", explanation: "Az FTD neve is utal a patológia helyére. A homloklebeny a viselkedésért és a végrehajtó funkciókért, a halántéklebeny pedig a nyelvért és az érzelmekért felelős, így ezek sorvadása okozza a jellegzetes tüneteket." },
+                    { question: "Mi a viselkedési variánsú FTD (bvFTD) legfőbb tünete?", options: ["Súlyos memóriavesztés", "Személyiség- és viselkedésváltozások (pl. gátlástalanság, apátia)", "Látótérkiesés", "Izomgyengeség"], answer: "Személyiség- és viselkedésváltozások (pl. gátlástalanság, apátia)", explanation: "A bvFTD-t nem a memóriazavar, hanem a személyiség drámai megváltozása jellemzi, ami gátlástalan, társadalmilag nem megfelelő viselkedésben, vagy éppen az érdeklődés és a motiváció teljes elvesztésében (apátia) nyilvánul meg." },
+                    { question: "Milyen alvászavar utal erősen Lewy-testes demenciára, és gyakran évekkel megelőzi a többi tünetet?", options: ["Insomnia (álmatlanság)", "Narkolepszia", "Alvajárás", "REM alvási viselkedészavar (RBD)"], answer: "REM alvási viselkedészavar (RBD)", explanation: "Az RBD során a beteg 'eljátssza' az álmait (beszél, kiabál, mozog), mert hiányzik a REM fázisra jellemző normális izomatónia. Ez az alfa-szinukleinopathiák (LBD, Parkinson-kór) egyik legkorábbi és legspecifikusabb jele lehet." },
+                    { question: "Mi a Huntington-kór (HK) jellegzetes motoros tünete?", options: ["Remegés nyugalomban", "Spaszticitás", "Chorea (szabálytalan, táncszerű, akaratlan mozgások)", "Lassú, csoszogó járás"], answer: "Chorea (szabálytalan, táncszerű, akaratlan mozgások)", explanation: "A chorea a Huntington-kór leglátványosabb mozgászavara, amely a végtagok, a törzs és az arc akaratlan, céltalan, folytonos mozgásából áll." },
+                    { question: "Hogyan öröklődik a Huntington-kór?", options: ["Autoszomális recesszíven", "X-kromoszómához kötötten", "Autoszomális dominánsan", "Nem örökletes betegség"], answer: "Autoszomális dominánsan", explanation: "A HK egy autoszomális domináns öröklődésű betegség, amit a huntingtin génben lévő CAG-triplet repeat kóros felszaporodása okoz. Egy beteg szülőnek 50% esélye van a hibás gén továbbörökítésére." },
+                    { question: "Melyik demencia típusra jellemző a rendkívül gyors, hetek-hónapok alatti lefolyás?", options: ["Alzheimer-kór", "Vaszkuláris demencia", "Frontotemporális demencia", "Creutzfeldt-Jakob-kór (CJD)"], answer: "Creutzfeldt-Jakob-kór (CJD)", explanation: "A CJD egy prionbetegség, amelyet a kognitív funkciók és a neurológiai állapot rendkívül gyors, fatális kimenetelű romlása jellemez. Ez a gyors progresszió a legfontosabb klinikai ismérve." },
+                    { question: "Melyik diagnosztikai vizsgálat a legérzékenyebb és legspecifikusabb a CJD kimutatására?", options: ["Koponya CT", "Liquor RT-QuIC teszt", "Szérum amiloid szint mérése", "EEG"], answer: "Liquor RT-QuIC teszt", explanation: "A Real-Time Quaking-Induced Conversion (RT-QuIC) egy modern laboratóriumi eljárás, amely képes kimutatni a kóros prion fehérjék jelenlétét a liquorban, rendkívül magas specificitással és szenzitivitással, lehetővé téve a CJD megbízható, életben történő diagnózisát." },
+                    { question: "Melyik demencia típus kezelésének alapja a vaszkuláris kockázati tényezők kontrollja?", options: ["Lewy-testes demencia", "Frontotemporális demencia", "Vaszkuláris demencia", "Alzheimer-kór"], answer: "Vaszkuláris demencia", explanation: "Mivel a VaD-t agyi érbetegség okozza, a kezelés és a megelőzés sarokköve a további érkárosodás megakadályozása, azaz a magas vérnyomás, a cukorbetegség, a magas koleszterinszint kezelése és a dohányzás elhagyása." },
+                    { question: "Milyen típusú hallucinációk a leggyakoribbak a DLB-ben?", options: ["Hallási", "Vizuális", "Tapintási", "Szaglási"], answer: "Vizuális", explanation: "A DLB-re a visszatérő, jól formált, részletgazdag vizuális hallucinációk (pl. emberek, állatok látása) a legjellemzőbbek, és gyakran a betegség korai szakaszában megjelennek." },
+                    { question: "Melyik demencia típusban NEM a memóriazavar a legelső és legdominánsabb tünet?", options: ["Tipikus Alzheimer-kór", "Frontotemporális demencia", "Amnesztikus MCI", "Kevert demencia Alzheimer-komponenssel"], answer: "Frontotemporális demencia", explanation: "Az FTD-ben a betegség leggyakrabban a személyiség, viselkedés vagy a nyelv zavarával kezdődik, míg a memória és a tájékozódás a korai szakaszban viszonylag megtartott lehet, ami éles ellentétben áll az Alzheimer-kórral." },
+                    { question: "Mi a primer progresszív afázia (PPA)?", options: ["A stroke utáni beszédzavar.", "A frontotemporális demencia egy nyelvi variánsa.", "Az Alzheimer-kór egy altípusa.", "A hallás teljes elvesztése."], answer: "A frontotemporális demencia egy nyelvi variánsa.", explanation: "A PPA az FTD egyik fő klinikai megjelenési formája, ahol a betegség a nyelvi központok progresszív sorvadásával kezdődik, ami a beszédprodukció, a szótalálás vagy a szóértés fokozatos romlásához vezet." },
+                    { question: "Milyen képalkotó lelet támasztja alá a vaszkuláris demencia diagnózisát?", options: ["Diffúz agyi atrófia", "A hippocampus szelektív sorvadása", "Korábbi stroke-ok, kiterjedt fehérállományi elváltozások vagy multiplex lakunáris infarktusok az MRI-n", "Normális agyi MRI"], answer: "Korábbi stroke-ok, kiterjedt fehérállományi elváltozások vagy multiplex lakunáris infarktusok az MRI-n", explanation: "A VaD diagnózisához bizonyítani kell a kognitív hanyatlás és a klinikailag szignifikáns agyi érbetegség közötti kapcsolatot, amit az agyi MRI-n látható vaszkuláris léziók igazolnak." },
+                    { question: "Melyik gyógyszer FDA-engedélyezett a Parkinson-kór demencia kezelésére?", options: ["Levodopa", "Donepezil", "Rivasztigmin", "Memantin"], answer: "Rivasztigmin", explanation: "A kolinészteráz-gátlók közül a rivasztigmint specifikusan engedélyezték a Parkinson-kórhoz társuló demencia kognitív tüneteinek kezelésére." }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

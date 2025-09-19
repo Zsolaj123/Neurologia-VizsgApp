@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.selected {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Neurológia Tesztek</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy témakört a tudása teszteléséhez.</p>
+            <div id="topic-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <p id="progress-text" class="text-slate-500"></p>
+                </div>
+                <button id="back-to-topics" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2 px-4 border border-slate-300 rounded-lg shadow-sm">Vissza</button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+                
+                <div id="feedback-container" class="mt-6">
+                    <div id="explanation" class="explanation p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                        <h4 class="font-bold mb-2">Magyarázat</h4>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="next-button" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h2>
+            <p id="score-text" class="text-xl text-slate-600 mb-2"></p>
+            <p id="score-percentage" class="text-4xl font-bold text-blue-600 mb-6"></p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Újra</button>
+                <button id="back-to-topics-from-results" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 border border-slate-300 rounded-lg shadow-sm">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            "spinalis_gyokok": {
+                title: "A spinális gyökök károsodásának tünetei",
+                questions: [
+                    {
+                        question: "Melyik ideggyök károsodása okoz gyengeséget a váll abdukciójában (m. deltoideus) és a könyök flexiójában (m. biceps)?",
+                        options: ["C4", "C5", "C6", "C7"],
+                        answer: "C5",
+                        explanation: "A C5 gyök idegzi be a m. deltoideust (váll abdukció) és a m. biceps brachiit (könyök flexió). Károsodása esetén ezen izmok gyengesége, valamint a biceps reflex csökkenése vagy kiesése a jellemző."
+                    },
+                    {
+                        question: "Melyik reflex kiesése a legjellemzőbb az S1 gyöki radiculopathiára?",
+                        options: ["Patella reflex", "Biceps reflex", "Achilles-ín reflex", "Triceps reflex"],
+                        answer: "Achilles-ín reflex",
+                        explanation: "Az Achilles-ín reflexet (boka reflex) elsődlegesen az S1 ideggyök közvetíti. Ennek a gyöknek a kompressziója vagy károsodása a reflex gyengüléséhez vagy teljes kieséséhez (areflexia) vezet."
+                    },
+                    {
+                        question: "Mi a 'lovaglónadrág-anesztézia' és melyik szindrómára utaló vészjelző tünet?",
+                        options: ["A comb elülső részének zsibbadása, L4 radiculopathiára utal.", "A gáttájék, genitáliák és végbél körüli terület érzéskiesése, Cauda Equina Szindrómára utal.", "A lábfej zsibbadása, L5 radiculopathiára utal.", "A kar zsibbadása, C8 radiculopathiára utal."],
+                        answer: "A gáttájék, genitáliák és végbél körüli terület érzéskiesése, Cauda Equina Szindrómára utal.",
+                        explanation: "A lovaglónadrág-anesztézia a perineális (gáttájéki), genitális és perianális területek érzéskiesését jelenti (S2-S5 dermatomák). Ez a Cauda Equina Szindróma egyik kardinális, vészhelyzetre utaló tünete, amely azonnali orvosi beavatkozást igényel."
+                    },
+                    {
+                        question: "Melyik ideggyök érintettsége okoz leggyakrabban gyengeséget a nagylábujj extenziójában (m. extensor hallucis longus)?",
+                        options: ["L3", "L4", "L5", "S1"],
+                        answer: "L5",
+                        explanation: "Az L5 gyök idegzi be a m. extensor hallucis longust, amely a nagylábujj hátrahajlításáért felelős. Az L5 radiculopathia klasszikus motoros jele ennek az izomnak a gyengesége, ami a sarokjárás nehezítettségében is megnyilvánulhat."
+                    },
+                    {
+                        question: "A radikuláris fájdalom gyakran súlyosbodik bizonyos tevékenységekre. Melyik NEM tartozik ezek közé?",
+                        options: ["Köhögés", "Tüsszentés", "Előrehajlás ülve", "Erőlködés (Valsalva-manőver)"],
+                        answer: "Előrehajlás ülve",
+                        explanation: "A köhögés, tüsszentés és erőlködés növeli az intrathecalis nyomást, ami fokozza az ideggyök kompresszióját és a fájdalmat. Ezzel szemben az előrehajlás vagy ülés gyakran enyhíti a lumbális radikuláris fájdalmat, különösen stenosis esetén, mert tágítja a foramen intervertebralékat."
+                    },
+                    {
+                        question: "Melyik a leggyakrabban érintett cervikális ideggyök?",
+                        options: ["C5", "C6", "C7", "C8"],
+                        answer: "C7",
+                        explanation: "A C7-es ideggyök (a C6-C7 csigolyák közötti résen kilépve) a leggyakrabban érintett a cervikális radiculopathiák során. Jellemző tünete a triceps gyengesége (könyök extenzió), a triceps reflex kiesése és a középső ujjba sugárzó fájdalom/zsibbadás."
+                    },
+                    {
+                        question: "Milyen típusú fájdalom jellemző a radiculopathiára?",
+                        options: ["Tompa, mély, nehezen lokalizálható", "Éles, nyilalló, elektromos áramütésszerű", "Görcsös, szorító", "Lüktető, pulzáló"],
+                        answer: "Éles, nyilalló, elektromos áramütésszerű",
+                        explanation: "A radikuláris fájdalom tipikusan neuropátiás jellegű, ami éles, lövöldöző, égő vagy elektromos áramütésszerű minőséget jelent, és az érintett ideggyök lefutása mentén sugárzik."
+                    },
+                    {
+                        question: "Melyik tünet utal felső motoros neuron (UMN) lézióra, és felveti a myelopathia gyanúját radiculopathiás tünetek mellett?",
+                        options: ["Areflexia (reflexkiesés)", "Izomatrófia (izomsorvadás)", "Fasciculatio (izomrángás)", "Hiperreflexia (fokozott reflexek)"],
+                        answer: "Hiperreflexia (fokozott reflexek)",
+                        explanation: "Míg a hipo-/areflexia, atrófia és fasciculatio alsó motoros neuron (LMN) károsodásra (mint a radiculopathia) utalnak, a hiperreflexia, klónus vagy Babinski-jel felső motoros neuron (UMN) lézió jele. Jelenlétük gerincvelő kompresszió (myelopathia) gyanúját veti fel."
+                    },
+                    {
+                        question: "Melyik ideggyök felelős a patella reflexért?",
+                        options: ["L2", "L3", "L4", "L5"],
+                        answer: "L4",
+                        explanation: "A patella reflexet (térd ínreflex) főként az L4 ideggyök (kisebb mértékben L2, L3) közvetíti. Az L4 gyök károsodása a reflex csökkenéséhez vagy kieséséhez vezet."
+                    },
+                    {
+                        question: "Mi a 'váll abdukciós jel' (shoulder abduction relief sign)?",
+                        options: ["A váll emelésére fokozódó nyaki fájdalom.", "A kar fej fölé emelése enyhíti a cervikális radikuláris fájdalmat.", "A váll lefelé nyomásakor jelentkező fájdalom.", "A kar abdukciójának képtelensége."],
+                        answer: "A kar fej fölé emelése enyhíti a cervikális radikuláris fájdalmat.",
+                        explanation: "A váll abdukciós jel pozitív, ha a beteg a karját a feje fölé emelve enyhülést tapasztal a cervikális radikuláris fájdalmában. Ennek oka valószínűleg az, hogy ez a mozdulat csökkenti az ideggyökre nehezedő feszülést."
+                    },
+                    {
+                        question: "Melyik állítás igaz a radiculopathia és a radikuláris fájdalom kapcsolatára?",
+                        options: ["A kettő ugyanazt jelenti.", "Radiculopathia mindig súlyos fájdalommal jár.", "Radiculopathia (objektív neurológiai kiesés) fennállhat fájdalom nélkül.", "Radikuláris fájdalom mindig kimutatható idegkárosodással jár."],
+                        answer: "Radiculopathia (objektív neurológiai kiesés) fennállhat fájdalom nélkül.",
+                        explanation: "Fontos megkülönböztetni a radiculopathiát (neurológiai funkciókiesés, pl. gyengeség, érzészavar, reflexkiesés) a radikuláris fájdalomtól. Bár gyakran együtt járnak, radiculopathia létezhet fájdalom nélkül (pl. tiszta motoros deficit), és radikuláris fájdalom is fennállhat objektív kiesési tünetek nélkül (pl. korai irritációs szakaszban)."
+                    },
+                    {
+                        question: "A thoracalis radiculopathia tünetei mit utánozhatnak?",
+                        options: ["Csak hátfájást", "Csípőízületi gyulladást", "Övsömört, szív- vagy hasi problémákat", "Fejfájást"],
+                        answer: "Övsömört, szív- vagy hasi problémákat",
+                        explanation: "A thoracalis radiculopathia övszerű, a mellkasfal vagy a has körül sugárzó fájdalmat okozhat, ami megtévesztően hasonlíthat övsömör (herpes zoster), szívinfarktus, epehólyag-gyulladás vagy egyéb hasi kórképek tüneteire."
+                    },
+                    {
+                        question: "Melyik ideggyök érintettsége okozhatja a kéz intrinsic izmainak gyengeségét és a gyűrűs- és kisujj zsibbadását?",
+                        options: ["C6", "C7", "C8", "T1"],
+                        answer: "C8",
+                        explanation: "A C8-as gyök látja el a kéz kisizmait (finommotorika) és az ujjhajlítókat, valamint érzően a mediális alkar, a gyűrűs- és a kisujj területét. Tünetei hasonlíthatnak a nervus ulnaris károsodására."
+                    },
+                    {
+                        question: "Mi a neurogén claudicatio, és melyik állapotra jellemző?",
+                        options: ["Járáskor jelentkező mellkasi fájdalom, szívbetegségre jellemző.", "Járáskor vagy álláskor fokozódó lábfájdalom és zsibbadás, ami előrehajlásra enyhül; lumbális stenosisra jellemző.", "Járáskor jelentkező látászavar, agyi keringészavarra jellemző.", "Járáskor jelentkező izomgörcs, ami pihenésre nem javul; izombetegségre jellemző."],
+                        answer: "Járáskor vagy álláskor fokozódó lábfájdalom és zsibbadás, ami előrehajlásra enyhül; lumbális stenosisra jellemző.",
+                        explanation: "A neurogén claudicatio a lumbális gerinccsatorna-szűkület (stenosis) jellegzetes tünete. A gerinc extenziója (járás, állás) tovább szűkíti a csatornát, provokálva a tüneteket, míg a flexió (ülés, előrehajlás) tágítja azt, így enyhülést hoz."
+                    },
+                    {
+                        question: "Melyik NEM számít 'vörös zászló' tünetnek gerincfájdalom esetén?",
+                        options: ["Anamnézisben szereplő malignus betegség", "4 hétnél rövidebb ideje tartó, mechanikus jellegű derékfájás", "Megmagyarázhatatlan testsúlycsökkenés", "Láz és hidegrázás"],
+                        answer: "4 hétnél rövidebb ideje tartó, mechanikus jellegű derékfájás",
+                        explanation: "A 'vörös zászló' tünetek súlyos alapbetegségre (pl. tumor, fertőzés, cauda equina szindróma) utalnak. Az anamnézisben szereplő daganat, a fogyás és a láz mind ilyenek. A rövid ideje tartó, mozgásra változó (mechanikus) derékfájás általában jóindulatú, mozgásszervi eredetű."
+                    },
+                    {
+                        question: "Melyik ideggyök károsodása okozhatja a lábfej plantárflexiójának (lábujjhegyre állás) gyengeségét?",
+                        options: ["L4", "L5", "S1", "S2"],
+                        answer: "S1",
+                        explanation: "Az S1 ideggyök idegzi be a m. gastrocnemiust és a m. soleust, amelyek a lábfej plantárflexiójáért felelősek. Az S1 radiculopathia a lábujjhegyre állás nehezítettségét vagy képtelenségét okozza."
+                    },
+                    {
+                        question: "A radiculopathia diagnózisában az érzészavarok klasszikusan milyen mintázatot követnek?",
+                        options: ["Myotomális", "Sclerotómális", "Dermatómális", "Véletlenszerű"],
+                        answer: "Dermatómális",
+                        explanation: "Az érzészavarok (zsibbadás, érzéskiesés) klasszikusan egy dermatomát követnek, ami az a bőrterület, amelyet egyetlen spinális ideggyök lát el érzően. Ez segít a károsodás szintjének lokalizálásában."
+                    },
+                    {
+                        question: "Melyik állítás igaz a porckorongsérv és a spinális stenosis okozta radiculopathia tüneteire?",
+                        options: ["A porckorongsérv általában lassú, alattomos kezdettel jár idősebb korban.", "A stenosisra jellemző a hirtelen, trauma utáni tünetkezdet fiataloknál.", "A porckorongsérv tünetei gyakran akutabbak, míg a stenosisé lassabban alakulnak ki.", "Mindkettő mindig kétoldali tüneteket okoz."],
+                        answer: "A porckorongsérv tünetei gyakran akutabbak, míg a stenosisé lassabban alakulnak ki.",
+                        explanation: "A porckorongsérv jellemzően akutabb, hirtelen kezdettel jár, gyakran emelés vagy rossz mozdulat váltja ki fiatalabbaknál. Ezzel szemben a degeneratív stenosis tünetei általában lassan, fokozatosan alakulnak ki idősebb korban."
+                    },
+                    {
+                        question: "Melyik ideggyök érintettsége okozhat zsibbadást a hüvelykujjban és a mutatóujjban?",
+                        options: ["C5", "C6", "C7", "C8"],
+                        answer: "C6",
+                        explanation: "A C6-os ideggyök látja el érzően az alkar laterális (radiális) oldalát, a hüvelykujjat és a mutatóujjat. A C6 radiculopathia tünetei utánozhatják a carpalis alagút szindrómát."
+                    },
+                    {
+                        question: "Melyik a legobjektívebb klinikai jel radiculopathia esetén?",
+                        options: ["A beteg által leírt fájdalom erőssége", "A zsibbadás kiterjedése", "A csökkent vagy hiányzó mély ínreflex", "A mozgásbeszűkülés mértéke"],
+                        answer: "A csökkent vagy hiányzó mély ínreflex",
+                        explanation: "A reflexváltozások (hipo- vagy areflexia) a radiculopathia legobjektívebb jelei közé tartoznak, mivel a reflexív megszakadását jelzik, és kevésbé befolyásolja őket a beteg szubjektív fájdalomérzete vagy az erőkifejtési hajlandósága."
+                    }
+                ]
+            },
+            "conus_cauda": {
+                title: "Conus-cauda szindróma",
+                questions: [
+                    {
+                        question: "Melyik anatómiai struktúra a conus medullaris?",
+                        options: ["A gerincvelőből kilépő ideggyökök kötege", "A gerincvelő elkeskenyedő, végső szakasza", "A lumbális csigolyák összessége", "A gerincvelőt borító legkülső burok"],
+                        answer: "A gerincvelő elkeskenyedő, végső szakasza",
+                        explanation: "A conus medullaris a gerincvelő kúp alakú, végső szakasza, amely felnőttekben általában az L1-L2 csigolyák szintjén helyezkedik el. Tényleges gerincvelői szövetet tartalmaz (S2-S5 szegmentumok)."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Cauda Equina Szindróma (CES) és a Conus Medullaris Szindróma (CMS) tüneteinek kezdetére és szimmetriájára?",
+                        options: ["Mindkettő mindig hirtelen és szimmetrikusan kezdődik.", "A CMS gyakran hirtelen és kétoldali, míg a CES lehet fokozatos és kezdetben egyoldali.", "A CES mindig hirtelen és szimmetrikus, míg a CMS fokozatos és egyoldali.", "Mindkettő mindig fokozatosan és aszimmetrikusan alakul ki."],
+                        answer: "A CMS gyakran hirtelen és kétoldali, míg a CES lehet fokozatos és kezdetben egyoldali.",
+                        explanation: "A conus medullaris egy kompakt, központi struktúra, ezért a károsodása gyakran hirtelen és szimmetrikus (kétoldali) tüneteket okoz. Ezzel szemben a cauda equina ideggyökökből áll, amelyek egyenként is károsodhatnak, így a tünetek kezdete lehet fokozatos és aszimmetrikus (egyoldali)."
+                    },
+                    {
+                        question: "Milyen típusú neurológiai jelek jellemzőek a Cauda Equina Szindrómára (CES)?",
+                        options: ["Kizárólag felső motoros neuron (UMN) jelek", "Kizárólag alsó motoros neuron (LMN) jelek", "Kevert UMN és LMN jelek", "Egyik sem"],
+                        answer: "Kizárólag alsó motoros neuron (LMN) jelek",
+                        explanation: "A cauda equina a gerincvelőből már kilépett ideggyökökből áll, amelyek perifériás idegelemek, azaz alsó motoros neuronok (LMN). Ezért a CES tiszta LMN tünetegyüttest okoz: petyhüdt bénulás, hipo-/areflexia, izomatrófia."
+                    },
+                    {
+                        question: "Melyik tünetegyüttesre jellemzőbb a súlyos, kínzó, gyakran aszimmetrikus radikuláris lábfájdalom (isiász)?",
+                        options: ["Conus Medullaris Szindróma (CMS)", "Cauda Equina Szindróma (CES)", "Mindkettőre egyformán jellemző", "Egyikre sem jellemző"],
+                        answer: "Cauda Equina Szindróma (CES)",
+                        explanation: "Míg a CMS-ben a hátfájás dominálhat, a CES-re jellemzőbb a súlyos, gyakran egyoldali vagy aszimmetrikus, a lábba sugárzó ideggyöki (radikuláris) fájdalom, mivel a lumboszakrális ideggyökök direkt kompressziója okozza."
+                    },
+                    {
+                        question: "A hólyag- és béldiszfunkció melyik szindrómában jelenik meg jellemzően korábban és súlyosabb formában?",
+                        options: ["Cauda Equina Szindróma (CES)", "Conus Medullaris Szindróma (CMS)", "Mindkettőben egyszerre és egyforma súlyossággal", "Egyikben sem jellemző"],
+                        answer: "Conus Medullaris Szindróma (CMS)",
+                        explanation: "A conus medullaris tartalmazza a vizelet- és székletürítésért felelős szakrális paraszimpatikus központokat (S2-S4). Ennek direkt károsodása miatt a CMS-ben a hólyag- és béldiszfunkció (retenció, inkontinencia) gyakran korai és súlyos tünet."
+                    },
+                    {
+                        question: "Mi a Cauda Equina Szindróma leggyakoribb oka?",
+                        options: ["Gerincvelői daganat", "Gerincvelői fertőzés", "Nagyméretű, centrális lumbális porckorongsérv", "Thoracolumbális csigolyatörés"],
+                        answer: "Nagyméretű, centrális lumbális porckorongsérv",
+                        explanation: "A CES leggyakoribb oka egy nagy, a gerinccsatornába kiszakadt, centrális elhelyezkedésű porckorongsérv, leggyakrabban az L4-L5 vagy L5-S1 szinten, amely a cauda equina több ideggyökét egyszerre nyomja."
+                    },
+                    {
+                        question: "Milyen reflexeltérések jellemzőek a Conus Medullaris Szindrómára?",
+                        options: ["Minden végtagreflex fokozott.", "A patella- és Achilles-reflex is mindig kiesik.", "Az Achilles-reflex gyakran kiesik, míg a patella-reflex normális vagy akár élénk is lehet.", "A reflexek mindig normálisak."],
+                        answer: "Az Achilles-reflex gyakran kiesik, míg a patella-reflex normális vagy akár élénk is lehet.",
+                        explanation: "A CMS kevert UMN/LMN képet mutathat. Az S1-S2 szegmentumok károsodása miatt az Achilles-reflex (LMN jel) kiesik. Ugyanakkor a gerincvelői szövet károsodása felszabadíthatja a felette lévő reflexíveket, így a patella reflex (L4) élénk lehet (UMN jel)."
+                    },
+                    {
+                        question: "Melyik csigolyaszint sérülése okoz leggyakrabban Conus Medullaris Szindrómát?",
+                        options: ["C5-C6", "T4-T5", "T12-L2", "L5-S1"],
+                        answer: "T12-L2",
+                        explanation: "A conus medullaris az L1-L2 csigolyatestek magasságában helyezkedik el. Ezért a thoracolumbális átmenet (T12-L2) sérülései, például robbanásos törések, okoznak leggyakrabban CMS-t."
+                    },
+                    {
+                        question: "Mi a 'fájdalommentes vizeletretenció' jelentősége CES gyanúja esetén?",
+                        options: ["Jó prognózisra utal.", "A betegség enyhe formáját jelzi.", "Késői, baljós jel, ami a hólyag beidegzésének súlyos károsodására utal.", "Gyakori, de jelentőség nélküli tünet."],
+                        answer: "Késői, baljós jel, ami a hólyag beidegzésének súlyos károsodására utal.",
+                        explanation: "A vizeletretenció kezdetben a feszülő hólyag miatt fájdalmas lehet. Amikor a hólyag érző beidegzése is károsodik, a retenció fájdalmatlanná válik. Ez egy késői, rossz prognózisú jel, ami a hólyagfunkció helyreállásának kisebb esélyére utal."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a conus és cauda szindrómákra?",
+                        options: ["Mindkettő idegsebészeti sürgősségi állapot.", "Azonnali képalkotó (MRI) vizsgálatot igényelnek.", "A kezelés célja a sebészeti dekompresszió.", "A konzervatív kezelés általában elegendő és a műtét elkerülhető."],
+                        answer: "A konzervatív kezelés általában elegendő és a műtét elkerülhető.",
+                        explanation: "Mind a conus, mind a cauda equina szindróma abszolút idegsebészeti vészhelyzet, amely azonnali diagnózist (MRI) és sürgős sebészeti dekompressziót igényel a maradandó neurológiai károsodások (bénulás, inkontinencia) megelőzése érdekében."
+                    },
+                    {
+                        question: "Milyen motoros jelek jellemzőek a Conus Medullaris Szindrómára (CMS)?",
+                        options: ["Aszimmetrikus, petyhüdt bénulás", "Szimmetrikus alsó végtagi gyengeség, kevert UMN/LMN jelekkel", "Csak a felső végtagokat érintő gyengeség", "Spasztikus paraparézis LMN jelek nélkül"],
+                        answer: "Szimmetrikus alsó végtagi gyengeség, kevert UMN/LMN jelekkel",
+                        explanation: "A CMS a gerincvelői szövet (UMN) és a belőle eredő gyökök (LMN) károsodását is okozhatja, ami szimmetrikus gyengeséghez vezet kevert jelekkel (pl. spaszticitás és petyhüdt bénulás együttesen)."
+                    },
+                    {
+                        question: "Melyik struktúra áll perifériás idegelemekből?",
+                        options: ["Conus medullaris", "Cauda equina", "Gerincvelő szürkeállománya", "Gerincvelő fehérállománya"],
+                        answer: "Cauda equina",
+                        explanation: "A cauda equina (lófarok) a gerincvelő vége (conus medullaris) alatti lumboszakrális ideggyökök kötege. Ezek az ideggyökök már a perifériás idegrendszer részét képezik."
+                    },
+                    {
+                        question: "Az impotencia (merevedési zavar) melyik szindrómában lehet korai és gyakori tünet?",
+                        options: ["Cauda Equina Szindróma (CES)", "Conus Medullaris Szindróma (CMS)", "Mindkettőben egyformán ritka", "Egyikben sem fordul elő"],
+                        answer: "Conus Medullaris Szindróma (CMS)",
+                        explanation: "A szexuális funkciókhoz szükséges paraszimpatikus központok a conus medullarisban (S2-S4) találhatók. Ennek direkt sérülése miatt a CMS-ben az impotencia gyakori és korai tünet lehet."
+                    },
+                    {
+                        question: "Milyen érzészavar jellemző a Conus Medullaris Szindrómára?",
+                        options: ["Aszimmetrikus lovaglónadrág anesztézia", "Szimmetrikus perianális/lovaglónadrág anesztézia", "Egyoldali lábzsibbadás", "A törzsön övszerűen körbefutó zsibbadás"],
+                        answer: "Szimmetrikus perianális/lovaglónadrág anesztézia",
+                        explanation: "A conus medullaris a szakrális (S2-S5) szegmentumokat tartalmazza, amelyek a gáttájékot idegzik be. A conus centrális, szimmetrikus elhelyezkedése miatt a károsodása szimmetrikus lovaglónadrág-érzészavart okoz."
+                    },
+                    {
+                        question: "Melyik reflex vizsgálata elengedhetetlen mindkét szindróma gyanúja esetén?",
+                        options: ["Biceps reflex", "Triceps reflex", "Analis sphincter reflex", "Hasi bőrreflex"],
+                        answer: "Analis sphincter reflex",
+                        explanation: "Az analis sphincter reflexet az S2-S4 szegmentumok idegzik be. Mivel mind a conus medullaris, mind a cauda equina szindróma érinti ezeket a gyököket/szegmentumokat, a reflex kiesése vagy csökkenése mindkét állapotban kulcsfontosságú diagnosztikai jel."
+                    },
+                    {
+                        question: "Melyik állítás írja le helyesen a fájdalom jellegét a két szindróma között?",
+                        options: ["CES-ben a fájdalom enyhe, CMS-ben súlyos.", "CMS-ben a radikuláris fájdalom dominál, CES-ben a hátfájás.", "CMS-ben a hátfájás, CES-ben a súlyos, aszimmetrikus radikuláris fájdalom a jellemzőbb.", "Mindkét esetben csak hátfájás jelentkezik, lábfájdalom nélkül."],
+                        answer: "CMS-ben a hátfájás, CES-ben a súlyos, aszimmetrikus radikuláris fájdalom a jellemzőbb.",
+                        explanation: "A CMS-ben a csigolya/gerincvelő sérülése miatt a lokalizált hátfájás lehet a domináns. A CES-ben az ideggyökök direkt irritációja miatt a súlyos, gyakran egyoldali vagy aszimmetrikus, lábba sugárzó (radikuláris) fájdalom a vezető tünet."
+                    },
+                    {
+                        question: "A 'foot drop' (lógó lábfej) melyik állapotban és melyik gyök érintettsége miatt gyakoribb?",
+                        options: ["CMS-ben, S1 gyök miatt", "CES-ben, L5 gyök miatt", "CMS-ben, L4 gyök miatt", "CES-ben, S2 gyök miatt"],
+                        answer: "CES-ben, L5 gyök miatt",
+                        explanation: "A lógó lábfej a lábfej dorsalflexiójának gyengesége, amit főként az L5 gyök által beidegzett izmok (pl. m. tibialis anterior) végeznek. Ez a tünet a cauda equina szindrómára jellemzőbb, mint LMN jel."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy betegnél felmerül a Cauda Equina Szindróma gyanúja?",
+                        options: ["Fájdalomcsillapítót adni és hazaküldeni.", "Háziorvosi kontrollt javasolni egy hét múlva.", "Azonnal sürgősségi osztályra szállítani és idegsebészeti konzultációt kérni.", "Gyógytornát javasolni."],
+                        answer: "Azonnal sürgősségi osztályra szállítani és idegsebészeti konzultációt kérni.",
+                        explanation: "A Cauda Equina Szindróma egy abszolút sürgősségi állapot, amely azonnali diagnózist (MRI) és gyakran sürgős műtétet igényel a maradandó károsodás elkerülése érdekében. Bármilyen késlekedés rontja a prognózist."
+                    },
+                    {
+                        question: "Milyen prognózisbeli különbség van a két szindróma között?",
+                        options: ["A CES prognózisa mindig jobb.", "A CMS prognózisa mindig jobb.", "A CMS prognózisa általában rosszabb, mert gerincvelői szövet károsodik.", "Nincs különbség a prognózisban."],
+                        answer: "A CMS prognózisa általában rosszabb, mert gerincvelői szövet károsodik.",
+                        explanation: "A Conus Medullaris Szindróma a központi idegrendszer (gerincvelő) direkt sérülését jelenti, amelynek regenerációs képessége korlátozott. A Cauda Equina Szindróma a perifériás idegrendszer (ideggyökök) sérülése, amelynek regenerációs potenciálja jobb, különösen időben elvégzett dekompresszió esetén."
+                    },
+                    {
+                        question: "Melyik szindrómára jellemzőbb a kevert felső (UMN) és alsó (LMN) motoros neuron tünettan?",
+                        options: ["Cauda Equina Szindróma (CES)", "Conus Medullaris Szindróma (CMS)", "Mindkettőre", "Egyikre sem"],
+                        answer: "Conus Medullaris Szindróma (CMS)",
+                        explanation: "A CMS a gerincvelő szövetét (UMN pályák) és a belőle kilépő legalsó ideggyököket (LMN) is érintheti, ezért jellemző rá a kevert kép (pl. hiperreflexia a lábakban, de petyhüdt bénulás a záróizmokban)."
+                    }
+                ]
+            },
+            "alsovegtag": {
+                title: "Az alsóvégtag perifériás idegbántalmai",
+                questions: [
+                    {
+                        question: "Melyik ideg károsodása okozza a 'foot drop' (lógó lábfej) tünetet, azaz a lábfej dorsalflexiójának és everziójának gyengeségét?",
+                        options: ["Nervus femoralis", "Nervus tibialis", "Nervus peroneus communis", "Nervus obturatorius"],
+                        answer: "Nervus peroneus communis",
+                        explanation: "A nervus peroneus communis (és annak mély ága) idegzi be a lábszár elülső és oldalsó rekeszének izmait, amelyek a lábfej hátrahajlításáért (dorsalflexio) és kifelé fordításáért (eversio) felelősek. Sérülése a jellegzetes 'lógó lábfej' tünethez vezet."
+                    },
+                    {
+                        question: "Hol a leggyakoribb a nervus peroneus communis kompressziós sérülésének helye?",
+                        options: ["A térdhajlatban", "A boka magasságában", "A fibulafejecs körül", "A combcsont nyakánál"],
+                        answer: "A fibulafejecs körül",
+                        explanation: "A nervus peroneus communis a térd külső oldalán, a fibula (szárkapocscsont) fejecse körül halad, ahol felszínesen helyezkedik el és csontos alaphoz nyomódhat. Ez a leggyakoribb helye a kompressziós sérülésének (pl. láb-láb fölött ülés, gipszrögzítés miatt)."
+                    },
+                    {
+                        question: "Melyik ideg károsodására utal a quadriceps femoris (négyfejű combizom) gyengesége, a térd extenziójának nehezítettsége és a patella reflex kiesése?",
+                        options: ["Nervus ischiadicus", "Nervus femoralis", "Nervus gluteus superior", "Nervus tibialis"],
+                        answer: "Nervus femoralis",
+                        explanation: "A nervus femoralis idegzi be a m. quadriceps femorist, amely a térd nyújtásáért felelős, és a patella reflex afferens és efferens szárát is ez az ideg alkotja. Sérülése ezen funkciók kiesését okozza."
+                    },
+                    {
+                        question: "Mi a Tarsal tunnel szindróma?",
+                        options: ["A nervus peroneus kompressziója a fibulafejecsnél.", "A nervus tibialis kompressziója a mediális boka mögötti alagútban.", "A nervus ischiadicus becsípődése a piriformis izom alatt.", "A nervus femoralis sérülése a lágyékhajlatban."],
+                        answer: "A nervus tibialis kompressziója a mediális boka mögötti alagútban.",
+                        explanation: "A Tarsal tunnel szindróma a nervus tibialis kompressziós neuropathiája, amely a mediális boka (belboka) mögött elhelyezkedő, szalaggal fedett csontos alagútban (tarsalis alagút) jön létre. Jellemző tünete a talpi fájdalom és zsibbadás."
+                    },
+                    {
+                        question: "A 'meralgia paraesthetica' melyik ideg kompresszióját jelenti és hol okoz tüneteket?",
+                        options: ["N. ischiadicus, a farpofában okoz fájdalmat.", "N. cutaneus femoris lateralis, a comb külső-elülső oldalán okoz égő fájdalmat és zsibbadást.", "N. saphenus, a lábszár belső oldalán okoz zsibbadást.", "N. suralis, a vádli hátsó részén okoz érzészavart."],
+                        answer: "N. cutaneus femoris lateralis, a comb külső-elülső oldalán okoz égő fájdalmat és zsibbadást.",
+                        explanation: "A meralgia paraesthetica a nervus cutaneus femoris lateralis (egy tisztán érző ideg) kompressziójából adódik, leggyakrabban a ligamentum inguinale (lágyékszalag) alatt. Jellemzője a comb külső-elülső (anterolateralis) felszínén jelentkező égő, bizsergő fájdalom és zsibbadás, motoros kiesés nélkül."
+                    },
+                    {
+                        question: "Melyik a legnagyobb perifériás ideg az emberi testben?",
+                        options: ["Nervus femoralis", "Nervus medianus", "Nervus ulnaris", "Nervus ischiadicus"],
+                        answer: "Nervus ischiadicus",
+                        explanation: "A nervus ischiadicus (ülőideg), amely a plexus sacralisból (L4-S3 gyökök) ered, a test legnagyobb és leghosszabb perifériás idege. Felelős a comb hátsó izmainak, valamint a lábszár és a lábfej szinte összes izmának beidegzéséért."
+                    },
+                    {
+                        question: "A nervus ischiadicus két fő ágra oszlik a térdhajlatban. Melyek ezek?",
+                        options: ["N. femoralis és n. obturatorius", "N. peroneus communis és n. tibialis", "N. saphenus és n. suralis", "N. gluteus superior és n. gluteus inferior"],
+                        answer: "N. peroneus communis és n. tibialis",
+                        explanation: "A nervus ischiadicus a fossa popliteában (térdhajlati árok) két fő végágára, a nervus peroneus communisra (lateralisan) és a nervus tibialisra (medialisan) oszlik."
+                    },
+                    {
+                        question: "Melyik klinikai teszt használatos a lumbosacralis gyökök vagy a n. ischiadicus irritációjának vizsgálatára?",
+                        options: ["Spurling teszt", "Phalen-jel", "Lasègue teszt (Straight Leg Raise)", "Tinel-jel a csuklónál"],
+                        answer: "Lasègue teszt (Straight Leg Raise)",
+                        explanation: "A Lasègue teszt (a hanyatt fekvő beteg nyújtott lábának passzív emelése) az L4, L5, S1 ideggyökök és a nervus ischiadicus feszülését okozza. Ha a lábba sugárzó fájdalmat provokál, az radiculopathiára vagy ischiasra utal."
+                    },
+                    {
+                        question: "Melyik ideg sérülése okozza a lábfej inverziójának (befelé fordítás) és plantárflexiójának (lefelé hajlítás) gyengeségét?",
+                        options: ["Nervus peroneus superficialis", "Nervus peroneus profundus", "Nervus tibialis", "Nervus femoralis"],
+                        answer: "Nervus tibialis",
+                        explanation: "A nervus tibialis idegzi be a lábszár hátsó rekeszének izmait (pl. m. tibialis posterior, m. gastrocnemius, m. soleus), amelyek a lábfej plantárflexiójáért és inverziójáért felelősek."
+                    },
+                    {
+                        question: "A diabetes mellitus okozta polyneuropathia jellemzően milyen tünetekkel kezdődik az alsó végtagon?",
+                        options: ["Hirtelen kialakuló, egyoldali lábgyengeség", "Fokozatosan kialakuló, szimmetrikus, 'kesztyű-harisnya' eloszlású zsibbadás és égő fájdalom", "Csak a combot érintő izomgyengeség", "Csak a nagylábujj zsibbadása"],
+                        answer: "Fokozatosan kialakuló, szimmetrikus, 'kesztyű-harisnya' eloszlású zsibbadás és égő fájdalom",
+                        explanation: "A diabeteszes polyneuropathia leggyakoribb formája a disztális szimmetrikus polyneuropathia, amely a leghosszabb idegrostokat érinti először. Jellemzően a lábujjakban kezdődik szimmetrikus zsibbadással, bizsergéssel, égő fájdalommal, ami lassan halad felfelé a lábszáron ('harisnya' eloszlás)."
+                    },
+                    {
+                        question: "Mi a különbség a radiculopathia és a perifériás mononeuropathia okozta tünetek között?",
+                        options: ["Nincs különbség, a tünetek azonosak.", "A radiculopathia dermatómális/myotomális mintázatot követ, míg a mononeuropathia egy specifikus perifériás ideg ellátási területére korlátozódik.", "A radiculopathia csak érzészavart, a mononeuropathia csak motoros kiesést okoz.", "A radiculopathia mindig fájdalmatlan, a mononeuropathia mindig fájdalmas."],
+                        answer: "A radiculopathia dermatómális/myotomális mintázatot követ, míg a mononeuropathia egy specifikus perifériás ideg ellátási területére korlátozódik.",
+                        explanation: "A radiculopathia egy spinális gyök károsodása, tünetei a gyök által ellátott szegmentális területeken (derma- és myotómák) jelentkeznek. A perifériás mononeuropathia egyetlen perifériás ideg károsodása, a tünetek az adott ideg által beidegzett, jól körülhatárolt területen (bőr, izmok) jelennek meg."
+                    },
+                    {
+                        question: "Melyik ideg sérülése okozhatja a csípő addukciójának (a láb közelítésének) gyengeségét?",
+                        options: ["Nervus femoralis", "Nervus obturatorius", "Nervus ischiadicus", "Nervus peroneus"],
+                        answer: "Nervus obturatorius",
+                        explanation: "A nervus obturatorius idegzi be a comb mediális (adductor) rekeszének izmait, amelyek a comb közelítéséért felelősek. Sérülése az addukció gyengeségéhez vezet."
+                    },
+                    {
+                        question: "Melyik teszt provokálja a nervus femoralis vagy a felső lumbális gyökök (L2-L4) irritációját?",
+                        options: ["Lasègue teszt", "Femoralis stretch teszt (fordított Lasègue)", "Tinel-jel a bokánál", "Phalen-teszt"],
+                        answer: "Femoralis stretch teszt (fordított Lasègue)",
+                        explanation: "A femoralis stretch teszt során a hason fekvő beteg térdét behajlítják és a csípőjét extendálják. Ez a manőver megfeszíti a nervus femoralist és az L2, L3, L4 gyököket. A comb elülső részébe sugárzó fájdalom pozitivitást jelez."
+                    },
+                    {
+                        question: "A lábfej everziójának (kifelé fordítás) gyengesége melyik ideg károsodására utal?",
+                        options: ["Nervus tibialis", "Nervus peroneus profundus", "Nervus peroneus superficialis", "Nervus saphenus"],
+                        answer: "Nervus peroneus superficialis",
+                        explanation: "A nervus peroneus superficialis idegzi be a lábszár laterális rekeszének izmait (mm. peronei), amelyek a lábfej everziójáért felelősek."
+                    },
+                    {
+                        question: "Melyik az alsó végtag legnagyobb tisztán érző idege?",
+                        options: ["Nervus ischiadicus", "Nervus femoralis", "Nervus saphenus", "Nervus peroneus communis"],
+                        answer: "Nervus saphenus",
+                        explanation: "A nervus saphenus a nervus femoralis végága, és egyben a legnagyobb tisztán érző ideg az alsó végtagon. A lábszár és a lábfej mediális (belső) oldalának bőrét idegzi be."
+                    },
+                    {
+                        question: "A piriformis szindróma mit jelent?",
+                        options: ["A piriformis izom gyulladását.", "A nervus ischiadicus kompresszióját a m. piriformis által vagy alatta.", "A csípőízület kopását.", "Az L5 gyök kompresszióját a foramenben."],
+                        answer: "A nervus ischiadicus kompresszióját a m. piriformis által vagy alatta.",
+                        explanation: "Piriformis szindróma esetén a nervus ischiadicus a gluteális régióban, a m. piriformis (körteképű izom) által kerül kompresszió alá, ami isiász-szerű, a farpofába és a lábba sugárzó fájdalmat okoz, de nem porckorongsérv miatt."
+                    },
+                    {
+                        question: "Melyik ideg sérülése okozhat érzéskiesést a lábfej dorsumán (lábhát), az első és második lábujj között?",
+                        options: ["Nervus peroneus superficialis", "Nervus peroneus profundus", "Nervus tibialis", "Nervus suralis"],
+                        answer: "Nervus peroneus profundus",
+                        explanation: "A nervus peroneus profundus (mély szárkapcsi ideg) végága idegzi be érzően a lábhát egy kis területét, az első és második lábujj közötti rést. Ez a terület fontos diagnosztikai pont az ideg sérülésének megítélésében."
+                    },
+                    {
+                        question: "Melyik állapot NEM okozhat perifériás neuropathiát az alsó végtagon?",
+                        options: ["Diabetes mellitus", "Alkoholfogyasztás", "B12-vitamin hiány", "Magas vérnyomás önmagában"],
+                        answer: "Magas vérnyomás önmagában",
+                        explanation: "A diabetes, a krónikus alkoholizmus és a B12-vitamin hiánya ismert okai a perifériás neuropathiának. A magas vérnyomás önmagában direkt módon nem okoz polyneuropathiát, bár a stroke vagy a kisérbetegség révén okozhat neurológiai tüneteket."
+                    },
+                    {
+                        question: "A lábfej intrinsic (saját) izmainak sorvadása és gyengesége melyik ideg súlyos, krónikus károsodására utal?",
+                        options: ["Nervus femoralis", "Nervus obturatorius", "Nervus tibialis", "Nervus peroneus communis"],
+                        answer: "Nervus tibialis",
+                        explanation: "A nervus tibialis (a mediális és laterális plantáris idegeken keresztül) idegzi be a talp és a lábfej saját izmainak nagy részét. Súlyos, hosszan tartó károsodása ezen izmok atrófiájához vezet."
+                    },
+                    {
+                        question: "Melyik elektrofiziológiai vizsgálat segít leginkább megkülönböztetni az axonális és a demyelinizációs neuropathiát?",
+                        options: ["Elektromiográfia (EMG)", "Elektroneurográfia (ENG/NCV)", "Kiváltott potenciál vizsgálatok", "Elektroenkefalográfia (EEG)"],
+                        answer: "Elektroneurográfia (ENG/NCV)",
+                        explanation: "Az elektroneurográfia (idegvezetési sebesség vizsgálat, NCV) méri az idegrostok vezetési sebességét. Demyelinizációs károsodás esetén a vezetési sebesség lelassul, míg axonális károsodás esetén a kiváltott potenciálok amplitúdója csökken, de a sebesség normális vagy csak enyhén csökkent lehet."
+                    }
+                ]
+            },
+            "tardiv_dyskinesia": {
+                title: "Tardív dyskinesia",
+                questions: [
+                    {
+                        question: "Mi a tardív diszkinézia (TD) leggyakoribb oka?",
+                        options: ["Antidepresszánsok rövid távú szedése", "Antipszichotikus (neuroleptikus) gyógyszerek hosszantartó alkalmazása", "Antibiotikumok szedése", "Szorongásoldók használata"],
+                        answer: "Antipszichotikus (neuroleptikus) gyógyszerek hosszantartó alkalmazása",
+                        explanation: "A TD egy iatrogén mozgászavar, amelyet leggyakrabban a dopamin receptor-blokkoló antipszichotikus gyógyszerek, különösen az első generációs (tipikus) szerek hosszantartó használata vált ki."
+                    },
+                    {
+                        question: "Melyik testtájékot érintik legjellemzőbben a tardív diszkinézia tünetei?",
+                        options: ["Csak az alsó végtagokat", "Az oro-facio-bucco-lingvális (OFBL) régiót (száj, arc, nyelv)", "Csak a törzset", "Csak a kezeket"],
+                        answer: "Az oro-facio-bucco-lingvális (OFBL) régiót (száj, arc, nyelv)",
+                        explanation: "A TD legklasszikusabb és leggyakoribb megjelenési formája az OFBL diszkinézia, amely az arc, az ajkak, az állkapocs és a nyelv akaratlan, repetitív mozgásaiban nyilvánul meg (pl. ajakcsücsörítés, nyelvöltögetés, rágó mozdulatok)."
+                    },
+                    {
+                        question: "Mi a dopamin receptor hiperszenzitivitás elméletének lényege a TD patofiziológiájában?",
+                        options: ["A dopamin receptorok száma csökken.", "A dopamin receptorok érzékenysége csökken a dopaminra.", "A dopamin receptorok krónikus blokkolása a receptorok számának és érzékenységének kompenzatorikus növekedéséhez vezet.", "A dopamin termelése teljesen leáll."],
+                        answer: "A dopamin receptorok krónikus blokkolása a receptorok számának és érzékenységének kompenzatorikus növekedéséhez vezet.",
+                        explanation: "Az elmélet szerint az antipszichotikumok általi tartós D2 receptor blokád a posztszinaptikus receptorok upregulációját (számuk és érzékenységük növekedését) váltja ki, ami a dopaminerg rendszer diszregulációjához és a kóros mozgásokhoz vezet."
+                    },
+                    {
+                        question: "Melyik NEM számít a tardív diszkinézia kialakulásának kockázati tényezőjének?",
+                        options: ["Idősebb életkor (>55 év)", "Fiatal férfi nem", "Első generációs antipszichotikumok használata", "Diabetes mellitus"],
+                        answer: "Fiatal férfi nem",
+                        explanation: "A kockázati tényezők közé tartozik az idősebb kor, a női nem (különösen posztmenopauzában), a tipikus antipszichotikumok használata, a kezelés időtartama és dózisa, valamint a diabetes. A fiatal férfi nem nem számít rizikófaktornak."
+                    },
+                    {
+                        question: "Mi az Abnormal Involuntary Movement Scale (AIMS)?",
+                        options: ["Egy beteg által kitöltendő kérdőív a hangulatról.", "Egy standardizált klinikai skála a TD jelenlétének szűrésére és súlyosságának mérésére.", "Egy képalkotó eljárás az agy vizsgálatára.", "Egy laboratóriumi teszt a dopaminszint mérésére."],
+                        answer: "Egy standardizált klinikai skála a TD jelenlétének szűrésére és súlyosságának mérésére.",
+                        explanation: "Az AIMS egy 12 tételes, klinikusi értékelő skála, amelyet a TD tüneteinek objektív felmérésére és a változások követésére használnak. Rendszeres alkalmazása javasolt a kockázatnak kitett betegeknél a korai felismerés érdekében."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport forradalmasította a tardív diszkinézia kezelését?",
+                        options: ["Antikolinerg szerek", "Benzodiazepinek", "VMAT2 (Vesicular Monoamine Transporter 2) inhibitorok", "Béta-blokkolók"],
+                        answer: "VMAT2 (Vesicular Monoamine Transporter 2) inhibitorok",
+                        explanation: "A VMAT2-gátlók (pl. valbenazin, deutetrabenazin) célzottan csökkentik a dopamin preszinaptikus felszabadulását anélkül, hogy a posztszinaptikus receptorokat blokkolnák. Ezek az első, kifejezetten a TD kezelésére jóváhagyott, bizonyítékokon alapuló gyógyszerek."
+                    },
+                    {
+                        question: "Mi a 'tardív akathisia'?",
+                        options: ["Tartós, kóros izomösszehúzódás", "Erős belső nyugtalanságérzés, késztetés a folyamatos mozgásra", "Rövid, villanásszerű izomrángás", "Akaratlan hangadás"],
+                        answer: "Erős belső nyugtalanságérzés, késztetés a folyamatos mozgásra",
+                        explanation: "A tardív akathisia a TD spektrumába tartozó mozgászavar, amelyet egy szubjektív, kínzó belső nyugtalanságérzés és a mozgáskényszer jellemez. A betegek képtelenek egy helyben maradni, toporognak, járkálnak."
+                    },
+                    {
+                        question: "Melyik állítás igaz az antikolinerg szerek használatára TD-ben?",
+                        options: ["Mindig hatékonyak és elsőként választandók.", "Nincs hatásuk a TD-re.", "Általában kerülendők, mert ronthatják az orofaciális TD tüneteit.", "Csak a végtagi tünetekre hatnak."],
+                        answer: "Általában kerülendők, mert ronthatják az orofaciális TD tüneteit.",
+                        explanation: "Bár a gyógyszer-indukált parkinsonizmusban hasznosak, az antikolinerg szerek felboríthatják a dopamin-acetilkolin egyensúlyt a striatumban, és gyakran rontják a klasszikus, száj körüli TD tüneteket, ezért alkalmazásuk általában nem javasolt."
+                    },
+                    {
+                        question: "Hogyan befolyásolja az alvás a TD tüneteit?",
+                        options: ["Alvás közben a tünetek fokozódnak.", "Alvás közben a tünetek általában megszűnnek.", "Az alvás nem befolyásolja a tüneteket.", "Csak a REM fázisban jelentkeznek a tünetek."],
+                        answer: "Alvás közben a tünetek általában megszűnnek.",
+                        explanation: "A TD, mint a legtöbb hiperkinetikus mozgászavar, a bazális ganglionok működészavarához köthető. Ezek a mozgások az ébrenléti állapotra jellemzőek, stressz hatására fokozódhatnak, de mély alvás során tipikusan megszűnnek."
+                    },
+                    {
+                        question: "Mi a TD megelőzésének legfontosabb stratégiája?",
+                        options: ["Magas dózisú E-vitamin szedése.", "Az antipszichotikumok körültekintő alkalmazása: a legkisebb hatékony dózis, a legrövidebb ideig.", "Rendszeres testmozgás.", "Minden antipszichotikumot szedő betegnek VMAT2-gátlót kell adni."],
+                        answer: "Az antipszichotikumok körültekintő alkalmazása: a legkisebb hatékony dózis, a legrövidebb ideig.",
+                        explanation: "A prevenció a leghatékonyabb megközelítés. Ez magában foglalja az antipszichotikumok indokolt, minimális dózisban és ideig történő használatát, az alacsonyabb kockázatú (atipikus) szerek preferálását, és a betegek rendszeres monitorozását."
+                    },
+                    {
+                        question: "Melyik nem-antipszichotikus gyógyszer okozhat tardív diszkinéziát?",
+                        options: ["Ibuprofen", "Metformin", "Metoklopramid", "Amlodipin"],
+                        answer: "Metoklopramid",
+                        explanation: "A metoklopramid egy dopamin-receptor antagonista, amelyet hányáscsillapítóként és prokinetikumként használnak. Hosszantartó alkalmazása, különösen időseknél, ismert kockázati tényező a TD kialakulására."
+                    },
+                    {
+                        question: "Mi a 'maszkírozó hatás' a TD-vel kapcsolatban?",
+                        options: ["A betegek sminkkel próbálják elfedni a tüneteket.", "Az antipszichotikum dózisának emelése átmenetileg elfedheti vagy csökkentheti a TD tüneteit.", "A TD tünetei csak maszkban jelennek meg.", "A TD csak más betegségekkel együtt fordul elő."],
+                        answer: "Az antipszichotikum dózisának emelése átmenetileg elfedheti vagy csökkentheti a TD tüneteit.",
+                        explanation: "Az antipszichotikum dózisának növelése fokozza a dopamin-blokádot, ami átmenetileg elnyomhatja a hiperszenzitív receptorok által generált kóros mozgásokat. A tünetek gyakran a dózis csökkentésekor vagy elhagyásakor válnak nyilvánvalóvá ('demaszkírozás')."
+                    },
+                    {
+                        question: "Melyik állapotot kell elkülöníteni a TD-től, amely szintén akaratlan mozgásokkal, de kognitív hanyatlással és pszichiátriai tünetekkel is jár?",
+                        options: ["Esszenciális tremor", "Huntington-kór", "Wilson-kór", "Tourette-szindróma"],
+                        answer: "Huntington-kór",
+                        explanation: "A Huntington-kór egy örökletes, progresszív neurodegeneratív betegség, amelyet choreiform mozgások, demencia és pszichiátriai zavarok jellemeznek. A chorea elkülönítendő a TD diszkinetikus mozgásaitól, és a családi anamnézis, valamint a genetikai vizsgálat segít a diagnózisban."
+                    },
+                    {
+                        question: "Melyik állítás igaz a TD prognózisára?",
+                        options: ["Mindig teljesen és gyorsan visszafordul a gyógyszer elhagyása után.", "Potenciálisan irreverzibilis, de korai beavatkozással a remisszió lehetséges.", "Mindig halálos kimenetelű.", "Soha nem javul, mindig csak rosszabbodik."],
+                        answer: "Potenciálisan irreverzibilis, de korai beavatkozással a remisszió lehetséges.",
+                        explanation: "A TD prognózisa változó. Lehet tartós és visszafordíthatatlan, de a betegek egy részénél, különösen korai diagnózis és a kiváltó szer elhagyása esetén, a tünetek enyhülhetnek vagy teljesen meg is szűnhetnek. Az 'irreverzibilitás' nem abszolút."
+                    },
+                    {
+                        question: "Milyen nem-gyógyszeres kezelés lehet hatékony fókális TD tünetek (pl. blepharospasmus) esetén?",
+                        options: ["Akupunktúra", "Pszichoterápia", "Botulinum toxin injekciók", "Fényterápia"],
+                        answer: "Botulinum toxin injekciók",
+                        explanation: "A botulinum toxin injekciók hatékonyan csökkentik a fókális disztóniás tüneteket (amelyek a TD részeként is megjelenhetnek) azáltal, hogy a célzott izmokba fecskendezve gátolják az acetilkolin felszabadulását és helyi izomrelaxációt okoznak."
+                    },
+                    {
+                        question: "Melyik típusú antipszichotikum hordozza a legalacsonyabb TD kockázatot?",
+                        options: ["Haloperidol", "Fluphenazin", "Tiapridum", "Clozapin"],
+                        answer: "Clozapin",
+                        explanation: "A clozapin egy atipikus antipszichotikum, amelynek rendkívül alacsony a TD-keltő potenciálja, sőt, néha a más szerek által kiváltott TD tüneteit is javíthatja. Ez a gyenge D2-receptor affinitásának és más receptorokon (pl. szerotonin) kifejtett hatásának köszönhető."
+                    },
+                    {
+                        question: "A 'tardív disztónia' miben különbözik a klasszikus TD-től?",
+                        options: ["Gyorsabb, rángásszerű mozgások jellemzik.", "Tartós, akaratlan izomösszehúzódások okoznak kóros testtartásokat.", "Csak az arcot érinti.", "Mindig fájdalommentes."],
+                        answer: "Tartós, akaratlan izomösszehúzódások okoznak kóros testtartásokat.",
+                        explanation: "Míg a klasszikus diszkinézia inkább fluens, repetitív mozgás, a disztóniát tartósabb, folyamatos izomkontrakciók jellemzik, amelyek csavaró mozgásokat és kóros, fixált testtartásokat eredményeznek (pl. torticollis, blepharospasmus)."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a TD klinikai megjelenésére?",
+                        options: ["A mozgások akaratlanok és repetitívek.", "A tünetek stressz hatására fokozódhatnak.", "A betegek mindig tudatában vannak a mozgásaiknak és súlyosan zavarják őket.", "Koncentráció során a mozgások csökkenhetnek."],
+                        answer: "A betegek mindig tudatában vannak a mozgásaiknak és súlyosan zavarják őket.",
+                        explanation: "A betegek tudatossága a mozgásokra változó. Különösen az enyhébb esetekben vagy a betegség kezdetén előfordulhat, hogy a beteg nem is észleli az akaratlan mozgásokat, vagy nem tulajdonít nekik jelentőséget."
+                    },
+                    {
+                        question: "Milyen invazív eljárás jöhet szóba súlyos, gyógyszer-rezisztens TD esetén?",
+                        options: ["Lumbálpunkció", "Agybiopszia", "Mély Agyi Stimuláció (DBS)", "Gerincműtét"],
+                        answer: "Mély Agyi Stimuláció (DBS)",
+                        explanation: "A DBS egy idegsebészeti eljárás, amely során elektródákat ültetnek be az agy specifikus, mozgásszabályozásért felelős területeire (pl. globus pallidus interna). Ez ígéretes lehetőség a terápiarezisztens, súlyos TD (különösen tardív disztónia) eseteiben."
+                    },
+                    {
+                        question: "Melyik vitamin antioxidáns tulajdonságai miatt vizsgálták a TD kezelésében, de hatékonysága bizonytalan?",
+                        options: ["A-vitamin", "C-vitamin", "D-vitamin", "E-vitamin"],
+                        answer: "E-vitamin",
+                        explanation: "Az E-vitamint (alfa-tokoferol) az oxidatív stressz elmélet alapján vizsgálták, feltételezve, hogy antioxidánsként védheti az idegsejteket. Azonban a klinikai vizsgálatok eredményei ellentmondásosak, és a jelenlegi irányelvek nem támasztják alá a rutinszerű használatát."
+                    }
+                ]
+            },
+            "acm_aca": {
+                title: "Az a. cerebri media és anterior elzáródásának tünettana",
+                questions: [
+                    {
+                        question: "Melyik agyi artéria elzáródása a leggyakoribb iszkémiás stroke típus?",
+                        options: ["Arteria cerebri anterior (ACA)", "Arteria cerebri posterior (ACP)", "Arteria cerebri media (ACM)", "Arteria basilaris"],
+                        answer: "Arteria cerebri media (ACM)",
+                        explanation: "Az arteria cerebri media (ACM) az arteria carotis interna legnagyobb, legdirektebb folytatása, és a legkiterjedtebb agyterületet látja el, ezért az elzáródása a leggyakoribb oka az iszkémiás stroke-nak."
+                    },
+                    {
+                        question: "Milyen motoros tünetegyüttes jellemző egy tipikus, komplett ACM elzáródásra?",
+                        options: ["Ellenoldali hemiplegia, ahol az alsó végtag súlyosabban érintett, mint a kar és az arc.", "Ellenoldali hemiplegia, ahol az arc és a felső végtag súlyosabban érintett, mint az alsó végtag.", "Mindkét alsó végtag bénulása (paraplegia).", "Csak az arcizmok bénulása."],
+                        answer: "Ellenoldali hemiplegia, ahol az arc és a felső végtag súlyosabban érintett, mint az alsó végtag.",
+                        explanation: "Az ACM látja el a motoros kéreg azon részét, amely az arc és a felső végtag mozgásaiért felelős. Ezért az elzáródása jellegzetes, brachiofacialis túlsúlyú bénulást okoz."
+                    },
+                    {
+                        question: "Melyik tünet jellemző az arteria cerebri anterior (ACA) elzáródására?",
+                        options: ["Súlyos beszédértési zavar (Wernicke-afázia)", "Ellenoldali alsó végtagi túlsúlyú gyengeség (cruralis monoparesis)", "Ellenoldali látótérkiesés (homonym hemianopia)", "Az arc és a kar bénulása ép alsó végtag mellett"],
+                        answer: "Ellenoldali alsó végtagi túlsúlyú gyengeség (cruralis monoparesis)",
+                        explanation: "Az ACA az agyféltekék mediális felszínét látja el, beleértve a primer motoros kéreg alsó végtagi reprezentációját. Elzáródásának vezető tünete ezért az ellenoldali láb gyengesége."
+                    },
+                    {
+                        question: "Melyik afázia típus társul a domináns (bal) félteki ACM superior divíziójának elzáródásához?",
+                        options: ["Globális afázia", "Wernicke-afázia", "Broca-afázia", "Transcorticalis motoros afázia"],
+                        answer: "Broca-afázia",
+                        explanation: "Az ACM superior divíziója látja el a Broca-féle motoros beszédközpontot a frontális lebenyben. Károsodása expresszív (motoros) afáziát okoz, amelyre a nonfluens, akadozó beszéd jellemző, relatíve megtartott beszédértés mellett."
+                    },
+                    {
+                        question: "Mi a 'neglect szindróma' és melyik félteke sérülésekor a leggyakoribb?",
+                        options: ["A beteg elhanyagolja a személyes higiéniáját; bal féltekei sérüléskor.", "Az ellenoldali (bal) testfél és téri fél figyelmen kívül hagyása; jobb (nem-domináns) féltekei sérüléskor.", "A beteg nem ismeri fel a családtagjait; jobb féltekei sérüléskor.", "A beteg képtelen beszélni; bal féltekei sérüléskor."],
+                        answer: "Az ellenoldali (bal) testfél és téri fél figyelmen kívül hagyása; jobb (nem-domináns) féltekei sérüléskor.",
+                        explanation: "A neglect szindróma a téri figyelem zavara, amely leggyakrabban és legsúlyosabb formában a jobb (nem-domináns) parietális lebeny károsodásakor jelentkezik, ami tipikusan a jobb oldali ACM ellátási területéhez tartozik."
+                    },
+                    {
+                        question: "Melyik tünetegyüttes NEM jellemző az ACA elzáródására?",
+                        options: ["Abulia (akarat, kezdeményezés hiánya)", "Vizelet inkontinencia", "Ellenoldali homonym hemianopia", "Ellenoldali fogó reflex"],
+                        answer: "Ellenoldali homonym hemianopia",
+                        explanation: "A homonym hemianopia (látótérkiesés) a látópálya károsodásának következménye, amelyet az ACM vagy az ACP lát el. Az ACA ellátási területe távol esik a látópályától, így elzáródása általában nem okoz látótérkiesést."
+                    },
+                    {
+                        question: "Mi a globális afázia?",
+                        options: ["Csak a beszédértés súlyos zavara.", "Csak a beszédprodukció súlyos zavara.", "Mind a beszédprodukció, mind a beszédértés súlyos zavara.", "Az olvasás és írás izolált zavara."],
+                        answer: "Mind a beszédprodukció, mind a beszédértés súlyos zavara.",
+                        explanation: "A globális afázia a legsúlyosabb afázia típus, amely a domináns félteki ACM főtörzsének kiterjedt elzáródásakor alakul ki, érintve mind a Broca-, mind a Wernicke-területet. A beteg szinte képtelen a verbális kommunikációra."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás a legérzékenyebb az akut iszkémiás stroke korai kimutatására?",
+                        options: ["Natív koponya CT (NCCT)", "Koponya röntgen", "Diffúzió-súlyozott MRI (DWI)", "Koponya ultrahang"],
+                        answer: "Diffúzió-súlyozott MRI (DWI)",
+                        explanation: "A DWI az iszkémia okozta citotoxikus ödémát (a vízmolekulák diffúziójának korlátozottságát) már percekkel a stroke kezdete után képes kimutatni, így lényegesen érzékenyebb, mint a CT az akut fázisban."
+                    },
+                    {
+                        question: "Mi az 'akineticus mutizmus'?",
+                        options: ["A beteg sokat mozog, de nem beszél.", "A beteg ébernek tűnik, de nem mozog és nem beszél spontán, hiányzik a 'hajtóerő'.", "A beteg kómában van.", "A beteg alszik és nem lehet felébreszteni."],
+                        answer: "A beteg ébernek tűnik, de nem mozog és nem beszél spontán, hiányzik a 'hajtóerő'.",
+                        explanation: "Az akinetikus mutizmus az abulia legsúlyosabb formája, amely a mediális frontális lebenyek (gyakran kétoldali ACA elzáródás miatti) károsodásakor lép fel. A mozgás és beszéd indításának súlyos zavara jellemzi, ép tudat és motoros pályák mellett."
+                    },
+                    {
+                        question: "Melyik artéria elzáródása okozhatja a Gerstmann-szindrómát (agraphia, acalculia, ujjagnózia, jobb-bal tévesztés)?",
+                        options: ["Jobb oldali ACA", "Bal oldali ACA", "Bal (domináns) oldali ACM", "Jobb oldali ACM"],
+                        answer: "Bal (domináns) oldali ACM",
+                        explanation: "A Gerstmann-szindróma a domináns (általában bal) parietális lebeny angularis gyrusának károsodásakor alakul ki, amely az ACM inferior divíziójának ellátási területéhez tartozik."
+                    },
+                    {
+                        question: "Mi a 'hyperdens MCA jel' a natív CT-n?",
+                        options: ["Az ACM meszesedése.", "Az elzáródott ACM-ben lévő friss vérrög (thrombus) denzitásnövekedése.", "Az ACM körüli vérzés.", "Az ACM tágulata."],
+                        answer: "Az elzáródott ACM-ben lévő friss vérrög (thrombus) denzitásnövekedése.",
+                        explanation: "A friss vérrög sűrűbb (hyperdensebb), mint az agyszövet, ezért az elzáródott arteria cerebri media az akut stroke korai jeleként egy denzebb csíkként jelenhet meg a natív CT felvételen."
+                    },
+                    {
+                        question: "Milyen tüneteket okoz a nem-domináns (jobb) félteki ACM inferior divíziójának elzáródása?",
+                        options: ["Broca-afázia és jobb oldali hemiparesis", "Wernicke-afázia és jobb oldali hemianopia", "Neglect szindróma, vizuospaciális zavarok és bal oldali felső quadrantanopia", "Csak bal oldali lábgyengeség"],
+                        answer: "Neglect szindróma, vizuospaciális zavarok és bal oldali felső quadrantanopia",
+                        explanation: "A jobb ACM inferior divíziója látja el a parietális és temporális lebenyek azon részeit, amelyek a téri észlelésért felelősek (neglect, vizuospaciális funkciók), valamint a látópálya felső részét (alsó látótérfél), ami a látópálya alsó részét (felső látótérfél) károsítja, így felső quadrantanopiát okoz."
+                    },
+                    {
+                        question: "Melyik struktúra köti össze a két arteria cerebri anteriort?",
+                        options: ["Arteria communicans posterior", "Arteria basilaris", "Arteria communicans anterior", "Arteria choroidea anterior"],
+                        answer: "Arteria communicans anterior",
+                        explanation: "Az arteria communicans anterior egy rövid ér, amely összeköti a kétoldali ACA A1-es szakaszát, és a Willis-gyűrű elülső részét képezi. Fontos szerepe van a kollaterális keringésben."
+                    },
+                    {
+                        question: "Melyik tünetegyüttesre jellemző a 'tiszta motoros hemiparesis' kortikális jelek (afázia, neglect) nélkül?",
+                        options: ["Komplett ACM infarktus", "ACA infarktus", "Lacunaris infarktus a capsula internában", "ACP infarktus"],
+                        answer: "Lacunaris infarktus a capsula internában",
+                        explanation: "A lacunaris infarktusok az agy mélyén futó kis, perforáló artériák (pl. lenticulostriatalis ágak) elzáródásakor alakulnak ki. Ha a capsula interna hátsó szárát érinti, izolált, 'tiszta' motoros hemiparesist okoz, mivel az agykéreg nem károsodik."
+                    },
+                    {
+                        question: "Melyik állítás igaz az 'idő agy' (time is brain) elvre?",
+                        options: ["A stroke tünetei idővel maguktól elmúlnak.", "Az érelzáródás után minden perc késlekedés további idegsejtek millióinak pusztulásával jár.", "A stroke kezelését elég 24 órán belül elkezdeni.", "Az idősebb agy lassabban károsodik."],
+                        answer: "Az érelzáródás után minden perc késlekedés további idegsejtek millióinak pusztulásával jár.",
+                        explanation: "Az 'idő agy' elv hangsúlyozza, hogy az akut iszkémiás stroke-ban az idő kritikus tényező. A vérellátás hiánya gyors és irreverzibilis idegsejt-pusztuláshoz vezet, ezért a tünetek észlelésekor azonnali cselekvés szükséges a terápia minél korábbi megkezdése érdekében."
+                    },
+                    {
+                        question: "Az 'alien hand' (idegen kéz) szindróma melyik ér elzáródásakor fordulhat elő?",
+                        options: ["ACM", "ACP", "ACA", "A. vertebralis"],
+                        answer: "ACA",
+                        explanation: "Az idegen kéz szindróma egy ritka jelenség, amikor a beteg egyik keze akaratától független, célirányosnak tűnő mozgásokat végez. A mediális frontális lebeny (supplementary motor area) vagy a corpus callosum károsodásakor fordulhat elő, amelyek az ACA ellátási területéhez tartoznak."
+                    },
+                    {
+                        question: "Mi a Wernicke-afázia fő jellemzője?",
+                        options: ["Akadozó, nonfluens beszéd, jó beszédértéssel.", "Fluens, de tartalmilag üres, érthetetlen beszéd, súlyos beszédértési zavarral.", "A beszéd teljes hiánya.", "Csak a szavak utánmondásának képtelensége."],
+                        answer: "Fluens, de tartalmilag üres, érthetetlen beszéd, súlyos beszédértési zavarral.",
+                        explanation: "A Wernicke (szenzoros) afáziát a domináns félteki ACM inferior divíziójának károsodása okozza. A beszéd fluens (folyékony), de tele van szótorzításokkal (parafázia) és értelmetlen, miközben a beteg nem érti meg a hozzá intézett beszédet."
+                    },
+                    {
+                        question: "Melyik a legfontosabb modifikálható kockázati tényezője az iszkémiás stroke-nak?",
+                        options: ["Életkor", "Genetikai hajlam", "Magas vérnyomás (hypertonia)", "Férfi nem"],
+                        answer: "Magas vérnyomás (hypertonia)",
+                        explanation: "Bár több kockázati tényező is van, a hypertonia a legjelentősebb és leggyakoribb befolyásolható rizikófaktor mind az iszkémiás, mind a vérzéses stroke esetében. Kezelése kulcsfontosságú a megelőzésben."
+                    },
+                    {
+                        question: "Milyen tüneteket okozhat az arteria recurrens Heubneri (az ACA A1-es szakaszának ága) izolált elzáródása?",
+                        options: ["Alsó végtagi bénulást", "Látótérkiesést", "Ellenoldali faciobrachialis (arcot és kart érintő) gyengeséget", "Globális afáziát"],
+                        answer: "Ellenoldali faciobrachialis (arcot és kart érintő) gyengeséget",
+                        explanation: "A Heubner-artéria a nucleus caudatus fejét és a capsula interna elülső szárát látja el, ahol az arc és a kar motoros rostjai is futnak. Izolált elzáródása ezért az ACM stroke-hoz hasonlóan arc- és kar-túlsúlyú gyengeséget okozhat, ami diagnosztikai kihívást jelenthet."
+                    },
+                    {
+                        question: "Mi a fő célja a natív koponya CT-nek az akut stroke ellátás során?",
+                        options: ["Az infarktus pontos méretének meghatározása.", "Az agyi vérzés gyors és megbízható kizárása.", "A penumbra (megmenthető agyszövet) kimutatása.", "Az elzáródott ér azonosítása."],
+                        answer: "Az agyi vérzés gyors és megbízható kizárása.",
+                        explanation: "Az akut stroke-ellátás első és legfontosabb képalkotó lépése a natív CT, mert gyorsan és hatékonyan ki tudja zárni az intracerebralis vérzést. Ez elengedhetetlen a további kezelési döntések (pl. intravénás thrombolysis) meghozatalához, mivel a vérzés esetén a vérrögoldó kezelés tilos."
+                    }
+                ]
+            }
+        };
+
+
+        const app = document.getElementById('app');
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizTitle = document.getElementById('quiz-title');
+        const progressText = document.getElementById('progress-text');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const explanationContainer = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreText = document.getElementById('score-text');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizButton = document.getElementById('restart-quiz');
+        const backToTopicsButton = document.getElementById('back-to-topics');
+        const backToTopicsFromResultsButton = document.getElementById('back-to-topics-from-results');
+
+        let currentQuizId = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function init() {
+            // Populate topic list
+            for (const topicId in quizData) {
+                const topic = quizData[topicId];
+                const topicCard = document.createElement('div');
+                topicCard.className = 'bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-slate-200 hover:border-blue-500';
+                topicCard.innerHTML = `<h3 class="text-xl font-semibold text-slate-800">${topic.title}</h3>`;
+                topicCard.addEventListener('click', () => startQuiz(topicId));
+                topicList.appendChild(topicCard);
+            }
+
+            backToTopicsButton.addEventListener('click', showTopicSelection);
+            backToTopicsFromResultsButton.addEventListener('click', showTopicSelection);
+            nextButton.addEventListener('click', nextQuestion);
+            restartQuizButton.addEventListener('click', () => startQuiz(currentQuizId));
+        }
+
+        function startQuiz(topicId) {
+            currentQuizId = topicId;
+            questions = quizData[topicId].questions;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            quizTitle.textContent = quizData[topicId].title;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            resetState();
+            const questionData = questions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            progressText.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${questions.length}`;
+
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'w-full text-left p-4 bg-slate-100 rounded-lg hover:bg-slate-200 quiz-option border border-slate-200';
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextButton.disabled = true;
+            explanationContainer.style.maxHeight = '0';
+            explanationContainer.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            explanationContainer.classList.add('border-blue-500', 'bg-blue-50');
+
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correctAnswer = questions[currentQuestionIndex].answer;
+
+            // Disable all options
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (selectedButton.textContent === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-green-500', 'bg-green-50');
+            } else {
+                selectedButton.classList.add('incorrect');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-red-500', 'bg-red-50');
+            }
+            
+            explanationText.textContent = questions[currentQuestionIndex].explanation;
+            explanationContainer.style.maxHeight = explanationContainer.scrollHeight + "px";
+
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            const percentage = Math.round((score / questions.length) * 100);
+            scoreText.textContent = `Helyes válaszok: ${score} / ${questions.length}`;
+            scorePercentage.textContent = `${percentage}%`;
+        }
+        
+        function showTopicSelection() {
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Initialize the app
+        init();
+    </script>
+
+</body>
+</html>

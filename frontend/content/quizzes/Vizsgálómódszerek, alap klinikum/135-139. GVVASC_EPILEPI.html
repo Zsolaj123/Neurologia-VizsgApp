@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt - 6. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.selected {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Neurológia Tesztek - 6. rész</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy témakört a tudása teszteléséhez.</p>
+            <div id="topic-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <p id="progress-text" class="text-slate-500"></p>
+                </div>
+                <button id="back-to-topics" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2 px-4 border border-slate-300 rounded-lg shadow-sm">Vissza</button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+                
+                <div id="feedback-container" class="mt-6">
+                    <div id="explanation" class="explanation p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                        <h4 class="font-bold mb-2">Magyarázat</h4>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="next-button" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h2>
+            <p id="score-text" class="text-xl text-slate-600 mb-2"></p>
+            <p id="score-percentage" class="text-4xl font-bold text-blue-600 mb-6"></p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Újra</button>
+                <button id="back-to-topics-from-results" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 border border-slate-300 rounded-lg shadow-sm">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            "gerincvelo_vascularis": {
+                title: "A gerincvelő vascularis károsodása",
+                questions: [
+                    {
+                        question: "Melyik a leggyakoribb gerincvelői ischaemiás szindróma?",
+                        options: ["Posterior spinalis artéria szindróma", "Centrális gerincvelő szindróma", "Anterior spinalis artéria szindróma", "Spinális epidurális hematóma"],
+                        answer: "Anterior spinalis artéria szindróma",
+                        explanation: "Az anterior spinalis artéria (ASA) szindróma a leggyakrabban felismert gerincvelői infarktus típus, amely a gerincvelő elülső kétharmadának károsodásával jár."
+                    },
+                    {
+                        question: "Mi a jellegzetes tünete az anterior spinalis artéria szindrómának?",
+                        options: ["Csak a mélyérzés kiesése", "Kétoldali motoros bénulás és a fájdalom/hőérzés kiesése, megtartott mélyérzés mellett", "Csak egyoldali gyengeség", "Csak vizeletinkontinencia"],
+                        answer: "Kétoldali motoros bénulás és a fájdalom/hőérzés kiesése, megtartott mélyérzés mellett",
+                        explanation: "Az ASA a motoros pályákat (corticospinalis) és a fájdalom/hőérzést szállító pályákat (spinothalamicus) látja el. Az elzáródása ezen funkciók kétoldali kiesését okozza, míg a posterior kötegek (mélyérzés) megkíméltek."
+                    },
+                    {
+                        question: "Mi az Adamkiewicz-artéria (AKA) klinikai jelentősége?",
+                        options: ["A nyaki gerincvelőt látja el.", "A gerincvelő alsó szakaszának fő artériás ellátója, sérülése súlyos bénulást okozhat.", "Egy vénás ér.", "Nincs klinikai jelentősége."],
+                        answer: "A gerincvelő alsó szakaszának fő artériás ellátója, sérülése súlyos bénulást okozhat.",
+                        explanation: "Az Adamkiewicz-artéria a legnagyobb radicularis artéria, amely a gerincvelő alsó thoracalis és lumbosacralis szakaszát látja el. Sérülése (pl. aorta műtét során) kiterjedt infarktushoz és paraplegiához vezethet."
+                    },
+                    {
+                        question: "Melyik képalkotó jel utal leginkább ASA infarktusra az axiális MRI felvételen?",
+                        options: ["Gyűrűs kontraszthalmozás", "'Bagolyszem' jel", "Diffúz agyödéma", "Csigolyatest törése"],
+                        answer: "'Bagolyszem' jel",
+                        explanation: "A 'bagolyszem' (owl's eye) jel a T2-súlyozott axiális MRI képeken látható kétoldali, szimmetrikus hiperintenzitást jelenti az elülső szarvakban, ami szinte patognomonikus az ASA infarktusra."
+                    },
+                    {
+                        question: "Mi a fibrocartilaginealis embolisatio (FCE) lényege?",
+                        options: ["Levegőembólia a gerincvelői erekben.", "Atheroscleroticus plakk leszakadása.", "Porckorongból származó anyag embolizációja a gerincvelői erekbe.", "Bakteriális embólus."],
+                        answer: "Porckorongból származó anyag embolizációja a gerincvelői erekbe.",
+                        explanation: "FCE esetén a porckorong (nucleus pulposus) egy darabja a gerincvelőt ellátó artériákba vagy vénákba kerül, ott elzáródást és infarktust okozva, gyakran kisebb trauma vagy megerőltetés után."
+                    },
+                    {
+                        question: "Melyik állítás igaz a gerincvelői infarktus (SCI) akut fázisú MRI vizsgálatára?",
+                        options: ["Mindig azonnal kimutatja a károsodást.", "Az első 24 órában gyakran negatív lehet.", "A kontrasztanyag adása a legfontosabb.", "A CT érzékenyebb az akut SCI-re."],
+                        answer: "Az első 24 órában gyakran negatív lehet.",
+                        explanation: "Az SCI korai diagnózisa kihívást jelenthet, mivel a standard T2-súlyozott MRI az esetek jelentős részében az első 24 órában még nem mutat eltérést. A DWI szekvencia érzékenyebb, de a gerincvelő vizsgálata technikailag nehézkes."
+                    },
+                    {
+                        question: "Mi a spinális epidurális hematóma (SEH)?",
+                        options: ["Vérzés a gerincvelő állományán belül.", "Vérgyülem a dura mater és a csigolyacsont közötti epidurális térben.", "Vérzés a subarachnoidealis térben.", "Vénás tágulat."],
+                        answer: "Vérgyülem a dura mater és a csigolyacsont közötti epidurális térben.",
+                        explanation: "Az SEH egy vérömleny, amely a gerincvelőt körülvevő epidurális térben helyezkedik el, és a gerincvelő kompresszióját okozza."
+                    },
+                    {
+                        question: "Mi a leggyakoribb oka a spontán spinális epidurális hematómának?",
+                        options: ["Trauma", "Daganat", "Antikoaguláns vagy antitrombocita terápia", "Fertőzés"],
+                        answer: "Antikoaguláns vagy antitrombocita terápia",
+                        explanation: "A spontán (nem traumás) SEH leggyakrabban véralvadásgátló vagy vérlemezke-gátló gyógyszereket szedő betegeknél alakul ki."
+                    },
+                    {
+                        question: "Mi a teendő neurológiai tüneteket okozó akut spinális epidurális hematóma esetén?",
+                        options: ["Megfigyelés és várakozás.", "Fájdalomcsillapítók adása.", "Azonnali sebészi dekompresszió és a hematóma kiürítése.", "Csak fizikoterápia."],
+                        answer: "Azonnali sebészi dekompresszió és a hematóma kiürítése.",
+                        explanation: "A tüneteket okozó SEH neurológiai vészhelyzet. A maradandó bénulás elkerülése érdekében a gerincvelő kompresszióját a lehető leghamarabb, sürgős műtéttel kell megszüntetni."
+                    },
+                    {
+                        question: "Mi a spinális durális arteriovenosus fistula (SDAVF) patofiziológiájának lényege?",
+                        options: ["Artériás elzáródás", "Vénás hipertónia és pangásos myelopathia", "A gerincvelő gyulladása", "Az ideggyökök kompressziója"],
+                        answer: "Vénás hipertónia és pangásos myelopathia",
+                        explanation: "SDAVF esetén egy kóros artéria-véna összeköttetés miatt a magas nyomású artériás vér a gerincvelői vénás rendszerbe jut. Ez a vénás nyomás emelkedéséhez, pangáshoz, a gerincvelő ödémájához és ischaemiás károsodásához vezet."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb spinális vascularis malformáció?",
+                        options: ["Intramedullaris AVM", "Spinális cavernoma", "Spinális durális arteriovenosus fistula (SDAVF)", "Juvenilis AVM"],
+                        answer: "Spinális durális arteriovenosus fistula (SDAVF)",
+                        explanation: "Az SDAVF az összes gerincvelői érfejlődési rendellenesség mintegy 70%-át teszi ki, így ez a leggyakoribb típus."
+                    },
+                    {
+                        question: "Milyen klinikai lefolyás jellemző az SDAVF-re?",
+                        options: ["Hirtelen, ütésszerű kezdet.", "Lassan, évek alatt progrediáló myelopathia.", "Epizodikus, átmeneti tünetek.", "Mindig tünetmentes."],
+                        answer: "Lassan, évek alatt progrediáló myelopathia.",
+                        explanation: "Az SDAVF tünetei (alsó végtagi gyengeség, érzészavar, sphincter zavarok) jellemzően alattomosan kezdődnek és lassan, fokozatosan rosszabbodnak a krónikus vénás pangás miatt."
+                    },
+                    {
+                        question: "Mi a hematomyelia?",
+                        options: ["Vérzés az epidurális térbe", "Vérzés a subdurális térbe", "Vérzés a gerincvelő állományán belül", "A gerincvelő infarktusa"],
+                        answer: "Vérzés a gerincvelő állományán belül",
+                        explanation: "A hematomyelia az intramedullaris vérzést jelenti, azaz a vérömleny magában a gerincvelő szövetében helyezkedik el."
+                    },
+                    {
+                        question: "Melyik állítás igaz a gerincvelő vénás rendszerére?",
+                        options: ["Gazdag billentyűkben.", "A Batson-féle plexus billentyű nélküli, ami lehetővé teszi a fertőzések és metasztázisok terjedését.", "Nincs kapcsolata a szisztémás keringéssel.", "Csak a gerincvelő felső szakaszán van jelen."],
+                        answer: "A Batson-féle plexus billentyű nélküli, ami lehetővé teszi a fertőzések és metasztázisok terjedését.",
+                        explanation: "A gerincvelő körüli vénás hálózat (Batson-plexus) billentyűk nélküli, ami lehetővé teszi a vér kétirányú áramlását. Ez megkönnyíti a daganatos áttétek vagy fertőzések terjedését a kismedencéből vagy a hasüregből a gerinc felé."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás az 'arany standard' az SDAVF diagnózisában?",
+                        options: ["MRI", "CT", "Ultrahang", "Digitális szubtrakciós angiográfia (DSA)"],
+                        answer: "Digitális szubtrakciós angiográfia (DSA)",
+                        explanation: "Bár az MRI felveti a gyanút, a fisztula pontos helyének és angioarchitektúrájának (tápláló artéria, drenáló véna) azonosításához a DSA a legpontosabb módszer."
+                    },
+                    {
+                        question: "Milyen tünetek jellemzik a posterior spinalis artéria szindrómát?",
+                        options: ["Motoros bénulás", "A fájdalom- és hőérzés kiesése", "A mélyérzés (propriocepció, vibráció) elvesztése", "Teljes érzéskiesés és bénulás"],
+                        answer: "A mélyérzés (propriocepció, vibráció) elvesztése",
+                        explanation: "A PSA a hátsó kötegeket látja el, ezért elzáródása a propriocepció, a vibráció és a finom tapintás érzékelésének kiesését okozza, míg a motoros és a fájdalom/hőérző pályák általában megkíméltek."
+                    },
+                    {
+                        question: "Melyik állítás igaz a gerincvelői infarktus prognózisára?",
+                        options: ["Mindig teljes a felépülés.", "A prognózis általában súlyos, gyakori a maradandó rokkantság.", "A prognózis mindig rossz, a betegek nem élik túl.", "A prognózis nem függ a kezdeti állapottól."],
+                        answer: "A prognózis általában súlyos, gyakori a maradandó rokkantság.",
+                        explanation: "A gerincvelő korlátozott regenerációs képessége miatt az SCI prognózisa általában kedvezőtlen. Bár javulás lehetséges, sok betegnél jelentős, tartós funkcióvesztés (pl. kerekesszékes mobilitás) marad vissza."
+                    },
+                    {
+                        question: "Hogyan lehet elkülöníteni a spinális epidurális hematómát a tályogtól MRI-n?",
+                        options: ["A méretük alapján.", "A tályog a DWI szekvencián jellegzetes diffúziógátlást mutat.", "A hematóma mindig kontrasztot halmoz, a tályog soha.", "Nincs különbség."],
+                        answer: "A tályog a DWI szekvencián jellegzetes diffúziógátlást mutat.",
+                        explanation: "A diffúzió-súlyozott képalkotás (DWI) kulcsfontosságú. A gennyes tályogtartalom a DWI képeken restrikált diffúziót (fényes jel) mutat, míg egy komplikációmentes hematóma általában nem."
+                    },
+                    {
+                        question: "Melyik kezelési módszer bizonyult hatékonyabbnak az SDAVF végleges ellátásában?",
+                        options: ["Csak gyógyszeres kezelés", "Endovascularis embolizáció", "Sebészi obliteráció", "Sugárterápia"],
+                        answer: "Sebészi obliteráció",
+                        explanation: "A vizsgálatok szerint a fisztula direkt sebészi lekötése (obliteráció) magasabb arányban eredményez teljes és tartós elzáródást, és alacsonyabb a kiújulás kockázata, mint az endovaszkuláris embolizáció esetén."
+                    },
+                    {
+                        question: "Mi a spinális cavernoma?",
+                        options: ["Egy gyors áramlású érmalformáció.", "Egy lassan áramló vért tartalmazó, tágult kapillárisokból álló érgomolyag.", "A gerincvelő daganata.", "A dura mater gyulladása."],
+                        answer: "Egy lassan áramló vért tartalmazó, tágult kapillárisokból álló érgomolyag.",
+                        explanation: "A cavernoma egy lassú áramlású vaszkuláris malformáció, amely ismétlődő mikrovérzésekre hajlamos, és jellegzetes 'pattogatott kukorica' képet ad az MRI-n."
+                    }
+                ]
+            },
+            "epilepszia_pathophys": {
+                title: "Az epilepszia pathophysiológiája",
+                questions: [
+                    {
+                        question: "Az ILAE 2014-es definíciója szerint mi NEM elegendő az epilepszia diagnózisához?",
+                        options: ["Legalább két, provokálatlan roham >24 óra különbséggel.", "Egyetlen, provokálatlan roham.", "Egy provokálatlan roham, ha a kiújulás kockázata >60%.", "Egy ismert epilepszia szindróma diagnózisa."],
+                        answer: "Egyetlen, provokálatlan roham.",
+                        explanation: "Egyetlen provokálatlan roham önmagában nem elegendő az epilepszia diagnózisához, kivéve, ha a további vizsgálatok (pl. EEG, MRI) a kiújulás magas (legalább 60%-os) kockázatát jelzik."
+                    },
+                    {
+                        question: "Mi a neuronális hiperexcitabilitás lényege?",
+                        options: ["A neuronok csökkent ingerlékenysége.", "A neuronok kórosan fokozott ingerlékenysége, hajlama az akciós potenciálok generálására.", "A neuronok pusztulása.", "A gliasejtek szaporodása."],
+                        answer: "A neuronok kórosan fokozott ingerlékenysége, hajlama az akciós potenciálok generálására.",
+                        explanation: "A hiperexcitabilitás azt jelenti, hogy az idegsejtek ingerküszöbe lecsökken, így kisebb ingerekre is tüzelni kezdenek, vagy akár spontán módon is generálnak kisüléseket."
+                    },
+                    {
+                        question: "Mi a hiperszinkronizáció?",
+                        options: ["A neuronok véletlenszerű tüzelése.", "Egy kiterjedt neuronpopuláció kórosan túlzott mértékű és időben összehangolt kisülése.", "A szinapszisok számának csökkenése.", "Az agyi véráramlás fokozódása."],
+                        answer: "Egy kiterjedt neuronpopuláció kórosan túlzott mértékű és időben összehangolt kisülése.",
+                        explanation: "A hiperszinkronizáció a hálózati szintű kóros működés, amikor sok idegsejt egyszerre, szinkronban sül ki. Ez a jelenség hozza létre az EEG-n látható epileptiform jeleket."
+                    },
+                    {
+                        question: "Melyik a központi idegrendszer fő serkentő (excitatórikus) neurotranszmittere?",
+                        options: ["GABA", "Szerotonin", "Dopamin", "Glutamát"],
+                        answer: "Glutamát",
+                        explanation: "A glutamát a legfontosabb serkentő neurotranszmitter az agyban. Kórosan magas szintje vagy a receptorainak túlműködése hiperexcitabilitáshoz és excitotoxicitáshoz vezethet."
+                    },
+                    {
+                        question: "Melyik a központi idegrendszer fő gátló (inhibítoros) neurotranszmittere?",
+                        options: ["Glutamát", "Acetilkolin", "GABA (gamma-amino-vajsav)", "Noradrenalin"],
+                        answer: "GABA (gamma-amino-vajsav)",
+                        explanation: "A GABA a fő gátló neurotranszmitter, amely a neuronok hiperpolarizációjával csökkenti azok ingerlékenységét. A GABAerg rendszer elégtelensége kulcsszerepet játszik az epilepszia kialakulásában."
+                    },
+                    {
+                        question: "Mi az epileptogenezis?",
+                        options: ["Egyetlen epilepsziás roham.", "Az a folyamat, amely során a normális agy képessé válik spontán rohamok generálására.", "Az epilepszia gyógyszeres kezelése.", "Az epilepszia sebészeti kezelése."],
+                        answer: "Az a folyamat, amely során a normális agy képessé válik spontán rohamok generálására.",
+                        explanation: "Az epileptogenezis egy hosszabb idő alatt lezajló, komplex biológiai folyamat, amely egy agyi inzultus után a normális agyszövetet kórosan ingerlékeny, rohamkeltésre hajlamos hálózattá alakítja át."
+                    },
+                    {
+                        question: "Mi a 'látens periódus' az epileptogenezisben?",
+                        options: ["A roham alatti időszak.", "A kiváltó agyi inzultus és az első spontán roham közötti, tünetmentes időszak.", "A gyógyszeres kezelés hatástalansága.", "A rohamok utáni alvás."],
+                        answer: "A kiváltó agyi inzultus és az első spontán roham közötti, tünetmentes időszak.",
+                        explanation: "A látens periódus alatt zajlanak le azok a rejtett, kóros átalakulások az agyban, amelyek végül a krónikus epilepszia kialakulásához vezetnek. Ez egy potenciális terápiás ablakot jelent a megelőzésre."
+                    },
+                    {
+                        question: "Milyen szerepet játszik a vér-agy gát (BBB) diszfunkciója az epileptogenezisben?",
+                        options: ["Véd az epilepszia ellen.", "Nincs szerepe.", "Hozzájárul az epileptogén környezet kialakulásához a gyulladásos sejtek és a vérplazma komponensek (pl. albumin) agyba jutásával.", "Csak az agyvíz termelését fokozza."],
+                        answer: "Hozzájárul az epileptogén környezet kialakulásához a gyulladásos sejtek és a vérplazma komponensek (pl. albumin) agyba jutásával.",
+                        explanation: "A sérült BBB áteresztővé válik, ami pro-epileptogén anyagok agyszövetbe kerülését teszi lehetővé, fenntartva a gyulladást és a neuronális hiperexcitabilitást."
+                    },
+                    {
+                        question: "Mi a moharostok-csírázás (mossy fiber sprouting)?",
+                        options: ["A gliasejtek egy típusának szaporodása.", "A hippokampusz szemcsesejtjeinek kóros, új serkentő kapcsolatokat létrehozó axonális kicsírázása.", "A mielinhüvely regenerációja.", "Az agyi erek újraképződése."],
+                        answer: "A hippokampusz szemcsesejtjeinek kóros, új serkentő kapcsolatokat létrehozó axonális kicsírázása.",
+                        explanation: "Ez egy kóros plasztikus változás, amely a temporális lebeny epilepsziában gyakori. Az új, rekurrens serkentő körök jelentősen fokozzák a hálózati ingerlékenységet."
+                    },
+                    {
+                        question: "Melyik ioncsatorna-típus diszfunkciója áll leggyakrabban a genetikai epilepsziák hátterében?",
+                        options: ["Kloridcsatornák", "Kalciumcsatornák", "Káliumcsatornák", "Nátriumcsatornák"],
+                        answer: "Nátriumcsatornák",
+                        explanation: "A feszültségfüggő nátriumcsatornákat kódoló gének (pl. SCN1A, SCN2A, SCN8A) mutációi a genetikai epilepsziák egyik leggyakoribb okát képezik."
+                    },
+                    {
+                        question: "Melyik súlyos gyermekkori epilepszia szindróma kapcsolódik leggyakrabban az SCN1A gén mutációihoz?",
+                        options: ["Lennox-Gastaut szindróma", "West szindróma", "Dravet-szindróma", "Benignus rolandicus epilepszia"],
+                        answer: "Dravet-szindróma",
+                        explanation: "A Dravet-szindrómát, egy súlyos, gyógyszerrezisztens myoclonusos epilepsziát, az esetek többségében az SCN1A gén funkcióvesztő mutációja okozza."
+                    },
+                    {
+                        question: "Melyik jelátviteli útvonal kóros hiperaktivációja áll a Tuberous Sclerosis Complex (TSC) hátterében?",
+                        options: ["Notch útvonal", "Wnt útvonal", "mTOR útvonal", "JAK-STAT útvonal"],
+                        answer: "mTOR útvonal",
+                        explanation: "TSC-ben a TSC1 vagy TSC2 gének mutációja az mTOR jelátviteli útvonal gátlásának elégtelenségéhez és kóros aktivációjához vezet, ami hamartomák képződését és epilepsziát okoz."
+                    },
+                    {
+                        question: "Milyen szerepet játszanak az asztrociták az epilepsziában?",
+                        options: ["Csak támasztó funkciójuk van.", "Aktívan hozzájárulnak a hiperexcitabilitáshoz a kálium- és glutamát-homeosztázis zavara révén.", "Gátolják a rohamok kialakulását.", "Nem érintettek a folyamatban."],
+                        answer: "Aktívan hozzájárulnak a hiperexcitabilitáshoz a kálium- és glutamát-homeosztázis zavara révén.",
+                        explanation: "A reaktív asztrociták elveszíthetik a képességüket az extracelluláris kálium és glutamát eltávolítására, ami a neuronok fokozott ingerlékenységéhez vezet."
+                    },
+                    {
+                        question: "Mi a paroxizmális depolarizációs shift (PDS)?",
+                        options: ["A neuron normális nyugalmi potenciálja.", "Egy tartós, nagy amplitúdójú depolarizáció, amely az interiktális tüske celluláris megfelelője.", "A neuron hiperpolarizációja.", "A gliasejtek elektromos jele."],
+                        answer: "Egy tartós, nagy amplitúdójú depolarizáció, amely az interiktális tüske celluláris megfelelője.",
+                        explanation: "A PDS egy jellegzetes, kóros elektromos esemény egy epilepsziás neuronban, amely egy hosszan tartó depolarizációból és az arra szuperponálódó akciós potenciálok sorozatából áll."
+                    },
+                    {
+                        question: "Melyik állítás igaz a kindling jelenségre?",
+                        options: ["Az agy veleszületett rohammentessége.", "Ismételt, küszöb alatti elektromos ingerlés hatására kialakuló, tartós rohamkészség-fokozódás.", "Az antiepileptikumok hatásmechanizmusa.", "A rohamok spontán megszűnése."],
+                        answer: "Ismételt, küszöb alatti elektromos ingerlés hatására kialakuló, tartós rohamkészség-fokozódás.",
+                        explanation: "A kindling az epileptogenezis egy kísérletes modellje, amely megmutatja, hogy az ismétlődő, önmagában rohamot nem okozó ingerlés hogyan teheti az agyat tartósan hajlamossá a rohamokra."
+                    },
+                    {
+                        question: "Milyen szerepe van a mikrogliáknak az epileptogenezisben?",
+                        options: ["Csak a mielinhüvelyt termelik.", "Aktiválódva proinflammatorikus mediátorokat bocsátanak ki, hozzájárulva a neuroinflammációhoz.", "Nincs szerepük.", "Gátolják a glutamát felszabadulását."],
+                        answer: "Aktiválódva proinflammatorikus mediátorokat bocsátanak ki, hozzájárulva a neuroinflammációhoz.",
+                        explanation: "A mikrogliák, mint az agy immunsejtjei, aktiválódnak a sérülésre, és az általuk termelt gyulladásos citokinek (pl. IL-1β, TNF-α) fokozhatják a neuronális ingerlékenységet."
+                    },
+                    {
+                        question: "A KCNQ2 és KCNQ3 gének mutációi melyik ionáramot befolyásolják?",
+                        options: ["Nátrium-áram", "Kalcium-áram", "M-típusú kálium-áram", "Klorid-áram"],
+                        answer: "M-típusú kálium-áram",
+                        explanation: "Ezek a gének az M-áramért felelős káliumcsatorna alegységeket kódolják. Az M-áram egy fontos, a neuronális ingerlékenységet stabilizáló áram, hiánya hiperexcitabilitáshoz vezet."
+                    },
+                    {
+                        question: "Mi a GLUT1-hiány szindróma terápiájának alapja?",
+                        options: ["Magas dózisú nátriumcsatorna-blokkolók", "Ketogén diéta", "Sebészeti beavatkozás", "Immunszuppresszió"],
+                        answer: "Ketogén diéta",
+                        explanation: "GLUT1-hiányban az agy nem jut elég glükózhoz. A ketogén diéta alternatív energiaforrást, ketontesteket biztosít az agy számára, megkerülve a hibás glükóztranszportot, így hatékonyan csökkenti a rohamokat."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az epilepszia patofiziológiájára?",
+                        options: ["A serkentő és gátló rendszerek egyensúlyzavara jellemzi.", "A neuronális hiperexcitabilitás és hiperszinkronizáció központi jelenségek.", "A folyamat mindig egyetlen gén hibájára vezethető vissza.", "A gliasejtek aktívan részt vesznek a kóros folyamatokban."],
+                        answer: "A folyamat mindig egyetlen gén hibájára vezethető vissza.",
+                        explanation: "Bár léteznek monogénes epilepsziák, a betegség háttere a legtöbb esetben multifaktoriális, ahol genetikai hajlam és szerzett (környezeti) tényezők komplex kölcsönhatása játszik szerepet."
+                    },
+                    {
+                        question: "Hogyan járulhat hozzá a neuronvesztés az epileptogenezishez?",
+                        options: ["Csökkenti az agy elektromos aktivitását.", "Különösen a gátló interneuronok elvesztése vezethet a hálózat diszinhibíciójához és hiperexcitabilitásához.", "Mindig javítja az agy működését.", "Nincs hatással a rohamkészségre."],
+                        answer: "Különösen a gátló interneuronok elvesztése vezethet a hálózat diszinhibíciójához és hiperexcitabilitásához.",
+                        explanation: "A gátló interneuronok szelektív pusztulása felborítja a serkentő-gátló egyensúlyt, ami a serkentő piramissejtek kontrollálatlan tüzelését teszi lehetővé."
+                    }
+                ]
+            },
+            "epilepszia_eeg": {
+                title: "Az epilepszia EEG jelei",
+                questions: [
+                    {
+                        question: "Mi az EEG vizsgálat alapelve?",
+                        options: ["Az agy mágneses terét méri.", "Az agy vérellátását vizsgálja.", "Az agy elektromos aktivitását rögzíti a fejbőrre helyezett elektródákkal.", "Az agy szerkezetét képezi le röntgensugarakkal."],
+                        answer: "Az agy elektromos aktivitását rögzíti a fejbőrre helyezett elektródákkal.",
+                        explanation: "Az EEG az idegsejtek kommunikációja során keletkező, összegződött elektromos potenciálváltozásokat detektálja, valós idejű információt nyújtva az agyi tevékenységről."
+                    },
+                    {
+                        question: "Mit jelent az interiktális epileptiform kisülés (IED)?",
+                        options: ["A roham alatti EEG jelet.", "A rohamok közötti időszakban jelentkező, az agykéreg fokozott ingerlékenységére utaló EEG jelet.", "Egyfajta műterméket.", "Az alvás normális EEG jelét."],
+                        answer: "A rohamok közötti időszakban jelentkező, az agykéreg fokozott ingerlékenységére utaló EEG jelet.",
+                        explanation: "Az IED-k (pl. tüskék, éles hullámok) a rohammentes időszakban is jelezhetik az agy fokozott rohamkészségét, és segíthetnek az epileptogén zóna lokalizálásában."
+                    },
+                    {
+                        question: "Melyik EEG mintázat a legjellemzőbb a gyermekkori absence epilepsziára?",
+                        options: ["Fokális temporális tüskék", "Generalizált, reguláris 3 Hz-es tüske-lassú hullám komplexumok", "Hypsarrhythmia", "Periodikus lateralizált kisülések"],
+                        answer: "Generalizált, reguláris 3 Hz-es tüske-lassú hullám komplexumok",
+                        explanation: "Ez a jellegzetes, szimmetrikus, generalizált mintázat szinte patognomonikus a tipikus absence rohamokra. Gyakran hiperventillációval provokálható."
+                    },
+                    {
+                        question: "Mi a hypsarrhythmia?",
+                        options: ["Egy normális alvási mintázat.", "Egy rendkívül kaotikus, magas amplitúdójú, multifokális tüskékből és lassú hullámokból álló EEG minta.", "A frontális lebeny epilepszia jele.", "Egyfajta műtermék."],
+                        answer: "Egy rendkívül kaotikus, magas amplitúdójú, multifokális tüskékből és lassú hullámokból álló EEG minta.",
+                        explanation: "A hypsarrhythmia a West-szindróma (infantilis spazmusok) interiktális EEG jele, amely súlyos, diffúz agyi diszfunkciót tükröz csecsemőkorban."
+                    },
+                    {
+                        question: "Melyik epilepszia szindrómára jellemzőek a centrotemporális (rolandikus) tüskék?",
+                        options: ["Juvenilis myoclonusos epilepszia (JME)", "Lennox-Gastaut szindróma (LGS)", "Self-limited Epilepsy with Centrotemporal Spikes (SeLECTS)", "Temporális lebeny epilepszia (TLE)"],
+                        answer: "Self-limited Epilepsy with Centrotemporal Spikes (SeLECTS)",
+                        explanation: "Ez a jóindulatú gyermekkori epilepszia szindróma jellegzetes, magas amplitúdójú tüskéket mutat a centrotemporális régióban, amelyek különösen alvásban aktiválódnak."
+                    },
+                    {
+                        question: "Milyen célt szolgál a video-EEG monitorozás?",
+                        options: ["Csak az alvás vizsgálatát.", "A klinikai rohamtünetek és az egyidejű EEG aktivitás korrelációját.", "Az agyi véráramlás mérését.", "Az agy szerkezetének feltérképezését."],
+                        answer: "A klinikai rohamtünetek és az egyidejű EEG aktivitás korrelációját.",
+                        explanation: "A video-EEG a 'gold standard' a rohamok pontos klasszifikálásához és az epileptogén zóna lokalizálásához, mivel lehetővé teszi a viselkedés és az agyi elektromos jelek egyidejű elemzését."
+                    },
+                    {
+                        question: "Melyik állítás igaz a rutin EEG vizsgálat diagnosztikus értékére?",
+                        options: ["Mindig kimutatja az epilepsziát.", "Egy negatív lelet kizárja az epilepszia lehetőségét.", "Egyetlen negatív rutin EEG nem zárja ki az epilepsziát, mivel az IED-k lehetnek ritkák.", "Csak a generalizált epilepsziákban hasznos."],
+                        answer: "Egyetlen negatív rutin EEG nem zárja ki az epilepsziát, mivel az IED-k lehetnek ritkák.",
+                        explanation: "Az epilepsziás betegek jelentős részénél az első rutin EEG normális lehet. A diagnosztikus pontosság növelhető ismételt vizsgálatokkal vagy provokációs módszerekkel (pl. alvásmegvonás)."
+                    },
+                    {
+                        question: "Milyen EEG jelenség társul gyakran a juvenilis myoclonusos epilepsziához (JME)?",
+                        options: ["Fokális lassulás", "Generalizált, irreguláris polispike-hullám kisülések", "3 Hz tüske-hullám", "Normális EEG"],
+                        answer: "Generalizált, irreguláris polispike-hullám kisülések",
+                        explanation: "A JME-re jellemzőek a gyors (3.5-6 Hz), generalizált, gyakran fragmentált polispike-hullám komplexumok, amelyek a myoclonusos rángások elektrofiziológiai korrelátumai."
+                    },
+                    {
+                        question: "Mi a fotoparoxizmális válasz (PPR)?",
+                        options: ["Az agy normális reakciója fényre.", "Epileptiform kisülések megjelenése villogó fényinger (fotostimuláció) hatására.", "A szem pupillájának reakciója.", "Egyfajta alvási orsó."],
+                        answer: "Epileptiform kisülések megjelenése villogó fényinger (fotostimuláció) hatására.",
+                        explanation: "A PPR a fotószenzitivitás EEG jele, és különösen gyakori bizonyos generalizált epilepsziákban, mint például a JME-ben."
+                    },
+                    {
+                        question: "Milyen két jellegzetes interiktális EEG mintázat szükséges a Lennox-Gastaut szindróma (LGS) diagnózisához?",
+                        options: ["Centrotemporális tüskék és 3 Hz tüske-hullám", "Lassú (<2.5 Hz) tüske-hullám kisülések és generalizált paroxizmális gyors aktivitás (GPFA)", "Hypsarrhythmia és fokális lassulás", "Csak normális alaptevékenység"],
+                        answer: "Lassú (<2.5 Hz) tüske-hullám kisülések és generalizált paroxizmális gyors aktivitás (GPFA)",
+                        explanation: "Az LGS diagnózisának EEG kritériuma a jellegzetes lassú tüske-hullám mintázat és az alvásban jelentkező GPFA együttes megléte, a megfelelő klinikai kép (többféle rohamtípus, kognitív hanyatlás) mellett."
+                    },
+                    {
+                        question: "Mi a 'tüske' (spike) celluláris szintű elektrofiziológiai megfelelője?",
+                        options: ["Paroxizmális depolarizációs shift (PDS)", "Elnyújtott hiperpolarizáció", "A neuron nyugalmi potenciálja", "A gliasejtek aktivitása"],
+                        answer: "Paroxizmális depolarizációs shift (PDS)",
+                        explanation: "A tüske az EEG-n egy nagy neuronpopuláció szinkron PDS-ének felel meg. A PDS egy tartós, nagy amplitúdójú depolarizáció, amelyre akciós potenciálok sorozata ül rá."
+                    },
+                    {
+                        question: "Melyik állítás igaz a temporális lebeny epilepszia (TLE) interiktális EEG képére?",
+                        options: ["Mindig normális.", "Gyakran mutat fokális tüskéket vagy éles hullámokat az anterior temporális régióban.", "Jellemzően generalizált kisülések láthatók.", "Mindig hypsarrhythmia látható."],
+                        answer: "Gyakran mutat fokális tüskéket vagy éles hullámokat az anterior temporális régióban.",
+                        explanation: "A TLE leggyakoribb interiktális jele az érintett temporális lebeny felett regisztrált fokális epileptiform aktivitás (tüskék, éles hullámok) vagy fokális lassulás."
+                    },
+                    {
+                        question: "Mi a 'recruiting rhythm'?",
+                        options: ["A normális alfa ritmus.", "A roham alatti, fokozatosan növekvő amplitúdójú ritmikus aktivitás.", "Az alvás közbeni lassú hullámok.", "Egyfajta műtermék."],
+                        answer: "A roham alatti, fokozatosan növekvő amplitúdójú ritmikus aktivitás.",
+                        explanation: "A 'recruiting rhythm' egy iktális mintázat, amely gyakran tónusos rohamok alatt látható. Jellemzője a gyors aktivitás, amelynek amplitúdója a roham során fokozatosan növekszik, ahogy egyre több neuron vonódik be a kisülésbe."
+                    },
+                    {
+                        question: "Melyik epilepszia típus esetén a legnehezebb gyakran az iktális EEG értékelése a kiterjedt izomartefaktumok miatt?",
+                        options: ["Absence epilepszia", "Temporális lebeny epilepszia", "Frontális lebeny epilepszia", "Benignus rolandicus epilepszia"],
+                        answer: "Frontális lebeny epilepszia",
+                        explanation: "Az FLE-re gyakran jellemzőek a heves motoros megnyilvánulások (pl. hypermotoros rohamok), amelyek jelentős izomaktivitást generálnak. Ez az izomartefaktum elfedheti az agyi elektromos jeleket, megnehezítve az iktális EEG értékelését."
+                    },
+                    {
+                        question: "Mit jelent a 'fokális lassulás' az EEG-n?",
+                        options: ["A beteg elálmosodott.", "Az agy egy körülírt területének strukturális vagy funkcionális zavarára utaló, lokalizált lassú hullámú aktivitás.", "A roham végét jelzi.", "A gyógyszerek hatását mutatja."],
+                        answer: "Az agy egy körülírt területének strukturális vagy funkcionális zavarára utaló, lokalizált lassú hullámú aktivitás.",
+                        explanation: "A perzisztens fokális lassulás (theta vagy delta aktivitás) egy nem specifikus, de fontos kóros jel, amely az epileptogén zóna helyére vagy egy mögöttes strukturális elváltozásra (pl. tumor, stroke) hívhatja fel a figyelmet."
+                    },
+                    {
+                        question: "Milyen aktivációs eljárást NEM használnak rutin EEG vizsgálat során?",
+                        options: ["Hiperventilláció", "Fotostimuláció", "Alvásmegvonás", "Mágneses stimuláció"],
+                        answer: "Mágneses stimuláció",
+                        explanation: "A rutin EEG során a hiperventilláció és a fotostimuláció a standard provokációs módszerek. Az alvásmegvonást speciális esetekben alkalmazzák. A mágneses stimuláció (TMS) egy másik diagnosztikai/terápiás eljárás."
+                    },
+                    {
+                        question: "Mi a 'B(I)RDs' (Brief Potentially Ictal Rhythmic Discharges) jelentősége?",
+                        options: ["Normális élettani jelenség.", "Rövid, rohamszerű EEG mintázatok, amelyek magas rohamkockázatot jeleznek, még ha nem is érik el a roham definícióját.", "Mindig jóindulatúak.", "Csak csecsemőknél fordulnak elő."],
+                        answer: "Rövid, rohamszerű EEG mintázatok, amelyek magas rohamkockázatot jeleznek, még ha nem is érik el a roham definícióját.",
+                        explanation: "A B(I)RDs olyan ritmikus kisülések, amelyek rövidebbek a roham definíciójához szükséges 10 másodpercnél. Jelenlétük azonban aggodalomra ad okot, mert a betegeknél később nagy valószínűséggel alakulnak ki valódi rohamok."
+                    },
+                    {
+                        question: "Melyik állítás igaz a periodikus lateralizált kisülésekre (PLDs)?",
+                        options: ["Mindig jóindulatúak.", "Gyakran akut, egyoldali agykárosodáshoz (pl. stroke, encephalitis) társulnak.", "Csak alvásban jelentkeznek.", "A generalizált epilepszia jelei."],
+                        answer: "Gyakran akut, egyoldali agykárosodáshoz (pl. stroke, encephalitis) társulnak.",
+                        explanation: "A PLD-k (korábban PLEDs) egyoldali, periodikusan ismétlődő kisülések, amelyek szinte mindig akut, súlyos, fokális agyi diszfunkciót jeleznek, és magas rohamrizikóval járnak."
+                    },
+                    {
+                        question: "Mi a fő különbség a tüske (spike) és az éles hullám (sharp wave) között az EEG-n?",
+                        options: ["Az amplitúdójuk", "A lokalizációjuk", "Az időtartamuk", "A klinikai jelentőségük"],
+                        answer: "Az időtartamuk",
+                        explanation: "A definíció szerinti fő különbség az időtartam: a tüske rövidebb (<70-80 ms), míg az éles hullám hosszabb (70-200 ms). Klinikai jelentőségükben nincs lényeges különbség, mindkettő epileptiform jel."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az EEG-re?",
+                        options: ["Az epilepszia diagnózisának fontos kiegészítője.", "Segít a rohamtípusok klasszifikálásában.", "A negatív EEG lelet 100%-os biztonsággal kizárja az epilepsziát.", "Kimutathatja a rohamkiindulás helyét."],
+                        answer: "A negatív EEG lelet 100%-os biztonsággal kizárja az epilepsziát.",
+                        explanation: "Az EEG érzékenysége korlátozott. Az epilepsziás betegek jelentős részénél, különösen egyetlen rutin vizsgálat során, az EEG normális lehet. A diagnózis elsősorban a klinikai képen alapul."
+                    }
+                ]
+            },
+            "generalizalt_fokalis_epilepsziak": {
+                title: "Generalizált és fokális epilepsziák",
+                questions: [
+                    {
+                        question: "Mi az alapvető különbség a fokális és a generalizált rohamok között?",
+                        options: ["A fokális rohamok mindig rövidebbek.", "A fokális rohamok az agy egyik körülírt területéről indulnak, míg a generalizáltak mindkét agyféltekét érintik a kezdetektől.", "A generalizált rohamok soha nem járnak eszméletvesztéssel.", "A fokális rohamok csak felnőtteknél fordulnak elő."],
+                        answer: "A fokális rohamok az agy egyik körülírt területéről indulnak, míg a generalizáltak mindkét agyféltekét érintik a kezdetektől.",
+                        explanation: "Az ILAE 2017-es osztályozásának alapja a roham kezdetének helye. A fokális rohamok egy hálózatból indulnak ki az egyik agyféltekén, míg a generalizált rohamok bilaterálisan elosztott hálózatokat vonnak be a kezdetektől."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb felnőttkori fokális epilepszia szindróma?",
+                        options: ["Frontális lebeny epilepszia (FLE)", "Gyermekkori absence epilepszia (CAE)", "Temporális lebeny epilepszia (TLE)", "Juvenilis myoclonusos epilepszia (JME)"],
+                        answer: "Temporális lebeny epilepszia (TLE)",
+                        explanation: "A TLE, különösen a mesialis temporális lebeny epilepszia (hippocampus sclerosis-szal), a leggyakrabban diagnosztizált fokális epilepszia felnőttkorban."
+                    },
+                    {
+                        question: "Milyen rohamtípus jellemző a gyermekkori absence epilepsziára (CAE)?",
+                        options: ["Tónusos-klónusos rohamok", "Rövid, gyakori 'elbambulások' (absence rohamok)", "Fokális motoros rohamok", "Atóniás rohamok"],
+                        answer: "Rövid, gyakori 'elbambulások' (absence rohamok)",
+                        explanation: "A CAE-t a hirtelen kezdődő és végződő, rövid (néhány másodperces) tudatmegszakadások jellemzik, amelyek naponta akár több tucatszor is ismétlődhetnek."
+                    },
+                    {
+                        question: "Mi a 'másodlagos generalizáció'?",
+                        options: ["Amikor egy generalizált roham fokálissá válik.", "Amikor egy fokális roham átterjed mindkét agyféltekére és tónusos-klónusos rohammá alakul.", "A roham utáni állapot.", "Két különböző típusú roham egy betegnél."],
+                        answer: "Amikor egy fokális roham átterjed mindkét agyféltekére és tónusos-klónusos rohammá alakul.",
+                        explanation: "Ez a jelenség azt írja le, amikor a kóros elektromos aktivitás az agy egy körülírt területéről kiindulva szétterjed, és mindkét agyféltekét bevonva egy generalizált tónusos-klónusos rohamot eredményez."
+                    },
+                    {
+                        question: "Melyik állítás igaz a juvenilis myoclonusos epilepsziára (JME)?",
+                        options: ["Jellemzően időskorban kezdődik.", "A fő tünetei a reggeli, ébredés utáni myoclonusos rángások.", "Könnyen kinőhető, nem igényel kezelést.", "Csak a lábakat érinti."],
+                        answer: "A fő tünetei a reggeli, ébredés utáni myoclonusos rángások.",
+                        explanation: "A JME egy idiopátiás generalizált epilepszia szindróma, amelynek kardinális tünete a serdülőkorban kezdődő, ébredés után jelentkező myoclonusos rángás, amihez gyakran társulnak generalizált tónusos-klónusos rohamok is."
+                    },
+                    {
+                        question: "Mi a hippokampális szklerózis?",
+                        options: ["A hippokampusz daganata.", "A hippokampusz sejtjeinek pusztulása és hegesedése.", "A hippokampusz megnagyobbodása.", "A hippokampusz gyulladása."],
+                        answer: "A hippokampusz sejtjeinek pusztulása és hegesedése.",
+                        explanation: "A hippokampális szklerózis a mesialis temporális lebeny epilepszia leggyakoribb strukturális oka, amely a hippokampusz specifikus neuronpopulációinak elvesztésével és gliózissal jár."
+                    },
+                    {
+                        question: "Melyik rohamtípusra jellemzőek az automatizmusok (pl. ajakcsattogtatás, matatás)?",
+                        options: ["Fokális tudatos rohamok", "Fokális tudatzavaros rohamok", "Absence rohamok", "Myoclonusos rohamok"],
+                        answer: "Fokális tudatzavaros rohamok",
+                        explanation: "Az automatizmusok akaratlan, de koordináltnak tűnő mozgássorok, amelyek a tudat beszűkülésével járó fokális rohamok (korábban komplex parciális rohamok) alatt jellemzőek, különösen TLE esetén."
+                    },
+                    {
+                        question: "Melyik epilepszia típus esetén jön leginkább szóba a sebészeti kezelés?",
+                        options: ["Gyermekkori absence epilepszia", "Juvenilis myoclonusos epilepszia", "Gyógyszerrezisztens fokális epilepszia", "Minden generalizált epilepszia"],
+                        answer: "Gyógyszerrezisztens fokális epilepszia",
+                        explanation: "A sebészeti beavatkozás akkor a leghatékonyabb, ha a rohamok egy jól körülhatárolható, eltávolítható agyi gócból indulnak ki, ami a fokális epilepsziákra jellemző."
+                    },
+                    {
+                        question: "Mi a Todd-féle parézis?",
+                        options: ["A roham alatti bénulás.", "Egy fokális motoros roham utáni átmeneti, féloldali végtaggyengeség.", "A roham utáni zavartság.", "Egyfajta epilepszia szindróma."],
+                        answer: "Egy fokális motoros roham utáni átmeneti, féloldali végtaggyengeség.",
+                        explanation: "A Todd-féle parézis egy posztiktális jelenség, ahol a motoros kéregből kiinduló roham után az érintett végtag(ok) átmenetileg gyengévé vagy bénulttá válnak."
+                    },
+                    {
+                        question: "Melyik állítás igaz a generalizált epilepsziák etiológiájára?",
+                        options: ["Mindig szerzett, agyi sérülés okozza.", "Gyakran genetikai vagy feltételezett genetikai eredetűek.", "Mindig ismeretlen az oka.", "Mindig daganat áll a háttérben."],
+                        answer: "Gyakran genetikai vagy feltételezett genetikai eredetűek.",
+                        explanation: "A generalizált epilepsziák, különösen az idiopátiás formák (pl. CAE, JME), erős genetikai háttérrel rendelkeznek, és gyakran ioncsatorna-gének mutációira vezethetők vissza."
+                    },
+                    {
+                        question: "Melyik rohamtípusra jellemző a hirtelen izomtónus-vesztés és 'összecsuklás'?",
+                        options: ["Tónusos roham", "Klónusos roham", "Atóniás roham", "Myoclonusos roham"],
+                        answer: "Atóniás roham",
+                        explanation: "Az atóniás rohamokat az izomtónus hirtelen, teljes elvesztése jellemzi, ami a beteg eleséséhez vezethet ('drop attack'). Gyakori a Lennox-Gastaut szindrómában."
+                    },
+                    {
+                        question: "Milyen EEG mintázat jellemző a frontális lebeny epilepsziára (FLE)?",
+                        options: ["Mindig jellegzetes 3 Hz tüske-hullám.", "Az interiktális EEG gyakran normális vagy nem specifikus, az iktális EEG-t pedig gyakran elfedi az izomartefaktum.", "Mindig temporális tüskék láthatók.", "Mindig hypsarrhythmia."],
+                        answer: "Az interiktális EEG gyakran normális vagy nem specifikus, az iktális EEG-t pedig gyakran elfedi az izomartefaktum.",
+                        explanation: "Az FLE diagnosztikája EEG-vel gyakran kihívást jelent a góc mély elhelyezkedése, a gyors terjedés és a rohamok alatti heves mozgások miatti műtermékek miatt."
+                    },
+                    {
+                        question: "Mi a 'déjà vu' jelenség jelentősége az epilepsziában?",
+                        options: ["Normális jelenség, nincs köze az epilepsziához.", "Egyfajta aura, amely temporális lebeny eredetű fokális rohamra utalhat.", "A generalizált rohamok jele.", "A roham utáni zavartság része."],
+                        answer: "Egyfajta aura, amely temporális lebeny eredetű fokális rohamra utalhat.",
+                        explanation: "A déjà vu (az érzés, hogy egy új helyzetet már átéltünk) a mesialis temporális struktúrák irritációjának jele lehet, és gyakran egy fokális tudatzavaros roham bevezető tünete (aurája)."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a Lennox-Gastaut szindrómára (LGS)?",
+                        options: ["Egy súlyos, gyermekkori kezdetű epilepsziás enkefalopátia.", "Jellemző rá a többféle, gyógyszerrezisztens rohamtípus.", "Az EEG-n lassú tüske-hullám mintázat látható.", "Jó prognózisú, a betegek serdülőkorra kinövik."],
+                        answer: "Jó prognózisú, a betegek serdülőkorra kinövik.",
+                        explanation: "Az LGS egy súlyos, rossz prognózisú epilepszia szindróma, amely tartós, gyakran gyógyszerrezisztens rohamokkal és súlyos kognitív károsodással jár."
+                    },
+                    {
+                        question: "Mi a fő különbség a fokális tudatos és a fokális tudatzavaros roham között?",
+                        options: ["Az időtartamuk", "A tudatállapot megmaradása vagy károsodása", "A mozgásos tünetek jelenléte", "Az életkor, amikor jelentkeznek"],
+                        answer: "A tudatállapot megmaradása vagy károsodása",
+                        explanation: "A fokális rohamok osztályozásának alapja, hogy a roham alatt a beteg tudatossága és reakciókészsége megmarad-e (fokális tudatos) vagy károsodik (fokális tudatzavaros)."
+                    },
+                    {
+                        question: "Melyik epilepszia típusra jellemzőbb a terápiarezisztencia?",
+                        options: ["Generalizált epilepsziák", "Fokális epilepsziák", "Mindkettőre egyformán", "Egyikre sem"],
+                        answer: "Fokális epilepsziák",
+                        explanation: "Bár mindkét típus lehet gyógyszerrezisztens, a fokális epilepsziák, különösen ha strukturális agyi elváltozás (pl. hippokampális szklerózis, FCD) okozza őket, gyakrabban válnak nehezen kezelhetővé."
+                    },
+                    {
+                        question: "Melyik rohamtípusra jellemző a tónusos fázis (test megmerevedése), amit a klónusos fázis (ritmikus rángatózás) követ?",
+                        options: ["Absence roham", "Myoclonusos roham", "Tónusos-klónusos roham", "Atóniás roham"],
+                        answer: "Tónusos-klónusos roham",
+                        explanation: "Ez a klasszikus 'grand mal' roham, amely egy tónusos (merevgörcs) és egy azt követő klónusos (rángógörcs) fázisból áll, teljes eszméletvesztés mellett."
+                    },
+                    {
+                        question: "Milyen provokáló tényező válthat ki rohamot a fotószenzitív epilepsziákban, mint a JME?",
+                        options: ["Hangos zajok", "Erős szagok", "Villogó fények", "Fűszeres ételek"],
+                        answer: "Villogó fények",
+                        explanation: "A fotószenzitivitás azt jelenti, hogy a rohamokat intermittáló fényingerlés (pl. stroboszkóp, videojátékok, napfény villódzása fák között) válthatja ki. Ez különösen gyakori JME-ben."
+                    },
+                    {
+                        question: "Mi a fő különbség a gyermekkori és a juvenilis absence epilepszia között?",
+                        options: ["Nincs különbség.", "A gyermekkori forma (CAE) korábban kezdődik, a rohamok rövidebbek és gyakoribbak, és a prognózis jobb, mint a juvenilis formáé (JAE).", "A JAE mindig enyhébb.", "A CAE csak fiúkat érint."],
+                        answer: "A gyermekkori forma (CAE) korábban kezdődik, a rohamok rövidebbek és gyakoribbak, és a prognózis jobb, mint a juvenilis formáé (JAE).",
+                        explanation: "A két szindrómát az életkori kezdet, a rohamok jellemzői és a prognózis különbözteti meg. A CAE általában iskoláskorban kezdődik és gyakran kinövik, míg a JAE serdülőkorban indul, és gyakran élethosszig tartó kezelést igényel."
+                    },
+                    {
+                        question: "A fokális epilepsziák etiológiájában melyik a leggyakoribb ok?",
+                        options: ["Mindig genetikai", "Strukturális agyi elváltozások", "Mindig ismeretlen", "Fertőzések"],
+                        answer: "Strukturális agyi elváltozások",
+                        explanation: "A fokális epilepsziák hátterében leggyakrabban valamilyen kimutatható agyi strukturális eltérés áll, mint például agyi hegesedés (stroke vagy trauma után), daganat, vagy fejlődési rendellenesség."
+                    }
+                ]
+            }
+        };
+
+        const app = document.getElementById('app');
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizTitle = document.getElementById('quiz-title');
+        const progressText = document.getElementById('progress-text');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const explanationContainer = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreText = document.getElementById('score-text');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizButton = document.getElementById('restart-quiz');
+        const backToTopicsButton = document.getElementById('back-to-topics');
+        const backToTopicsFromResultsButton = document.getElementById('back-to-topics-from-results');
+
+        let currentQuizId = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function init() {
+            // Populate topic list
+            topicList.innerHTML = '';
+            for (const topicId in quizData) {
+                const topic = quizData[topicId];
+                const topicCard = document.createElement('div');
+                topicCard.className = 'bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-slate-200 hover:border-blue-500';
+                topicCard.innerHTML = `<h3 class="text-xl font-semibold text-slate-800">${topic.title}</h3>`;
+                topicCard.addEventListener('click', () => startQuiz(topicId));
+                topicList.appendChild(topicCard);
+            }
+
+            backToTopicsButton.addEventListener('click', showTopicSelection);
+            backToTopicsFromResultsButton.addEventListener('click', showTopicSelection);
+            nextButton.addEventListener('click', nextQuestion);
+            restartQuizButton.addEventListener('click', () => startQuiz(currentQuizId));
+        }
+
+        function startQuiz(topicId) {
+            currentQuizId = topicId;
+            questions = quizData[topicId].questions;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            quizTitle.textContent = quizData[topicId].title;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            resetState();
+            const questionData = questions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            progressText.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${questions.length}`;
+
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'w-full text-left p-4 bg-slate-100 rounded-lg hover:bg-slate-200 quiz-option border border-slate-200';
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextButton.disabled = true;
+            explanationContainer.style.maxHeight = '0';
+            explanationContainer.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            explanationContainer.classList.add('border-blue-500', 'bg-blue-50');
+
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correctAnswer = questions[currentQuestionIndex].answer;
+
+            // Disable all options
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (selectedButton.textContent === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-green-500', 'bg-green-50');
+            } else {
+                selectedButton.classList.add('incorrect');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-red-500', 'bg-red-50');
+            }
+            
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            explanationContainer.style.maxHeight = explanationContainer.scrollHeight + "px";
+
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            const percentage = Math.round((score / questions.length) * 100);
+            scoreText.textContent = `Helyes válaszok: ${score} / ${questions.length}`;
+            scorePercentage.textContent = `${percentage}%`;
+        }
+        
+        function showTopicSelection() {
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Initialize the app
+        init();
+    </script>
+
+</body>
+</html>

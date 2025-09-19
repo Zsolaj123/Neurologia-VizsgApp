@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Kvíz - 4. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.correct {
+            background-color: #10B981; /* Emerald-500 */
+            color: white;
+            border-color: #059669; /* Emerald-600 */
+        }
+        .quiz-option.incorrect {
+            background-color: #EF4444; /* Red-500 */
+            color: white;
+            border-color: #DC2626; /* Red-600 */
+        }
+        .quiz-option:not(.disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection -->
+        <div id="topic-selection" class="text-center">
+            <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Neurológiai Kvíz - 4. rész</h1>
+            <p class="text-lg mb-8 text-gray-600 dark:text-gray-400">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quiz-interface" class="hidden">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-gray-900 dark:text-white">Téma</h2>
+                    <div id="score" class="text-lg font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-1 rounded-full">Pontszám: 0 / 0</div>
+                </div>
+                <div id="progress-bar-container" class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-xl font-medium mb-6 text-gray-800 dark:text-gray-200"></p>
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="hidden mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Magyarázat</h3>
+                    <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="back-to-topics" class="py-2 px-5 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Témakörök</button>
+                    <button id="next-question" class="py-2 px-5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Score Screen -->
+        <div id="final-score-screen" class="hidden text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">A kvíz vége!</h2>
+            <p class="text-xl mb-6 text-gray-700 dark:text-gray-300">A pontszámod a(z) <span id="final-topic-title" class="font-semibold"></span> témakörben:</p>
+            <p id="final-score" class="text-6xl font-bold mb-8 text-blue-600 dark:text-blue-400">0 / 20</p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Újra</button>
+                <button id="change-topic" class="py-3 px-6 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Másik téma</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            'liberatios_jelek': {
+                title: 'A liberációs jelek',
+                questions: [
+                    { question: "Mit jelez a liberációs jelek megjelenése felnőttkorban?", options: ["Az idegrendszer kiváló állapotát", "A frontális lebeny gátló funkcióinak kiesését", "A kisagy fokozott aktivitását", "A perifériás idegek sérülését"], correct: 1, explanation: "A liberációs jelek olyan primitív reflexek, amelyek csecsemőkor után a frontális lebeny gátlása alá kerülnek. Újbóli megjelenésük felnőttkorban a frontális lebeny diszfunkciójára vagy diffúz agyi károsodásra utal." },
+                    { question: "Melyik NEM tartozik a szopóreflex-csoportba?", options: ["Orális beállítódás", "Szopóreflex", "Bulldog reflex", "Palmomentális reflex"], correct: 3, explanation: "A palmomentális reflex (az állcsúcsi izom összehúzódása a tenyér ingerlésére) egy különálló liberációs jel, nem része a direkt orális, táplálkozáshoz kötődő szopóreflex-csoportnak." },
+                    { question: "Mi a kóros fogóreflex (grasp reflex) lényege felnőttkorban?", options: ["A beteg erősen megszorítja a vizsgáló kezét kérésre.", "A beteg a tenyerét megérintő tárgyat akaratlanul is megfogja és nehezen engedi el.", "A beteg nem képes megfogni a tárgyakat.", "A beteg elejti a megfogott tárgyakat."], correct: 1, explanation: "A kóros fogóreflex esetén a beteg akaratlanul, reflexesen megfogja a tenyerébe kerülő tárgyat, és súlyos esetben (kényszerfogás) képtelen azt akaratlagosan elengedni." },
+                    { question: "Melyik betegségben figyelhető meg gyakran a perzisztáló, ki nem merülő glabellareflex (Myerson-jel)?", options: ["Alzheimer-kór", "Stroke", "Parkinson-kór", "Sclerosis multiplex"], correct: 2, explanation: "A Myerson-jel, azaz a glabella ismételt ütögetésére kiváltott, ki nem merülő pislogás gyakori tünet a Parkinson-kórban és más extrapyramidális zavarokban, de frontális károsodásra is utalhat." },
+                    { question: "A kóros fogóreflex egyoldali megjelenése melyik agyterület károsodására utal?", options: ["Az azonos oldali temporális lebeny", "Az ellenoldali (kontralaterális) frontális lebeny", "A kisagy vermise", "A gerincvelő nyaki szakasza"], correct: 1, explanation: "Az egyoldali fogóreflex a kontralaterális, azaz az ellenkező oldali frontális lebeny, specifikusan a supplementer motoros area károsodására utal." },
+                    { question: "Mi váltja ki a snout (ormány) reflexet?", options: ["A tenyér simogatása", "A glabella ütögetése", "Az ajkak (philtrum) enyhe megütögetése", "A talp ingerlése"], correct: 2, explanation: "A snout reflexet az ajkak feletti terület (philtrum) enyhe, hirtelen megütögetésével vagy megnyomásával váltjuk ki, amire a válasz az ajkak csücsörítése." },
+                    { question: "Melyik állítás igaz a palmomentális reflexre?", options: ["Mindig súlyos agykárosodást jelez.", "Egészséges idős egyénekben is előfordulhat.", "A lábfej ingerlésére váltódik ki.", "A szemhéjak záródását jelenti."], correct: 1, explanation: "Bár a palmomentális reflex frontális károsodás jele lehet, kisebb specificitással bír, és egészséges, különösen idős egyének egy részénél is kiváltható lehet anélkül, hogy az kóros lenne." },
+                    { question: "Mi a 'Gegenhalten' (paratonia)?", options: ["Akaratlan izomrángás", "A végtagok passzív mozgatásakor fellépő, akaratlan tónusfokozódás", "A mélyreflexek teljes hiánya", "A beteg aktívan ellenáll a vizsgálatnak"], correct: 1, explanation: "A Gegenhalten a végtag passzív mozgatásakor jelentkező, akaratlan, a mozgatás irányával ellentétes izomtónus-fokozódás, ami diffúz vagy kétoldali frontális lézióra utal." },
+                    { question: "Melyik demencia típusban jelennek meg legkorábban és legkifejezettebben a liberációs jelek?", options: ["Alzheimer-kór", "Vaszkuláris demencia", "Lewy-testes demencia", "Frontotemporális demencia (FTD)"], correct: 3, explanation: "Mivel az FTD-ben a frontális és temporális lebenyek atrófiája a központi patológiai folyamat, a liberációs jelek itt jelennek meg a legkorábban és a legmarkánsabban, a viselkedési és exekutív zavarok mellett." },
+                    { question: "Mi a liberációs jelek neurofiziológiai alapja?", options: ["Az agytörzsi reflexközpontok túlműködése", "A magasabb szintű kortikális (frontális) gátlás kiesése", "A neurotranszmitterek túltermelődése", "A perifériás idegek sérülése"], correct: 1, explanation: "A liberációs jelek azért jelennek meg újra, mert a frontális lebeny gátló kontrollja sérül, és emiatt az alacsonyabb szintű, primitív reflexek 'felszabadulnak' e gátlás alól." },
+                    { question: "A bulldog reflex során mit csinál a beteg?", options: ["Vicsorít, mint egy kutya.", "Erősen ráharap a fogsorai közé helyezett spatulára.", "Kereső mozdulatokat végez a szájával.", "Utánozza a vizsgáló mozdulatait."], correct: 1, explanation: "A bulldog reflex a szopóreflex-csoport része, ahol a beteg a fogai közé helyezett tárgyra (spatula) erősen és tartósan ráharap." },
+                    { question: "A liberációs jelek jelenléte önmagában elegendő egy specifikus betegség diagnózisához?", options: ["Igen, minden jel egy adott betegségre specifikus.", "Nem, jelenlétük általában frontális diszfunkcióra utal, de nem specifikusak egyetlen betegségre sem.", "Igen, ha legalább három jel egyszerre jelen van.", "Csak akkor, ha a beteg 60 év alatti."], correct: 1, explanation: "A liberációs jelek nem betegség-specifikusak. Segítenek a lokalizációban (frontális lebeny), de a pontos diagnózishoz a teljes klinikai kép és egyéb vizsgálatok (pl. képalkotó) szükségesek." },
+                    { question: "Melyik reflex NEM tartozik a klasszikus liberációs jelek közé?", options: ["Szopóreflex", "Fogóreflex", "Patellareflex", "Palmomentális reflex"], correct: 2, explanation: "A patellareflex (térdreflex) egy normális, fiziológiás mélyreflex (sajátreflex), nem pedig egy kóros liberációs jel. Értékelése a fokozottság vagy renyheség alapján történik." },
+                    { question: "Melyik állapotban lehet fontos a bulldog reflex ismerete az ellátás során?", options: ["Demens betegeknél", "Stroke utáni betegeknél", "Intubált, tudatzavarral küzdő betegeknél", "Epilepsziás betegeknél"], correct: 2, explanation: "Intubált betegeknél a bulldog reflex veszélyes lehet, mert a beteg ráharaphat és elzárhatja a lélegeztető tubust, ami fulladáshoz vezethet." },
+                    { question: "Igaz vagy hamis: A liberációs jelek hiánya kizárja a frontális lebeny károsodását.", options: ["Igaz", "Hamis"], correct: 1, explanation: "Hamis. Bár a liberációs jelek jelenléte utalhat frontális diszfunkcióra, a hiányuk nem zárja ki azt, mivel a tünetek érzékenysége és specificitása nem 100%-os." },
+                    { question: "Mi az utánnyúlás (reaching) a fogóreflex kontextusában?", options: ["A beteg elhúzza a kezét az ingertől.", "A beteg a látóterébe kerülő tárgyak után nyúl, anélkül, hogy erre utasítást kapna.", "A beteg csak kérésre nyúl a tárgyakért.", "A beteg görcsösen nyújtja a karját."], correct: 1, explanation: "Az utánnyúlás a kóros fogóreflex egy enyhébb vagy bevezető formája, ahol a beteg vizuális ingerre, akaratlanul is a tárgyak felé nyúl." },
+                    { question: "A fokozott masseter reflex (állreflex) mire utalhat?", options: ["A nervus trigeminus perifériás sérülésére.", "Agytörzsi, a híd feletti pyramispálya-károsodásra.", "A kisagy károsodására.", "Normális leletre."], correct: 1, explanation: "A masseterreflex egy agytörzsi reflex. Kóros fokozódása, ami egyfajta liberációs jelenség, a híd feletti kétoldali pyramispálya-károsodásra (pseudobulbaris paresis) utalhat." },
+                    { question: "A keresőreflex (rooting) felnőttkori megjelenése melyik agyterület patológiájára utal?", options: ["Temporális lebeny", "Parietális lebeny", "Occipitális lebeny", "Frontális lebeny"], correct: 3, explanation: "A keresőreflex, ahol a beteg a száj körüli érintésre a fejét az inger felé fordítja, csecsemőkorban normális, de felnőttkori megjelenése a frontális lebeny gátló funkcióinak zavarát jelzi." },
+                    { question: "A liberációs jelek prognosztikai értéke...", options: ["...mindig kiváló, pontosan megjósolja a kimenetelt.", "...korlátozott és kontextusfüggő, a teljes klinikai képpel együtt értékelendő.", "...teljesen megbízhatatlan, nincs jelentősége.", "...csak traumás agysérülés esetén informatív."], correct: 1, explanation: "A liberációs jelek prognosztikai értéke önmagukban korlátozott. Bár több jel jelenléte általában súlyosabb károsodásra és kedvezőtlenebb prognózisra utal, az értékelésükhöz mindig a teljes klinikai kép szükséges." },
+                    { question: "Melyik állapotban a leggyakoribb a liberációs jelek megjelenése?", options: ["Enyhe depresszió", "Perifériás neuropathia", "Demenciák és súlyos agysérülések", "Migrénes fejfájás"], correct: 2, explanation: "A liberációs jelek leggyakrabban olyan állapotokban jelennek meg, amelyek a frontális lebeny kiterjedt vagy progresszív károsodásával járnak, mint például a demenciák (főleg FTD) vagy a súlyos traumás agysérülések." }
+                ]
+            },
+            'eszmeletlen_beteg': {
+                title: 'Az eszméletlen beteg',
+                questions: [
+                    { question: "Mi az eszméletlenség orvosi definíciójának két kulcseleme?", options: ["Légzés van, keringés nincs.", "Légzés és keringés van, de kontaktusba nem vonható és védekező reflexei hiányoznak.", "Légzés és keringés nincs.", "A beteg alszik, de ébreszthető."], correct: 1, explanation: "Az eszméletlen betegnek van légzése és keringése (ez különbözteti meg a klinikai haláltól), de nem reagál a külvilág ingereire, és a légutakat védő reflexei (nyelés, köhögés) hiányoznak, ami fulladásveszélyt jelent." },
+                    { question: "Melyik skála a legelterjedtebb a tudatzavar mélységének objektív, pontozásos felmérésére?", options: ["AVPU Skála", "Glasgow Kóma Skála (GCS)", "SAD PERSONS skála", "APGAR score"], correct: 1, explanation: "A Glasgow Kóma Skála (GCS) egy nemzetközileg elfogadott pontozórendszer, amely a szemnyitás, a verbális és a motoros válaszok alapján értékeli a tudatzavar mélységét 3-tól 15-ig terjedő skálán." },
+                    { question: "Melyik a leggyakoribb oka a légúti elzáródásnak egy eszméletlen betegnél?", options: ["A tüdő összeesése", "A nyelv hátraesése", "Allergiás gégeödéma", "Idegentest"], correct: 1, explanation: "Eszméletlen állapotban az izomtónus elvesztése miatt a nyelv hátraeshet a garatfalhoz, mechanikusan elzárva a felső légutakat. Ezért a légútbiztosítás első lépése a fej hátrahajtása." },
+                    { question: "Melyik a helyes elsősegélynyújtási teendő egy normálisan lélegző, nem sérült eszméletlen beteg esetén?", options: ["Azonnal mellkaskompressziókat kezdeni.", "Vízzel arcon locsolni.", "Stabil oldalfektetésbe helyezni.", "Felültetni a beteget."], correct: 2, explanation: "Ha a betegnek van normális légzése és nincs gerincsérülés gyanúja, a stabil oldalfektetés a helyes eljárás a szabad légutak fenntartására és az aspiráció (félrenyelés) megelőzésére." },
+                    { question: "Milyen GCS pontszám alatt javasolt általában a légútbiztosítás (intubáció)?", options: ["GCS 15", "GCS 12", "GCS ≤ 8", "GCS 5"], correct: 2, explanation: "Általános szabály, hogy 8 vagy annál alacsonyabb GCS pontszám esetén a beteg már nem képes megvédeni a saját légutait, ezért a légútbiztosítás (endotracheális intubáció) indokolt az aspiráció megelőzésére." },
+                    { question: "Mi a 'hármas érzékelés' módszere a légzésvizsgálat során?", options: ["A pulzus, vérnyomás és testhőmérséklet mérése.", "A beteg bőrének nézése, tapintása és szagolása.", "Nézem a mellkas mozgását, hallgatom a légzési hangokat, érzem a levegő áramlását.", "A tudatállapot, a légzés és a keringés vizsgálata."], correct: 2, explanation: "A 'hármas érzékelés' az alapfokú újraélesztés (BLS) része: a segélynyújtó a fülét a beteg szája fölé hajolva egyszerre nézi a mellkas emelkedését, hallgatja a légzést és érzi a kiáramló levegőt az arcán." },
+                    { question: "Az AVPU skálán mit jelent a 'P' betű?", options: ["Paralysed (Bénult)", "Pale (Sápadt)", "Pain (Fájdalomingerre reagál)", "Pupils (Pupillák)"], correct: 2, explanation: "Az AVPU skálán a 'P' azt jelenti, hogy a beteg csak fájdalmas ingerre ad valamilyen választ (pl. szemnyitás, mozgás), de verbális ingerre már nem. Ez a sopor állapotának felel meg." },
+                    { question: "Melyik vizsgálatot kell minden eszméletlen betegnél haladéktalanul elvégezni?", options: ["Gerinc röntgen", "Vércukorszint mérés", "Lumbálpunkció", "Koponya MRI"], correct: 1, explanation: "Minden ismeretlen eredetű tudatzavar esetén kötelező a gyors vércukormérés, mivel a hipoglikémia (alacsony vércukorszint) gyakori, de gyorsan és könnyen korrigálható oka az eszméletlenségnek." },
+                    { question: "Melyik képalkotó eljárás a választandó elsőként az akut eszméletlen beteg sürgősségi kivizsgálásakor?", options: ["Natív koponya CT", "Kontrasztanyagos koponya MRI", "PET-CT", "Koponya ultrahang"], correct: 0, explanation: "A natív (kontrasztanyag nélküli) koponya CT a leggyorsabb és legszélesebb körben elérhető vizsgálat, amely megbízhatóan kimutatja az akut, életveszélyes strukturális eltéréseket, mint a vérzés, a nagy tumor vagy a hydrocephalus." },
+                    { question: "Mi a decerebrációs rigiditás?", options: ["A karok hajlított, a lábak feszített helyzete.", "Minden végtag petyhüdt bénulása.", "A karok és lábak feszített helyzete, pronációban.", "Ritmusos izomrángás."], correct: 2, explanation: "A decerebrációs rigiditás egy kóros testtartás, ahol a fájdalmas ingerre a végtagok extenzióba (feszítésbe) kerülnek. Súlyos agytörzsi (középagy, híd) károsodásra utal, és rosszabb prognózisú, mint a dekortikációs tartás." },
+                    { question: "Melyik állítás igaz a kómára?", options: ["A beteg hangos szóra ébreszthető.", "A beteg csak fájdalmas ingerre reagál védekező mozgással.", "A beteg semmilyen ingerre nem ébreszthető, vagy csak primitív reflexválaszokat ad.", "A kómás betegnek mindig van köhögési reflexe."], correct: 2, explanation: "A kóma a tudatzavar legsúlyosabb foka, ahol a beteg teljesen ébreszthetetlen. Nincs adekvát válasz semmilyen külső ingerre, legfeljebb kóros, reflexszerű motoros mintázatok válthatók ki." },
+                    { question: "Mi az agytörzsi felszálló retikuláris aktiváló rendszer (ARAS) fő funkciója?", options: ["A mozgáskoordináció", "A memória tárolása", "Az éberségi szint fenntartása", "Az érzelmek szabályozása"], correct: 2, explanation: "Az ARAS egy, az agytörzsben található neuronhálózat, amely az agykéreg aktiválásával alapvető szerepet játszik az éberség (arousal) fenntartásában és az alvás-ébrenlét ciklus szabályozásában. Károsodása eszméletlenséghez vezet." },
+                    { question: "Melyik állapotra utalhat, ha egy eszméletlen beteg lehelete aceton szagú?", options: ["Májkóma", "Alkoholmérgezés", "Diabeteszes ketoacidózis", "Szén-monoxid mérgezés"], correct: 2, explanation: "Az aceton szagú lehelet a diabeteszes ketoacidózis (DKA) egyik jellegzetes tünete, ami a szervezetben felszaporodó ketontestek miatt alakul ki." },
+                    { question: "Milyen célt szolgál a szomatoszenzoros kiváltott potenciál (SSEP) vizsgálata kómás betegnél?", options: ["Az epilepsziás aktivitás kimutatását.", "A prognózis becslését az érzőpályák épsége alapján.", "Az agyi véráramlás mérését.", "Az agydaganat típusának meghatározását."], correct: 1, explanation: "Az SSEP vizsgálat, különösen a kérgi N20 válasz kétoldali hiánya anoxiás kóma esetén, súlyos agykárosodásra és nagyon rossz prognózisra utal a tudat visszatérése szempontjából." },
+                    { question: "Mi a tartós fekvés egyik legsúlyosabb keringési szövődménye?", options: ["Magas vérnyomás", "Szívritmuszavar", "Mélyvénás trombózis (MVT) és tüdőembólia (PE)", "Szívelégtelenség"], correct: 2, explanation: "Az immobilizáció miatti vénás pangás jelentősen növeli a mélyvénás trombózis kockázatát az alsó végtagokban. Az innen leszakadó vérrög tüdőembóliát okozhat, ami életveszélyes állapot." },
+                    { question: "Az EEG melyik mintázata jelezheti a nonkonvulzív status epilepticust (NCSE) egy eszméletlen betegnél?", options: ["Normális alfa-ritmus", "Diffúz lassulás", "Folyamatos vagy periodikus epileptiform aktivitás", "Alvási orsók"], correct: 2, explanation: "Az NCSE egy olyan állapot, ahol a betegnek folyamatos, tudatzavart okozó epilepsziás agyi aktivitása van, de nincsenek látható görcsei. Ezt csak az EEG tudja kimutatni." },
+                    { question: "Melyik a legfontosabb ápolási teendő a decubitus (felfekvés) megelőzésére?", options: ["Magas fehérjetartalmú diéta", "Rendszeres, legalább 2 óránkénti pozicionálás", "A beteg melegen tartása", "Antibiotikumos krémek használata"], correct: 1, explanation: "A felfekvés megelőzésének legfontosabb eleme a beteg rendszeres forgatása, pozicionálása, hogy a nyomásnak kitett területek tehermentesüljenek és vérellátásuk javuljon." },
+                    { question: "Mi a különbség a szomnolencia és a szopor között?", options: ["Nincs különbség.", "A szomnolens beteg hangingerre ébreszthető és adekvát választ adhat, a szoporos csak fájdalomingerre reagál, nem adekvátan.", "A szomnolens betegnek van légzése, a szoporosnak nincs.", "A szopor enyhébb, mint a szomnolencia."], correct: 1, explanation: "A szomnolencia enyhébb fokozat, a beteg ébreszthető és képes lehet egyszerű kommunikációra. A szopor mélyebb tudatzavar, ahol a beteg csak erős, fájdalmas ingerekre ad primitív, elhárító válaszokat." },
+                    { question: "A GCS felmérésekor a beteg a fájdalmas ingerre kóros flexiós tartást vesz fel. Mennyi a motoros pontszáma?", options: ["M1", "M2", "M3", "M4"], correct: 2, explanation: "A kóros flexió (dekortikációs tartás) a GCS motoros skáláján 3 pontot (M3) ér. Az M4 a normál flexiós elhárítás, az M2 a kóros extenzió." },
+                    { question: "Mi a célja a célzott hőmérséklet-menedzsmentnek (TTM) szívmegállás utáni kómában?", options: ["A beteg komfortérzetének növelése.", "A láz megelőzése.", "Az agykárosodás mértékének csökkentése (neuroprotekció).", "A keringés stabilizálása."], correct: 2, explanation: "A szívleállás utáni sikeres újraélesztést követően a testhőmérséklet kontrollált csökkentése (terápiás hipotermia) egy neuroprotektív eljárás, amely lassítja az agyi anyagcserét és csökkenti az anoxiás-ischaemiás károsodás mértékét." }
+                ]
+            },
+            'zavart_beteg': {
+                title: 'A zavart beteg',
+                questions: [
+                    { question: "Mi a delírium legfőbb megkülönböztető jegye a demenciával szemben?", options: ["A delírium csak időseket érint.", "Az akut kezdet és a fluktuáló lefolyás.", "A memóriazavar hiánya.", "A delírium mindig visszafordíthatatlan."], correct: 1, explanation: "A delírium hirtelen, órák vagy napok alatt alakul ki, és a tünetek súlyossága a nap folyamán ingadozik. Ezzel szemben a demencia fokozatosan, hónapok-évek alatt fejlődik ki és lefolyása stabilan progresszív." },
+                    { question: "Melyik kognitív funkció zavara a delírium kardinális tünete?", options: ["Hosszú távú memória", "Számolási képesség", "Figyelem", "Nyelvi képességek"], correct: 2, explanation: "A figyelem zavara (a figyelem irányításának, fókuszálásának és fenntartásának nehézsége) a delírium egyik legfontosabb és kötelező tünete a diagnózishoz." },
+                    { question: "Melyik gyógyszercsoport mellékhatásaként alakul ki gyakran delírium, különösen időseknél?", options: ["Vitaminok", "Vérnyomáscsökkentők", "Antibiotikumok", "Antikolinerg hatású szerek (pl. bizonyos antidepresszánsok, antihisztaminok)"], correct: 3, explanation: "Az antikolinerg hatású gyógyszerek közismerten gyakran okoznak zavartságot és delíriumot, mivel gátolják az acetilkolin neurotranszmitter működését, ami fontos a kognitív funkciókhoz. Időseknél ez a hatás fokozott." },
+                    { question: "Melyik szűrőtesztet fejlesztették ki kifejezetten a delírium gyors, betegágy melletti felismerésére?", options: ["MMSE (Mini-Mental State Examination)", "MoCA (Montreal Cognitive Assessment)", "CAM (Confusion Assessment Method)", "Beck Depresszió Kérdőív"], correct: 2, explanation: "A CAM egy validált, egyszerű eszköz, amely négy fő tünet (akut kezdet/fluktuáció, figyelemzavar, dezorganizált gondolkodás, megváltozott tudati szint) alapján segít a delírium gyors diagnosztizálásában." },
+                    { question: "Mi az elsődleges és legfontosabb lépés a delírium kezelésében?", options: ["A beteg azonnali gyógyszeres nyugtatása.", "A kiváltó ok vagy okok azonosítása és kezelése.", "Pszichoterápia megkezdése.", "A beteg izolálása."], correct: 1, explanation: "A delírium kezelésének alapja a kiváltó szervi ok (pl. fertőzés, elektrolitzavar, gyógyszermellékhatás) felderítése és célzott kezelése, mivel a delírium legtöbbször ennek hatására oldódik." },
+                    { question: "Milyen típusú hallucinációk a leggyakoribbak delíriumban?", options: ["Hallási", "Tapintási", "Vizuális", "Szaglási"], correct: 2, explanation: "Bár bármilyen érzékszervi modalitást érinthet, a delíriumra leginkább a vizuális hallucinációk (pl. kis állatok, emberek, ijesztő jelenetek látása) a jellemzőek." },
+                    { question: "Mi a 'sundowning' (naplemente-effektus) jelensége?", options: ["A beteg reggelente a legzavartabb.", "A beteg állapota az esti, éjszakai órákban rosszabbodik.", "A beteg fél a sötéttől.", "A beteg állapota a napfény hatására javul."], correct: 1, explanation: "A 'sundowning' a delírium és demencia gyakori tünete, amikor a zavartság, nyugtalanság és agitáció az esti, éjszakai órákban fokozódik." },
+                    { question: "Melyik állítás igaz a delírium hipoaktív formájára?", options: ["A beteg agitált és agresszív.", "Könnyen felismerhető a látványos tünetek miatt.", "Jellemzője a letargia, apátia, csökkent aktivitás, és gyakran aluldiagnosztizált.", "Mindig lázzal jár."], correct: 2, explanation: "A hipoaktív delírium csendes, a beteg visszahúzódó, aluszékony, ami miatt gyakran elkerüli a figyelmet vagy tévesen depressziónak diagnosztizálják, pedig prognózisa rosszabb lehet, mint a hiperaktív formáé." },
+                    { question: "Melyik NEM tartozik a delírium megelőzésének nem-gyógyszeres módszerei közé?", options: ["Korai mobilizálás", "Megfelelő hidratálás biztosítása", "Azonnali, nagy dózisú nyugtatók adása minden idős betegnek", "Szemüveg és hallókészülék használatának biztosítása"], correct: 2, explanation: "A nyugtatók (különösen a benzodiazepinek) profilaktikus adása nemhogy nem előzi meg, de növelheti a delírium kockázatát. A megelőzés a rizikófaktorok minimalizálásán és a támogató környezet biztosításán alapul." },
+                    { question: "Melyik fertőzés okoz különösen gyakran delíriumot idős betegeknél?", options: ["Bőrfertőzések", "Húgyúti fertőzések és tüdőgyulladás", "Körömgomba", "Szemgyulladás"], correct: 1, explanation: "Idős korban a húgyúti fertőzések és a tüdőgyulladás gyakran atipikus tünetekkel, például akut zavartsággal (delíriummal) jelentkeznek, láz vagy specifikus helyi tünetek nélkül." },
+                    { question: "Mi a különbség az akut és a krónikus zavartság között?", options: ["Az akut mindig súlyosabb.", "A krónikus csak a memóriát érinti.", "Az akut hirtelen alakul ki és gyakran reverzibilis, a krónikus fokozatosan és általában progresszív.", "Az akutot mindig fertőzés okozza."], correct: 2, explanation: "Az akut zavartság (delírium) hirtelen kezdődik és az alapok kezelésével gyakran visszafordítható. A krónikus zavartság (pl. demencia) lassan, fokozatosan alakul ki és általában irreverzibilis, progresszív folyamat." },
+                    { question: "Melyik gyógyszercsoportot kell különös óvatossággal alkalmazni delíriumos betegnél, mert ronthatja az állapotot?", options: ["Fájdalomcsillapítók (NSAID)", "Benzodiazepinek", "Vitaminok", "Véralvadásgátlók"], correct: 1, explanation: "A benzodiazepinek (pl. Xanax, Rivotril) paradox módon súlyosbíthatják a delíriumot, fokozhatják a zavartságot és a légzésdepresszió kockázatát. Alkalmazásuk általában csak alkohol- vagy benzodiazepin-megvonásos delíriumban indokolt." },
+                    { question: "Milyen következménnyel járhat, ha a zavartságot nem ismerik fel időben?", options: ["A beteg jobban alszik.", "Az alapbetegség romlásához, balesetekhez, a gyógyszerszedési hibákhoz vezethet.", "A beteg memóriája spontán javulni kezd.", "Nincs semmilyen következménye."], correct: 1, explanation: "A fel nem ismert és kezeletlen zavartság súlyos következményekkel jár: az alapbetegség rosszabbodhat, a beteg eleshet, megsérülhet, nem veszi be a gyógyszereit, ami tovább rontja az állapotát és a prognózisát." },
+                    { question: "Mi a delirium tremens?", options: ["A Parkinson-kór egyik tünete.", "Súlyos alkoholmegvonási szindróma.", "Egyfajta epilepsziás roham.", "A fejsérülés utáni állapot."], correct: 1, explanation: "A delirium tremens az alkoholmegvonás legsúlyosabb formája, amelyet zavartság, élénk, gyakran ijesztő hallucinációk, tremor, és súlyos vegetatív tünetek (pl. izzadás, szapora pulzus, magas vérnyomás) jellemeznek." },
+                    { question: "Mi a legfontosabb teendő, ha egy demens beteg viselkedése hirtelen megváltozik, zavarttá, agitálttá válik?", options: ["Azonnal növelni a demencia gyógyszereinek adagját.", "Feltételezni, hogy a demencia rosszabbodott, és nem tenni semmit.", "Kizárni és kezelni egy esetleges rárakódó akut állapotot, leggyakrabban delíriumot (pl. fertőzés, dehidratáció miatt).", "Azonnal pszichiátriai osztályra szállítani."], correct: 2, explanation: "Demens beteg hirtelen állapotromlása esetén mindig gondolni kell egy rárakódó, potenciálisan kezelhető okra (pl. fertőzés, fájdalom, gyógyszermellékhatás), ami delíriumot okoz. Ennek kezelésével a beteg állapota visszatérhet a korábbi szintre." },
+                    { question: "Mikor indokolt pszichiátriai konzílium a zavart beteg ellátásában?", options: ["Minden esetben.", "Soha.", "Ha a szervi okok kizárása után primer pszichiátriai betegség gyanúja merül fel, vagy a pszichés tünetek kezelése nehézséget okoz.", "Csak ha a beteg erőszakos."], correct: 2, explanation: "Pszichiáter bevonása indokolt, ha a zavartság hátterében nem találnak egyértelmű szervi okot, vagy ha a súlyos viselkedési és pszichés tünetek (pl. agitáció, pszichózis) speciális gyógyszeres kezelést vagy diagnosztikai megítélést igényelnek." },
+                    { question: "A MMSE (Mini Mentál Teszt) egy...", options: ["...diagnosztikus teszt a delíriumra.", "...gyors kognitív szűrőteszt a kognitív hanyatlás mértékének becslésére.", "...személyiségteszt.", "...laboratóriumi vizsgálat."], correct: 1, explanation: "Az MMSE egy rövid, széles körben használt szűrőteszt, ami orientáló információt ad a kognitív funkciók (tájékozódás, memória, figyelem, nyelv) általános állapotáról, de önmagában nem diagnosztikus értékű." },
+                    { question: "Mi a 'polifarmácia' és miért rizikófaktor a zavartságra?", options: ["Súlyos fertőzés; mert lázat okoz.", "Több gyógyszer egyidejű szedése; mert növeli a káros gyógyszerkölcsönhatások esélyét.", "Vitaminhiány; mert rontja az agyi anyagcserét.", "Alváshiány; mert kimeríti a szervezetet."], correct: 1, explanation: "A polifarmácia (5 vagy több gyógyszer egyidejű szedése) jelentős rizikófaktor a zavartság és a delírium kialakulására, különösen idős korban, mivel megnő a nemkívánatos gyógyszer-mellékhatások és -kölcsönhatások valószínűsége." },
+                    { question: "Melyik a leghatékonyabb stratégia a posztoperatív delírium megelőzésére?", options: ["A műtét előtti teljes koplaltatás.", "A korai mobilizálás és a multimodális, nem-gyógyszeres beavatkozások.", "Nagy dózisú megelőző nyugtatók adása.", "A fájdalomcsillapítók teljes elhagyása."], correct: 1, explanation: "A kutatások szerint a leghatékonyabb megelőzési stratégia a multikomponensű, nem-gyógyszeres beavatkozások alkalmazása, mint a korai mobilizálás, az orientáció támogatása, az alvás segítése és az érzékszervi segédeszközök használata." },
+                    { question: "Igaz vagy hamis: A zavartság az idősödés normális velejárója.", options: ["Igaz", "Hamis"], correct: 1, explanation: "Hamis. Bár az idős kor rizikófaktor, a zavartság soha nem tekinthető a normális öregedés részének. Mindig valamilyen háttérben álló, kezelést igénylő kóros állapot (betegség, gyógyszerhatás stb.) jele." }
+                ]
+            },
+            'hypnoid': {
+                title: 'Hypnoid tudatzavarok',
+                questions: [
+                    { question: "Melyik NEM tartozik a hypnoid (kvantitatív) tudatzavarok közé?", options: ["Szomnolencia", "Szopor", "Delírium", "Kóma"], correct: 2, explanation: "A delírium egy kvalitatív tudatzavar, ahol a tudat tartalma, tisztasága sérül, míg a hypnoid zavarok (szomnolencia, szopor, kóma) az éberségi szint csökkenését jelentik." },
+                    { question: "Melyik agyhullám-típus jellemző leginkább az éber, figyelő, koncentráló állapotra?", options: ["Delta-hullámok", "Théta-hullámok", "Alfa-hullámok", "Béta-hullámok"], correct: 3, explanation: "A béta-hullámok (13-30 Hz) az aktív, éber, kifelé irányuló figyelmi állapotra, a logikus gondolkodásra és a koncentrációra jellemzőek." },
+                    { question: "Mi a fő különbség a szomnolencia és a szopor között?", options: ["A szomnolens beteg nem ébreszthető, a szoporos igen.", "A szomnolens beteg hangingerre ébreszthető, a szoporos csak erős, fájdalmas ingerre.", "A szopor enyhébb, mint a szomnolencia.", "A szomnolencia mindig lázzal jár, a szopor soha."], correct: 1, explanation: "A szomnolencia enyhébb tudatzavar, a beteg hangos szóra vagy érintésre ébreszthető. A szopor mélyebb állapot, ahol már csak erős, gyakran fájdalmas ingerrel lehet primitív, elhárító reakciókat kiváltani." },
+                    { question: "Mi a kóma (coma)?", options: ["Egy nagyon mély alvás, amiből nehéz felébredni.", "Olyan állapot, ahol a beteg csak a családtagjaira reagál.", "Teljes ébreszthetetlenség, ahol a beteg semmilyen ingerre nem reagál, vagy csak reflexszerűen.", "A légzés és keringés teljes hiánya."], correct: 2, explanation: "A kóma a tudatzavar legsúlyosabb foka, egy teljesen ébreszthetetlen állapot, ahol megszűnik a tudatos kapcsolat a külvilággal." },
+                    { question: "Melyik alvásfázisban a legjellemzőbbek az élénk, történetmesélő álmok és az izomatónia?", options: ["NREM N1", "NREM N2", "NREM N3 (mélyalvás)", "REM (paradox alvás)"], correct: 3, explanation: "A REM fázisra jellemzők a gyors szemmozgások, az éber állapothoz hasonló agyi aktivitás, az élénk álmok és a vázizmok szinte teljes tónusvesztése (atónia)." },
+                    { question: "Mi a hipnózis disszociációs elméletének lényege Ernest Hilgard szerint?", options: ["A hipnózis csak egy szociális szerepjáték.", "A hipnózis egy megosztott tudatállapot, ahol a tudat részei elkülönülhetnek.", "A hipnózis azonos a mélyalvással.", "A hipnózis egy veszélyes, kontrollálhatatlan állapot."], correct: 1, explanation: "Hilgard disszociációs elmélete szerint a hipnózis során a tudat megoszlik, lehetővé téve, hogy a tudatos elme bizonyos részei elkülönüljenek egymástól, ami magyarázza például a hipnotikus fájdalomcsillapítás jelenségét." },
+                    { question: "Melyik neuropszichiátriai kórképre jellemző a kataplexia (hirtelen izomtónus-vesztés erős érzelmekre)?", options: ["Inszomnia", "Alvajárás", "Narkolepszia", "Epilepszia"], correct: 2, explanation: "A kataplexia a narkolepszia (1-es típus) egyik legjellegzetesebb, patognomikus tünete. Az erős érzelmek, mint a nevetés vagy a meglepetés, hirtelen, átmeneti izomtónus-vesztést váltanak ki." },
+                    { question: "Melyik NEM tartozik a nem-hypnoid tudatzavarok közé?", options: ["Akinetikus mutizmus", "Minimálisan tudatos állapot (MCS)", "Szopor", "Apalliumos állapot (vegetatív állapot)"], correct: 2, explanation: "A szopor a hypnoid (kvantitatív) tudatzavarok közé tartozik, mivel az éberségi szint súlyos csökkenése jellemzi. A nem-hypnoid zavarokban az éberség megmaradhat, de a tudatosság sérül." },
+                    { question: "Milyen agyhullámok dominálnak mély, álomtalan alvásban?", options: ["Alfa-hullámok", "Béta-hullámok", "Gamma-hullámok", "Delta-hullámok"], correct: 3, explanation: "A mélyalvást (NREM N3 stádium) a nagy amplitúdójú, lassú delta-hullámok (0.5-4 Hz) dominanciája jellemzi az EEG-n." },
+                    { question: "Mi a REM alvási viselkedészavar (RBD) legfőbb jellemzője?", options: ["A beteg hirtelen felébred és pánikol.", "A beteg alvás közben beszél.", "A REM alatti normális izomatónia hiánya miatt a beteg 'eljátssza' az álmait.", "A beteg nehezen alszik el."], correct: 2, explanation: "RBD esetén a REM alvásra jellemző izombénulás kiesik, így a beteg az álmai tartalmának megfelelően mozog, beszél, ami sérülésveszélyes lehet. Gyakran neurodegeneratív betegségek (pl. Parkinson-kór) korai előjele." },
+                    { question: "A Coma Recovery Scale-Revised (CRS-R) mire szolgál?", options: ["A delírium gyors szűrésére.", "A GCS pontszám kiszámítására.", "A súlyos agysérültek tudatállapotának finomabb megkülönböztetésére (pl. VS vs. MCS).", "A hipnózis mélységének mérésére."], correct: 2, explanation: "A CRS-R egy részletes viselkedéses skála, amelyet kifejezetten a súlyosan csökkent tudatú betegek (pl. vegetatív állapot, minimálisan tudatos állapot) állapotának pontosabb felmérésére és követésére fejlesztettek ki." },
+                    { question: "Melyik agyi struktúra a 'belső óra', ami a cirkadián ritmust szabályozza?", options: ["Hippokampusz", "Amygdala", "Nucleus suprachiasmaticus (SCN)", "Talamusz"], correct: 2, explanation: "A hipotalamuszban található nucleus suprachiasmaticus (SCN) az agy központi, 'mester' órája, amely a test belső, kb. 24 órás (cirkadián) ritmusát szabályozza, elsősorban a fény-sötétség ciklus alapján." },
+                    { question: "Melyik állítás igaz a halálközeli élményekre (NDE) a tudatkutatás szempontjából?", options: ["Mindig oxigénhiány okozza őket.", "Kihívást jelentenek a tudat tisztán materialista, agyműködésre redukáló modelljei számára.", "Csak vallásos emberek élik át.", "Mindig kellemes élmények."], correct: 1, explanation: "Az NDE-k, különösen azok az esetek, amikor klinikailag kimutatható agyi aktivitás nélkül (pl. szívleállás alatt) történnek, komoly kérdéseket vetnek fel a tudat és az agy viszonyáról, és megkérdőjelezik azokat a modelleket, amelyek a tudatot kizárólag az agyi neuronális aktivitás termékének tekintik." },
+                    { question: "Milyen típusú tudatzavar a tenebrositas?", options: ["Kvantitatív tudatzavar", "Kvalitatív tudatzavar", "Normál alvási fázis", "Nem tudatzavar"], correct: 1, explanation: "A tenebrositas (tudatborulás, ködös állapot) egy kvalitatív tudatzavar, ahol az éberség csak enyhén csökkent, de a tudat tisztasága, a gondolkodás rendezettsége és a tájékozódás károsodott." },
+                    { question: "Mi az aktiváció-szintézis hipotézis az álmokról?", options: ["Az álmok a tudattalan vágyak kifejeződései.", "Az álmok az agytörzsi véletlenszerű impulzusok agykérgi értelmezési kísérletei.", "Az álmok a napi problémák megoldását szolgálják.", "Az álmoknak nincs funkciójuk."], correct: 1, explanation: "Hobson és McCarley aktiváció-szintézis elmélete szerint az álmok úgy jönnek létre, hogy az agykéreg megpróbál koherens történetet alkotni az alvás (főleg a REM fázis) során az agytörzsből érkező, véletlenszerű neurális jelekből." },
+                    { question: "Az alvásmegvonás hogyan hat a pszichés funkciókra?", options: ["Javítja a koncentrációt.", "Csökkenti a szorongást.", "Rontja a figyelmet, a döntéshozatalt és a hangulati stabilitást.", "Nincs hatással rájuk."], correct: 2, explanation: "Az alvásmegvonás súlyosan károsítja a kognitív funkciókat, csökkenti a figyelmi kapacitást, rontja a reakcióidőt és a döntéshozatalt, valamint hangulati labilitást, ingerlékenységet okoz." },
+                    { question: "Melyik neurotranszmitter játszik kulcsszerepet az ébrenlét fenntartásában, és amelynek hiánya narkolepsziát okoz?", options: ["Szerotonin", "GABA", "Orexin/Hipokretin", "Melatonin"], correct: 2, explanation: "Az orexin (vagy hipokretin) a hipotalamuszban termelődő neuropeptid, amely az ébrenlét fenntartásáért és stabilizálásáért felelős. Az orexin-termelő neuronok pusztulása okozza a narkolepszia 1-es típusát." },
+                    { question: "Melyik igaz az alvási ciklusok szerkezetére?", options: ["Az éjszaka folyamán a REM alvás aránya csökken.", "Egy ciklus kb. 30 percig tart.", "Az éjszaka első felében a mélyalvás (N3), a második felében a REM alvás dominál.", "Mindig 4 ciklus van egy éjszaka."], correct: 2, explanation: "Egy tipikus éjszaka során az alvás kb. 90-120 perces ciklusokban zajlik. Az éjszaka elején a mély, lassú hullámú alvás (N3) a hangsúlyosabb, míg a reggel közeledtével a REM fázisok egyre hosszabbá válnak." },
+                    { question: "Mi az a Locked-in szindróma (LIS)?", options: ["A tudat teljes hiánya éber állapotban.", "Egy súlyos alvászavar.", "A tudat és a kognitív funkciók épek, de a test szinte teljesen bénult.", "Egyfajta mély kóma."], correct: 2, explanation: "A Locked-in szindróma nem valódi tudatzavar. A beteg tudata teljesen ép, de az agytörzs sérülése miatti kvadriplégia és anartria ('bezártság') miatt csak vertikális szemmozgásokkal vagy pislogással képes kommunikálni." },
+                    { question: "Melyik NEM-hypnoid tudatzavarban vannak a betegnek alvás-ébrenlét ciklusai, de nincsenek tudatos reakciói?", options: ["Szopor", "Apalliumos állapot (vegetatív állapot)", "Minimálisan tudatos állapot (MCS)", "Kóma"], correct: 1, explanation: "Az apalliumos vagy vegetatív állapotot (Unresponsive Wakefulness Syndrome - UWS) az éberség (arousal) megléte, de a tudatosság (awareness) teljes hiánya jellemzi. A betegnek vannak alvás-ébrenlét ciklusai, kinyitja a szemét, de nem mutat tudatos, értelmes reakciókat." }
+                ]
+            }
+        };
+
+        const app = {
+            // DOM Elements
+            topicSelectionScreen: document.getElementById('topic-selection'),
+            quizInterfaceScreen: document.getElementById('quiz-interface'),
+            finalScoreScreen: document.getElementById('final-score-screen'),
+            
+            topicContainer: document.querySelector('#topic-selection .grid'),
+            quizTitle: document.getElementById('quiz-title'),
+            scoreDisplay: document.getElementById('score'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationText: document.getElementById('explanation-text'),
+            
+            backToTopicsBtn: document.getElementById('back-to-topics'),
+            nextQuestionBtn: document.getElementById('next-question'),
+            
+            finalTopicTitle: document.getElementById('final-topic-title'),
+            finalScoreDisplay: document.getElementById('final-score'),
+            restartQuizBtn: document.getElementById('restart-quiz'),
+            changeTopicBtn: document.getElementById('change-topic'),
+
+            // State
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            questions: [],
+
+            init() {
+                this.renderTopicSelection();
+                this.addEventListeners();
+            },
+
+            addEventListeners() {
+                this.backToTopicsBtn.addEventListener('click', () => this.showScreen('topics'));
+                this.nextQuestionBtn.addEventListener('click', () => this.nextQuestion());
+                this.restartQuizBtn.addEventListener('click', () => this.startQuiz(this.currentTopic));
+                this.changeTopicBtn.addEventListener('click', () => this.showScreen('topics'));
+            },
+
+            renderTopicSelection() {
+                this.topicContainer.innerHTML = '';
+                Object.keys(quizData).forEach(key => {
+                    const topic = quizData[key];
+                    const button = document.createElement('button');
+                    button.className = "p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 text-left";
+                    button.innerHTML = `
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${topic.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">${topic.questions.length} kérdés</p>
+                    `;
+                    button.addEventListener('click', () => this.startQuiz(key));
+                    this.topicContainer.appendChild(button);
+                });
+            },
+
+            startQuiz(topicKey) {
+                this.currentTopic = topicKey;
+                this.questions = this.shuffleArray([...quizData[topicKey].questions]);
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.quizTitle.textContent = quizData[topicKey].title;
+                this.updateScore();
+                this.displayQuestion();
+                this.showScreen('quiz');
+            },
+
+            displayQuestion() {
+                this.explanationContainer.classList.add('hidden');
+                this.nextQuestionBtn.classList.add('disabled');
+                
+                if (this.currentQuestionIndex >= this.questions.length) {
+                    this.showFinalScore();
+                    return;
+                }
+
+                const question = this.questions[this.currentQuestionIndex];
+                this.questionText.textContent = question.question;
+                this.optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = "w-full text-left p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent quiz-option";
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.addEventListener('click', (e) => this.selectAnswer(e));
+                    this.optionsContainer.appendChild(button);
+                });
+
+                this.updateProgressBar();
+            },
+
+            selectAnswer(e) {
+                const selectedButton = e.target;
+                const selectedIndex = parseInt(selectedButton.dataset.index);
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedIndex === question.correct;
+
+                if (isCorrect) {
+                    this.score++;
+                    selectedButton.classList.add('correct');
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    // Highlight the correct answer
+                    const correctButton = this.optionsContainer.querySelector(`[data-index='${question.correct}']`);
+                    correctButton.classList.add('correct');
+                }
+
+                this.explanationText.textContent = question.explanation;
+                this.explanationContainer.classList.remove('hidden');
+                
+                Array.from(this.optionsContainer.children).forEach(btn => btn.classList.add('disabled'));
+                
+                this.nextQuestionBtn.classList.remove('disabled');
+                this.updateScore();
+            },
+
+            nextQuestion() {
+                this.currentQuestionIndex++;
+                this.displayQuestion();
+            },
+
+            updateScore() {
+                this.scoreDisplay.textContent = `Pontszám: ${this.score} / ${this.questions.length}`;
+            },
+
+            updateProgressBar() {
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            },
+
+            showFinalScore() {
+                this.finalTopicTitle.textContent = quizData[this.currentTopic].title;
+                this.finalScoreDisplay.textContent = `${this.score} / ${this.questions.length}`;
+                this.showScreen('final');
+            },
+
+            showScreen(screen) {
+                this.topicSelectionScreen.classList.add('hidden');
+                this.quizInterfaceScreen.classList.add('hidden');
+                this.finalScoreScreen.classList.add('hidden');
+
+                if (screen === 'topics') {
+                    this.topicSelectionScreen.classList.remove('hidden');
+                } else if (screen === 'quiz') {
+                    this.quizInterfaceScreen.classList.remove('hidden');
+                } else if (screen === 'final') {
+                    this.finalScoreScreen.classList.remove('hidden');
+                }
+            },
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        };
+
+        app.init();
+    </script>
+
+</body>
+</html>

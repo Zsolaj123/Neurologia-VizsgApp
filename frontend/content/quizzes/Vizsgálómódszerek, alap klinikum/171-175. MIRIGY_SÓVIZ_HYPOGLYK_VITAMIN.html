@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5; /* green-100 */
+            border-color: #10b981; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .explanation.visible {
+            max-height: 500px; /* Adjust as needed */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h1 class="text-3xl font-bold mb-2 text-gray-700">Neurológiai Vizsga Kvíz</h1>
+                <p class="text-gray-600 mb-8">Válasszon egy témakört a kezdéshez.</p>
+                <div id="topic-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Topic buttons will be inserted here by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="quiz-title" class="text-xl md:text-2xl font-bold text-gray-700">Téma Címe</h2>
+                    <span id="question-counter" class="text-sm font-semibold text-gray-500">1 / 20</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-lg md:text-xl font-semibold mb-6 min-h-[60px]"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="mt-6">
+                    <div id="explanation-box" class="explanation bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
+                        <h4 class="font-bold text-gray-700 mb-2">Magyarázat:</h4>
+                        <p id="explanation-text" class="text-gray-600"></p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-question-btn" class="hidden bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-gray-700">Eredmények</h2>
+                <p id="score-text" class="text-5xl font-bold my-6 text-blue-600">18 / 20</p>
+                <p id="score-message" class="text-lg text-gray-600 mb-8">Kiváló munka!</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">Teszt újraindítása</button>
+                    <button id="back-to-topics-btn" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors">Vissza a témákhoz</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA: Questions, Options, Explanations ---
+        const quizData = {
+            "endocrine": {
+                title: "Belsőelválasztású mirigyek zavarai",
+                questions: [
+                    {
+                        question: "Melyik a hypothyreosis legjellemzőbb kognitív tünete?",
+                        options: ["Fokozott ingerlékenység", "Gyors gondolkodás és beszéd", "Gondolkodás és beszéd lelassulása", "Vizuospaciális zavarok"],
+                        answer: 2,
+                        explanation: "Hypothyreosisban a leggyakoribb és legjellemzőbb kognitív tünet a gondolkodás és a beszéd lelassulása, a figyelem és koncentráció zavara, valamint az apátia."
+                    },
+                    {
+                        question: "Mi a myxoedemás kóma?",
+                        options: ["A hyperthyreosis enyhe szövődménye", "A hypothyreosis legsúlyosabb, életveszélyes szövődménye", "A Cushing-szindróma egy formája", "Autoimmun eredetű encephalopathia"],
+                        answer: 1,
+                        explanation: "A myxoedemás kóma a hypothyreosis legsúlyosabb, életveszélyes szövődménye, amelyet megváltozott mentális állapot, hypotermia, bradycardia és progresszív aluszékonyság jellemez."
+                    },
+                    {
+                        question: "Melyik a hyperthyreosis leggyakoribb motoros tünete?",
+                        options: ["Proximális izomatrófia", "Finom, poszturális kézremegés (tremor)", "Cerebelláris ataxia", "Renyhe ínreflexek"],
+                        answer: 1,
+                        explanation: "A finom, poszturális kézremegés (tremor) a hyperthyreosis leggyakoribb és legjellegzetesebb motoros tünete."
+                    },
+                    {
+                        question: "Mi a Hashimoto encephalopathia kezelésének alapja?",
+                        options: ["Levothyroxin pótlás", "Antithyroid gyógyszerek", "Glükokortikoid (szteroid) kezelés", "Béta-blokkolók"],
+                        answer: 2,
+                        explanation: "A Hashimoto encephalopathia jellemzően jól reagál a glükokortikoid (szteroid) kezelésre, ami alátámasztja autoimmun eredetét. A pajzsmirigyhormon-pótlás önmagában általában nem elegendő."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb pszichiátriai zavar Cushing-szindrómában?",
+                        options: ["Mánia", "Skizofrénia", "Pánikzavar", "Major depresszió"],
+                        answer: 3,
+                        explanation: "A major depresszió a leggyakoribb pszichiátriai zavar Cushing-szindrómában, a betegek akár 50-81%-át is érintheti."
+                    },
+                    {
+                        question: "Mi a pheochromocytoma klasszikus tüneti triásza?",
+                        options: ["Fáradtság, súlygyarapodás, hidegintolerancia", "Epizodikus fejfájás, izzadás, tachycardia", "Depresszió, izomgyengeség, striák", "Szomjúság, polyuria, testsúlycsökkenés"],
+                        answer: 1,
+                        explanation: "A pheochromocytoma klasszikus tüneti triásza az epizodikus, gyakran lüktető fejfájás, a profúz izzadás és a tachycardia (szívdobogásérzés)."
+                    },
+                    {
+                        question: "Melyik a diabetes mellitus leggyakoribb krónikus szövődménye?",
+                        options: ["Retinopathia", "Nephropathia", "Perifériás neuropathia (DPN)", "Kardiovaszkuláris autonóm neuropathia"],
+                        answer: 2,
+                        explanation: "A diabéteszes perifériás neuropathia (DPN) a diabetes mellitus leggyakoribb krónikus szövődménye, amely 'kesztyű-harisnya' eloszlásban okoz érző és motoros tüneteket."
+                    },
+                    {
+                        question: "Mi jellemző a kardiovaszkuláris autonóm neuropathiára (DAN) diabetesben?",
+                        options: ["Bradycardia", "Orthostaticus hypotensio", "Csökkent nyugalmi pulzus", "Hypertoniás krízisek"],
+                        answer: 1,
+                        explanation: "A kardiovaszkuláris autonóm neuropathia jellemzői közé tartozik a nyugalmi tachycardia, az orthostaticus hypotensio (szédülés felálláskor) és a csökkent terhelési tolerancia."
+                    },
+                    {
+                        question: "Milyen agyideg neuropátia a leggyakoribb diabetesben?",
+                        options: ["N. olfactorius (I.)", "N. opticus (II.)", "N. oculomotorius (III.)", "N. vestibulocochlearis (VIII.)"],
+                        answer: 2,
+                        explanation: "A leggyakrabban érintett agyidegek a III. (oculomotorius), VI. (abducens) és VII. (facialis) agyidegek, amelyek szemmozgászavarokat vagy arcidegbénulást okozhatnak."
+                    },
+                    {
+                        question: "A diabetes mellitus növeli a kockázatát melyik típusú demenciának?",
+                        options: ["Frontotemporális demencia", "Lewy-testes demencia", "Vaszkuláris demencia és Alzheimer-kór", "Csak a vaszkuláris demenciának"],
+                        answer: 2,
+                        explanation: "Mind az 1-es, mind a 2-es típusú diabetes mellitus fokozza a kognitív hanyatlás és a demencia (különösen a vaszkuláris demencia, de az Alzheimer-kór kockázata is) kialakulásának kockázatát."
+                    },
+                    {
+                        question: "Milyen gyógyszercsoportok használatosak első vonalban a fájdalmas diabéteszes neuropathia kezelésére?",
+                        options: ["Opioidok és NSAID-ok", "Antikonvulzívumok (pregabalin, gabapentin) és SNRI-k (duloxetin)", "Kortikoszteroidok és béta-blokkolók", "Kizárólag helyi kezelések (krémek, tapaszok)"],
+                        answer: 1,
+                        explanation: "A fájdalmas DPN kezelésére első vonalban antikonvulzívumokat (pregabalin, gabapentin) és szerotonin-noradrenalin visszavétel gátlókat (SNRI-k, pl. duloxetin) alkalmaznak."
+                    },
+                    {
+                        question: "Mi a 'myxoedemás őrület'?",
+                        options: ["Hyperthyreosisban jelentkező eufória", "Hypothyreosisban kialakuló akut pszichotikus állapot", "Cushing-szindróma mániás epizódja", "Addison-krízishez társuló delírium"],
+                        answer: 1,
+                        explanation: "A 'myxoedemás őrület' egy ritka, de súlyos tünet, amely súlyos hypothyreosis esetén alakulhat ki, és akut pszichotikus állapotot, agitációt jelent."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a 'apatikus hyperthyreosis'?",
+                        options: ["Fiatal nőkre", "Gyermekekre", "Idősebb betegekre", "Sportolókra"],
+                        answer: 2,
+                        explanation: "Az 'apatikus hyperthyreosis' egy atipikus megjelenési forma, amely főként idősebb betegeknél fordul elő, és a szokásos hyperadrenerg tünetek (nyugtalanság, ingerlékenység) helyett apátia, levertség jellemzi."
+                    },
+                    {
+                        question: "Milyen elektrolit-eltérések jellemzőek primer mellékvese-elégtelenség (Addison-kór) esetén?",
+                        options: ["Hypernatraemia, hypokalaemia", "Hyponatraemia, hyperkalaemia", "Hypercalcaemia, hypophosphataemia", "Normális elektrolit szintek"],
+                        answer: 1,
+                        explanation: "Primer mellékvese-elégtelenségben az aldoszteronhiány miatt a vese nátriumot veszít és káliumot tart vissza, ami hyponatraemiához és hyperkalaemiához vezet."
+                    },
+                    {
+                        question: "Mely agyterületek mutatnak leginkább atrófiát krónikus hypercortisolismus (Cushing-szindróma) esetén?",
+                        options: ["Agytörzs és kisagy", "Talamusz és hipotalamusz", "Hippocampus és prefrontális kéreg", "Motoros és szenzoros kéreg"],
+                        answer: 2,
+                        explanation: "A krónikus hypercortisolismus agyi atrófiát okozhat, különösen a hippocampusban és a prefrontális kéregben, ami hozzájárul a memóriazavarokhoz és a végrehajtó funkciók romlásához."
+                    },
+                    {
+                        question: "Melyik a legfontosabb kezelési elv a diabéteszes neurológiai szövődmények progressziójának lassítására?",
+                        options: ["Szigorú fájdalomcsillapítás", "Magas dózisú vitaminpótlás", "Jó és stabil glikémiás kontroll", "Rendszeres elektrofiziológiai vizsgálat"],
+                        answer: 2,
+                        explanation: "A neurológiai szövődmények progressziójának lassításában a legfontosabb a jó és stabil glikémiás kontroll (optimális HbA1c célérték) elérése és fenntartása."
+                    },
+                    {
+                        question: "Mi a Graves-orbitopathia?",
+                        options: ["A hypothyreosis szemtünete", "A Cushing-szindróma szemészeti szövődménye", "A Graves-Basedow-kórhoz társuló autoimmun szemtünetegyüttes", "A pheochromocytoma okozta látászavar"],
+                        answer: 2,
+                        explanation: "A Graves-orbitopathia egy autoimmun szemtünetegyüttes, amely Graves-Basedow-kórban (a hyperthyreosis leggyakoribb oka) fordul elő, és szemkidülledést (exophthalmus), kettőslátást okozhat."
+                    },
+                    {
+                        question: "Milyen teszt kulcsfontosságú a mellékvese-elégtelenség diagnózisának megerősítésében?",
+                        options: ["Dexametazon szuppressziós teszt", "Oralis glükóz tolerancia teszt (OGTT)", "ACTH stimulációs (Synacthen) teszt", "TSH-receptor antitest (TRAb) mérés"],
+                        answer: 2,
+                        explanation: "Az ACTH stimulációs (Synacthen) teszt kulcsfontosságú a mellékvese-elégtelenség diagnózisának megerősítésében, mivel felméri a mellékvesekéreg kortizoltermelő kapacitását."
+                    },
+                    {
+                        question: "A 'hypoglycemia unawareness' jelenség melyik diabéteszes szövődményhez köthető?",
+                        options: ["Diabetikus retinopathia", "Diabetikus nephropathia", "Autonóm neuropathia (DAN)", "Proximális motoros neuropathia"],
+                        answer: 2,
+                        explanation: "A 'hypoglycemia unawareness' (a hipoglikémia adrenerg figyelmeztető tüneteinek hiánya) a kardiovaszkuláris autonóm neuropathia (DAN) egyik súlyos manifesztációja."
+                    },
+                    {
+                        question: "Melyik gyógyszert kell óvatosan, csak az alfa-blokád elérése után adni pheochromocytoma műtéti előkészítése során?",
+                        options: ["ACE-gátlók", "Béta-blokkolók", "Kalcium-csatorna blokkolók", "Diuretikumok"],
+                        answer: 1,
+                        explanation: "Pheochromocytoma esetén a béta-blokkolókat csak a megfelelő alfa-adrenerg blokád elérése után szabad bevezetni, hogy elkerüljék a paradox, súlyos hypertoniás krízist, amit a nem-opponált alfa-receptor stimuláció okozna."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a proximális izomgyengeség (myopathia)?",
+                        options: ["Csak hypothyreosis", "Csak hyperthyreosis", "Hypothyreosis, hyperthyreosis és Cushing-szindróma is", "Csak Addison-kór"],
+                        answer: 2,
+                        explanation: "A proximális izomgyengeség (myopathia) mind a hypothyreosis, mind a hyperthyreosis (thyreotoxikus myopathia), mind pedig a Cushing-szindróma (szteroid myopathia) jellemző tünete lehet."
+                    }
+                ]
+            },
+            "metabolic": {
+                title: "Metabolikus Encephalopathiák",
+                questions: [
+                    {
+                        question: "Mi a metabolikus enkefalopátia (ME) alapvető definíciója?",
+                        options: ["Primer agyi strukturális károsodás", "Az agy globális diszfunkciója szisztémás betegség vagy toxikus hatás miatt", "Kizárólag fertőzéses eredetű agyi gyulladás", "Örökletes anyagcsere-betegség"],
+                        answer: 1,
+                        explanation: "A metabolikus enkefalopátia az agyműködés globális, diffúz zavara, amelyet nem primer agyi strukturális károsodás, hanem valamilyen szisztémás betegség, anyagcsere-eltérés vagy toxikus hatás idéz elő."
+                    },
+                    {
+                        question: "Melyik neurotoxikus anyag játszik központi szerepet a hepatikus enkefalopátia (HE) patogenezisében?",
+                        options: ["Karbamid", "Kreatinin", "Bilirubin", "Ammónia"],
+                        answer: 3,
+                        explanation: "Az ammónia központi szerepet játszik a HE patogenezisében. Májelégtelenség esetén a bélbaktériumok által termelt ammónia nem tud megfelelően méregtelenítődni, felhalmozódik és az agyba jutva neurotoxikus hatást fejt ki."
+                    },
+                    {
+                        question: "Mi az asterixis, a HE egyik klasszikus jele?",
+                        options: ["Fokozott ínreflexek", "A kitartott kézfejek csapkodó remegése (flapping tremor)", "Járási bizonytalanság", "Elkent beszéd"],
+                        answer: 1,
+                        explanation: "Az asterixis, vagy 'májremegés', a csukló és az ujjak hirtelen, rövid, akaratlan flexiós-extenziós mozgása a kitartott, dorsalflektált kézfejeken."
+                    },
+                    {
+                        question: "Melyik gyógyszer az elsődleges terápia a hepatikus enkefalopátia kezelésében?",
+                        options: ["Rifaximin", "Probiotikumok", "Laktulóz", "Metronidazol"],
+                        answer: 2,
+                        explanation: "A laktulóz az elsődleges terápia mind az akut HE kezelésében, mind a megelőzésben. Csökkenti a bél pH-ját, ami gátolja az ammónia felszívódását, és hashajtó hatása révén gyorsítja a toxinok kiürülését."
+                    },
+                    {
+                        question: "Melyik két tünet a legjellemzőbb az urémiás enkefalopátiára (UE), amelyek segíthetnek elkülöníteni más ME-ktől?",
+                        options: ["Fejfájás és látászavar", "Myoclonus és görcsrohamok", "Depresszió és apátia", "Tremor és ataxia"],
+                        answer: 1,
+                        explanation: "Bár a tünetek változatosak, a myoclonus (akaratlan izomrángások) és a görcsrohamok gyakoribbak az urémiás enkefalopátiában, mint sok más metabolikus enkefalopátiában."
+                    },
+                    {
+                        question: "Mi a dialízis diszekvilibrium szindróma oka?",
+                        options: ["A dializátum alumínium-toxicitása", "A vér és az agy közötti ozmotikus gradiens hirtelen megváltozása", "A dialízis során fellépő fertőzés", "A vérnyomás túlzott esése a kezelés alatt"],
+                        answer: 1,
+                        explanation: "A dialízis diszekvilibrium szindróma oka valószínűleg a vér és az agy közötti ozmotikus gradiens hirtelen megváltozása, mivel a karbamid és más ozmolitok gyorsabban távoznak a vérből, mint az agyból, ami átmeneti agyödémához vezet."
+                    },
+                    {
+                        question: "Mely agyterületek a legsérülékenyebbek a hipoglikémiás károsodással szemben?",
+                        options: ["Agytörzs és nyúltvelő", "Talamusz és kisagy", "Hippokampusz, agykéreg és bazális ganglionok", "Csak a frontális lebeny"],
+                        answer: 2,
+                        explanation: "A hipoglikémiás agykárosodással szemben szelektíven sérülékeny területek a hippokampusz, az agykéreg (főként parieto-occipitális), a bazális ganglionok és a belső tok hátsó szára."
+                    },
+                    {
+                        question: "Mi a hiperozmoláris hiperglikémiás szindróma (HHS) enkefalopátiájának fő patofiziológiai tényezője?",
+                        options: ["Súlyos ketoacidózis", "Extrém hiperozmolaritás és sejtes dehidratáció", "Magas inzulinszint", "Agyi laktát felhalmozódás"],
+                        answer: 1,
+                        explanation: "Az enkefalopátia HHS-ben elsősorban a súlyos szérum hiperozmolaritásnak és az ennek következtében kialakuló súlyos dehidratációnak (beleértve az agysejtek dehidratációját is) tudható be."
+                    },
+                    {
+                        question: "Melyik a legrettegettebb neurológiai szövődmény a diabéteszes ketoacidózis (DKA) kezelése során, különösen gyermekeknél?",
+                        options: ["Görcsrohamok", "Agyi ödéma", "Stroke", "Fokális neuropathia"],
+                        answer: 1,
+                        explanation: "Az agyi ödéma a legrettegettebb, bár ritka neurológiai szövődmény, amely főleg gyermekeknél és fiatal felnőtteknél fordul elő a DKA kezelése során, és magas mortalitással jár."
+                    },
+                    {
+                        question: "Melyik a legjellemzőbb motoros tünet az anoxiás/hipoxiás enkefalopátiában (HIE) szívmegállás után?",
+                        options: ["Chorea", "Dystonia", "Myoclonus", "Spaszticitás"],
+                        answer: 2,
+                        explanation: "A myoclonus (akaratlan, hirtelen izomrángások), különösen a stimulusra provokálható generalizált myoclonus, nagyon gyakori és jellemző tünet a szívmegállás utáni anoxiás/hipoxiás enkefalopátiában."
+                    },
+                    {
+                        question: "Mi a West-Haven kritériumok (WHC) szerepe a hepatikus enkefalopátiában?",
+                        options: ["A májbetegség okának meghatározása", "A HE súlyosságának stádiumbeosztása", "A kezelési protokoll kiválasztása", "A prognózis becslése"],
+                        answer: 1,
+                        explanation: "A West-Haven kritériumokat a hepatikus enkefalopátia súlyosságának egységes megítélésére és a klinikai állapot követésére használják, 0-tól 4-ig terjedő stádiumokba sorolva a tüneteket."
+                    },
+                    {
+                        question: "Milyen diétás tanács javasolt HE esetén a modern ellátásban?",
+                        options: ["Szigorú fehérjemegszorítás", "Magas zsírtartalmú diéta", "Megfelelő fehérjebevitel biztosítása, a megszorítás kerülése", "Folyékony diéta"],
+                        answer: 2,
+                        explanation: "A korábbi gyakorlattal ellentétben a fehérjemegszorítás ma már NEM javasolt, sőt káros lehet, mert súlyosbítja a malnutríciót és a sarcopeniát. Megfelelő fehérjebevitel (1.2-1.5 g/ttkg/nap) javasolt."
+                    },
+                    {
+                        question: "Milyen képalkotó jel lehet jellegzetes nem ketotikus hiperglikémiához társuló hemichorea-hemiballismus esetén?",
+                        options: ["T2 hiperintenzitás a hippocampusban", "Diffúz agyi atrófia", "T1 hiperintenzitás a kontralaterális bazális ganglionokban", "Agytörzsi vérzés"],
+                        answer: 2,
+                        explanation: "Nem ketotikus hiperglikémiához társuló hemichorea-hemiballismus esetén az MRI T1-súlyozott képeken jellegzetes magas jelintenzitás látható a tünetekkel kontralaterális oldali bazális ganglionokban (főleg a putamenben)."
+                    },
+                    {
+                        question: "Mi a legfontosabb teendő a hiperglikémiás krízisek (HHS, DKA) kezelésének kezdeti fázisában?",
+                        options: ["Azonnali magas dózisú inzulin adása", "Intravénás folyadékpótlás", "Bikarbonát adása az acidózisra", "Káliumpótlás"],
+                        answer: 1,
+                        explanation: "A kezelés sarokköve, különösen HHS-ben, az intravaszkuláris volumen helyreállítása és a dehidratáció korrekciója gyors intravénás folyadékpótlással (általában 0,9%-os NaCl oldattal)."
+                    },
+                    {
+                        question: "Milyen EEG eltérés jellemző a súlyosabb metabolikus enkefalopátiákra, mint pl. a HE vagy UE?",
+                        options: ["Tüske-hullám komplexek", "Gyors, béta aktivitás", "Trifázisos hullámok", "Normális EEG"],
+                        answer: 2,
+                        explanation: "Súlyosabb stádiumokban jellegzetes, bár nem patognomonikus trifázisos hullámok jelenhetnek meg, amelyek általában bilaterálisan szimmetrikusak, frontális dominanciával."
+                    },
+                    {
+                        question: "Melyik a legérzékenyebb képalkotó szekvencia a korai hipoglikémiás agykárosodás kimutatására?",
+                        options: ["T1-súlyozott MRI", "T2-súlyozott MRI", "FLAIR MRI", "Diffúziósúlyozott képalkotás (DWI)"],
+                        answer: 3,
+                        explanation: "A DWI rendkívül érzékeny a korai (akár órákon belüli) hipoglikémiás agykárosodás kimutatására. Az érintett területeken diffúziórestrikciót mutat, ami citotoxikus ödémára utal."
+                    },
+                    {
+                        question: "Milyen típusú agyödéma jellemző a hipoglikémiás enkefalopátiára?",
+                        options: ["Vazogén ödéma", "Citotoxikus ödéma", "Interstitialis ödéma", "Ozmotikus ödéma"],
+                        answer: 1,
+                        explanation: "Súlyos hipoglikémiában az ATP-hiány miatti ionpumpa-elégtelenség a sejtek duzzanatához, azaz citotoxikus ödémához vezet."
+                    },
+                    {
+                        question: "Melyik neurofiziológiai vizsgálat a legfontosabb a prognózisbecslésben szívmegállás utáni anoxiás kómában?",
+                        options: ["EEG", "ENG (elektroneurográfia)", "SSEP (szomatoszenzoros kiváltott potenciál)", "Vizuális kiváltott potenciál (VEP)"],
+                        answer: 2,
+                        explanation: "A kétoldali N20 válasz hiánya a mediánus ideg ingerlésekor végzett SSEP vizsgálat során az egyik legmegbízhatóbb, specifikus mutatója a rossz neurológiai kimenetelnek anoxiás kóma esetén."
+                    },
+                    {
+                        question: "Miért kell óvatosan, lassan csökkenteni a vércukorszintet HHS kezelésekor?",
+                        options: ["A hipoglikémia elkerülése érdekében", "Az iatrogén agyödéma kockázatának csökkentése érdekében", "A veseelégtelenség megelőzése érdekében", "A szívritmuszavarok elkerülése érdekében"],
+                        answer: 1,
+                        explanation: "A vércukorszint és a szérum ozmolalitás túl gyors csökkentése iatrogén agyödémát okozhat, mivel a már adaptálódott (idiogén ozmolokat tartalmazó) agysejtekbe a hirtelen hipoozmotikussá váló környezetből víz áramlik be."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a 'minimális' forma, amely csak speciális pszichometriai tesztekkel mutatható ki?",
+                        options: ["Urémiás enkefalopátia", "Hepatikus enkefalopátia", "Hipoglikémiás enkefalopátia", "Anoxiás enkefalopátia"],
+                        answer: 1,
+                        explanation: "A minimális hepatikus enkefalopátia (MHE) egy szubklinikai állapot, amely a rutin vizsgálat során nem okoz nyilvánvaló tüneteket, de speciális tesztekkel (pl. PHES, NCT) kimutatható kognitív zavarokkal (pl. csökkent figyelem, lassult reakcióidő) jár."
+                    },
+                    {
+                        question: "Mi a Posterior Reversible Encephalopathy Syndrome (PRES) és melyik metabolikus állapothoz társulhat gyakran?",
+                        options: ["Irreverzibilis agytörzsi károsodás, HE-hez társul", "Vazogén ödéma a parieto-occipitális régiókban, urémiához társulhat", "Kisagyi infarktus, hipoglikémiához társul", "Diffúz agyi atrófia, anoxiához társul"],
+                        answer: 1,
+                        explanation: "A PRES egy klinikai-radiológiai szindróma, amelyet főként a hátsó agyi területeken (parieto-occipitális) kialakuló vazogén ödéma jellemez. Gyakran társul súlyos hipertóniához, de urémiában is előfordulhat."
+                    }
+                ]
+            },
+            "water_salt": {
+                title: "Só- és vízháztartás zavarai",
+                questions: [
+                    {
+                        question: "Mi a hyponatraemia által okozott neurológiai tünetek elsődleges patofiziológiai oka?",
+                        options: ["Agysejt-zsugorodás", "Agyödéma az ozmotikus vízbeáramlás miatt", "Csökkent agyi perfúzió", "Neurotranszmitter-hiány"],
+                        answer: 1,
+                        explanation: "Hyponatraemiában a csökkent extracelluláris ozmolalitás miatt a víz beáramlik az agysejtekbe, ami agysejtduzzanathoz (agyödéma) és koponyaűri nyomásfokozódáshoz vezet."
+                    },
+                    {
+                        question: "Mi az ozmotikus demielinizációs szindróma (ODS) leggyakoribb oka?",
+                        options: ["A krónikus hyponatraemia túl gyors korrekciója", "A súlyos hypernatraemia", "A krónikus hypokalaemia", "A súlyos dehidratáció"],
+                        answer: 0,
+                        explanation: "Az ODS egy súlyos neurológiai komplikáció, amely jellemzően a krónikus hyponatraemia túl gyors (általában >8-10 mmol/L/24h) korrekciója következtében alakul ki, ami az agysejtek gyors zsugorodásához és demielinizációhoz vezet."
+                    },
+                    {
+                        question: "Melyik betegcsoport különösen veszélyeztetett az agyödéma kialakulására akut hyponatraemiában?",
+                        options: ["Idős férfiak", "Posztmenopauzális nők", "Premenopauzális nők", "Gyermekek"],
+                        answer: 2,
+                        explanation: "A premenopauzális nők fokozottan veszélyeztetettek, valószínűleg a nemi hormonok (ösztrogén, progeszteron) agyi adaptációs mechanizmusokra gyakorolt hatása miatt."
+                    },
+                    {
+                        question: "Mi a hypernatraemia által okozott neurológiai tünetek elsődleges patofiziológiai oka?",
+                        options: ["Agyödéma", "Agysejt-zsugorodás és vaszkuláris feszülés", "Fokozott agyi perfúzió", "Agyi gyulladás"],
+                        answer: 1,
+                        explanation: "Hypernatraemiában a magas extracelluláris ozmolalitás vizet von el az agysejtekből, ami agysejt-zsugorodáshoz vezet. Ez mechanikai feszülést okozhat a hídvénákban, ami vérzésekhez vezethet."
+                    },
+                    {
+                        question: "Milyen súlyos szövődményt okozhat a krónikus hypernatraemia túl gyors korrekciója?",
+                        options: ["Ozmotikus demielinizációs szindrómát (ODS)", "Agyvérzést", "Agyödémát", "Vénás sinus thrombosist"],
+                        answer: 2,
+                        explanation: "A krónikus hypernatraemia túl gyors korrekciója agyödémához vezethet, mivel a már adaptálódott (idiogén ozmolokkal teli) agysejtekbe a hirtelen hipoozmotikussá váló környezetből víz áramlik be."
+                    },
+                    {
+                        question: "Melyik elektrolitzavar okoz elsősorban neuromuszkuláris tüneteket (izomgyengeség, bénulás) a sejtmembrán hyperpolarizációja révén?",
+                        options: ["Hyponatraemia", "Hypernatraemia", "Hypokalaemia", "Hyperkalaemia"],
+                        answer: 2,
+                        explanation: "Hypokalaemiában az extracelluláris káliumkoncentráció csökkenése a sejtmembrán hyperpolarizációjához vezet, ami csökkenti az ideg- és izomsejtek ingerlékenységét, izomgyengeséget és bénulást okozva."
+                    },
+                    {
+                        question: "Melyik EKG elváltozás a hyperkalaemia legkorábbi, legjellemzőbb jele?",
+                        options: ["ST-depresszió", "Prominens U-hullám", "Magas, csúcsos, sátorszerű T-hullámok", "QRS-komplexum kiszélesedése"],
+                        answer: 2,
+                        explanation: "A magas, csúcsos, sátorszerű T-hullámok általában a hyperkalaemia legkorábbi és legjellemzőbb elektrokardiográfiás jelei."
+                    },
+                    {
+                        question: "Mi a súlyos hyperkalaemia által okozott izombénulás mechanizmusa?",
+                        options: ["A sejtmembrán hyperpolarizációja", "A feszültségfüggő nátriumcsatornák inaktivációja a tartós depolarizáció miatt", "Az acetilkolin-receptorok blokkolása", "A kalciumcsatornák gátlása"],
+                        answer: 1,
+                        explanation: "Súlyos hyperkalaemiában a tartós depolarizáció inaktiválja a feszültségfüggő nátriumcsatornákat, így az akciós potenciálok nem tudnak kialakulni, ami az ingerlékenység csökkenéséhez és petyhüdt bénuláshoz vezet."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a 'psychogen polydipsia' miatti vízmérgezés?",
+                        options: ["Szívelégtelenség", "Veseelégtelenség", "Pszichiátriai betegségek (pl. skizofrénia)", "Diabetes insipidus"],
+                        answer: 2,
+                        explanation: "A psychogen polydipsia (kényszeres, túlzott vízfogyasztás) pszichiátriai betegeknél, különösen skizofréniában fordulhat elő, és vízmérgezéshez, valamint súlyos hyponatraemiához vezethet."
+                    },
+                    {
+                        question: "Milyen neurológiai tünet gyakori az idősek dehidratációja esetén, amelyet könnyen félrediagnosztizálhatnak?",
+                        options: ["Fejfájás", "Akut zavartság (delírium) és elesések", "Görcsrohamok", "Izomgyengeség"],
+                        answer: 1,
+                        explanation: "Időseknél a dehidratáció gyakran atipikus tünetekkel, például akut zavartsággal (delíriummal), funkcionális hanyatlással és elesésekkel jelentkezik, amelyeket tévesen demenciának vagy más betegségnek tulajdoníthatnak."
+                    },
+                    {
+                        question: "Melyik a legfontosabb lépés a súlyos, tünetes hyperkalaemia azonnali kezelésében a szívizom védelmére?",
+                        options: ["Inzulin és glükóz adása", "Intravénás kalcium-glukonát adása", "Kacsdiuretikumok adása", "Hemodialízis"],
+                        answer: 1,
+                        explanation: "A súlyos hyperkalaemia sürgősségi kezelésének első lépése a szívizom membránjának stabilizálása intravénás kalcium-glukonát adásával, hogy megelőzzük az életveszélyes ritmuszavarokat."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport okozhat gyakran hyponatraemiát, különösen időseknél?",
+                        options: ["Béta-blokkolók", "Tiazid diuretikumok és SSRI-k", "Sztatinok", "Protonpumpa-gátlók"],
+                        answer: 1,
+                        explanation: "A tiazid típusú diuretikumok és a szelektív szerotonin-visszavétel gátló (SSRI) antidepresszánsok ismert és gyakori okai a hyponatraemiának, különösen az idős populációban."
+                    },
+                    {
+                        question: "Milyen típusú bénulást okoz jellemzően a súlyos hypokalaemia?",
+                        options: ["Spasztikus bénulást", "Petyhüdt (flaccid) bénulást", "Rigiditással járó bénulást", "Csak a szemizmok bénulását"],
+                        answer: 1,
+                        explanation: "A súlyos hypokalaemia a csökkent neuromuszkuláris ingerlékenység miatt petyhüdt (flaccid) bénulást okoz, amely a légzőizmokat is érintheti."
+                    },
+                    {
+                        question: "Mi a 'pszeudohyperkalaemia'?",
+                        options: ["A hyperkalaemia egy enyhe, tünetmentes formája", "A kálium transzcelluláris shiftje miatti emelkedés", "Laboratóriumi műtermék a vérminta feldolgozása során", "Hyperkalaemia normális EKG mellett"],
+                        answer: 2,
+                        explanation: "A pszeudohyperkalaemia egy laboratóriumi műtermék, amelyet a vérminta feldolgozása során a sejtekből (pl. hemolízis, thrombocytosis miatt) kiszabaduló kálium okoz, és nem tükrözi a beteg valós szérum káliumszintjét."
+                    },
+                    {
+                        question: "Milyen neurológiai tünet a legjellemzőbb a hypernatraemia kezdeti szakaszában, ha a szomjúságközpont ép?",
+                        options: ["Zavartság", "Letargia", "Intenzív szomjúság", "Görcsroham"],
+                        answer: 2,
+                        explanation: "A hypernatraemia legjellemzőbb és legkorábbi tünete az intenzív szomjúság, amely a szervezet védekező mechanizmusa a vízvesztés pótlására."
+                    },
+                    {
+                        question: "Hypokalaemiás periódusos paralízis esetén mi váltja ki leggyakrabban a bénulásos epizódot?",
+                        options: ["Intenzív testmozgás", "Szénhidrátdús étkezés vagy pihenés terhelés után", "Sószegény diéta", "Kávéfogyasztás"],
+                        answer: 1,
+                        explanation: "A rohamokat gyakran szénhidrátdús étkezés (ami inzulinfelszabadulást és a kálium sejtekbe áramlását indukálja) vagy fizikai megterhelés utáni pihenés váltja ki."
+                    },
+                    {
+                        question: "Mi a korrekció javasolt maximális sebessége krónikus hyponatraemia esetén az ODS elkerülésére?",
+                        options: ["15-20 mmol/L/24h", "12-14 mmol/L/24h", "8-10 mmol/L/24h", "Nincs korlát, a lehető leggyorsabb"],
+                        answer: 2,
+                        explanation: "Az ozmotikus demielinizációs szindróma (ODS) megelőzése érdekében a szérum nátriumszint emelkedése nem haladhatja meg a 8-10 mmol/L-t 24 óra alatt (magas kockázatú betegeknél 4-6 mmol/L/24h)."
+                    },
+                    {
+                        question: "Milyen típusú hasmenés okozhat jelentős káliumvesztést és hypokalaemiát?",
+                        options: ["Ozmotikus diarrhoea", "Szekretoros diarrhoea", "Gyulladásos diarrhoea", "Mindegyik egyformán"],
+                        answer: 1,
+                        explanation: "A szekretoros diarrhoea (pl. kolera, villosus adenoma) különösen nagy mennyiségű káliumot tartalmazó folyadékvesztéssel jár, ami súlyos hypokalaemiához vezethet."
+                    },
+                    {
+                        question: "Melyik állapotban kell kizárni a pszeudohyponatraemiát?",
+                        options: ["Súlyos hyperglykaemia, hyperlipidemia vagy hyperproteinemia esetén", "Súlyos dehidratáció esetén", "Szívelégtelenség esetén", "Diuretikum használat esetén"],
+                        answer: 0,
+                        explanation: "Pszeudohyponatraemiára kell gondolni, ha a mért nátriumszint alacsony, de a plazma ozmolalitása normális (súlyos hyperlipidemia/hyperproteinemia) vagy magas (súlyos hyperglykaemia). Ilyenkor nincs valódi hipoozmolalitás."
+                    },
+                    {
+                        question: "Melyik ion hiánya gátolja a kálium visszatartását a vesében és a sejtekben, súlyosbítva a hypokalaemiát?",
+                        options: ["Nátrium", "Kalcium", "Magnézium", "Foszfát"],
+                        answer: 2,
+                        explanation: "A hypomagnesaemia gyakran társul hypokalaemiával és nehezíti annak korrekcióját, mivel a magnézium szükséges a vese és a sejtek kálium-visszatartó mechanizmusainak megfelelő működéséhez. A hypokalaemia korrekciója előtt a magnéziumhiányt is rendezni kell."
+                    },
+                    {
+                        question: "Milyen neurológiai tünetegyüttest kell elkülöníteni a hypokalaemia okozta petyhüdt bénulástól?",
+                        options: ["Parkinson-kór", "Sclerosis multiplex", "Guillain-Barré szindróma (GBS)", "Alzheimer-kór"],
+                        answer: 2,
+                        explanation: "A hypokalaemia okozta petyhüdt bénulást el kell különíteni más, hasonló képet mutató kórképektől, mint a Guillain-Barré szindróma, myasthenia gravis krízis vagy a botulizmus. A GBS szintén felszálló, petyhüdt bénulással jár."
+                    }
+                ]
+            },
+            "hypoglycemia": {
+                title: "A hipoglikémia következményei",
+                questions: [
+                    {
+                        question: "Mi a Whipple-triász, a hipoglikémia diagnózisának alapja?",
+                        options: ["Magas vércukor, szomjúság, polyuria", "Hipoglikémiás tünetek, alacsony vércukorszint, tünetek megszűnése glükóz adására", "Fejfájás, izzadás, tachycardia", "Zavartság, ataxia, ophthalmoplegia"],
+                        answer: 1,
+                        explanation: "A Whipple-triász három eleme: 1. hipoglikémiára utaló tünetek, 2. laboratóriumilag igazolt alacsony vércukorszint, 3. a tünetek javulása a vércukorszint normalizálásával."
+                    },
+                    {
+                        question: "Melyik tünetcsoport tartozik a neurogén (autonóm) tünetek közé hipoglikémiában?",
+                        options: ["Zavartság, kóma, görcsroham", "Remegés, izzadás, szívdobogásérzés", "Hemiparesis, aphasia", "Memóriazavar, koncentrációs nehézség"],
+                        answer: 1,
+                        explanation: "A neurogén (autonóm) tünetek a szervezet ellenregulációs válaszából erednek. Ide tartozik a remegés, izzadás, tachycardia (szívdobogásérzés), szorongás és éhségérzet. Ezek korai figyelmeztető jelek."
+                    },
+                    {
+                        question: "Melyik tünetcsoport tartozik a neuroglikopéniás tünetek közé?",
+                        options: ["Izzadás, éhségérzet, remegés", "Sápadtság, szorongás, tachycardia", "Zavartság, viselkedésváltozás, görcsrohamok", "Csak a fejfájás és szédülés"],
+                        answer: 2,
+                        explanation: "A neuroglikopéniás tünetek közvetlenül az agy glükózhiányából adódnak. Ide tartozik a zavartság, viselkedésváltozás, koncentrációs zavar, és súlyos esetben a görcsrohamok és a kóma."
+                    },
+                    {
+                        question: "Mi a 'hipoglikémia-tudatosság hiánya' (hypoglycemia unawareness)?",
+                        options: ["A beteg nem tudja, mi a hipoglikémia", "A neurogén (autonóm) figyelmeztető jelek elmaradása", "A neuroglikopéniás tünetek hiánya", "A beteg nem hajlandó kezelni a hipoglikémiát"],
+                        answer: 1,
+                        explanation: "A 'hipoglikémia-tudatosság hiánya' azt jelenti, hogy a korai autonóm figyelmeztető jelek (remegés, izzadás) elmaradnak, így a beteg közvetlenül a súlyosabb neuroglikopéniás tünetekkel szembesül, ami növeli a súlyos epizódok kockázatát."
+                    },
+                    {
+                        question: "Melyik folyamat játszik kulcsszerepet a súlyos, elhúzódó hipoglikémia okozta neuronális sejthalálban?",
+                        options: ["Csökkent oxigénellátás", "Glutamát excitotoxicitás", "Agyi laktacidózis", "Ammónia felhalmozódás"],
+                        answer: 1,
+                        explanation: "Súlyos hipoglikémiában az energiahiány és a membrándepolarizáció masszív glutamát-felszabaduláshoz vezet, ami túlstimulálja a receptorokat, kontrollálatlan kalcium-beáramlást és végül sejthalált (excitotoxicitás) okoz."
+                    },
+                    {
+                        question: "Mely agyterületek a legkevésbé érzékenyek a hipoglikémiás károsodásra felnőttekben?",
+                        options: ["Hippokampusz és agykéreg", "Bazális ganglionok", "Agytörzs és kisagy", "Capsula interna"],
+                        answer: 2,
+                        explanation: "A talamusz, az agytörzs és a kisagy felnőttekben általában relatíve megkíméltek a hipoglikémiás károsodással szemben, ami differenciáldiagnosztikai szempontból fontos lehet."
+                    },
+                    {
+                        question: "Mennyi gyorsan felszívódó szénhidrát adása javasolt egy tudatánál lévő, hipoglikémiás betegnek?",
+                        options: ["5-10 gramm", "15-20 gramm", "30-40 gramm", "50 gramm"],
+                        answer: 1,
+                        explanation: "A '15-ös szabály' szerint 15-20 gramm gyorsan felszívódó szénhidrátot (pl. 3-4 glükóz tabletta, fél pohár gyümölcslé) kell adni, majd 15 perc múlva ellenőrizni a vércukorszintet."
+                    },
+                    {
+                        question: "Milyen beavatkozás szükséges egy eszméletlen, hipoglikémiás betegnél, ha nincs azonnal elérhető intravénás út?",
+                        options: ["Cukros víz itatása", "Intramuszkuláris glukagon injekció", "Szájon át adott glükóz gél", "Várni, amíg az IV út biztosítható"],
+                        answer: 1,
+                        explanation: "Ha az intravénás út nem biztosítható azonnal, glukagon adható intramuszkulárisan vagy szubkután. A glukagon a máj glikogénraktárainak mobilizálásával emeli a vércukorszintet."
+                    },
+                    {
+                        question: "Milyen hosszú távú neurológiai következménnyel járhat a visszatérő, súlyos hipoglikémia?",
+                        options: ["Fokozott kreativitás", "Javuló memória", "Kognitív hanyatlás és demencia kockázatának növekedése", "Nincs hosszú távú hatása"],
+                        answer: 2,
+                        explanation: "A visszatérő, súlyos hipoglikémia hosszú távon kognitív hanyatláshoz (memória, végrehajtó funkciók zavara) és különösen időseknél a demencia fokozott kockázatához vezethet."
+                    },
+                    {
+                        question: "Milyen jelenséget utánozhatnak a hipoglikémia okozta fokális neurológiai tünetek (pl. hemiparesis)?",
+                        options: ["Epilepsziás rohamot", "Migrénes aurát", "Stroke-ot", "Pánikrohamot"],
+                        answer: 2,
+                        explanation: "A hipoglikémia okozta átmeneti fokális neurológiai deficitek, mint a hemiparesis (féloldali gyengeség) vagy aphasia, stroke-ot utánozhatnak ('stroke mimics'), ami azonnali vércukormérést tesz szükségessé a differenciáldiagnózishoz."
+                    },
+                    {
+                        question: "Miért veszélyesebb a hipoglikémia az idősek számára?",
+                        options: ["Mert gyorsabban emelkedik a vércukruk", "Mert a figyelmeztető tünetek később vagy gyengébben jelentkeznek", "Mert jobban bírják az alacsony vércukrot", "Mert náluk sosem okoz kognitív zavart"],
+                        answer: 1,
+                        explanation: "Időseknél a hormonális ellenregulációs válasz és a szubjektív tünetészlelés tompulhat, így a figyelmeztető jelek csak kritikusan alacsony vércukorszintnél jelentkeznek, növelve a súlyos epizódok kockázatát."
+                    },
+                    {
+                        question: "Milyen hatással van a glükóz reperfúzió a súlyos hipoglikémia után a neuronokra?",
+                        options: ["Mindig jótékony hatású", "Nincs hatása", "Fokozhatja a neuronális sejthalált az oxidatív stressz révén", "Csökkenti a gyulladást"],
+                        answer: 2,
+                        explanation: "Bár a glükózpótlás életmentő, bizonyítékok utalnak arra, hogy a reperfúzió során a hirtelen visszatérő glükóz fokozhatja a reaktív oxigén gyökök termelődését és az oxidatív stresszt, ami tovább károsíthatja a neuronokat."
+                    },
+                    {
+                        question: "Melyik a legérzékenyebb képalkotó eljárás a hipoglikémiás agykárosodás korai kimutatására?",
+                        options: ["Koponya CT", "T1 súlyozott MRI", "Diffúziósúlyozott MRI (DWI)", "Koponya röntgen"],
+                        answer: 2,
+                        explanation: "A diffúziósúlyozott képalkotás (DWI) a legérzékenyebb módszer, amely már órákon belül képes kimutatni a citotoxikus ödémát az agy szelektíven sérülékeny területein."
+                    },
+                    {
+                        question: "Mi a 'pszeudohipoglikémia'?",
+                        options: ["A beteg csak tetteti a hipoglikémiát", "Hipoglikémiás tünetek normális vércukorszint mellett", "A vércukorszint gyors esése normális vagy magas értékről, ami tüneteket okoz", "A vércukormérő hibás mérése"],
+                        answer: 2,
+                        explanation: "Pszeudohipoglikémia akkor fordul elő, amikor krónikusan magas vércukorszinthez (hiperglikémia) szokott betegeknél a vércukor gyorsan esik, de még a normál tartományon belül van, mégis hipoglikémiás tüneteket élnek át."
+                    },
+                    {
+                        question: "Milyen szerepet játszik az acetilkolin (ACh) a mérsékelt hipoglikémia tüneteiben?",
+                        options: ["Nincs szerepe", "Az ACh szintje emelkedik", "A csökkent ACh szintézis hozzájárul a kognitív tünetekhez", "Az ACh gátolja a glükózfelvételt"],
+                        answer: 2,
+                        explanation: "Mérsékelt hipoglikémiában az acetilkolin szintézise károsodik, mivel a glükóz prekurzorokat is biztosít hozzá. Ez a neurotranszmitter-hiány hozzájárul a korai kognitív és neurológiai tünetekhez, még a teljes energiahiány előtt."
+                    },
+                    {
+                        question: "Milyen típusú EEG elváltozás várható súlyos hipoglikémiában?",
+                        options: ["Gyors, béta aktivitás", "Generalizált delta aktivitás, esetleg izoelektromos EEG", "Tüske-hullám komplexek", "Normális alfa ritmus"],
+                        answer: 1,
+                        explanation: "A hipoglikémia súlyosbodásával az EEG progresszíven lassul. Súlyos esetben generalizált delta aktivitás, majd az agyi elektromos tevékenység teljes leállása (izoelektromos EEG) figyelhető meg."
+                    },
+                    {
+                        question: "Miért fontos a folyamatos glükózmonitorozó (CGM) rendszer a hipoglikémia megelőzésében?",
+                        options: ["Mert automatikusan inzulint ad", "Mert riasztást ad a közelgő alacsony vércukorszint előtt", "Mert helyettesíti az étkezéseket", "Mert meggyógyítja a cukorbetegséget"],
+                        answer: 1,
+                        explanation: "A CGM rendszerek folyamatosan mérik a szöveti glükózszintet és képesek riasztást adni, ha a szint túl alacsonyra esik, vagy gyorsan csökken, így időt adnak a beavatkozásra a súlyos hipoglikémia kialakulása előtt."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport okozhat hipoglikémiát nem cukorbeteg egyénekben is?",
+                        options: ["Sztatinok", "Protonpumpa-gátlók", "Bizonyos antibiotikumok (pl. kinin, ciprofloxacin) és béta-blokkolók", "Antihisztaminok"],
+                        answer: 2,
+                        explanation: "Számos gyógyszer okozhat hipoglikémiát, többek között a kinin, a fluorokinolon antibiotikumok (pl. ciprofloxacin), a nem-szelektív béta-blokkolók és a nagy dózisú szalicilátok."
+                    },
+                    {
+                        question: "Milyen hatással van az alkohol a hipoglikémia kockázatára?",
+                        options: ["Csökkenti a kockázatot", "Nincs hatása", "Növeli a kockázatot a máj glükózleadásának gátlásával", "Csak sör fogyasztása esetén növeli"],
+                        answer: 2,
+                        explanation: "Az alkohol gátolja a glükoneogenezist (a máj glükózelőállítását), ezért különösen éhgyomorra fogyasztva jelentősen növeli a hipoglikémia kockázatát, és elfedheti annak tüneteit."
+                    },
+                    {
+                        question: "Milyen intézkedés javasolt egy hipoglikémiás epizód után a következő epizód megelőzésére?",
+                        options: ["Azonnal duplájára emelni az inzulinadagot", "Kihagyni a következő étkezést", "Komplex szénhidrátot tartalmazó étel vagy snack fogyasztása", "Intenzív testmozgás végzése"],
+                        answer: 2,
+                        explanation: "A gyorsan felszívódó szénhidrátok után lassabban felszívódó, komplex szénhidrátot (pl. teljes kiőrlésű kenyér, keksz) tartalmazó ételt kell fogyasztani a vércukorszint stabilizálása és egy újabb esés megelőzése érdekében."
+                    },
+                    {
+                        question: "Melyik a legfontosabb teendő minden akut tudatzavarral, görcsrohammal vagy fokális neurológiai tünettel jelentkező betegnél?",
+                        options: ["Azonnali koponya MRI", "Azonnali lumbálpunkció", "Azonnali vércukorszint mérés", "Azonnali EEG"],
+                        answer: 2,
+                        explanation: "Mivel a hipoglikémia számos súlyos neurológiai állapotot utánozhat, az azonnali vércukorszint mérés kritikus fontosságú minden ilyen betegnél a gyors diagnózis és a potenciálisan életmentő kezelés érdekében."
+                    }
+                ]
+            },
+            "vitamins": {
+                title: "Vitaminhiány Szindrómák",
+                questions: [
+                    {
+                        question: "Mi a Wernicke encephalopathia klasszikus tüneti triásza?",
+                        options: ["Amnézia, konfabuláció, apátia", "Konfúzió, ataxia, ophthalmoplegia", "Depresszió, neuropathia, dermatitis", "Izomgyengeség, areflexia, spaszticitás"],
+                        answer: 1,
+                        explanation: "A Wernicke encephalopathia klasszikus triásza a mentális státusz változása (konfúzió), a járási és törzsataxia, valamint a szemmozgászavarok (ophthalmoplegia, pl. nystagmus)."
+                    },
+                    {
+                        question: "Melyik klinikai szabályt kell betartani tiaminhiányra gyanús betegnél?",
+                        options: ["Glükóz infúziót kell adni a tiamin előtt", "Tiamint kell adni a glükóz infúzió előtt", "Soha nem szabad glükózt adni", "A tiamint csak szájon át szabad pótolni"],
+                        answer: 1,
+                        explanation: "Kritikus fontosságú szabály, hogy tiaminhiányos vagy arra gyanús betegnek glükóz infúzió adása előtt mindig tiamint kell adni, mert a glükóz adása fokozza a tiamin felhasználást, és kiválthatja vagy súlyosbíthatja a Wernicke encephalopathiát."
+                    },
+                    {
+                        question: "Mi a subacut kombinált degeneráció (SCD) oka?",
+                        options: ["B1-vitamin (tiamin) hiány", "B12-vitamin (kobalamin) hiány", "Folsav hiány", "E-vitamin hiány"],
+                        answer: 1,
+                        explanation: "Az SCD a B12-vitamin hiány legsúlyosabb neurológiai manifesztációja, amely a gerincvelő hátsó és oldalsó kötegeinek progresszív demielinizációjával jár."
+                    },
+                    {
+                        question: "Milyen jellegzetes képalkotó eltérést mutathat az MRI az SCD-ben?",
+                        options: ["Diffúz agyi atrófia", "A hátsó kötegek T2 hiperintenzitása ('fordított V jel')", "A mamilláris testek atrófiája", "Fehérállományi léziók a corpus callosumban"],
+                        answer: 1,
+                        explanation: "Az SCD-re jellegzetes MRI lelet a T2-súlyozott képeken látható szimmetrikus, magas jelintenzitás a gerincvelő hátsó kötegeiben, amit axiális síkon 'fordított V jelnek' neveznek."
+                    },
+                    {
+                        question: "Miért veszélyes a folsavpótlás a B12-vitamin hiány kizárása nélkül?",
+                        options: ["Mert a folsav gátolja a B12 felszívódását", "Mert a folsav súlyosbítja a B12-hiányos anaemiát", "Mert a folsav maszkírozhatja az anaemiát, miközben a neurológiai tünetek progrediálnak", "Mert a folsav toxikus B12-hiányban"],
+                        answer: 2,
+                        explanation: "A folsav adása javíthatja a B12-vitamin hiány okozta megaloblasztos anaemiát, de a neurológiai károsodás (pl. SCD) tovább súlyosbodik. Ezért a B12-hiányt mindig ki kell zárni a folsavpótlás előtt."
+                    },
+                    {
+                        question: "Melyik laboratóriumi marker a legspecifikusabb a B12-vitamin hiányra, különösen határeseti szinteknél?",
+                        options: ["Emelkedett homocisztein", "Emelkedett metilmalonsav (MMA)", "Alacsony folsavszint", "Macrocytosis az MCV-ben"],
+                        answer: 1,
+                        explanation: "Az emelkedett szérum metilmalonsav (MMA) szint specifikusabb és érzékenyebb marker a B12-vitamin hiányra, mint maga a szérum B12 szint, mivel a B12 az MMA metabolizmusának kofaktora."
+                    },
+                    {
+                        question: "Melyik neurológiai betegséggel mutat erős összefüggést az alacsony D-vitamin szint?",
+                        options: ["Guillain-Barré szindróma", "Sclerosis Multiplex (MS)", "Myasthenia gravis", "Huntington-kór"],
+                        answer: 1,
+                        explanation: "Számos vizsgálat igazolta az erős asszociációt az alacsony D-vitamin szint és a Sclerosis Multiplex (MS) kialakulásának kockázata, valamint a betegség aktivitása között."
+                    },
+                    {
+                        question: "Melyik örökletes ataxiát utánozhatja az E-vitamin hiány okozta neurológiai szindróma (AVED)?",
+                        options: ["Spinocerebelláris ataxia 1-es típus", "Friedreich-ataxia", "Epizodikus ataxia", "Dentatorubral-pallidoluysian atrófia (DRPLA)"],
+                        answer: 1,
+                        explanation: "Az Ataxia with Vitamin E Deficiency (AVED) klinikai képe (progresszív ataxia, areflexia, propriocepció vesztés) nagyon hasonlít a Friedreich-ataxiáéhoz, de AVED-ben az E-vitamin szint alacsony."
+                    },
+                    {
+                        question: "Milyen típusú B12-vitamin pótlást igényelnek a neurológiai tünetekkel járó hiányállapotok?",
+                        options: ["Alacsony dózisú orális pótlást", "Intenzív parenterális (injekciós) pótlást", "Csak diétás változtatást", "Folsavval kombinált pótlást"],
+                        answer: 1,
+                        explanation: "Neurológiai érintettség (pl. SCD) esetén intenzív, magas dózisú parenterális (általában intramuszkuláris) B12-vitamin pótlás szükséges a gyors és biztos hatás érdekében."
+                    },
+                    {
+                        question: "Mi a Korsakoff szindróma két fő tünete?",
+                        options: ["Ataxia és nystagmus", "Depresszió és szorongás", "Anterográd/retrográd amnézia és konfabuláció", "Izomgyengeség és spaszticitás"],
+                        answer: 2,
+                        explanation: "A Korsakoff szindróma fő tünetei a súlyos anterográd és retrográd amnézia (emlékezetzavar) és a konfabuláció (emlékezeti hézagok kitöltése valótlan történetekkel)."
+                    },
+                    {
+                        question: "Milyen veleszületett rendellenesség megelőzésében kulcsfontosságú a terhesség előtti és alatti folsavpótlás?",
+                        options: ["Szívfejlődési rendellenességek", "Veleszületett csípőficam", "Velőcső záródási rendellenességek (pl. spina bifida)", "Végtagfejlődési rendellenességek"],
+                        answer: 2,
+                        explanation: "A perikoncepcionális folsavpótlás bizonyítottan csökkenti a velőcső záródási rendellenességek, mint a spina bifida (nyitott gerinc) és az anencephalia kockázatát."
+                    },
+                    {
+                        question: "Milyen mechanizmussal okozhat szerzett E-vitamin hiányt egy felnőttnél?",
+                        options: ["Vegetáriánus étrend", "Túlzott alkoholfogyasztás", "Súlyos, krónikus zsírfelszívódási zavar", "Dohányzás"],
+                        answer: 2,
+                        explanation: "Felnőtteknél a szerzett E-vitamin hiány szinte kizárólag súlyos, krónikus zsírfelszívódási zavarok (malabszorpciós szindrómák, pl. kolesztázis, Crohn-betegség) következtében alakul ki."
+                    },
+                    {
+                        question: "Igaz vagy hamis: A B12-vitamin hiány neurológiai tünetei mindig megelőzik a hematológiai eltéréseket (anaemia).",
+                        options: ["Igaz", "Hamis"],
+                        answer: 1,
+                        explanation: "Hamis. A neurológiai tünetek anaemia (vérszegénység) vagy macrocytosis nélkül is kialakulhatnak, ami diagnosztikai buktató lehet. A két tünetcsoport egymástól függetlenül is megjelenhet."
+                    },
+                    {
+                        question: "Melyik agyi struktúra mutat jellegzetes elváltozást (T2 hiperintenzitás, atrófia) Wernicke encephalopathiában?",
+                        options: ["Hippocampus", "Putamen", "Cerebellum", "Mamilláris testek"],
+                        answer: 3,
+                        explanation: "A mamilláris testek, a mediális thalamusok és a periaqueductalis szürkeállomány a legjellegzetesebben érintett területek Wernicke encephalopathiában, amelyek az MRI-n T2 hiperintenzitást és kontraszthalmozást mutathatnak."
+                    },
+                    {
+                        question: "Milyen típusú neuropathiát okoz jellemzően a B1-vitamin hiánya (Dry Beriberi)?",
+                        options: ["Fokális mononeuropathiát", "Autonóm neuropathiát", "Distalis, szimmetrikus szenzomotoros polyneuropathiát", "Csak motoros neuropathiát"],
+                        answer: 2,
+                        explanation: "A tiaminhiány okozta polyneuropathia (Dry Beriberi) jellemzően egy distalis, szimmetrikus, szenzoros és motoros tünetekkel járó, gyakran fájdalmas idegkárosodás, amely az alsó végtagokon kezdődik."
+                    },
+                    {
+                        question: "Milyen betegség gyanúja merül fel, ha a B12-vitamin hiány hátterében intrinsic faktor ellenes antitesteket (IFAB) mutatnak ki?",
+                        options: ["Crohn-betegség", "Coeliakia", "Perniciózus anaemia", "Atrophiás gastritis"],
+                        answer: 2,
+                        explanation: "A perniciózus anaemia egy autoimmun betegség, amelyben a gyomor parietális sejtjei által termelt intrinsic faktor ellen termelődnek antitestek. Az intrinsic faktor elengedhetetlen a B12-vitamin felszívódásához."
+                    },
+                    {
+                        question: "Melyik állítás igaz a D-vitamin és a neurológiai betegségek kapcsolatáról?",
+                        options: ["A D-vitamin pótlás bizonyítottan gyógyítja a Parkinson-kórt.", "Az ok-okozati összefüggés sok esetben még nem tisztázott, de erős asszociációk léteznek.", "A D-vitamin szintnek nincs köze az agyi funkciókhoz.", "A magas D-vitamin szint véd a stroke ellen."],
+                        answer: 1,
+                        explanation: "Bár erős összefüggéseket írtak le (pl. MS, Parkinson-kór, dementia), az ok-okozati kapcsolat sok esetben még nem bizonyított. A 'tyúk vagy a tojás' kérdése gyakran nyitott."
+                    },
+                    {
+                        question: "Milyen típusú E-vitamin pótlás szükséges AVED (Ataxia with Vitamin E Deficiency) esetén?",
+                        options: ["Alacsony dózisú, rövid ideig", "Élethosszig tartó, nagyon magas dózisú", "Csak injekciós formában", "Nincs szükség pótlásra"],
+                        answer: 1,
+                        explanation: "AVED esetén a genetikai hiba miatt a szervezet nem tudja megfelelően hasznosítani az E-vitamint, ezért élethosszig tartó, nagyon magas dózisú (800-1500 mg/nap) orális pótlás szükséges a progresszió lassítására."
+                    },
+                    {
+                        question: "Melyik vitamin hiánya okozhat görcsrohamokat, különösen antiepileptikumot szedő gyermekeknél?",
+                        options: ["D-vitamin", "E-vitamin", "K-vitamin", "Folsav (B9-vitamin)"],
+                        answer: 3,
+                        explanation: "Bizonyos antiepileptikumok csökkenthetik a folsavszintet. Folsavhiány esetén a görcsküszöb csökkenhet, és a pótlás javíthatja a görcskontrollt, különösen gyermekeknél."
+                    },
+                    {
+                        question: "Milyen dózisú tiamint javasolnak a Wernicke encephalopathia agresszív kezelésére?",
+                        options: ["10 mg per os naponta", "50 mg IM hetente", "100 mg IV naponta", "500 mg IV naponta háromszor"],
+                        answer: 3,
+                        explanation: "Súlyos WE esetén agresszív, magas dózisú parenterális pótlás javasolt, például 500 mg tiamin intravénásan, naponta háromszor, legalább 2-3 napig, a neurológiai károsodás minimalizálása érdekében."
+                    },
+                    {
+                        question: "Melyik állítás igaz a B12-vitamin hiány és a folsavhiány laboratóriumi elkülönítésére?",
+                        options: ["Mindkettőben magas a metilmalonsav (MMA) szint.", "Csak B12-hiányban magas az MMA, folsavhiányban normális.", "Mindkettőben normális az MMA szint.", "Csak folsavhiányban magas az MMA."],
+                        answer: 1,
+                        explanation: "Az emelkedett MMA szint specifikus a B12-vitamin hiányra. A homocisztein mindkét hiányállapotban emelkedett lehet, így az MMA segít a kettő elkülönítésében."
+                    }
+                ]
+            }
+        };
+
+        // --- APPLICATION STATE ---
+        let currentState = {
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            answered: false
+        };
+
+        // --- DOM ELEMENTS ---
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicButtonsContainer = document.getElementById('topic-buttons');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationBox = document.getElementById('explanation-box');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+
+        const scoreText = document.getElementById('score-text');
+        const scoreMessage = document.getElementById('score-message');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const backToTopicsBtn = document.getElementById('back-to-topics-btn');
+
+        // --- FUNCTIONS ---
+
+        function init() {
+            renderTopicSelection();
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            restartQuizBtn.addEventListener('click', () => {
+                startQuiz(currentState.currentTopic);
+            });
+            backToTopicsBtn.addEventListener('click', () => {
+                showScreen('topic-selection');
+            });
+        }
+
+        function showScreen(screenName) {
+            topicSelectionScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            document.getElementById(`${screenName}-screen`).classList.remove('hidden');
+        }
+
+        function renderTopicSelection() {
+            topicButtonsContainer.innerHTML = '';
+            const topics = [
+                { key: 'endocrine', name: 'Belsőelválasztású mirigyek' },
+                { key: 'metabolic', name: 'Metabolikus encephalopathiák' },
+                { key: 'water_salt', name: 'Só- és vízháztartás zavarai' },
+                { key: 'hypoglycemia', name: 'Hipoglikémia következményei' },
+                { key: 'vitamins', name: 'Vitaminhiány szindrómák' }
+            ];
+
+            topics.forEach(topic => {
+                const button = document.createElement('button');
+                button.className = "w-full bg-blue-500 text-white font-semibold py-4 px-6 rounded-xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105";
+                button.textContent = topic.name;
+                button.onclick = () => startQuiz(topic.key);
+                topicButtonsContainer.appendChild(button);
+            });
+        }
+
+        function startQuiz(topicKey) {
+            currentState.currentTopic = topicKey;
+            currentState.currentQuestionIndex = 0;
+            currentState.score = 0;
+            quizTitle.textContent = quizData[topicKey].title;
+            renderQuestion();
+            showScreen('quiz');
+        }
+
+        function renderQuestion() {
+            currentState.answered = false;
+            explanationBox.classList.remove('visible');
+            nextQuestionBtn.classList.add('hidden');
+
+            const topic = quizData[currentState.currentTopic];
+            const question = topic.questions[currentState.currentQuestionIndex];
+            const totalQuestions = topic.questions.length;
+
+            questionCounter.textContent = `${currentState.currentQuestionIndex + 1} / ${totalQuestions}`;
+            progressBar.style.width = `${((currentState.currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+            questionText.textContent = question.question;
+
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = "quiz-option w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:bg-gray-100 hover:border-blue-400 focus:outline-none focus:border-blue-500";
+                button.innerHTML = `<span class="font-bold mr-2">${String.fromCharCode(65 + index)}.</span> ${option}`;
+                button.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (currentState.answered) return;
+            currentState.answered = true;
+
+            const topic = quizData[currentState.currentTopic];
+            const question = topic.questions[currentState.currentQuestionIndex];
+            const options = optionsContainer.children;
+
+            if (selectedIndex === question.answer) {
+                currentState.score++;
+                options[selectedIndex].classList.add('correct');
+            } else {
+                options[selectedIndex].classList.add('incorrect');
+                options[question.answer].classList.add('correct');
+            }
+
+            explanationText.textContent = question.explanation;
+            explanationBox.classList.add('visible');
+            nextQuestionBtn.classList.remove('hidden');
+            
+            // Disable all options after answering
+            for (let option of options) {
+                option.disabled = true;
+                option.classList.remove('hover:bg-gray-100', 'hover:border-blue-400');
+            }
+        }
+
+        function nextQuestion() {
+            const topic = quizData[currentState.currentTopic];
+            if (currentState.currentQuestionIndex < topic.questions.length - 1) {
+                currentState.currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                renderResults();
+            }
+        }
+
+        function renderResults() {
+            const topic = quizData[currentState.currentTopic];
+            const totalQuestions = topic.questions.length;
+            const percentage = Math.round((currentState.score / totalQuestions) * 100);
+
+            scoreText.textContent = `${currentState.score} / ${totalQuestions}`;
+            
+            let message = '';
+            if (percentage === 100) {
+                message = 'Tökéletes eredmény, gratulálok!';
+            } else if (percentage >= 80) {
+                message = 'Kiváló munka!';
+            } else if (percentage >= 60) {
+                message = 'Jó eredmény, de van még hova fejlődni.';
+            } else {
+                message = 'Gyakoroljon még egy kicsit!';
+            }
+            scoreMessage.textContent = message;
+
+            showScreen('results');
+        }
+
+        // --- INITIALIZE APP ---
+        init();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Átfogó Neuroanatómia Teszt: Asszociációs lebenyek és funkciók</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Átfogó Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Occipitalis, Parietalis, Temporalis lebeny és Asszociációs Rendszerek</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- Questions will be dynamically inserted here -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- Detailed results will be dynamically inserted here -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        const fullQuizData = [
+            // ----- TOPIC 1: Occipitalis lebeny -----
+            { question: "Melyik Brodmann-area felel meg az elsődleges látókéregnek (V1)?", answers: { a: "BA 4", b: "BA 17", c: "BA 22", d: "BA 39" }, correctAnswer: "b", explanation: "A Brodmann 17-es area az elsődleges, vagy striatális látókéreg, amely a sulcus calcarinus körül helyezkedik el az occipitalis lebenyben." },
+            { question: "Melyik vizuális pálya felelős a tárgyfelismerésért ('Mi?' pálya)?", answers: { a: "A dorzális pálya", b: "A ventrális pálya", c: "A spinothalamicus pálya", d: "A fasciculus arcuatus" }, correctAnswer: "b", explanation: "A ventrális pálya az occipitalis lebenyből a temporális lebeny felé fut, és a tárgyak alakjának, színének és identitásának feldolgozásáért felelős." },
+            { question: "A mozgásérzékelésért felelős V5/MT terület sérülése milyen zavart okoz?", answers: { a: "Prosopagnosia (arcvakság)", b: "Akinetopsia (mozgásvakság)", c: "Achromatopsia (színvakság)", d: "Alexia (olvasászavar)" }, correctAnswer: "b", explanation: "Az akinetopszia egy ritka állapot, ahol a beteg a mozgó tárgyakat állóképek sorozataként érzékeli. Ezt a V5/MT terület kétoldali károsodása okozza." },
+            { question: "Melyik artéria látja el túlnyomórészt az occipitalis lebenyt?", answers: { a: "Arteria cerebri anterior (ACA)", b: "Arteria cerebri media (MCA)", c: "Arteria cerebri posterior (PCA)", d: "Arteria basilaris" }, correctAnswer: "c", explanation: "Az occipitalis lebeny és a látókéreg nagy részének vérellátását az arteria cerebri posterior (PCA) és annak ágai (pl. ramus calcarinus) biztosítják." },
+            { question: "Mi a 'retinotópia' a V1 látókéregben?", answers: { a: "A színek leképeződése.", b: "A mozgásirányok leképeződése.", c: "A retina pontjainak rendezett, térkép-szerű leképeződése a kéregre.", d: "A hallási és látási információk integrációja." }, correctAnswer: "c", explanation: "A retinotópia azt jelenti, hogy a retina szomszédos pontjai a V1 szomszédos pontjaira vetülnek, megőrizve a vizuális tér térbeli viszonyait." },
+            { question: "Melyik barázda körül helyezkedik el a primer látókéreg (V1)?", answers: { a: "Sulcus centralis", b: "Fissura lateralis", c: "Sulcus parietooccipitalis", d: "Sulcus calcarinus" }, correctAnswer: "d", explanation: "A sulcus calcarinus az occipitalis lebeny mediális felszínén található, és a V1 kéreg a barázda alsó és felső partján helyezkedik el." },
+            { question: "Az apperceptív vizuális agnózia esetén mi a fő probléma?", answers: { a: "A beteg nem látja a tárgyakat.", b: "A beteg nem tudja a látott elemeket egységes egésszé szervezni és lerajzolni.", c: "A beteg felismeri és le tudja rajzolni a tárgyat, de nem tudja megnevezni.", d: "A beteg csak a mozgó tárgyakat nem ismeri fel." }, correctAnswer: "b", explanation: "Apperceptív agnóziában a vizuális percepció alapvető szintje sérül. A beteg látja az éleket és kontúrokat, de nem képes őket koherens tárggyá integrálni." },
+            { question: "A dorzális vizuális pálya ('Hol?') melyik lebenyben végződik?", answers: { a: "Frontális lebeny", b: "Temporális lebeny", c: "Parietális lebeny", d: "Csak az occipitalis lebenyben marad." }, correctAnswer: "c", explanation: "A dorzális pálya az occipitalis lebenyből a parietális lebeny felé szállít téri és mozgásinformációkat a vizuálisan vezérelt cselekvésekhez." },
+            { question: "Mi a 'vaklátás' (blindsight) jelenségének lehetséges anatómiai alapja?", answers: { a: "A sérült V1 látókéreg regenerációja.", b: "A V1-et elkerülő, a colliculus superioron és a pulvinaron keresztül haladó látópályák.", c: "A két agyfélteke közötti kompenzáció a corpus callosumon keresztül.", d: "A beteg csak képzeli, hogy lát." }, correctAnswer: "b", explanation: "Vaklátás esetén, bár a V1 sérülése miatt nincs tudatos látásélmény, a beteg képes reagálni a vizuális ingerekre. Ezt valószínűleg egy ősibb, V1-et kikerülő pálya teszi lehetővé, ami a colliculus superioron és a thalamus pulvinar magján keresztül jut el az asszociációs kérgi területekre." },
+            { question: "Melyik állítás igaz a V4 vizuális területre?", answers: { a: "A mozgásérzékelés központja.", b: "Az elsődleges látókéreg (V1) másik neve.", c: "Fontos szerepet játszik a szín- és formafeldolgozásban.", d: "A parietális lebenyben található." }, correctAnswer: "c", explanation: "A V4 terület a ventrális vizuális pálya része, és kulcsfontosságú a színkonstancia (a szín állandóságának észlelése változó megvilágítás mellett) és a komplexebb formák elemzése szempontjából." },
+            { question: "Kérgi vakság esetén mi a jellemző pupillareakció?", answers: { a: "A pupillák tágak és fénymerevek.", b: "A pupillák fényre adott reakciója általában megtartott.", c: "A pupillák szűkek és fénymerevek.", d: "A pupillareakciók aszimmetrikusak." }, correctAnswer: "b", explanation: "Kérgi vakság esetén a V1 sérül, de a pupillareflex pályája, amely a pretectalis területen keresztül halad az agytörzsben, ép marad. Így a beteg nem lát, de a pupillája reagál a fényre." },
+            { question: "Az occipitalis lebeny irritatív léziója (pl. epilepszia) milyen tünetet okozhat?", answers: { a: "Teljes vakságot", b: "Egyszerű vizuális hallucinációkat (pl. fényfelvillanások, cikk-cakk vonalak)", c: "Hallási hallucinációkat", d: "Bénulást" }, correctAnswer: "b", explanation: "Az occipitalis lebeny kóros ingerülete egyszerű, formázatlan vizuális jelenségeket (fotopszia, teichopszia) provokálhat, ellentétben a temporális lebenyi rohamokkal, amelyek komplexebb hallucinációkkal járhatnak." },
+            { question: "Tiszta alexia (olvasászavar írászavar nélkül) esetén tipikusan hol van a sérülés?", answers: { a: "A jobb oldali Broca-területen", b: "A bal oldali occipitalis lebenyben, ami megakadályozza a vizuális információ eljutását a bal oldali nyelvi területekhez.", c: "A corpus callosumban", d: "Mindkét primer hallókéregben" }, correctAnswer: "b", explanation: "Tiszta alexia esetén a vizuális információ a jobb látókéregből nem tud átjutni a bal oldali nyelvi központokba (pl. gyrus angularis), mert a bal occipitalis lebeny és/vagy a corpus callosum hátsó része sérült." },
+            { question: "A látótér felső fele az elsődleges látókéreg melyik részére vetül?", answers: { a: "A sulcus calcarinus felső partjára", b: "A sulcus calcarinus alsó partjára", c: "A V1 legelülső részére", d: "A V1 legoldalsóbb részére" }, correctAnswer: "b", explanation: "A V1 retinotópiája 'fordított': a látótér felső része a sulcus calcarinus alatti kérgi területre (gyrus lingualis), míg az alsó része a felette lévő területre (cuneus) vetül." },
+            { question: "Melyik állítás HAMIS a 'Mi?' és 'Hol?' vizuális pályákkal kapcsolatban?", answers: { a: "A 'Mi?' pálya a tárgyfelismerésért felelős.", b: "A 'Hol?' pálya a téri lokalizációért és a mozgásért felelős.", c: "Mindkét pálya a primer látókéregből (V1) indul.", d: "A 'Mi?' pálya a parietális lebenybe, a 'Hol?' pálya a temporális lebenybe fut." }, correctAnswer: "d", explanation: "A felosztás fordított: a ventrális ('Mi?') pálya fut a temporális lebenybe, míg a dorzális ('Hol?') pálya fut a parietális lebenybe." },
+            { question: "A mélységészlelés melyik jelén alapul a binokuláris diszparitás?", answers: { a: "A tárgyak takarásán", b: "A mozgásparallaxison", c: "A két szem kissé eltérő nézőpontjából adódó képkülönbségen", d: "A perspektíván" }, correctAnswer: "c", explanation: "A binokuláris diszparitás az a finom különbség, ami a két szem által látott kép között van. Az agy ezt a különbséget használja fel a háromdimenziós mélység észleléséhez." },
+            { question: "A cuneus melyik lebeny része?", answers: { a: "Frontális lebeny", b: "Parietális lebeny", c: "Temporális lebeny", d: "Occipitalis lebeny" }, correctAnswer: "d", explanation: "A cuneus egy ék alakú terület az occipitalis lebeny mediális felszínén, a sulcus parietooccipitalis és a sulcus calcarinus között." },
+            { question: "Melyik Brodmann-area NEM tartozik az extrastriatális (másodlagos, asszociációs) látókéreghez?", answers: { a: "BA 17", b: "BA 18", c: "BA 19", d: "V5/MT" }, correctAnswer: "a", explanation: "A BA 17 a primer látókéreg (V1). A BA 18 és 19, valamint a funkcionális területek, mint a V5/MT, az extrastriatális látókérget alkotják." },
+            { question: "A színkonstancia, azaz a tárgy színének állandóként való észlelése változó megvilágítás mellett, melyik vizuális területhez köthető?", answers: { a: "V1", b: "V2", c: "V4", d: "V5/MT" }, correctAnswer: "c", explanation: "A V4 területnek kiemelt szerepe van a színinformációk feldolgozásában és a színkonstancia fenntartásában, ami lehetővé teszi, hogy egy banánt sárgának lássunk napfényben és egy szobában is." },
+            { question: "A bal oldali homonym hemianopsia a látópálya melyik részének sérülésére utal?", answers: { a: "A bal látóideg", b: "A chiasma opticum", c: "A jobb tractus opticus vagy a jobb oldali látósugárzás/látókéreg", d: "A bal tractus opticus vagy a bal oldali látósugárzás/látókéreg" }, correctAnswer: "c", explanation: "A bal látótérfél információit a jobb agyfélteke dolgozza fel. Ezért a bal oldali homonym hemianopsiát a jobb oldali retrochiasmalis pályák (tractus opticus, radiatio optica, V1) sérülése okozza." },
+            
+            // ----- TOPIC 2: Parietalis lebeny -----
+            { question: "Melyik barázda választja el a frontális és a parietális lebenyt?", answers: { a: "Fissura lateralis", b: "Sulcus centralis", c: "Sulcus parietooccipitalis", d: "Sulcus calcarinus" }, correctAnswer: "b", explanation: "A sulcus centralis (Rolando-árok) a fő határvonal a frontális lebeny (előtte a motoros kéreg) és a parietális lebeny (mögötte a szomatoszenzoros kéreg) között." },
+            { question: "Hol található a primer szomatoszenzoros kéreg (S1)?", answers: { a: "Gyrus precentralis", b: "Gyrus postcentralis", c: "Gyrus temporalis superior", d: "Gyrus angularis" }, correctAnswer: "b", explanation: "A primer szomatoszenzoros kéreg (Brodmann 3, 1, 2) a gyrus postcentralison, közvetlenül a sulcus centralis mögött helyezkedik el a parietális lebenyben." },
+            { question: "A Gerstmann-szindróma (acalculia, agraphia, ujjagnózia, jobb-bal tévesztés) melyik agyterület sérülésére jellemző?", answers: { a: "A domináns oldali gyrus angularis (BA 39)", b: "A nem-domináns oldali gyrus supramarginalis", c: "A primer látókéreg", d: "A prefrontális kéreg" }, correctAnswer: "a", explanation: "A Gerstmann-szindróma egy specifikus tünetegyüttes, amely a domináns (általában bal) inferior parietális lebenyke, különösen a gyrus angularis károsodásakor alakul ki." },
+            { question: "Melyik fehérállományi pálya köti össze a Broca- és Wernicke-területeket, és játszik szerepet a nyelvi ismétlésben?", answers: { a: "Corpus callosum", b: "Fasciculus uncinatus", c: "Fasciculus arcuatus", d: "Cingulum" }, correctAnswer: "c", explanation: "A fasciculus arcuatus (a fasciculus longitudinalis superior része) a beszédértő (Wernicke) és a beszédmotoros (Broca) központok közötti kritikus összeköttetés." },
+            { question: "A 'neglect' szindróma, azaz a térbeli féloldali elhanyagolás, melyik agyfélteke sérülésekor a leggyakoribb és legsúlyosabb?", answers: { a: "A bal (domináns) félteke", b: "A jobb (nem-domináns) félteke", c: "Mindkét félteke sérülésekor egyforma", d: "Csak agytörzsi sérüléseknél fordul elő." }, correctAnswer: "b", explanation: "Bár mindkét félteke sérülése okozhatja, a neglect szindróma sokkal gyakoribb és súlyosabb a jobb (nem-domináns) parietális lebeny károsodása esetén, ami a téri figyelem jobb oldali dominanciájára utal." },
+            { question: "Mi a sztereognózis?", answers: { a: "Kétdimenziós ábrák másolása.", b: "A beszéd érzelmi hangsúlyának felismerése.", c: "Tárgyak tapintás alapján, látás nélkül történő felismerése.", d: "A saját testrészek felismerése." }, correctAnswer: "c", explanation: "A sztereognózis egy komplex szomatoszenzoros asszociációs funkció, amelyhez a primer érzőkéregből származó információk integrálására van szükség a parietális asszociációs kéregben." },
+            { question: "Melyik thalamikus magcsoport a fő szenzoros reléállomás a parietális lebeny szomatoszenzoros kérge felé?", answers: { a: "CGL és CGM", b: "Nuclei anteriores", c: "VPL és VPM", d: "Nucleus mediodorsalis" }, correctAnswer: "c", explanation: "A testből érkező szomatoszenzoros információk a nucleus ventralis posterolateralisban (VPL), míg az arcból érkezők a nucleus ventralis posteromedialisban (VPM) kapcsolódnak át, mielőtt a primer szomatoszenzoros kéregbe jutnának." },
+            { question: "Melyik állítás írja le az optikus ataxiát?", answers: { a: "Olvasási nehézség.", b: "A tárgyak megnevezésének képtelensége.", c: "A vizuálisan vezérelt nyúló és megfogó mozgások zavara.", d: "Járásbizonytalanság csukott szemmel." }, correctAnswer: "c", explanation: "Az optikus ataxia a dorzális vizuális pálya és a parietális lebeny sérülésének tünete, ahol a beteg látja a tárgyat és képes mozgatni a kezét, de a kettőt nem tudja koordinálni, és mellényúl." },
+            { question: "A sulcus intraparietalis mely két fő alegységre osztja a parietális lebenyt?", answers: { a: "Gyrus precentralis és postcentralis", b: "Lobulus parietalis superior és inferior", c: "Gyrus angularis és supramarginalis", d: "Precuneus és cuneus" }, correctAnswer: "b", explanation: "A sulcus intraparietalis a parietális lebeny fő szervező barázdája, amely azt egy felső (superior) és egy alsó (inferior) lebenykére tagolja." },
+            { question: "Melyik Brodmann-area felel meg a primer szomatoszenzoros kéregnek?", answers: { a: "BA 17", b: "BA 41, 42", c: "BA 4", d: "BA 3, 1, 2" }, correctAnswer: "d", explanation: "A Brodmann 3, 1 és 2-es areák együttesen alkotják a primer szomatoszenzoros kérget (S1) a gyrus postcentralison." },
+            { question: "Az 'anomia', azaz a szómegnevezési nehézség, melyik asszociációs terület sérülésekor gyakori tünet?", answers: { a: "A primer motoros kéreg", b: "A domináns oldali parieto-temporális asszociációs kéreg", c: "A prefrontális kéreg", d: "A nem-domináns oldali occipitális lebeny" }, correctAnswer: "b", explanation: "Az anomia az afáziák gyakori komponense, és a Wernicke-területhez, valamint a környező temporális és parietális asszociációs területekhez köthető, amelyek a szavak szemantikai reprezentációját tárolják." },
+            { question: "Melyik funkcióhoz van a legkevesebb köze a parietális lebenynek?", answers: { a: "Téri tájékozódás", b: "Számolás", c: "Primer szaglási információk feldolgozása", d: "Figyelem irányítása" }, correctAnswer: "c", explanation: "A primer szaglókéreg a temporális és frontális lebeny mediális/alsó részén található. A parietális lebeny a szomatoszenzoros, vizuális és hallási információk integrációjában játszik szerepet, de nem a primer szagfeldolgozásban." },
+            { question: "A gyrus supramarginalis (BA 40) a domináns féltekén milyen nyelvi funkcióban játszik fontos szerepet?", answers: { a: "Szemantikai feldolgozás", b: "Fonológiai feldolgozás", c: "A beszéd érzelmi hangsúlyának értelmezése", d: "A beszéd motoros kivitelezése" }, correctAnswer: "b", explanation: "A gyrus supramarginalis kulcsfontosságú a hangok és betűk közötti megfeleltetésben, a szavak hangalakra bontásában, azaz a fonológiai feldolgozásban." },
+            { question: "Mi az aszomatognózia?", answers: { a: "A tárgyak felismerésének zavara.", b: "A saját test vagy testrészek észlelésének, felismerésének zavara.", c: "Az írás képességének elvesztése.", d: "A számolási képesség elvesztése." }, correctAnswer: "b", explanation: "Az aszomatognózia a testséma súlyos zavara, ami gyakran a jobb parietális lebeny sérülésekor alakul ki, és a beteg tagadhatja például a bal oldali végtagjai létezését." },
+            { question: "Melyik fehérállományi pálya NEM tartozik a főbb parietális asszociációs kötegek közé?", answers: { a: "Fasciculus longitudinalis superior", b: "Fasciculus arcuatus", c: "Corpus callosum parietális része", d: "Fasciculus uncinatus" }, correctAnswer: "d", explanation: "A fasciculus uncinatus a frontális és a temporális lebenyt köti össze. A többi felsorolt pálya mind fontos szerepet játszik a parietális lebeny kommunikációjában." },
+            { question: "Az inferior parietális lebenyke melyik két fontos tekervényt foglalja magában?", answers: { a: "Gyrus precentralis és postcentralis", b: "Gyrus cinguli és gyrus parahippocampalis", c: "Gyrus supramarginalis és gyrus angularis", d: "Cuneus és precuneus" }, correctAnswer: "c", explanation: "A lobulus parietalis inferior (LPI) két fő részből áll: a gyrus supramarginalisból és a gyrus angularisból, amelyek a magasabb rendű kognitív funkciókban, mint a nyelv és a számolás, kulcsfontosságúak." },
+            { question: "A parietális operculum milyen érzékszervi modalitás primer kérgi központját tartalmazza?", answers: { a: "Látás", b: "Hallás", c: "Ízlelés", d: "Szaglás" }, correctAnswer: "c", explanation: "A parietális operculum (BA 43) területén található a primer ízlelőkéreg." },
+            { question: "Melyik állítás írja le a parietális lebeny szerepét a 'hogyan' vizuális pályában?", answers: { a: "Meghatározza, hogy egy tárgy 'mi'.", b: "Azonosítja a tárgy érzelmi jelentőségét.", c: "Feldolgozza a vizuális információkat a mozgásos cselekvések (pl. megfogás) irányításához.", d: "Tárolja a tárgyakkal kapcsolatos emlékeket." }, correctAnswer: "c", explanation: "A dorzális vizuális pálya a 'hol?' vagy 'hogyan?' pálya, mert a vizuális információt arra használja fel, hogy meghatározza a tárgy helyzetét és a vele való interakcióhoz szükséges mozgásokat (hogyan fogjam meg, stb.)." },
+            { question: "A konstrukciós apraxia, azaz a rajzolási, építési nehézség, melyik lebeny sérülésére utal leginkább?", answers: { a: "Temporális lebeny", b: "Occipitalis lebeny", c: "Frontális lebeny", d: "Parietális lebeny" }, correctAnswer: "d", explanation: "A konstrukciós apraxia a téri-vizuális információk és a motoros kivitelezés integrációjának zavara, ami a parietális lebeny, különösen a jobb oldali, sérülésének jellegzetes tünete." },
+            { question: "A precuneus mely agyi funkciókkal hozható kapcsolatba?", answers: { a: "Csak az alapvető tapintásérzékeléssel", b: "Epizodikus memória előhívásával, téri-vizuális képzelettel és éntudatossággal", c: "Csak a mozgásindítással", d: "Csak a beszédértéssel" }, correctAnswer: "b", explanation: "A precuneus, a parietális lebeny mediális részén, egy magasabb rendű asszociációs terület, amely a 'default mode network' fontos része, és szerepet játszik az önreflexióban, a memóriában és a tudatosságban." },
+            
+            // ----- TOPIC 3: Temporalis lebeny -----
+            { question: "Melyik agylebenyben található a primer hallókéreg (Heschl-féle haránttekervények)?", answers: { a: "Frontális lebeny", b: "Parietális lebeny", c: "Temporális lebeny", d: "Occipitalis lebeny" }, correctAnswer: "c", explanation: "A primer hallókéreg (BA 41, 42) a gyrus temporalis superior felső felszínén, a Sylvius-árok mélyén helyezkedik el." },
+            { question: "A Wernicke-féle beszédértő központ hol található a legtöbb embernél?", answers: { a: "A domináns (általában bal) temporális lebeny superior gyrusának hátsó részén", b: "A nem-domináns frontális lebenyben", c: "Az occipitalis lebenyben", d: "A kisagyban" }, correctAnswer: "a", explanation: "A Wernicke-terület (BA 22) a domináns félteke temporális lebenyében van, és a beszélt és írott nyelv megértéséért felelős." },
+            { question: "A hippocampus és a környező mediális temporális lebeny (MTL) struktúrák kulcsfontosságúak melyik funkcióban?", answers: { a: "Akaratlagos mozgások indítása", b: "Új deklaratív (epizodikus és szemantikus) emlékek kialakítása", c: "Fájdalomérzékelés", d: "Primer látás" }, correctAnswer: "b", explanation: "Az MTL, beleértve a hippocampust, elengedhetetlen az új tények és események memóriába véséséhez (konszolidációjához). Sérülése anterográd amnéziát okoz." },
+            { question: "Melyik állapotra jellemző a 'lelki vakság' (vizuális agnózia), a hiperoralitás és a placiditás (csökkent félelem)?", answers: { a: "Wernicke-afázia", b: "Gerstmann-szindróma", c: "Klüver-Bucy-szindróma", d: "Balint-szindróma" }, correctAnswer: "c", explanation: "A Klüver-Bucy-szindróma a mediális temporális lebenyek (különösen az amygdala) kétoldali károsodásának következménye, és jellegzetes érzelmi, viselkedésbeli és felismerési zavarokkal jár." },
+            { question: "Melyik struktúra a temporális lebenyben specializálódott az arcfelismerésre (fusiform face area, FFA)?", answers: { a: "Gyrus temporalis superior", b: "Hippocampus", c: "Amygdala", d: "Gyrus fusiformis (occipitotemporalis)" }, correctAnswer: "d", explanation: "Az FFA a gyrus fusiformis egy része, amely a ventrális vizuális pályán található, és kiemelten fontos az arcok, mint komplex vizuális mintázatok feldolgozásában." },
+            { question: "A temporális lebeny epilepszia (TLE) során gyakori aura-jelenség a déjà vu vagy a szaglási hallucináció. Mely struktúrák irritációja okozhatja ezeket?", answers: { a: "A primer motoros kéreg", b: "A látókéreg", c: "A mediális temporális lebeny struktúrái (hippocampus, amygdala, uncus)", d: "A parietális lebeny" }, correctAnswer: "c", explanation: "A TLE rohamok gyakran a mediális temporális lebenyből indulnak. Az itt lévő memória- (hippocampus) és érzelmi/szaglási (amygdala/uncus) központok kóros aktivitása okozhatja a jellegzetes aura tüneteket." },
+            { question: "Mi a Wernicke-afázia legfőbb jellemzője?", answers: { a: "A beteg nem tud beszélni.", b: "A beszéd akadozó, agrammatikus.", c: "A beszéd folyékony (fluens), de értelmetlen (parafáziás), és a beszédértés súlyosan károsodott.", d: "A beteg csak ismételni nem tud." }, correctAnswer: "c", explanation: "Wernicke (szenzoros) afáziában a beszédprodukció mechanikája ép, de a tartalom zavart, és a beteg nem érti a hozzá intézett beszédet, sem a sajátját." },
+            { question: "Az 'amúzia', a zenei képességek zavara, melyik agyterület sérüléséhez köthető leginkább?", answers: { a: "A domináns (bal) temporális lebeny", b: "A nem-domináns (jobb) temporális lebeny", c: "A frontális lebeny", d: "Az occipitalis lebeny" }, correctAnswer: "b", explanation: "A zenei elemek, mint a dallam és a harmónia holisztikus feldolgozása inkább a jobb agyféltekéhez, különösen a jobb gyrus temporalis superiorhoz kötött." },
+            { question: "Mi az entorhinális kéreg (BA 28) fő funkciója?", answers: { a: "A primer hallási feldolgozás.", b: "A félelmi válaszok generálása.", c: "A neokortex és a hippocampus közötti fő kapuként funkcionál a memória konszolidációjában.", d: "Az ízérzékelés." }, correctAnswer: "c", explanation: "Az entorhinális kéreg egy kritikus interfész, amelyen keresztül a feldolgozott szenzoros információ bejut a hippocampusba az emléknyomok kialakításához." },
+            { question: "Melyik fehérállományi pálya köti össze a temporális lebeny elülső részét az orbitofrontális kéreggel, és játszik szerepet az érzelmi memóriában?", answers: { a: "Fasciculus arcuatus", b: "Fasciculus longitudinalis inferior", c: "Fasciculus uncinatus", d: "Cingulum" }, correctAnswer: "c", explanation: "A kampó alakú fasciculus uncinatus köti össze a temporális pólust és az amygdalát az OFC-vel, integrálva az érzelmi és memória-információkat." },
+            { question: "Súlyos, kétoldali mediális temporális lebeny sérülés (mint H.M. esete) után milyen típusú memória marad leginkább ép?", answers: { a: "Epizodikus memória (személyes események)", b: "Szemantikus memória (tények)", c: "Procedurális memória (készségek, pl. biciklizés)", d: "Minden memória funkció kiesik." }, correctAnswer: "c", explanation: "Az MTL sérülése a deklaratív (explicit) memóriát károsítja. A nem-deklaratív, procedurális memória, amely más rendszerekhez (pl. bazális ganglionok, kisagy) kötött, általában megmarad." },
+            { question: "Melyik állítás írja le a tiszta szó-süketséget (verbális auditív agnózia)?", answers: { a: "A beteg nem hall semmit.", b: "A beteg nem érti a non-verbális hangokat, de a beszédet igen.", c: "A beteg nem érti a beszélt szavakat, de a hallása, olvasása és írása ép.", d: "A beteg nem képes beszélni." }, correctAnswer: "c", explanation: "Tiszta szó-süketség esetén a probléma a hallott hangsorok nyelvi feldolgozásának specifikus zavara, ami a primer hallókéreg és a Wernicke-terület közötti kapcsolat megszakadása miatt jön létre." },
+            { question: "A temporális pólus (BA 38) melyik funkcióban játszik szerepet?", answers: { a: "Csak a hallásban", b: "Csak a látásban", c: "A szociális kognícióban, a tudatelméletben (Theory of Mind) és a személyes szemantikus memóriában", d: "Csak a mozgásban" }, correctAnswer: "c", explanation: "A temporális pólus egy magasabb rendű asszociációs terület, amely a személyes ismeretek, a szociális koncepciók és mások mentális állapotainak megértésében játszik szerepet." },
+            { question: "Melyik artéria látja el a temporális lebeny laterális felszínének nagy részét, beleértve a Wernicke-területet?", answers: { a: "A. cerebri anterior (ACA)", b: "A. cerebri media (MCA)", c: "A. cerebri posterior (PCA)", d: "A. vertebralis" }, correctAnswer: "b", explanation: "Az arteria cerebri media (MCA) a legnagyobb agyi artéria, amely a féltekék laterális felszínét, így a temporális lebeny nagy részét is ellátja. Elzáródása gyakran okoz afáziát." },
+            { question: "A hippocampus és az amygdala hol helyezkedik el pontosabban?", answers: { a: "A parietális lebenyben", b: "A frontális lebenyben", c: "A mediális temporális lebenyben", d: "Az occipitális lebenyben" }, correctAnswer: "c", explanation: "Mind a hippocampus (memória), mind az amygdala (érzelmek) a temporális lebeny mélyén, mediális részén található limbikus struktúrák." },
+            { question: "Melyik állítás HAMIS a temporális lebennyel kapcsolatban?", answers: { a: "Részt vesz a hallási információk feldolgozásában.", b: "Itt található a primer motoros kéreg.", c: "Kulcsfontosságú a memória kialakításában.", d: "Sérülése nyelvértési zavart (afáziát) okozhat." }, correctAnswer: "b", explanation: "A primer motoros kéreg a frontális lebenyben, a gyrus precentralison található. A temporális lebenynek nincs primer motoros funkciója." },
+            { question: "Mi az anterográd amnézia?", answers: { a: "A sérülés előtti emlékek elvesztése.", b: "A sérülés utáni új emlékek kialakításának képtelensége.", c: "A procedurális memória elvesztése.", d: "A rövid távú memória teljes hiánya." }, correctAnswer: "b", explanation: "Anterográd amnéziában a beteg képtelen új információkat, eseményeket hosszú távon megjegyezni, bár a rövid távú memóriája és a régi emlékei épek lehetnek. Ez az MTL károsodásának tipikus következménye." },
+            { question: "A fasciculus longitudinalis inferior (ILF) milyen információk átvitelében játszik szerepet?", answers: { a: "A hallási és a nyelvi területek között.", b: "A frontális és a parietális lebeny között.", c: "Az occipitális és a temporális lebeny között, a vizuális tárgyfelismeréshez.", d: "A két hippocampus között." }, correctAnswer: "c", explanation: "Az ILF a ventrális vizuális pálya fontos asszociációs kötege, amely a vizuális információkat az occipitalis lebenyből a tárgyfelismerésért felelős temporális területekre szállítja." },
+            { question: "A gyrus temporalis superior sérülése a domináns féltekén milyen zavart okoz?", answers: { a: "Teljes vakságot", b: "Bénulást a jobb oldalon", c: "Beszédértési zavart (Wernicke-afázia)", d: "Súlyos memóriazavart" }, correctAnswer: "c", explanation: "A domináns oldali gyrus temporalis superior hátsó része tartalmazza a Wernicke-területet, amelynek károsodása a nyelv megértésének súlyos zavarát eredményezi." },
+            { question: "Melyik klinikai tünet NEM jellemző a Klüver-Bucy-szindrómára?", answers: { a: "Hiperoralitás", b: "Érzelmi eltompulás (placiditás)", c: "Spasztikus bénulás", d: "Vizuális agnózia" }, correctAnswer: "c", explanation: "A Klüver-Bucy-szindróma a mediális temporális lebenyek sérüléséhez kötődik, és viselkedési, érzelmi és felismerési zavarokkal jár. A spasztikus bénulás a felső motoneuronok (pl. piramispálya) károsodásának a jele." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Initial quiz setup
+        startNewRound();
+    </script>
+</body>
+</html>

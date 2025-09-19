@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Új Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/80</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Pszichoszomatikus zavarok és depresszió",
+                questions: [
+                    { question: "Mi a funkcionális neurológiai zavar (FND) modern értelmezésének lényege?", options: ["A beteg szándékosan produkálja a tüneteket.", "A tünetek az agy 'szoftverproblémájából' erednek, nem strukturális károsodásból.", "Mindig egy elfojtott pszichológiai konfliktus okozza.", "Kizárólag képalkotó vizsgálatokkal diagnosztizálható."], answer: "A tünetek az agy 'szoftverproblémájából' erednek, nem strukturális károsodásból.", explanation: "Az FND modern koncepciója szerint a probléma az agy működésében, a hálózati kapcsolatok zavarában rejlik, miközben az agy szerkezete (a 'hardver') ép. Ez egy valós, agyi alapú probléma." },
+                    { question: "Melyik állítás igaz a depresszió és az organikus neurológiai betegségek (pl. Parkinson-kór, SM) kapcsolatára?", options: ["A depresszió mindig csak pszichológiai reakció a betegség terhére.", "A két állapotnak nincsenek közös neurobiológiai mechanizmusai.", "A neurológiai betegségek és a depresszió gyakran közös agyi hálózatokat és neurokémiai pályákat érintenek.", "A neurológiai betegségben szenvedőknél ritkább a depresszió."], answer: "A neurológiai betegségek és a depresszió gyakran közös agyi hálózatokat és neurokémiai pályákat érintenek.", explanation: "A kutatások szerint a depresszió és a neurológiai betegségek hátterében gyakran közös mechanizmusok állnak, mint a HPA-tengely diszregulációja, a neuroinflammáció és a neurotranszmitter-zavarok. Így a depresszió a betegség szerves része lehet." },
+                    { question: "Mi a Hoover-jel?", options: ["A pupillák kóros fényreakciója.", "Egy pozitív klinikai jel funkcionális lábgyengeség kimutatására.", "A tremor ritmusának megváltozása.", "A beteg látszólagos közömbössége a tüneteivel szemben."], answer: "Egy pozitív klinikai jel funkcionális lábgyengeség kimutatására.", explanation: "A Hoover-jel során a vizsgáló azt tapasztalja, hogy a beteg 'bénult' lábának csípőfeszítő izmai akaratlanul megfeszülnek, amikor az ép lábát kell emelnie ellenállással szemben, ami az intakt motoros pályákra utal." },
+                    { question: "Melyik pszichometriai skálát fejlesztették ki specifikusan a depresszió szűrésére epilepsziás betegeknél?", options: ["Beck Depresszió Kérdőív (BDI)", "Geriatriai Depresszió Skála (GDS)", "Neurológiai Zavarok Depresszió Kérdőív Epilepsziában (NDDI-E)", "Kórházi Szorongás és Depresszió Skála (HADS)"], answer: "Neurológiai Zavarok Depresszió Kérdőív Epilepsziában (NDDI-E)", explanation: "Az NDDI-E egy rövid, 6 tételből álló, önkitöltős kérdőív, amelyet kifejezetten az epilepsziával élő felnőttek depressziójának és öngyilkossági kockázatának szűrésére terveztek." },
+                    { question: "Mi a pszichogén nem-epilepsziás rohamok (PNES) diagnózisának arany standardja?", options: ["Koponya MRI", "Szérum prolaktin szint mérése", "Video-EEG monitorozás", "A beteg beszámolója"], answer: "Video-EEG monitorozás", explanation: "A video-EEG egyidejűleg rögzíti a beteg viselkedését (videó) és az agy elektromos aktivitását (EEG). PNES esetén a roham alatt az EEG nem mutat epilepsziára jellemző kóros elektromos aktivitást, ami segít az elkülönítésben." },
+                    { question: "Melyik terápia a leghatékonyabb a funkcionális neurológiai zavar (FND) kezelésében?", options: ["Kizárólag gyógyszeres kezelés.", "Multidiszciplináris rehabilitáció, amely fizikoterápiát és pszichoterápiát (CBT) is magában foglal.", "Sebészeti beavatkozás.", "Hosszú távú ágynyugalom."], answer: "Multidiszciplináris rehabilitáció, amely fizikoterápiát és pszichoterápiát (CBT) is magában foglal.", explanation: "Az FND kezelésének alapja az 'agy átképzése'. A célzott fizikoterápia segít a normális mozgásminták helyreállításában, a kognitív viselkedésterápia (CBT) pedig a tünetekhez kapcsolódó maladaptív gondolatok és viselkedések kezelésében." },
+                    { question: "Miért nehéz diagnosztizálni a depressziót sclerosis multiplexben (MS)?", options: ["Mert az MS-betegek soha nem depressziósak.", "Mert a depresszió tünetei (fáradtság, kognitív zavarok) jelentősen átfednek az MS tüneteivel.", "Mert nincsenek megfelelő diagnosztikai skálák.", "Mert az antidepresszánsok hatástalanok MS-ben."], answer: "Mert a depresszió tünetei (fáradtság, kognitív zavarok) jelentősen átfednek az MS tüneteivel.", explanation: "A tüneti átfedés (ún. maszkoló hatás) miatt nehéz elkülöníteni, hogy egy tünet (pl. fáradtság) a depresszió vagy magának az MS-nek a következménye. Ezért fontos a specifikus affektív tünetekre (pl. anhedónia, bűntudat) fókuszálni." },
+                    { question: "Melyik állítás igaz a stroke utáni depresszióra (PSD)?", options: ["Ritka szövődmény.", "Nincs hatással a felépülésre.", "Jelentősen rontja a funkcionális kimenetelt és növeli a mortalitást.", "Mindig a stroke után évekkel jelentkezik."], answer: "Jelentősen rontja a funkcionális kimenetelt és növeli a mortalitást.", explanation: "A PSD a stroke egyik leggyakoribb és legsúlyosabb neuropszichiátriai következménye, amely negatívan befolyásolja a rehabilitációban való részvételt, a gyógyszerszedési hajlandóságot és a hosszú távú túlélést." },
+                    { question: "Milyen agyi tengely diszregulációja játszik központi szerepet a stresszre adott válaszban és a depresszió patofiziológiájában?", options: ["Bél-agy tengely", "Hipotalamusz-hipofízis-mellékvese (HPA) tengely", "Vizuális pálya", "Piramispálya"], answer: "Hipotalamusz-hipofízis-mellékvese (HPA) tengely", explanation: "A HPA-tengely a szervezet fő stresszválasz-rendszere. Krónikus aktivációja és a kortizolszint tartós emelkedése, ami a depresszióban és számos neurológiai betegségben megfigyelhető, hozzájárul az idegsejt-károsodáshoz." },
+                    { question: "Miért fontos a 'pozitív klinikai jelekre' alapozni az FND diagnózisát?", options: ["Mert a képalkotó vizsgálatok mindig kórosak.", "Mert ez megerősíti, hogy a tünetek szándékosak.", "Mert objektív bizonyítékot szolgáltat a funkcionális zavarra, és segít elkerülni a téves 'kizárásos' diagnózist.", "Mert a betegek ezt elvárják."], answer: "Mert objektív bizonyítékot szolgáltat a funkcionális zavarra, és segít elkerülni a téves 'kizárásos' diagnózist.", explanation: "A pozitív jelek (pl. Hoover-jel) a tünetek és az ismert neurológiai működés közötti inkompatibilitást mutatják. Ez egy 'rule-in' diagnosztikai stratégia, ami sokkal megbízhatóbb, mint csupán arra hagyatkozni, hogy a tesztek 'normálisak'." },
+                    { question: "Milyen típusú rohamokra jellemző a csukott szem, az aszinkron végtagmozgások és a hosszú időtartam?", options: ["Tónusos-klónusos epilepsziás roham", "Abszencia roham", "Pszichogén nem-epilepsziás roham (PNES)", "Fokális tudatzavarral járó roham"], answer: "Pszichogén nem-epilepsziás roham (PNES)", explanation: "Ezek a klinikai jellemzők atípusosak az epilepsziás rohamokra nézve, és erősen felvetik a PNES gyanúját, ami az FND egyik megnyilvánulási formája." },
+                    { question: "Melyik neurotranszmitter-rendszer diszfunkciója áll leggyakrabban a depresszió hátterében?", options: ["Acetilkolin", "GABA", "Glutamát", "Szerotonin és noradrenalin"], answer: "Szerotonin és noradrenalin", explanation: "A monoamin hipotézis szerint a depresszió hátterében a szerotonerg és noradrenerg rendszerek csökkent aktivitása áll. A legtöbb antidepresszáns ezeknek a neurotranszmittereknek a szintjét növeli a szinaptikus résben." },
+                    { question: "Milyen prognózisa van általában a kezeletlen FND-nek?", options: ["Mindig spontán gyógyul.", "Általában kedvezőtlen, a tünetek a betegek többségénél fennmaradnak vagy romlanak.", "A tünetek idővel mindig enyhülnek.", "A prognózis mindig kiváló."], answer: "Általában kedvezőtlen, a tünetek a betegek többségénél fennmaradnak vagy romlanak.", explanation: "Bár a felépülés lehetséges, a vizsgálatok azt mutatják, hogy megfelelő, célzott kezelés nélkül az FND-s betegek többségének tünetei krónikussá válnak, ami jelentős funkcionális károsodáshoz vezet." },
+                    { question: "Melyik állítás igaz az FND és az organikus neurológiai betegségek kapcsolatára?", options: ["A kettő soha nem fordulhat elő egyszerre.", "Az FND mindig egy organikus betegség korai jele.", "Az FND gyakran együtt járhat organikus neurológiai betegségekkel, vagy azok kiválthatják.", "Ha egy betegnek organikus betegsége van, nem lehet FND-je."], answer: "Az FND gyakran együtt járhat organikus neurológiai betegségekkel, vagy azok kiválthatják.", explanation: "Gyakori, hogy egy organikus betegség (pl. stroke, SM) 'triggerként' szolgál az FND tüneteinek megjelenéséhez, vagy a két állapot egymás mellett, komorbiditásként létezik." },
+                    { question: "Mi a 'tremor entrainment' teszt?", options: ["A tremor gyógyszeres kezelése.", "A tremor sebességének mérése.", "Egy diagnosztikai manőver, ahol a funkcionális tremor ritmusa megváltozik, ha a beteg a másik kezével egy másik ritmust követ.", "A tremor sebészeti kezelése."], answer: "Egy diagnosztikai manőver, ahol a funkcionális tremor ritmusa megváltozik, ha a beteg a másik kezével egy másik ritmust követ.", explanation: "Ez egy pozitív klinikai jel funkcionális tremor esetén. Az organikus tremorok ritmusa általában állandó és nem befolyásolja a figyelemelterelés, ellentétben a funkcionális tremorral." },
+                    { question: "Milyen szerepe van a bél-agy tengelynek a pszichoszomatikus zavarokban?", options: ["Nincs szerepe.", "A bélmikrobióta befolyásolja a hangulatot és a stresszválaszt, hozzájárulva a tünetek kialakulásához.", "Csak az emésztési tünetekért felelős.", "A bélbaktériumok közvetlenül az agyban okoznak gyulladást."], answer: "A bélmikrobióta befolyásolja a hangulatot és a stresszválaszt, hozzájárulva a tünetek kialakulásához.", explanation: "A bél-agy tengely egy kétirányú kommunikációs rendszer. A bélbaktériumok által termelt anyagok (pl. neurotranszmitterek) és a gyulladásos jelek befolyásolhatják az agyi funkciókat és a hangulatot, ami szerepet játszik a pszichoszomatikus tünetek patofiziológiájában." },
+                    { question: "Melyik állítás NEM igaz a pszichoszomatikus zavarokra?", options: ["A tünetek valósak és szenvedést okoznak.", "A pszichológiai tényezők szerepet játszanak a kialakulásukban.", "Mindig egyértelműen kimutatható szervi elváltozás áll a háttérben.", "A kezelésük gyakran multidiszciplináris megközelítést igényel."], answer: "Mindig egyértelműen kimutatható szervi elváltozás áll a háttérben.", explanation: "A pszichoszomatikus (és különösen a funkcionális) zavarok lényege, hogy a tünetek mögött nincs a hagyományos orvosi vizsgálatokkal (pl. képalkotó, labor) kimutatható strukturális vagy szervi elváltozás." },
+                    { question: "Miért fontos a depresszió szűrése a neurológiai betegeknél?", options: ["Mert az antidepresszánsok minden neurológiai betegséget gyógyítanak.", "Mert a kezeletlen depresszió rontja az életminőséget, a terápiás együttműködést és a prognózist.", "Mert a neurológusok feladata a pszichiátriai betegségek kezelése.", "Csak tudományos kutatásokhoz szükséges."], answer: "Mert a kezeletlen depresszió rontja az életminőséget, a terápiás együttműködést és a prognózist.", explanation: "A depresszió súlyosbítja a neurológiai betegség terhét, rontja a kognitív funkciókat, csökkenti a rehabilitációban való részvételt és növeli a mortalitást. A proaktív szűrés és kezelés elengedhetetlen a holisztikus betegellátáshoz." },
+                    { question: "Melyik a legfontosabb első lépés az FND kezelésében?", options: ["Azonnali gyógyszeres terápia.", "A diagnózis egyértelmű és empatikus közlése a beteggel.", "A beteg elküldése pszichiáterhez.", "Hosszú távú megfigyelés."], answer: "A diagnózis egyértelmű és empatikus közlése a beteggel.", explanation: "A kezelés sikere nagyban függ a beteg és az orvos közötti bizalmi kapcsolattól. A diagnózis megértése, a tünetek valóságának elismerése és a kezelési lehetőségek felvázolása az első és legfontosabb lépés a gyógyulás felé." },
+                    { question: "Mi a 'diagnosztikai árnyékolás' (diagnostic overshadowing) jelensége?", options: ["A képalkotó vizsgálatokon látható árnyék.", "Amikor egy meglévő diagnózis (pl. FND) miatt az új tüneteket is automatikusan annak tulajdonítják, késleltetve egy új organikus betegség felismerését.", "A beteg eltitkolja a tüneteit.", "A diagnózis túl gyors felállítása."], answer: "Amikor egy meglévő diagnózis (pl. FND) miatt az új tüneteket is automatikusan annak tulajdonítják, késleltetve egy új organikus betegség felismerését.", explanation: "Ez egy gyakori kognitív torzítás az orvosi gyakorlatban, ahol egy meglévő (gyakran pszichiátriai vagy funkcionális) diagnózis 'beárnyékolja' az új panaszok objektív értékelését, ami téves vagy késleltetett diagnózishoz vezethet." }
+                ]
+            },
+            {
+                topic: "Organikus pszichoszindrómák és konverziós kórképek",
+                questions: [
+                    { question: "Mi a fő különbség az organikus (neurokognitív) és a funkcionális neurológiai zavarok között?", options: ["Az organikus zavarok mindig visszafordíthatók, a funkcionálisak soha.", "Az organikus zavarok hátterében bizonyítható agyi patológia áll, míg a funkcionális zavaroknál az agy működési zavara a probléma.", "A funkcionális zavarok tünetei szándékosak.", "Az organikus zavarok csak időseket, a funkcionálisak csak fiatalokat érintenek."], answer: "Az organikus zavarok hátterében bizonyítható agyi patológia áll, míg a funkcionális zavaroknál az agy működési zavara a probléma.", explanation: "Az organikus (neurokognitív) zavarokat mérhető strukturális vagy fiziológiai elváltozás okozza, míg a funkcionális zavarok (FNTZ) esetén a tünetek az agyi hálózatok diszfunkciójából erednek, ép 'hardver' mellett." },
+                    { question: "Melyik állítás igaz a delíriumra?", options: ["Egy krónikus, lassan progrediáló állapot.", "Akut kezdetű, fluktuáló figyelem- és tudatzavar, amely gyakran visszafordítható.", "Kizárólag pszichiátriai betegség.", "A demencia egy enyhe formája."], answer: "Akut kezdetű, fluktuáló figyelem- és tudatzavar, amely gyakran visszafordítható.", explanation: "A delírium egy orvosi vészhelyzet, amelyet a figyelem és a tudatállapot hirtelen (órák-napok alatti) megváltozása és ingadozása jellemez, és mindig egy alapul szolgáló orvosi ok (pl. fertőzés, gyógyszer) váltja ki." },
+                    { question: "Mi a demencia (súlyos neurokognitív zavar) és az enyhe neurokognitív zavar (MCI) közötti legfontosabb különbség?", options: ["Az MCI-ben nincs memóriazavar.", "A demencia mindig gyorsan progrediál, az MCI soha.", "A demencia jelentősen befolyásolja a mindennapi önállóságot, míg az MCI nem.", "Az MCI csak fiatal korban fordul elő."], answer: "A demencia jelentősen befolyásolja a mindennapi önállóságot, míg az MCI nem.", explanation: "A kulcsfontosságú különbség a funkcionális károsodás mértéke. Míg mindkettő kognitív hanyatlást jelent, a demencia diagnózisához a deficitnek olyan súlyosnak kell lennie, hogy a beteg már nem képes önállóan ellátni a mindennapi tevékenységeit." },
+                    { question: "Melyik képalkotó vizsgálat a legalkalmasabb egy akut delíriumos betegnél a strukturális agyi okok (pl. vérzés, stroke) gyors kizárására?", options: ["Koponya MRI", "Natív koponya CT", "PET-CT", "SPECT"], answer: "Natív koponya CT", explanation: "A CT gyors, széles körben elérhető, és hatékonyan kimutatja az akut, életveszélyes strukturális elváltozásokat, ezért ez az elsődlegesen választandó vizsgálat a delírium kivizsgálásakor." },
+                    { question: "Melyik a legfontosabb lépés a funkcionális neurológiai tüneti zavar (FNTZ) diagnózisában?", options: ["A beteg elküldése pszichológushoz.", "A 'normális' teszteredményekre való támaszkodás.", "A pozitív klinikai jelek (pl. Hoover-jel) azonosítása, amelyek a tünetek funkcionális eredetére utalnak.", "A beteg meggyőzése arról, hogy a tünetei 'csak a fejében' vannak."], answer: "A pozitív klinikai jelek (pl. Hoover-jel) azonosítása, amelyek a tünetek funkcionális eredetére utalnak.", explanation: "Az FNTZ diagnózisa ma már nem kizárásos alapon, hanem a tünetek és az ismert neurológiai működés közötti inkompatibilitást bizonyító pozitív jelek alapján történik." },
+                    { question: "Melyik állítás igaz a pszichogén nem-epilepsziás rohamokra (PNES)?", options: ["Az EEG a roham alatt mindig kóros elektromos aktivitást mutat.", "A betegek szándékosan produkálják a rohamokat.", "A rohamok alatt a szemek jellemzően nyitva vannak.", "A video-EEG a diagnózis aranystandardja, és a roham alatt normális agyi aktivitást mutat."], answer: "A video-EEG a diagnózis aranystandardja, és a roham alatt normális agyi aktivitást mutat.", explanation: "A video-EEG segít elkülöníteni a PNES-t az epilepsziától. Míg a klinikai kép hasonló lehet, PNES alatt az agy elektromos aktivitása nem mutatja az epilepsziára jellemző kóros kisüléseket." },
+                    { question: "Mi a Wernicke-Korsakoff szindróma?", options: ["Az Alzheimer-kór egy variánsa.", "Krónikus alkoholizmus és tiamin (B1-vitamin) hiány okozta súlyos amnesztikus és kognitív zavar.", "Egy örökletes demencia forma.", "A frontotemporális demencia egy altípusa."], answer: "Krónikus alkoholizmus és tiamin (B1-vitamin) hiány okozta súlyos amnesztikus és kognitív zavar.", explanation: "Ez egy kétfázisú neurológiai kórkép: az akut Wernicke-encephalopathia (zavartság, ataxia, szemmozgászavar) kezeletlenül a krónikus Korsakoff-szindrómába megy át, amelyet súlyos anterográd amnézia és konfabuláció jellemez." },
+                    { question: "Melyik állítás jellemző a funkcionális tremorra?", options: ["A tremor frekvenciája mindig állandó.", "Figyelemelterelésre a tremor súlyosbodik.", "A tremor ritmusa megváltozik vagy megszűnik, ha a beteg a másik végtagjával egy másik ritmust követ (entrainment).", "Mindig nyugalomban jelentkezik."], answer: "A tremor ritmusa megváltozik vagy megszűnik, ha a beteg a másik végtagjával egy másik ritmust követ (entrainment).", explanation: "A funkcionális tremor egyik pozitív klinikai jele a változékonyság és a figyelemelterelésre való reagálás. Az organikus tremorok (pl. Parkinson-kór) ritmusa általában állandó és nem befolyásolható ilyen módon." },
+                    { question: "Melyik a leggyakoribb oka a delíriumnak kórházban fekvő idős betegeknél?", options: ["Agydaganat", "Stroke", "Fertőzés (pl. húgyúti, tüdőgyulladás)", "Fejsérülés"], answer: "Fertőzés (pl. húgyúti, tüdőgyulladás)", explanation: "Idős, legyengült szervezetű betegeknél egy szisztémás fertőzés gyakran okoz akut zavartságot, azaz delíriumot, még akkor is, ha a fertőzés nem közvetlenül az idegrendszert érinti." },
+                    { question: "Miért fontos a neurokognitív zavarok és az FNTZ elkülönítése?", options: ["Mert a kezelésük teljesen megegyezik.", "Mert az FNTZ prognózisa mindig jobb.", "Mert a kezelési stratégiáik alapvetően eltérőek.", "Nincs klinikai jelentősége a különbségtételnek."], answer: "Mert a kezelési stratégiáik alapvetően eltérőek.", explanation: "Az organikus zavarok kezelése az alapbetegség (pl. fertőzés, vitaminhiány) kezelésére vagy a neurodegeneratív folyamat lassítására irányul. Az FNTZ kezelése ezzel szemben a rehabilitációra (fiziko-, pszichoterápia) fókuszál. A téves diagnózis hatástalan vagy káros kezeléshez vezethet." },
+                    { question: "Milyen kognitív területet mér az MMSE (Mini-Mental State Examination)?", options: ["Csak a memóriát.", "Főként az orientációt, a memóriát és a nyelvi funkciókat.", "Kizárólag a végrehajtó funkciókat.", "A szociális kogníciót."], answer: "Főként az orientációt, a memóriát és a nyelvi funkciókat.", explanation: "Az MMSE egy rövid szűrőteszt, amely az orientációra, a megjegyző és felidéző emlékezetre, a figyelemre, a számolásra és az alapvető nyelvi képességekre fókuszál." },
+                    { question: "Milyen típusú neurokognitív zavarra utal a lépcsőzetes hanyatlás?", options: ["Alzheimer-kór", "Frontotemporális demencia", "Lewy-testes demencia", "Vaszkuláris demencia"], answer: "Vaszkuláris demencia", explanation: "A lépcsőzetes progresszió, ahol a kognitív állapot egy-egy újabb stroke után hirtelen romlik, majd egy ideig stabil marad, a vaszkuláris demencia jellegzetes, bár nem kizárólagos lefolyása." },
+                    { question: "Mi a 'la belle indifférence'?", options: ["A beteg túlzott aggodalma a tünetei miatt.", "A beteg látszólagos érzelmi közömbössége a súlyos tüneteivel szemben.", "A beteg agresszív viselkedése.", "A beteg depressziós hangulata."], answer: "A beteg látszólagos érzelmi közömbössége a súlyos tüneteivel szemben.", explanation: "Ez egy klasszikus, de ma már nem diagnosztikai kritériumnak számító jel, amelyet a konverziós zavarral hoztak összefüggésbe. A beteg nem mutatja a tünetei súlyosságának megfelelő érzelmi reakciót." },
+                    { question: "Melyik állítás igaz a funkcionális kognitív zavarra (FCD)?", options: ["Mindig demenciába progrediál.", "Az FNTZ egy altípusa, ahol a fő panaszok a kognitív funkciókat (memória, koncentráció) érintik.", "Ugyanaz, mint az enyhe neurokognitív zavar (MCI).", "Kizárólag fejsérülés után alakul ki."], answer: "Az FNTZ egy altípusa, ahol a fő panaszok a kognitív funkciókat (memória, koncentráció) érintik.", explanation: "Az FCD-ben a betegek szubjektív kognitív panaszokat élnek meg (pl. 'agy köd'), amelyek a neuropszichológiai teszteken inkonzisztens vagy a panaszok mértékével nem arányos teljesítményt mutatnak, és a háttérben nincs progresszív neurodegeneratív betegség." },
+                    { question: "Mi a legfontosabb teendő, ha egy idős betegnél akut zavartság (delírium) lép fel?", options: ["Azonnal pszichiáterhez küldeni.", "Nyugtatókat adni és megfigyelni.", "Alapos kivizsgálást indítani a háttérben álló, potenciálisan kezelhető orvosi ok (pl. fertőzés, elektrolitzavar) felderítésére.", "Demencia diagnózisát felállítani."], answer: "Alapos kivizsgálást indítani a háttérben álló, potenciálisan kezelhető orvosi ok (pl. fertőzés, elektrolitzavar) felderítésére.", explanation: "A delírium mindig egy szomatikus betegség vagy intoxikáció következménye. Az alapbetegség azonosítása és kezelése elengedhetetlen, mivel a delírium egy orvosi vészhelyzet, és kezeletlenül súlyos szövődményekhez vezethet." },
+                    { question: "Melyik állítás NEM igaz a neurokognitív zavarok diagnózisára?", options: ["A heteroanamnézis kulcsfontosságú.", "A kivizsgálás célja a reverzibilis okok kizárása.", "A diagnózis mindig egyetlen képalkotó vizsgálaton alapul.", "A neuropszichológiai tesztelés segít a kognitív profil felmérésében."], answer: "A diagnózis mindig egyetlen képalkotó vizsgálaton alapul.", explanation: "A diagnózis egy komplex, multimodális folyamat, amely az anamnézis, a klinikai vizsgálat, a laboratóriumi tesztek, a képalkotás és a neuropszichológiai értékelés eredményeinek integrálásán alapul." },
+                    { question: "Milyen típusú memóriazavar jellemző a Korsakoff-szindrómára?", options: ["Csak a régi emlékek elvesztése.", "Súlyos anterográd amnézia (új emlékek képzésének képtelensége) és konfabuláció.", "A procedurális memória zavara.", "A rövid távú munkamemória izolált károsodása."], answer: "Súlyos anterográd amnézia (új emlékek képzésének képtelensége) és konfabuláció.", explanation: "A Korsakoff-szindrómát a diencephalon (különösen a mammilláris testek) károsodása okozza, ami súlyos és tartós anterográd amnéziához vezet. A betegek a hiányzó emlékeket gyakran kitalált történetekkel (konfabuláció) pótolják." },
+                    { question: "Melyik tünetegyüttesben van a legnagyobb szerepe a pszichoterápiának?", options: ["Alzheimer-kór", "Vaszkuláris demencia", "Funkcionális neurológiai tüneti zavar", "Delírium"], answer: "Funkcionális neurológiai tüneti zavar", explanation: "Mivel az FNTZ kialakulásában és fenntartásában a pszichológiai tényezők (stressz, trauma, maladaptív megküzdés) gyakran fontos szerepet játszanak, a pszichoterápia, különösen a CBT, a kezelés egyik sarokköve." },
+                    { question: "Mi a 'give-way' gyengeség?", options: ["Az izomerő fokozatos csökkenése.", "A funkcionális gyengeség egy formája, ahol az izomerő hirtelen, akaratlanul 'megadja magát' az ellenállással szembeni teszteléskor.", "A spaszticitás egy típusa.", "A fáradékonyság jele."], answer: "A funkcionális gyengeség egy formája, ahol az izomerő hirtelen, akaratlanul 'megadja magát' az ellenállással szembeni teszteléskor.", explanation: "Ez a jelenség az FNTZ egyik pozitív klinikai jele. Az organikus gyengeséggel ellentétben, ahol az erőkifejtés egyenletes, itt a beteg hirtelen abbahagyja az ellenállást, ami a motoros kontroll funkcionális zavarára utal." },
+                    { question: "Melyik állítás írja le legjobban a neurokognitív zavarok és az FNTZ közötti differenciáldiagnózis lényegét?", options: ["A neurokognitív zavarok mindig súlyosabbak.", "Az FNTZ csak nőket érint.", "A diagnózis a tünetek mintázatának és konzisztenciájának, valamint a pozitív organikus vagy funkcionális jeleknek a gondos elemzésén alapul.", "Ha a betegnek pszichiátriai betegsége van, akkor biztosan FNTZ-ről van szó."], answer: "A diagnózis a tünetek mintázatának és konzisztenciájának, valamint a pozitív organikus vagy funkcionális jeleknek a gondos elemzésén alapul.", explanation: "A pontos elkülönítés nem egyetlen tényezőn múlik, hanem egy komplex értékelési folyamaton, amely figyelembe veszi a tünetek jellegét, a vizsgálati leletek konzisztenciáját és a specifikus, organikus vagy funkcionális kórképre utaló pozitív jeleket." }
+                ]
+            },
+            {
+                topic: "Neurológiai intenzív osztályos monitorozás és agyhalál",
+                questions: [
+                    { question: "Mi a neurokritikus ellátás elsődleges célja?", options: ["A primer agysérülés visszafordítása.", "A másodlagos agyi sérülések megelőzése és a betegkimenetel optimalizálása.", "Kizárólag a koponyaűri nyomás csökkentése.", "A betegek hosszú távú rehabilitációja."], answer: "A másodlagos agyi sérülések megelőzése és a betegkimenetel optimalizálása.", explanation: "A primer agysérülés a trauma pillanatában bekövetkező, irreverzibilis károsodás. A neuro-ITO fókuszában a másodlagos, potenciálisan megelőzhető károsodási folyamatok (pl. hypoxia, ischaemia, ödéma) minimalizálása áll." },
+                    { question: "Melyik a 'gold standard' módszer az intrakraniális nyomás (ICP) monitorozására és terápiás liquorlecsapolásra?", options: ["Parenchymális szonda", "Subarachnoidealis csavar", "Epiduralis szonda", "Külső kamrai drain (EVD)"], answer: "Külső kamrai drain (EVD)", explanation: "Az EVD az egyetlen olyan ICP monitorozási módszer, amely nemcsak méri a nyomást, hanem lehetővé teszi a felesleges agy-gerincvelői folyadék (CSF) terápiás célú lecsapolását is, így aktívan csökkentve az ICP-t." },
+                    { question: "Mi a normál ICP tartomány egy fekvő felnőttnél?", options: ["< 25 Hgmm", "7-15 Hgmm", "25-35 Hgmm", "Mindig 0 Hgmm"], answer: "7-15 Hgmm", explanation: "Egészséges, fekvő felnőttben a normál koponyaűri nyomás 7 és 15 Hgmm között van. A 20-22 Hgmm feletti tartós nyomásfokozódás általában kezelést igényel." },
+                    { question: "Mit jelez az ICP hullámformán, ha a P2 komponens magasabb, mint a P1?", options: ["Normális agyi compliance-t.", "Csökkent agyi compliance-t és emelkedett ICP-t.", "Agyi véráramlás csökkenését.", "Az agyhalál beálltát."], answer: "Csökkent agyi compliance-t és emelkedett ICP-t.", explanation: "Normálisan a P1 (artériás pulzációs hullám) a legmagasabb. Ha a P2 (tidal wave) válik a dominánssá, az azt jelzi, hogy az agy kompenzációs kapacitása kimerült, a compliance csökkent, és már kis térfogat-növekedés is jelentős nyomásfokozódást okoz." },
+                    { question: "Mi a cerebrális perfúziós nyomás (CPP) és mi az ajánlott célértéke súlyos TBI esetén?", options: ["CPP = ICP - MAP; cél: >80 Hgmm", "CPP = MAP - ICP; cél: 60-70 Hgmm", "CPP = MAP + ICP; cél: >100 Hgmm", "CPP = SBP - DBP; cél: 40-50 Hgmm"], answer: "CPP = MAP - ICP; cél: 60-70 Hgmm", explanation: "A CPP az a nyomásgradiens, ami az agyi véráramlást hajtja. A közép artériás nyomás (MAP) és a koponyaűri nyomás (ICP) különbségeként számolják. A 60-70 Hgmm közötti célérték biztosítja a megfelelő agyi perfúziót a szekunder ischaemiás károsodás elkerülésére." },
+                    { question: "Milyen célt szolgál az agyszöveti oxigénnyomás (PbtO2) monitorozása?", options: ["A koponyaűri nyomás mérését.", "Az agyi elektromos aktivitás követését.", "A helyi, sérült agyszövet oxigénellátásának direkt mérését.", "Az agyi véráramlás sebességének mérését."], answer: "A helyi, sérült agyszövet oxigénellátásának direkt mérését.", explanation: "A PbtO2 monitor egy invazív szonda, amely közvetlenül az agyszövetben méri a parciális oxigénnyomást, így valós idejű információt ad a regionális agyi oxigenizációról és a hipoxia kockázatáról." },
+                    { question: "Mi a cerebrális mikrodialízis (CMD) legfontosabb biomarkere?", options: ["Glükóz", "Glutamát", "Glicerin", "Laktát/Piruvát arány (LPR)"], answer: "Laktát/Piruvát arány (LPR)", explanation: "Az LPR az agyi anyagcsere állapotának legfontosabb mutatója. Az emelkedett LPR az anaerob metabolizmusra utal, ami lehet ischaemia (alacsony piruvát) vagy mitokondriális diszfunkció (normál/magas piruvát) következménye." },
+                    { question: "Milyen neurológiai állapot kimutatására szolgál elsődlegesen a folyamatos EEG (cEEG) a neuro-ITO-n?", options: ["Agyödéma", "Non-konvulzív görcsrohamok", "Agyi vérzés", "Agyhalál"], answer: "Non-konvulzív görcsrohamok", explanation: "A cEEG lehetővé teszi a szubklinikai, azaz külső motoros jelek nélküli (non-konvulzív) görcsrohamok és status epilepticus detektálását, ami a kómás betegek jelentős részénél előfordul és súlyosbítja az agykárosodást." },
+                    { question: "Mi az agyhalál definíciója?", options: ["A szívműködés leállása.", "Az agykéreg funkcióinak elvesztése.", "Az agy – beleértve az agytörzset is – összes funkciójának teljes és visszafordíthatatlan megszűnése.", "A beteg kómás állapota."], answer: "Az agy – beleértve az agytörzset is – összes funkciójának teljes és visszafordíthatatlan megszűnése.", explanation: "Az agyhalál egy jogi és orvosi definíció, amely a teljes agyi funkció (agykéreg és agytörzs) irreverzibilis elvesztését jelenti. Ez a halál megállapításának egyik módja." },
+                    { question: "Melyik NEM tartozik az agyhalál megállapításának kötelező klinikai kritériumai közé?", options: ["Mély, areaktív kóma (GCS 3)", "Az agytörzsi reflexek hiánya", "Pozitív apnoe teszt", "Izoelektromos (csendes) EEG"], answer: "Izoelektromos (csendes) EEG", explanation: "Az agyhalál diagnózisa elsősorban klinikai. Az EEG egy kiegészítő vizsgálat, amely nem kötelező, ha a teljes klinikai vizsgálat elvégezhető, és szerepe a modern protokollokban csökken." },
+                    { question: "Mi az apnoe teszt lényege?", options: ["A beteg légzési mintázatának megfigyelése.", "A légzési drive tesztelése a PaCO2 szint emelésével, spontán légzés hiányának igazolására.", "A tüdőkapacitás mérése.", "A beteg reakciójának vizsgálata oxigénmegvonásra."], answer: "A légzési drive tesztelése a PaCO2 szint emelésével, spontán légzés hiányának igazolására.", explanation: "Az apnoe teszt során a beteget lekapcsolják a lélegeztetőgépről, és hagyják, hogy a vérében a szén-dioxid szintje megemelkedjen. Ha a magas PaCO2 szint sem vált ki légzési kísérletet, az az agytörzsi légzőközpont irreverzibilis károsodását igazolja." },
+                    { question: "Melyik állapotot kell kizárni az agyhalál megállapítása előtt?", options: ["Magas vérnyomás", "Súlyos hipotermia", "Cukorbetegség", "Láz"], answer: "Súlyos hipotermia", explanation: "A súlyos hipotermia (<32-36°C, protokolltól függően) utánozhatja az agyhalál klinikai képét az agyi metabolizmus és a reflexek gátlásával. A tesztelés előtt a beteget fel kell melegíteni a normotermiás tartományba." },
+                    { question: "Milyen célt szolgálnak a kiegészítő (ancillary) vizsgálatok az agyhalál diagnózisában?", options: ["Helyettesítik a klinikai vizsgálatot.", "Megerősítik az agyi keringés hiányát, ha a klinikai vizsgálat nem végezhető el teljesen.", "A halál okának megállapítására szolgálnak.", "A szervdonációhoz szükségesek."], answer: "Megerősítik az agyi keringés hiányát, ha a klinikai vizsgálat nem végezhető el teljesen.", explanation: "Kiegészítő vizsgálatokra (pl. agyi perfúziós szcintigráfia, CT-angiográfia) akkor van szükség, ha a klinikai agyhalál-vizsgálat valamelyik része (pl. súlyos arcsérülés miatt az agytörzsi reflexek, vagy instabil keringés miatt az apnoe teszt) nem kivitelezhető." },
+                    { question: "Melyik állítás igaz a kiváltott potenciálok (EP) vizsgálatára az agyhalál diagnosztikájában?", options: ["Az EEG-nél kevésbé megbízható.", "Nem befolyásolja a hipotermia vagy a gyógyszeres kezelés, ellentétben az EEG-vel.", "Csak a látópályát vizsgálja.", "A leggyakrabban használt kiegészítő vizsgálat."], answer: "Nem befolyásolja a hipotermia vagy a gyógyszeres kezelés, ellentétben az EEG-vel.", explanation: "A kiváltott potenciálok (pl. BAEP, SSEP) előnye, hogy a zavaró metabolikus és farmakológiai tényezők kevésbé befolyásolják őket, így objektívebb képet adhatnak az agytörzsi pályák integritásáról, mint az EEG." },
+                    { question: "Mi a CPP (cerebrális perfúziós nyomás) számításának képlete?", options: ["MAP + ICP", "ICP / MAP", "MAP - ICP", "SBP - DBP"], answer: "MAP - ICP", explanation: "A CPP a közép artériás nyomás (Mean Arterial Pressure - MAP) és a koponyaűri nyomás (Intracranial Pressure - ICP) különbsége. Ez a nyomásgradiens határozza meg az agy vérellátását." },
+                    { question: "Milyen típusú agyi ödéma alakul ki a vér-agy gát károsodása miatt?", options: ["Citotoxikus ödéma", "Vasogén ödéma", "Interstitialis ödéma", "Ozmotikus ödéma"], answer: "Vasogén ödéma", explanation: "A vasogén ödéma akkor alakul ki, amikor a vér-agy gát (VAG) sérül, és a plazmafehérjék és folyadék az érpályából az agy extracelluláris terébe szivárognak. A citotoxikus ödéma ezzel szemben a sejtek duzzanatát jelenti az ionpumpák elégtelensége miatt." },
+                    { question: "Melyik állítás igaz a multimodális neuromonitorozásra (MMM)?", options: ["Egyetlen, mindenre kiterjedő monitort jelent.", "Több, egymást kiegészítő monitorozási technika együttes alkalmazását jelenti.", "Csak kutatási célokra használják.", "Lassítja a klinikai döntéshozatalt."], answer: "Több, egymást kiegészítő monitorozási technika együttes alkalmazását jelenti.", explanation: "Az MMM lényege, hogy több különböző paraméter (pl. ICP, PbtO2, cEEG, CMD) egyidejű monitorozásával komplexebb, holisztikusabb képet kapjunk az agy állapotáról, mivel egyetlen modalitás sem képes minden kóros folyamatot detektálni." },
+                    { question: "Milyen szerepe van a mesterséges intelligenciának (AI) a neuro-ITO-n?", options: ["Helyettesíti a neurointenzivista orvost.", "Segít a nagy mennyiségű monitorozási adat elemzésében és a kóros események előrejelzésében.", "Kizárólag az adminisztrációs feladatokat végzi.", "Nincs még szerepe a klinikai gyakorlatban."], answer: "Segít a nagy mennyiségű monitorozási adat elemzésében és a kóros események előrejelzésében.", explanation: "Az AI és a gépi tanulás képes a komplex, multimodális adatok mintázatainak elemzésére, segítve a klinikusokat a másodlagos agysérülések korai felismerésében és a beavatkozások időzítésében, így javítva a betegellátás hatékonyságát." },
+                    { question: "Melyik vizsgálat a legalkalmasabb a cerebrális vasospazmus kimutatására non-invazív módon?", options: ["EEG", "Koponya röntgen", "Transzkraniális Doppler (TCD)", "Lumbálpunkció"], answer: "Transzkraniális Doppler (TCD)", explanation: "A TCD képes mérni a nagy agyi artériákban a véráramlás sebességét. Vasospazmus (érszűkület) esetén az áramlási sebesség jellegzetesen megnő, így a TCD egy hasznos, ágy melletti, non-invazív szűrővizsgálat, különösen subarachnoidealis vérzés után." },
+                    { question: "Mi a legfontosabb különbség a magyar és a 2023-as amerikai (SCCM) agyhalál-megállapítási protokoll között a felnőtt betegeknél?", options: ["A magyar protokoll nem ismeri el az agyhalált.", "Az amerikai protokoll nem igényel klinikai vizsgálatot.", "A magyar protokoll két klinikai vizsgálatot ír elő, míg az amerikai egyet is elegendőnek tart (bár javasolja a másodikat).", "Az amerikai protokoll kötelezővé teszi az EEG-t."], answer: "A magyar protokoll két klinikai vizsgálatot ír elő, míg az amerikai egyet is elegendőnek tart (bár javasolja a másodikat).", explanation: "A legtöbb európai, köztük a magyar szabályozás is, két, meghatározott időközönként elvégzett klinikai vizsgálatot ír elő az agyhalál megállapításához. Ezzel szemben a legújabb amerikai irányelv már egyetlen, alapos vizsgálatot is elfogad a diagnózis felállításához." }
+                ]
+            },
+            {
+                topic: "Sürgősségi ellátás a neurológiában",
+                questions: [
+                    { question: "Mi a 'Time is Brain' elv lényege a neurológiai sürgősségi ellátásban?", options: ["A neurológiai vizsgálatokat lassan és alaposan kell végezni.", "Az idő múlásával az agysejtek gyorsan és visszafordíthatatlanul károsodnak, ezért a gyors beavatkozás kritikus.", "Az agy képes regenerálódni, ezért nem kell sietni a kezeléssel.", "A betegeket az agyuk mérete szerint kell rangsorolni."], answer: "Az idő múlásával az agysejtek gyorsan és visszafordíthatatlanul károsodnak, ezért a gyors beavatkozás kritikus.", explanation: "Ez az elv azt hangsúlyozza, hogy az olyan állapotokban, mint a stroke vagy a status epilepticus, minden perc késlekedés további idegsejt-pusztulást eredményez, ami rontja a beteg kimenetelét. A gyors diagnózis és terápia elengedhetetlen." },
+                    { question: "Mi a F.A.S.T. mozaikszó jelentése a stroke felismerésében?", options: ["Fever, Aphasia, Seizure, Tachycardia", "Face drooping, Arm weakness, Speech difficulty, Time to call 9-1-1", "Fatigue, Ataxia, Sensory loss, Tremor", "Falling, Agitation, Sleepiness, Temperature"], answer: "Face drooping, Arm weakness, Speech difficulty, Time to call 9-1-1", explanation: "A F.A.S.T. egy egyszerű, a laikusok számára is könnyen megjegyezhető mozaikszó a stroke leggyakoribb tüneteinek (arc félrehúzódása, kar gyengesége, beszédzavar) gyors felismerésére és az azonnali segítségkérés (Time to call 9-1-1) fontosságára." },
+                    { question: "Mi az elsődleges képalkotó vizsgálat akut iszkémiás stroke gyanúja esetén?", options: ["Koponya MRI", "Koponya röntgen", "Natív koponya CT", "PET-CT"], answer: "Natív koponya CT", explanation: "Bár az MRI érzékenyebb a korai iszkémiás jelekre, a natív (kontrasztanyag nélküli) CT sokkal gyorsabb és szélesebb körben elérhető. Elsődleges célja a koponyaűri vérzés kizárása, ami az intravénás trombolízis elindításának feltétele." },
+                    { question: "Mennyi az intravénás trombolízis (rtPA) standard időablaka akut iszkémiás stroke esetén?", options: ["1 óra", "3 óra (kiterjeszthető 4.5 órára)", "6 óra", "24 óra"], answer: "3 óra (kiterjeszthető 4.5 órára)", explanation: "Az intravénás szöveti plazminogén aktivátor (rtPA) a tünetek kezdetétől számított 3 órán belül a leghatékonyabb. Szigorú kritériumok teljesülése esetén ez az időablak 4.5 órára kiterjeszthető." },
+                    { question: "Mi a status epilepticus (SE) modern definíciója?", options: ["Bármilyen epilepsziás roham.", "30 percnél tovább tartó folyamatos rohamtevékenység.", "5 percnél tovább tartó folyamatos roham, vagy ismétlődő rohamok a tudat visszanyerése nélkül.", "Csak a non-konvulzív rohamok."], answer: "5 percnél tovább tartó folyamatos roham, vagy ismétlődő rohamok a tudat visszanyerése nélkül.", explanation: "A definíciót 30 percről 5 percre csökkentették, hangsúlyozva, hogy a hosszan tartó rohamtevékenység már 5 perc után is neuronális károsodást okozhat, és az agresszív kezelést azonnal el kell kezdeni." },
+                    { question: "Melyik gyógyszercsoport az első vonalbeli választás a status epilepticus akut leállítására?", options: ["Antidepresszánsok", "Benzodiazepinek", "Nem-szteroid gyulladáscsökkentők", "Béta-blokkolók"], answer: "Benzodiazepinek", explanation: "A benzodiazepinek (pl. lorazepam, diazepam, midazolam) gyors hatású, hatékony görcsoldó szerek, amelyek a GABA-erg rendszeren keresztül fejtik ki hatásukat, és az SE kezdeti terápiájának alapkövei." },
+                    { question: "Mi a 'villámcsapás-fejfájás' (thunderclap headache) legveszélyesebb lehetséges oka?", options: ["Migrénes roham", "Tenziós fejfájás", "Subarachnoidealis vérzés (SAH)", "Cluster fejfájás"], answer: "Subarachnoidealis vérzés (SAH)", explanation: "A hirtelen, maximális intenzitással kezdődő, 'életem legrosszabb fejfájása'-ként leírt fejfájás a subarachnoidealis vérzés klasszikus tünete, ami egy agyi aneurizma megrepedéséből adódik és életveszélyes állapot." },
+                    { question: "Milyen vizsgálatot kell elvégezni, ha a koponya CT negatív, de a SAH gyanúja továbbraও erős?", options: ["Koponya MRI", "Lumbálpunkció (LP)", "EEG", "Koponya röntgen"], answer: "Lumbálpunkció (LP)", explanation: "A CT érzékenysége a SAH kimutatására az idő múlásával csökken. Ha a CT negatív, de a klinikai gyanú erős, az LP során a liquorban kimutatható vér (vagy annak lebomlási terméke, a xanthochromia) megerősítheti a diagnózist." },
+                    { question: "Mi a Guillain-Barré szindróma (GBS) jellegzetes klinikai képe?", options: ["Hirtelen, súlyos fejfájás", "Felszálló, szimmetrikus, petyhüdt bénulás areflexiával", "Féloldali testgyengeség", "Memóriazavar és viselkedésváltozás"], answer: "Felszálló, szimmetrikus, petyhüdt bénulás areflexiával", explanation: "A GBS egy autoimmun polyneuropathia, amelyre a végtagok distalis részén kezdődő és a törzs felé terjedő ('felszálló') szimmetrikus gyengeség és a mélyreflexek kiesése a legjellemzőbb." },
+                    { question: "Melyik kezelés hatékony a GBS és a myastheniás krízis esetén?", options: ["Nagy dózisú kortikoszteroidok", "Antibiotikumok", "Intravénás immunglobulin (IVIG) vagy plazmaferézis (PLEX)", "Sebészeti beavatkozás"], answer: "Intravénás immunglobulin (IVIG) vagy plazmaferézis (PLEX)", explanation: "Mindkét autoimmun betegség súlyos, akut fázisában az immunmoduláns terápiák, mint az IVIG (ellenanyagok pótlása) vagy a PLEX (a kóros ellenanyagok eltávolítása a vérből), bizonyítottan lerövidítik a betegség lefolyását és javítják a kimenetelt." },
+                    { question: "Mi a Cauda Equina Szindróma (CES) klasszikus tüneti triásza?", options: ["Fejfájás, láz, tarkókötöttség", "Nyeregérzéstelenítés, vizelet-/bélműködési zavar, alsó végtagi gyengeség", "Látászavar, szédülés, fülzúgás", "Beszédzavar, féloldali bénulás, arcfél-aszimmetria"], answer: "Nyeregérzéstelenítés, vizelet-/bélműködési zavar, alsó végtagi gyengeség", explanation: "A CES a lumbosacralis ideggyökök akut kompressziója, amely a gáttájék (nyeregtájék) érzéskiesését, a vizelet- és székletürítés kontrolljának elvesztését és a lábak petyhüdt bénulását okozza. Azonnali sebészeti beavatkozást igénylő állapot." },
+                    { question: "Melyik képalkotó vizsgálat elengedhetetlen a Cauda Equina Szindróma megerősítéséhez?", options: ["Medence röntgen", "Sürgős gerinc MRI", "Hasi ultrahang", "Gerinc CT"], answer: "Sürgős gerinc MRI", explanation: "A CES diagnózisához és a kompresszió okának (pl. porckorongsérv, daganat) azonosításához az MRI a legmegfelelőbb vizsgálat, mivel részletes képet ad a gerinccsatornáról és az ideggyökökről. A vizsgálatot sürgősséggel kell elvégezni." },
+                    { question: "Milyen kezelést igényel a bakteriális meningitis gyanúja?", options: ["Azonnali lumbálpunkció, az eredménytől függően terápia.", "Várakozás a vérkultúra eredményére.", "Azonnali, empirikus antibiotikum terápia megkezdése, a diagnosztikai vizsgálatokra nem várva.", "Csak lázcsillapítás."], answer: "Azonnali, empirikus antibiotikum terápia megkezdése, a diagnosztikai vizsgálatokra nem várva.", explanation: "A bakteriális meningitis egy gyorsan progrediáló, életveszélyes fertőzés. A kezelés késlekedése drámaian rontja a prognózist, ezért a gyanú felmerülésekor, a kórokozó azonosítása előtt azonnal el kell kezdeni a széles spektrumú antibiotikum kezelést." },
+                    { question: "Milyen veszélyt rejt a myastheniás krízis?", options: ["Súlyos fájdalom", "Magas láz", "A légzőizmok bénulása és légzési elégtelenség", "Epilepsziás rohamok"], answer: "A légzőizmok bénulása és légzési elégtelenség", explanation: "A myastheniás krízis a betegség életveszélyes fellángolása, ahol a légzőizmok gyengesége miatt a beteg nem képes önállóan lélegezni, ami azonnali intenzív osztályos ellátást és gyakran gépi lélegeztetést tesz szükségessé." },
+                    { question: "Milyen vérnyomás célértéket kell tartani a trombolízis alatt és után?", options: ["A lehető legmagasabbat", "A lehető legalacsonyabbat", "Szisztolés < 185 Hgmm, diasztolés < 110 Hgmm", "Szisztolés > 220 Hgmm"], answer: "Szisztolés < 185 Hgmm, diasztolés < 110 Hgmm", explanation: "A trombolízis növeli az agyvérzés kockázatát. A vérnyomás szigorú kontrollja (<185/110 Hgmm) elengedhetetlen a kezelés alatt és az azt követő 24 órában, hogy ezt a kockázatot minimalizálják." },
+                    { question: "Mi a 'kóma koktél'?", options: ["Egy diagnosztikai teszt.", "Egy sebészeti eljárás.", "Ismeretlen eredetű eszméletvesztés esetén empirikusan adott szerek kombinációja (oxigén, naloxon, glükóz, tiamin).", "A beteg ébresztésére szolgáló gyógyszer."], answer: "Ismeretlen eredetű eszméletvesztés esetén empirikusan adott szerek kombinációja (oxigén, naloxon, glükóz, tiamin).", explanation: "A 'kóma koktél' egy sürgősségi protokoll, ahol a leggyakoribb, kezelhető eszméletvesztés-okokat (hypoxia, opioid-túladagolás, hypoglykaemia, Wernicke-encephalopathia) célozzák meg empirikusan, még a definitív diagnózis előtt." },
+                    { question: "Mikor indokolt a mechanikus trombektómia akut iszkémiás stroke esetén?", options: ["Minden stroke esetén.", "Nagy agyi ér elzáródása esetén, a tünetek kezdetétől számított 6 (esetenként 24) órán belül.", "Csak ha a beteg eszméletlen.", "Csak a hátsó keringési stroke-okban."], answer: "Nagy agyi ér elzáródása esetén, a tünetek kezdetétől számított 6 (esetenként 24) órán belül.", explanation: "A mechanikus trombektómia egy endovaszkuláris eljárás, ahol egy katéter segítségével mechanikusan távolítják el a vérrögöt egy nagy agyi artériából. Ez a terápia a nagyér-elzáródással járó súlyos stroke-ok esetén hatékony." },
+                    { question: "Melyik állítás igaz a status epilepticus gyógyszeres kezelésére?", options: ["A kezelést lassan, fokozatosan kell felépíteni.", "A második vonalbeli antiepileptikumokat csak a benzodiazepinek hatástalansága után szabad elkezdeni.", "A második vonalbeli szereket (pl. levetiracetam) a benzodiazepinekkel egyidejűleg kell elkezdeni.", "A propofol infúzió biztonságos gyermekeknél."], answer: "A második vonalbeli szereket (pl. levetiracetam) a benzodiazepinekkel egyidejűleg kell elkezdeni.", explanation: "A modern protokollok szerint a második vonalbeli, hosszabb hatástartamú antiepileptikum telítő dózisát már az első vonalbeli benzodiazepinek adásával párhuzamosan el kell kezdeni, hogy megelőzzék a rohamok kiújulását, mire a benzodiazepinek hatása csökken." },
+                    { question: "Mi a fő célja az adjuváns dexametazon adásának bakteriális meningitisben?", options: ["A láz csillapítása.", "A fejfájás enyhítése.", "A gyulladásos válasz és a neurológiai szövődmények (pl. halláskárosodás) kockázatának csökkentése.", "A baktériumok elpusztítása."], answer: "A gyulladásos válasz és a neurológiai szövődmények (pl. halláskárosodás) kockázatának csökkentése.", explanation: "A dexametazont az első antibiotikum dózis előtt vagy azzal egy időben adva csökkenti a baktériumok szétesésekor felszabaduló gyulladásos mediátorok által okozott károsodást, így javítva a kimenetelt, különösen pneumococcus meningitis esetén." },
+                    { question: "Melyik neurológiai vészhelyzet igényel azonnali sebészeti dekompressziót a maradandó bénulás elkerülése érdekében?", options: ["Migrénes roham", "Guillain-Barré szindróma", "Cauda Equina Szindróma", "Status epilepticus"], answer: "Cauda Equina Szindróma", explanation: "A Cauda Equina Szindróma esetén az ideggyökök akut kompressziója gyorsan visszafordíthatatlan károsodáshoz vezet. A funkciók megmentésének egyetlen módja a nyomást okozó elváltozás (pl. porckorongsérv) sürgős sebészi eltávolítása, ideális esetben 24-48 órán belül." }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

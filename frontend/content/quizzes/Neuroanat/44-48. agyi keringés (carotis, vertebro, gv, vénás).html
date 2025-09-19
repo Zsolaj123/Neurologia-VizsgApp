@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agyi Keringés Kvíz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .option-btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #22c55e !important;
+            color: white;
+            border-color: #16a34a;
+        }
+        .incorrect {
+            background-color: #ef4444 !important;
+            color: white;
+            border-color: #dc2626;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            position: relative;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-app" class="w-full max-w-4xl mx-auto">
+        
+        <div id="start-screen" class="text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">Agyi Keringés Kvíz</h1>
+            <p class="text-slate-600 mb-8 text-lg">Válassz egy témakört a tudásod elmélyítéséhez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button onclick="startQuiz('az_agyi_keringes')" class="bg-sky-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-sky-700 transition duration-300 shadow-md">1. Az agyi keringés</button>
+                <button onclick="startQuiz('az_agyi_keringes_fiziologiaja')" class="bg-teal-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-teal-700 transition duration-300 shadow-md">2. A keringés fiziológiája</button>
+                <button onclick="startQuiz('az_agyi_ischemia_korelettana')" class="bg-amber-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-amber-700 transition duration-300 shadow-md">3. Ischaemia kórélettana</button>
+                <button onclick="startQuiz('carotis_rendszer')" class="bg-rose-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-rose-700 transition duration-300 shadow-md">4. Carotis rendszer</button>
+                <button onclick="startQuiz('vertebro_basilaris_rendszer')" class="bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md">5. Vertebro-basilaris rendszer</button>
+            </div>
+        </div>
+
+        <div id="quiz-container" class="hidden bg-white p-6 md:p-10 rounded-2xl shadow-xl">
+            <div id="header" class="flex justify-between items-center mb-6">
+                <p id="question-counter" class="text-slate-500 font-medium"></p>
+                <p id="score" class="text-slate-500 font-medium">Pontszám: 0</p>
+            </div>
+            <div id="question" class="text-xl md:text-2xl font-semibold mb-8 min-h-[6rem] flex items-center"></div>
+            <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <button id="next-btn" class="w-full mt-8 bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition duration-300 shadow-md hidden">Következő</button>
+        </div>
+
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h2 class="text-3xl font-bold mb-4">Eredmény</h2>
+            <p id="final-score" class="text-5xl font-bold text-slate-700 mb-6"></p>
+            <p id="result-message" class="text-slate-600 mb-8 text-lg"></p>
+            <button onclick="restartQuiz()" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300 shadow-md">Vissza a főmenübe</button>
+        </div>
+    </div>
+
+    <div id="explanation-modal" class="modal">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl">
+            <h3 id="explanation-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="explanation-text" class="text-slate-700 leading-relaxed"></p>
+        </div>
+    </div>
+
+<script>
+    const quizData = [
+        // Tétel 1: Az agyi keringés
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik két fő artériás rendszer látja el az agyat?",
+            options: ["A. carotis externa és a. subclavia", "A. carotis interna és a. vertebralis", "A. cerebri anterior és a. cerebri media", "A. basilaris és a. spinalis anterior"],
+            answer: "A. carotis interna és a. vertebralis",
+            explanation: "Az agy vérellátását két fő rendszer biztosítja: az elülső (carotis) rendszert az a. carotis interna, a hátulsó (vertebrobasilaris) rendszert pedig az aa. vertebrales és az általuk alkotott a. basilaris képezi."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Mi a Willis-kör (circulus arteriosus Willisii) elsődleges funkciója?",
+            options: ["A liquor termelése", "Az agyi vénás vér elvezetése", "Potenciális kollaterális keringés biztosítása", "A vér-agy gát fenntartása"],
+            answer: "Potenciális kollaterális keringés biztosítása",
+            explanation: "A Willis-kör egy artériás anasztomózisgyűrű az agyalapon, amely összeköti az elülső és hátulsó keringési rendszereket, így egy fő ér elzáródása esetén képes lehet kompenzálni a kieső véráramlást."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik artéria NEM része a Willis-körnek?",
+            options: ["A. communicans anterior", "A. cerebri media", "A. communicans posterior", "A. cerebri anterior (A1 szakasz)"],
+            answer: "A. cerebri media",
+            explanation: "A Willis-kört az a. communicans anterior, az aa. cerebri anteriores (A1), az aa. communicantes posteriores és az aa. cerebri posteriores (P1) alkotják. Az a. cerebri media (ACM) a körből ered, de nem része annak."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Hova ömlik az agy vénás vérének nagy része, mielőtt a vena jugularis internába jutna?",
+            options: ["A subarachnoidealis térbe", "Az agykamrákba", "A duralis vénás sinusokba", "Közvetlenül az artériákba"],
+            answer: "A duralis vénás sinusokba",
+            explanation: "Az agyi vénák a dura mater kettőzeteiben elhelyezkedő, merev falú duralis vénás sinusokba gyűjtik a vért, ahonnan az a v. jugularis internán keresztül távozik."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik két fő ágra oszlik az a. carotis interna a koponyán belül?",
+            options: ["A. ophthalmica és a. communicans posterior", "A. cerebri anterior és a. cerebri media", "A. basilaris és a. cerebri posterior", "A. vertebralis és a. spinalis anterior"],
+            answer: "A. cerebri anterior és a. cerebri media",
+            explanation: "Az a. carotis interna (ACI) a koponyaüregben a két fő végágára, az a. cerebri anteriorra (ACA) és a nála általában erősebb a. cerebri mediara (ACM) oszlik."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Miből alakul ki az arteria basilaris?",
+            options: ["Az a. carotis internák egyesüléséből", "A két a. vertebralis egyesüléséből", "Az a. cerebri mediák egyesüléséből", "Közvetlenül az aortaívből"],
+            answer: "A két a. vertebralis egyesüléséből",
+            explanation: "A kétoldali a. vertebralis a híd alsó szélénél egyesül, létrehozva a páratlan a. basilarist, amely a híd elülső felszínén halad felfelé."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik sinus cavernosuson halad át az a. carotis interna és több agyideg is?",
+            options: ["Sinus sagittalis superior", "Sinus transversus", "Sinus cavernosus", "Sinus rectus"],
+            answer: "Sinus cavernosus",
+            explanation: "A sinus cavernosus egy komplex vénás plexus a sella turcica két oldalán, amelyen az ACI és a III., IV., V/1., V/2. és VI. agyidegek is áthaladnak, ezért patológiája jellegzetes tüneteket okoz."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Mi a `végartéria` fogalmának klinikai jelentősége az agyban?",
+            options: ["Azonnal elzáródnak", "Nincs jelentős anasztomózisuk, ezért elzáródásuk infarktust okoz", "Csak a kéreg vérellátásáért felelősek", "Könnyen tágulnak"],
+            answer: "Nincs jelentős anasztomózisuk, ezért elzáródásuk infarktust okoz",
+            explanation: "Az agy állományába belépő kisebb artériák végartériáknak tekinthetők, ami azt jelenti, hogy minimális az oldalirányú összeköttetésük. Így egy ilyen ér elzáródása az általa ellátott agyterület elhalásához (infarktus) vezet."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik artéria látja el a nagyagyféltekék laterális (domború) felszínének jelentős részét?",
+            options: ["A. cerebri anterior (ACA)", "A. cerebri media (ACM)", "A. cerebri posterior (ACP)", "A. choroidea anterior"],
+            answer: "A. cerebri media (ACM)",
+            explanation: "Az ACM a nagyagyféltekék laterális felszínének nagy részét látja el, beleértve a frontális, parietális és temporális lebenyek külső területeit, ezért ez a leggyakrabban érintett ér stroke esetén."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik artéria felelős a látókéreg (occipitalis lebeny) vérellátásáért?",
+            options: ["A. cerebri anterior (ACA)", "A. cerebri media (ACM)", "A. cerebri posterior (ACP)", "A. ophthalmica"],
+            answer: "A. cerebri posterior (ACP)",
+            explanation: "Az a. cerebri posterior, amely a vertebrobasilaris rendszer végága, látja el az occipitalis lebenyt, benne a primer látókérget is."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik véna köti össze a sinus sagittalis superiort és a v. cerebri media superficialist?",
+            options: ["V. magna cerebri (Galeni)", "V. basalis (Rosenthal)", "V. anastomotica superior (Trolard)", "V. anastomotica inferior (Labbé)"],
+            answer: "V. anastomotica superior (Trolard)",
+            explanation: "A Trolard-véna egy fontos anasztomotikus véna a felszínes vénás rendszerben, amely a sinus sagittalis superiort és a v. cerebri media superficialist köti össze, alternatív elvezetési utat biztosítva."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik két fő véna egyesüléséből jön létre a vena magna cerebri (Galeni-véna)?",
+            options: ["A két v. jugularis interna", "A két v. interna cerebri", "A sinus sagittalis superior és inferior", "A sinus transversus és sigmoideus"],
+            answer: "A két v. interna cerebri",
+            explanation: "A v. magna cerebri egy rövid, páratlan véna, amely a két v. interna cerebri és gyakran a két v. basalis (Rosenthal) egyesüléséből jön létre, és a mély agyi struktúrák vérét gyűjti össze."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Az arteria cerebelli posterior inferior (PICA) melyik fő artéria legfontosabb intracranialis ága?",
+            options: ["A. basilaris", "A. carotis interna", "A. cerebri posterior", "A. vertebralis"],
+            answer: "A. vertebralis",
+            explanation: "A PICA az a. vertebralis legnagyobb és legfontosabb koponyán belüli ága, amely a nyúltvelő lateralis részét és a kisagy alsó-hátsó részét látja el. Elzáródása a Wallenberg-szindrómát okozza."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Mi a sinus caroticus funkciója?",
+            options: ["Vénás vért gyűjt", "Baroreceptorokat tartalmaz a vérnyomás szabályozásához", "Liquort termel", "Agyidegeket vezet"],
+            answer: "Baroreceptorokat tartalmaz a vérnyomás szabályozásához",
+            explanation: "A sinus caroticus, az ACI eredésénél lévő tágulat, baroreceptorokban gazdag, amelyek érzékelik a vérnyomás változásait és részt vesznek annak szisztémás szabályozásában."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik két idegfonatból áll az agy vénás elvezetésének két fő rendszere?",
+            options: ["Plexus brachialis és lumbalis", "Felszínes és mély agyi vénák", "Plexus choroideus és myentericus", "Artériás és vénás hálózat"],
+            answer: "Felszínes és mély agyi vénák",
+            explanation: "Az agy vénás elvezetését két fő, egymással összeköttetésben álló rendszer végzi: a felszínes vénák a kéreg felszínéről, a mély vénák pedig az agy központi struktúráiból gyűjtik a vért."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik duralis sinus fut a falx cerebri felső, rögzített szélén?",
+            options: ["Sinus cavernosus", "Sinus rectus", "Sinus transversus", "Sinus sagittalis superior"],
+            answer: "Sinus sagittalis superior",
+            explanation: "A sinus sagittalis superior a falx cerebri felső, a koponyacsontokhoz rögzített szélén fut végig, és a felszínes agyi vénák többségének vérét gyűjti össze."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Melyik artéria látja el a gerincvelő elülső kétharmadát?",
+            options: ["A. spinalis posterior", "A. basilaris", "A. spinalis anterior", "A. cerebelli posterior inferior"],
+            answer: "A. spinalis anterior",
+            explanation: "Az a. spinalis anterior, amely a két a. vertebralisból egyesülő ágakból jön létre, a gerincvelő elülső felszínén száll le és annak elülső kétharmadát látja el."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "A Willis-kör melyik komponense köti össze a két elülső keringési rendszert (a két ACA-t)?",
+            options: ["A. communicans posterior (PComA)", "A. basilaris", "A. carotis interna", "A. communicans anterior (AComA)"],
+            answer: "A. communicans anterior (AComA)",
+            explanation: "Az a. communicans anterior egy rövid, harántul futó ér, amely a kétoldali a. cerebri anteriort (ACA) köti össze, így kapcsolatot teremt a két félteke elülső keringése között."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Mi a confluens sinuum?",
+            options: ["Az a. basilaris kettéoszlása", "A mély agyi vénák találkozása", "A főbb duralis vénás sinusok találkozási helye", "Az ACI és AV közötti fő anasztomózis"],
+            answer: "A főbb duralis vénás sinusok találkozási helye",
+            explanation: "A confluens sinuum (Herophili torcular) a sinus sagittalis superior, a sinus rectus és a két sinus transversus találkozási helye a protuberantia occipitalis interna magasságában."
+        },
+        {
+            topic: 'az_agyi_keringes',
+            question: "Miért fontos, hogy az agyi vénáknak nincsenek billentyűik?",
+            options: ["Mert így lassabb a véráramlás", "Mert így a vér kétirányú áramlása lehetséges", "Mert így jobban ellenállnak a nyomásnak", "Mert így kevesebb helyet foglalnak"],
+            answer: "Mert így a vér kétirányú áramlása lehetséges",
+            explanation: "A billentyűk hiánya lehetővé teszi a vér kétirányú áramlását bizonyos körülmények között, és hozzájárul, hogy az intracranialis nyomás változásai közvetlenül befolyásolják a vénás elfolyást."
+        },
+
+        // Tétel 2: Az agyi keringés fiziológiája
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mi a cerebrális perfúziós nyomás (CPP) definíciója?",
+            options: ["Artériás középnyomás (MAP) + Intracranialis nyomás (ICP)", "MAP / ICP", "MAP - ICP", "ICP - MAP"],
+            answer: "MAP - ICP",
+            explanation: "A cerebrális perfúziós nyomás (CPP) az artériás középnyomás (MAP) és az intracranialis nyomás (ICP) különbsége. Ez a nyomásgradiens hajtja a vért az agyi ereken keresztül."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mit jelent az agyi autoreguláció?",
+            options: ["Az agy képes növelni a vérnyomást", "Az agyi véráramlás (CBF) állandó szinten tartása a CPP változásai ellenére", "A vér-agy gát szelektív áteresztőképessége", "A neuronális aktivitás és a véráramlás kapcsolata"],
+            answer: "Az agyi véráramlás (CBF) állandó szinten tartása a CPP változásai ellenére",
+            explanation: "Az agyi autoreguláció az agyi erek azon képessége, hogy a CPP széles tartományban (kb. 60-160 Hgmm) történő változásai ellenére képesek viszonylag állandó szinten tartani a CBF-et."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Melyik a legerősebb ismert endogén agyi vazodilatátor?",
+            options: ["Oxigén (O2)", "Szén-dioxid (CO2)", "Nitrogén-monoxid (NO)", "Adenozin"],
+            answer: "Szén-dioxid (CO2)",
+            explanation: "Az artériás szén-dioxid parciális nyomása (PaCO2) a legerősebb ismert endogén agyi vazodilatátor. Emelkedése (hypercapnia) jelentős CBF-növekedést okoz."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mi a neurovaszkuláris egység (NVU) koncepciójának lényege?",
+            options: ["Csak a neuronok szabályozzák a véráramlást", "A vér-agy gát egy passzív szűrő", "Az agyi keringést több sejttípus (neuron, asztrocita, periciták, endothel) összehangolt működése szabályozza", "Az agyi ereknek nincs saját beidegzésük"],
+            answer: "Az agyi keringést több sejttípus (neuron, asztrocita, periciták, endothel) összehangolt működése szabályozza",
+            explanation: "Az NVU koncepciója hangsúlyozza, hogy a vér-agy gát és a helyi véráramlás szabályozása egy komplex, több sejttípusból álló funkcionális egység összehangolt működésének eredménye."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Milyen hatással van a hypocapnia (alacsony PaCO2) az agyi erekre?",
+            options: ["Vazodilatációt (értágulatot) okoz", "Vazokonstrikciót (érszűkületet) okoz", "Nincs hatással rájuk", "Növeli a vér-agy gát áteresztőképességét"],
+            answer: "Vazokonstrikciót (érszűkületet) okoz",
+            explanation: "A hypocapnia (pl. hyperventilláció következtében) agyi vazokonstrikciót és a CBF csökkenését eredményezi, mivel az agyszöveti pH emelkedik (alkalózis)."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Melyik mechanizmus NEM része a vér-agy gáton (BBB) keresztüli transzportnak?",
+            options: ["Passzív diffúzió", "Carrier-mediált transzport", "Receptor-mediált transzcitózis", "Szabad paracelluláris vándorlás"],
+            answer: "Szabad paracelluláris vándorlás",
+            explanation: "A vér-agy gátat alkotó endothelsejtek közötti rendkívül szoros tight junctionok megakadályozzák a legtöbb anyag szabad, sejtek közötti (paracelluláris) vándorlását."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mi a P-glikoprotein (P-gp) szerepe a vér-agy gátban?",
+            options: ["Glükózt szállít az agyba", "Aktívan kipumpálja a gyógyszereket és toxinokat az agyból a vérbe", "Tight junctionokat alkot", "Oxigént szállít"],
+            answer: "Aktívan kipumpálja a gyógyszereket és toxinokat az agyból a vérbe",
+            explanation: "A P-glikoprotein egy aktív efflux transzporter, amely ATP felhasználásával számos idegen anyagot (xenobiotikumot), köztük gyógyszereket pumpál ki az agyból, korlátozva azok agyi koncentrációját."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mit jelent a neurovaszkuláris csatolás (funkcionális hyperaemia)?",
+            options: ["A neuronok és az erek fizikai összekapcsolódását", "A neuronális aktivitás növekedése helyi véráramlás-fokozódást vált ki", "Az agyi véráramlás független a neuronális aktivitástól", "A szívverés és az agyi aktivitás szinkronizációját"],
+            answer: "A neuronális aktivitás növekedése helyi véráramlás-fokozódást vált ki",
+            explanation: "A neurovaszkuláris csatolás az a folyamat, amely során a megnövekedett helyi idegi aktivitás gyors és precíz helyi véráramlás-növekedést (hyperaemia) okoz, hogy kielégítse a fokozott metabolikus igényeket."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Krónikus magas vérnyomás esetén hogyan változik az agyi autoregulációs görbe?",
+            options: ["Balra tolódik", "Jobbra tolódik", "Laposabbá válik", "Nem változik"],
+            answer: "Jobbra tolódik",
+            explanation: "Krónikus hipertóniában az autoregulációs görbe adaptívan jobbra tolódik, ami megvédi az agyat a magasabb nyomástól, de egyben sebezhetőbbé teszi a vérnyomásesésre."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Melyik sejt játszik kulcsszerepet a neuronok és az erek közötti kommunikáció közvetítésében az NVC során?",
+            options: ["Mikroglia", "Oligodendrocita", "Asztrocita", "Ependymasejt"],
+            answer: "Asztrocita",
+            explanation: "Az asztrociták végtalpaikkal körülveszik a szinapszisokat és az ereket is, így kulcsfontosságú közvetítő szerepet játszanak a neurovaszkuláris csatolásban, vazoaktív anyagokat szabadítva fel."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Milyen hatással van a súlyos hypoxia (PaO2 < 50 Hgmm) az agyi erekre?",
+            options: ["Vazokonstrikciót okoz", "Vazodilatációt okoz", "Nincs hatással", "Növeli a vér viszkozitását"],
+            answer: "Vazodilatációt okoz",
+            explanation: "Súlyos hypoxia (alacsony oxigénszint) esetén az agyi erek kitágulnak (vazodilatáció), hogy növeljék a véráramlást és kompenzálják az oxigénhiányt."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mi az agy elsődleges energiaforrása normál körülmények között?",
+            options: ["Zsírsavak", "Ketontestek", "Glükóz", "Aminosavak"],
+            answer: "Glükóz",
+            explanation: "Az agy szinte kizárólagos és preferált energiaforrása normál, táplált állapotban a glükóz, amelyet aerob módon bont le ATP termeléséhez."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "A vér-agy gát melyik szerkezeti eleme felelős leginkább a paracelluláris permeabilitás drasztikus csökkentéséért?",
+            options: ["Periciták", "Asztrocita végtalpak", "Tight junctionok", "Bazális membrán"],
+            answer: "Tight junctionok",
+            explanation: "Az agyi kapillárisok endothelsejtjei között található rendkívül szoros kapcsolószerkezetek, a tight junctionok (zonulae occludentes) akadályozzák meg a legtöbb anyag szabad, sejtek közötti átjutását."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mi a Bayliss-effektus?",
+            options: ["A CO2 értágító hatása", "A neuronális aktivitás által kiváltott véráramlás-növekedés", "Az erek simaizomzatának direkt válasza a feszülésre (nyomásnövekedésre)", "A vér-agy gát szelektív transzportja"],
+            answer: "Az erek simaizomzatának direkt válasza a feszülésre (nyomásnövekedésre)",
+            explanation: "A Bayliss-effektus az autoreguláció miogén mechanizmusa: a nyomásnövekedés hatására megfeszülő érfali simaizomzat összehúzódással (vazokonstrikcióval) válaszol."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Melyik ion játszik központi szerepet az asztrociták által közvetített neurovaszkuláris csatolásban?",
+            options: ["Na+", "K+", "Cl-", "Ca2+"],
+            answer: "Ca2+",
+            explanation: "Neuronális aktivitásra válaszul az asztrociták intracelluláris Ca2+ szintje megemelkedik, ami vazoaktív anyagok felszabadulásához vezet a közeli erekre."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mi a szimpatikus idegrendszer fő szerepe az agyi keringés szabályozásában?",
+            options: ["A nyugalmi véráramlás finomhangolása", "Vazodilatáció kiváltása", "Az agy védelme extrém magas vérnyomás esetén", "A vér-agy gát megnyitása"],
+            answer: "Az agy védelme extrém magas vérnyomás esetén",
+            explanation: "A szimpatikus beidegzés fő szerepe valószínűleg az agy védelme a hirtelen, súlyos vérnyomás-emelkedés káros hatásaitól, mivel a vazokonstrikcióval segít megelőzni az autoreguláció 'áttörését'."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Hogyan jut át a glükóz a vér-agy gáton?",
+            options: ["Passzív diffúzióval", "Receptor-mediált transzcitózissal", "GLUT1 transzporteren keresztüli facilitált diffúzióval", "Pinocitózissal"],
+            answer: "GLUT1 transzporteren keresztüli facilitált diffúzióval",
+            explanation: "A glükóz egy specifikus carrier, a GLUT1 transzporter segítségével, facilitált diffúzióval jut át a vér-agy gáton a koncentrációgradiensének megfelelően."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Az agy a testtömeg kb. 2%-át teszi ki, de a szervezet nyugalmi oxigénfogyasztásának hány százalékáért felelős?",
+            options: ["kb. 5%", "kb. 10%", "kb. 20%", "kb. 50%"],
+            answer: "kb. 20%",
+            explanation: "Az agy rendkívül magas metabolikus rátával rendelkezik: bár tömege kicsi, a szervezet teljes nyugalmi oxigénfogyasztásának mintegy 20%-át használja fel."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Milyen hatással van a szöveti acidózis (pH csökkenés) az agyi arteriolákra?",
+            options: ["Vazokonstrikciót okoz", "Vazodilatációt okoz", "Nincs hatással", "Növeli a fal merevségét"],
+            answer: "Vazodilatációt okoz",
+            explanation: "Az agyi interstitialis folyadék pH-jának csökkenése (acidózis), ami gyakran a CO2 szint emelkedésének vagy a laktát felhalmozódásának a következménye, az agyi erek tágulatát (vazodilatáció) váltja ki."
+        },
+        {
+            topic: 'az_agyi_keringes_fiziologiaja',
+            question: "Mi a BOLD-effektus alapja, amelyet az fMRI használ?",
+            options: ["Az agyi elektromos aktivitás mérése", "A vér áramlási sebességének mérése", "A vénás vér oxigenizációjának növekedése aktív agyterületen", "A glükózfelhasználás mérése radioaktív izotóppal"],
+            answer: "A vénás vér oxigenizációjának növekedése aktív agyterületen",
+            explanation: "Funkcionális aktivitás során a véráramlás (CBF) növekedése meghaladja az oxigénfogyasztás (CMRO2) növekedését. Ennek eredményeként a helyi vénás vér oxigéntelítettsége nő, ami megváltoztatja a mágneses jelet. Ez a BOLD (Blood-Oxygen-Level Dependent) hatás."
+        },
+
+        // Tétel 3: Az agyi ischaemia kórélettana
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi a alapvető különbség az ischaemia és a 'tiszta' hypoxia között?",
+            options: ["Az ischaemia mindig globális, a hypoxia mindig fokális", "Ischaemiában csak oxigénhiány van, hypoxiában glükózhiány is", "Ischaemiában az oxigén- és tápanyaghiány mellett a metabolitok is felhalmozódnak", "A hypoxia mindig súlyosabb, mint az ischaemia"],
+            answer: "Ischaemiában az oxigén- és tápanyaghiány mellett a metabolitok is felhalmozódnak",
+            explanation: "Az ischaemia a véráramlás csökkenése, ami nemcsak oxigén- és glükózhiányt, hanem a toxikus anyagcseretermékek (pl. laktát) felhalmozódását is jelenti. Ezzel szemben a 'tiszta' hypoxiánál a véráramlás fenntartott lehet."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi az ischaemiás kaszkád legkorábbi és központi eseménye?",
+            options: ["A vér-agy gát károsodása", "A szabadgyök-képződés", "Az ATP depléció (energiahiány)", "A neuroinflammatio"],
+            answer: "Az ATP depléció (energiahiány)",
+            explanation: "Az oxigén- és glükózhiány miatt az ATP-termelés gyorsan leáll. Ez az energiahiány az ischaemiás kaszkád kiindulópontja, ami az ionpumpák leállásához és minden további károsító folyamathoz vezet."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi az excitotoxicitás?",
+            options: ["A gátló neurotranszmitterek túlzott felszabadulása", "A serkentő neurotranszmitterek (főleg glutamát) túlzott felszabadulása és a receptorok túlstimulációja", "Az idegsejtek elektromos túlingerlése", "A szabad gyökök által okozott toxicitás"],
+            answer: "A serkentő neurotranszmitterek (főleg glutamát) túlzott felszabadulása és a receptorok túlstimulációja",
+            explanation: "Az excitotoxicitás során az energiahiány miatt a preszinaptikus végződésekből kontrollálatlanul glutamát szabadul fel, ami a posztszinaptikus NMDA és AMPA receptorok túlstimulációjához és masszív Ca2+ beáramláshoz vezet, sejthalált okozva."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyik ion játszik kulcsszerepet az excitotoxikus neuronkárosodásban?",
+            options: ["Kálium (K+)", "Nátrium (Na+)", "Kalcium (Ca2+)", "Klorid (Cl-)"],
+            answer: "Kalcium (Ca2+)",
+            explanation: "A glutamát-receptorok túlzott aktiválása masszív Ca2+ beáramlást okoz a sejtbe. A magas intracelluláris Ca2+ koncentráció aktiválja a sejtkárosító enzimeket (proteázokat, foszfolipázokat, endonukleázokat)."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi az ischaemiás penumbra?",
+            options: ["Az infarktus végleges, elhalt magja", "Egy agyi vérzés típusa", "Az infarktusmagot körülvevő, funkcionálisan károsodott, de még megmenthető agyszövet", "Az agyi erek görcsös állapota"],
+            answer: "Az infarktusmagot körülvevő, funkcionálisan károsodott, de még megmenthető agyszövet",
+            explanation: "A penumbra az a 'veszélyeztetett' agyterület az ischaemiás mag körül, ahol a véráramlás kritikusan alacsony a normális működéshez, de még elegendő a sejtek túléléséhez, ha a keringés időben helyreáll."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi a reperfúziós sérülés?",
+            options: ["A vérrög újbóli kialakulása", "Az a paradox jelenség, amikor a véráramlás helyreállítása további sejtkárosodást okoz", "A penumbra spontán javulása", "A kollaterális keringés elégtelensége"],
+            answer: "Az a paradox jelenség, amikor a véráramlás helyreállítása további sejtkárosodást okoz",
+            explanation: "Reperfúziós sérülés során az oxigén visszatérése a korábban ischaemiás szövetbe robbanásszerű szabadgyök-képződést és a gyulladásos válasz súlyosbodását indítja el, ami további károsodáshoz vezethet."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyik folyamat NEM jellemző az ischaemiás kaszkádra?",
+            options: ["Oxidatív stressz", "Neuroinflammatio", "Apoptózis", "Fokozott mielinizáció"],
+            answer: "Fokozott mielinizáció",
+            explanation: "Az ischaemiás kaszkád károsító folyamatok sorozata, beleértve az oxidatív stresszt, a gyulladást és a programozott sejthalált (apoptózis). A mielinizáció (az idegrostok velőshüvelyének képzése) nem része ennek a folyamatnak, sőt, a myelin is károsodhat."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyik képalkotó módszer-pár használatos leggyakrabban a penumbra kimutatására?",
+            options: ["Koponya röntgen és ultrahang", "EEG és EKG", "Diffúzió-súlyozott (DWI) és Perfúzió-súlyozott (PWI) MRI", "Angiográfia és lumbálpunkció"],
+            answer: "Diffúzió-súlyozott (DWI) és Perfúzió-súlyozott (PWI) MRI",
+            explanation: "A DWI az irreverzibilisen károsodott infarktusmagot, míg a PWI a teljes csökkent keringésű területet (mag + penumbra) mutatja. A kettő közötti különbség (DWI-PWI mismatch) jelzi a megmenthető penumbra jelenlétét."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi az apoptózis?",
+            options: ["A sejt kontrollálatlan szétesése (nekrózis)", "Egy energiaigényes, programozott sejthalál-folyamat", "A sejt rosszindulatú átalakulása", "A sejtek közötti kommunikáció zavara"],
+            answer: "Egy energiaigényes, programozott sejthalál-folyamat",
+            explanation: "Az apoptózis egy szabályozott, 'öngyilkos' program, amely a sejtek rendezett eliminációját eredményezi anélkül, hogy jelentős gyulladást váltana ki. Az ischaemiás penumbrában ez egy fontos sejthalál-forma."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyik enzimcsalád játssza a központi végrehajtó szerepet az apoptózisban?",
+            options: ["Kinázok", "Foszfatázok", "Kaszpázok", "Lipázok"],
+            answer: "Kaszpázok",
+            explanation: "A kaszpázok egy proteáz enzimcsalád, amelyek aktiválódásuk után láncreakció-szerűen hasítják a sejt létfontosságú fehérjéit, végrehajtva ezzel az apoptózis programját."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Milyen hatással van a hyperglykaemia (magas vércukorszint) az agyi ischaemiára?",
+            options: ["Védő hatású, mert több a tápanyag", "Nincs hatással rá", "Súlyosbítja a károsodást a tejsavas acidózis fokozásával", "Csökkenti az agyödémát"],
+            answer: "Súlyosbítja a károsodást a tejsavas acidózis fokozásával",
+            explanation: "Ischaemiás körülmények között a magas glükózszint fokozza az anaerob glikolízist, ami tejsav felhalmozódásához és súlyosabb szöveti acidózishoz vezet, rontva a kimenetelt."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyek a neuroinflammatio legkorábbi sejtes szereplői az agyban ischaemia után?",
+            options: ["Limfociták és neutrofilek", "Mikroglia és asztrociták", "Ependymasejtek és oligodendrociták", "Vörösvértestek és vérlemezkék"],
+            answer: "Mikroglia és asztrociták",
+            explanation: "Az ischaemiás inzultusra válaszul az agy saját, rezidens immunsejtjei, a mikroglia és az asztrociták aktiválódnak leggyorsabban, és indítják el a gyulladásos kaszkádot."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyik állítás igaz a citotoxikus ödémára?",
+            options: ["A vér-agy gát károsodása okozza", "A sejtekbe történő vízbeáramlás miatt a sejtek megduzzadnak", "Főleg a sejtek közötti térben halmozódik fel a folyadék", "Lassan, napok alatt alakul ki"],
+            answer: "A sejtekbe történő vízbeáramlás miatt a sejtek megduzzadnak",
+            explanation: "A citotoxikus ödéma az ischaemia korai fázisában alakul ki. Az ionpumpák leállása miatt Na+ és víz áramlik a sejtekbe, ami azok duzzanatához vezet."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi a peri-infarktus depolarizációk (spreading depolarizations) szerepe?",
+            options: ["Védik a penumbra sejtjeit", "Helyreállítják a membránpotenciált", "Tovább rontják az energiaegyensúlyt és terjesztik a károsodást a penumbrában", "Csökkentik a glutamát felszabadulását"],
+            answer: "Tovább rontják az energiaegyensúlyt és terjesztik a károsodást a penumbrában",
+            explanation: "Ezek a lassan terjedő depolarizációs hullámok a penumbra területén ismétlődően kimerítik a maradék energiatartalékokat és fokozzák a Ca2+ beáramlást, hozzájárulva az infarktus növekedéséhez."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi a 'time is brain' koncepció lényege?",
+            options: ["Az agy fejlődése időbe telik", "A stroke után a betegnek sok időre van szüksége a gyógyuláshoz", "Az agyi ischaemiában minden perc számít, mert a sejtek gyorsan és folyamatosan halnak el", "A gondolkodás sebességét méri"],
+            answer: "Az agyi ischaemiában minden perc számít, mert a sejtek gyorsan és folyamatosan halnak el",
+            explanation: "Ez a koncepció arra hívja fel a figyelmet, hogy akut stroke esetén az időablak kritikus. Minden egyes perccel, amíg a keringés nem áll helyre, neuronok milliói halnak el, ezért a gyors beavatkozás (reperfúzió) elengedhetetlen."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyik a hisztotoxikus hypoxia mechanizmusa?",
+            options: ["A belélegzett levegő oxigéntartalma alacsony", "A vér oxigénszállító kapacitása csökkent", "A véráramlás elégtelen", "A sejtek nem képesek felhasználni a rendelkezésre álló oxigént"],
+            answer: "A sejtek nem képesek felhasználni a rendelkezésre álló oxigént",
+            explanation: "Hisztotoxikus hypoxia esetén a probléma a sejtekben van: a sejtlégzés enzimei (pl. cianidmérgezésben a citokróm-oxidáz) gátoltak, így a sejtek nem tudják felhasználni az oxigént az ATP-termeléshez."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Melyik folyamatot NEM okozza a magas intracelluláris kalcium szint?",
+            options: ["Proteázok aktiválása", "Foszfolipázok aktiválása", "Endonukleázok aktiválása", "Az ATP-szintézis serkentése"],
+            answer: "Az ATP-szintézis serkentése",
+            explanation: "A magas intracelluláris Ca2+ szint egy sejtkárosító jel, amely aktiválja a lebontó enzimeket és károsítja a mitokondriumokat, ami tovább csökkenti, nem pedig serkenti az ATP-szintézist."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Mi a lipidperoxidáció?",
+            options: ["A zsírok emésztése", "A sejtmembránok zsírsavainak szabad gyökök által okozott károsodása", "Zsírok lerakódása az érfalban", "A zsírsavak energiává alakítása"],
+            answer: "A sejtmembránok zsírsavainak szabad gyökök által okozott károsodása",
+            explanation: "A lipidperoxidáció során a reaktív oxigénfajták (szabad gyökök) láncreakció-szerűen károsítják a sejtmembránok többszörösen telítetlen zsírsavait, ami a membránintegritás elvesztéséhez vezet."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "A neuroinflammatio során beáramló perifériás sejtek közül melyek jelennek meg legkorábban az ischaemiás területen?",
+            options: ["T-limfociták", "B-limfociták", "Monociták/Makrofágok", "Neutrofil granulociták"],
+            answer: "Neutrofil granulociták",
+            explanation: "A neutrofilek az akut gyulladásos válasz fő sejtes elemei, amelyek a vér-agy gát károsodása után órákon belül megjelennek az ischaemiás agyszövetben, és hozzájárulnak a másodlagos károsodáshoz."
+        },
+        {
+            topic: 'az_agyi_ischemia_korelettana',
+            question: "Milyen hatással van a hypothermia (testhőmérséklet csökkentése) az ischaemiás agykárosodásra?",
+            options: ["Súlyosbítja a károsodást", "Nincs hatással rá", "Neuroprotektív hatású lehet", "Fokozza a gyulladást"],
+            answer: "Neuroprotektív hatású lehet",
+            explanation: "A hypothermia csökkenti az agy metabolikus igényét, lassítja a károsító biokémiai folyamatokat (pl. excitotoxicitás, szabadgyök-képződés), és így védő (neuroprotektív) hatást fejthet ki."
+        },
+
+        // Tétel 4: Carotis rendszer
+        {
+            topic: 'carotis_rendszer',
+            question: "Az arteria carotis interna (ACI) melyik szakasza halad át a sinus cavernosuson?",
+            options: ["C1: Cervicalis szakasz", "C2: Petrosa szakasz", "C4: Cavernosus szakasz", "C7: Communicans szakasz"],
+            answer: "C4: Cavernosus szakasz",
+            explanation: "A C4, vagyis a cavernosus szakasz az, ahol az ACI a sinus cavernosuson belül halad, több agyideg társaságában."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik artéria elzáródása okoz leggyakrabban alsó végtagi túlsúlyú ellenoldali hemiparesist?",
+            options: ["A. cerebri media (ACM)", "A. cerebri anterior (ACA)", "A. cerebri posterior (ACP)", "A. choroidea anterior"],
+            answer: "A. cerebri anterior (ACA)",
+            explanation: "Az ACA látja el a nagyagyfélteke mediális felszínét, beleértve a lobulus paracentralist, ahol az alsó végtag motoros kérgi reprezentációja található. Ezért elzáródása alsó végtagi túlsúlyú bénulást okoz."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik artéria elzáródása okoz leggyakrabban faciobrachialis (arc és felső végtag) túlsúlyú hemiparesist és afáziát (domináns féltekén)?",
+            options: ["A. cerebri media (ACM)", "A. cerebri anterior (ACA)", "A. cerebri posterior (ACP)", "A. vertebralis"],
+            answer: "A. cerebri media (ACM)",
+            explanation: "Az ACM látja el a féltekék laterális felszínét, ahol az arc és a felső végtag motoros kérge, valamint a Broca- és Wernicke-féle beszédközpontok találhatók."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Mi a neve az ACM M1 szakaszából eredő, mély agyi struktúrákat ellátó kis perforáló ágaknak?",
+            options: ["Aa. thalamoperforantes", "Aa. lenticulostriatae", "Aa. pontinae", "A. recurrens Heubneri"],
+            answer: "Aa. lenticulostriatae",
+            explanation: "Az arteriae lenticulostriatae laterales az ACM M1 szakaszából erednek, és a törzsdúcok (putamen, globus pallidus) és a capsula interna jelentős részét látják el. Elzáródásuk lacunaris stroke-ot okoz."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Milyen tünetet okoz az a. ophthalmica (az ACI első intracranialis ága) átmeneti elzáródása?",
+            options: ["Diplopia (kettőslátás)", "Vertigo (szédülés)", "Amaurosis fugax (átmeneti vakság)", "Afázia (beszédzavar)"],
+            answer: "Amaurosis fugax (átmeneti vakság)",
+            explanation: "Az amaurosis fugax egy átmeneti, fájdalmatlan, egyoldali látásvesztés ('mint egy legördülő függöny'), amelyet a retina keringési zavara okoz, leggyakrabban a carotis rendszerből származó embólia miatt."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik tünetegyüttes NEM jellemző a nem-domináns (általában jobb) féltekei MCA szindrómára?",
+            options: ["Neglect szindróma", "Anosognosia (betegségbelátás hiánya)", "Konstrukciós apraxia", "Globális afázia"],
+            answer: "Globális afázia",
+            explanation: "Az afázia (beszédzavar) a domináns (általában bal) félteke károsodásának tünete. A globális afázia a Broca- és Wernicke-terület együttes, kiterjedt károsodásakor lép fel. A nem-domináns féltekei stroke-ra a neglect, anosognosia és vizuospaciális zavarok jellemzőek."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Mi a Gerstmann-szindróma?",
+            options: ["Acalculia, agraphia, ujjagnosia és jobb-bal tévesztés", "Afázia, apraxia és agnosia", "Hemiparesis, hemianesthesia és hemianopia", "Neglect, anosognosia és apraxia"],
+            answer: "Acalculia, agraphia, ujjagnosia és jobb-bal tévesztés",
+            explanation: "A Gerstmann-szindróma a domináns parietalis lebeny (gyrus angularis) károsodásának jellegzetes tünetegyüttese, amely a számolás (acalculia), írás (agraphia), ujjak felismerésének (ujjagnosia) és a jobb-bal orientáció zavarából áll."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik artéria ága az arteria recurrens Heubneri, és mit lát el?",
+            options: ["Az ACM ága, a temporális lebenyt látja el", "Az ACA ága, a capsula interna elülső szárát és a striatum egy részét látja el", "Az ACI ága, a hippocampust látja el", "Az ACP ága, a thalamust látja el"],
+            answer: "Az ACA ága, a capsula interna elülső szárát és a striatum egy részét látja el",
+            explanation: "Az a. recurrens Heubneri általában az ACA A2 szakaszából ered, és fontos mély struktúrákat lát el, mint a nucleus caudatus fejének és a putamen elülső részét, valamint a capsula interna elülső szárát."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik állítás igaz a Broca-afáziára?",
+            options: ["A beszéd fluens, de értelmetlen", "A beszédértés súlyosan károsodott", "A beszédprodukció nem fluens, agrammatikus, de a beszédértés viszonylag jó", "A beteg nem képes megismételni a hallott szavakat, de a spontán beszéde jó"],
+            answer: "A beszédprodukció nem fluens, agrammatikus, de a beszédértés viszonylag jó",
+            explanation: "A Broca- (motoros) afázia a domináns frontális lebeny (Broca-terület) károsodásakor lép fel, és a beszédképzés nehezítettsége jellemzi, miközben a beteg általában megérti a beszédet."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Mi a neglect szindróma?",
+            options: ["A betegség tagadása", "A beteg nem vesz tudomást a tér és/vagy a test egyik (általában bal) feléről", "Olvasási zavar", "Számolási zavar"],
+            answer: "A beteg nem vesz tudomást a tér és/vagy a test egyik (általában bal) feléről",
+            explanation: "A neglect (hemispatialis inattentio) a nem-domináns (általában jobb) parietalis lebeny károsodásának jellegzetes tünete, amikor a beteg figyelmen kívül hagyja a lézióval ellentétes tér- és testfelet."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik artéria elzáródása okozza leggyakrabban a lacunaris infarktusokat?",
+            options: ["Nagy kérgi ágak", "Perforáló artériák (pl. lenticulostriatae)", "Willis-kör összekötő artériái", "Vénás sinusok"],
+            answer: "Perforáló artériák (pl. lenticulostriatae)",
+            explanation: "A lacunaris infarktusok kis, mély agyi területeken kialakuló elhalások, amelyeket a mély agyi struktúrákat ellátó vékony, perforáló artériák (pl. lenticulostriatae, thalamoperforantes) elzáródása okoz, leggyakrabban magas vérnyomás következtében."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik tünet NEM jellemző az ACA szindrómára?",
+            options: ["Alsó végtagi túlsúlyú hemiparesis", "Vizeletinkontinencia", "Abulia (motivációhiány)", "Wernicke-afázia"],
+            answer: "Wernicke-afázia",
+            explanation: "A Wernicke-afázia (szenzoros beszédzavar) a domináns temporális lebeny hátsó részének károsodásakor lép fel, ami az ACM ellátási területe. Az ACA szindrómára a frontális lebeny tünetei (pl. abulia) és az alsó végtagi bénulás jellemző."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Mi az 'idegen kéz' (alien hand) szindróma?",
+            options: ["A beteg nem ismeri fel a saját kezét", "A beteg egyik keze akaratától független, célszerűnek tűnő mozgásokat végez", "A kéz érzéketlenné válik", "A kéz izmai elsorvadnak"],
+            answer: "A beteg egyik keze akaratától független, célszerűnek tűnő mozgásokat végez",
+            explanation: "Ez egy ritka neurológiai szindróma, amikor a beteg úgy érzi, a keze 'önálló életet él'. Gyakran a corpus callosum és a frontális lebeny mediális részének (ACA terület) károsodásakor fordul elő."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "A capsula interna vérellátásában melyik artéria játszik domináns szerepet?",
+            options: ["A. cerebri anterior (ACA)", "A. cerebri media (ACM)", "A. cerebri posterior (ACP)", "A. vertebralis"],
+            answer: "A. cerebri media (ACM)",
+            explanation: "Bár több artéria is ellátja, a capsula interna (a fő motoros és szenzoros pályák gyűjtőhelye) vérellátásának jelentős részét az ACM lenticulostriatalis ágai biztosítják."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "A Wernicke-féle szenzoros beszédközpont melyik artéria ellátási területén található?",
+            options: ["A. cerebri anterior (ACA)", "A. cerebri media (ACM)", "A. cerebri posterior (ACP)", "A. basilaris"],
+            answer: "A. cerebri media (ACM)",
+            explanation: "A Wernicke-központ a domináns félteke gyrus temporalis superiorának hátsó részén helyezkedik el, ami tipikusan az ACM inferior truncusának ellátási területéhez tartozik."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik tünet utalhat az ACI főtörzsi elzáródására, ha a kollaterális keringés elégtelen?",
+            options: ["Csak enyhe kézzsibbadás", "Izolált látótérkiesés", "Kiterjedt hemiplegia, globális afázia/neglect és tudatzavar", "Csak alsó végtagi gyengeség"],
+            answer: "Kiterjedt hemiplegia, globális afázia/neglect és tudatzavar",
+            explanation: "Az ACI főtörzsi elzáródása rossz kollaterális keringés esetén az ACA és MCA területek együttes, masszív infarktusát okozza, ami súlyos, az egész féltekét érintő tünetekkel és gyakran tudatzavarral jár."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Az a. choroidea anterior elzáródása milyen klasszikus tünet-triászt okozhat?",
+            options: ["Ataxia, nystagmus, vertigo", "Afázia, apraxia, agnosia", "Hemiparesis, hemiszenzoros zavar, homonym hemianopia", "Fejfájás, hányinger, tarkókötöttség"],
+            answer: "Hemiparesis, hemiszenzoros zavar, homonym hemianopia",
+            explanation: "Az AChA ritka elzáródása a capsula interna hátsó szárának, a thalamusnak és a tractus opticusnak az érintettsége miatt okozhatja ezt a klasszikus, bár nem mindig teljes tünetegyüttest."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Melyik állítás NEM igaz a Wernicke-afáziára?",
+            options: ["A beszéd fluens, de tartalmilag szegény", "A beteg nem érti a beszédet", "A beteg nehezen, akadozva beszél", "Jellemzőek a parafráziák (szótorzítások)"],
+            answer: "A beteg nehezen, akadozva beszél",
+            explanation: "A Wernicke- (szenzoros) afáziára a fluens, de értelmetlen beszéd és a súlyos beszédértési zavar jellemző. A nehéz, akadozó beszéd a Broca- (motoros) afázia tünete."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Az ACI melyik szakasza NEM ad le tipikusan ágakat?",
+            options: ["C1: Cervicalis szakasz", "C2: Petrosa szakasz", "C4: Cavernosus szakasz", "C6: Ophthalmicus szakasz"],
+            answer: "C1: Cervicalis szakasz",
+            explanation: "Az ACI cervicalis (nyaki) szakasza, ellentétben az a. carotis externával, jellegzetesen nem ad le ágakat a nyakon."
+        },
+        {
+            topic: 'carotis_rendszer',
+            question: "Mi a 'deviatio conjugata' jelensége akut MCA stroke-ban?",
+            options: ["A pupillák aszimmetriája", "A szemek és a fej akaratlanul a lézió oldala felé fordulnak", "A szemek és a fej az ellenoldal felé fordulnak", "A szemek nem tudnak felfelé nézni"],
+            answer: "A szemek és a fej akaratlanul a lézió oldala felé fordulnak",
+            explanation: "Akut fázisban a frontális tekintésközpont károsodása miatt a szemek és a fej a lézió oldala felé 'néznek', mivel az ép oldali központ túlsúlyba kerül."
+        },
+
+        // Tétel 5: Vertebro-basilaris rendszer
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Mi a Wallenberg-szindróma (lateralis medulláris szindróma) leggyakoribb oka?",
+            options: ["Az a. basilaris elzáródása", "Az a. vertebralis vagy a PICA elzáródása", "Az AICA elzáródása", "Az SCA elzáródása"],
+            answer: "Az a. vertebralis vagy a PICA elzáródása",
+            explanation: "A Wallenberg-szindrómát a nyúltvelő lateralis részének infarktusa okozza, amelyet leggyakrabban az a. vertebralis vagy az abból eredő a. cerebelli posterior inferior (PICA) elzáródása vált ki."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik tünet NEM jellemző a Wallenberg-szindrómára?",
+            options: ["Ipsilateralis Horner-szindróma", "Kontralaterális testfél fájdalom- és hőérzéskiesés", "Dysphagia (nyelészavar)", "Kontralaterális hemiplegia"],
+            answer: "Kontralaterális hemiplegia",
+            explanation: "A Wallenberg-szindrómában a pyramispálya (a fő motoros pálya) általában megkímélt, mivel az a nyúltvelő ventrális részén fut. Ezért a motoros gyengeség (hemiplegia/hemiparesis) nem jellemző tünet."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Mi a locked-in szindróma (bezártságszindróma) oka?",
+            options: ["A híd ventrális részének kétoldali károsodása", "A középagy kiterjedt infarktusa", "A nyúltvelő teljes elhalása", "Kétoldali féltekei stroke"],
+            answer: "A híd ventrális részének kétoldali károsodása",
+            explanation: "A locked-in szindrómát az a. basilaris elzáródása okozza, ami a híd bázisának kétoldali infarktusához vezet. Ez a corticospinalis és corticobulbaris pályák megszakadását eredményezi, ami quadriplegiát és anarthriát okoz megtartott tudat mellett."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik artéria látja el a kisagy felső felszínét?",
+            options: ["PICA", "AICA", "SCA", "PCA"],
+            answer: "SCA",
+            explanation: "Az arteria cerebelli superior (SCA), az a. basilaris legrostralisabb páros ága, látja el a kisagy egész felső felszínét, a vermis superior nagy részét és a mély kisagyi magvakat."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "A 'top-of-the-basilar' szindróma mely struktúrák károsodásával jár?",
+            options: ["Nyúltvelő és a kisagy alsó része", "A híd alsó és középső része", "A középagy, a thalamus és az occipitalis/temporalis lebenyek", "Csak a kisagy"],
+            answer: "A középagy, a thalamus és az occipitalis/temporalis lebenyek",
+            explanation: "Ez a szindróma az a. basilaris csúcsának vagy a PCA-k proximális szakaszainak embóliás elzáródása miatt alakul ki, és a tudat, látás, memória és szemmozgások komplex zavarával jár."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Az akut, izolált halláscsökkenés és vertigo melyik artéria elzáródására utalhat?",
+            options: ["PICA", "AICA (vagy az abból eredő a. labyrinthi)", "SCA", "PCA"],
+            answer: "AICA (vagy az abból eredő a. labyrinthi)",
+            explanation: "Az a. labyrinthi, amely leggyakrabban az AICA ága, látja el a belső fület. Elzáródása hirtelen hallásvesztést és/vagy vertigót okoz, ami fontos elkülönítő jel a PICA-szindrómától."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Mi a foetalis típusú PCA?",
+            options: ["Egy ritka kisagyi artéria", "A PCA az a. basilaris helyett az a. carotis internából ered egy tág PComA-n keresztül", "A PCA hiánya", "A PCA korai kettéoszlása"],
+            answer: "A PCA az a. basilaris helyett az a. carotis internából ered egy tág PComA-n keresztül",
+            explanation: "Foetalis PCA esetén a PCA vérellátása funkcionálisan az elülső (carotis) keringéstől függ, mivel az a. basilaris felőli összeköttetése (P1 szakasz) fejletlen. Ez egy gyakori anatómiai variáció."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik tünetegyüttesre jellemző az ipsilateralis III. agyideg bénulás és a kontralaterális hemiparesis?",
+            options: ["Wallenberg-szindróma", "Benedikt-szindróma", "Weber-szindróma", "Millard-Gubler szindróma"],
+            answer: "Weber-szindróma",
+            explanation: "A Weber-szindrómát a középagy ventrális részének infarktusa okozza (PCA perforáns ágak), ami károsítja a kilépő III. agyideg rostjait (ipsilateralis tünet) és a pyramispályát (kontralaterális tünet)."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik struktúrát látja el az arteria spinalis anterior a nyúltvelőben?",
+            options: ["A nyúltvelő lateralis részét", "A nyúltvelő mediális részét (pyramis, lemniscus medialis)", "A nyúltvelő dorsalis részét", "Az egész nyúltvelőt"],
+            answer: "A nyúltvelő mediális részét (pyramis, lemniscus medialis)",
+            explanation: "Az a. spinalis anterior a nyúltvelő mediális részét látja el, beleértve a pyramisokat (corticospinalis pálya) és a lemniscus medialist (proprioceptív pálya)."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Mi az a 'drop attack' a vertebrobasilaris insufficientia (VBI) tüneteként?",
+            options: ["Hirtelen eszméletvesztés", "Hirtelen látásvesztés", "Az alsó végtagok hirtelen tónusvesztése miatti esés, eszméletvesztés nélkül", "Hirtelen, erős fejfájás"],
+            answer: "Az alsó végtagok hirtelen tónusvesztése miatti esés, eszméletvesztés nélkül",
+            explanation: "A drop attack az agytörzsi motoros pályák átmeneti ischaemiájára utal, ami az alsó végtagok hirtelen tónusvesztését és elesést okoz, de a tudat megmarad."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Az a. vertebralis disszekciója leggyakrabban melyik szakaszon fordul elő?",
+            options: ["V1 (praeforaminalis)", "V2 (foraminalis)", "V3 (atlanticus/extraduralis)", "V4 (intraduralis)"],
+            answer: "V3 (atlanticus/extraduralis)",
+            explanation: "Az a. vertebralis disszekciója (az érfal rétegeinek szétválása) leggyakrabban a V3 szakaszon következik be, ahol az artéria kilép a csigolyák közül és kanyarog, így jobban ki van téve a nyaki traumáknak és mozgásoknak."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "A 'kérgi vakság' (a beteg nem lát, de nincs tudatában a vakságának) melyik artéria elzáródásakor léphet fel?",
+            options: ["A. opthalmica", "Kétoldali A. cerebri media (ACM)", "Kétoldali A. cerebri posterior (ACP)", "A. basilaris"],
+            answer: "Kétoldali A. cerebri posterior (ACP)",
+            explanation: "A kérgi vakság a kétoldali primer látókéreg (occipitalis lebeny) pusztulásakor alakul ki. Ezt a területet a PCA látja el. Ha a látási asszociációs kéreg is károsodik, a beteg nem ismeri fel a vakságát (Anton-szindróma)."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik szindrómára jellemző az ipsilateralis ataxia és intenciós tremor, valamint a kontralaterális fájdalom- és hőérzéskiesés?",
+            options: ["AICA-szindróma", "SCA-szindróma", "Weber-szindróma", "Wallenberg-szindróma"],
+            answer: "SCA-szindróma",
+            explanation: "Az SCA-szindrómára a kisagy felső részének és a pedunculus cerebellaris superiornak a károsodása miatti súlyos ipsilateralis ataxia, valamint az agytörzsi pályák (pl. tractus spinothalamicus) érintettsége miatti kontralaterális érzészavar jellemző."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik agytörzsi szindróma kombinálja az ipsilateralis VI. és VII. agyidegbénulást a kontralaterális hemiparesissel?",
+            options: ["Weber-szindróma", "Benedikt-szindróma", "Millard-Gubler szindróma", "Wallenberg-szindróma"],
+            answer: "Millard-Gubler szindróma",
+            explanation: "A Millard-Gubler szindróma a híd alsó ventrális részének károsodásakor lép fel, érintve a kilépő VI. és VII. agyideg rostjait (ipsilateralis tünetek) és a pyramispályát (kontralaterális hemiparesis)."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "A thalamikus fájdalom (súlyos, égető, nehezen csillapítható fájdalom) melyik artéria elzáródása után alakulhat ki?",
+            options: ["A. cerebri anterior (ACA)", "A. cerebri media (ACM)", "A. cerebri posterior (ACP)", "A. cerebelli superior (SCA)"],
+            answer: "A. cerebri posterior (ACP)",
+            explanation: "A Dejerine-Roussy szindróma, vagy thalamikus fájdalom, a thalamus (főleg a VPL/VPM magok) infarktusa után alakulhat ki, hetekkel vagy hónapokkal az esemény után. Ezt a területet a PCA thalamoperforáló ágai látják el."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik a VBI egyik leggyakoribb tünete?",
+            options: ["Afázia", "Vertigo (forgó szédülés)", "Alsó végtagi bénulás", "Memóriavesztés"],
+            answer: "Vertigo (forgó szédülés)",
+            explanation: "A vertigo, vagy forgó jellegű szédülés, a VBI egyik leggyakoribb és legjellegzetesebb tünete, amelyet a vestibularis rendszer (belső fül, agytörzsi magok) vagy a kisagy ischaemiája okoz."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Mi a 'subclavian steal' szindróma?",
+            options: ["Az a. subclavia aneurizmája", "Az a. subclavia proximális elzáródása miatt a vér az azonos oldali a. vertebralisból retrográd módon 'lopódik el'", "A kulcscsont alatti idegfonat kompressziója", "A carotis és a subclavia közötti kóros összeköttetés"],
+            answer: "Az a. subclavia proximális elzáródása miatt a vér az azonos oldali a. vertebralisból retrográd módon 'lopódik el'",
+            explanation: "Subclavian steal szindrómában az a. subclavia szűkülete miatt a kar munkavégzésekor a vér az a. vertebralisból visszafelé áramlik a kar felé, ami a vertebrobasilaris keringés csökkenését és VBI tüneteket okozhat."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik állítás igaz a 'top-of-the-basilar' szindrómára?",
+            options: ["Főleg a nyúltvelőt érinti", "Elsősorban súlyos motoros bénulással jár", "Gyakran okoz komplex látás-, tudat- és memóriazavarokat", "Mindig jó a prognózisa"],
+            answer: "Gyakran okoz komplex látás-, tudat- és memóriazavarokat",
+            explanation: "Ez a szindróma az a. basilaris csúcsának elzáródása miatt a középagy, thalamus és a PCA területek ischaemiáját okozza, ami jellegzetesen a magasabb szintű funkciók (látásfeldolgozás, tudat, memória) komplex zavarával jár."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Az a. vertebralis melyik szakaszán halad át a nyaki csigolyák foramen transversariumaiban?",
+            options: ["V1", "V2", "V3", "V4"],
+            answer: "V2",
+            explanation: "A V2 (foraminalis) szakasz az, ahol az a. vertebralis a C6-tól a C1 csigolya harántnyúlványainak nyílásain keresztül halad felfelé."
+        },
+        {
+            topic: 'vertebro_basilaris_rendszer',
+            question: "Melyik struktúrát NEM látja el a PICA?",
+            options: ["A kisagy alsó felszínét", "A nyúltvelő lateralis részét", "A híd bázisát", "A IV. agykamra plexus choroideusát"],
+            answer: "A híd bázisát",
+            explanation: "A híd bázisát (basis pontis) az a. basilarisból eredő direkt pontin ágak látják el. A PICA a nyúltvelő és a kisagy alsó részének vérellátásáért felelős."
+        }
+    ];
+
+    const startScreen = document.getElementById('start-screen');
+    const quizContainer = document.getElementById('quiz-container');
+    const resultsScreen = document.getElementById('results-screen');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const questionCounterEl = document.getElementById('question-counter');
+    const scoreEl = document.getElementById('score');
+    const finalScoreEl = document.getElementById('final-score');
+    const resultMessageEl = document.getElementById('result-message');
+    const explanationModal = document.getElementById('explanation-modal');
+    const explanationTitleEl = document.getElementById('explanation-title');
+    const explanationTextEl = document.getElementById('explanation-text');
+
+    let currentTopicQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let questionsAnswered = false;
+
+    function startQuiz(topic) {
+        let filteredQuestions = quizData.filter(q => q.topic === topic);
+        currentTopicQuestions = shuffleArray(filteredQuestions);
+        
+        if (currentTopicQuestions.length > 20) {
+            currentTopicQuestions = currentTopicQuestions.slice(0, 20);
+        }
+        
+        currentQuestionIndex = 0;
+        score = 0;
+        
+        startScreen.classList.add('hidden');
+        resultsScreen.classList.add('hidden');
+        quizContainer.classList.remove('hidden');
+        quizContainer.style.opacity = '0';
+        setTimeout(() => { quizContainer.style.opacity = '1'; }, 10);
+        
+        scoreEl.textContent = `Pontszám: 0`;
+        displayQuestion();
+    }
+
+    function displayQuestion() {
+        questionsAnswered = false;
+        nextBtn.classList.add('hidden');
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        
+        questionCounterEl.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${currentTopicQuestions.length}`;
+        questionEl.textContent = currentQuestion.question;
+        
+        optionsEl.innerHTML = '';
+        const shuffledOptions = shuffleArray([...currentQuestion.options]);
+        shuffledOptions.forEach(option => {
+            const button = document.createElement('button');
+            button.innerHTML = option;
+            button.classList.add('option-btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-slate-300', 'bg-slate-50', 'hover:bg-slate-200');
+            button.onclick = () => selectAnswer(button, option);
+            optionsEl.appendChild(button);
+        });
+    }
+
+    function selectAnswer(button, selectedOption) {
+        if (questionsAnswered) return;
+        questionsAnswered = true;
+
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        const isCorrect = selectedOption === currentQuestion.answer;
+        
+        Array.from(optionsEl.children).forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent === currentQuestion.answer) {
+                 btn.classList.add('correct');
+            }
+        });
+
+        if (isCorrect) {
+            score++;
+            button.classList.add('correct');
+            explanationTitleEl.textContent = "✅ Helyes válasz!";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-green-600";
+        } else {
+            button.classList.add('incorrect');
+            explanationTitleEl.textContent = "❌ Helytelen válasz";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-red-600";
+        }
+
+        scoreEl.textContent = `Pontszám: ${score}`;
+        explanationTextEl.innerHTML = `<b>Magyarázat:</b> ${currentQuestion.explanation}`;
+        showExplanationModal();
+        nextBtn.classList.remove('hidden');
+    }
+    
+    function showExplanationModal() {
+        explanationModal.style.display = "flex";
+        explanationModal.onclick = (e) => {
+             if (e.target === explanationModal) {
+                 explanationModal.style.display = "none";
+             }
+        };
+    }
+
+    nextBtn.addEventListener('click', () => {
+        explanationModal.style.display = "none";
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentTopicQuestions.length) {
+            displayQuestion();
+        } else {
+            showResults();
+        }
+    });
+
+    function showResults() {
+        quizContainer.classList.add('hidden');
+        resultsScreen.classList.remove('hidden');
+        
+        const percentage = Math.round((score / currentTopicQuestions.length) * 100);
+        finalScoreEl.textContent = `${percentage}%`;
+        
+        let message = "";
+        if (percentage === 100) {
+            message = "Tökéletes! Készen állsz a vizsgára. 🏆";
+        } else if (percentage >= 80) {
+            message = "Kiváló eredmény! Már csak egy kis ismétlés kell. 👍";
+        } else if (percentage >= 50) {
+            message = "Szép munka! Gyakorolj még egy kicsit. 😊";
+        } else {
+            message = "Ne add fel, ismételd át az anyagot és próbáld újra! 📚";
+        }
+        resultMessageEl.textContent = message;
+    }
+
+    function restartQuiz() {
+        resultsScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+</script>
+
+</body>
+</html>

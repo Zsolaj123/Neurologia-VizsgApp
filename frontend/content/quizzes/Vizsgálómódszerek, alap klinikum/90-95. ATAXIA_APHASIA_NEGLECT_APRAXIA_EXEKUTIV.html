@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Kvíz - 3. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.correct {
+            background-color: #10B981; /* Emerald-500 */
+            color: white;
+            border-color: #059669; /* Emerald-600 */
+        }
+        .quiz-option.incorrect {
+            background-color: #EF4444; /* Red-500 */
+            color: white;
+            border-color: #DC2626; /* Red-600 */
+        }
+        .quiz-option:not(.disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection -->
+        <div id="topic-selection" class="text-center">
+            <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Neurológiai Kvíz - 3. rész</h1>
+            <p class="text-lg mb-8 text-gray-600 dark:text-gray-400">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quiz-interface" class="hidden">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-gray-900 dark:text-white">Téma</h2>
+                    <div id="score" class="text-lg font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-1 rounded-full">Pontszám: 0 / 0</div>
+                </div>
+                <div id="progress-bar-container" class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-xl font-medium mb-6 text-gray-800 dark:text-gray-200"></p>
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="hidden mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Magyarázat</h3>
+                    <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="back-to-topics" class="py-2 px-5 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Témakörök</button>
+                    <button id="next-question" class="py-2 px-5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Score Screen -->
+        <div id="final-score-screen" class="hidden text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">A kvíz vége!</h2>
+            <p class="text-xl mb-6 text-gray-700 dark:text-gray-300">A pontszámod a(z) <span id="final-topic-title" class="font-semibold"></span> témakörben:</p>
+            <p id="final-score" class="text-6xl font-bold mb-8 text-blue-600 dark:text-blue-400">0 / 20</p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Újra</button>
+                <button id="change-topic" class="py-3 px-6 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Másik téma</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            'ataxia': {
+                title: 'Végtag- és törzsataxiák',
+                questions: [
+                    { question: "Mi az ataxia definíciója?", options: ["Izomerő-csökkenés", "Mozgáskoordinációs zavar", "Érzékszervi kiesés", "Akaratlan izomrángás"], correct: 1, explanation: "Az ataxia egy neurológiai tünetegyüttes, amelyet az akaratlagos mozgások koordinációjának, összerendezettségének zavara jellemez, nem pedig az izomerő hiánya." },
+                    { question: "Melyik agyi struktúra károsodása okozza elsődlegesen a cerebelláris ataxiát?", options: ["Bazális ganglionok", "Talamusz", "Kisagy (cerebellum)", "Hippokampusz"], correct: 2, explanation: "A cerebelláris ataxia a kisagy (cerebellum) vagy annak fő be- és kimeneti pályáinak károsodása következtében alakul ki." },
+                    { question: "Mi a Romberg-próba pozitivitásának legfőbb jele?", options: ["A beteg már nyitott szemmel is instabil.", "A szem becsukásakor az instabilitás drámaian fokozódik.", "A beteg mindig előre dől.", "A beteg szédülésre panaszkodik."], correct: 1, explanation: "A pozitív Romberg-jel azt jelenti, hogy a beteg instabilitása a szem becsukásakor (a vizuális kontroll kiesésekor) drámaian fokozódik, ami elsősorban szenzoros vagy vesztibuláris ataxiára utal." },
+                    { question: "Melyik tünet NEM jellemző a cerebelláris ataxiára?", options: ["Intenciós tremor", "Dysdiadochokinesia", "Nyugalmi tremor", "Dysmetria"], correct: 2, explanation: "A nyugalmi tremor a bazális ganglionok, különösen a Parkinson-kór károsodására jellemző. A cerebelláris károsodás intenciós (célirányos mozgás közbeni) tremort okoz." },
+                    { question: "A törzsataxia (állás és járás bizonytalansága) a kisagy melyik részének károsodására utal leginkább?", options: ["Laterális hemiszfériumok", "Vermis és flocculonodularis lebeny", "Nucleus dentatus", "Pedunculus cerebellaris superior"], correct: 1, explanation: "A törzsataxia tipikusan a kisagy középvonali struktúráinak, a vermisnek (spinocerebellum) és a flocculonodularis lebenynek (vestibulocerebellum) a károsodására utal." },
+                    { question: "Mi a dysmetria?", options: ["A beszéd skandáló jellege.", "A gyors, váltakozó mozgások nehezítettsége.", "A célmozgások pontatlan kivitelezése (túllövés vagy alullövés).", "Csökkent izomtónus."], correct: 2, explanation: "A dysmetria a célirányos mozgások pontatlanságát jelenti, a távolság és az erőkifejtés rossz felmérése miatt. Megnyilvánulhat hipermetriában (túllövés) vagy hipometriában (alullövés)." },
+                    { question: "Melyik pályarendszer károsodása okoz szenzoros ataxiát?", options: ["Pyramispálya", "Spinothalamicus pálya", "Gerincvelői hátsó köteg", "Corticobulbaris pálya"], correct: 2, explanation: "A szenzoros ataxia a proprioceptív információkat szállító pályák, különösen a gerincvelő hátsó kötegeinek (funiculus posterior) károsodása miatt alakul ki." },
+                    { question: "A 'skandáló beszéd' melyik ataxiatípushoz társul?", options: ["Szenzoros ataxia", "Vesztibuláris ataxia", "Cerebelláris ataxia", "Frontális ataxia"], correct: 2, explanation: "A skandáló beszéd, amely a cerebelláris dysarthria egyik formája, a kisagyi károsodás jellegzetes tünete." },
+                    { question: "Mi a dysdiadochokinesia?", options: ["Nyelési zavar", "Gyors, alternáló mozgások kivitelezésének zavara", "Akaratlan szemmozgás", "Írászavar"], correct: 1, explanation: "A dysdiadochokinesia a gyors, egymást követő ellentétes mozgások (pl. alkar forgatása) kivitelezésének nehezítettsége, ami a mozgások lelassulásában, darabosságában nyilvánul meg." },
+                    { question: "Melyik vitamin hiánya okozhat funicularis myelosist, ami szenzoros ataxiával jár?", options: ["C-vitamin", "D-vitamin", "A-vitamin", "B12-vitamin"], correct: 3, explanation: "A B12-vitamin hiánya a gerincvelő hátsó és oldalsó kötegeinek demyelinizációjához (funicularis myelosis) vezethet, ami szenzoros ataxiát és pyramisjeleket okoz." },
+                    { question: "Melyik állítás igaz a cerebelláris laesio okozta tünetek oldaliságára?", options: ["Mindig kontralaterális (ellenoldali).", "Mindig ipszilaterális (azonos oldali).", "Mindig kétoldali.", "Nem mutat oldaliságot."], correct: 1, explanation: "A kisagyi pályák anatómiai elrendeződése miatt a féloldali kisagyi károsodások jellemzően azonos (ipszilaterális) oldali tüneteket okoznak." },
+                    { question: "Mi a 'dobogó' vagy 'kalapáló' járás jellemzője?", options: ["Cerebelláris ataxia", "Szenzoros ataxia", "Vesztibuláris ataxia", "Parkinsonos járás"], correct: 1, explanation: "A 'dobogó' járás a szenzoros ataxiára jellemző. A beteg magasra emeli, majd a földhöz csapja a lábát, hogy a proprioceptív deficitet más érzékszervi csatornákon (hallás, tapintás) keresztül kompenzálja." },
+                    { question: "Az intenciós tremor melyik mozgásfázisban a legkifejezettebb?", options: ["Nyugalomban", "A mozgás indításakor", "A mozgás közben egyenletesen", "A célhoz közeledve"], correct: 3, explanation: "Az intenciós tremor a célirányos mozgás végfázisában, a célhoz közeledve a legerősebb, legdurvább hullámú." },
+                    { question: "Mi a vesztibuláris ataxia legdominánsabb tünete?", options: ["Intenciós tremor", "Forgó szédülés (vertigo)", "Skandáló beszéd", "Hypotonia"], correct: 1, explanation: "A vesztibuláris ataxia legjellegzetesebb és leggyakrabban domináló tünete a forgó jellegű szédülés (vertigo), amihez gyakran hányinger és hányás is társul." },
+                    { question: "Melyik agyi struktúra károsodására utal a végtagataxia?", options: ["Vermis", "Lobulus flocculonodularis", "Kisagyi hemiszfériumok", "Agytörzsi vesztibuláris magvak"], correct: 2, explanation: "A végtagataxia (a karok és lábak mozgáskoordinációs zavara) elsősorban a kisagyi féltekék (hemisphaeriumok), azaz a neocerebellum károsodására utal." },
+                    { question: "Melyik próba a legalkalmasabb a dysdiadochokinesia vizsgálatára?", options: ["Orr-ujjhegy kísérlet", "Romberg-próba", "Gyors, alternáló alkarforgatás", "Sarok-térd kísérlet"], correct: 2, explanation: "A gyors, váltakozó mozgások, mint az alkar pronáció-szupinációja, a legdirektebb módon tesztelik a dysdiadochokinesia jelenlétét." },
+                    { question: "Melyik örökletes ataxia típusra jellemző a hypertrophiás cardiomyopathia és a diabetes mellitus?", options: ["Spinocerebelláris ataxia 1 (SCA1)", "Friedreich-ataxia (FRDA)", "Ataxia-telangiectasia", "Epizodikus ataxia 2 (EA2)"], correct: 1, explanation: "A Friedreich-ataxia egy multisystemás betegség, ahol a neurológiai tünetek mellett gyakoriak a nem-neurológiai manifesztációk, mint a hypertrophiás cardiomyopathia és a cukorbetegség." },
+                    { question: "Mire utal a rebound fenomén (Stewart-Holmes jel) hiánya?", options: ["Alsó motoneuron sérülésre", "Kisagyi károsodásra", "Bazális ganglion betegségre", "Normális leletre"], correct: 1, explanation: "A rebound fenomén hiánya (azaz a 'fékező' antagonista izomkontrakció elmaradása) a kisagy, különösen a hemiszfériumok károsodására utal, jelezve az agonista-antagonista izmok koordinációjának zavarát." },
+                    { question: "Mi a különbség a cerebelláris és a szenzoros ataxia között a szem csukásának hatására?", options: ["A cerebelláris ataxia javul, a szenzoros romlik.", "A cerebelláris ataxia nem vagy alig romlik, a szenzoros drámaian romlik.", "Mindkettő javul.", "Mindkettő egyformán romlik."], correct: 1, explanation: "A szenzoros ataxiás beteg a látásával kompenzálja a propriocepció hiányát, ezért a szem becsukása drámaian rontja az egyensúlyát. A cerebelláris ataxiát a vizuális kontroll alig befolyásolja." },
+                    { question: "Az 'ingareflex' (pendular reflex) melyik kisagyi tünet következménye?", options: ["Dysmetria", "Hypotonia", "Nystagmus", "Dysarthria"], correct: 1, explanation: "Az ingareflex, amikor a mélyreflex kiváltása után a végtag többször tehetetlenül kileng, a kisagyi hypotonia (csökkent izomtónus) egyik jellegzetes megnyilvánulása." }
+                ]
+            },
+            'aphasia': {
+                title: 'Folyamatos aphasiák, aphasia vizsgálata',
+                questions: [
+                    { question: "Mi az afázia alapvető definíciója?", options: ["A hangképzés zavara.", "Szerzett nyelvi zavar agyi sérülés következtében.", "Fejlődési beszédhiba.", "Az intelligencia elvesztése."], correct: 1, explanation: "Az afázia egy szerzett neurogén kommunikációs zavar, amely az agy sérülése miatt a már kialakult nyelvi képességeket (beszédprodukció, értés, olvasás, írás) érinti." },
+                    { question: "Melyik agyfélteke sérülése okoz leggyakrabban afáziát?", options: ["A jobb agyfélteke.", "A bal agyfélteke.", "A kisagy.", "Mindkét félteke egyformán."], correct: 1, explanation: "A legtöbb embernél (a jobbkezesek ~95%-ánál és a balkezesek többségénél is) a bal agyfélteke domináns a nyelvi funkciók tekintetében, így annak sérülése okoz afáziát." },
+                    { question: "Mi a legfőbb jellemzője a Wernicke-afáziának?", options: ["Lassú, erőlködő beszéd.", "Súlyos beszédértési zavar fluens, de tartalmatlan beszéd mellett.", "Kiváló utánmondás.", "Csak a megnevezés zavara."], correct: 1, explanation: "A Wernicke-afázia (szenzoros, fluens afázia) kardinális tünete a súlyos beszédértési zavar, miközben a spontán beszéd folyamatos, de parafáziákkal és neologizmusokkal teli, így gyakran érthetetlen." },
+                    { question: "Melyik nyelvi képesség a legsúlyosabban károsodott kondukciós afáziában?", options: ["Beszédértés", "Spontán beszéd", "Utánmondás", "Megnevezés"], correct: 2, explanation: "A kondukciós afázia legjellegzetesebb tünete a diszproporcionálisan súlyos utánmondási zavar, ami a Broca- és Wernicke-területeket összekötő fasciculus arcuatus sérülésére utal." },
+                    { question: "Melyik állítás igaz a transzkortikális afáziákra?", options: ["Mindig a beszédértés a legsúlyosabban érintett.", "Jellemzőjük a non-fluens beszéd.", "Közös jellemzőjük a relatíve jó, megőrzött utánmondási képesség.", "Mindig a Broca-terület sérülése okozza őket."], correct: 2, explanation: "A transzkortikális afáziák (motoros, szenzoros, kevert) közös és megkülönböztető jegye a jó, gyakran echolaliaszerű utánmondási képesség, miközben a spontán beszéd vagy a beszédértés súlyosan károsodott." },
+                    { question: "Mi a 'szósaláta' jelensége?", options: ["Agrammatikus, távirati stílusú beszéd.", "A beszéd teljes hiánya.", "Érthetetlen, halandzsa-szerű beszéd, tele neologizmusokkal és parafáziákkal.", "Monoton, érzelemmentes beszéd."], correct: 2, explanation: "A 'szósaláta' (jargon) a súlyos Wernicke-afázia jellemzője, ahol a beszéd annyira tele van szócserékkel (parafáziák) és új, értelmetlen szavakkal (neologizmusok), hogy teljesen érthetetlenné válik." },
+                    { question: "Melyik a legenyhébb afázia típus, melynek fő tünete a szótalálási nehézség?", options: ["Globális afázia", "Broca-afázia", "Wernicke-afázia", "Anómiás afázia"], correct: 3, explanation: "Az anómiás (vagy amnesztikus) afázia a legenyhébb forma, ahol a fő tünet az anómia, azaz a szótalálási nehézség, miközben a fluencia, a grammatika és a beszédértés viszonylag jó." },
+                    { question: "A betegágy melletti vizsgálat során melyik feladat a legfontosabb a fluens és non-fluens afáziák elkülönítésére?", options: ["Utánmondás", "Tárgymegnevezés", "A spontán beszéd megfigyelése", "Olvasás"], correct: 2, explanation: "A spontán beszéd megfigyelése és elemzése (pl. beszélgetés, képleírás) a legfontosabb annak megítélésére, hogy a beszéd folyamatos (fluens) vagy akadozó, erőlködő (non-fluens)." },
+                    { question: "Mi az a fonemikus parafázia?", options: ["Egy szó helyettesítése egy jelentésében hasonló másik szóval (pl. 'szék' helyett 'asztal').", "Egy szó helyettesítése egy hangzásában hasonló, de értelmetlen szóval.", "Hangok cseréje, kihagyása vagy betoldása egy szóban (pl. 'telefon' helyett 'tefelon').", "Egy teljesen új, értelmetlen szó képzése."], correct: 2, explanation: "A fonemikus (vagy literális) parafázia a célszó hangalaki torzulását jelenti, például hangok felcserélésével, kihagyásával vagy hozzáadásával." },
+                    { question: "Melyik afázia típusra jellemző az anozognózia (betegségtudat hiánya)?", options: ["Broca-afázia", "Wernicke-afázia", "Kondukciós afázia", "Anómiás afázia"], correct: 1, explanation: "A Wernicke-afáziában szenvedő betegek gyakran nincsenek tudatában beszédük érthetetlenségének és a súlyos beszédértési zavaruknak, ez az anozognózia." },
+                    { question: "Melyik képesség vizsgálata segít leginkább elkülöníteni a centrális (pl. Broca, Wernicke) és a pericentrális (transzkortikális) afáziákat?", options: ["Beszédértés", "Spontán beszéd fluenciája", "Megnevezés", "Utánmondás"], correct: 3, explanation: "Az utánmondás képessége a kulcsfontosságú differenciáldiagnosztikai marker. Míg a centrális afáziákban (Broca, Wernicke, kondukciós) az utánmondás sérül, addig a transzkortikális formákban relatíve megőrzött." },
+                    { question: "Mi a Magyar Afázia Szűrőteszt (MASZT) fő célja?", options: ["Az afázia teljes körű, részletes diagnosztikája.", "A post-stroke afázia gyanújának gyors, betegágy melletti megállapítása.", "Kizárólag a beszédapraxia vizsgálata.", "A beteg intelligencia szintjének mérése."], correct: 1, explanation: "A MASZT egy 5-10 perc alatt felvehető szűrőteszt, amelynek célja az afázia jelenlétének és súlyosságának gyors, orientáló felmérése, különösen az akut stroke ellátásban." },
+                    { question: "Melyik állítás NEM igaz az afáziára?", options: ["Agyi sérülés okozza.", "Az intelligencia elvesztését jelenti.", "Érintheti a beszédértést és produkciót is.", "Lehet fluens vagy non-fluens."], correct: 1, explanation: "Az afázia nem az intelligencia elvesztését jelenti. Az érintett személyek gondolkodási képességei megmaradnak, de a nyelvi funkcióik, a kommunikációs képességeik sérülnek." },
+                    { question: "Melyik afázia típusban a legsúlyosabb az összes nyelvi modalitás károsodása?", options: ["Anómiás afázia", "Kondukciós afázia", "Globális afázia", "Transzkortikális motoros afázia"], correct: 2, explanation: "Globális afázia esetén minden nyelvi modalitás – beszédprodukció, értés, utánmondás, megnevezés, olvasás, írás – súlyosan, szinte teljesen károsodik egy kiterjedt bal féltekei sérülés miatt." },
+                    { question: "Mi a 'conduite d'approche' jelenség?", options: ["A beteg elkerüli a kommunikációt.", "A beteg ismételt kísérleteket tesz egy szó kijavítására, egyre közelebb kerülve a célformához.", "A beteg mások szavait ismételgeti.", "A beszéd egyre halkulóvá és gyorsulóvá válik."], correct: 1, explanation: "A 'conduite d'approche' a kondukciós afáziára jellemző viselkedés, ahol a beteg észleli saját fonemikus parafáziáit, és ismételt, gyakran sikertelen kísérleteket tesz a szó helyes kiejtésére." },
+                    { question: "Melyik afáziához társul leggyakrabban beszédapraxia?", options: ["Wernicke-afázia", "Anómiás afázia", "Transzkortikális szenzoros afázia", "Broca-afázia"], correct: 3, explanation: "A beszédapraxia, a beszédmozgások tervezésének zavara, gyakran társul non-fluens afáziákhoz, különösen a Broca-afáziához, mivel az érintett agyterületek (bal inferior frontális gyrus) átfednek." },
+                    { question: "Mi az echolalia?", options: ["A beszéd teljes hiánya.", "Új, értelmetlen szavak képzése.", "Mások szavainak, mondatainak visszhangszerű, kényszeres ismételgetése.", "A szavak jelentésének felcserélése."], correct: 2, explanation: "Az echolalia a hallott beszéd automatikus, visszhangszerű ismétlése, gyakran a jelentés megértése nélkül. Jellemző a transzkortikális afáziákra." },
+                    { question: "A betegágy melletti vizsgálat során mire következtethetünk, ha a beteg egyszerű igen/nem kérdésekre is megbízhatatlanul válaszol?", options: ["Súlyos beszédprodukciós zavarra.", "Súlyos beszédértési zavarra.", "Anómiára.", "Diszartriára."], correct: 1, explanation: "Az egyszerű, személyes vagy általános tényekre vonatkozó igen/nem kérdésekre adott hibás válaszok súlyos beszédértési zavarra utalnak, ami a Wernicke- vagy globális afázia egyik fő jellemzője." },
+                    { question: "Milyen típusú afáziára utal, ha a beteg beszéde non-fluens, agrammatikus, de az utánmondása feltűnően jó?", options: ["Broca-afázia", "Globális afázia", "Transzkortikális motoros afázia (TCMA)", "Kondukciós afázia"], correct: 2, explanation: "A non-fluens, erőlködő beszéd és a jó utánmondás kombinációja a transzkortikális motoros afázia klasszikus tünete. Ez különbözteti meg a Broca-afáziától, ahol az utánmondás is rossz." },
+                    { question: "Agrammatizmus alatt mit értünk?", options: ["A beszéd dallamának hiányát.", "A nyelvtani szerkezetek, ragok, funkciószavak elhagyását, ami 'távirati stílusú' beszédhez vezet.", "A szavak hangalaki torzítását.", "A beszéd sebességének lelassulását."], correct: 1, explanation: "Az agrammatizmus a nyelvtani szerkezetek hibás használatát jelenti, ami a funkciószavak (névelők, kötőszavak) és a ragok elhagyásában, valamint egyszerűsített mondatszerkezetekben nyilvánul meg. Jellemzően a non-fluens afáziák (pl. Broca-afázia) tünete." }
+                ]
+            },
+            'neglect': {
+                title: 'Neglect',
+                questions: [
+                    { question: "Mi a neglect szindróma legfőbb jellemzője?", options: ["A látótér egyik felének kiesése.", "Az agysérüléssel ellentétes téri fél figyelmen kívül hagyása.", "A mozgáskoordináció zavara.", "Súlyos emlékezetzavar."], correct: 1, explanation: "A neglect egy figyelmi zavar, ahol a páciens a sérüléssel ellentétes oldali teret, tárgyakat, ingereket elhanyagolja, anélkül, hogy primer érzékszervi kiesése lenne." },
+                    { question: "Melyik agyfélteke sérülése okoz leggyakrabban és legsúlyosabban neglect szindrómát?", options: ["A bal agyfélteke.", "A jobb agyfélteke.", "A kisagy.", "Mindkét félteke egyformán."], correct: 1, explanation: "A jobb agyfélteke (különösen a parietális lebeny) kitüntetett szerepet játszik a téri figyelemben mindkét térfélre, ezért annak sérülése okoz a leggyakrabban súlyos, bal oldali neglectet." },
+                    { question: "Mi a különbség a neglect és a hemianopsia között?", options: ["Nincs különbség, ugyanazt jelentik.", "A neglect a hallás, a hemianopsia a látás zavara.", "A neglect figyelmi, a hemianopsia primer látópálya-sérülés miatti látótérkiesés.", "A neglect mindig átmeneti, a hemianopsia mindig maradandó."], correct: 2, explanation: "A hemianopsia a látópálya sérülése miatti látótérkiesés (az agy nem kap vizuális információt). A neglect egy magasabb szintű figyelmi zavar, ahol az információ bejut az agyba, de nem tudatosul." },
+                    { question: "Melyik teszt során kell a betegnek áthúznia a lapon elszórt cél-ingereket?", options: ["Vonalfelezési teszt", "Órarajz teszt", "Törlési (cancellation) tesztek", "Képmásolási feladat"], correct: 2, explanation: "A törlési tesztek (pl. Albert-teszt, Csengő teszt) során a beteg feladata, hogy egy lapon szétszórt cél-ingereket (pl. vonalakat) keressen meg és húzzon át. Neglect esetén a kontralaterális oldalon lévőket kihagyja." },
+                    { question: "Mit jelent a személyes (perszonális) neglect?", options: ["A beteg elhanyagolja a karnyújtásnyi távolságon belüli teret.", "A beteg elhanyagolja a saját testének kontralaterális felét.", "A beteg nem ismeri fel a családtagjait.", "A beteg nem tud térképen tájékozódni."], correct: 1, explanation: "A személyes neglect a saját test sérüléssel ellentétes oldalának elhanyagolását jelenti (pl. nem borotválkozik meg a bal arcán, nem fésüli meg a haja bal oldalát)." },
+                    { question: "Mi az extinkció (kioltás) jelensége?", options: ["A neglect tüneteinek teljes megszűnése.", "Ha mindkét térfélen egyszerre adnak ingert, a kontralaterális oldalit nem észleli.", "A beteg elveszti az eszméletét.", "A beteg a kontralaterális oldali ingert az ipszilaterális oldalon észleli."], correct: 1, explanation: "Az extinkció a neglect enyhébb formája. A beteg képes észlelni a kontralaterális ingert, ha az önmagában jelenik meg, de ha az ipszilaterális oldalon is adnak egy ingert szimultán, akkor a kontralaterálisat 'kioltja' az ipszilaterális, és nem tudatosul." },
+                    { question: "Melyik jelenség NEM jellemző a neglect szindrómára?", options: ["A beteg csak a tányér jobb oldaláról eszik.", "A beteg nekiütközik a bal oldali ajtófélfának.", "A beteg a lap bal szélét üresen hagyja íráskor.", "A beteg nem tudja mozgatni a bal oldali végtagjait azok bénulása miatt."], correct: 3, explanation: "A neglect nem izombénulást (parézist) jelent. Bár motoros neglect is létezik, a mozgásképtelenség nem primer gyengeségből fakad. A hemiparézis és a neglect gyakran társulnak, de két különálló deficitről van szó." },
+                    { question: "Melyik állítás igaz az allocentrikus neglectre?", options: ["Az elhanyagolás a beteg testének középvonalához viszonyított.", "Az elhanyagolás az egyes tárgyak saját, belső kontralaterális oldalára vonatkozik.", "Mindig a távoli tér elhanyagolását jelenti.", "Csak a hallási ingereket érinti."], correct: 1, explanation: "Az allocentrikus (tárgyközpontú) neglect esetén a beteg az egyes tárgyak saját bal oldalát hanyagolja el, függetlenül attól, hogy a tárgy hol helyezkedik el a beteghez képest." },
+                    { question: "Mi az anoszognózia?", options: ["A téri tájékozódás zavara.", "A betegségtudat hiánya vagy csökkent volta.", "A tárgyak felismerésének képtelensége.", "A mozgástervezés zavara."], correct: 1, explanation: "Az anoszognózia a betegségbelátás hiányát jelenti. A neglektes betegek gyakran nincsenek tudatában deficitjüknek, ami jelentősen nehezíti a rehabilitációt." },
+                    { question: "Melyik rehabilitációs módszer használ speciális, a vizuális mezőt eltoló szemüveget?", options: ["Vizuális szkennelési tréning", "Kalorikus vesztibuláris stimuláció", "Prizma adaptáció", "Törzsrotáció"], correct: 2, explanation: "A prizma adaptáció során a beteg egy olyan prizmás szemüveget visel, ami oldalirányba eltolja a látóteret. Az ehhez való adaptáció és az utóhatás átmenetileg javíthatja a neglektes tüneteket." },
+                    { question: "Milyen prognosztikai jelentősége van a neglectnek stroke után?", options: ["Pozitív, a neglectes betegek gyorsabban gyógyulnak.", "Nincs prognosztikai jelentősége.", "Negatív, a neglect jelenléte rosszabb funkcionális kimenetelt jelez.", "Csak az enyhe stroke-oknál van jelentősége."], correct: 2, explanation: "A legtöbb vizsgálat szerint a neglect jelenléte a stroke utáni korai szakaszban negatív prognosztikai faktor, ami hosszabb rehabilitációt, rosszabb funkcionális felépülést és nagyobb esélyt jelez a tartós függőségre." },
+                    { question: "Az órarajz teszt során mi a tipikus hiba bal oldali neglect esetén?", options: ["A beteg nem tud kört rajzolni.", "A beteg a számokat csak a számlap jobb oldalára rajzolja.", "A beteg fordítva írja a számokat.", "A beteg nem tudja megmondani, mennyi az idő."], correct: 1, explanation: "Bal oldali neglect esetén a beteg az órarajz teszt során tipikusan a számlap bal oldalát elhanyagolja, és a számokat a jobb oldalra zsúfolja, vagy teljesen kihagyja a bal oldaliakat." },
+                    { question: "Mi a reprezentációs neglect?", options: ["A beteg nem ismeri fel a családtagjait.", "Az elhanyagolás a mentális képekre, emlékekre is kiterjed.", "A beteg csak a tükörben látott bal oldalt hanyagolja el.", "A beteg nem tudja reprezentálni az érzelmeit."], correct: 1, explanation: "Reprezentációs neglect esetén az elhanyagolás nemcsak a valós teret érinti, hanem a beteg mentális téri reprezentációit is. Például egy ismert tér képzeletbeli leírásakor is kihagyja a bal oldali részleteket." },
+                    { question: "A Catherine Bergego Scale (CBS) mit mér?", options: ["A beteg intelligenciaszintjét.", "A neglect súlyosságát standardizált, papír-ceruza tesztekkel.", "A neglect megjelenését a mindennapi élet valós tevékenységei során.", "A beteg depressziójának mértékét."], correct: 2, explanation: "A CBS egy funkcionális skála, amely megfigyelésen és interjún alapul, és azt méri, hogy a neglect hogyan befolyásolja a beteg mindennapi tevékenységeit (pl. öltözködés, étkezés)." },
+                    { question: "Melyik állítás írja le az input (figyelmi) neglectet?", options: ["A beteg nem mozgatja a bal oldali végtagjait.", "A beteg nem észleli a bal oldalról érkező szenzoros ingereket.", "A beteg nehezen vált a feladatok között.", "A beteg nem tudja megtervezni a mozgását."], correct: 1, explanation: "Az input (vagy figyelmi/szenzoros) neglect a kontralaterális oldalon megjelenő szenzoros ingerek (vizuális, hallási, stb.) észlelésének és tudatosításának zavarát jelenti." },
+                    { question: "A vizuális szkennelési tréning során mire tanítják a beteget?", options: ["Gyorsabban olvasni.", "Aktívan és szisztematikusan pásztázni a teljes vizuális teret, különösen a bal oldalt.", "Csak a jobb oldalra koncentrálni.", "Letakarni a 'jó' szemét."], correct: 1, explanation: "A vizuális szkennelési tréning célja, hogy a beteget megtanítsa tudatosan, egyfajta stratégiaként a teljes vizuális tér pásztázására, így kompenzálva a bal oldalra irányuló figyelem automatikus hiányát." },
+                    { question: "Melyik agyterület sérülése a legszorosabban köthető a neglect szindrómához?", options: ["Occipitális lebeny", "Parietális lebeny", "Hippocampus", "Agytörzs"], correct: 1, explanation: "Bár több terület is érintett lehet, a neglektet klasszikusan a parietális lebeny, különösen a jobb oldali inferior parietális lebeny és a temporo-parietális junkció sérüléséhez kötik." },
+                    { question: "Mi az alloesztézia?", options: ["Az érzékelés teljes hiánya.", "Fokozott fájdalomérzet.", "Az inger helyének téves lokalizálása az ellenoldalra.", "A saját testrészek idegenként való megélése."], correct: 2, explanation: "Az alloesztézia egy ritkább neglekthez társuló tünet, amikor a beteg a kontralaterális oldalon (pl. bal kézen) kapott ingert az ipszilaterális (jobb) oldalon érzi." },
+                    { question: "Melyik állítás igaz a jobb oldali neglectre (ami bal agyféltekei sérülés következménye)?", options: ["Súlyosabb és tartósabb, mint a bal oldali.", "Soha nem fordul elő.", "Általában enyhébb és gyorsabban javul, mint a bal oldali.", "Kizárólag a személyes teret érinti."], correct: 2, explanation: "Bal oldali agyféltekei sérülés is okozhat jobb oldali neglectet, de ez általában sokkal enyhébb és jobb prognózisú, mivel a téri figyelemért felelős jobb agyfélteke részben képes kompenzálni a kiesést." },
+                    { question: "Milyen hatással van az anoszognózia a neglect rehabilitációjára?", options: ["Megkönnyíti, mert a beteg nem szorong.", "Nincs hatással rá.", "Jelentősen megnehezíti, mert a beteg nincs tudatában a deficitjének és kevésbé motivált.", "Csak a kezdeti szakaszban van szerepe."], correct: 2, explanation: "Az anoszognózia (betegségbelátás hiánya) komoly akadályt jelent a rehabilitációban, mivel ha a beteg nem ismeri el a problémáját, nehéz rávenni a terápiás gyakorlatok elvégzésére és a kompenzációs stratégiák megtanulására." }
+                ]
+            },
+            'apraxia_agnosia': {
+                title: 'Apraxia, agnosia',
+                questions: [
+                    { question: "Mi az apraxia lényege?", options: ["Izomgyengeség", "Akaratlagos mozgások tervezésének és/vagy kivitelezésének zavara", "Érzéskiesés", "Koordinációs zavar (ataxia)"], correct: 1, explanation: "Az apraxia egy magasabb szintű motoros zavar, ahol a probléma nem az izomerőben vagy a koordinációban van, hanem az akaratlagos, célirányos mozgások megtervezésében és megszervezésében." },
+                    { question: "Mi az 'akaratlagos-automatikus disszociáció' az apraxia esetében?", options: ["A beteg csak az akaratlan mozgásokra képes.", "Az akaratlan, automatikus mozgások épek maradnak, míg az akaratlagos, tudatosan irányítottak sérülnek.", "A beteg nem tudja megkülönböztetni az akaratlagos és akaratlan mozgásokat.", "Minden mozgás akaratlanná válik."], correct: 1, explanation: "Ez az apraxia egyik kulcsfontosságú jele: a beteg például felszólításra nem tud integetni (akaratlagos), de spontán, búcsúzáskor igen (automatikus)." },
+                    { question: "Melyik agyfélteke sérülése okoz leggyakrabban apraxiát (jobbkezeseknél)?", options: ["A jobb (nem domináns) félteke", "A bal (domináns) félteke", "Mindkét félteke egyformán", "A kisagy"], correct: 1, explanation: "Az apraxia legtöbb típusa a domináns (jobbkezeseknél általában a bal) agyfélteke, különösen a parietális és frontális lebenyek sérüléséhez köthető." },
+                    { question: "Mi jellemző az ideatoros apraxiára?", options: ["A mozgás kivitelezése ügyetlen, de a terv jó.", "A cselekvés tervének, mentális sémájának, az 'ötletnek' a zavara.", "Csak a beszédmozgások érintettek.", "A beteg nem ismeri fel a tárgyakat."], correct: 1, explanation: "Ideatoros apraxiában a probléma a cselekvés koncepcionális szintjén van. A beteg nem tudja, mit kellene tennie, vagy rossz sorrendbe rakja a komplex mozdulatsor elemeit." },
+                    { question: "Melyik apraxia típusra jellemző, hogy a beteg nem tud parancsra fütyülni, de spontán igen?", options: ["Végtag-kinetikus apraxia", "Bukkofaciális (orofaciális) apraxia", "Konstrukciós apraxia", "Öltözködési apraxia"], correct: 1, explanation: "A bukkofaciális apraxia az arc, száj, nyelv akaratlagos, nem-beszédcélú mozgásainak (pl. fütyülés, köhintés, csettintés parancsra) zavara." },
+                    { question: "Mi az agnózia definíciója?", options: ["Emlékezetkiesés", "Az érzékelt ingerek felismerésének képtelensége ép érzékszervek mellett", "Nyelvi zavar", "Figyelemzavar"], correct: 1, explanation: "Az agnózia az érzékelt ingerek felismerésének és megértésének zavara, ami nem magyarázható az érzékszervek, az intellektus vagy a nyelv primer károsodásával." },
+                    { question: "Melyik állítás írja le az asszociatív vizuális agnóziát?", options: ["A beteg nem látja a tárgyakat.", "A beteg nem tudja lemásolni a látott tárgyat.", "A beteg lemásolja a tárgyat, de nem tudja megnevezni vagy megmondani, mire való.", "A beteg csak a mozgó tárgyakat nem ismeri fel."], correct: 2, explanation: "Asszociatív agnóziában a vizuális észlelés (percepció) viszonylag ép, de a létrejött perceptumot a beteg nem tudja a szemantikus tudásához (jelentéséhez) kapcsolni. Ez a 'látás a megértés nélkül' állapota." },
+                    { question: "Mi a prozopagnózia?", options: ["Színfelismerési zavar", "Arcfelismerési zavar (arcvakság)", "Tárgyfelismerési zavar", "Helyszínfelismerési zavar"], correct: 1, explanation: "A prozopagnózia az ismerős arcok, súlyos esetben akár a saját arc felismerésének képtelensége, ami leggyakrabban a jobb féltekei gyrus fusiformis sérüléséhez köthető." },
+                    { question: "Melyik apraxia típusra jellemző a 'tapadós' járás és a járásindítási nehézség?", options: ["Ideomotoros apraxia", "Járásapraxia (gait apraxia)", "Beszédapraxia", "Öltözködési apraxia"], correct: 1, explanation: "A járásapraxia (frontális járásapraxia) a járás megindításának és mintázatának zavara. A beteg lába 'mintha a padlóhoz ragadna', lépései kicsik, bizonytalanok." },
+                    { question: "Milyen típusú agnózia a 'tiszta szósüketség'?", options: ["Vizuális agnózia", "Tapintási agnózia", "Hallási (auditoros) agnózia", "Szaglási agnózia"], correct: 2, explanation: "A tiszta szósüketség (verbális auditoros agnózia) egy hallási agnózia, ahol a beteg hallja, de nem érti a beszélt nyelvet, miközben a nem-verbális hangok felismerése ép lehet." },
+                    { question: "Melyik apraxia típusra jellemző a rajzolás, építés zavara?", options: ["Ideatoros apraxia", "Beszédapraxia", "Konstrukciós apraxia", "Járásapraxia"], correct: 2, explanation: "A konstrukciós apraxia a téri-vizuális feladatok, mint a rajzolás, másolás, vagy elemekből való építkezés kivitelezésének zavara, ami a téri viszonyok észlelésének és reprodukálásának nehézségéből fakad." },
+                    { question: "Mi az asztereognózis?", options: ["A test jobb és bal oldalának összekeverése.", "A tárgyak tapintás útján történő felismerésének zavara.", "Az írott szöveg olvasásának képtelensége.", "Az ismerős hangok felismerésének zavara."], correct: 1, explanation: "Az asztereognózis egy tapintási agnózia, ahol a beteg csukott szemmel, tapintás útján nem képes felismerni a kezébe adott tárgyakat, ép elemi tapintásérzés mellett." },
+                    { question: "A beszédapraxia leginkább melyik afázia típussal társul gyakran?", options: ["Wernicke-afázia", "Anómiás afázia", "Broca-afázia", "Transzkortikális szenzoros afázia"], correct: 2, explanation: "A beszédapraxia gyakran fordul elő non-fluens afáziákkal, leginkább a Broca-afáziával, mivel a háttérben álló sérülés helye (bal inferior frontális gyrus) átfedhet." },
+                    { question: "A Gerstmann-szindróma egyik tünete az ujjagnózia. Melyik NEM tartozik a szindróma további tünetei közé?", options: ["Jobb-bal tévesztés", "Akalkulia (számolási zavar)", "Agráfia (írászavar)", "Prozopagnózia (arcfelismerési zavar)"], correct: 3, explanation: "A klasszikus Gerstmann-szindróma tünetei: ujjagnózia, jobb-bal tévesztés, akalkulia és agráfia. A prozopagnózia nem része." },
+                    { question: "Melyik állítás írja le legjobban az apraxia rehabilitációjának fő célját?", options: ["Az izmok megerősítése.", "A kiesett érzékszervi funkciók pótlása.", "Kompenzációs stratégiák tanítása és a megmaradt képességek optimalizálása.", "Gyógyszeres kezeléssel a mozgástervezés helyreállítása."], correct: 2, explanation: "Mivel az apraxia egy magasabb szintű zavar, a terápia ritkán tudja teljesen helyreállítani a funkciót. A fő cél a kompenzációs stratégiák (pl. mozdulatok lebontása, verbális instrukciók) tanítása a mindennapi önállóság növelése érdekében." },
+                    { question: "Milyen típusú hibát vét egy apperceptív vizuális agnóziás beteg egy rajzmásolási feladatban?", options: ["Tökéletesen lemásolja, de nem tudja megnevezni.", "Csak a rajz jobb oldalát másolja le.", "Nehezen, torzultan, hibásan másolja le, mert nem tudja a látott elemeket egységes formává szervezni.", "A másolatot elforgatja 90 fokkal."], correct: 2, explanation: "Apperceptív agnóziában a probléma a vizuális forma észlelése, a perceptuális integráció szintjén van, ezért a beteg már a másolással is küzd, a rajz széteső, pontatlan lesz." },
+                    { question: "Milyen agyi károsodás okozhat egyszerre afáziát és apraxiát?", options: ["Jobb oldali cerebelláris stroke", "Kiterjedt bal agyféltekei stroke (pl. a. cerebri media területén)", "Kétoldali hippocampus laesio", "Agytörzsi infarktus"], correct: 1, explanation: "A bal agyfélteke a domináns a nyelv (afázia) és a mozgástervezés (apraxia) szempontjából is. Egy kiterjedt, pl. az a. cerebri media ellátási területét érintő stroke egyszerre károsíthatja a frontális és parietális területeket, afáziát és apraxiát is okozva." },
+                    { question: "Hogyan lehet elkülöníteni az anómiát (afáziás tünet) és a vizuális agnóziát?", options: ["Az anómiás beteg tudja, mire való a tárgy, csak a neve nem jut eszébe; az agnóziás fel sem ismeri.", "Az anómiás beteg csak a főneveket felejti el, az agnóziás csak az igéket.", "Az anómia csak írásban, az agnózia csak beszédben jelentkezik.", "Nincs különbség, ugyanaz a zavar."], correct: 0, explanation: "Anómia esetén a beteg felismeri a tárgyat és tudja a funkcióját (pl. 'ezzel lehet írni'), csak a szót ('toll') nem találja. Vizuális agnóziában a beteg magát a tárgyat sem ismeri fel látás alapján, így a funkcióját sem tudja megmondani." },
+                    { question: "Melyik neurodegeneratív betegségben lehet gyakori tünet az apraxia?", options: ["Perifériás neuropathia", "Sclerosis multiplex", "Alzheimer-kór, kortikobazális degeneráció", "Guillain-Barré szindróma"], correct: 2, explanation: "Számos demenciával járó neurodegeneratív kórkép, mint az Alzheimer-kór vagy a kortikobazális degeneráció, a betegség előrehaladtával gyakran okoz apraxiás tüneteket a kérgi asszociációs területek károsodása miatt." },
+                    { question: "Mi a 'tiszta' agnózia?", options: ["A legenyhébb agnózia forma.", "Egy olyan agnózia, ahol csak egyetlen, jól körülhatárolt felismerési zavar áll fenn, más kognitív funkciók épsége mellett.", "Amikor a beteg csak a tiszta, nem zajos hangokat nem ismeri fel.", "Az agnózia veleszületett formája."], correct: 1, explanation: "A 'tiszta' agnóziák ritka esetek, ahol csak egy modalitás vagy egy ingerkategória felismerése sérül izoláltan, anélkül, hogy más, jelentős kognitív zavar (pl. afázia, demencia) is jelen lenne." }
+                ]
+            },
+            'exekutiv': {
+                title: 'Exekutív zavarok',
+                questions: [
+                    { question: "Melyik agyterület játssza a legfontosabb szerepet az exekutív funkciókban?", options: ["Kisagy", "Prefrontális kéreg", "Hippokampusz", "Agytörzs"], correct: 1, explanation: "Az exekutív funkciók neuroanatómiai hátterének központjában a prefrontális kéreg (PFC) áll, amely az agy legfejlettebb, a célorientált viselkedés szervezéséért felelős része." },
+                    { question: "Mi a munkamemória feladata?", options: ["Csak a hosszú távú emlékek tárolása.", "Információk átmeneti tárolása és aktív manipulálása.", "Csak az új információk befogadása.", "Az érzelmek szabályozása."], correct: 1, explanation: "A munkamemória egy korlátozott kapacitású rendszer, amely nemcsak átmenetileg tárolja, hanem aktívan manipulálja, frissíti és integrálja is az információkat komplex kognitív feladatok szolgálatában." },
+                    { question: "A Stroop teszt elsősorban melyik exekutív funkciót méri?", options: ["Tervezés", "Munkamemória", "Gátlás (inhibíció)", "Kognitív flexibilitás"], correct: 2, explanation: "A Stroop teszt a gátló funkciók klasszikus mérőeszköze, mivel a feladat során egy automatikus választ (a szó elolvasása) kell gátolni, és a kevésbé domináns ingerre (a tinta színe) kell koncentrálni." },
+                    { question: "Mi a kognitív flexibilitás (shifting)?", options: ["A gondolatok merev, rugalmatlan ismétlése.", "A figyelem tartós fenntartásának képessége.", "A figyelmi fókusz vagy gondolkodási stratégia rugalmas változtatásának képessége.", "A feladatok önálló elkezdésének képessége."], correct: 2, explanation: "A kognitív flexibilitás az a képesség, amely lehetővé teszi, hogy rugalmasan váltsunk a feladatok, szabályok vagy nézőpontok között, és alkalmazkodjunk a változó körülményekhez." },
+                    { question: "Melyik kórképben játszanak központi szerepet az exekutív zavarok?", options: ["Perifériás neuropathia", "Myasthenia Gravis", "Figyelemhiányos hiperaktivitás-zavar (ADHD)", "Akut labyrinthitis"], correct: 2, explanation: "Az ADHD-t gyakran az exekutív funkciók neurodevelopmentális (fejlődési) zavaraként definiálják, melynek fő tünetei (figyelmetlenség, impulzivitás) a gátlás, a munkamemória és a tervezés zavarára vezethetők vissza." },
+                    { question: "A Wisconsin Kártyaszortírozási Teszt (WCST) melyik exekutív funkciót vizsgálja elsődlegesen?", options: ["Érzelmi kontroll", "Kognitív flexibilitás és szabálytanulás", "Verbális fluencia", "Impulzuskontroll"], correct: 1, explanation: "A WCST a kognitív flexibilitást méri, mivel a betegnek a visszajelzések alapján kell rájönnie a változó válogatási szabályokra, és rugalmasan váltania kell a stratégiák között." },
+                    { question: "Mi jellemző a dysexecutív szindróma dorzolaterális típusára?", options: ["Diszinhibíció, impulzivitás", "Apátia, motivációhiány, tervezési nehézségek", "Súlyos memóriazavar", "Vizuális agnózia"], correct: 1, explanation: "A dorzolaterális prefrontális kéreg (DLPFC) sérülése apátiát, a tervezés, a munkamemória és a rugalmas gondolkodás zavarát okozza. Ezt 'pszeudodepresszív' képnek is nevezik." },
+                    { question: "Milyen típusú exekutív funkciók kapcsolódnak az orbitofrontális kéreghez?", options: ["'Hideg' exekutív funkciók", "'Meleg' exekutív funkciók", "Csak a munkamemória", "Csak a tervezés"], correct: 1, explanation: "A 'meleg' exekutív funkciók az érzelmileg és motivációsan releváns helyzetekben (pl. döntéshozatal, szociális interakciók) játszanak szerepet, és neuroanatómiailag az orbitofrontális (OFC) és ventromediális (vmPFC) prefrontális területekhez kötődnek." },
+                    { question: "Mi a perseveráció?", options: ["A feladatok halogatása.", "Egy korábbi, már nem helyénvaló válasz vagy gondolatmenet ismételgetése.", "A beszéd teljes hiánya.", "Túlzott érzelmi reakció."], correct: 1, explanation: "A perseveráció a kognitív flexibilitás hiányának a jele, ami egy korábbi, már nem adaptív válaszmódhoz vagy gondolkodási sémához való merev ragaszkodásban nyilvánul meg." },
+                    { question: "Melyik teszt méri a tervezési képességet egy több lépésből álló, célirányos feladat megoldásán keresztül?", options: ["Stroop teszt", "Verbális fluencia teszt", "Torony tesztek (pl. Hanoi-torony)", "N-Back teszt"], correct: 2, explanation: "A torony tesztek (pl. Hanoi-torony, London-torony) klasszikus mérőeszközei a tervezési képességnek, a problémamegoldásnak és az előre gondolkodásnak." },
+                    { question: "Az exekutív funkciók fejlődése melyik életszakaszban a legintenzívebb?", options: ["Csecsemőkorban", "Gyermek- és serdülőkorban", "Középfelnőttkorban", "Időskorban"], correct: 1, explanation: "A prefrontális kéreg és a hozzá kapcsolódó exekutív funkciók fejlődése egy elnyújtott folyamat, ami gyermek- és serdülőkorban a legintenzívebb, és egészen a fiatal felnőttkorig tart." },
+                    { question: "Mit mér a verbális fluencia teszt?", options: ["A beszéd sebességét.", "A szókincs méretét.", "A szóelőhívás hatékonyságát, a keresési stratégiákat és a munkamemóriát.", "Az olvasás pontosságát."], correct: 2, explanation: "A verbális fluencia tesztek (pl. adott betűvel vagy kategóriában szavak felsorolása) a lexikális hozzáférés sebességét, a mentális keresési stratégiák rugalmasságát és a gátló funkciókat (pl. ismétlések elkerülése) mérik." },
+                    { question: "Mi a 'feladatkezdeményezés' zavarának a lényege?", options: ["A beteg nem érti a feladatot.", "A beteg nem akarja megcsinálni a feladatot.", "A beteg halogatja a feladat elkezdését, bár tudja, mit kellene tennie.", "A beteg túl gyorsan, meggondolatlanul kezd a feladatba."], correct: 2, explanation: "A feladatkezdeményezés zavara (prokrasztináció) az a nehézség, hogy az egyén időben, külső noszogatás nélkül elkezdjen egy tevékenységet, még akkor is, ha motivált és képes lenne rá." },
+                    { question: "Melyik viselkedéses értékelő skála méri az exekutív funkciókat a mindennapi életben szülői vagy tanári becslés alapján?", options: ["Wechsler Intelligencia Teszt", "Behavior Rating Inventory of Executive Function (BRIEF)", "Beck Depresszió Kérdőív", "Mini-Mental State Examination (MMSE)"], correct: 1, explanation: "A BRIEF egy széles körben használt kérdőív, amely az exekutív funkciók viselkedéses megnyilvánulásait méri a mindennapokban, szülői, tanári és önbecslő formában is." },
+                    { question: "Az orbitofrontális kéreg sérülése milyen típusú dysexecutív szindrómához vezethet?", options: ["Apatikus szindróma", "Diszinhibált (pszeudopszichopátiás) szindróma", "Dysexecutív (pszeudodepresszív) szindróma", "Amnesztikus szindróma"], correct: 1, explanation: "Az orbitofrontális kéreg sérülése a gátló funkciók és az érzelmi-szociális szabályozás zavarát okozza, ami diszinhibált, impulzív, szociálisan inadekvát viselkedéshez vezet." },
+                    { question: "Hogyan segíthet a kognitív viselkedésterápia (CBT) az exekutív zavarokban?", options: ["Gyógyszerekkel helyettesíti a terápiát.", "Javítja a maladaptív gondolkodási mintákat és viselkedési rutinokat.", "Csak a memóriát fejleszti.", "Kizárólag relaxációs technikákat alkalmaz."], correct: 1, explanation: "A CBT segíthet azonosítani és átkeretezni az exekutív zavarokhoz (pl. halogatás, impulzivitás) kapcsolódó negatív gondolatokat, valamint új, adaptívabb viselkedési stratégiákat és megküzdési módokat tanít." },
+                    { question: "Melyik állítás NEM igaz az exekutív funkciókra?", options: ["Lehetővé teszik a célorientált viselkedést.", "A prefrontális kéreghez kötődnek.", "Kizárólag az intelligenciától függenek.", "Fejleszthetők és sérülékenyek is."], correct: 2, explanation: "Bár van összefüggés, az exekutív funkciók és az IQ nem azonosak. Az EF-ek a viselkedés szabályozását, míg az IQ inkább a már meglévő tudás alkalmazását méri. Jó EF mellett is lehet alacsonyabb IQ és fordítva." },
+                    { question: "Milyen szerepet játszanak a neurotranszmitterek az exekutív funkciókban?", options: ["Nincs szerepük.", "Csak a szerotonin fontos.", "A dopamin, noradrenalin és más neurotranszmitterek egyensúlya kritikus a prefrontális kéreg megfelelő működéséhez.", "Csak a motoros funkciókat befolyásolják."], correct: 2, explanation: "A prefrontális kéreg működését és ezáltal az exekutív funkciókat jelentősen modulálják a különböző neurotranszmitter rendszerek, különösen a dopamin és a noradrenalin. Ezen rendszerek diszfunkciója (pl. ADHD-ban) exekutív zavarokhoz vezet." },
+                    { question: "Mit jelent az 'ökológiai validitás' az exekutív funkciók mérésében?", options: ["A teszt környezetbarát.", "A teszt eredményei mennyire jósolják be a valós, mindennapi életben való működést.", "A tesztet csak természetes környezetben lehet felvenni.", "A teszt minden kultúrában egyformán érvényes."], correct: 1, explanation: "Az ökológiai validitás arra utal, hogy egy teszt vagy vizsgálati módszer mennyire képes megragadni és előre jelezni az adott funkció (pl. exekutív funkciók) megnyilvánulását a valós, mindennapi élethelyzetekben." },
+                    { question: "Melyik állítás igaz az exekutív zavarok rehabilitációjára?", options: ["A gyógyszeres kezelés mindig megoldja a problémát.", "A rehabilitáció célja a kompenzációs stratégiák tanítása és a funkciók javítása.", "A rehabilitáció csak gyermekkorban hatásos.", "A legjobb módszer a számítógépes agytréning játékok használata."], correct: 1, explanation: "Az exekutív zavarok rehabilitációja komplex, és általában a kognitív-viselkedésterápiás módszerek, a kompenzációs stratégiák (pl. tervezők, emlékeztetők) tanítása és a környezeti adaptációk kombinációját jelenti a funkcionális javulás érdekében." }
+                ]
+            }
+        };
+
+        const app = {
+            // DOM Elements
+            topicSelectionScreen: document.getElementById('topic-selection'),
+            quizInterfaceScreen: document.getElementById('quiz-interface'),
+            finalScoreScreen: document.getElementById('final-score-screen'),
+            
+            topicContainer: document.querySelector('#topic-selection .grid'),
+            quizTitle: document.getElementById('quiz-title'),
+            scoreDisplay: document.getElementById('score'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationText: document.getElementById('explanation-text'),
+            
+            backToTopicsBtn: document.getElementById('back-to-topics'),
+            nextQuestionBtn: document.getElementById('next-question'),
+            
+            finalTopicTitle: document.getElementById('final-topic-title'),
+            finalScoreDisplay: document.getElementById('final-score'),
+            restartQuizBtn: document.getElementById('restart-quiz'),
+            changeTopicBtn: document.getElementById('change-topic'),
+
+            // State
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            questions: [],
+
+            init() {
+                this.renderTopicSelection();
+                this.addEventListeners();
+            },
+
+            addEventListeners() {
+                this.backToTopicsBtn.addEventListener('click', () => this.showScreen('topics'));
+                this.nextQuestionBtn.addEventListener('click', () => this.nextQuestion());
+                this.restartQuizBtn.addEventListener('click', () => this.startQuiz(this.currentTopic));
+                this.changeTopicBtn.addEventListener('click', () => this.showScreen('topics'));
+            },
+
+            renderTopicSelection() {
+                this.topicContainer.innerHTML = '';
+                Object.keys(quizData).forEach(key => {
+                    const topic = quizData[key];
+                    const button = document.createElement('button');
+                    button.className = "p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 text-left";
+                    button.innerHTML = `
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${topic.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">${topic.questions.length} kérdés</p>
+                    `;
+                    button.addEventListener('click', () => this.startQuiz(key));
+                    this.topicContainer.appendChild(button);
+                });
+            },
+
+            startQuiz(topicKey) {
+                this.currentTopic = topicKey;
+                this.questions = this.shuffleArray([...quizData[topicKey].questions]);
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.quizTitle.textContent = quizData[topicKey].title;
+                this.updateScore();
+                this.displayQuestion();
+                this.showScreen('quiz');
+            },
+
+            displayQuestion() {
+                this.explanationContainer.classList.add('hidden');
+                this.nextQuestionBtn.classList.add('disabled');
+                
+                if (this.currentQuestionIndex >= this.questions.length) {
+                    this.showFinalScore();
+                    return;
+                }
+
+                const question = this.questions[this.currentQuestionIndex];
+                this.questionText.textContent = question.question;
+                this.optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = "w-full text-left p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent quiz-option";
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.addEventListener('click', (e) => this.selectAnswer(e));
+                    this.optionsContainer.appendChild(button);
+                });
+
+                this.updateProgressBar();
+            },
+
+            selectAnswer(e) {
+                const selectedButton = e.target;
+                const selectedIndex = parseInt(selectedButton.dataset.index);
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedIndex === question.correct;
+
+                if (isCorrect) {
+                    this.score++;
+                    selectedButton.classList.add('correct');
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    // Highlight the correct answer
+                    const correctButton = this.optionsContainer.querySelector(`[data-index='${question.correct}']`);
+                    correctButton.classList.add('correct');
+                }
+
+                this.explanationText.textContent = question.explanation;
+                this.explanationContainer.classList.remove('hidden');
+                
+                Array.from(this.optionsContainer.children).forEach(btn => btn.classList.add('disabled'));
+                
+                this.nextQuestionBtn.classList.remove('disabled');
+                this.updateScore();
+            },
+
+            nextQuestion() {
+                this.currentQuestionIndex++;
+                this.displayQuestion();
+            },
+
+            updateScore() {
+                this.scoreDisplay.textContent = `Pontszám: ${this.score} / ${this.questions.length}`;
+            },
+
+            updateProgressBar() {
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            },
+
+            showFinalScore() {
+                this.finalTopicTitle.textContent = quizData[this.currentTopic].title;
+                this.finalScoreDisplay.textContent = `${this.score} / ${this.questions.length}`;
+                this.showScreen('final');
+            },
+
+            showScreen(screen) {
+                this.topicSelectionScreen.classList.add('hidden');
+                this.quizInterfaceScreen.classList.add('hidden');
+                this.finalScoreScreen.classList.add('hidden');
+
+                if (screen === 'topics') {
+                    this.topicSelectionScreen.classList.remove('hidden');
+                } else if (screen === 'quiz') {
+                    this.quizInterfaceScreen.classList.remove('hidden');
+                } else if (screen === 'final') {
+                    this.finalScoreScreen.classList.remove('hidden');
+                }
+            },
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        };
+
+        app.init();
+    </script>
+
+</body>
+</html>

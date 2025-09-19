@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Kvíz: Haladó Témakörök</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .option-btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #22c55e !important;
+            color: white;
+            border-color: #16a34a;
+        }
+        .incorrect {
+            background-color: #ef4444 !important;
+            color: white;
+            border-color: #dc2626;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            position: relative;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-app" class="w-full max-w-5xl mx-auto">
+        
+        <div id="start-screen" class="text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">Neuroanatómia Kvíz: Haladó</h1>
+            <p class="text-slate-600 mb-8 text-lg">Válassz egy témakört a tudásod elmélyítéséhez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button onclick="startQuiz('vizterek')" class="bg-sky-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-sky-700 transition duration-300 shadow-md">1. Agy Vízterei</button>
+                <button onclick="startQuiz('agyhartyak')" class="bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-cyan-700 transition duration-300 shadow-md">2. Agyhártyák</button>
+                <button onclick="startQuiz('ver_agy_gat')" class="bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-md">3. Vér-Agy Gát</button>
+                <button onclick="startQuiz('glia')" class="bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition duration-300 shadow-md">4. Glia</button>
+                <button onclick="startQuiz('neurotranszmitterek')" class="bg-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-700 transition duration-300 shadow-md">5. Neurotranszmitterek</button>
+                <button onclick="startQuiz('transzmisszio')" class="bg-rose-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-rose-700 transition duration-300 shadow-md">6. Transzmisszió</button>
+            </div>
+        </div>
+
+        <div id="quiz-container" class="hidden bg-white p-6 md:p-10 rounded-2xl shadow-xl">
+            <div id="header" class="flex justify-between items-center mb-6">
+                <p id="question-counter" class="text-slate-500 font-medium"></p>
+                <p id="score" class="text-slate-500 font-medium">Pontszám: 0</p>
+            </div>
+            <div id="question" class="text-xl md:text-2xl font-semibold mb-8 min-h-[6rem] flex items-center"></div>
+            <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <button id="next-btn" class="w-full mt-8 bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition duration-300 shadow-md hidden">Következő</button>
+        </div>
+
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h2 class="text-3xl font-bold mb-4">Eredmény</h2>
+            <p id="final-score" class="text-5xl font-bold text-slate-700 mb-6"></p>
+            <p id="result-message" class="text-slate-600 mb-8 text-lg"></p>
+            <button onclick="restartQuiz()" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300 shadow-md">Vissza a főmenübe</button>
+        </div>
+    </div>
+
+    <div id="explanation-modal" class="modal">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl">
+            <h3 id="explanation-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="explanation-text" class="text-slate-700 leading-relaxed"></p>
+        </div>
+    </div>
+
+<script>
+    const quizData = [
+        // Tétel 1: Az agy vízterei
+        {
+            topic: 'vizterek',
+            question: "Melyik struktúra termeli a liquor cerebrospinalis (CSF) legnagyobb részét?",
+            options: ["Ependymasejtek", "Plexus choroideus", "Arachnoidealis granulációk", "Asztrociták"],
+            answer: "Plexus choroideus",
+            explanation: "A CSF mintegy 70-80%-át az agykamrákban található, speciális érfonatok, a plexus choroideusok termelik aktív szekrécióval."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik nyílás NEM a negyedik agykamrából vezeti ki a CSF-et a subarachnoidealis térbe?",
+            options: ["Apertura mediana (Magendie)", "Aquaeductus cerebri (Sylvius)", "Aperturae laterales (Luschka)", "Mindhárom kivezető nyílás."],
+            answer: "Aquaeductus cerebri (Sylvius)",
+            explanation: "Az aquaeductus cerebri a harmadik és a negyedik agykamrát köti össze, de nem a subarachnoidealis térbe vezet. A CSF a negyedik agykamrából a Magendie- és Luschka-féle nyílásokon keresztül jut ki."
+        },
+        {
+            topic: 'vizterek',
+            question: "Mi a normál nyomású hydrocephalus (NPH) klasszikus tünet-triásza?",
+            options: ["Fejfájás, hányinger, látászavar", "Láz, tarkókötöttség, tudatzavar", "Járászavar, demencia, vizeletinkontinencia", "Tremor, rigiditás, bradykinesia"],
+            answer: "Járászavar, demencia, vizeletinkontinencia",
+            explanation: "Az NPH egy főként időskorban jelentkező kórkép, amelynek klasszikus tünetei a járás bizonytalansága, a kognitív hanyatlás (demencia) és a vizelettartási nehézség (inkontinencia)."
+        },
+        {
+            topic: 'vizterek',
+            question: "Mi a fő különbség a kommunikáló és a nem-kommunikáló (obstruktív) hydrocephalus között?",
+            options: ["A kommunikáló mindig súlyosabb.", "A nem-kommunikáló esetén a CSF áramlása elzáródott a kamrarendszeren belül.", "A kommunikáló csak csecsemőkorban fordul elő.", "A nem-kommunikáló a CSF túltermelődése miatt van."],
+            answer: "A nem-kommunikáló esetén a CSF áramlása elzáródott a kamrarendszeren belül.",
+            explanation: "Obstruktív (nem-kommunikáló) hydrocephalus esetén egy fizikai akadály (pl. tumor, szűkület) gátolja a CSF áramlását a kamrák között vagy a kamrákból kifelé. Kommunikáló hydrocephalus esetén az áramlás szabad, de a felszívódás károsodott."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik cisterna található a kisagy és a nyúltvelő között, ahová a foramen Magendie nyílik?",
+            options: ["Cisterna pontis", "Cisterna interpeduncularis", "Cisterna magna (cerebellomedullaris)", "Cisterna ambiens"],
+            answer: "Cisterna magna (cerebellomedullaris)",
+            explanation: "A cisterna magna a hátsó koponyagödör legnagyobb cisternája, amely a kisagy alatt és a nyúltvelő mögött helyezkedik el. A negyedik agykamrából a foramen Magendie-n keresztül ide áramlik a CSF."
+        },
+        {
+            topic: 'vizterek',
+            question: "Mi a liquorrhoea?",
+            options: ["A liquor túltermelődése", "A liquor kóros felhalmozódása", "A liquor szivárgása a subarachnoidealis térből", "A liquor gyulladása"],
+            answer: "A liquor szivárgása a subarachnoidealis térből",
+            explanation: "A liquorrhoea a CSF szivárgását jelenti egy durális defektuson keresztül, ami leggyakrabban trauma vagy műtét következménye, és tiszta, vizes orrfolyást (rhinorrhoea) vagy fülfolyást (otorrhoea) okozhat."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik struktúra köti össze az oldalkamrákat a harmadik agykamrával?",
+            options: ["Aquaeductus cerebri", "Foramen Luschka", "Foramen interventriculare (Monro)", "Foramen Magendie"],
+            answer: "Foramen interventriculare (Monro)",
+            explanation: "A kétoldali oldalkamra a páros foramen interventriculare (Monro-féle nyílás) révén kommunikál az egyetlen, középvonali harmadik agykamrával."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik állítás igaz a CSF összetételére a vérplazmához képest?",
+            options: ["Magasabb a fehérje- és glükózkoncentrációja.", "Alacsonyabb a fehérje- és glükózkoncentrációja.", "Azonos az összetétele.", "Csak vizet és nátriumot tartalmaz."],
+            answer: "Alacsonyabb a fehérje- és glükózkoncentrációja.",
+            explanation: "A CSF egyfajta ultrafiltrátum, amelynek fehérje- és glükóztartalma jelentősen alacsonyabb, mint a vérplazmáé, ami a vér-liquor gát szelektív transzportfolyamatainak eredménye."
+        },
+        {
+            topic: 'vizterek',
+            question: "Hol történik a CSF nagy részének felszívódása a vénás keringésbe?",
+            options: ["A plexus choroideusokban", "Az ependymasejteken keresztül", "Az arachnoidealis granulációkon keresztül a sinus sagittalis superiorba", "A nyirokereken keresztül"],
+            answer: "Az arachnoidealis granulációkon keresztül a sinus sagittalis superiorba",
+            explanation: "A CSF felszívódásának fő helye az arachnoidealis granulációk, amelyek a pókhálóhártya kitüremkedéseiként benyomulnak a duralis sinusokba, elsősorban a sinus sagittalis superiorba."
+        },
+        {
+            topic: 'vizterek',
+            question: "Az agykamra rendszer legszűkebb része, ahol az elzáródás a leggyakoribb?",
+            options: ["Oldalkamrák", "Harmadik agykamra", "Aquaeductus cerebri (Sylvius)", "Negyedik agykamra"],
+            answer: "Aquaeductus cerebri (Sylvius)",
+            explanation: "Az aquaeductus cerebri egy rendkívül keskeny csatorna, amely a harmadik és negyedik agykamrát köti össze, ezért ez a leggyakoribb helye a veleszületett vagy szerzett elzáródásoknak, ami hydrocephalushoz vezet."
+        },
+        {
+            topic: 'vizterek',
+            question: "Mi a 'naplemente' szemtünet csecsemőknél?",
+            options: ["A pupillák tágulása sötétben.", "A szemhéjak lecsukódása.", "A szemgolyók lefelé tekintő helyzete, ahol az írisz felső részét eltakarja az alsó szemhéj.", "A szemek gyors, akaratlan mozgása."],
+            answer: "A szemgolyók lefelé tekintő helyzete, ahol az írisz felső részét eltakarja az alsó szemhéj.",
+            explanation: "A 'naplemente' tünet a csecsemőkori hydrocephalus egyik jele, amelyet a megnövekedett koponyaűri nyomás okozta agytörzsi kompresszió vált ki."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik cisterna tartalmazza a chiasma opticumot és az a. communicans anteriort?",
+            options: ["Cisterna magna", "Cisterna interpeduncularis", "Cisterna chiasmatica (suprasellaris)", "Cisterna quadrigeminalis"],
+            answer: "Cisterna chiasmatica (suprasellaris)",
+            explanation: "A cisterna chiasmatica a sella turcica felett helyezkedik el, és olyan fontos képleteket tartalmaz, mint a látóideg-kereszteződés (chiasma opticum) és a Willis-kör elülső részét alkotó a. communicans anterior."
+        },
+        {
+            topic: 'vizterek',
+            question: "A hydrocephalus ex-vacuo mit jelent?",
+            options: ["A liquor túltermelődése okozza.", "Az agyi szövetveszteség (atrophia) miatti másodlagos kamratágulatot.", "Egy sürgős sebészeti beavatkozást igénylő állapotot.", "A liquor fertőzését."],
+            answer: "Az agyi szövetveszteség (atrophia) miatti másodlagos kamratágulatot.",
+            explanation: "Hydrocephalus ex-vacuo esetén a kamrák azért tágulnak ki, mert a környező agyszövet elsorvad (pl. stroke, Alzheimer-kór miatt), és a CSF passzívan kitölti a keletkezett teret. Itt nincs valódi nyomásfokozódás."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik fehérje kimutatása specifikus a liquorrhoea diagnosztikájában?",
+            options: ["Albumin", "Béta-2 transzferrin", "Immunglobulin G", "Kreatin-kináz"],
+            answer: "Béta-2 transzferrin",
+            explanation: "A béta-2 transzferrin egy olyan fehérje, amely szinte kizárólag a CSF-ben található meg. Kimutatása egy orrból vagy fülből származó folyadékmintából megbízhatóan igazolja a CSF-szivárgást (liquorrhoea)."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik kamrában található a glomus choroideum?",
+            options: ["Harmadik agykamra", "Negyedik agykamra", "Oldalkamra (a trigonumban)", "Aquaeductus cerebri"],
+            answer: "Oldalkamra (a trigonumban)",
+            explanation: "A glomus choroideum a plexus choroideus egy nagy, kalcifikációra hajlamos csomója, amely az oldalkamra trigonumában (atriumában), a test, a hátsó és alsó szarv találkozásánál helyezkedik el."
+        },
+        {
+            topic: 'vizterek',
+            question: "A subarachnoidealis tér mely két agyhártya között helyezkedik el?",
+            options: ["Dura mater és arachnoidea mater", "Arachnoidea mater és pia mater", "Pia mater és az agy felszíne", "Dura mater és a koponyacsont"],
+            answer: "Arachnoidea mater és pia mater",
+            explanation: "A subarachnoidealis tér egy valódi, CSF-fel töltött tér az arachnoidea (pókhálóhártya) és a pia mater (lágy agyhártya) között."
+        },
+        {
+            topic: 'vizterek',
+            question: "Mi a cisterna ambiens?",
+            options: ["A híd előtti cisterna.", "A középagyat oldalról körülvevő cisterna.", "A kisagy és a nyúltvelő közötti cisterna.", "A corpus callosum feletti cisterna."],
+            answer: "A középagyat oldalról körülvevő cisterna.",
+            explanation: "A cisterna ambiens (vagy perimesencephalica) a középagy oldala mentén fut, és fontos ereket (pl. PCA, v. basalis Rosenthalii) és a IV. agyideget tartalmazza."
+        },
+        {
+            topic: 'vizterek',
+            question: "Mi a CSF felhajtóerejének (Auftrieb-hatás) jelentősége?",
+            options: ["Növeli az agy súlyát.", "Csökkenti az agy tényleges súlyát, mechanikai védelmet nyújtva.", "Segíti a liquor termelődését.", "Fokozza a koponyaűri nyomást."],
+            answer: "Csökkenti az agy tényleges súlyát, mechanikai védelmet nyújtva.",
+            explanation: "A CSF felhajtóereje miatt az agy 'lebeg' a koponyán belül, ami drasztikusan csökkenti annak effektív súlyát és védi a mechanikai erőktől, rázkódásoktól."
+        },
+        {
+            topic: 'vizterek',
+            question: "Mi a glymphatikus rendszer?",
+            options: ["Az agy nyirokrendszere.", "A CSF termeléséért felelős rendszer.", "Egy salakanyag-eltávolító rendszer, amely a CSF és az agyi interstitialis folyadék cseréjén alapul.", "A vér-agy gátat alkotó sejtek hálózata."],
+            answer: "Egy salakanyag-eltávolító rendszer, amely a CSF és az agyi interstitialis folyadék cseréjén alapul.",
+            explanation: "A glymphatikus rendszer egy nemrég felfedezett rendszer, amely főként alvás közben aktív. A CSF a perivascularis tereken beáramlik az agyszövetbe, 'átmossa' azt, és eltávolítja a metabolikus bomlástermékeket (pl. amiloid-béta)."
+        },
+        {
+            topic: 'vizterek',
+            question: "Melyik állítás igaz a fossa rhomboideára?",
+            options: ["Az oldalkamrák alapját képezi.", "A harmadik agykamra oldalfala.", "A negyedik agykamra alapja, és számos agyidegmagot tartalmaz.", "A sella turcica egy része."],
+            answer: "A negyedik agykamra alapja, és számos agyidegmagot tartalmaz.",
+            explanation: "A fossa rhomboidea (rombuszárok) a negyedik agykamra rombusz alakú alapja, amelyet a híd és a nyúltvelő hátsó felszíne alkot. Felszínén számos, agyidegmagokhoz köthető kiemelkedés és barázda található."
+        },
+
+        // Tétel 2: Agyhártyák
+        {
+            topic: 'agyhartyak',
+            question: "Melyik a legkülső, legvastagabb agyhártya?",
+            options: ["Pia mater", "Arachnoidea mater", "Dura mater", "Tela choroidea"],
+            answer: "Dura mater",
+            explanation: "A dura mater (kemény agyhártya vagy pachymeninx) a legkülső, legerősebb, kétrétegű agyhártya, amely a koponyacsontok belső felszínéhez tapad."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Mi a falx cerebri?",
+            options: ["Egy horizontális dura kettőzet a nagyagy és kisagy között.", "Egy sarló alakú dura kettőzet a két agyfélteke között.", "Az agyalapi vénás sinus.", "A pókhálóhártya egy része."],
+            answer: "Egy sarló alakú dura kettőzet a két agyfélteke között.",
+            explanation: "A falx cerebri a dura mater meningealis rétegének egy nagy, sarló alakú, középvonali redője, amely a fissura longitudinalis cerebriben helyezkedik el és elválasztja a két nagyagyféltekét."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Az epiduralis haematoma leggyakrabban melyik ér sérülése miatt alakul ki?",
+            options: ["Vena cerebri media", "Arteria carotis interna", "Arteria meningea media", "Sinus sagittalis superior"],
+            answer: "Arteria meningea media",
+            explanation: "Az epiduralis haematoma artériás vérzés eredménye a dura és a koponyacsont között, amelyet leggyakrabban a koponyatöréssel járó a. meningea media szakadás okoz."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik vérzésre jellemző a CT-képen a sarló (konkáv) alak és az, hogy átlépi a suturákat?",
+            options: ["Epiduralis haematoma", "Subduralis haematoma", "Subarachnoidealis vérzés", "Intracerebralis vérzés"],
+            answer: "Subduralis haematoma",
+            explanation: "A subduralis haematoma, amelyet az áthidaló vénák szakadása okoz, sarló alakban terül el az agy felszínén, követve a hemisphaeriumok görbületét, és mivel a dura alatt van, átlépheti a suturavonalakat."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Mi a tentorium cerebelli?",
+            options: ["A két kisagyféltekét elválasztó sövény.", "A hypophysist fedő dura lemez.", "Egy horizontális dura kettőzet, amely elválasztja a nagyagyat a kisagytól.", "A dura mater fő artériája."],
+            answer: "Egy horizontális dura kettőzet, amely elválasztja a nagyagyat a kisagytól.",
+            explanation: "A tentorium cerebelli egy sátorszerű dura lemez, amely a hátsó koponyagödröt (infratentorialis tér) választja el a felette lévő supratentorialis tértől, ahol a nagyagy occipitalis és temporalis lebenyei helyezkednek el."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik agyhártya tapad szorosan az agy felszínéhez, követve minden gyrus és sulcus kontúrját?",
+            options: ["Dura mater", "Arachnoidea mater", "Pia mater", "Mindhárom"],
+            answer: "Pia mater",
+            explanation: "A pia mater (lágy agyhártya) a legbelső, vékony hártya, amely közvetlenül az agy és a gerincvelő felszínén helyezkedik el, és minden redőjébe behúzódik."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "A subarachnoidealis vérzés (SAV) melyik térben történik?",
+            options: ["Az epiduralis térben", "A subduralis térben", "Az arachnoidea mater és a pia mater között", "Az agykamrákban"],
+            answer: "Az arachnoidea mater és a pia mater között",
+            explanation: "A SAV az arachnoidea és a pia mater közötti, liquorral telt subarachnoidealis térbe történő vérzést jelent, leggyakrabban egy agyalapi aneurizma megrepedése miatt."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Mi az incisura tentorii klinikai jelentősége?",
+            options: ["Itt termelődik a liquor.", "Ez egy nyílás, amelyen a középagy áthalad, és agyi herniációk helyszíne lehet.", "Ez a sinus cavernosus bejárata.", "Itt rögzül a falx cerebri."],
+            answer: "Ez egy nyílás, amelyen a középagy áthalad, és agyi herniációk helyszíne lehet.",
+            explanation: "Az incisura tentorii a tentorium cerebelli szabad belső széle által képzett nyílás. Térfoglaló folyamatok esetén az agyszövet (pl. az uncus) benyomulhat (herniálódhat) ezen a nyíláson, életveszélyes kompressziót okozva."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik ideg felelős a supratentorialis dura mater nagy részének érző beidegzéséért?",
+            options: ["N. vagus (X.)", "N. facialis (VII.)", "Felső cervicalis idegek", "N. trigeminus (V.)"],
+            answer: "N. trigeminus (V.)",
+            explanation: "A tentorium feletti dura mater érző beidegzését túlnyomórészt a n. trigeminus három ága (V1, V2, V3) biztosítja. A dura irritációja által kiváltott fejfájás ezen az útvonalon közvetítődik."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik állítás igaz a cranialis epiduralis térre?",
+            options: ["Valódi, zsírszövettel telt tér.", "A dura mater és az arachnoidea között van.", "Potenciális tér a dura és a koponyacsont között.", "Liquort tartalmaz."],
+            answer: "Potenciális tér a dura és a koponyacsont között.",
+            explanation: "A koponyán belül az epiduralis tér csak potenciális, mivel a dura periostealis rétege szorosan a csonthoz tapad. Csak kóros esetben (pl. vérzés) válik valódi térré. Ezzel szemben a gerincben valódi, zsírt tartalmazó tér."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik betegség az agyhártyák gyulladása?",
+            options: ["Encephalitis", "Meningitis", "Meningioma", "Hydrocephalus"],
+            answer: "Meningitis",
+            explanation: "A meningitis az agyhártyák (főként a leptomeningek: arachnoidea és pia mater) és a subarachnoidealis térben lévő liquor gyulladása, amelyet leggyakrabban bakteriális vagy virális fertőzés okoz."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Miből indulnak ki a meningiomák?",
+            options: ["A dura mater periostealis rétegéből", "Az arachnoidea mater cap sejtjeiből", "A pia mater ereiből", "Az ependymasejtekből"],
+            answer: "Az arachnoidea mater cap sejtjeiből",
+            explanation: "A meningiomák, az agyhártyák leggyakoribb daganatai, az arachnoidea mater speciális sejtjeiből, az ún. 'cap cells'-ből (sapkasejtekből) indulnak ki, amelyek az arachnoidealis villusokban találhatók."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Mi a 'lucid intervallum'?",
+            options: ["A migrén aurája", "Egy mély alvási fázis", "Epiduralis haematomára jellemző, átmeneti eszméletlenség utáni tiszta tudatú periódus, amelyet gyors állapotromlás követ", "A liquor felszívódásának szünetelése"],
+            answer: "Epiduralis haematomára jellemző, átmeneti eszméletlenség utáni tiszta tudatú periódus, amelyet gyors állapotromlás követ",
+            explanation: "A lucid intervallum klasszikusan az epiduralis vérzéshez társul. A beteg a fejsérülés utáni rövid eszméletvesztésből magához tér, majd ahogy a vérömleny nő és nyomja az agyat, állapota hirtelen, drámaian romlik."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik dura kettőzet tartalmazza a sinus sagittalis superiort és inferiort?",
+            options: ["Tentorium cerebelli", "Falx cerebelli", "Diaphragma sellae", "Falx cerebri"],
+            answer: "Falx cerebri",
+            explanation: "A falx cerebri felső, rögzített szélében fut a sinus sagittalis superior, míg alsó, szabad szélében a sinus sagittalis inferior."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik állítás igaz a subduralis haematomára?",
+            options: ["Mindig artériás eredetű.", "Lencse alakú a CT-n.", "Gyakran az áthidaló vénák szakadása okozza.", "Soha nem lépi át a suturavonalakat."],
+            answer: "Gyakran az áthidaló vénák szakadása okozza.",
+            explanation: "A subduralis haematoma tipikusan vénás eredetű, az agy felszínéről a duralis sinusokba vezető áthidaló vénák szakadása miatt alakul ki, gyakran agyi atrophiával társuló enyhébb traumák után."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Mi a tela choroidea?",
+            options: ["A dura mater legbelső rétege.", "A plexus choroideusok vaszkuláris magját képező pia mater.", "Az arachnoidea mater egy része.", "Az agykamrákat bélelő sejtréteg."],
+            answer: "A plexus choroideusok vaszkuláris magját képező pia mater.",
+            explanation: "A tela choroidea a pia mater egy specializált, erekben gazdag rétege, amely benyomul az agykamrákba, és az őt borító ependymasejtekkel együtt alkotja a liquortermelő plexus choroideust."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik tér egy valódi, liquorral telt tér normális körülmények között is?",
+            options: ["Epiduralis tér (cranialis)", "Subduralis tér", "Subarachnoidealis tér", "Intraaxonalis tér"],
+            answer: "Subarachnoidealis tér",
+            explanation: "Míg a cranialis epiduralis és a subduralis tér csak potenciális (kóros esetben válnak valódivá), addig a subarachnoidealis tér egy valódi, liquorral és erekkel kitöltött tér az arachnoidea és a pia mater között."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Melyik struktúra sérülése okozza leggyakrabban a szaglás elvesztését (anosmia) az elülső koponyagödri meningiomáknál?",
+            options: ["Chiasma opticum", "N. oculomotorius", "Gyrus cinguli", "N. olfactorius"],
+            answer: "N. olfactorius",
+            explanation: "Az olfactorius árokban növő meningiomák nyomást gyakorolhatnak a szaglóidegre (n. olfactorius) vagy a szaglóhagymára (bulbus olfactorius), ami a szaglás elvesztéséhez vezet."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Milyen típusú sejtek alkotják az arachnoidea granulációk magját?",
+            options: ["Ependymasejtek", "Asztrociták", "Arachnoidea 'cap' sejtek", "Dura mater fibroblastok"],
+            answer: "Arachnoidea 'cap' sejtek",
+            explanation: "Az arachnoidealis granulációk magját az arachnoidea mater speciális sejtjei, az ún. 'cap cells' alkotják. Ezekből a sejtekből indulnak ki a meningiomák is."
+        },
+        {
+            topic: 'agyhartyak',
+            question: "Mi a Virchow-Robin tér?",
+            options: ["A dura mater két lemeze közötti tér.", "Az agyállományba belépő ereket körülvevő, pia mater által határolt tér.", "A negyedik agykamra egy oldalsó kitüremkedése.", "A gerincvelő központi csatornája."],
+            answer: "Az agyállományba belépő ereket körülvevő, pia mater által határolt tér.",
+            explanation: "A Virchow-Robin-féle perivascularis terek az agy parenchymájába behatoló ereket kísérik egy rövid szakaszon. Fontos szerepük van a folyadék- és salakanyag-transzportban, a glymphatikus rendszer részeként."
+        },
+
+        // Tétel 3: Vér-agy gát, vér-liquor gát
+        {
+            topic: 'ver_agy_gat',
+            question: "Mi a vér-agy gát (VAG) elsődleges funkciója?",
+            options: ["A liquor termelése", "Az agyi homeosztázis fenntartása és az agy védelme", "Az agyi véráramlás növelése", "Az idegsejtek táplálása"],
+            answer: "Az agyi homeosztázis fenntartása és az agy védelme",
+            explanation: "A VAG egy szelektív gát, amely fenntartja az agy stabil belső környezetét (homeosztázis) és megvédi azt a vérben keringő potenciálisan káros anyagoktól."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "A vér-agy gátat melyik sejttípus közötti szoros kapcsolatok (tight junctionok) alkotják elsődlegesen?",
+            options: ["Asztrociták", "Periciták", "Endothelsejtek", "Neuronok"],
+            answer: "Endothelsejtek",
+            explanation: "A VAG alapvető szerkezeti elemét az agyi kapillárisok speciális endothelsejtjei között található, rendkívül szoros tight junctionok képezik, amelyek drasztikusan csökkentik a sejtek közötti (paracelluláris) átjárhatóságot."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik állítás igaz a vér-liquor gátra (VLG)?",
+            options: ["Ugyanaz, mint a vér-agy gát.", "Főként az agyi kapillárisok endothelsejtjei alkotják.", "A plexus choroideus hámsejtjei közötti tight junctionok képezik.", "Teljesen átjárhatatlan minden anyag számára."],
+            answer: "A plexus choroideus hámsejtjei közötti tight junctionok képezik.",
+            explanation: "Ellentétben a VAG-gal, a VLG-t a plexus choroideusokat borító speciális hámsejtek (módosult ependyma) közötti tight junctionok alkotják. A plexus choroideus kapillárisai maguk fenesztráltak."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik anyag jut át a legkönnyebben a vér-agy gáton passzív diffúzióval?",
+            options: ["Glükóz", "Aminosavak", "Oxigén és szén-dioxid", "Fehérjék"],
+            answer: "Oxigén és szén-dioxid",
+            explanation: "A kisméretű, zsíroldékony molekulák, mint a légzési gázok (O2, CO2), az alkohol vagy a nikotin, könnyen átjutnak a VAG lipidmembránján passzív diffúzióval."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Mi a neurovaszkuláris egység (NVU)?",
+            options: ["Egyetlen neuron és a hozzá tartozó ér", "A vér-agy gátat és a helyi keringést szabályozó sejtes komplex (endothel, periciták, asztrociták, neuronok)", "A Willis-kör egy szakasza", "Az agykamrákat bélelő sejtek"],
+            answer: "A vér-agy gátat és a helyi keringést szabályozó sejtes komplex (endothel, periciták, asztrociták, neuronok)",
+            explanation: "Az NVU koncepciója hangsúlyozza, hogy a VAG működése és a helyi véráramlás szabályozása ezen sejttípusok szoros és összehangolt kölcsönhatásának eredménye."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik transzporter felelős a glükóz agyba történő szállításáért?",
+            options: ["P-glikoprotein (P-gp)", "Szerotonin transzporter (SERT)", "Glükóz transzporter 1 (GLUT1)", "Dopamin transzporter (DAT)"],
+            answer: "Glükóz transzporter 1 (GLUT1)",
+            explanation: "A glükóz, az agy fő energiaforrása, a GLUT1 transzporteren keresztül, facilitált diffúzióval jut át a vér-agy gáton."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Mik azok a cirkumventrikuláris organumok (CVO-k)?",
+            options: ["A liquor termelésének fő helyei.", "Az agykamrák körüli speciális területek, ahol a vér-agy gát hiányzik vagy áteresztőbb.", "A dura mater vénás sinusai.", "A gerincvelő szürkeállományának részei."],
+            answer: "Az agykamrák körüli speciális területek, ahol a vér-agy gát hiányzik vagy áteresztőbb.",
+            explanation: "A CVO-k (pl. area postrema, eminentia mediana) olyan 'ablakok' a VAG-on, ahol az agy közvetlenül érzékelheti a vérben keringő anyagokat (hormonok, toxinok), ami fontos a neuroendokrin és vegetatív szabályozásban."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik állítás igaz a pericitákra?",
+            options: ["A liquor keringtetéséért felelősek.", "A kapilláris bazális membránjába ágyazódva szabályozzák a VAG integritását és a kapillárisok átmérőjét.", "A mielinhüvelyt képzik a KIR-ben.", "Az agy fő immunsejtjei."],
+            answer: "A kapilláris bazális membránjába ágyazva szabályozzák a VAG integritását és a kapillárisok átmérőjét.",
+            explanation: "A periciták kontraktilis sejtek, amelyek körülveszik az endothelsejteket, és fontos szerepet játszanak a VAG fenntartásában, az angiogenezisben és a kapilláris véráramlás szabályozásában."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Mi az efflux pumpák (pl. P-glikoprotein) szerepe a VAG-ban?",
+            options: ["Segítik a tápanyagok bejutását az agyba.", "Aktívan kipumpálják a gyógyszereket és toxinokat az agyból.", "Stabilizálják a tight junctionokat.", "Szabályozzák a kapillárisok tágasságát."],
+            answer: "Aktívan kipumpálják a gyógyszereket és toxinokat az agyból.",
+            explanation: "Az efflux pumpák, mint a P-glikoprotein (P-gp), a VAG védelmi funkciójának fontos elemei. Aktívan eltávolítanak számos idegen anyagot és gyógyszert az agyból, megakadályozva azok felhalmozódását."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik gliasejt játszik kulcsszerepet a vér-agy gát indukálásában és fenntartásában?",
+            options: ["Oligodendrocita", "Mikroglia", "Asztrocita", "Schwann-sejt"],
+            answer: "Asztrocita",
+            explanation: "Az asztrociták perivascularis végtalpaikkal körülveszik az agyi kapillárisokat, és az általuk kibocsátott faktorok elengedhetetlenek a VAG specifikus tulajdonságainak (pl. tight junctionok) kialakulásához és fenntartásához."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik állítás igaz a VAG és VLG permeabilitására?",
+            options: ["A VAG áteresztőbb, mint a VLG.", "A VLG áteresztőbb, mint a VAG.", "Mindkettő egyformán áteresztő.", "Mindkettő teljesen átjárhatatlan."],
+            answer: "A VLG áteresztőbb, mint a VAG.",
+            explanation: "Általánosságban a vér-liquor gátat 'szivárgóbbnak' tartják, mint a vér-agy gátat. A plexus choroideus kapillárisai fenesztráltak, és a choroidalis epithelsejtek közötti tight junctionok kevésbé szorosak, mint az agyi endothelsejtekéi."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Receptor-mediált transzcitózissal melyik anyag juthat át a VAG-on?",
+            options: ["Oxigén", "Glükóz", "Inzulin és transzferrin", "Nátriumionok"],
+            answer: "Inzulin és transzferrin",
+            explanation: "A nagyobb molekulák, mint a hormonok (inzulin) vagy szállítófehérjék (transzferrin a vashoz), specifikus receptorokhoz kötődve, vezikuláris transzporttal (transzcitózis) jutnak át a VAG-on."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik neurológiai betegségben játszik központi szerepet a VAG károsodása és az immunsejtek beáramlása?",
+            options: ["Parkinson-kór", "Sclerosis multiplex", "Huntington-kór", "Epilepszia"],
+            answer: "Sclerosis multiplex",
+            explanation: "A sclerosis multiplex egy autoimmun betegség, amelyben a VAG károsodik, lehetővé téve a gyulladásos immunsejtek (limfociták, makrofágok) bejutását a központi idegrendszerbe, ahol azok megtámadják a mielinhüvelyt."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik enzim gátlásával lehet csökkenteni a CSF termelődését?",
+            options: ["Acetilkolin-észteráz", "Monoamino-oxidáz (MAO)", "Szénsavanhidráz", "Katekol-O-metiltranszferáz (COMT)"],
+            answer: "Szénsavanhidráz",
+            explanation: "A szénsavanhidráz-gátlók (pl. acetazolamid) csökkentik a CSF termelődését a plexus choroideusban, mivel gátolják a szekrécióhoz szükséges iontranszportot. Ezt a hatást használják ki pl. a koponyaűri nyomás csökkentésére."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Miért nehéz sok központi idegrendszeri betegséget gyógyszeresen kezelni?",
+            options: ["Mert a betegségek túl gyorsan progrediálnak.", "Mert a gyógyszerek nem tudnak átjutni a vér-agy gáton.", "Mert nincsenek specifikus célpontok az agyban.", "Mert a gyógyszerek túl toxikusak."],
+            answer: "Mert a gyógyszerek nem tudnak átjutni a vér-agy gáton.",
+            explanation: "A VAG hatékony védelmi funkciója egyben komoly akadályt is jelent, mivel számos potenciálisan hatásos gyógyszert (különösen a nagy vagy poláris molekulákat) nem enged be az agyba."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "A vér-agy gát melyik szerkezeti elemének kontraktilitása szabályozhatja a kapillárisok véráramlását?",
+            options: ["Endothelsejt", "Asztrocita", "Bazális membrán", "Pericita"],
+            answer: "Pericita",
+            explanation: "A periciták kontraktilis sejtek, amelyek képesek lehetnek a kapillárisok átmérőjének aktív szabályozására, így finomhangolva a mikrokeringést és a helyi véráramlást."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik cirkumventrikuláris organum ismert hányásközpontként?",
+            options: ["Eminentia mediana", "Subfornicalis szerv", "Area postrema", "Neurohypophysis"],
+            answer: "Area postrema",
+            explanation: "Az area postrema a negyedik agykamra alapjában helyezkedik el, és mivel itt a VAG hiányzik, érzékeny a vérben keringő emetogén (hányást kiváltó) anyagokra, ezért kemoreceptor trigger zónaként vagy hányásközpontként funkcionál."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Milyen típusú kapillárisok találhatók a plexus choroideus stromájában?",
+            options: ["Nem fenesztrált, folytonos kapillárisok", "Fenesztrált (pórusos) kapillárisok", "Szinuszoid kapillárisok", "Nincsenek kapillárisok"],
+            answer: "Fenesztrált (pórusos) kapillárisok",
+            explanation: "A plexus choroideus kapillárisai fenesztráltak, ami lehetővé teszi a vérplazma-szűrlet könnyű kijutását a stromába. A tényleges gátat itt a choroidalis epithelsejtek közötti tight junctionok képezik."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "Melyik állítás igaz az agyi endothelsejtekre?",
+            options: ["Sok pinocitotikus vezikulát tartalmaznak.", "Nincsenek mitokondriumaik.", "Nagyon szoros tight junctionok kötik össze őket.", "Szabadon átjárhatók a fehérjék számára."],
+            answer: "Nagyon szoros tight junctionok kötik össze őket.",
+            explanation: "Az agyi endothelsejtek legfőbb jellemzője a kiterjedt, szoros tight junction hálózat, a csökkent pinocitotikus aktivitás és a mitokondriumokban gazdag citoplazma, ami az aktív gátfunkcióhoz szükséges."
+        },
+        {
+            topic: 'ver_agy_gat',
+            question: "A VAG diszfunkciója hogyan járulhat hozzá az agyödéma kialakulásához?",
+            options: ["Csökkenti a liquor termelését.", "Fokozza a liquor felszívódását.", "Növeli a gát permeabilitását, lehetővé téve a plazma kiáramlását a szövetekbe.", "Csökkenti az agyi véráramlást."],
+            answer: "Növeli a gát permeabilitását, lehetővé téve a plazma kiáramlását a szövetekbe.",
+            explanation: "Számos kórállapotban (pl. stroke, trauma, gyulladás) a VAG károsodik, a tight junctionok megnyílnak, ami a gát áteresztőképességének növekedéséhez vezet. Ez lehetővé teszi a plazmafehérjék és a víz bejutását az agyszövetbe, vasogén ödémát okozva."
+        },
+
+        // Tétel 4: Glia
+        {
+            topic: 'glia',
+            question: "Melyik gliasejt felelős a mielinhüvely képzéséért a KÖZPONTI idegrendszerben?",
+            options: ["Asztrocita", "Schwann-sejt", "Oligodendrocita", "Mikroglia"],
+            answer: "Oligodendrocita",
+            explanation: "Az oligodendrociták a KIR-ben található gliasejtek, amelyek nyúlványaikkal több közeli axon egy-egy szakaszát is képesek körülvenni és mielinizálni."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik gliasejt a központi idegrendszer rezidens immunsejtje (makrofágja)?",
+            options: ["Asztrocita", "Mikroglia", "Ependimasejt", "Oligodendrocita"],
+            answer: "Mikroglia",
+            explanation: "A mikroglia mezodermális eredetű, és az agy fő immunsejtjeként funkcionál, felelős a fagocitózisért, a gyulladásos válaszokért és az immunológiai felügyeletért."
+        },
+        {
+            topic: 'glia',
+            question: "Mi az asztrociták egyik legfontosabb funkciója a szinapszisokban?",
+            options: ["Mielinhüvely képzése", "Akciós potenciál generálása", "A neurotranszmitterek (főleg glutamát) felvétele a szinaptikus résből", "A liquor keringtetése"],
+            answer: "A neurotranszmitterek (főleg glutamát) felvétele a szinaptikus résből",
+            explanation: "Az asztrociták periszinaptikus nyúlványai specifikus transzporterekkel rendelkeznek, amelyekkel gyorsan eltávolítják a glutamátot a szinaptikus résből, megakadályozva ezzel az excitotoxicitást és szabályozva a jelátvitelt."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik sejttípus béleli az agykamrákat és a gerincvelő központi csatornáját?",
+            options: ["Asztrociták", "Mikrogliák", "Oligodendrociták", "Ependimasejtek"],
+            answer: "Ependimasejtek",
+            explanation: "Az ependimasejtek egyrétegű, csillós hámréteget képeznek az agykamrák és a canalis centralis felszínén, és fontos szerepet játszanak a CSF keringetésében."
+        },
+        {
+            topic: 'glia',
+            question: "Mi a 'háromoldalú (tripartit) szinapszis' koncepciójának lényege?",
+            options: ["Egy szinapszis, amely három neuront köt össze.", "Az asztrocita aktívan részt vesz a szinaptikus jelátvitel modulálásában a pre- és posztszinaptikus neuron mellett.", "Három különböző neurotranszmitter felszabadulása egy szinapszisban.", "A szinapszis, amely elektromos és kémiai jeleket is továbbít."],
+            answer: "Az asztrocita aktívan részt vesz a szinaptikus jelátvitel modulálásában a pre- és posztszinaptikus neuron mellett.",
+            explanation: "A háromoldalú szinapszis modellje szerint az asztrociták periszinaptikus nyúlványai a szinapszis harmadik, aktív komponensét képezik, amelyek érzékelik a neuronális aktivitást és gliotranszmitterekkel visszahatnak rá."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik gliasejt felelős a mielinhüvely képzéséért a PERIFÉRIÁS idegrendszerben?",
+            options: ["Oligodendrocita", "Schwann-sejt", "Szatellita gliasejt", "Asztrocita"],
+            answer: "Schwann-sejt",
+            explanation: "A Schwann-sejtek a PIR gliasejtjei. Egy Schwann-sejt egyetlen perifériás axon egy szegmentumát képes mielinizálni. Fontos különbség az oligodendrocitától, ami a KIR-ben több axon szegmentumát is ellátja."
+        },
+        {
+            topic: 'glia',
+            question: "Mi a reaktív asztrogliózis?",
+            options: ["Az asztrociták normális, nyugalmi állapota.", "Az asztrociták válasza agyi sérülésre vagy betegségre, amely hegképződéshez vezethet.", "Az asztrociták rosszindulatú daganata.", "Az asztrociták szerepe a vér-agy gátban."],
+            answer: "Az asztrociták válasza agyi sérülésre vagy betegségre, amely hegképződéshez vezethet.",
+            explanation: "Reaktív asztrogliózis során az asztrociták aktiválódnak, morfológiájuk és génexpressziójuk megváltozik. Gliális heget képezhetnek, ami kezdetben védő, de később gátolhatja a regenerációt."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik betegségre jellemző az oligodendrociták és a KIR mielinhüvelyének autoimmun pusztulása?",
+            options: ["Alzheimer-kór", "Parkinson-kór", "Sclerosis multiplex", "Epilepszia"],
+            answer: "Sclerosis multiplex",
+            explanation: "A sclerosis multiplex (SM) egy demyelinizációs autoimmun betegség, amelyben az immunrendszer a központi idegrendszerben lévő oligodendrocitákat és az általuk képzett mielint támadja meg."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik állítás igaz a mikroglia eredetére?",
+            options: ["Neuroektodermális eredetű, mint a többi gliasejt.", "Mezodermális eredetű, a szikhólyagból származik.", "Endodermális eredetű.", "A perifériás idegrendszerből vándorol be."],
+            answer: "Mezodermális eredetű, a szikhólyagból származik.",
+            explanation: "Ellentétben a többi gliasejttel, a mikroglia nem neuroektodermális, hanem mezodermális eredetű. Az embrionális fejlődés során a szikhólyagból származó progenitor sejtekből alakul ki, és az agy rezidens makrofágjának tekinthető."
+        },
+        {
+            topic: 'glia',
+            question: "Mi a szatellita gliasejtek fő funkciója?",
+            options: ["Axonok mielinizálása", "A perifériás ganglionokban a neuronok sejttesteinek támogatása és izolálása", "Liquor termelése", "Szinapszisok eltávolítása"],
+            answer: "A perifériás ganglionokban a neuronok sejttesteinek támogatása és izolálása",
+            explanation: "A szatellita gliasejtek a perifériás idegrendszer érző és autonóm ganglionjaiban találhatók, ahol szorosan körülveszik a neuronok sejttesteit, szabályozva azok mikrokörnyezetét és biztosítva a strukturális és metabolikus támogatást."
+        },
+        {
+            topic: 'glia',
+            question: "Mi a szinaptikus 'pruning'?",
+            options: ["Új szinapszisok képződése", "A szinapszisok megerősödése", "A felesleges vagy gyengén működő szinapszisok eltávolítása", "A neurotranszmitterek újrahasznosítása"],
+            answer: "A felesleges vagy gyengén működő szinapszisok eltávolítása",
+            explanation: "A szinaptikus pruning (metszés) a fejlődő és a felnőtt agyban is zajló folyamat, amely során a mikroglia sejtek eltávolítják a felesleges szinaptikus kapcsolatokat, hozzájárulva az idegi hálózatok finomhangolásához."
+        },
+        {
+            topic: 'glia',
+            question: "A Schwann-sejtek melyik képessége NEM jellemző az oligodendrocitákra?",
+            options: ["Mielinhüvely képzése", "Az axonok metabolikus támogatása", "A sérült axonok hatékony regenerációjának elősegítése (Büngner-szalagok)", "Több axon egyidejű ellátása"],
+            answer: "A sérült axonok hatékony regenerációjának elősegítése (Büngner-szalagok)",
+            explanation: "A Schwann-sejtek a perifériás idegsérülés után képesek ún. Büngner-szalagokat képezni, amelyek vezetősínként szolgálnak a regenerálódó axonok számára. A KIR-ben az oligodendrociták és az asztrociták által képzett gliális heg gátolja az axonregenerációt."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik gliasejt-típusból indulnak ki a glioblasztómák?",
+            options: ["Mikroglia", "Oligodendrocita", "Asztrocita", "Ependimasejt"],
+            answer: "Asztrocita",
+            explanation: "A glioblasztóma a leggyakoribb és legagresszívabb primer agydaganat, amely az asztrocitákból vagy azok prekurzor sejtjeiből indul ki (IV. grádusú asztrocitóma)."
+        },
+        {
+            topic: 'glia',
+            question: "Mi a 'glutamát-glutamin ciklus'?",
+            options: ["A glutamát lebontási útvonala", "A glutamát és a glutamin kölcsönös átalakulása a neuronok és asztrociták között", "A glutamát szintézisének egy lépése", "A glutamát receptorok egy típusa"],
+            answer: "A glutamát és a glutamin kölcsönös átalakulása a neuronok és asztrociták között",
+            explanation: "Ebben a ciklusban az asztrociták felveszik a glutamátot a szinaptikus résből, glutaminná alakítják, majd a glutamint visszajuttatják a neuronokba, ahol az újra glutamáttá alakul a neurotranszmitter-készlet pótlásához."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik állítás igaz a mikroglia M1 és M2 fenotípusára?",
+            options: ["Az M1 neuroprotektív, az M2 proinflammatorikus.", "Az M1 proinflammatorikus, az M2 antiinflammatorikus/reparatív.", "Az M1 és M2 is mindig neurotoxikus.", "Az M1 a nyugvó, az M2 az aktivált forma."],
+            answer: "Az M1 proinflammatorikus, az M2 antiinflammatorikus/reparatív.",
+            explanation: "A mikroglia aktivációja során polarizálódhat. Az M1 (klasszikus) fenotípus gyulladást keltő anyagokat termel, míg az M2 (alternatív) fenotípus gyulladáscsökkentő és a szöveti regenerációt elősegítő faktorokat bocsát ki."
+        },
+        {
+            topic: 'glia',
+            question: "A rostos (fibrilláris) asztrociták főként hol találhatók?",
+            options: ["A szürkeállományban", "A fehérállományban", "A perifériás ganglionokban", "Az agykamrák falában"],
+            answer: "A fehérállományban",
+            explanation: "A rostos asztrocitákra a hosszú, kevéssé elágazó nyúlványok jellemzők, és főként a KIR fehérállományában, az idegrostok között helyezkednek el, ahol strukturális és metabolikus támogatást nyújtanak."
+        },
+        {
+            topic: 'glia',
+            question: "Milyen szerepet játszanak a csillók az ependimasejteken?",
+            options: ["Növelik a felszívó felületet.", "Segítik a CSF áramlását az agykamrákban.", "Rögzítik a sejteket.", "Neurotransmitereket bocsátanak ki."],
+            answer: "Segítik a CSF áramlását az agykamrákban.",
+            explanation: "Az ependimasejtek apikális felszínén található mozgékony csillók összehangolt csapkodása hajtja a liquor cerebrospinalis (CSF) áramlását a kamrarendszeren belül."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik gliasejt biztosít metabolikus támogatást a perifériás neuronok sejttesteinek?",
+            options: ["Schwann-sejt", "Mikroglia", "Asztrocita", "Szatellita gliasejt"],
+            answer: "Szatellita gliasejt",
+            explanation: "A szatellita gliasejtek szorosan körülveszik a neuronok sejttesteit a perifériás ganglionokban, és szabályozzák azok mikrokörnyezetét, beleértve a metabolikus támogatást is."
+        },
+        {
+            topic: 'glia',
+            question: "Melyik ion koncentrációjának szabályozása az asztrociták egyik legfontosabb homeosztatikus funkciója?",
+            options: ["Nátrium (Na+)", "Kalcium (Ca2+)", "Klorid (Cl-)", "Kálium (K+)"],
+            answer: "Kálium (K+)",
+            explanation: "Neuronális aktivitás során K+ ionok áramlanak ki a sejtekből. Az asztrociták hatékonyan felveszik ezt a felesleges extracelluláris káliumot (K+ pufferelés), megakadályozva ezzel a kóros neuronális ingerlékenységet."
+        },
+        {
+            topic: 'glia',
+            question: "Mi a fő különbség az oligodendrociták és a Schwann-sejtek mielinizációs képessége között?",
+            options: ["Csak az oligodendrociták képeznek valódi mielint.", "Az oligodendrocita egy axont, a Schwann-sejt több axont mielinizál.", "Az oligodendrocita több axont, a Schwann-sejt egy axont mielinizál (egy szakaszon).", "Nincs különbség."],
+            answer: "Az oligodendrocita több axont, a Schwann-sejt egy axont mielinizál (egy szakaszon).",
+            explanation: "Egyetlen oligodendrocita a KIR-ben több (akár 50-60) közeli axon egy-egy szegmentumát is képes mielinizálni, míg a PIR-ben egy Schwann-sejt mindig csak egyetlen axon egy internodiumát veszi körül."
+        },
+
+        // Tétel 5: Neurotranszmitter rendszerek
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik a központi idegrendszer legfontosabb serkentő neurotranszmittere?",
+            options: ["GABA", "Glicin", "Szerotonin", "Glutamát"],
+            answer: "Glutamát",
+            explanation: "A glutamát (glutaminsav) a KIR messze legelterjedtebb serkentő neurotranszmittere, amely a szinapszisok kb. 80%-ában felelős a gyors jelátvitelért és kulcsszerepet játszik a plaszticitásban."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik a központi idegrendszer fő gátló neurotranszmittere?",
+            options: ["Acetilkolin", "Dopamin", "GABA", "Noradrenalin"],
+            answer: "GABA",
+            explanation: "A gamma-amino-vajsav (GABA) a KIR fő gátló neurotranszmittere, amely csökkenti a neuronális ingerlékenységet és megakadályozza a túlzott serkentést."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "A Parkinson-kór melyik neurotranszmitter rendszer neuronjainak pusztulásával függ össze?",
+            options: ["Szerotonerg", "Kolinerg", "Dopaminerg", "GABAerg"],
+            answer: "Dopaminerg",
+            explanation: "A Parkinson-kór a substantia nigra pars compacta dopaminerg neuronjainak progresszív pusztulása miatt alakul ki, ami dopaminhiányhoz vezet a striátumban, és ez okozza a jellegzetes motoros tüneteket."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Az SSRI típusú antidepresszánsok melyik neurotranszmitter visszavételét gátolják?",
+            options: ["Dopamin", "Noradrenalin", "Szerotonin", "Acetilkolin"],
+            answer: "Szerotonin",
+            explanation: "Az SSRI-k (szelektív szerotonin visszavétel-gátlók) a szerotonin transzporter (SERT) gátlásával növelik a szerotonin koncentrációját a szinaptikus résben, ezáltal fejtik ki antidepresszáns hatásukat."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik agytörzsi mag a központi noradrenerg rendszer fő forrása?",
+            options: ["Raphe magvak", "Locus coeruleus", "Substantia nigra", "Ventralis tegmentális area"],
+            answer: "Locus coeruleus",
+            explanation: "Az agy noradrenerg neuronjainak sejttestjei túlnyomórészt a hídban található locus coeruleusban (LC) koncentrálódnak, ahonnan kiterjedt, diffúz projekciókat küldenek az egész agyba."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Az Alzheimer-kórban melyik rendszer neuronjainak pusztulása játszik kulcsszerepet a kognitív hanyatlásban?",
+            options: ["Dopaminerg", "Szerotonerg", "Kolinerg", "Hisztaminerg"],
+            answer: "Kolinerg",
+            explanation: "Az Alzheimer-kór egyik korai és fontos jellemzője a bazális előagyi kolinerg neuronok (főleg a Meynert-mag) pusztulása, ami az agykérgi acetilkolin-szint csökkenéséhez és a memóriazavarokhoz vezet."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik neurotranszmitter receptorai a benzodiazepinek (pl. Xanax, Rivotril) fő támadáspontjai?",
+            options: ["Dopamin D2", "Szerotonin 5-HT2A", "Nikotinos acetilkolin", "GABA-A"],
+            answer: "GABA-A",
+            explanation: "A benzodiazepinek a GABA-A receptorok pozitív allosztérikus modulátorai, ami azt jelenti, hogy fokozzák a GABA gátló hatását a receptoron, ezáltal fejtik ki szorongásoldó, altató és görcsgátló hatásukat."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik NEM tartozik a katekolaminok közé?",
+            options: ["Dopamin", "Noradrenalin", "Szerotonin", "Adrenalin"],
+            answer: "Szerotonin",
+            explanation: "A katekolaminok (dopamin, noradrenalin, adrenalin) a tirozin aminosavból szintetizálódnak és közös kémiai szerkezettel (katekol gyűrű) rendelkeznek. A szerotonin egy indolamin, amely a triptofánból képződik."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Mi a szerotonin szindróma?",
+            options: ["A szerotonin hiánya által okozott állapot.", "A szerotonerg rendszer túlzott stimulációja miatti, potenciálisan életveszélyes állapot.", "A szerotonin allergiás reakciója.", "A szerotonin termelésének leállása."],
+            answer: "A szerotonerg rendszer túlzott stimulációja miatti, potenciálisan életveszélyes állapot.",
+            explanation: "Szerotonin szindróma akkor alakul ki, ha a szerotonerg szerek kombinációja vagy túladagolása miatt a szerotonin szintje kórosan megemelkedik. Tünetei a mentális állapot változása, autonóm hiperaktivitás és neuromuscularis zavarok."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik enzim felelős az acetilkolin lebontásáért a szinaptikus résben?",
+            options: ["Monoamino-oxidáz (MAO)", "Katekol-O-metiltranszferáz (COMT)", "Acetilkolin-észteráz (AChE)", "GABA-transzamináz"],
+            answer: "Acetilkolin-észteráz (AChE)",
+            explanation: "Az acetilkolin-észteráz enzim rendkívül gyorsan bontja le az acetilkolint a szinaptikus résben, ezzel megszüntetve a hatását. Az Alzheimer-kórban használt gyógyszerek ezt az enzimet gátolják."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "A jutalomérzésben és a függőségek kialakulásában melyik dopaminerg pálya játszik központi szerepet?",
+            options: ["Nigrostriatális pálya", "Mezolimbikus pálya", "Mezokortikális pálya", "Tuberoinfundibuláris pálya"],
+            answer: "Mezolimbikus pálya",
+            explanation: "A mezolimbikus pálya, amely a VTA-ból a nucleus accumbensbe projektál, az agy jutalmazó rendszerének központi eleme. Ennek a pályának a dopaminerg túlstimulációja felelős a függőségek kialakulásáért."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik receptor típusa ionotróp a szerotonin receptorai közül?",
+            options: ["5-HT1A", "5-HT2A", "5-HT3", "5-HT4"],
+            answer: "5-HT3",
+            explanation: "Az 5-HT3 receptor az egyetlen ionotróp szerotonin receptor, amely egy kationcsatornát alkot. Fontos szerepe van a hányinger és hányás kiváltásában."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik állítás igaz az endokannabinoidokra?",
+            options: ["Fehérje természetűek.", "A preszinaptikus neuronból szabadulnak fel.", "Retrográd hírvivőként a posztszinaptikus neuronból felszabadulva hatnak a preszinaptikus receptorokra.", "Fő receptoruk a dopamin receptor."],
+            answer: "Retrográd hírvivőként a posztszinaptikus neuronból felszabadulva hatnak a preszinaptikus receptorokra.",
+            explanation: "Az endokannabinoidok (pl. anandamid) lipid-alapú, nem-klasszikus neurotranszmitterek, amelyek a posztszinaptikus sejtből 'igény szerint' szintetizálódnak, és retrográd módon (visszafelé) hatnak a preszinaptikus CB1 receptorokra, gátolva a neurotranszmitter felszabadulást."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "A nikotinos és muszkarinos receptorok melyik neurotranszmitter receptorai?",
+            options: ["Dopamin", "Szerotonin", "Acetilkolin", "GABA"],
+            answer: "Acetilkolin",
+            explanation: "Az acetilkolin két fő receptortípusa a nikotinos (ionotróp) és a muszkarinos (metabotróp) receptor, amelyek eltérő hatásokat közvetítenek."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik neurotranszmitter rendszer alulműködése okozza az anhedóniát (örömérzés képességének elvesztése) depresszióban?",
+            options: ["Kolinerg", "Dopaminerg", "GABAerg", "Hisztaminerg"],
+            answer: "Dopaminerg",
+            explanation: "Az anhedónia, a depresszió egyik kulcstünete, szorosan kapcsolódik a mezolimbikus jutalmazó rendszer dopaminerg alulműködéséhez."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik nem egy klasszikus neurotranszmitter?",
+            options: ["Glutamát", "Nitrogén-monoxid (NO)", "Acetilkolin", "GABA"],
+            answer: "Nitrogén-monoxid (NO)",
+            explanation: "A nitrogén-monoxid egy gáztranszmitter. Nem tárolódik vezikulákban és nincs specifikus membránreceptora, hanem szabadon diffundál és intracelluláris célpontokat aktivál."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Az antidepresszánsok mely két fő enzim gátlásán keresztül fejtik ki hatásukat (a visszavétel-gátláson kívül)?",
+            options: ["AChE és GAD", "TH és DBH", "MAO és COMT", "DAT és SERT"],
+            answer: "MAO és COMT",
+            explanation: "A monoamino-oxidáz (MAO) és a katekol-O-metiltranszferáz (COMT) a monoaminok (szerotonin, dopamin, noradrenalin) lebontásáért felelős enzimek. Gátlásuk (pl. MAO-gátló gyógyszerekkel) növeli ezen neurotranszmitterek szintjét."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "A koffein élénkítő hatása melyik neuromodulátor receptorainak gátlásán alapul?",
+            options: ["Dopamin", "Szerotonin", "Adenozin", "Hisztamin"],
+            answer: "Adenozin",
+            explanation: "Az adenozin egy gátló neuromodulátor, amelynek szintje ébrenlét alatt nő, álmosságot okozva. A koffein az adenozin receptorok antagonistája, gátolja az adenozin hatását, így élénkítő hatású."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "Melyik neuropeptid játszik kulcsszerepet a fájdalomérzet továbbításában?",
+            options: ["Endorfin", "Neuropeptid Y", "P-anyag (Substance P)", "Oxitocin"],
+            answer: "P-anyag (Substance P)",
+            explanation: "A P-anyagot a primer szenzoros (fájdalomérző) neuronok szabadítják fel a gerincvelőben, és kulcsszerepet játszik a nociceptív (fájdalmi) jelek továbbításában."
+        },
+        {
+            topic: 'neurotranszmitterek',
+            question: "A 'glutamát hipotézis' melyik pszichiátriai betegséghez kapcsolódik?",
+            options: ["Depresszió", "Skizofrénia", "Pánikbetegség", "ADHD"],
+            answer: "Skizofrénia",
+            explanation: "A skizofrénia glutamát hipotézise szerint a betegség, különösen annak negatív és kognitív tünetei, az NMDA receptorok hipofunkciójával (csökkent működésével) hozhatók összefüggésbe."
+        },
+
+        // Tétel 6: Szinaptikus és extraszinaptikus transzmisszió
+        {
+            topic: 'transzmisszio',
+            question: "Mi a fő különbség az elektromos és a kémiai szinapszisok között?",
+            options: ["Az elektromos gyorsabb, a kémiai lassabb.", "Az elektromosban neurotranszmitterek, a kémiaiban ionok közvetítenek.", "Az elektromos mindig serkentő, a kémiai mindig gátló.", "Az elektromos csak a periférián, a kémiai csak a központi idegrendszerben van."],
+            answer: "Az elektromos gyorsabb, a kémiai lassabb.",
+            explanation: "Az elektromos szinapszisokban (réskapcsolatok) az ionok közvetlenül áramlanak, így a jelátvitel szinte azonnali. A kémiai szinapszisokban a neurotranszmitter felszabadulása, diffúziója és kötődése időt vesz igénybe (szinaptikus késés)."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Mi az extraszinaptikus transzmisszió?",
+            options: ["Egy kóros jelátviteli forma.", "Jelátvitel, amely a szinaptikus résen kívül, az extracelluláris térben történik.", "Csak gliasejtek közötti kommunikáció.", "Az elektromos szinapszisok másik neve."],
+            answer: "Jelátvitel, amely a szinaptikus résen kívül, az extracelluláris térben történik.",
+            explanation: "Extraszinaptikus transzmisszió során a neurotranszmitterek az extracelluláris térbe diffundálva olyan receptorokat aktiválnak, amelyek nem közvetlenül a kibocsátó szinapszissal szemben helyezkednek el."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Melyik jelátviteli módra jellemző a 'volumen transzmisszió'?",
+            options: ["Szinaptikus transzmisszió", "Elektromos szinapszisok", "Extraszinaptikus transzmisszió", "Retrográd transzmisszió"],
+            answer: "Extraszinaptikus transzmisszió",
+            explanation: "A volumen transzmisszió a neurotranszmitterek lassú diffúzióját jelenti az extracelluláris térben, ami egy lassabb, diffúzabb, szélesebb körű moduláló hatást tesz lehetővé. Ez az extraszinaptikus jelátvitel egyik fő formája."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Melyik receptor típus jellemzőbb az extraszinaptikus jelátvitelre?",
+            options: ["Ionotróp receptorok", "Metabotróp receptorok (GPCR-ek)", "Feszültségfüggő ioncsatornák", "Receptor tirozin-kinázok"],
+            answer: "Metabotróp receptorok (GPCR-ek)",
+            explanation: "Az extraszinaptikus receptorok gyakran magas affinitású, lassan deszenzitizálódó metabotróp receptorok, amelyek képesek az alacsony, környezeti neurotranszmitter-koncentrációkra is reagálni és tartós, moduláló hatást kiváltani."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Mi a neurotranszmitter 'spillover'?",
+            options: ["A neurotranszmitterek túlzott termelése.", "A neurotranszmitterek kiszivárgása a szinaptikus résből a környező extracelluláris térbe.", "A neurotranszmitterek gyors lebontása.", "A neurotranszmitterek újrahasznosítása."],
+            answer: "A neurotranszmitterek kiszivárgása a szinaptikus résből a környező extracelluláris térbe.",
+            explanation: "Spillover akkor következik be, ha a felszabaduló neurotranszmitter nem tud elég gyorsan megkötődni vagy eltávolítódni, és 'túlcsordul' a szinapszisból, elérve az extraszinaptikus receptorokat."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Melyik állítás igaz az ionotróp receptorokra?",
+            options: ["Másodlagos hírvivőket aktiválnak.", "Lassú és tartós hatást közvetítenek.", "Közvetlenül egy ioncsatornát alkotnak.", "Főként az extraszinaptikus térben találhatók."],
+            answer: "Közvetlenül egy ioncsatornát alkotnak.",
+            explanation: "Az ionotróp receptorok ligand-kapuzott ioncsatornák. A neurotranszmitter kötődése közvetlenül a csatorna megnyílását okozza, ami gyors ionáramlást és membránpotenciál-változást eredményez."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Mi a térbeli szummáció?",
+            options: ["Egyetlen szinapszisból rövid időn belül érkező jelek összegződése.", "Különböző helyeken lévő szinapszisokból közel egy időben érkező jelek összegződése.", "A serkentő és gátló jelek kioltják egymást.", "Az akciós potenciál terjedése az axon mentén."],
+            answer: "Különböző helyeken lévő szinaptikusokból közel egy időben érkező jelek összegződése.",
+            explanation: "Térbeli szummáció során a neuron különböző pontjain (pl. különböző dendriteken) egyidejűleg aktív szinapszisok által keltett kis posztszinaptikus potenciálok összeadódnak az axon dombnál."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Melyik receptor játszik kulcsszerepet az LTP (hosszútávú potenciáció) indukciójában mint 'koincidencia detektor'?",
+            options: ["AMPA receptor", "GABA-A receptor", "NMDA receptor", "Muszkarinos acetilkolin receptor"],
+            answer: "NMDA receptor",
+            explanation: "Az NMDA receptor aktiválásához a glutamát kötődése mellett a posztszinaptikus membrán depolarizációja is szükséges (a Mg2+-blokk eltávolításához). Ez a tulajdonsága teszi ideális koincidencia detektorrá a pre- és posztszinaptikus aktivitás egybeesésének jelzésére, ami az LTP alapja."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Melyik állítás NEM igaz a neuromodulátorokra?",
+            options: ["Gyakran G-protein-csatolt receptorokon hatnak.", "Általában gyors, fázisos EPSP-ket vagy IPSP-ket váltanak ki.", "Hatásuk lassú és elhúzódó lehet.", "Befolyásolják a neuronális hálózatok általános ingerlékenységét."],
+            answer: "Általában gyors, fázisos EPSP-ket vagy IPSP-ket váltanak ki.",
+            explanation: "A neuromodulátorok (pl. dopamin, szerotonin) jellemzően nem közvetlenül váltanak ki gyors posztszinaptikus potenciálokat, hanem a neuronok és szinapszisok működését modulálják, hangolják hosszabb időskálán."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Milyen szerepe van az extraszinaptikus GABA-A receptoroknak?",
+            options: ["Gyors, fázisos gátlást közvetítenek.", "Folyamatos, tónusos gátló áramot generálnak, beállítva a hálózat ingerlékenységét.", "Mindig serkentő hatásúak.", "A GABA felszabadulását serkentik."],
+            answer: "Folyamatos, tónusos gátló áramot generálnak, beállítva a hálózat ingerlékenységét.",
+            explanation: "A magas affinitású, lassan deszenzitizálódó extraszinaptikus GABA-A receptorok a környezeti (ambienteális) GABA-ra reagálva egy állandó, háttér jellegű gátlást (tónusos gátlás) biztosítanak."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Hogyan különbözik a neuropeptidek és a kismolekulájú neurotranszmitterek szintézise?",
+            options: ["A neuropeptidek a szinaptikus végződésben, a kismolekulájúak a sejttestben szintetizálódnak.", "Nincs különbség.", "A neuropeptidek a sejttestben, a kismolekulájúak a végződésben szintetizálódnak.", "Mindkettő a szinaptikus résben képződik."],
+            answer: "A neuropeptidek a sejttestben, a kismolekulájúak a végződésben szintetizálódnak.",
+            explanation: "A neuropeptidek a sejttestben, a riboszómákon képződnek, és vezikulákban szállítódnak a végződésbe. Ezzel szemben a kismolekulájú transzmitterek szintézise általában helyben, a preszinaptikus terminálisban történik."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Mi a söntölő (shunting) gátlás lényege?",
+            options: ["A gátló jel átirányítása egy másik neuronra.", "A membrán vezetőképességének növelése, ami 'lerövidíti' a serkentő jeleket, anélkül, hogy feltétlenül hiperpolarizációt okozna.", "A szinapszis teljes elektromos blokkolása.", "A serkentő és gátló jelek tökéletes kioltása."],
+            answer: "A membrán vezetőképességének növelése, ami 'lerövidíti' a serkentő jeleket, anélkül, hogy feltétlenül hiperpolarizációt okozna.",
+            explanation: "Söntölő gátlás során egy gátló neurotranszmitter (pl. GABA) olyan ioncsatornát nyit meg (pl. Cl-), amelynek reverziós potenciálja a tüzelési küszöb alatt van. Ez megnöveli a membrán vezetőképességét, és megnehezíti, hogy a serkentő jelek elérjék a küszöböt."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Melyik folyamat NEM része a kémiai neurotranszmissziónak?",
+            options: ["Neurotranszmitter felszabadulása a preszinaptikus végződésből", "Közvetlen ionáramlás a neuronok között réskapcsolatokon", "Neurotranszmitter kötődése a posztszinaptikus receptorokhoz", "Neurotranszmitter eltávolítása a szinaptikus résből"],
+            answer: "Közvetlen ionáramlás a neuronok között réskapcsolatokon",
+            explanation: "A közvetlen ionáramlás a réskapcsolatokon (gap junctions) keresztül az elektromos szinapszisokra jellemző. A kémiai szinapszisokban a jelet a szinaptikus résen átdiffundáló neurotranszmitterek közvetítik."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Milyen következménnyel jár a szinaptikus és extraszinaptikus NMDA receptorok eltérő aktivációja?",
+            options: ["Mindkettő mindig sejthalált okoz.", "Mindkettő mindig a sejttúlélést segíti.", "A szinaptikus aktiváció inkább a sejttúlélést és plaszticitást, míg az extraszinaptikus az excitotoxicitást segíti elő.", "Nincs funkcionális különbség közöttük."],
+            answer: "A szinaptikus aktiváció inkább a sejttúlélést és plaszticitást, míg az extraszinaptikus az excitotoxicitást segíti elő.",
+            explanation: "A kutatások szerint a két NMDAR populáció eltérő intracelluláris jelátviteli utakat aktivál. A szinaptikus NMDAR-ok a plaszticitásban és neuroprotekcióban, míg az extraszinaptikus NMDAR-ok túlzott aktivációja a neuronális károsodásban játszik szerepet."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "A dopamin, a szerotonin és a noradrenalin melyik transzmissziós móddal fejtik ki hatásukat leginkább?",
+            options: ["Gyors, pont-pont közötti szinaptikus transzmisszióval", "Volumen transzmisszióval, neuromodulátorként", "Csak elektromos szinapszisokon keresztül", "Csak retrográd jelátvitellel"],
+            answer: "Volumen transzmisszióval, neuromodulátorként",
+            explanation: "Ezek a monoaminok a diffúz modulátor rendszerek fő neurotranszmittereiként az agy nagy területeire hatnak, gyakran volumen transzmisszióval, befolyásolva a hálózatok általános állapotát."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Mi a szerepe az asztrocitáknak a glutamát-glutamin ciklusban?",
+            options: ["Glutamint szintetizálnak glutamátból, és visszajuttatják a neuronokba.", "Glutamátot szintetizálnak a neuronok számára.", "Lebontják a glutamint.", "Gátolják a glutamát felszabadulását."],
+            answer: "Glutamint szintetizálnak glutamátból, és visszajuttatják a neuronokba.",
+            explanation: "Az asztrociták felveszik a glutamátot a szinaptikus résből, glutaminná alakítják, majd ezt a glutamint adják át a neuronoknak, amelyek ebből újra glutamátot tudnak szintetizálni. Ez egy hatékony újrahasznosítási folyamat."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Mi a szinaptikus késés (synaptic delay)?",
+            options: ["Az akciós potenciál terjedési ideje az axonon.", "Az idő, ami a preszinaptikus akciós potenciál és a posztszinaptikus potenciál kezdete között eltelik.", "A receptor deszenzitizációjának ideje.", "A neurotranszmitter szintézisének ideje."],
+            answer: "Az idő, ami a preszinaptikus akciós potenciál és a posztszinaptikus potenciál kezdete között eltelik.",
+            explanation: "A szinaptikus késés (kb. 0.5-2 ms) a kémiai szinapszisokra jellemző, és a neurotranszmitter felszabadulásához, diffúziójához és a receptorhoz való kötődéséhez szükséges időből adódik."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Mi a 'háromfaktoros plaszticitási szabály' lényege?",
+            options: ["Három szinapszis egyidejű aktivációja szükséges.", "A pre- és posztszinaptikus aktivitás mellett egy harmadik, moduláló jel (pl. neuromodulátor) is szükséges a plasztikus változáshoz.", "Az LTP három lépésből áll.", "Háromféle receptor szükséges a plaszticitáshoz."],
+            answer: "A pre- és posztszinaptikus aktivitás mellett egy harmadik, moduláló jel (pl. neuromodulátor) is szükséges a plasztikus változáshoz.",
+            explanation: "Ez a szabály azt mondja ki, hogy a szinaptikus plaszticitás nem csak a helyi aktivitástól függ, hanem a globális agyi állapottól is, amelyet a neuromodulátorok (pl. dopamin, acetilkolin) közvetítenek, és amelyek 'engedélyezik' vagy módosítják a plasztikus változásokat."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "Hogyan hatnak a gliotranszmitterek?",
+            options: ["Mindig serkentik a neuronokat.", "Az asztrocitákból felszabadulva befolyásolják a közeli neuronok és szinapszisok működését.", "Csak más gliasejtekre hatnak.", "Gátolják a liquor termelését."],
+            answer: "Az asztrocitákból felszabadulva befolyásolják a közeli neuronok és szinapszisok működését.",
+            explanation: "A gliotranszmitterek (pl. ATP, D-szerin, glutamát) az asztrocitákból szabadulnak fel neuronális aktivitásra válaszul, és visszahatnak a neuronokra, modulálva a szinaptikus átvitelt és a hálózati aktivitást."
+        },
+        {
+            topic: 'transzmisszio',
+            question: "A receptor heteromerek hogyan teszik lehetővé a jelek integrációját?",
+            options: ["Növelik a neurotranszmitterek felszabadulását.", "Különböző receptorok fizikai összekapcsolódásával egyedi jelátviteli tulajdonságokat hoznak létre.", "Csökkentik a receptorok számát.", "Gyorsítják a szinaptikus késést."],
+            answer: "Különböző receptorok fizikai összekapcsolódásával egyedi jelátviteli tulajdonságokat hoznak létre.",
+            explanation: "A receptor heteromerek (pl. egy dopamin- és egy adenozin-receptor komplex) lehetővé teszik, hogy a sejt egyszerre érzékeljen és integráljon különböző jeleket, mivel az egyik receptor aktivációja módosíthatja a másik jelátvitelét, így egy komplex, kombinált választ generálva."
+        }
+    ];
+
+    const startScreen = document.getElementById('start-screen');
+    const quizContainer = document.getElementById('quiz-container');
+    const resultsScreen = document.getElementById('results-screen');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const questionCounterEl = document.getElementById('question-counter');
+    const scoreEl = document.getElementById('score');
+    const finalScoreEl = document.getElementById('final-score');
+    const resultMessageEl = document.getElementById('result-message');
+    const explanationModal = document.getElementById('explanation-modal');
+    const explanationTitleEl = document.getElementById('explanation-title');
+    const explanationTextEl = document.getElementById('explanation-text');
+
+    let currentTopicQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let questionsAnswered = false;
+
+    function startQuiz(topic) {
+        let filteredQuestions = quizData.filter(q => q.topic === topic);
+        currentTopicQuestions = shuffleArray(filteredQuestions);
+        
+        if (currentTopicQuestions.length > 20) {
+            currentTopicQuestions = currentTopicQuestions.slice(0, 20);
+        }
+        
+        currentQuestionIndex = 0;
+        score = 0;
+        
+        startScreen.classList.add('hidden');
+        resultsScreen.classList.add('hidden');
+        quizContainer.classList.remove('hidden');
+        quizContainer.style.opacity = '0';
+        setTimeout(() => { quizContainer.style.opacity = '1'; }, 10);
+        
+        scoreEl.textContent = `Pontszám: 0`;
+        displayQuestion();
+    }
+
+    function displayQuestion() {
+        questionsAnswered = false;
+        nextBtn.classList.add('hidden');
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        
+        questionCounterEl.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${currentTopicQuestions.length}`;
+        questionEl.textContent = currentQuestion.question;
+        
+        optionsEl.innerHTML = '';
+        const shuffledOptions = shuffleArray([...currentQuestion.options]);
+        shuffledOptions.forEach(option => {
+            const button = document.createElement('button');
+            button.innerHTML = option;
+            button.classList.add('option-btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-slate-300', 'bg-slate-50', 'hover:bg-slate-200');
+            button.onclick = () => selectAnswer(button, option);
+            optionsEl.appendChild(button);
+        });
+    }
+
+    function selectAnswer(button, selectedOption) {
+        if (questionsAnswered) return;
+        questionsAnswered = true;
+
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        const isCorrect = selectedOption === currentQuestion.answer;
+        
+        Array.from(optionsEl.children).forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent === currentQuestion.answer) {
+                 btn.classList.add('correct');
+            }
+        });
+
+        if (isCorrect) {
+            score++;
+            button.classList.add('correct');
+            explanationTitleEl.textContent = "✅ Helyes válasz!";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-green-600";
+        } else {
+            button.classList.add('incorrect');
+            explanationTitleEl.textContent = "❌ Helytelen válasz";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-red-600";
+        }
+
+        scoreEl.textContent = `Pontszám: ${score}`;
+        explanationTextEl.innerHTML = `<b>Magyarázat:</b> ${currentQuestion.explanation}`;
+        showExplanationModal();
+        nextBtn.classList.remove('hidden');
+    }
+    
+    function showExplanationModal() {
+        explanationModal.style.display = "flex";
+        explanationModal.onclick = (e) => {
+             if (e.target === explanationModal) {
+                 explanationModal.style.display = "none";
+             }
+        };
+    }
+
+    nextBtn.addEventListener('click', () => {
+        explanationModal.style.display = "none";
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentTopicQuestions.length) {
+            displayQuestion();
+        } else {
+            showResults();
+        }
+    });
+
+    function showResults() {
+        quizContainer.classList.add('hidden');
+        resultsScreen.classList.remove('hidden');
+        
+        const percentage = Math.round((score / currentTopicQuestions.length) * 100);
+        finalScoreEl.textContent = `${percentage}%`;
+        
+        let message = "";
+        if (percentage === 100) {
+            message = "Tökéletes! Készen állsz a vizsgára. 🏆";
+        } else if (percentage >= 80) {
+            message = "Kiváló eredmény! Már csak egy kis ismétlés kell. 👍";
+        } else if (percentage >= 50) {
+            message = "Szép munka! Gyakorolj még egy kicsit. 😊";
+        } else {
+            message = "Ne add fel, ismételd át az anyagot és próbáld újra! 📚";
+        }
+        resultMessageEl.textContent = message;
+    }
+
+    function restartQuiz() {
+        resultsScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Átfogó Neuroanatómia Teszt: Agyidegek és Érzékszervek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Átfogó Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Agyidegek (V, VII, VIII), Hallás, Szaglás és Egyensúly</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- A kérdések dinamikusan itt jelennek meg -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- A részletes eredmények itt jelennek meg -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        const fullQuizData = [
+            // ----- NERVUS TRIGEMINUS (V) -----
+            { question: "Melyik trigeminus mag felelős a rágóizmokból származó proprioceptív információk feldolgozásáért, és tartalmaz primer szenzoros neuronokat?", answers: { a: "Nucleus principalis sensorius", b: "Nucleus spinalis", c: "Nucleus motorius", d: "Nucleus mesencephalicus" }, correctAnswer: "d", explanation: "A nucleus mesencephalicus nervi trigemini egyedülálló, mivel primer szenzoros (pseudounipolaris) neuronok sejttestjeit tartalmazza a központi idegrendszeren belül, és a propriocepcióért felelős." },
+            { question: "A nervus mandibularis (V/3) melyik koponyalapi nyíláson lép ki?", answers: { a: "Foramen rotundum", b: "Fissura orbitalis superior", c: "Foramen ovale", d: "Foramen spinosum" }, correctAnswer: "c", explanation: "A N. mandibularis (V/3) a foramen ovalén keresztül hagyja el a koponyaüreget, és a fossa infratemporalisba jut." },
+            { question: "A cornea reflex afferens (érző) szárát melyik idegág alkotja?", answers: { a: "N. ophthalmicus (V/1)", b: "N. maxillaris (V/2)", c: "N. mandibularis (V/3)", d: "N. facialis (VII)" }, correctAnswer: "a", explanation: "A cornea érintését a N. ophthalmicus (V/1) nasociliaris ágán keresztül futó rostok érzékelik, ez alkotja a reflex afferens szárát. Az efferens szár a N. facialis." },
+            { question: "Melyik izmot NEM idegzi be a nervus trigeminus motoros része?", answers: { a: "M. masseter", b: "M. temporalis", c: "M. buccinator", d: "M. tensor tympani" }, correctAnswer: "c", explanation: "A M. buccinator egy mimikai izom, amelyet a nervus facialis (VII.) idegez be motorosan. A N. trigeminus a rágóizmokat (masseter, temporalis, pterygoideusok) és néhány más izmot (pl. tensor tympani) lát el." },
+            { question: "Hol helyezkedik el a ganglion trigeminale (Gasser-dúc)?", answers: { a: "A fossa cranii posteriorban", b: "A foramen magnumon belül", c: "A halántékcsont sziklacsonti részének elülső felszínén, az impressio trigeminiben", d: "Az orbitában, a szemgolyó mögött" }, correctAnswer: "c", explanation: "A Gasser-dúc a középső koponyagödörben, a halántékcsont (os temporale) pars petrosájának elülső felszínén, egy dura-kettőzetben (cavum Meckeli) helyezkedik el." },
+            { question: "Mi a Wallenberg-szindróma jellegzetes trigeminus-tünete?", answers: { a: "Azonos oldali teljes arcfél érzéskiesés", b: "Ellenoldali teljes arcfél érzéskiesés", c: "Azonos oldali disszociált érzészavar (fájdalom-hő kiesik, tapintás megtartott)", d: "Kétoldali rágóizom-gyengeség" }, correctAnswer: "c", explanation: "Wallenberg-szindrómában a nyúltvelő lateralis része sérül, ami károsítja a tractus spinalis nervi trigeminit és a hozzá tartozó magot. Ez az azonos oldali arcfélen a fájdalom- és hőérzés kiesését okozza a finom tapintás megtartottsága mellett." },
+            { question: "Melyik idegág szállítja a postganglionaris paraszimpatikus rostokat a ganglion oticumból a glandula parotishoz?", answers: { a: "N. lingualis", b: "N. alveolaris inferior", c: "N. auriculotemporalis", d: "N. buccalis" }, correctAnswer: "c", explanation: "A N. auriculotemporalis (a V/3 ága) veszi fel a N. glossopharyngeushoz (IX) tartozó ganglion oticumból jövő secretomotoros rostokat és szállítja azokat a fültőmirigyhez (glandula parotis)." },
+            { question: "A nervus infraorbitalis melyik fő trigeminus-ág végága?", answers: { a: "N. ophthalmicus (V/1)", b: "N. maxillaris (V/2)", c: "N. mandibularis (V/3)", d: "Egyiknek sem, önálló ideg." }, correctAnswer: "b", explanation: "A N. maxillaris (V/2) a fossa pterygopalatina után a fissura orbitalis inferioron keresztül lép a szemüregbe, ahol N. infraorbitalis néven folytatódik." },
+            { question: "A trigeminus neuralgia leggyakrabban melyik két ágat érinti?", answers: { a: "V/1 és V/2", b: "V/2 és V/3", c: "V/1 és V/3", d: "Mindhárom ágat egyformán gyakran" }, correctAnswer: "b", explanation: "A klasszikus trigeminus neuralgia leggyakrabban a N. maxillaris (V/2) vagy a N. mandibularis (V/3) ellátási területén okoz heves, rohamokban jelentkező fájdalmat." },
+            { question: "Mi a masseter reflex afferens és efferens szára?", answers: { a: "Afferens: V/3; Efferens: VII", b: "Afferens: V/2; Efferens: V/3", c: "Afferens és Efferens is a V/3", d: "Afferens: VII; Efferens: V/3" }, correctAnswer: "c", explanation: "A masseter reflex egy monoszimaptikus nyújtási reflex, amelynek mind az érző (proprioceptív a rágóizomból), mind a mozgató szárát a nervus mandibularis (V/3) rostjai alkotják." },
+            { question: "A nervus nasociliaris melyik fő trigeminus-ág része?", answers: { a: "V/1", b: "V/2", c: "V/3", d: "Önálló ideg" }, correctAnswer: "a", explanation: "A N. nasociliaris a N. ophthalmicus (V/1) egyik fő ága, amely a szemgolyó, a rostasejtek és az orrüreg elülső részének érző beidegzéséért felelős." },
+            { question: "Melyik állítás igaz a nervus trigeminus motoros magjának kérgi beidegzésére?", answers: { a: "Kizárólag ellenoldali (kontralaterális)", b: "Kizárólag azonos oldali (ipszilaterális)", c: "Főként bilaterális (kétoldali)", d: "Nincs direkt kérgi beidegzése" }, correctAnswer: "c", explanation: "A N. trigeminus motoros magja, amely a rágóizmokat látja el, jelentős bilaterális (mindkét agyféltekéből jövő) supranuclearis beidegzést kap, ezért egyoldali kérgi sérülés ritkán okoz súlyos, permanens rágóizom-gyengeséget." },
+            { question: "Mi a foramen spinosumon áthaladó legfontosabb képlet?", answers: { a: "N. mandibularis", b: "N. maxillaris", c: "A. carotis interna", d: "A. meningea media" }, correctAnswer: "d", explanation: "A foramen spinosumon keresztül lép be a koponyaüregbe az arteria meningea media, a dura mater fő artériás ellátója. Törése epidurális hematómát okozhat." },
+            { question: "Melyik ideg felel a nyelv elülső kétharmadának általános (tapintás, fájdalom, hő) érző beidegzéséért?", answers: { a: "N. glossopharyngeus (IX)", b: "N. facialis (VII) / chorda tympani", c: "N. hypoglossus (XII)", d: "N. lingualis (a V/3 ága)" }, correctAnswer: "d", explanation: "A N. lingualis, a N. mandibularis (V/3) ága, felelős a nyelv elülső kétharmadának általános szenzoros beidegzéséért. Az ízérzést ugyanerről a területről a chorda tympani (VII) szállítja, amely csatlakozik a N. lingualishoz." },
+            { question: "Melyik mag felelős a finom tapintási információk feldolgozásáért az arc területéről?", answers: { a: "Nucleus spinalis nervi trigemini", b: "Nucleus mesencephalicus nervi trigemini", c: "Nucleus principalis sensorius nervi trigemini", d: "Nucleus salivatorius superior" }, correctAnswer: "c", explanation: "A nucleus principalis (fő érzőmag) a hídban található és az epikritikus (finom tapintás, diszkrimináció) szenzibilitás feldolgozásáért felelős, míg a nucleus spinalis a protopátiás (fájdalom, hő) érzésekért." },
+            { question: "Melyik idegág látja el a homlok bőrét és a fejsisak elülső részét?", answers: { a: "N. supraorbitalis", b: "N. infraorbitalis", c: "N. mentalis", d: "N. auriculotemporalis" }, correctAnswer: "a", explanation: "A N. supraorbitalis, a N. frontalis (V/1) végága, a foramen supraorbitalén kilépve látja el a homlok és a fejsisak elülső részének bőrét." },
+            { question: "Egyoldali rágóizom-bénulás esetén szájnyitáskor merre deviál az állkapocs?", answers: { a: "Az ép oldal felé", b: "A bénult oldal felé", c: "Nem deviál, csak gyengébb a nyitás", d: "Előre-hátra mozog" }, correctAnswer: "b", explanation: "Az állkapocs nyitásában és előre tolásában a m. pterygoideus lateralisnak van szerepe. Ha az egyik oldalon megbénul, az ép oldali izom túlsúlyba kerül és a bénult oldal felé tolja az állkapcsot." },
+            { question: "A herpes zoster ophthalmicus melyik struktúra reaktivált vírusfertőzésének következménye?", answers: { a: "Ganglion geniculi", b: "Ganglion trigeminale (Gasser-dúc)", c: "Nucleus motorius nervi trigemini", d: "Szemüregi izmok" }, correctAnswer: "b", explanation: "A herpes zoster ophthalmicus a Gasser-dúcban latensen megbúvó Varicella-Zoster vírus reaktivációja, ami a N. ophthalmicus (V/1) ellátási területén okoz fájdalmas, hólyagos kiütéseket és súlyos szemészeti szövődményeket." },
+            { question: "Melyik nyílás NEM az ékcsonton (os sphenoidale) található?", answers: { a: "Foramen ovale", b: "Foramen rotundum", c: "Canalis opticus", d: "Foramen jugulare" }, correctAnswer: "d", explanation: "A foramen jugulare a halántékcsont (os temporale) és a nyakszirtcsont (os occipitale) között elhelyezkedő nyílás. A többi felsorolt nyílás az ékcsont része." },
+            { question: "A nervus zygomaticus fontos anasztomózist képez egy másik ideggel, hogy paraszimpatikus rostokat juttasson a könnymirigyhez. Melyik ez az ideg?", answers: { a: "N. opticus", b: "N. trochlearis", c: "N. lacrimalis", d: "N. infraorbitalis" }, correctAnswer: "c", explanation: "A N. facialisból származó, a könnymirigyhez tartó paraszimpatikus rostok a N. zygomaticuson keresztül érik el a szemüreget, ahol egy összekötő ágon (ramus communicans) keresztül csatlakoznak a N. lacrimalishoz (V/1 ága), és azzal együtt érik el a könnymirigyet." },
+            { question: "Melyik trigeminus ág látja el érzően a felső fogsort?", answers: { a: "N. ophthalmicus (V/1)", b: "N. maxillaris (V/2)", c: "N. mandibularis (V/3)", d: "N. facialis (VII)" }, correctAnswer: "b", explanation: "A felső fogakat és a hozzájuk tartozó ínyt a N. maxillaris (V/2) ágai, a nervi alveolares superiores (posterior, medius, anterior) idegzik be." },
+
+            // ----- NERVUS FACIALIS (VII) -----
+            { question: "Mi a legfontosabb különbség a centrális és a perifériás facialis parézis között?", answers: { a: "A centrális mindig fájdalmas, a perifériás soha.", b: "Centrális parézisnél a homlokráncolás és a szemzárás általában megtartott, míg perifériásnál az egész arcfél bénul.", c: "A perifériás parézis mindig kétoldali.", d: "Centrális parézisnél mindig van ízérzészavar, perifériásnál soha." }, correctAnswer: "b", explanation: "A motoros mag felső (homlokot ellátó) részének bilaterális kérgi beidegzése miatt egyoldali agyi sérülés (centrális parézis) megkíméli a homlokot. A perifériás sérülés a teljes azonos oldali arcfelet érinti." },
+            { question: "A nervus facialis melyik ága felelős a nyelv elülső kétharmadának ízérzéséért?", answers: { a: "N. petrosus major", b: "N. stapedius", c: "Chorda tympani", d: "Ramus marginalis mandibulae" }, correctAnswer: "c", explanation: "A chorda tympani szállítja a speciális ízérző rostokat a nyelv elülső kétharmadáról, valamint a paraszimpatikus rostokat a submandibularis és sublingualis nyálmirigyekhez." },
+            { question: "Hyperacusis (kóros hangérzékenység) a nervus facialis mely ágának sérülésére utal?", answers: { a: "N. stapedius", b: "N. petrosus major", c: "Rami temporales", d: "Chorda tympani" }, correctAnswer: "a", explanation: "A n. stapedius idegzi be a m. stapediust, ami csillapítja az erős hangokat. Ennek bénulása a hangok felerősödését, hyperacusist okoz." },
+            { question: "Hol található a ganglion geniculi?", answers: { a: "A fültőmirigy (parotis) állományában.", b: "A belső hallójáratban (meatus acusticus internus).", c: "A sziklacsonton belüli facialis csatorna első kanyarulatában (geniculum).", d: "A híd-nyúltvelő határon, az agytörzsi kilépésnél." }, correctAnswer: "c", explanation: "A ganglion geniculi, a facialis érző dúca, a canalis facialis első éles kanyarulatában, a 'térdecskében' (geniculum) helyezkedik el a sziklacsontban." },
+            { question: "Melyik struktúra sérülése okozza a Ramsay-Hunt szindrómát (herpes zoster oticus)?", answers: { a: "Nucleus motorius nervi facialis", b: "Ganglion trigeminale", c: "Ganglion geniculi", d: "Glandula parotis" }, correctAnswer: "c", explanation: "A Ramsay-Hunt szindrómát a Varicella-Zoster vírus reaktivációja okozza a ganglion geniculiban, ami perifériás arcbénulással, fülfájdalommal és hólyagos kiütésekkel jár a fülön." },
+            { question: "Melyik paraszimpatikus magból erednek a könnymirigyhez futó secretomotoros rostok?", answers: { a: "Edinger-Westphal mag", b: "Nucleus salivatorius inferior", c: "Nucleus salivatorius superior", d: "Dorsalis vagus mag" }, correctAnswer: "c", explanation: "A nucleus salivatorius superior a híd tegmentumában található, és innen indulnak a praeganglionaris paraszimpatikus rostok, amelyek a N. facialison keresztül a könnymirigyet és bizonyos nyálmirigyeket látnak el." },
+            { question: "A nervus facialis motoros rostjai melyik agyideg magját kerülik meg jellegzetes hurokkal (genu internum)?", answers: { a: "N. trigeminus (V.) motoros magja", b: "N. abducens (VI.) magja", c: "N. glossopharyngeus (IX.) motoros magja", d: "N. hypoglossus (XII.) magja" }, correctAnswer: "b", explanation: "A VII. agyideg motoros rostjai a hídban egy belső hurkot (genu internum) képeznek a VI. agyideg (N. abducens) magja körül, mielőtt kilépnének az agytörzsből." },
+            { question: "A nervus facialis melyik végága felelős a száj körüli izmok felső részének (pl. m. orbicularis oris pars superior) beidegzéséért?", answers: { a: "Rami temporales", b: "Rami zygomatici", c: "Rami buccales", d: "Ramus marginalis mandibulae" }, correctAnswer: "c", explanation: "A rami buccales a pes anserinus major egyik fő ágcsoportja, amely a pofa és a felső ajak körüli mimikai izmokat látja el." },
+            { question: "Mi a Bell-tünet?", answers: { a: "A szájzug akaratlan rángatózása.", b: "Szemzárási kísérletnél a szemgolyó felfelé és kifelé fordulása perifériás arcbénulásban.", c: "A homlokráncolás képességének elvesztése.", d: "Ízérzés kiesése a nyelv hátsó harmadán." }, correctAnswer: "b", explanation: "Perifériás facialis parézisben a szemzárás gyengesége miatt a szemhéjak nem záródnak teljesen, és a szemgolyó reflexesen felfelé és kifelé fordul (Bell-jelenség), láthatóvá téve az ínhártyát." },
+            { question: "A chorda tympani hol csatlakozik a nervus lingualishoz?", answers: { a: "A dobüregen belül", b: "A foramen stylomastoideumnál", c: "A ganglion geniculiban", d: "A fossa infratemporalisban" }, correctAnswer: "d", explanation: "Miután a chorda tympani a fissura petrotympanicán keresztül elhagyja a koponyát, a fossa infratemporalisban csatlakozik a nervus lingualishoz (a V/3 ága), hogy rostjait eljuttassa a nyelvhez és a nyálmirigyekhez." },
+            { question: "Melyik állítás HAMIS a centrális facialis parézisre?", answers: { a: "Leggyakoribb oka az agyi stroke.", b: "Az ellenoldali alsó arcfél bénulása jellemzi.", c: "A homlokráncolás és a szemzárás képessége kiesik.", d: "Az emocionális mimika (pl. spontán mosoly) megtartott lehet." }, correctAnswer: "c", explanation: "Centrális parézisben a homlokot és szem körüli izmokat ellátó magrészlet bilaterális kérgi beidegzése miatt a homlokráncolás és a szemzárás tipikusan megkímélt vagy csak enyhén gyengült." },
+            { question: "A nervus petrosus major melyik dúcban kapcsolódik át?", answers: { a: "Ganglion geniculi", b: "Ganglion oticum", c: "Ganglion submandibulare", d: "Ganglion pterygopalatinum" }, correctAnswer: "d", explanation: "A N. petrosus major a praeganglionaris paraszimpatikus rostokat a ganglion pterygopalatinumhoz szállítja, ahol átkapcsolódnak a postganglionaris neuronokra, melyek a könnymirigyet és az orr/szájpad mirigyeit idegzik be." },
+            { question: "Melyik agyideg NEM a cerebellopontin szögletben lép ki az agytörzsből?", answers: { a: "N. facialis (VII)", b: "N. vestibulocochlearis (VIII)", c: "N. trigeminus (V)", d: "N. abducens (VI)" }, correctAnswer: "d", explanation: "A N. abducens (VI) a híd és a nyúltvelő közötti barázdában (sulcus bulbopontinus), mediálisabban lép ki. A cerebellopontin szöglet a VII. és VIII. agyideg kilépési helye, a V. pedig a híd lateralis részéből ered." },
+            { question: "A ramus marginalis mandibulae sérülése milyen funkciókiesést okoz?", answers: { a: "A homlokráncolás gyengeségét", b: "A szemzárás nehezítettségét", c: "Az alsó ajak mozgásának (pl. lefelé húzás) gyengeségét", d: "Ízérzészavart" }, correctAnswer: "c", explanation: "Ez az ág látja el az alsó ajak és az áll izmait, így sérülése az alsó ajak aszimmetriáját, a szájzug legörbülését okozza." },
+            { question: "A nervus facialis motoros magja melyik funkcionális oszlophoz tartozik?", answers: { a: "Általános szomatikus efferens (GSE)", b: "Speciális visceralis efferens (SVE)", c: "Általános visceralis efferens (GVE)", d: "Speciális visceralis afferens (SVA)" }, correctAnswer: "b", explanation: "Az SVE (branchiomotoros) oszlop idegzi be a kopoltyúívekből fejlődő harántcsíkolt izmokat. A nervus facialis a második kopoltyúív idege, ezért a mimikai izmok SVE beidegzésűek." },
+            { question: "Sziklacsonttörés esetén, ha a sérülés a canalis facialisban a n. stapedius eredése és a chorda tympani eredése között van, milyen tünetek várhatók?", answers: { a: "Csak arcbénulás", b: "Arcbénulás és hyperacusis", c: "Arcbénulás, hyperacusis és ízérzészavar", d: "Arcbénulás, hyperacusis, ízérzészavar és csökkent könnyelválasztás" }, correctAnswer: "c", explanation: "A lézió a n. petrosus major eredése után van (könnyelválasztás megtartott), de a n. stapedius és a chorda tympani előtt. Így az arcbénulás mellett a stapedius-reflex kiesése (hyperacusis) és a chorda tympani funkcióinak (ízérzés, nyálelválasztás) zavara is várható." },
+            { question: "Melyik mirigy NEM kap paraszimpatikus beidegzést a nervus facialistól?", answers: { a: "Glandula lacrimalis", b: "Glandula submandibularis", c: "Glandula parotis", d: "Glandula sublingualis" }, correctAnswer: "c", explanation: "A glandula parotis (fültőmirigy) paraszimpatikus beidegzését a nervus glossopharyngeus (IX) biztosítja a ganglion oticumon keresztül." },
+            { question: "Hol található a nervus facialis és a nervus vestibulocochlearis közösen?", answers: { a: "A foramen ovaléban", b: "A meatus acusticus internusban", c: "A fissura orbitalis superiorban", d: "A foramen jugularéban" }, correctAnswer: "b", explanation: "A VII. és VIII. agyideg az agytörzsi kilépés után együtt lép be a belső hallójáratba (meatus acusticus internus), ahol a sziklacsont belseje felé haladnak." },
+            { question: "Mi a 'pes anserinus major'?", answers: { a: "A nervus trigeminus három fő ágának közös neve", b: "A nervus facialis legyezőszerű végelágazódása a fültőmirigyben", c: "A hallócsontocskák láncolata", d: "A nyaki gerincidegek fonata" }, correctAnswer: "b", explanation: "A pes anserinus major ('nagy lúdláb') a N. facialis öt fő motoros végágának legyezőszerű elrendeződését jelöli a parotis állományában." },
+            { question: "Melyik állítás igaz a nervus intermediusra?", answers: { a: "Ez a N. facialis fő motoros gyökere.", b: "Tisztán ízérző rostokat tartalmaz.", c: "A N. facialis érző és paraszimpatikus rostjait tartalmazó vékonyabb gyökere.", d: "A N. vestibulocochlearis motoros komponense." }, correctAnswer: "c", explanation: "A nervus intermedius (Wrisberg-féle ideg) a N. facialis vékonyabb gyökere, amely az érző (ízérzés, általános érzés a fül körül) és a praeganglionaris paraszimpatikus rostokat szállítja." },
+
+            // ----- VESTIBULARIS RENDSZER ÉS HALLÁS/SZAGLÁS ZAVARAI -----
+            { question: "Melyik perifériás vestibularis szerv felelős a fej forgó mozgásainak (szöggyorsulás) érzékeléséért?", answers: { a: "Utriculus", b: "Sacculus", c: "Íves járatok (canales semicirculares)", d: "Ganglion vestibulare" }, correctAnswer: "c", explanation: "Az íves járatokban lévő endolympha elmozdulása a fej forgása során ingerli a crista ampullaris szőrsejtjeit, így érzékelve a szöggyorsulást." },
+            { question: "Mi a vestibulo-ocularis reflex (VOR) alapvető funkciója?", answers: { a: "A szem fókuszálása közeli tárgyakra", b: "A pupilla szűkítése erős fényre", c: "A tekintet stabilizálása a fej mozgása közben", d: "A fej elfordítása hanginger irányába" }, correctAnswer: "c", explanation: "A VOR biztosítja a tiszta látást a fej mozgásakor azáltal, hogy a fej mozgásával ellentétes, de azonos sebességű kompenzáló szemmozgásokat generál." },
+            { question: "Melyik állítás igaz a perifériás és a centrális nystagmus elkülönítésére?", answers: { a: "A perifériás nystagmus soha nem gátlódik fixációval, a centrális igen.", b: "A centrális nystagmus gyakran tisztán egyirányú (vertikális vagy torzionális), míg a perifériás általában horizontális-rotátoros.", c: "A perifériás nystagmushoz ritkán társul vertigo, a centrális mindig heves forgó szédüléssel jár.", d: "A perifériás nystagmus iránya változik a tekintés irányával, a centrális fix irányú." }, correctAnswer: "b", explanation: "A centrális (agytörzsi/kisagyi) nystagmus gyakran atípusos, tisztán vertikális, horizontális vagy torzionális lehet, és iránya változhat a tekintés irányával. A perifériás nystagmus általában horizontális-rotátoros, és fixációval gátlódik." },
+            { question: "A tractus vestibulospinalis lateralis melyik magból ered főként és mi a funkciója?", answers: { a: "Deiters-mag; Az antigravitációs (extensor) izmok tónusának fokozása.", b: "Schwalbe-mag; A fej-nyak koordináció.", c: "Bechterew-mag; A VOR közvetítése.", d: "Roller-mag; Az autonóm központok befolyásolása." }, correctAnswer: "a", explanation: "A tractus vestibulospinalis lateralis főként a lateralis vestibularis magból (Deiters-mag) ered, és az azonos oldali gerincvelői motoneuronokon keresztül fokozza az extensor izmok tónusát, ami a testtartás fenntartásában kulcsfontosságú." },
+            { question: "Menière-betegség esetén mi okozza a rohamokban jelentkező vertigót, halláscsökkenést és fülzúgást?", answers: { a: "A hallóideg demyelinisatiója", b: "A belső fül folyadéktereinek nyomásfokozódása (endolymphaticus hydrops)", c: "Vírusfertőzés a ganglion vestibularéban", d: "Agyi vénás thrombosis" }, correctAnswer: "b", explanation: "A Menière-betegség patofiziológiai alapja az endolympha termelődésének és felszívódásának egyensúlyzavara, ami nyomásfokozódáshoz és a hártyás labyrinthus kitágulásához vezet." },
+            { question: "Acusticus neurinoma (vestibularis schwannoma) esetén melyik a leggyakoribb korai tünet?", answers: { a: "Hirtelen, heves, forgó szédülés", b: "Kétoldali, fluktuáló halláscsökkenés", c: "Egyoldali, lassan progrediáló halláscsökkenés és fülzúgás", d: "Teljes, egyoldali arcbénulás" }, correctAnswer: "c", explanation: "A lassan növekvő daganat fokozatosan nyomja a VIII. agyideg cochlearis rostjait, ami jellemzően lassan progrediáló, egyoldali idegi halláscsökkenést és fülzúgást okoz. A heves vertigo ritkább." },
+            { question: "Melyik két neurodegeneratív betegségben számít nagyon gyakori és korai tünetnek a hyposmia (csökkent szaglás)?", answers: { a: "Sclerosis multiplex és Huntington-kór", b: "Alzheimer-kór és Parkinson-kór", c: "Amyotrophiás lateralsclerosis (ALS) és Friedreich-ataxia", d: "Progresszív supranukleáris parézis (PSP) és corticobasalis degeneráció" }, correctAnswer: "b", explanation: "Mind az Alzheimer-kórban, mind a Parkinson-kórban a szaglás zavara az egyik legkorábbi nem-motoros tünet, amely évekkel megelőzheti a klasszikus kognitív vagy motoros tünetek megjelenését." },
+            { question: "Temporalis lebeny epilepszia során a rohamot bevezető aura milyen típusú érzékszervi hallucináció lehet?", answers: { a: "Vizuális (fényvillanások)", b: "Szaglási (phantosmia), gyakran kellemetlen szag", c: "Hallási (komplex hangok, zene)", d: "Tapintási (zsibbadás)" }, correctAnswer: "b", explanation: "Az uncus gyri parahippocampalis (primer szaglókéreg) vagy az amygdala irritációja a roham kezdetén jellegzetes, gyakran kellemetlen (pl. égett gumi) szaghallucinációt (phantosmia) okozhat." },
+            { question: "Mi az oscillopsia?", answers: { a: "Forgó jellegű szédülés.", b: "A hangokra való kóros túlérzékenység.", c: "A környezet látszólagos ugrálása, remegése fejmozgáskor.", d: "A szagok torz érzékelése." }, correctAnswer: "c", explanation: "Az oscillopsia a vestibulo-ocularis reflex (VOR) elégtelenségének következménye. Mivel a fej mozgatásakor a szem nem tudja stabilizálni a tekintetet, a vizuális világ a beteg számára ugrálónak, instabilnak tűnik." },
+            { question: "Melyik állítás írja le helyesen a centrális hallászavart?", answers: { a: "Mindig teljes süketséget okoz az egyik fülön.", b: "A középfül betegsége okozza.", c: "A belső fül szőrsejtjeinek pusztulása áll a háttérben.", d: "Gyakran a beszédértés zavara zajos környezetben, vagy a hanglokalizáció nehezítettsége jellemzi." }, correctAnswer: "d", explanation: "Mivel a hallópályák jelentősen kereszteződnek, egyoldali centrális lézió ritkán okoz súlyos hallásvesztést. Jellemzőbbek a feldolgozási zavarok, mint a beszédértés romlása komplex akusztikus környezetben vagy a hangforrás irányának meghatározásának nehézsége." },
+            { question: "Melyik struktúrák érzékelik a lineáris gyorsulást és a fej statikus helyzetét a gravitációs térhez képest?", answers: { a: "Íves járatok", b: "Otolith szervek (utriculus és sacculus)", c: "Corti-szerv", d: "Colliculus inferior" }, correctAnswer: "b", explanation: "Az utriculusban és sacculusban található maculák az otoconiumok (kristályok) tehetetlensége révén érzékelik a lineáris gyorsulást és a fej dőlését." },
+            { question: "A koponyatrauma miatti anosmia (szaglásvesztés) leggyakoribb mechanizmusa mi?", answers: { a: "A szaglóhám direkt sérülése", b: "A szaglóideg rostjainak elszakadása, ahogy áthaladnak a lamina cribrosán", c: "A temporalis lebeny zúzódása", d: "A hypothalamus sérülése" }, correctAnswer: "b", explanation: "Frontális vagy occipitalis ütéseknél az agy elmozdul a koponyán belül (coup-contrecoup mechanizmus), ami elnyírhatja a szaglóideg finom rostjait a lamina cribrosa (rostalemez) éles csontszéleinél." },
+            { question: "Melyik agytörzsi artéria elzáródása okozhat hirtelen egyoldali hallásvesztést és vertigót?", answers: { a: "A. cerebri posterior (PCA)", b: "A. cerebri media (MCA)", c: "A. cerebelli inferior anterior (AICA)", d: "A. spinalis anterior" }, correctAnswer: "c", explanation: "Az AICA látja el a belső fül egy részét (az a. labyrinthin keresztül) és az agytörzs lateralis részét, beleértve a vestibularis és cochlearis magvakat. Elzáródása ezért okozhatja a belső fül és az agytörzsi központok együttes iszkémiáját." },
+            { question: "Melyik struktúra diszfunkciója okozza a benignus paroxizmális pozicionális vertigót (BPPV)?", answers: { a: "A vestibularis magok gyulladása", b: "A kisagy vermisének atrófiája", c: "Az otoconiumok leszakadása és bekerülése az íves járatokba", d: "A nervus vestibularis kompressziója" }, correctAnswer: "c", explanation: "BPPV esetén az otolith szervekből leszakadt kristályok (otoconiumok) bekerülnek valamelyik íves járatba (leggyakrabban a posteriorba), ahol a fej helyzetének változtatásakor az endolympha áramlását és a cupula kóros ingerlését okozzák, rövid, heves forgó szédülést váltva ki." },
+            { question: "Mi a 'centrális süketség' oka?", answers: { a: "A dobhártya kétoldali perforációja", b: "A hallóidegek kétoldali daganata", c: "A hallópályák kétoldali, kiterjedt agytörzsi vagy temporalis lebenyi károsodása", d: "A középfül izmainak bénulása" }, correctAnswer: "c", explanation: "Mivel a hallópálya jelentősen kereszteződik, egyoldali centrális lézió nem okoz süketséget. A 'kérgi' vagy centrális süketség csak a hallókéreg vagy az odavezető pályák kétoldali, súlyos károsodása esetén jön létre." },
+            { question: "A szaglóbarázda meningeomája milyen jellegzetes tünetet okoz?", answers: { a: "Kétoldali hallásvesztést", b: "Egyoldali, lassan progrediáló szaglásvesztést (anosmia)", c: "Heves, forgó szédülést", d: "Arcfájdalmat" }, correctAnswer: "b", explanation: "Az elülső koponyagödörben, a szaglóbarázdában növő meningeoma nyomja a szaglóhagymát és a szaglóköteget, ami az azonos oldalon lassan kialakuló szaglásvesztéshez vezet. Ezt nevezik Foster-Kennedy szindrómának, ha ipszilaterális anosmiához és látóideg-sorvadáshoz, valamint kontralaterális papillaödémához társul." },
+            { question: "Melyik állítás írja le a konduktív (vezetéses) halláscsökkenést?", answers: { a: "A belső fül szőrsejtjei sérültek.", b: "A hallóideg nem vezeti az ingerületet.", c: "A hanghullámok nem jutnak el megfelelően a belső fülhöz a külső- vagy középfül problémája miatt.", d: "Az agy hallókérge nem képes feldolgozni a hanginformációt." }, correctAnswer: "c", explanation: "A vezetéses halláscsökkenés a hang mechanikai továbbításának zavara, pl. fülzsírdugó, középfülgyulladás vagy a hallócsontok problémája miatt. Az idegi elemek (belső fül, hallóideg) épek." },
+            { question: "A laterális superior oliva (LSO) melyik hanglokalizációs jel feldolgozásában játszik kulcsszerepet?", answers: { a: "Interaurális Időkülönbség (ITD)", b: "Interaurális Intenzitáskülönbség (ILD)", c: "Spektrális jelek", d: "Hangmagasság" }, correctAnswer: "b", explanation: "Az LSO a két fülbe érkező hangok intenzitásának különbségét elemzi, ami különösen a magas frekvenciájú hangok lokalizációjában fontos a fej akusztikus árnyékoló hatása miatt." },
+            { question: "Mi a cochlearis erősítés?", answers: { a: "A hallócsontok emelőszerű működése.", b: "A külső szőrsejtek aktív, hangingerre adott mozgása, ami felerősíti a baziláris membrán rezgéseit.", c: "A hallókéreg figyelmi mechanizmusa.", d: "Az endolympha és perilympha közötti potenciálkülönbség." }, correctAnswer: "b", explanation: "A cochlearis erősítés a külső szőrsejtek egyedülálló képessége (elektromotilitás), amellyel aktívan felerősítik a halk hangok által keltett rezgéseket, növelve ezzel a hallás érzékenységét és frekvenciaszelektivitását." },
+            { question: "Melyik agytörzsi magcsoport az elsődleges átkapcsoló állomás a hallópályán, ahol a hallóideg rostjai végződnek?", answers: { a: "Nucleus olivaris superior", b: "Colliculus inferior", c: "Corpus geniculatum mediale", d: "Nuclei cochleares" }, correctAnswer: "d", explanation: "A hallóideg rostjai az agytörzsbe lépve a dorsalis és ventralis cochlearis magvakban kapcsolódnak át a másodlagos neuronokra. Ez a hallópálya első szinapszisa a központi idegrendszerben." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Kezdeti kvíz felépítése
+        startNewRound();
+    </script>
+</body>
+</html>

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt - 2. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.selected {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Neurológia Tesztek - 2. rész</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy témakört a tudása teszteléséhez.</p>
+            <div id="topic-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <p id="progress-text" class="text-slate-500"></p>
+                </div>
+                <button id="back-to-topics" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2 px-4 border border-slate-300 rounded-lg shadow-sm">Vissza</button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+                
+                <div id="feedback-container" class="mt-6">
+                    <div id="explanation" class="explanation p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                        <h4 class="font-bold mb-2">Magyarázat</h4>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="next-button" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h2>
+            <p id="score-text" class="text-xl text-slate-600 mb-2"></p>
+            <p id="score-percentage" class="text-4xl font-bold text-blue-600 mb-6"></p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Újra</button>
+                <button id="back-to-topics-from-results" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 border border-slate-300 rounded-lg shadow-sm">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            "agytorzsi_szindromak": {
+                title: "Agytörzsi vascularis szindrómák",
+                questions: [
+                    {
+                        question: "Melyik a leggyakrabban érintett agytörzsi régió iszkémiás stroke esetén?",
+                        options: ["Nyúltvelő (medulla)", "Középagy (mesencephalon)", "Híd (pons)", "Thalamus"],
+                        answer: "Híd (pons)",
+                        explanation: "Az agytörzsi infarktusok mintegy 60%-a a hidat érinti, ami a leggyakrabban érintett területté teszi. Ennek oka részben a híd vérellátásának sajátossága, amelyet nagyrészt az arteria basilarisból eredő kis, perforáló ágak biztosítanak."
+                    },
+                    {
+                        question: "Mi a Wallenberg-szindróma (laterális medulláris szindróma) legjellemzőbb tünetkombinációja?",
+                        options: ["Ipsilaterális hemiplegia és kontralaterális arcbénulás", "Ipsilaterális arcérzés-kiesés és Horner-szindróma, kontralaterális testfél érzéskieséssel", "Kétoldali lábgyengeség és vizeletinkontinencia", "Csak forgó jellegű szédülés motoros kiesés nélkül"],
+                        answer: "Ipsilaterális arcérzés-kiesés és Horner-szindróma, kontralaterális testfél érzéskieséssel",
+                        explanation: "A Wallenberg-szindróma klasszikus 'keresztezett' tünetegyüttes: az azonos oldalon (ipsilateralis) agyidegi tünetek (pl. arcérzés-kiesés, Horner-triász, ataxia, dysphagia) és az ellenoldali (kontralateralis) testfélen a fájdalom- és hőérzés kiesése jellemzi."
+                    },
+                    {
+                        question: "Melyik artéria elzáródása okozza leggyakrabban a Wallenberg-szindrómát?",
+                        options: ["Arteria cerebri anterior (ACA)", "Arteria cerebri media (ACM)", "Arteria vertebralis (VA) vagy az abból eredő PICA", "Arteria basilaris csúcsa"],
+                        answer: "Arteria vertebralis (VA) vagy az abból eredő PICA",
+                        explanation: "A laterális nyúltvelőt az arteria cerebelli posterior inferior (PICA) látja el, amely leggyakrabban az arteria vertebralisból ered. Ezért a VA vagy a PICA elzáródása okozza a szindrómát."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a mediális medulláris szindrómára (Dejerine)?",
+                        options: ["Kontralaterális hemiparesis", "Kontralaterális mélyérzés-zavar", "Ipsilaterális nyelvparesis", "Ipsilaterális ataxia és Horner-szindróma"],
+                        answer: "Ipsilaterális ataxia és Horner-szindróma",
+                        explanation: "A Dejerine-szindróma klasszikus triásza: 1. kontralaterális hemiparesis (pyramispálya), 2. kontralaterális mélyérzés-zavar (lemniscus medialis), 3. ipsilaterális nyelvparesis (XII. agyidegmag). Az ataxia és a Horner-szindróma a laterális medulláris szindróma (Wallenberg) tünetei."
+                    },
+                    {
+                        question: "Mi a 'locked-in' szindróma oka és legfőbb jellemzője?",
+                        options: ["A nyúltvelő károsodása; a beteg kómában van.", "A ventrális pons kiterjedt, kétoldali károsodása; a beteg tudata ép, de quadriplegiás és anarthriás, kommunikálni csak szemmozgással tud.", "A középagy károsodása; a betegnek súlyos memóriazavara van.", "A kisagy károsodása; a betegnek extrém egyensúlyzavara van."],
+                        answer: "A ventrális pons kiterjedt, kétoldali károsodása; a beteg tudata ép, de quadriplegiás és anarthriás, kommunikálni csak szemmozgással tud.",
+                        explanation: "A locked-in szindrómát a ventrális híd kétoldali sérülése okozza, ami elvágja a leszálló motoros pályákat. A tudatállapotért felelős felszálló rendszer (ARAS) a híd tegmentumában megkímélt, így a beteg tudata tiszta, de 'be van zárva' a saját testébe."
+                    },
+                    {
+                        question: "Melyik agytörzsi szindrómára jellemző az ipsilaterális III. agyidegbénulás és a kontralaterális hemiparesis?",
+                        options: ["Wallenberg-szindróma", "Millard-Gubler szindróma", "Weber-szindróma", "Foville-szindróma"],
+                        answer: "Weber-szindróma",
+                        explanation: "A Weber-szindróma a ventrális középagy károsodása, amely érinti a kilépő III. agyideg (oculomotorius) rostjait (ipsilateralis bénulást okozva) és a crus cerebriben futó corticospinalis pályát (kontralateralis hemiparesist okozva)."
+                    },
+                    {
+                        question: "A HINTS vizsgálatot milyen tünetegyüttes differenciáldiagnosztikájában használják?",
+                        options: ["Akut fejfájás", "Akut beszédzavar", "Akut vestibularis szindróma (hirtelen vertigo, nystagmus)", "Akut végtaggyengeség"],
+                        answer: "Akut vestibularis szindróma (hirtelen vertigo, nystagmus)",
+                        explanation: "A HINTS (Head Impulse, Nystagmus, Test of Skew) egy ágy melletti vizsgálatsorozat, amely nagy pontossággal segít elkülöníteni az akut vestibularis szindróma centrális (agytörzsi/kisagyi stroke) és perifériás (pl. vestibularis neuritis) okait."
+                    },
+                    {
+                        question: "Melyik a legfontosabb, leggyakoribb rizikófaktora a primer agytörzsi vérzéseknek?",
+                        options: ["Dohányzás", "Diabetes mellitus", "Hypertonia (magas vérnyomás)", "Magas koleszterinszint"],
+                        answer: "Hypertonia (magas vérnyomás)",
+                        explanation: "A magas vérnyomás a legdominánsabb oki tényező a primer agytörzsi vérzések hátterében, az esetek körülbelül 90%-áért felelős."
+                    },
+                    {
+                        question: "Mi a 'keresztezett tünetek' lényege az agytörzsi szindrómákban?",
+                        options: ["A tünetek a test mindkét oldalán szimmetrikusan jelennek meg.", "A tünetek csak a végtagokat érintik, az arcot nem.", "Az azonos oldali agyideg-károsodás tünetei kombinálódnak az ellenoldali hosszú pályarendszeri kiesési tünetekkel.", "A motoros és érző tünetek mindig ellentétes oldalon jelentkeznek."],
+                        answer: "Az azonos oldali agyideg-károsodás tünetei kombinálódnak az ellenoldali hosszú pályarendszeri kiesési tünetekkel.",
+                        explanation: "A keresztezett tünettan az agytörzsi léziók fémjele. Az oka az, hogy a lézió az agyidegmagot/rostot a kereszteződés előtt, míg a hosszú pályákat (pl. pyramispálya) a kereszteződés után (vagy épp a kereszteződésben) károsítja."
+                    },
+                    {
+                        question: "Melyik szindróma társulhat makacs, csillapíthatatlan csuklással (singultus)?",
+                        options: ["Weber-szindróma", "Laterális medulláris szindróma (Wallenberg)", "Locked-in szindróma", "Mediális medulláris szindróma"],
+                        answer: "Laterális medulláris szindróma (Wallenberg)",
+                        explanation: "A laterális nyúltvelő károsodása irritálhatja a csuklásért felelős reflexívet, ezért a makacs csuklás a Wallenberg-szindróma egyik jellegzetes, bár nem mindig jelenlévő tünete."
+                    },
+                    {
+                        question: "Melyik állítás igaz az ATTENTION és BAOCHE vizsgálatok eredményeire?",
+                        options: ["Azt mutatták, hogy az arteria basilaris elzáródásában a gyógyszeres kezelés hatékonyabb, mint a thrombectomia.", "Azt igazolták, hogy a mechanikus thrombectomia jelentősen javítja a kimenetelt basilaris elzáródás esetén, még kiterjesztett időablakban is.", "Azt találták, hogy a thrombectomia csak a stroke utáni első 3 órában hatásos.", "Azt mutatták, hogy a thrombectomia túl kockázatos az agytörzsi stroke-okban."],
+                        answer: "Azt igazolták, hogy a mechanikus thrombectomia jelentősen javítja a kimenetelt basilaris elzáródás esetén, még kiterjesztett időablakban is.",
+                        explanation: "Az ATTENTION (0-12 óra) és a BAOCHE (6-24 óra) vizsgálatok mérföldkőnek számítanak, mivel bizonyították, hogy a mechanikus thrombectomia szignifikánsan javítja a funkcionális kimenetelt és csökkenti a mortalitást az arteria basilaris occlusióban szenvedő betegeknél, még a hagyományos időablakon túl is."
+                    },
+                    {
+                        question: "Melyik tünetegyüttesre jellemző az ipsilaterális VI. és VII. agyidegbénulás kontralaterális hemiparézissel?",
+                        options: ["Weber-szindróma", "Benedikt-szindróma", "Millard-Gubler szindróma", "Wallenberg-szindróma"],
+                        answer: "Millard-Gubler szindróma",
+                        explanation: "A Millard-Gubler szindróma a ventrális kaudális híd károsodása, amely érinti az átfutó VI. (abducens) és VII. (facialis) agyideg rostokat (ipsilateralis bénulás), valamint a corticospinalis pályát (kontralateralis hemiparesis)."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás az 'arany standard' az akut iszkémiás agyi lézió kimutatására?",
+                        options: ["Natív CT", "CT angiográfia", "Diffúzió-súlyozott MRI (DWI)", "Koponya röntgen"],
+                        answer: "Diffúzió-súlyozott MRI (DWI)",
+                        explanation: "A DWI rendkívül érzékeny a citotoxikus ödémára, amely percekkel az iszkémiás inzultus után kialakul, így ez a legpontosabb módszer az akut infarktus kimutatására."
+                    },
+                    {
+                        question: "A Parinaud-szindróma (vertikális tekintésbénulás, light-near disszociáció) melyik agytörzsi rész károsodására utal?",
+                        options: ["Laterális nyúltvelő", "Ventrális híd", "Dorsalis középagy (pretectalis terület)", "Mediális nyúltvelő"],
+                        answer: "Dorsalis középagy (pretectalis terület)",
+                        explanation: "A Parinaud-szindrómát a dorsalis középagy (tectum, pretectalis régió) kompressziója vagy károsodása okozza, amelyet gyakran pinealis tumorok vagy hydrocephalus idéz elő."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb etiológiai tényező az agytörzsi iszkémiás stroke-ok hátterében?",
+                        options: ["Vasculitis", "Véralvadási zavar", "Atherosclerosis és arteria vertebralis disszekció", "Tumor"],
+                        answer: "Atherosclerosis és arteria vertebralis disszekció",
+                        explanation: "Az agytörzsi iszkémiás stroke-ok leggyakoribb okai a nagyerek (főleg a. vertebralis, a. basilaris) atherosclerosisa és az arteria vertebralis disszekciója."
+                    },
+                    {
+                        question: "A 'Top of the basilar' szindróma mely artériák elzáródásakor alakul ki?",
+                        options: ["Az arteria basilaris kezdeti szakaszának elzáródásakor", "Az arteria basilaris csúcsának és/vagy a belőle eredő PCA-k, SCA-k elzáródásakor", "Csak az AICA elzáródásakor", "Csak a PICA elzáródásakor"],
+                        answer: "Az arteria basilaris csúcsának és/vagy a belőle eredő PCA-k, SCA-k elzáródásakor",
+                        explanation: "A 'Top of the basilar' szindrómát egy embólus okozza, amely az arteria basilaris disztális végénél (csúcsánál) akad el, és egyszerre károsíthatja a középagy, a thalamus és az occipitalis/temporalis lebenyek vérellátását, komplex tüneteket (tudatzavar, szemmozgászavar, látászavar) okozva."
+                    },
+                    {
+                        question: "Melyik agytörzsi szindróma járhat kontralaterális intenciós tremorral és ataxiával?",
+                        options: ["Weber-szindróma", "Benedikt-szindróma", "Dejerine-szindróma", "Millard-Gubler szindróma"],
+                        answer: "Benedikt-szindróma",
+                        explanation: "A Benedikt-szindróma a középagyi tegmentum károsodása, amely érinti a nucleus rubert és/vagy a hozzá kapcsolódó cerebelláris pályákat, ami az ellenoldalon mozgászavarokat, például intenciós tremort és ataxiát okoz, gyakran ipsilateralis III. agyidegbénulással kombinálva."
+                    },
+                    {
+                        question: "A dysphagia (nyelészavar) melyik agytörzsi szindrómában különösen gyakori és súlyos szövődmény?",
+                        options: ["Weber-szindróma", "Laterális medulláris szindróma (Wallenberg)", "Tiszta motoros stroke", "Benedikt-szindróma"],
+                        answer: "Laterális medulláris szindróma (Wallenberg)",
+                        explanation: "A Wallenberg-szindróma során károsodik a nucleus ambiguus, amely a IX. és X. agyidegek motoros magja, és kritikus a nyelésben. Ezért a dysphagia ebben a szindrómában az esetek akár 94%-ában is előfordulhat, és súlyos aspirációs kockázatot jelent."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a 'locked-in' szindrómára?",
+                        options: ["A beteg tudata és kognitív funkciói megtartottak.", "A beteg quadriplegiás és nem tud beszélni.", "A beteg kómában van és nem reagál ingerekre.", "A kommunikáció vertikális szemmozgásokkal lehetséges lehet."],
+                        answer: "A beteg kómában van és nem reagál ingerekre.",
+                        explanation: "A locked-in szindróma és a kóma közötti alapvető különbség a tudatállapot. A locked-in beteg éber és tudatánál van, míg a kómában lévő beteg nem. A locked-in szindróma a motoros pályák, nem pedig a tudatért felelős rendszerek károsodása."
+                    },
+                    {
+                        question: "Mi a Horner-szindróma három fő tünete?",
+                        options: ["Tág pupilla, szemhéj-emelkedés, fokozott verejtékezés", "Szűk pupilla (miosis), szemhéjcsüngés (ptosis), csökkent verejtékezés (anhidrosis)", "Kancsalság, kettőslátás, fejfájás", "Szemtekerezgés, szédülés, hányinger"],
+                        answer: "Szűk pupilla (miosis), szemhéjcsüngés (ptosis), csökkent verejtékezés (anhidrosis)",
+                        explanation: "A Horner-szindróma a szimpatikus beidegzés károsodásának következménye, amelynek klasszikus triásza a miosis, ptosis és az arc azonos oldalán jelentkező anhidrosis."
+                    }
+                ]
+            },
+            "hatarteruleti_infarktusok": {
+                title: "Az agyi arteriás határterületek károsodásának következményei",
+                questions: [
+                    {
+                        question: "Mit jelent a 'watershed' vagy határterületi infarktus?",
+                        options: ["Az agy közepén lévő artéria elzáródása.", "Vérzés az agy felszínén.", "Ischaemiás károsodás a nagy agyi artériák (ACA, ACM, ACP) ellátási területeinek határán.", "A gerincvelő vérellátási zavara."],
+                        answer: "Ischaemiás károsodás a nagy agyi artériák (ACA, ACM, ACP) ellátási területeinek határán.",
+                        explanation: "A határterületi (watershed) infarktusok az agy fő artériás territóriumai közötti, legdisztálisabb, hemodinamikailag legsérülékenyebb zónákban alakulnak ki, ahol a perfúziós nyomás a legalacsonyabb."
+                    },
+                    {
+                        question: "Melyik a két fő típusa a határterületi infarktusoknak lokalizáció alapján?",
+                        options: ["Elülső és hátsó", "Felszínes és mély", "Kortikális (külső) és internális (szubkortikális/mély)", "Artériás és vénás"],
+                        answer: "Kortikális (külső) és internális (szubkortikális/mély)",
+                        explanation: "A határterületi infarktusokat két fő csoportra osztjuk: a kortikális (CBZ) típus az agykéreg nagy artériás területeinek határán, míg az internális (IBZ) típus a mély fehérállományban, a felszínes és mély érrendszerek határán alakul ki."
+                    },
+                    {
+                        question: "Melyik patomechanizmus játszik szerepet leginkább az internális (mély) határterületi infarktusok (IBZ) kialakulásában?",
+                        options: ["Kardiális embólia", "Csak mikroembólia", "Hemodinamikai elégtelenség (hypoperfúzió)", "Vénás thrombosis"],
+                        answer: "Hemodinamikai elégtelenség (hypoperfúzió)",
+                        explanation: "Míg a kortikális határterületi infarktusoknál gyakori a mikroembólia, az internális (IBZ) típus hátterében erőteljesebben feltételezhető a tiszta hemodinamikai elégtelenség, pl. súlyos artériás stenosis vagy szisztémás hypotensio miatti csökkent agyi perfúzió."
+                    },
+                    {
+                        question: "Mi a 'man in the barrel' szindróma?",
+                        options: ["A beteg nem tudja mozgatni a lábait.", "Kétoldali, a karokat proximálisan (vállöv) jobban érintő gyengeség, mint a kezeket és a lábakat.", "A beteg csak egy hordóban érzi jól magát.", "Súlyos beszédzavar."],
+                        answer: "Kétoldali, a karokat proximálisan (vállöv) jobban érintő gyengeség, mint a kezeket és a lábakat.",
+                        explanation: "A 'hordóban lévő ember' szindróma a kétoldali ACA-ACM határterületi infarktusok jellegzetes tünete lehet. A laesio a motoros kéreg azon részeit érinti, amelyek a törzset és a proximális karizmokat látják el, míg a kéz és a láb reprezentációja megkímélt lehet."
+                    },
+                    {
+                        question: "Milyen képalkotó mintázat jellemző a mély, internális határterületi infarktusokra (IBZ)?",
+                        options: ["Egyetlen, nagy, ék alakú infarktus", "Rózsafüzér- vagy gyöngysorszerű, multiplex kis léziók a fehérállományban", "Csak az agykéregben látható elváltozás", "Nagy kiterjedésű vérzés"],
+                        answer: "Rózsafüzér- vagy gyöngysorszerű, multiplex kis léziók a fehérállományban",
+                        explanation: "Az internális határterületi infarktusok a DWI felvételeken gyakran jellegzetes, 'rosary-like' vagy 'string of pearls' mintázatot mutatnak: a laterális kamrákkal párhuzamosan elhelyezkedő, sorba rendeződött kis infarktusok a centrum semiovaleban."
+                    },
+                    {
+                        question: "Melyik állapot NEM vezethet szisztémás hypoperfúzióhoz és határterületi infarktushoz?",
+                        options: ["Szívmegállás", "Szeptikus sokk", "Enyhe, kontrollált magas vérnyomás", "Nagy mennyiségű vérvesztés"],
+                        answer: "Enyhe, kontrollált magas vérnyomás",
+                        explanation: "A szívmegállás, a sokk és a hypovolaemia mind súlyos vérnyomásesést okoznak, ami az agyi perfúzió csökkenéséhez és a határzónák ischaemiájához vezethet. A jól kontrollált hypertonia ezzel szemben a stroke prevenciójának célja."
+                    },
+                    {
+                        question: "Milyen szerepe van a Willis-körnek a határterületi infarktusok kialakulásában?",
+                        options: ["Nincs szerepe.", "Mindig megvédi az agyat az infarktustól.", "Egy inkomplett Willis-kör korlátozza a kollaterális keringést, növelve a határzónák sérülékenységét.", "A Willis-kör mindig határterületi infarktust okoz."],
+                        answer: "Egy inkomplett Willis-kör korlátozza a kollaterális keringést, növelve a határzónák sérülékenységét.",
+                        explanation: "A Willis-gyűrű egy fontos kollaterális útvonal. Ha azonban inkomplett (pl. hiányzik vagy vékony egy összekötő artéria), akkor egy proximális érelzáródás esetén nem tudja megfelelően kompenzálni a kieső keringést, ami növeli a határterületi infarktus kockázatát."
+                    },
+                    {
+                        question: "Melyik tünetegyüttes társulhat az ACM-ACP határterületi (posterior) infarktushoz?",
+                        options: ["Tiszta motoros hemiparesis", "Balint-szindróma vagy Gerstmann-szindróma", "Locked-in szindróma", "Weber-szindróma"],
+                        answer: "Balint-szindróma vagy Gerstmann-szindróma",
+                        explanation: "A posterior, parieto-occipitalis határterület károsodása magasabb rendű vizuális és kognitív funkciózavarokat okozhat, mint amilyen a Balint-szindróma (okulomotoros apraxia, opticus ataxia, szimultánagnózia) vagy a Gerstmann-szindróma (agraphia, acalculia stb.)."
+                    },
+                    {
+                        question: "Melyik képalkotó szekvencia a legérzékenyebb az akut határterületi infarktus kimutatására?",
+                        options: ["T1-súlyozott MRI", "Natív CT", "Diffúzió-súlyozott MRI (DWI)", "FLAIR MRI"],
+                        answer: "Diffúzió-súlyozott MRI (DWI)",
+                        explanation: "A DWI percekkel a kialakulása után képes kimutatni az akut ischaemiás károsodást (citotoxikus ödéma), ezért ez a legérzékenyebb módszer a határterületi infarktusok korai diagnosztizálására."
+                    },
+                    {
+                        question: "Milyen vérnyomáskezelési stratégia javasolt akut, hemodinamikai eredetűnek vélt határterületi stroke esetén?",
+                        options: ["A vérnyomás azonnali és agresszív csökkentése a normális szintre.", "A túlzott vérnyomáscsökkentés kerülése, esetenként az enyhe hypertonia megengedése a perfúzió fenntartása érdekében.", "A vérnyomás emelése minden esetben.", "A vérnyomást nem kell figyelni."],
+                        answer: "A túlzott vérnyomáscsökkentés kerülése, esetenként az enyhe hypertonia megengedése a perfúzió fenntartása érdekében.",
+                        explanation: "Az akut, hypoperfúziós eredetű határterületi stroke-ban a vérnyomás túlzott csökkentése tovább ronthatja a sérülékeny zónák keringését. Ezért ilyenkor óvatos vérnyomásmenedzsment, az ún. 'permisszív hypertonia' javasolt, szoros monitorozás mellett."
+                    },
+                    {
+                        question: "Melyik állítás igaz a határterületi infarktusok prognózisára?",
+                        options: ["Mindig jobb a prognózisuk, mint más stroke típusoknak.", "Az internális (IBZ) típusok rosszabb prognózissal és magasabb kiújulási kockázattal járhatnak.", "Mindig halálos kimenetelűek.", "Soha nem okoznak maradandó károsodást."],
+                        answer: "Az internális (IBZ) típusok rosszabb prognózissal és magasabb kiújulási kockázattal járhatnak.",
+                        explanation: "Bár egyes kortikális határterületi infarktusok kedvező kimenetelűek lehetnek, az internális (mély) típusok gyakran súlyosabb mögöttes érbetegségre utalnak, és rosszabb prognózissal, valamint a korai kiújulás magasabb kockázatával társulnak."
+                    },
+                    {
+                        question: "Melyik artéria súlyos szűkülete vagy elzáródása a leggyakoribb oka a határterületi infarktusoknak?",
+                        options: ["Arteria cerebelli superior", "Arteria carotis interna (ACI)", "Arteria ophthalmica", "Arteria spinalis anterior"],
+                        answer: "Arteria carotis interna (ACI)",
+                        explanation: "A súlyos, hemodinamikailag szignifikáns arteria carotis interna stenosis az egyik leggyakoribb oka a határterületi infarktusoknak, mivel csökkenti a teljes agyfélteke perfúziós nyomását, ami a határzónákban nyilvánul meg először."
+                    },
+                    {
+                        question: "Milyen klinikai lefolyás lehet jellemző a határterületi stroke-okra?",
+                        options: ["Mindig hirtelen, maximális deficittel kezdődik.", "Gyakran fokozatosan progrediáló, fluktuáló vagy epizodikus tünetekkel jár.", "Csak alvás közben jelentkeznek a tünetek.", "A tünetek mindig 24 órán belül teljesen elmúlnak."],
+                        answer: "Gyakran fokozatosan progrediáló, fluktuáló vagy epizodikus tünetekkel jár.",
+                        explanation: "A hemodinamikai instabilitás miatt a határterületi infarktusok tünetei gyakran nem hirtelen, maximális deficittel jelentkeznek, hanem lehetnek ingadozóak, lépcsőzetesen rosszabbodóak, vagy akár átmenetiek is, ami megnehezíti a diagnózist."
+                    },
+                    {
+                        question: "Mi a DWI-PWI mismatch jelentősége a stroke képalkotásban?",
+                        options: ["A vérzés méretét mutatja.", "Az ischaemiás penumbrát (veszélyeztetett, de még megmenthető szövet) jelzi.", "A stroke krónikus voltát igazolja.", "Nincs klinikai jelentősége."],
+                        answer: "Az ischaemiás penumbrát (veszélyeztetett, de még megmenthető szövet) jelzi.",
+                        explanation: "A DWI-PWI mismatch azt a helyzetet írja le, amikor a perfúziós zavar (PWI) területe nagyobb, mint a már elhalt szövet (DWI lézió). A kettő közötti különbség a penumbra, amelynek megmentése a reperfúziós terápia (pl. thrombectomia) célja."
+                    },
+                    {
+                        question: "A kortikális határterületi infarktusok gyakran milyen tünettel jelentkeznek, ami más stroke típusokban ritkább?",
+                        options: ["Fejfájás", "Fokális epilepsziás rohamok", "Hányinger", "Láz"],
+                        answer: "Fokális epilepsziás rohamok",
+                        explanation: "Mivel a kortikális határterületi infarktusok az agykérget érintik, az irritatív hatás miatt gyakrabban okozhatnak fokális epilepsziás rohamokat, mint a mélyebb, szubkortikális infarktusok."
+                    },
+                    {
+                        question: "Melyik artériás területek határán alakul ki az anterior kortikális határterületi infarktus?",
+                        options: ["ACM és ACP", "ACA és ACM", "ACA és ACP", "Mindhárom között"],
+                        answer: "ACA és ACM",
+                        explanation: "Az anterior kortikális határzóna az arteria cerebri anterior (ACA) és az arteria cerebri media (ACM) ellátási területeinek találkozásánál, a frontális lebeny felső-oldalsó részén helyezkedik el."
+                    },
+                    {
+                        question: "Milyen kezelés jöhet szóba tünetes, súlyos carotis stenosis okozta határterületi infarktus másodlagos prevenciójában?",
+                        options: ["Csak gyógyszeres kezelés", "Carotis endarterectomia (CEA) vagy stentelés (CAS)", "Agytörzsi műtét", "Nincs hatékony kezelés"],
+                        answer: "Carotis endarterectomia (CEA) vagy stentelés (CAS)",
+                        explanation: "Ha a határterületi infarktus hátterében súlyos, tünetes carotis stenosis áll, a gyógyszeres kezelés mellett a szűkület sebészi (CEA) vagy endovaszkuláris (CAS) megszüntetése javasolt a további stroke-ok megelőzése érdekében."
+                    },
+                    {
+                        question: "Az internális határterületi infarktusok milyen más stroke típust utánozhatnak klinikailag?",
+                        options: ["Nagy, malignus ACM infarktust", "Agytörzsi stroke-ot", "Lacunaris szindrómákat", "Kisagyi vérzést"],
+                        answer: "Lacunaris szindrómákat",
+                        explanation: "Mivel az internális határterületi infarktusok a mély fehérállományi pályákat (pl. capsula interna, corona radiata) érintik, gyakran okoznak olyan tiszta motoros vagy szenzomotoros tünetegyütteseket, amelyek klinikailag megkülönböztethetetlenek a klasszikus lacunaris szindrómáktól."
+                    },
+                    {
+                        question: "Miért sérülékenyek a határzónák?",
+                        options: ["Mert ott a legvastagabbak az erek.", "Mert az artériás ellátás legdisztálisabb pontjain helyezkednek el, ahol a perfúziós nyomás a legalacsonyabb.", "Mert nincsenek idegsejtek ezeken a területeken.", "Mert a vénás elfolyásuk rossz."],
+                        answer: "Mert az artériás ellátás legdisztálisabb pontjain helyezkednek el, ahol a perfúziós nyomás a legalacsonyabb.",
+                        explanation: "A határzónák az 'utolsó rét' elve alapján a legérzékenyebbek a vérnyomásesésre. Mivel ezek a területek kapják utoljára a vért a nagy artériás rendszerekből, bármilyen globális vagy lokális perfúziócsökkenés itt okoz először ischaemiás károsodást."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a határterületi infarktusokra?",
+                        options: ["Okozhatja őket szisztémás hypotensio.", "Gyakran súlyos carotis stenosis áll a hátterükben.", "Mindig egyetlen, nagy kiterjedésű laesiót jelentenek.", "A klinikai kép lehet fluktuáló vagy progresszív."],
+                        answer: "Mindig egyetlen, nagy kiterjedésű laesiót jelentenek.",
+                        explanation: "A határterületi infarktusok morfológiája változatos. Lehetnek ék alakúak, de különösen az internális típusra jellemző a multiplex, kis, sorba rendeződött ('gyöngysorszerű') laesiók megjelenése, nem pedig egyetlen nagy infarktus."
+                    }
+                ]
+            },
+            "lacunaris_szindromak": {
+                title: "Lacunaris szindrómák",
+                questions: [
+                    {
+                        question: "Mi a lacunaris infarktus definíció szerinti méretkritériuma?",
+                        options: ["<5 mm", "<15 mm vagy <20 mm", "20-30 mm", ">30 mm"],
+                        answer: "<15 mm vagy <20 mm",
+                        explanation: "A lacunaris infarktusok definíció szerint kis méretű (<15 mm vagy néha <20 mm átmérőjű) ischaemiás stroke-ok, amelyek az agy mély, nem kortikális struktúráiban alakulnak ki."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb klasszikus lacunaris szindróma?",
+                        options: ["Tiszta szenzoros stroke (PSS)", "Ataxiás hemiparesis (AH)", "Tiszta motoros hemiparesis (PMH)", "Dysarthria-ügyetlen kéz szindróma (DCHS)"],
+                        answer: "Tiszta motoros hemiparesis (PMH)",
+                        explanation: "A tiszta motoros hemiparesis a leggyakrabban felismert lacunaris szindróma, amely az összes lacunaris stroke 30-50%-át teszi ki."
+                    },
+                    {
+                        question: "Melyik anatómiai struktúra károsodása okozza leggyakrabban a tiszta motoros hemiparesist?",
+                        options: ["Thalamus", "A capsula interna hátsó szára", "A capsula interna elülső szára", "Putamen"],
+                        answer: "A capsula interna hátsó szára",
+                        explanation: "A tiszta motoros hemiparesis leggyakoribb oka egy lacunaris infarktus a capsula interna hátsó szárában, ahol a corticospinalis (piramis) pálya motoros rostjai sűrűn futnak."
+                    },
+                    {
+                        question: "Melyik tünet hiánya a legfontosabb diagnosztikai kritérium a lacunaris szindrómákban?",
+                        options: ["A fejfájás hiánya", "A tudatzavar hiánya", "A kortikális jelek (afázia, neglect, hemianopia) hiánya", "A szédülés hiánya"],
+                        answer: "A kortikális jelek (afázia, neglect, hemianopia) hiánya",
+                        explanation: "A lacunaris infarktusok a szubkortikális struktúrákat érintik, az agykérget megkímélik. Ezért a diagnózis kulcsa a kortikális funkciózavarokra utaló jelek (pl. beszédzavar, téri figyelemzavar, látótérkiesés) hiánya."
+                    },
+                    {
+                        question: "Melyik két kórállapot a legfontosabb rizikófaktora a cerebrális kisérbetegségnek és a lacunaris infarktusoknak?",
+                        options: ["Magas koleszterinszint és dohányzás", "Krónikus hypertonia és diabetes mellitus", "Alkoholfogyasztás és elhízás", "Szívritmuszavar és alacsony vérnyomás"],
+                        answer: "Krónikus hypertonia és diabetes mellitus",
+                        explanation: "A krónikus magas vérnyomás és a cukorbetegség a két legjelentősebb, jól dokumentált kockázati tényező, amelyek a kis penetráló artériák falának károsodásához (lipohyalinosis, microatheroma) és lacunaris infarktusok kialakulásához vezetnek."
+                    },
+                    {
+                        question: "Mi a lipohyalinosis?",
+                        options: ["A nagyerek falának meszesedése.", "A kis penetráló artériák falának degeneratív megvastagodása és szűkülete.", "Vérrögképződés a szívben.", "Az agyhártyák gyulladása."],
+                        answer: "A kis penetráló artériák falának degeneratív megvastagodása és szűkülete.",
+                        explanation: "A lipohyalinosis a kiserek falának jellegzetes patológiás elváltozása, amelyet a fal dezorganizációja, kollagén és lipid lerakódása, valamint a lumen szűkülete jellemez. Gyakran a krónikus hypertonia következménye."
+                    },
+                    {
+                        question: "A tiszta szenzoros stroke (PSS) leggyakrabban melyik agyi struktúra károsodásakor alakul ki?",
+                        options: ["Pons", "Putamen", "Capsula interna", "Thalamus"],
+                        answer: "Thalamus",
+                        explanation: "A tiszta szenzoros stroke legtipikusabb oka a thalamus ventrális posterolaterális (VPL) magjának lacunaris infarktusa, mivel ez a mag a testből érkező szenzoros információk fő átkapcsoló állomása."
+                    },
+                    {
+                        question: "Melyik lacunaris szindrómára jellemző az ipsilaterális ataxia és a piramidális gyengeség kombinációja?",
+                        options: ["Tiszta motoros hemiparesis", "Tiszta szenzoros stroke", "Ataxiás hemiparesis", "Szenzomotoros stroke"],
+                        answer: "Ataxiás hemiparesis",
+                        explanation: "Az ataxiás hemiparesis egy jellegzetes szindróma, ahol a gyengeség (paresis) és a koordinációs zavar (ataxia) a test azonos oldalán jelentkezik, gyakran a ponsban vagy a capsula internában lévő lézió miatt, amely a corticospinalis és a corticopontocerebellaris pályákat is érinti."
+                    },
+                    {
+                        question: "Mi jellemzi a dysarthria-ügyetlen kéz szindrómát?",
+                        options: ["Súlyos hemiplegia és afázia", "Elkent beszéd és az ellenoldali kéz finommotoros ügyetlensége", "Csak a kéz zsibbadása", "Súlyos nyelészavar és látótérkiesés"],
+                        answer: "Elkent beszéd és az ellenoldali kéz finommotoros ügyetlensége",
+                        explanation: "Ez a szindróma a dysarthria (az artikuláció zavara) és az ellenoldali kéz ügyetlenségének kombinációja, jelentős végtaggyengeség nélkül. Tipikusan a ponsban vagy a capsula interna genu-jában lévő laesio okozza."
+                    },
+                    {
+                        question: "Melyik képalkotó módszer a legérzékenyebb az akut lacunaris infarktus kimutatására?",
+                        options: ["Koponya röntgen", "Natív koponya CT", "Diffúzió-súlyozott MRI (DWI)", "Doppler ultrahang"],
+                        answer: "Diffúzió-súlyozott MRI (DWI)",
+                        explanation: "A DWI rendkívül magas szenzitivitással bír az akut ischaemia kimutatásában, még a nagyon kis méretű lacunaris infarktusok esetében is, amelyeket a CT az akut fázisban gyakran nem ábrázol."
+                    },
+                    {
+                        question: "Milyen hosszú távú következménye lehet a multiplex, kumulatív lacunaris infarktusoknak?",
+                        options: ["Mindig teljes gyógyulás", "Csak átmeneti tünetek", "Vaszkuláris kognitív hanyatlás és demencia", "Csak fejfájás"],
+                        answer: "Vaszkuláris kognitív hanyatlás és demencia",
+                        explanation: "Bár egy-egy lacunaris infarktus prognózisa viszonylag jó lehet, az ismétlődő, felhalmozódó kis infarktusok és a mögöttes kisérbetegség a vaszkuláris kognitív hanyatlás és a szubkortikális típusú vaszkuláris demencia egyik vezető okai."
+                    },
+                    {
+                        question: "Melyik artériák látják el a bazális ganglionokat és a capsula internát, és melyek elzáródása okoz lacunaris infarktust?",
+                        options: ["Nagy kortikális ágak", "Mély, penetráló artériák (pl. lenticulostriatalis ágak)", "Vénás sinusok", "Agyburkok artériái"],
+                        answer: "Mély, penetráló artériák (pl. lenticulostriatalis ágak)",
+                        explanation: "A lacunaris infarktusok az agy mély struktúráit ellátó kis, végartéria-szerű penetráló erek (pl. az ACM-ből eredő lenticulostriatalis, vagy a PCA-ból eredő thalamoperforátorok) elzáródása miatt alakulnak ki."
+                    },
+                    {
+                        question: "Mi a 'capsularis warning syndrome'?",
+                        options: ["Egyetlen, súlyos, maradandó stroke.", "Ismétlődő, tranziens motoros vagy szenzoros epizódok (TIA-k), amelyek egy elkerülhetetlen lacunaris stroke-ot jeleznek előre.", "A capsula interna daganata.", "A capsula interna körüli vérzés."],
+                        answer: "Ismétlődő, tranziens motoros vagy szenzoros epizódok (TIA-k), amelyek egy elkerülhetetlen lacunaris stroke-ot jeleznek előre.",
+                        explanation: "Ez egy olyan klinikai jelenség, amikor a beteg órák vagy napok alatt több, sztereotip, tranziens ischaemiás attackot (TIA) él át, amelyek egy közelgő, kialakuló lacunaris infarktusra utalnak, leggyakrabban a capsula internában."
+                    },
+                    {
+                        question: "Melyik állítás igaz a lacunaris stroke-ok akut kezelésére?",
+                        options: ["A mechanikus thrombectomia az elsődleges kezelés.", "Az intravénás thrombolysis (tPA) megfontolható, ha a beteg időablakon belül van és megfelel a kritériumoknak.", "Az akut kezelés mindig sebészi.", "Nincs hatékony akut kezelés."],
+                        answer: "Az intravénás thrombolysis (tPA) megfontolható, ha a beteg időablakon belül van és megfelel a kritériumoknak.",
+                        explanation: "Hasonlóan más iszkémiás stroke-okhoz, a lacunaris infarktusok esetén is indikált lehet az intravénás vérrögoldó kezelés, ha a beteg időben érkezik és nincsenek kontraindikációk. A thrombectomia a kisér-elzáródás miatt általában nem alkalmazható."
+                    },
+                    {
+                        question: "Mi a másodlagos prevenció legfontosabb eleme lacunaris stroke után?",
+                        options: ["Rendszeres lumbálpunkció", "Agresszív vérnyomáskontroll", "Magas dózisú vitaminok szedése", "Csak a dohányzás elhagyása"],
+                        answer: "Agresszív vérnyomáskontroll",
+                        explanation: "Mivel a krónikus hypertonia a lacunaris stroke-ok legfőbb rizikófaktora, a másodlagos prevenció sarokköve az agresszív és tartós vérnyomáskezelés, a célérték <130/80 Hgmm."
+                    },
+                    {
+                        question: "Hol helyezkedik el leggyakrabban lacunaris infarktus?",
+                        options: ["A kisagyban", "Az agykéregben", "A putamenben", "A gerincvelőben"],
+                        answer: "A putamenben",
+                        explanation: "A rendelkezésre álló adatok szerint a putamen (a bazális ganglionok része) a lacunaris infarktusok leggyakoribb lokalizációja, az esetek kb. 37%-át teszi ki."
+                    },
+                    {
+                        question: "Milyen típusú gyengeség jellemző a tiszta motoros hemiparesisre?",
+                        options: ["Petyhüdt, alsó motoros neuron típusú", "Spasztikus, felső motoros neuron (piramidális) típusú", "Csak az arcot érintő", "Fluktuáló, myastheniás jellegű"],
+                        answer: "Spasztikus, felső motoros neuron (piramidális) típusú",
+                        explanation: "A PMH a corticospinalis (piramis) pálya károsodása miatt alakul ki, ami egy felső motoros neuron (UMN) lézió. Ezért a gyengeség spasztikus jellegű, és kóros reflexek (pl. Babinski-jel) kísérhetik."
+                    },
+                    {
+                        question: "A Dejerine-Roussy szindróma minek a késői szövődménye lehet?",
+                        options: ["Tiszta motoros stroke", "Ataxiás hemiparesis", "Tiszta szenzoros stroke", "Dysarthria-ügyetlen kéz szindróma"],
+                        answer: "Tiszta szenzoros stroke",
+                        explanation: "A Dejerine-Roussy szindróma, vagyis a thalamicus fájdalom szindróma, a thalamust érintő stroke (leggyakrabban PSS) késői, kínzó szövődménye lehet, amelyet spontán neuropátiás fájdalom és allodynia jellemez."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a lacunaris infarktusokra?",
+                        options: ["Egyetlen, kis, mélyen fekvő artéria elzáródása okozza.", "Gyakran társulnak súlyos afáziával és neglecttel.", "Hátterében gyakran cerebrális kisérbetegség áll.", "A hosszú távú prognózist a kiújulás és a kognitív hanyatlás kockázata rontja."],
+                        answer: "Gyakran társulnak súlyos afáziával és neglecttel.",
+                        explanation: "A lacunaris szindrómák definíciójának kulcsfontosságú része a kortikális jelek, mint az afázia (beszédzavar) és a neglect (figyelmen kívül hagyás), hiánya. Ezek a tünetek az agykéreg károsodására utalnak, amit a lacunaris infarktusok megkímélnek."
+                    },
+                    {
+                        question: "Milyen kezelés NEM javasolt rutinszerűen lacunaris stroke másodlagos prevenciójában?",
+                        options: ["Aspirin", "Statinok", "Vérnyomáscsökkentők", "Orális antikoagulánsok (pl. warfarin)"],
+                        answer: "Orális antikoagulánsok (pl. warfarin)",
+                        explanation: "Hacsak nincs egyértelmű kardioemboliás forrás (pl. pitvarfibrilláció), az orális antikoagulánsok nem indikáltak a tipikus, kisérbetegség okozta lacunaris stroke-ok prevenciójában, sőt, növelhetik a vérzéses szövődmények kockázatát."
+                    }
+                ]
+            },
+            "steal_szindromak": {
+                title: "Subclavian steal és egyéb steal szindrómák",
+                questions: [
+                    {
+                        question: "Mi a Subclavian Steal Szindróma (SSS) alapvető patomechanizmusa?",
+                        options: ["Az arteria subclavia aneurizmája", "Retrográd (visszafelé irányuló) véráramlás az arteria vertebralisban egy proximális subclavia szűkület miatt", "Az arteria carotis elzáródása", "Vénás thrombosis a karban"],
+                        answer: "Retrográd (visszafelé irányuló) véráramlás az arteria vertebralisban egy proximális subclavia szűkület miatt",
+                        explanation: "SSS esetén az arteria subclavia szűkülete vagy elzáródása (az a. vertebralis eredésétől proximálisan) nyomásesést okoz a karban. Terhelésre a kar 'ellopja' a vért az agytörzset ellátó vertebrobasilaris rendszerből az a. vertebralison keresztüli retrográd áramlással."
+                    },
+                    {
+                        question: "Melyik a legfontosabb fizikális vizsgálati lelet SSS gyanúja esetén?",
+                        options: ["Magas láz", "Jelentős (>15-20 Hgmm) vérnyomáskülönbség a két kar között", "Fokozott ínreflexek", "Pupillaszűkület"],
+                        answer: "Jelentős (>15-20 Hgmm) vérnyomáskülönbség a két kar között",
+                        explanation: "A két kar között mért, 15-20 Hgmm-t meghaladó szisztolés vérnyomáskülönbség (az érintett karon alacsonyabb értékkel) az SSS kulcsfontosságú, szűrő jellegű klinikai jele."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a Subclavian Steal Szindrómának?",
+                        options: ["Takayasu arteritis", "Atherosclerosis", "Fibromuscularis dysplasia", "Trauma"],
+                        answer: "Atherosclerosis",
+                        explanation: "Az SSS messze leggyakoribb oka az arteria subclavia proximális szakaszának atheroscleroticus szűkülete, különösen 50 év feletti, vaszkuláris rizikófaktorokkal rendelkező betegeknél."
+                    },
+                    {
+                        question: "Milyen tünetcsoport jellemző az SSS-re?",
+                        options: ["Csak mellkasi fájdalom", "Csak fejfájás", "Vertebrobasilaris insufficientia (pl. szédülés, látászavar) és felső végtagi ischaemia (kar claudicatio) tüneteinek kombinációja", "Csak hasi fájdalom"],
+                        answer: "Vertebrobasilaris insufficientia (pl. szédülés, látászavar) és felső végtagi ischaemia (kar claudicatio) tüneteinek kombinációja",
+                        explanation: "A tünetek két forrásból erednek: az agytörzsi keringés 'meglopása' vertebrobasilaris tüneteket (szédülés, kettőslátás, syncope) okoz, míg a kar csökkent vérellátása felső végtagi claudicatiót (terhelésre jelentkező fájdalom, fáradtság) eredményez."
+                    },
+                    {
+                        question: "Mi a Coronaria-Subclavian Steal Szindróma (CSSS) lényege?",
+                        options: ["A koszorúerekből a kar felé áramlik a vér.", "Egy IMA bypass grafton keresztül a vér a szívizom helyett a kar felé áramlik egy proximális subclavia stenosis miatt.", "A subclavia artéria elzárja a koszorúereket.", "A szívből egy embólus a subclavia artériába kerül."],
+                        answer: "Egy IMA bypass grafton keresztül a vér a szívizom helyett a kar felé áramlik egy proximális subclavia stenosis miatt.",
+                        explanation: "CSSS akkor alakul ki, ha egy koszorúér bypass műtéthez felhasznált arteria mammaria interna (IMA) graft eredete mögött (proximálisan) az arteria subclavia beszűkül. Ilyenkor a kar terhelése 'elszívja' a vért az IMA grafton keresztül a szívizomtól, anginás tüneteket okozva."
+                    },
+                    {
+                        question: "Melyik betegségre kell gondolni, ha egy fiatal nőnél alakul ki Subclavian Steal Szindróma?",
+                        options: ["Atherosclerosis", "Takayasu arteritis", "Diabetes mellitus", "Magas koleszterinszint"],
+                        answer: "Takayasu arteritis",
+                        explanation: "A Takayasu arteritis egy nagyér-vasculitis, amely jellemzően fiatal (20-40 éves) nőket érint, és gyakran okozza az aortaív ágainak, így az arteria subclaviának a szűkületét. Fiatal nőbeteg esetén ez a diagnózis előbb merül fel, mint az atherosclerosis."
+                    },
+                    {
+                        question: "Milyen jellegzetes leletet mutat a Doppler ultrahang SSS esetén?",
+                        options: ["Normális áramlás minden érben", "Gyorsult áramlás az arteria vertebralisban", "Retrográd vagy bifázisos áramlás az azonos oldali arteria vertebralisban", "Nincs áramlás az arteria carotisban"],
+                        answer: "Retrográd vagy bifázisos áramlás az azonos oldali arteria vertebralisban",
+                        explanation: "A Doppler UH kulcslelete a véráramlás irányának megfordulása (retrográd áramlás) vagy oda-vissza áramlása (bifázisos minta) az érintett oldali arteria vertebralisban, ami a 'steal' jelenséget bizonyítja."
+                    },
+                    {
+                        question: "Mi a Leriche-szindróma klasszikus tüneti triásza?",
+                        options: ["Fejfájás, szédülés, látászavar", "Mellkasi fájdalom, légszomj, szívdobogásérzés", "Fartáji/comb claudicatio, erectilis dysfunctio, és hiányzó femoralis pulzusok", "Hasi fájdalom, hasmenés, hányinger"],
+                        answer: "Fartáji/comb claudicatio, erectilis dysfunctio, és hiányzó femoralis pulzusok",
+                        explanation: "A Leriche-szindróma az aorta és/vagy az iliacalis artériák elzáródása, amelynek klasszikus tünetei a kétoldali, terhelésre jelentkező far- és combtáji fájdalom (claudicatio), az impotencia és a tapintható femoralis pulzusok hiánya."
+                    },
+                    {
+                        question: "Mi a Dialízis Asszociált Steal Szindróma (DASS) lényege?",
+                        options: ["A dialízis gép 'ellopja' a vért.", "A dialízishez létrehozott AV fisztula túl sok vért terel el, ami a kéz iszkémiáját okozza.", "A dializáló folyadék okoz érszűkületet.", "A beteg allergiás a dialízisre."],
+                        answer: "A dialízishez létrehozott AV fisztula túl sok vért terel el, ami a kéz iszkémiáját okozza.",
+                        explanation: "DASS esetén a dialízishez készített, alacsony ellenállású arteriovenosus fisztula vagy graft 'ellopja' a vért a disztális keringésből, ami a kéz és az ujjak elégtelen vérellátásához (iszkémia), fájdalomhoz, zsibbadáshoz vezet."
+                    },
+                    {
+                        question: "Melyik az első vonalbeli kezelés a tünetes, atheroscleroticus eredetű SSS esetén?",
+                        options: ["Gyógyszeres kezelés önmagában", "Endovascularis terápia (angioplasztika és stentelés)", "Sebészeti bypass műtét", "Fizikoterápia"],
+                        answer: "Endovascularis terápia (angioplasztika és stentelés)",
+                        explanation: "A tüneteket okozó atheroscleroticus subclavia stenosis kezelésére ma már az endovaszkuláris megoldás (a szűkület tágítása és stent beültetése) az elsődlegesen választott eljárás a magas sikerességi arány és a kisebb invazivitás miatt."
+                    },
+                    {
+                        question: "Melyik oldali arteria subclavia érintett gyakrabban SSS esetén és miért?",
+                        options: ["A jobb oldali, mert rövidebb.", "A bal oldali, mert meredekebben ered az aortaívből.", "Egyforma gyakorisággal.", "Az érintettség a beteg domináns kezétől függ."],
+                        answer: "A bal oldali, mert meredekebben ered az aortaívből.",
+                        explanation: "A bal arteria subclavia négyszer gyakrabban érintett, mint a jobb. Ennek anatómiai oka van: az aortaívből való meredekebb, élesebb szögű eredése hajlamosít a turbulens áramlásra és az atheroma plakkok képződésére."
+                    },
+                    {
+                        question: "Mi a DRIL eljárás a DASS kezelésében?",
+                        options: ["A fisztula teljes elzárása.", "Egy gyógyszer neve.", "Distalis Revascularisatio-Intervallum Ligatura: egy bypass a kéz vérellátásának javítására, kombinálva a steal útvonal lekötésével.", "Egy speciális dialízis technika."],
+                        answer: "Distalis Revascularisatio-Intervallum Ligatura: egy bypass a kéz vérellátásának javítására, kombinálva a steal útvonal lekötésével.",
+                        explanation: "A DRIL egy komplex sebészeti megoldás DASS kezelésére. Lényege egy új ér (bypass) létrehozása a fisztula feletti artériából a fisztula alatti artériába, ami direkt módon javítja a kéz vérellátását, miközben a kettő között lekötik az eredeti eret, hogy megakadályozzák a retrográd 'steal'-t."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás számít 'arany standardnak' a steal szindrómák diagnosztikájában, különösen beavatkozás tervezésekor?",
+                        options: ["Röntgen", "Doppler ultrahang", "Digitális Szubtrakciós Angiográfia (DSA)", "Natív CT"],
+                        answer: "Digitális Szubtrakciós Angiográfia (DSA)",
+                        explanation: "Bár a non-invazív módszerek (UH, CTA, MRA) kiválóak a szűrésre és az anatómia ábrázolására, a DSA (katéteres érfestés) adja a legpontosabb képet a hemodinamikáról, a szűkület mértékéről és a kollaterálisokról, ezért ez az arany standard, és elengedhetetlen az endovaszkuláris beavatkozások tervezéséhez."
+                    },
+                    {
+                        question: "Milyen tünetek utalnak Coronaria-Subclavian Steal Szindrómára egy CABG-n átesett betegnél?",
+                        options: ["Lábfájás járáskor", "Anginás mellkasi fájdalom, amelyet az azonos oldali kar terhelése vált ki", "Csak szédülés", "Csak a kar zsibbadása"],
+                        answer: "Anginás mellkasi fájdalom, amelyet az azonos oldali kar terhelése vált ki",
+                        explanation: "A CSSS diagnosztikus gyanúját az veti fel, ha egy IMA grafttal rendelkező betegnél anginás tünetek jelentkeznek, és ezeket specifikusan az érintett oldali kar mozgatása, terhelése provokálja, mivel ekkor 'lopódik el' a vér a szívizomtól."
+                    },
+                    {
+                        question: "Mi a teendő aszimptomatikus, véletlenül felfedezett Subclavian Steal Fenomén esetén?",
+                        options: ["Azonnali sürgős műtét", "Agresszív kardiovaszkuláris rizikófaktor-menedzsment és obszerváció", "Azonnali stent beültetés", "A betegnek tilos mozgatnia a karját"],
+                        answer: "Agresszív kardiovaszkuláris rizikófaktor-menedzsment és obszerváció",
+                        explanation: "A tünetmentes steal fenomén önmagában általában jóindulatú, és nem igényel invazív beavatkozást. A kezelés a háttérben álló atherosclerosis agresszív gyógyszeres kezelésére (statin, antiplatelet, vérnyomáscsökkentő) és a rizikófaktorok (dohányzás, diéta) módosítására fókuszál."
+                    },
+                    {
+                        question: "Milyen tünetekkel jár a májtranszplantáció után kialakuló Arteria Hepatica Steal Szindróma (HASS)?",
+                        options: ["Súlyos hasi fájdalom és láz", "A beültetett máj graft diszfunkciójával, emelkedett májenzim értékekkel", "Sárgaság és viszketés", "Magas vérnyomás és fejfájás"],
+                        answer: "A beültetett máj graft diszfunkciójával, emelkedett májenzim értékekkel",
+                        explanation: "A HASS alattomosan, nem specifikus tünetekkel jelentkezik. A legfőbb jele a májtranszplantátum funkciójának romlása, ami a laboratóriumi értékekben (emelkedett transzaminázok, bilirubin, rossz alvadási paraméterek) mutatkozik meg, miután más okokat (pl. thrombosis, rejekció) kizártak."
+                    },
+                    {
+                        question: "Melyik szerv artériájának embolizációja a leggyakoribb kezelési mód HASS esetén?",
+                        options: ["Veseartéria", "Lép artéria (Arteria lienalis)", "Gyomor artériája", "Bél artériája"],
+                        answer: "Lép artéria (Arteria lienalis)",
+                        explanation: "HASS esetén leggyakrabban a nagy, alacsony ellenállású lép keringése 'lopja el' a vért a máj elől. Ezért a kezelés az arteria lienalis katéteres embolizációja, ami csökkenti a lépbe jutó vér mennyiségét, így több vér jut a májba az arteria hepaticán keresztül."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a steal szindrómákra általánosságban?",
+                        options: ["Egy proximális érszűkület vagy elzáródás okozza őket.", "A véráramlás kórosan elterelődik egy területről egy másikra.", "A tüneteket gyakran a fizikai terhelés provokálja.", "Mindig veleszületett rendellenesség okozza őket."],
+                        answer: "Mindig veleszületett rendellenesség okozza őket.",
+                        explanation: "Bár a veleszületett anomáliák ritkán okozhatnak steal szindrómát, a legtöbb esetben szerzett betegségek, leggyakrabban az atherosclerosis, vagy iatrogén beavatkozások (pl. AV fisztula készítés, bypass műtét) állnak a háttérben."
+                    },
+                    {
+                        question: "A 'Pelvic Steal Test' mit vizsgál?",
+                        options: ["A láb keringését", "A szív működését terhelésre", "A vasculogen erectilis dysfunctio hátterében álló hemodinamikai változást", "A vesék vérellátását"],
+                        answer: "A vasculogen erectilis dysfunctio hátterében álló hemodinamikai változást",
+                        explanation: "A teszt során a pénisz-brachiális indexet (PBI) mérik terhelés előtt és után. Ha a PBI terhelésre jelentősen csökken, az arra utal, hogy a lábak terhelése 'ellopja' a vért a kismedencei (és így a pénisz) keringésből, ami vasculogen impotenciát okozhat."
+                    },
+                    {
+                        question: "A Takayasu arteritis okozta SSS kezelése miben különbözik az atheroscleroticus formáétól?",
+                        options: ["Nincs különbség.", "Takayasu esetén csak műtét jöhet szóba.", "A revascularisatio mellett immunszuppresszív terápia is szükséges a gyulladás kontrollálására.", "Takayasu esetén csak gyógyszeres kezelés hatásos."],
+                        answer: "A revascularisatio mellett immunszuppresszív terápia is szükséges a gyulladás kontrollálására.",
+                        explanation: "Mivel a Takayasu arteritis egy gyulladásos betegség, a kezelésének alapja az immunszuppresszió (pl. kortikoszteroidok) a gyulladásos folyamat leállítására. A revascularisatio (stent, műtét) csak ezután, vagy ezzel párhuzamosan jön szóba, a gyulladásmentes fázisban a leghatékonyabb."
+                    }
+                ]
+            }
+        };
+
+        const app = document.getElementById('app');
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizTitle = document.getElementById('quiz-title');
+        const progressText = document.getElementById('progress-text');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const explanationContainer = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreText = document.getElementById('score-text');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizButton = document.getElementById('restart-quiz');
+        const backToTopicsButton = document.getElementById('back-to-topics');
+        const backToTopicsFromResultsButton = document.getElementById('back-to-topics-from-results');
+
+        let currentQuizId = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function init() {
+            // Populate topic list
+            for (const topicId in quizData) {
+                const topic = quizData[topicId];
+                const topicCard = document.createElement('div');
+                topicCard.className = 'bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-slate-200 hover:border-blue-500';
+                topicCard.innerHTML = `<h3 class="text-xl font-semibold text-slate-800">${topic.title}</h3>`;
+                topicCard.addEventListener('click', () => startQuiz(topicId));
+                topicList.appendChild(topicCard);
+            }
+
+            backToTopicsButton.addEventListener('click', showTopicSelection);
+            backToTopicsFromResultsButton.addEventListener('click', showTopicSelection);
+            nextButton.addEventListener('click', nextQuestion);
+            restartQuizButton.addEventListener('click', () => startQuiz(currentQuizId));
+        }
+
+        function startQuiz(topicId) {
+            currentQuizId = topicId;
+            questions = quizData[topicId].questions;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            quizTitle.textContent = quizData[topicId].title;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            resetState();
+            const questionData = questions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            progressText.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${questions.length}`;
+
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'w-full text-left p-4 bg-slate-100 rounded-lg hover:bg-slate-200 quiz-option border border-slate-200';
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextButton.disabled = true;
+            explanationContainer.style.maxHeight = '0';
+            explanationContainer.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            explanationContainer.classList.add('border-blue-500', 'bg-blue-50');
+
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correctAnswer = questions[currentQuestionIndex].answer;
+
+            // Disable all options
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (selectedButton.textContent === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-green-500', 'bg-green-50');
+            } else {
+                selectedButton.classList.add('incorrect');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-red-500', 'bg-red-50');
+            }
+            
+            explanationText.textContent = questions[currentQuestionIndex].explanation;
+            explanationContainer.style.maxHeight = explanationContainer.scrollHeight + "px";
+
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            const percentage = Math.round((score / questions.length) * 100);
+            scoreText.textContent = `Helyes válaszok: ${score} / ${questions.length}`;
+            scorePercentage.textContent = `${percentage}%`;
+        }
+        
+        function showTopicSelection() {
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Initialize the app
+        init();
+    </script>
+
+</body>
+</html>

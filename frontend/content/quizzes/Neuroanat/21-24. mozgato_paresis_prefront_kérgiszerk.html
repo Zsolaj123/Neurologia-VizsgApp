@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Átfogó Neuroanatómia Teszt: Mozgatórendszer és Agykéreg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Átfogó Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Mozgatórendszer, Paresis Lokalizáció, Prefrontális Kéreg és Kérgi Szerkezet</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- A kérdések dinamikusan itt jelennek meg -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- A részletes eredmények itt jelennek meg -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        const fullQuizData = [
+            // ----- TÉMAKÖR 1: A mozgatórendszer szerkezete -----
+            { question: "Melyik leszálló motoros pálya felelős elsődlegesen a finom, akaratlagos, tanult mozgások kivitelezéséért?", answers: { a: "Tractus vestibulospinalis", b: "Tractus reticulospinalis", c: "Tractus corticospinalis (piramispálya)", d: "Tractus tectospinalis" }, correctAnswer: "c", explanation: "A tractus corticospinalis, vagy piramispálya, a legfontosabb leszálló motoros pálya, amely az akaratlagos, különösen a precíz, ügyességet igénylő mozgásokért felelős." },
+            { question: "Mi az alsó motoneuron (AMN) definíciója?", answers: { a: "Az agykéregben található idegsejt, ami a mozgást tervezi.", b: "A gerincvelő elülső szarvában vagy agytörzsi magvakban lévő idegsejt, ami közvetlenül beidegzi az izmot.", c: "A kisagyban található gátló neuron.", d: "A thalamusban lévő átkapcsoló neuron." }, correctAnswer: "b", explanation: "Az alsó motoneuronok (AMN) azok a neuronok, melyek sejtteste a gerincvelő elülső szarvában vagy az agytörzs motoros magjaiban van, és axonjuk a periférián keresztül közvetlenül az izomrostokhoz fut." },
+            { question: "Melyik extrapiramidális pálya játszik kulcsszerepet az egyensúly fenntartásában és az antigravitációs izmok tónusának szabályozásában?", answers: { a: "Tractus rubrospinalis", b: "Tractus tectospinalis", c: "Tractus reticulospinalis", d: "Tractus vestibulospinalis" }, correctAnswer: "d", explanation: "A tractus vestibulospinalis a vestibularis magokból ered, és az egyensúlyi információk alapján szabályozza a testtartást és az antigravitációs (feszítő) izmok tónusát." },
+            { question: "Hol történik a tractus corticospinalis rostjainak nagy részének átkereszteződése?", answers: { a: "A capsula internában", b: "A középagyban", c: "A nyúltvelő alsó részén (decussatio pyramidum)", d: "A gerincvelő minden szegmentumában" }, correctAnswer: "c", explanation: "A piramispálya rostjainak kb. 90%-a a nyúltvelő alján, a decussatio pyramidumban kereszteződik át az ellenoldalra, létrehozva a tractus corticospinalis lateralist." },
+            { question: "Mi a neuromuszkuláris junkció fő ingerületátvivő anyaga?", answers: { a: "Szerotonin", b: "Dopamin", c: "GABA", d: "Acetilkolin" }, correctAnswer: "d", explanation: "A motoros idegvégződésből felszabaduló acetilkolin kötodik az izomrost membránján lévő receptorokhoz, ami az izomösszehúzódást váltja ki." },
+            { question: "Melyik agyterület felelős a mozgások koordinációjáért, pontosságáért és a hibák valós idejű korrekciójáért?", answers: { a: "Bazális ganglionok", b: "Kisagy (cerebellum)", c: "Thalamus", d: "Prefrontális kéreg" }, correctAnswer: "b", explanation: "A kisagy folyamatosan összehasonlítja a tervezett és a kivitelezett mozgást, és korrekciós jeleket küld a motoros központoknak, biztosítva a mozgások simaságát és pontosságát." },
+            { question: "Melyik állítás igaz a tractus corticobulbarisra?", answers: { a: "A gerincvelő alsó motoneuronjait idegzi be.", b: "A legtöbb agyideg motoros magját kétoldalian (bilaterálisan) idegzi be.", c: "Csak azonos oldali beidegzést ad.", d: "Az egyensúlyi reflexekért felelős." }, correctAnswer: "b", explanation: "A tractus corticobulbaris az agytörzsi motoros agyidegmagvakhoz fut. A legtöbb magot mindkét agyféltekéből megkapja, ami védelmet nyújt egyoldali kérgi sérülés esetén. Fontos kivételek a N. facialis alsó és a N. hypoglossus bizonyos részei." },
+            { question: "Melyik pálya felelős a fej és a szemek reflexos orientációs mozgásaiért vizuális és akusztikus ingerekre?", answers: { a: "Tractus tectospinalis", b: "Tractus rubrospinalis", c: "Tractus vestibulospinalis", d: "Tractus corticospinalis" }, correctAnswer: "a", explanation: "A tractus tectospinalis a colliculus superiorból (látási/hallási reflexközpont) indul, és a nyakizmok mozgatásával a fej orientációs reflexeit koordinálja." },
+            { question: "Melyik mozgatórendszeri komponens játszik központi szerepet a mozgásprogramok kiválasztásában és a nem kívánt mozgások gátlásában?", answers: { a: "Primer motoros kéreg", b: "Kisagy", c: "Gerincvelői interneuronok", d: "Bazális ganglionok" }, correctAnswer: "d", explanation: "A bazális ganglionok direkt és indirekt pályáinak egyensúlya révén facilitálják a kívánt mozgásokat és gátolják a versengő, nem kívánt mozgásokat, működve mint egy 'kapuőr'." },
+            { question: "Az emberben a tractus rubrospinalis mely mozgásokban játszik alárendeltebb, de mégis meglévő szerepet?", answers: { a: "A törzs stabilizálásában", b: "A láb finommozgásaiban", c: "A felső végtag flexor izmainak facilitálásában", d: "A szemmozgásokban" }, correctAnswer: "c", explanation: "Emberben a piramispálya domináns, de a tractus rubrospinalis továbbra is részt vesz a felső végtag, különösen a hajlító izmok kontrolljában, a kéregből jövő parancsok közvetítésével." },
+            { question: "Melyik pálya NEM tartozik az extrapiramidális rendszerhez?", answers: { a: "Tractus reticulospinalis", b: "Tractus corticospinalis", c: "Tractus vestibulospinalis", d: "Tractus rubrospinalis" }, correctAnswer: "b", explanation: "A tractus corticospinalis alkotja a piramispályát. Az extrapiramidális rendszer az összes többi, nem a piramisokon áthaladó leszálló motoros pályát foglalja magában." },
+            { question: "Mi a 'végső közös pálya' (final common pathway) a mozgatórendszerben?", answers: { a: "A felső motoneuron", b: "A kisagy Purkinje-sejtje", c: "Az alsó motoneuron", d: "A bazális ganglionok kimenete" }, correctAnswer: "c", explanation: "Az alsó motoneuron (alfa-motoneuron) a 'végső közös pálya', mert minden, a mozgást befolyásoló központi parancs (piramidális, extrapiramidális, reflexek) végül rajta keresztül éri el az izmot." },
+            { question: "Hol ered a piramispálya?", answers: { a: "Csak a primer motoros kéregből (M1)", b: "Csak a thalamusból", c: "Főként az M1-ből, de a premotoros és szenzoros kéregből is", d: "A bazális ganglionokból" }, correctAnswer: "c", explanation: "Bár a legnagyobb részt az M1 adja, a piramispálya rostokat kap a premotoros és a primer szomatoszenzoros kéregből is, ami a mozgás és érzékelés szoros kapcsolatára utal." },
+            { question: "Melyik állítás írja le helyesen az izomtónus szabályozását?", answers: { a: "Kizárólag a piramispálya szabályozza.", b: "Főként az extrapiramidális pályák (reticulospinalis, vestibulospinalis) és a kisagy által modulált reflexműködés eredménye.", c: "Csak a perifériás idegek felelősek érte.", d: "Akaratlagosan, a frontális lebeny által kontrollált." }, correctAnswer: "b", explanation: "Az izomtónus egy komplex, nagyrészt tudattalan reflextevékenység, amelyet a leszálló extrapiramidális pályák és a kisagy folyamatosan szabályoz a testtartásnak és a mozgásnak megfelelően." },
+            { question: "Mi a különbség a vázizom és a simaizom között a beidegzés szempontjából?", answers: { a: "Nincs különbség, mindkettőt a szomatikus idegrendszer idegzi be.", b: "A vázizom akaratlagos (szomatikus), a simaizom akaratlan (vegetatív) beidegzésű.", c: "A simaizom akaratlagos, a vázizom akaratlan.", d: "A vázizomnak nincs idegi beidegzése." }, correctAnswer: "b", explanation: "A vázizmok mozgását tudatosan kontrolláljuk a szomatikus idegrendszeren keresztül, míg a belső szervek falában lévő simaizmok működését az autonóm (vegetatív) idegrendszer szabályozza." },
+            { question: "Melyik struktúra a legfontosabb a már begyakorolt, automatikus mozgássorozatok (pl. járás) zökkenőmentes kivitelezésében?", answers: { a: "Csak a motoros kéreg", b: "A látókéreg", c: "A bazális ganglionok", d: "A hippocampus" }, correctAnswer: "c", explanation: "A bazális ganglionok kulcsfontosságúak abban, hogy a gyakran ismételt mozgások automatikussá váljanak, és a tudatos kontroll helyett szubkortikális hurkok vezéreljék őket." },
+            { question: "A tractus reticulospinalis medialis és lateralis milyen hatással van általában az izmokra?", answers: { a: "Mindkettő gátló.", b: "Mindkettő serkentő.", c: "A mediális facilitálja az extensorokat, a lateralis a flexorokat.", d: "A mediális facilitálja a flexorokat, a lateralis az extensorokat." }, correctAnswer: "c", explanation: "Általánosságban a hídi eredetű mediális pálya a feszítő (antigravitációs) izmokat, míg a nyúltvelői eredetű lateralis pálya a hajlító izmokat serkenti, komplex egyensúlyt teremtve." },
+            { question: "A mozgástervezés legelső, absztrakt szintje (a mozgás ötlete, célja) mely agyterületekhez köthető?", answers: { a: "A gerincvelőhöz", b: "A primer motoros kéreghez", c: "A prefrontális és parietális asszociációs kéreghez", d: "A nyúltvelőhöz" }, correctAnswer: "c", explanation: "Mielőtt a motoros kéreg kiadná a konkrét parancsot, a mozgás ötlete és célja a magasabb rendű asszociációs kérgi területeken (PFC, parietális lebeny) formálódik meg." },
+            { question: "Melyik struktúrának van a legkiterjedtebb és legfinomabb motoros reprezentációja a primer motoros kéregben (motoros homunculus)?", answers: { a: "A törzs", b: "A láb", c: "Az arc és a kéz", d: "A váll" }, correctAnswer: "c", explanation: "Az arc (különösen a száj) és a kéz (különösen a hüvelykujj) rendelkezik a legnagyobb kérgi reprezentációval, ami a finom, precíz mozgásokhoz (beszéd, mimika, manipuláció) szükséges hatalmas idegrendszeri kontrollt tükrözi." },
+            { question: "Melyik állítás HAMIS az extrapiramidális rendszerre?", answers: { a: "Részt vesz a testtartás szabályozásában.", b: "Pályái az agytörzsi magokból erednek.", c: "Felelős a finom, precíziós ujjmozgásokért.", d: "Befolyásolja az izomtónust." }, correctAnswer: "c", explanation: "A finom, precíziós, különösen a disztális végtagizmokat érintő mozgások a piramispálya elsődleges feladata. Az extrapiramidális rendszer inkább a durvább, automatikus és testtartási mozgásokat szabályozza." },
+
+            // ----- TÉMAKÖR 2: Paresist okozó idegrendszeri károsodások lokalizációja -----
+            { question: "Melyik tünet utal leginkább felső motoneuron (FMN) sérülésre?", answers: { a: "Petyhüdt bénulás", b: "Izomatrófia és fasciculatio", c: "Spasztikus bénulás és kóros reflexek (pl. Babinski-jel)", d: "Kiesett sajátreflexek" }, correctAnswer: "c", explanation: "A felső motoneuron sérülés (centrális paresis) klasszikus jelei a spasztikus tónusfokozódás, a fokozott sajátreflexek és a kóros (piramis) jelek megjelenése, mint a Babinski-jel." },
+            { question: "Mi jellemző az alsó motoneuron (AMN) laesióra?", answers: { a: "Fokozott izomtónus", b: "Élénk mélyreflexek", c: "Kifejezett, gyors izomsorvadás (atrófia)", d: "Nincs izomgyengeség" }, correctAnswer: "c", explanation: "Az AMN sérülése (perifériás paresis) megvonja az izomtól a közvetlen beidegzést, ami petyhüdt bénuláshoz, tónusvesztéshez, reflexkieséshez és gyorsan kialakuló denervációs atrófiához vezet." },
+            { question: "Agykéregi stroke esetén, amely a kar motoros reprezentációját érinti, milyen típusú bénulás várható?", answers: { a: "Csak az ellenoldali kar petyhüdt bénulása", b: "Az ellenoldali kar spasztikus monoparesise", c: "Azonos oldali kar spasztikus bénulása", d: "Mindkét kar bénulása" }, correctAnswer: "b", explanation: "Az agykéreg a felső motoneuronok helye, így sérülése spasztikus bénulást okoz az ellenoldali testfélen. Ha csak a kar reprezentációja sérül, az monoparesishez (egy végtag bénulása) vezet." },
+            { question: "Porckorongsérv okozta ideggyök-kompresszió (radiculopathia) milyen típusú laesiónak felel meg?", answers: { a: "Felső motoneuron laesio", b: "Alsó motoneuron laesio", c: "Kevert FMN és AMN laesio", d: "Nem okoz motoros tüneteket" }, correctAnswer: "b", explanation: "Az ideggyök a gerincvelői alsó motoneuronok axonjait tartalmazza, így kompressziója az AMN laesio jeleit (petyhüdt gyengeség, reflexkiesés, érzészavar a megfelelő dermatómában) okozza." },
+            { question: "Melyik betegségre jellemző a felső és alsó motoneuron károsodás jeleinek egyidejű jelenléte?", answers: { a: "Sclerosis multiplex (SM)", b: "Guillain-Barré szindróma (GBS)", c: "Amyotrophiás lateralsclerosis (ALS)", d: "Myasthenia gravis" }, correctAnswer: "c", explanation: "Az ALS a motoneuron-betegségek prototípusa, amelyben mind az agykérgi/agytörzsi (FMN), mind a gerincvelői/agytörzsi (AMN) motoneuronok pusztulnak, kevert klinikai képet eredményezve (pl. spaszticitás atrófiával és fasciculatióval)." },
+            { question: "Centrális facialis paresis (pl. stroke miatt) esetén miért marad meg a homlokráncolás képessége?", answers: { a: "Mert a homlokizmokat a N. trigeminus idegzi be.", b: "Mert a N. facialis motoros magjának felső része kétoldali (bilaterális) kérgi beidegzést kap.", c: "Mert a sérülés mindig elkerüli a homlok reprezentációját.", d: "Mert a homlokizmok akaratlanul működnek." }, correctAnswer: "b", explanation: "Az arc felső részét ellátó magrészlet mindkét agyféltekéből kap parancsot. Egyoldali agyi sérülés esetén az ép félteke kompenzál, így a homlokráncolás megmarad, ellentétben az ellenoldali beidegzésű alsó arcféllel." },
+            { question: "A Brown-Séquard-szindróma (gerincvelő féloldali sérülése) milyen motoros tünettel jár a sérülés szintje alatt?", answers: { a: "Ellenoldali petyhüdt bénulás", b: "Azonos oldali petyhüdt bénulás", c: "Ellenoldali spasztikus bénulás", d: "Azonos oldali spasztikus bénulás" }, correctAnswer: "d", explanation: "A gerincvelő féloldali sérülése károsítja az azonos oldali leszálló tractus corticospinalis lateralist (ami már átkereszteződött a nyúltvelőben), így a sérülés szintje alatt azonos oldali felső motoneuron típusú (spasztikus) bénulás alakul ki." },
+            { question: "A 'bicskatünet' melyik állapotra jellemző?", answers: { a: "Petyhüdt bénulásra", b: "Izomatrófiára", c: "Spaszticitásra", d: "Normális izomtónusra" }, correctAnswer: "c", explanation: "A bicskatünet a spaszticitás egyik jele: a végtag passzív mozgatásakor az ellenállás egy ponton hirtelen megszűnik, hasonlóan egy zsebkés nyitásához/csukásához." },
+            { question: "Melyik artéria elzáródása okoz leggyakrabban az alsó végtagon hangsúlyosabb kontralaterális bénulást?", answers: { a: "A. cerebri media (MCA)", b: "A. cerebri anterior (ACA)", c: "A. cerebri posterior (PCA)", d: "A. basilaris" }, correctAnswer: "b", explanation: "Az ACA látja el az agykéreg mediális felszínét, ahol a motoros homunculus szerint a láb és az alsó végtag reprezentációja található. Elzáródása ezért az ellenoldali alsó végtagot érintő domináns paresist okoz." },
+            { question: "Mi a fasciculatio?", answers: { a: "Az egész végtag ritmusos rángása (clonus).", b: "Látható, apró, akaratlan izomrángások a bőr alatt.", c: "Fájdalmas izomgörcs.", d: "Akaratlagos, gyors izom-összehúzódás." }, correctAnswer: "b", explanation: "A fasciculatio egy motoros egység spontán kisülése, ami apró izomkötegek rángását okozza. Az alsó motoneuron betegségek (pl. ALS, gyöki irritáció) jellegzetes tünete." },
+            { question: "Myasthenia gravis esetén hol van a károsodás?", answers: { a: "A felső motoneuronban", b: "A perifériás idegben", c: "A neuromuszkuláris junkcióban", d: "Az izomrostban" }, correctAnswer: "c", explanation: "A myasthenia gravis egy autoimmun betegség, ahol az immunrendszer az acetilkolin receptorokat támadja meg a neuromuszkuláris junkció posztszinaptikus membránján, gátolva az ingerületátvitelt és fluktuáló izomgyengeséget okozva." },
+            { question: "Milyen típusú paresist okoz a Guillain-Barré szindróma?", answers: { a: "Spasztikus tetraplegiát", b: "Szimmetrikus, felszálló petyhüdt bénulást", c: "Aszimmetrikus monomelic paresist", d: "Csak az arcizmok bénulását" }, correctAnswer: "b", explanation: "A GBS egy akut polyradiculoneuropathia, ami az alsó motoneuronok (ideggyökök, perifériás idegek) myelinjét támadja, jellegzetesen szimmetrikus, az alsó végtagokon kezdődő és felfelé terjedő petyhüdt bénulást és reflexkiesést okozva." },
+            { question: "Melyik a legvalószínűbb lokalizációja egy olyan sérülésnek, ami kontralaterális hemiparesist (arc, kar, láb egyforma érintettségével) és hemihypaesthesiát okoz?", answers: { a: "Agykéreg", b: "Capsula interna", c: "Gerincvelő nyaki szakasza", d: "Perifériás idegfonat" }, correctAnswer: "b", explanation: "A capsula internában a motoros (corticospinalis) és érző (thalamocorticalis) pályák szorosan egymás mellett futnak. Egy sérülés (pl. lacunaris infarktus) itt könnyen okozhat egyidejűleg kiterjedt motoros és szenzoros kiesést az ellenoldali testfélen." },
+            { question: "Az 'akut spinális sokk' fázisában egy gerincvelő-harántlaesio után milyen tünetek várhatók a sérülés szintje alatt?", answers: { a: "Spasztikus bénulás és hiperreflexia", b: "Petyhüdt bénulás és areflexia", c: "Csak érzészavar, mozgás nélkül", d: "Normális reflexek és tónus" }, correctAnswer: "b", explanation: "Közvetlenül egy súlyos gerincvelő-sérülés után a sérülés alatti területeken átmenetileg minden reflexműködés és az izomtónus is kiesik. Ez a spinális sokk állapota, amit később (hetek-hónapok múlva) a felső motoneuron laesióra jellemző spaszticitás és hiperreflexia vált fel." },
+            { question: "Melyik állítás igaz a primer izombetegségekre (myopathia)?", answers: { a: "Mindig fasciculatióval járnak.", b: "Jellemző a spasztikus bénulás.", c: "Tipikusan a disztális izmokat érintik először.", d: "Általában szimmetrikus, proximális izomgyengeséggel járnak, megtartott reflexekkel." }, correctAnswer: "d", explanation: "A myopathiák az izomrostok primer károsodásai. Jellemző a törzshöz közelebbi (proximális) izmok (pl. vállöv, medenceöv) gyengesége, míg a reflexek és az érzékelés általában megtartottak, és nincs fasciculatio." },
+            { question: "Milyen tüneteket okoz a nervus facialis magjának sérülése a hídban?", answers: { a: "Csak az ellenoldali alsó arcfél bénulását", b: "Az azonos oldali teljes arcfél petyhüdt bénulását", c: "Az azonos oldali arc spasztikus bénulását", d: "Kétoldali arcbénulást" }, correctAnswer: "b", explanation: "A N. facialis magja az alsó motoneuronok sejttestjeit tartalmazza az arcizmokhoz. Ennek sérülése azonos oldali, perifériás típusú (tehát a teljes arcfelet érintő, petyhüdt) bénulást okoz." },
+            { question: "Melyik pályarendszer károsodására utalnak a kóros (piramis) jelek, mint a Babinski-tünet?", answers: { a: "Spinocerebellaris pályák", b: "Tractus corticospinalis", c: "Extrapiramidális pályák", d: "Hátsó kötegi rendszer" }, correctAnswer: "b", explanation: "A kóros reflexek felszabadulása a piramispálya (tractus corticospinalis) leszálló gátló hatásának kiesése miatt következik be, és a felső motoneuron sérülés patognomonikus jele." },
+            { question: "Mi a spaszticitás?", answers: { a: "Az izom teljes tónustalansága.", b: "A mozgás sebességétől függő, fokozott izomtónus.", c: "Akaratlan, gyors izomrángások.", d: "Az izom tömegének csökkenése." }, correctAnswer: "b", explanation: "A spaszticitás a nyújtási reflex felszabadulása miatti tónusfokozódás. Jellemzője, hogy a passzív mozgatással szembeni ellenállás a mozgatás sebességével nő ('velocity-dependent')." },
+            { question: "Melyik artéria elzáródása okoz leggyakrabban az arcon és a felső végtagon hangsúlyosabb kontralaterális bénulást?", answers: { a: "A. cerebri media (MCA)", b: "A. cerebri anterior (ACA)", c: "A. cerebri posterior (PCA)", d: "A. communicans anterior" }, correctAnswer: "a", explanation: "Az MCA látja el az agykéreg laterális felszínét, ahol a motoros homunculus szerint az arc és a kar reprezentációja található. Elzáródása ezért faciobrachiális túlsúlyú paresist okoz." },
+            { question: "A petyhüdt (flaccid) bénulás melyik laesióra jellemző?", answers: { a: "Csak a felső motoneuronra", b: "Csak a myopathiákra", c: "Az alsó motoneuron laesióra és az akut FMN laesio (spinális sokk) fázisára", d: "Csak az agykéreg sérülésére" }, correctAnswer: "c", explanation: "A petyhüdt bénulás az alsó motoneuron sérülésének állandó jele. A felső motoneuron sérülés utáni akut 'sokk' fázisában is petyhüdtség van, de ez később spaszticitásba megy át." },
+
+            // ----- TÉMAKÖR 3: PREFRONTÁLIS LEBENY, FRONTOSTRIATALIS KÖRÖK -----
+            { question: "Melyik prefrontális kérgi terület felelős elsődlegesen a végrehajtó funkciókért, mint a tervezés, munkamemória és problémamegoldás?", answers: { a: "Ventromediális prefrontális kéreg (VMPFC)", b: "Orbitofrontális kéreg (OFC)", c: "Dorsolaterális prefrontális kéreg (DLPFC)", d: "Anterior cinguláris kéreg (ACC)" }, correctAnswer: "c", explanation: "A DLPFC a klasszikus 'kognitív' PFC terület, amely a legmagasabb szintű végrehajtó funkciókban, a tervezésben, a munkamemóriában és a flexibilis gondolkodásban játszik kulcsszerepet." },
+            { question: "A frontostriatalis körökben melyik struktúra a fő bemeneti állomás a kéreg felől?", answers: { a: "Thalamus", b: "Globus pallidus", c: "Striatum (Nucleus caudatus és putamen)", d: "Substantia nigra" }, correctAnswer: "c", explanation: "A frontostriatalis körök az agykéregből indulnak, és a fő bemenetük a bazális ganglionokon belül a striatum, ahová a serkentő kérgi rostok projiciálnak." },
+            { question: "Melyik frontostriatalis kör játszik szerepet a motivációban, hibadetekcióban és a jutalom alapú tanulásban?", answers: { a: "Motoros kör", b: "Okulomotoros kör", c: "Dorzolaterális prefrontális kör", d: "Anterior cinguláris (limbikus) kör" }, correctAnswer: "d", explanation: "Az anterior cinguláris kéregből (ACC) kiinduló limbikus kör, amely a ventrális striatumon (nucleus accumbens) keresztül halad, kulcsfontosságú a motiváció, az érzelmi szabályozás és a teljesítmény monitorozásában." },
+            { question: "Phineas Gage híres esete, ahol egy vasrúd áthatolt a fején, melyik agyterület sérülésére és annak következményeire hívta fel a figyelmet?", answers: { a: "A látókéreg sérülésére, ami vakságot okozott.", b: "A motoros kéreg sérülésére, ami bénulást okozott.", c: "A prefrontális kéreg (főként OFC/VMPFC) sérülésére, ami drámai személyiség- és viselkedésváltozást okozott.", d: "A hippocampus sérülésére, ami amnéziát okozott." }, correctAnswer: "c", explanation: "Phineas Gage esete klasszikus példája az orbitofrontális/ventromediális PFC sérülésének, ami az impulzuskontroll elvesztéséhez, a szociális viselkedés zavarához és a személyiség megváltozásához vezetett, miközben más kognitív funkciói viszonylag épek maradtak." },
+            { question: "Melyik thalamikus mag a fő reléállomás a prefrontális asszociációs körökben?", answers: { a: "Corpus Geniculatum Laterale (CGL)", b: "Nucleus Ventralis Posterolateralis (VPL)", c: "Nucleus Mediodorsalis (MD)", d: "Nuclei Anteriores" }, correctAnswer: "c", explanation: "A nucleus mediodorsalis (MD) a thalamus nagy asszociációs magja, amely kiterjedt reciprok kapcsolatban áll a prefrontális kéreg alegységeivel, és a kognitív és limbikus frontostriatalis körök fontos állomása." },
+            { question: "Melyik állítás írja le helyesen a laterális orbitofrontális kör (OFC) funkcióját?", answers: { a: "A mozgások kivitelezése.", b: "A munkamemória fenntartása.", c: "A szociálisan megfelelő viselkedés szabályozása és az impulzív válaszok gátlása.", d: "A téri tájékozódás." }, correctAnswer: "c", explanation: "Az OFC kör a cselekedetek lehetséges társas és érzelmi következményeit értékeli, és segít a helyzetnek megfelelő, szociálisan elfogadható viselkedés kiválasztásában, gátolva az impulzív vagy helytelen reakciókat." },
+            { question: "A frontostriatalis körök motoros, okulomotoros és három prefrontális (DLPFC, OFC, ACC) köre milyen szerveződési elvet követ?", answers: { a: "Teljesen átfedő, diffúz hálózatot alkotnak.", b: "Párhuzamosan futó, de funkcionálisan nagyrészt szegregált hálózatokat alkotnak.", c: "Szigorúan hierarchikus rendszert, ahol a motoros kör irányítja a többit.", d: "Csak a bal agyféltekében léteznek." }, correctAnswer: "b", explanation: "A frontostriatalis körök egyik legfontosabb szerveződési elve, hogy párhuzamosan futnak a kéregtől a bazális ganglionokon és a thalamuson keresztül vissza a kéregig, és mindegyik kör specifikus funkciót (mozgás, szemmozgás, kogníció, emóció) lát el." },
+            { question: "A végrehajtó funkciók (executive functions) zavara, mint a tervezési nehézség és a csökkent kognitív flexibilitás, melyik PFC terület diszfunkciójára utal?", answers: { a: "Anterior cinguláris kéreg (ACC)", b: "Dorsolaterális prefrontális kéreg (DLPFC)", c: "Ventromediális prefrontális kéreg (VMPFC)", d: "Orbitofrontális kéreg (OFC)" }, correctAnswer: "b", explanation: "A végrehajtó funkciók a DLPFC és a hozzá kapcsolódó frontostriatalis kör klasszikus funkciói. Ennek sérülése okozza a dysexecutiv szindrómát." },
+            { question: "A frontostriatalis körökben mi a thalamus szerepe?", answers: { a: "Kizárólag gátló jeleket küld a kéregnek.", b: "A bazális ganglionokból érkező feldolgozott, gátló jeleket fogadja, és serkentő jeleket küld vissza a kéregbe.", c: "Ez a körök fő bemeneti állomása.", d: "Dopamint termel a körök modulálására." }, correctAnswer: "b", explanation: "A thalamus (pl. VA/VL, MD magok) fogadja a BG kimeneti magjainak (GPi/SNr) gátló projekcióit. A direkt út a thalamus diszinhibícióján keresztül 'engedélyezi' a thalamusnak, hogy serkentse a kérget, míg az indirekt út fokozza a thalamus gátlását." },
+            { question: "Az 'akcióválasztás' (action selection) modellje szerint a bazális ganglionok frontostriatalis körei hogyan működnek?", answers: { a: "Minden lehetséges mozgást egyszerre aktiválnak.", b: "Egy 'győztes mindent visz' mechanizmussal kiválasztják a legmegfelelőbb mozgás- vagy viselkedésprogramot, miközben gátolják a versengőket.", c: "Csak a reflexos mozgásokat szabályozzák.", d: "Lassítják az összes mozgást a pontosság érdekében." }, correctAnswer: "b", explanation: "A modell szerint a különböző frontostriatalis körök versengenek egymással. A direkt út felerősíti ('facilitálja') a kiválasztott választ, míg az indirekt út elnyomja ('gátolja') az alternatív, nem megfelelő válaszokat." },
+            { question: "Melyik állítás HAMIS a prefrontális kéregre (PFC)?", answers: { a: "Az emberi agyban arányaiban a legnagyobb.", b: "Fejlődése a legkorábban, már a születéskor befejeződik.", c: "Fontos szerepet játszik a személyiség és a szociális viselkedés meghatározásában.", d: "Kiterjedt kapcsolatban áll a limbikus rendszerrel." }, correctAnswer: "b", explanation: "A PFC az agy legkésőbb érő területe. Myelinizációja és szinaptikus finomhangolása egészen a fiatal felnőttkorig (kb. 25 éves korig) tart, ami magyarázza a serdülőkori impulzivitást és döntéshozatali nehézségeket." },
+            { question: "A ventrális striatum, beleértve a nucleus accumbenst, melyik frontostriatalis kör legfontosabb bemeneti területe?", answers: { a: "Motoros kör", b: "Okulomotoros kör", c: "Dorzolaterális prefrontális kör", d: "Anterior cinguláris (limbikus) kör" }, correctAnswer: "d", explanation: "A ventrális striatum a limbikus kör fő striatális komponense, amely a limbikus és motivációs kérgi területekről (ACC, OFC, amygdala, hippocampus) kap bemenetet." },
+            { question: "A hibáink észlelésében és a viselkedésünk ennek megfelelő módosításában melyik PFC terület játszik központi szerepet?", answers: { a: "DLPFC", b: "OFC", c: "VMPFC", d: "ACC" }, correctAnswer: "d", explanation: "Az anterior cinguláris kéreg (ACC) egyik fő funkciója a teljesítmény-monitorozás, beleértve a hibák detektálását és a viselkedés korrekcióját igénylő helyzetek felismerését." },
+            { question: "A szupplementer motoros área (SMA) melyik frontostriatalis kör kiinduló kérgi területe?", answers: { a: "Csak a motoros köré", b: "A motoros és az okulomotoros köré", c: "Csak a limbikus köré", d: "Egyiknek sem" }, correctAnswer: "b", explanation: "Az SMA, amely a mozgások belső indíttatású tervezésében fontos, mind a vázizommozgásokat vezérlő motoros körhöz, mind a szemmozgásokat irányító okulomotoros körhöz (mint szupplementer szemmező - SEF) ad projekciókat." },
+            { question: "Melyik mag a ventrális pallidum fő kimeneti célpontja a limbikus körben?", answers: { a: "A thalamus VA/VL magja", b: "A thalamus mediodorsalis (MD) magja", c: "A nucleus subthalamicus (STN)", d: "A colliculus superior" }, correctAnswer: "b", explanation: "A limbikus körben a ventrális striatum a ventrális pallidumra vetít, amelynek fő kimenete a thalamus MD magján keresztül visszajut a limbikus kéregbe (ACC, OFC), szabályozva a motivációt és az érzelmeket." },
+            { question: "A munkamemória 'online' fenntartása, azaz az információk rövid távú, aktív megtartása egy feladat elvégzéséhez, melyik PFC területhez kötődik leginkább?", answers: { a: "VMPFC", b: "ACC", c: "OFC", d: "DLPFC" }, correctAnswer: "d", explanation: "A DLPFC a munkamemória-hálózat központi eleme. Tartós idegi aktivitása teszi lehetővé, hogy az információkat 'emlékezetben tartsuk' és mentálisan manipuláljuk őket, amíg relevánsak." },
+            { question: "Melyik állítás írja le a 'szomatikus marker hipotézist'?", answers: { a: "A testből érkező fájdalomingerek gátolják a PFC működését.", b: "A VMPFC integrálja a korábbi érzelmi élményekből származó testi (szomatikus) jelzéseket a döntéshozatali folyamatba, segítve a 'zsigeri' döntéseket.", c: "A mozgások mindig szomatotopikusan vannak reprezentálva a PFC-ben.", d: "Minden gondolatnak van egy testi megfelelője." }, correctAnswer: "b", explanation: "Antonio Damasio hipotézise szerint a VMPFC a múltbeli tapasztalatokhoz társuló érzelmi-testi állapotokat (szomatikus markereket) használja fel, hogy gyors, intuitív iránymutatást adjon a komplex, különösen a személyes és szociális döntések során." },
+            { question: "Melyik frontostriatalis kör sérülése magyarázza leginkább a súlyos apátiát és a motiváció hiányát (abulia)?", answers: { a: "Dorzolaterális prefrontális kör", b: "Laterális orbitofrontális kör", c: "Anterior cinguláris (limbikus) kör", d: "Okulomotoros kör" }, correctAnswer: "c", explanation: "Az ACC és a hozzá kapcsolódó limbikus kör felelős a motivációért és a cselekvés energetizálásáért. Sérülése apátiához, a spontán viselkedés csökkenéséhez, súlyos esetben akinetikus mutizmushoz vezethet." },
+            { question: "Melyik struktúrának a dopaminerg beidegzése kulcsfontosságú a frontostriatalis körök megfelelő működéséhez?", answers: { a: "Thalamus", b: "Striatum", c: "Amygdala", d: "Cerebellum" }, correctAnswer: "b", explanation: "A Substantia nigra pars compactából (SNc) származó dopamin a striatumban modulálja a direkt és indirekt utak egyensúlyát, ami alapvető a motoros és kognitív funkciókhoz. Ennek hiánya Parkinson-kórt okoz." },
+            { question: "A frontostriatalis körökön belüli információáramlás alapvetően:", answers: { a: "Gátló", b: "Serkentő", c: "Egyensúly a serkentő (kéreg, thalamus, STN) és gátló (striatum, pallidum) elemek között", d: "Moduláló (dopaminerg)" }, correctAnswer: "c", explanation: "A körök működése a serkentő (glutamáterg) és gátló (GABAerg) neuronok bonyolult, dinamikus egyensúlyán alapul, amelyet a dopaminerg és más neurotranszmitter rendszerek finomhangolnak." },
+            
+            // ----- TÉMAKÖR 4: Az agykéreg szerkezete, régiói -----
+            { question: "Melyik az agykéreg fő bemeneti rétege a thalamus felől?", answers: { a: "I. Lamina molecularis", b: "III. Lamina pyramidalis externa", c: "IV. Lamina granularis interna", d: "V. Lamina pyramidalis interna" }, correctAnswer: "c", explanation: "A IV. (belső szemcsés) réteg a specifikus thalamikus afferensek fő fogadó állomása, ezért különösen fejlett az elsődleges érzőkérgi területeken." },
+            { question: "Melyik agylebenyben található az elsődleges látókéreg (V1)?", answers: { a: "Frontális lebeny", b: "Parietális lebeny", c: "Temporális lebeny", d: "Occipitális lebeny" }, correctAnswer: "d", explanation: "Az occipitális (nyakszirti) lebeny szinte kizárólag a vizuális információk feldolgozásáért felelős. A V1 a sulcus calcarinus körül helyezkedik el." },
+            { question: "A Broca-féle beszédközpont, amely a beszéd motoros produkciójáért felelős, hol található?", answers: { a: "A domináns félteke temporális lebenyének superior részén", b: "A domináns félteke frontális lebenyének inferior részén", c: "A nem-domináns félteke parietális lebenyében", d: "Az occipitális lebenyben" }, correctAnswer: "b", explanation: "A Broca-terület a domináns (általában bal) félteke gyrus frontalis inferiorjában helyezkedik el, és a beszédképzéshez szükséges motoros programokat szervezi." },
+            { question: "Mi az agykéreg oszlopos (kolumnáris) organizációjának funkcionális lényege?", answers: { a: "Az agykéreg rétegekre osztása.", b: "A kéreg felszínére merőlegesen szerveződő neuroncsoportok, amelyek egy adott ingertulajdonságra specializálódtak.", c: "A két agyfélteke közötti kommunikáció.", d: "A vér-agy gát fenntartása." }, correctAnswer: "b", explanation: "Az oszlopos organizáció szerint a kéreg funkcionális alapegységei a vertikális oszlopok, amelyeken belül a neuronok hasonló ingerekre reagálnak, lehetővé téve a specifikus információk hatékony, párhuzamos feldolgozását." },
+            { question: "Melyik agykéregi réteg a fő kimeneti réteg a szubkortikális struktúrák (pl. agytörzs, gerincvelő) felé?", answers: { a: "II. Lamina granularis externa", b: "IV. Lamina granularis interna", c: "V. Lamina pyramidalis interna", d: "VI. Lamina multiformis" }, correctAnswer: "c", explanation: "Az V. (belső piramis) réteg tartalmazza a nagy piramissejteket (pl. Betz-sejtek), amelyek axonjai a leszálló projekciós pályákat (pl. tractus corticospinalis) alkotják." },
+            { question: "Melyik barázda választja el a frontális és a parietális lebenyt?", answers: { a: "Fissura lateralis (Sylvius-árok)", b: "Sulcus centralis (Rolando-árok)", c: "Sulcus parietooccipitalis", d: "Sulcus calcarinus" }, correctAnswer: "b", explanation: "A sulcus centralis egy fontos anatómiai és funkcionális határvonal, amely elválasztja az előtte lévő motoros kérget a mögötte lévő szomatoszenzoros kéregtől." },
+            { question: "A Wernicke-féle beszédértő központ hol helyezkedik el?", answers: { a: "A domináns félteke frontális lebenyében", b: "Az occipitális lebenyben", c: "A domináns félteke temporális lebenyének superior részén", d: "A kisagyban" }, correctAnswer: "c", explanation: "A Wernicke-terület a domináns (általában bal) félteke gyrus temporalis superiorjának hátsó részén található, és a beszélt és írott nyelv megértéséért felelős." },
+            { question: "Melyik az agykéreg leggyakoribb, serkentő (glutamáterg) projekciós neuronja?", answers: { a: "Szemcsesejt", b: "Kosársejt", c: "Martinotti-sejt", d: "Piramissejt" }, correctAnswer: "d", explanation: "A piramissejtek alkotják az agykéreg serkentő neuronjainak többségét, és felelősek a kérgen belüli és a kéregből kiinduló hosszútávú projekciókért." },
+            { question: "Az insula (szigetlebeny) melyik funkcióban játszik kiemelt szerepet?", answers: { a: "Csak a mozgáskoordinációban", b: "Az interocepcióban (test belső állapotának érzékelése) és az érzelmek (pl. undor) feldolgozásában", c: "Csak a látásban", d: "Csak a hallásban" }, correctAnswer: "b", explanation: "Az insula, amely a Sylvius-árok mélyén rejtőzik, kulcsfontosságú a test belső jelzéseinek tudatosításában, az érzelmek (különösen az undor), az empátia és a fájdalomérzet feldolgozásában." },
+            { question: "Mi a corpus callosum (kérgestest) fő funkciója?", answers: { a: "A hormontermelés szabályozása", b: "A két agyfélteke közötti kommunikáció biztosítása", c: "A gerincvelő védelme", d: "A mozgások indítása" }, correctAnswer: "b", explanation: "A corpus callosum a legnagyobb komisszurális pálya, egy masszív fehérállományi köteg, amely összeköti a két agyfélteke megfelelő területeit, lehetővé téve azok összehangolt működését." },
+            { question: "Melyik rétegben találhatók a fejlődő agykéregben a Cajal-Retzius sejtek, amelyek a neuronális migrációt irányítják?", answers: { a: "I. Lamina molecularis", b: "III. Lamina pyramidalis externa", c: "V. Lamina pyramidalis interna", d: "VI. Lamina multiformis" }, correctAnswer: "a", explanation: "A Cajal-Retzius sejtek az I. (legfelső) rétegben helyezkednek el, és a reelin nevű fehérje kiválasztásával irányítják a neuronok vándorlását és a kérgi rétegződés megfelelő kialakulását az egyedfejlődés során." },
+            { question: "A gyrus postcentralis melyik funkcionális kérgi területnek felel meg?", answers: { a: "Elsődleges motoros kéreg (M1)", b: "Elsődleges szomatoszenzoros kéreg (S1)", c: "Elsődleges látókéreg (V1)", d: "Elsődleges hallókéreg (A1)" }, correctAnswer: "b", explanation: "A gyrus postcentralis, amely közvetlenül a sulcus centralis mögött helyezkedik el a parietális lebenyben, a testből érkező tapintási, fájdalom-, hő- és proprioceptív ingerek elsődleges feldolgozási helye." },
+            { question: "Melyik állítás HAMIS a neocortex lamináris szerkezetével kapcsolatban?", answers: { a: "Hat fő rétegből áll.", b: "Minden kérgi területen pontosan egyforma a rétegek vastagsága és sejtsűrűsége.", c: "A IV. réteg a thalamikus bemenet fő fogadója.", d: "Az V. réteg a szubkortikális kimenet fő forrása." }, correctAnswer: "b", explanation: "Bár a hatrétegű szerkezet általános, az egyes rétegek vastagsága és sejtsűrűsége jelentősen eltér a különböző funkcionális területeken. Például az érzőkéregben a IV. (bemeneti) réteg vastag, míg a motoros kéregben az V. (kimeneti) réteg dominál." },
+            { question: "A limbikus rendszer melyik része játszik központi szerepet a félelem és más érzelmek feldolgozásában és az érzelmi memóriában?", answers: { a: "Hippocampus", b: "Gyrus cinguli", c: "Amygdala", d: "Corpus mammillare" }, correctAnswer: "c", explanation: "Az amygdala a temporális lebenyben elhelyezkedő magcsoport, amely a félelmi válaszok, az érzelmi töltetű ingerek feldolgozásának és az érzelmi memória kialakításának kulcsfontosságú központja." },
+            { question: "Melyik az agykéreg azon területe, amely a komplex vizuális tárgyak és arcok felismeréséért felelős?", answers: { a: "Primer látókéreg (V1)", b: "Parietális asszociációs kéreg", c: "Inferior temporális kéreg", d: "Prefrontális kéreg" }, correctAnswer: "c", explanation: "A ventrális vizuális pályán ('Mi?' útvonal) végighaladva az információ az inferior temporális kéregbe jut, ahol olyan neuronok találhatók, amelyek specifikusan komplex tárgyakra, például arcokra reagálnak." },
+            { question: "Melyik agylebeny sérülése okoz leggyakrabban téri neglect szindrómát (az ellenoldali térfél figyelmen kívül hagyása)?", answers: { a: "Frontális lebeny", b: "Occipitális lebeny", c: "Temporális lebeny", d: "Parietális lebeny (jellemzően a nem-domináns, jobb oldali)" }, correctAnswer: "d", explanation: "A téri figyelem és a testséma hálózatainak fontos központja a parietális lebeny. Ennek sérülése (főként a jobb oldalon) a kontralaterális (bal oldali) tér és testfél tudatos észlelésének és a rá irányuló figyelemnek a zavarát okozza." },
+            { question: "A Betz-féle óriás piramissejtek melyik kérgi területen és rétegben találhatók?", answers: { a: "A V1 látókéreg IV. rétegében", b: "Az S1 szomatoszenzoros kéreg III. rétegében", c: "Az M1 motoros kéreg V. rétegében", d: "A prefrontális kéreg VI. rétegében" }, correctAnswer: "c", explanation: "A Betz-sejtek az agykéreg legnagyobb neuronjai, amelyek az elsődleges motoros kéreg (M1) V. (kimeneti) rétegében helyezkednek el, és axonjaik a piramispálya leggyorsabb vezetési sebességű rostjait alkotják." },
+            { question: "A kérgestest (corpus callosum) milyen típusú rostokat tartalmaz?", answers: { a: "Asszociációs rostokat", b: "Projekciós rostokat", c: "Komisszurális rostokat", d: "Perifériás idegrostokat" }, correctAnswer: "c", explanation: "A komisszurális rostok a két agyfélteke azonos (homotóp) vagy különböző (heterotóp) területeit kötik össze. A corpus callosum a legnagyobb ilyen pálya." },
+            { question: "A 'szomatotópia' elve mit jelent a szenzoros és motoros kéregben?", answers: { a: "A test minden része egyforma méretű reprezentációval rendelkezik.", b: "A test szomszédos részei a kéregben is szomszédos területeken reprezentálódnak, létrehozva egy 'testtérképet'.", c: "A test bal oldala a bal agyféltekében reprezentálódik.", d: "Az érzékelés és a mozgás elválaszthatatlan." }, correctAnswer: "b", explanation: "A szomatotópia azt jelenti, hogy a test felszíne és izomzata pontról-pontra leképeződik a kéregre, létrehozva egy torzított, funkcionális fontosságnak megfelelő testtérképet (homunculus)." },
+            { question: "Melyik kérgi réteg a legfejlettebb a primer érzőkérgi területeken (pl. V1, S1, A1)?", answers: { a: "I. réteg", b: "III. réteg", c: "IV. réteg", d: "V. réteg" }, correctAnswer: "d", explanation: "A IV. (belső szemcsés) réteg a thalamikus bemenetek fő fogadóállomása, ezért a primer érzőkéregekben, amelyek masszív szenzoros inputot kapnak, ez a réteg különösen vastag és sejtdús." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Kezdeti kvíz felépítése
+        startNewRound();
+    </script>
+</body>
+</html>

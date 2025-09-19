@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .btn-topic {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-topic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .option-btn:hover {
+            transform: scale(1.02);
+            border-color: #059669; /* Emerald */
+        }
+        .option-btn.selected {
+            background-color: #10b981; /* Emerald-500 */
+            color: white;
+            border-color: #047857; /* Emerald-700 */
+        }
+        .feedback {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .feedback.show {
+            max-height: 500px; /* Adjust as needed */
+            opacity: 1;
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app" class="w-full max-w-4xl mx-auto">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 text-slate-900">Neurológiai Ismeretek Teszt 2</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy új témakört a kezdéshez.</p>
+            <div id="topic-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topic buttons will be generated here -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-container" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <button id="back-to-topics" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Témakörök
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-base font-medium text-slate-700">Haladás</span>
+                        <span id="progress-text" class="text-sm font-medium text-slate-700">Kérdés 1 / 20</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full" style="width: 5%"></div>
+                    </div>
+                </div>
+
+                <div id="question-area" class="mb-6">
+                    <p id="question" class="text-xl font-semibold mb-6 text-slate-800 leading-relaxed"></p>
+                    <div id="options" class="space-y-3">
+                        <!-- Option buttons will be generated here -->
+                    </div>
+                </div>
+
+                <div id="feedback-area" class="feedback">
+                    <div id="feedback-content" class="p-5 rounded-lg">
+                        <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                        <p id="explanation" class="text-slate-700 leading-relaxed"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>
+                        Következő kérdés <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Score Screen -->
+        <div id="score-container" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-slate-900">Teszt Vége!</h2>
+            <p class="text-xl text-slate-600 mb-6">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-bold text-emerald-600 mb-8"></p>
+            <button id="restart-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mr-4">
+                <i class="fas fa-redo mr-2"></i>Újrapróbálkozás
+            </button>
+            <button id="home-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition-colors">
+                <i class="fas fa-home mr-2"></i>Főmenü
+            </button>
+        </div>
+    </div>
+
+<script>
+const quizData = [
+    {
+        topic: "Gyógyszerinterakciók a neurológiai therápiában",
+        questions: [
+            {
+                question: "Melyik folyamatot írja le a farmakokinetika?",
+                options: ["A gyógyszer hatását a szervezetre.", "A gyógyszer sorsát a szervezetben (felszívódás, eloszlás, metabolizmus, kiürülés).", "A gyógyszer receptorhoz való kötődését.", "A gyógyszer által kiváltott mellékhatásokat."],
+                answer: 1,
+                explanation: "A farmakokinetika (PK) azt írja le, hogy a szervezet mit tesz a gyógyszerrel. Négy fő folyamatot foglal magában (ADME): felszívódás (Abszorpció), eloszlás (Disztribúció), átalakulás (Metabolizmus) és kiürülés (Exkréció)."
+            },
+            {
+                question: "Melyik antiepileptikum ismert erős enzimgátlóként, amely növeli más gyógyszerek (pl. lamotrigin) koncentrációját?",
+                options: ["Karbamazepin", "Fenitoin", "Valproát (valproinsav)", "Levetiracetám"],
+                answer: 2,
+                explanation: "A valproát egy széles spektrumú enzimgátló, amely több CYP és UGT enzim működését is gátolja. Ennek következtében jelentősen növelheti más, ezen enzimek által metabolizált gyógyszerek koncentrációját, ami fokozott toxicitáshoz vezethet."
+            },
+            {
+                question: "Milyen következménnyel jár, ha egy enziminduktor antiepileptikumot (pl. karbamazepin) adnak együtt orális fogamzásgátlóval?",
+                options: ["A fogamzásgátló hatása megnő, ami trombózisveszélyt okoz.", "A fogamzásgátló hatása csökken, ami nem tervezett terhességhez vezethet.", "Nincs klinikailag jelentős interakció.", "A karbamazepin toxicitása fokozódik."],
+                answer: 1,
+                explanation: "Az enziminduktor antiepileptikumok (pl. karbamazepin, fenitoin) fokozzák a máj CYP enzimeinek működését, ami felgyorsítja az orális fogamzásgátlók hormonkomponenseinek lebomlását. Ez csökkenti a fogamzásgátló hatékonyságát és növeli a nem kívánt terhesség kockázatát."
+            },
+            {
+                question: "Melyik antipszichotikum-csoport kerülendő Parkinson-kóros betegeknél, mert jelentősen ronthatják a motoros tüneteket?",
+                options: ["Szelektív szerotonin visszavétel gátlók (SSRI)", "Benzodiazepinek", "Tipikus (első generációs) antipszichotikumok (pl. haloperidol)", "Kolinészteráz-gátlók"],
+                answer: 2,
+                explanation: "A tipikus antipszichotikumok erős dopamin D2 receptor blokkolók. Mivel a Parkinson-kór alapja a dopaminhiány, ezek a szerek antagonizálják a dopaminerg terápiát és súlyosbíthatják a parkinsonos motoros tüneteket (rigiditás, bradykinesia)."
+            },
+            {
+                question: "Mi a szerotonin szindróma, és melyik gyógyszerkombináció okozhatja?",
+                options: ["A szerotonin hiánya; SSRI + béta-blokkoló.", "Potenciálisan életveszélyes állapot a szerotonerg túlstimuláció miatt; MAO-B gátló + SSRI.", "A dopaminszint csökkenése; Levodopa + antipszichotikum.", "Allergiás reakció; Penicillin + NSAID."],
+                answer: 1,
+                explanation: "A szerotonin szindróma egy potenciálisan letális állapot, amelyet a központi idegrendszeri szerotonerg aktivitás túlzott fokozódása okoz. Jellemzően akkor alakul ki, ha két, a szerotonin rendszerre ható gyógyszert (pl. egy MAO-gátlót és egy SSRI-t) kombinálnak."
+            },
+            {
+                question: "Mi a P-glikoprotein (P-gp) fő funkciója és miért fontos a neurológiában?",
+                options: ["Egy neurotranszmitter receptor.", "Egy efflux pumpa, amely korlátozza a gyógyszerek bejutását az agyba a vér-agy gáton keresztül.", "Egy enzim, amely lebontja a gyógyszereket.", "Egy ioncsatorna a neuronok membránjában."],
+                answer: 1,
+                explanation: "A P-glikoprotein egy aktív transzporter fehérje (efflux pumpa), amely a vér-agy gátnál 'kipumpálja' a gyógyszereket az agyból. Működésének gátlása vagy serkentése jelentősen befolyásolhatja a KIR-re ható gyógyszerek agyi koncentrációját és hatását."
+            },
+            {
+                question: "Melyik két atipikus antipszichotikum tekinthető biztonságosabbnak Parkinson-kórral társult pszichózis kezelésére?",
+                options: ["Haloperidol és klórpromazin", "Riszperidon és olanzapin", "Klozapin és kvetiapin", "Aripiprazol és zipraszidon"],
+                answer: 2,
+                explanation: "A klozapin és a kvetiapin gyengébb dopamin D2 receptor blokkolók, mint más antipszichotikumok, ezért kisebb valószínűséggel rontják a Parkinson-kór motoros tüneteit. Emiatt ezek a preferált szerek PK-hoz társuló pszichózis esetén."
+            },
+            {
+                question: "Milyen típusú gyógyszerinterakcióról beszélünk, amikor két KIR-depresszáns (pl. benzodiazepin és egy opioid) együttes adása fokozott szedációt okoz?",
+                options: ["Farmakokinetikai - metabolikus gátlás", "Farmakokinetikai - felszívódási", "Farmakodinámiás - antagonista", "Farmakodinámiás - additív/szinergista"],
+                answer: 3,
+                explanation: "Ez egy farmakodinámiás interakció, ahol a két gyógyszer hasonló (depresszáns) hatásai a központi idegrendszerben összegződnek (addíció) vagy felerősítik egymást (szinergizmus), anélkül, hogy feltétlenül megváltoztatnák egymás koncentrációját."
+            },
+            {
+                question: "Mi a 'deprescribing' lényege?",
+                options: ["Új gyógyszerek felírása.", "A gyógyszerek tudatos, tervszerű felülvizsgálata és elhagyása a kockázatok csökkentése érdekében.", "A gyógyszerdózisok folyamatos emelése.", "Kizárólag gyógynövények alkalmazása."],
+                answer: 1,
+                explanation: "A 'deprescribing' egy proaktív folyamat, amely során az orvos kritikusan felülvizsgálja a beteg gyógyszerelését, és elhagyja azokat a szereket, amelyek már nem szükségesek, nem hatékonyak, vagy több kárt okoznak, mint hasznot. Célja a polifarmácia és az interakciók kockázatának csökkentése."
+            },
+            {
+                question: "Melyik állítás NEM igaz a gyógyszerinterakciókra a neurológiai betegeknél?",
+                options: ["A polifarmácia növeli a kockázatukat.", "A szűk terápiás indexű gyógyszerek különösen veszélyesek.", "Az interakciók soha nem járnak klinikai következményekkel.", "Az időskor és a társbetegségek növelik az érzékenységet."],
+                answer: 2,
+                explanation: "A gyógyszerinterakciók súlyos klinikai következményekkel járhatnak, a terápia hatástalanságától a súlyos, akár életveszélyes toxicitásig. Ezért felismerésük és kezelésük kulcsfontosságú."
+            },
+            {
+                question: "Melyik CYP enzim a legfontosabb a humán gyógyszermetabolizmusban, amely a legtöbb gyógyszer átalakításában részt vesz?",
+                options: ["CYP1A2", "CYP2D6", "CYP2C9", "CYP3A4"],
+                answer: 3,
+                explanation: "A CYP3A4 a leggyakrabban expresszálódó és legfontosabb CYP izoenzim az emberi májban és bélfalban. A klinikumban használt gyógyszerek körülbelül 50%-ának metabolizmusáért felelős, így kiemelt szerepet játszik a gyógyszerinterakciókban."
+            },
+            {
+                question: "Milyen interakcióra kell számítani donepezil (AChEI) és egy antikolinerg hatású gyógyszer (pl. inkontinencia elleni szer) együttes adásakor?",
+                options: ["Szinergista hatás, a kognitív funkciók javulnak.", "Farmakodinámiás antagonizmus, a donepezil hatása csökkenhet.", "Farmakokinetikai gátlás, a donepezil szintje megnő.", "Nincs interakció."],
+                answer: 1,
+                explanation: "A kolinészteráz-gátlók (AChEI-k) növelik az acetilkolin szintjét, míg az antikolinerg szerek blokkolják az acetilkolin receptorokat. Együttes adásuk farmakodinámiás antagonizmust eredményez, azaz a két gyógyszer ellentétes hatásmechanizmusa kiolthatja egymást."
+            },
+            {
+                question: "Melyik gyógyszercsoport csökkentheti a csontsűrűséget és növelheti a törések kockázatát, ami SM-es betegeknél különös figyelmet igényel?",
+                options: ["Béta-blokkolók", "NSAID-ok", "SSRI és TCA típusú antidepresszánsok", "Kolinészteráz-gátlók"],
+                answer: 2,
+                explanation: "Egyes antidepresszánsok, különösen az SSRI-k és a triciklikus antidepresszánsok (TCA-k) használata összefüggésbe hozható a csontvesztés fokozódásával és a csonttörések megnövekedett kockázatával. Ez SM betegeknél, akiknél eleve lehetnek egyensúlyproblémák és csontsűrűség-csökkenés, különösen fontos szempont."
+            },
+            {
+                question: "Milyen veszélyt rejt a fingolimod (SM DMT) és a QT-szakaszt megnyújtó gyógyszerek (pl. bizonyos antiarrhythmiás szerek, antipszichotikumok) kombinációja?",
+                options: ["Májtoxicitás", "Súlyos bradycardia és potenciálisan életveszélyes szívritmuszavar (Torsades de Pointes)", "Vesekárosodás", "Szerotonin szindróma"],
+                answer: 1,
+                explanation: "A fingolimod önmagában is okozhat bradycardiát (szívfrekvencia-csökkenést) a kezelés kezdetén. Ha más, a szív ingerületvezetését befolyásoló, a QT-szakaszt megnyújtó gyógyszerekkel kombinálják, az additív hatás növeli a súlyos, akár halálos szívritmuszavarok kockázatát."
+            },
+            {
+                question: "Mi az oka annak, hogy a Parkinson-kóros betegeknek kerülniük kell a metoklopramid tartalmú hányáscsillapítókat?",
+                options: ["Mert májkárosító.", "Mert dopamin receptor antagonista, és rontja a motoros tüneteket.", "Mert súlyos allergiás reakciót válthat ki.", "Mert csökkenti a levodopa felszívódását."],
+                answer: 1,
+                explanation: "A metoklopramid egy dopamin antagonista, amely átjut a vér-agy gáton. Hatása ellentétes a Parkinson-kór dopaminpótló terápiájával, ezért jelentősen ronthatja a motoros tüneteket."
+            },
+            {
+                question: "Melyik állítás igaz a terápiás gyógyszerszint monitorozásra (TDM)?",
+                options: ["Minden gyógyszernél kötelező elvégezni.", "Csak a gyógyszer toxicitásának kimutatására szolgál.", "Segíthet az interakciók korai felismerésében és a dózisok finomhangolásában szűk terápiás indexű gyógyszereknél.", "Egy elavult módszer, amit már nem használnak."],
+                answer: 2,
+                explanation: "A TDM során a gyógyszer plazmakoncentrációját mérik. Ez különösen hasznos szűk terápiás indexű gyógyszerek (pl. fenitoin, lítium) esetén, hogy a dózist az optimális terápiás tartományban tartsák, elkerülve a hatástalanságot és a toxicitást. Interakciók gyanújakor is értékes információt ad."
+            },
+            {
+                question: "Mi a farmakokinetikai interakció fő mechanizmusa a valproát és a lamotrigin között?",
+                options: ["CYP3A4 enzimindukció", "P-glikoprotein gátlás", "UGT enzimek gátlása", "Fehérjekötésből való leszorítás"],
+                answer: 2,
+                explanation: "A lamotrigin elsődlegesen az UGT (uridin-difoszfát-glükuronoziltranszferáz) enzimeken keresztül metabolizálódik. A valproát gátolja ezeket az enzimeket, így jelentősen lelassítja a lamotrigin lebomlását, ami annak plazmaszintjének megemelkedéséhez és a súlyos bőrreakciók fokozott kockázatához vezet."
+            },
+            {
+                question: "Melyik állítás írja le helyesen a gyógyszerinterakciók és a polifarmácia kapcsolatát?",
+                options: ["A polifarmácia csökkenti az interakciók esélyét.", "Minden egyes újabb gyógyszer bevezetése exponenciálisan növeli az interakciók kialakulásának valószínűségét.", "Csak 10-nél több gyógyszer esetén beszélünk interakciós kockázatról.", "A polifarmácia és az interakciók között nincs összefüggés."],
+                answer: 1,
+                explanation: "A polifarmácia (5 vagy több gyógyszer egyidejű szedése) az egyik legjelentősebb kockázati tényező a gyógyszerinterakciók szempontjából. Minél több gyógyszert szed egy beteg, annál több lehetséges kölcsönhatási pár van, így a kockázat exponenciálisan nő."
+            },
+            {
+                question: "Miért fontos a grapefruitlé fogyasztásának kerülése bizonyos gyógyszerek (pl. egyes kalciumcsatorna-blokkolók, sztatinok) szedése mellett?",
+                options: ["Mert rontja a gyógyszerek ízét.", "Mert gátolja a bélfalban lévő CYP3A4 enzimet, növelve a gyógyszerek felszívódását és koncentrációját.", "Mert felgyorsítja a gyógyszerek kiürülését a vesén keresztül.", "Mert semlegesíti a gyógyszerek hatását."],
+                answer: 1,
+                explanation: "A grapefruitlé és annak komponensei (furanokumarinok) irreverzibilisen gátolják a bélfalban található CYP3A4 enzimet. Ez csökkenti a gyógyszerek 'first-pass' metabolizmusát, így a szájon át bevett gyógyszerből sokkal több szívódik fel, ami váratlanul magas plazmakoncentrációhoz és toxicitáshoz vezethet."
+            },
+            {
+                question: "Melyik neurológiai gyógyszercsoport esetében a leggyakoribb és klinikailag legjelentősebbek a gyógyszerinterakciók?",
+                options: ["Vitaminok és ásványi anyagok", "Antiepileptikumok", "Fájdalomcsillapítók (pl. paracetamol)", "Memóriajavítók"],
+                answer: 1,
+                explanation: "Az antiepileptikumok (AED-k), különösen a régebbi generációs szerek, hírhedtek a magas interakciós potenciáljukról. Sokan közülük erős enziminduktorok vagy -gátlók, és gyakran alkalmazzák őket politerápiában, ami tovább növeli a kockázatot."
+            }
+        ]
+    },
+    {
+        topic: "Liquorkémiai, -cytológiai és -keringési vizsgálatok",
+        questions: [
+            {
+                question: "Mi a liquor cerebrospinalis (CSF) fő képződési helye?",
+                options: ["Az agykéreg neuronjai", "A lágy agyhártya (pia mater)", "Az agykamrák érfonatai (plexus choroideus)", "A gerincvelő szürkeállománya"],
+                answer: 2,
+                explanation: "A liquor túlnyomó részét, kb. 70%-át, az agykamrákban található, specializált érgomolyagok, a plexus choroideusok termelik aktív szekréció és ultrafiltráció révén a vérplazmából."
+            },
+            {
+                question: "Melyik állítás igaz a liquor normál fehérjekoncentrációjára?",
+                options: ["Azonos a szérum fehérjekoncentrációjával.", "Sokkal magasabb, mint a szérumban.", "Rendkívül alacsony, a szérumkoncentráció kevesebb mint 1%-a.", "Kizárólag immunglobulinokból áll."],
+                answer: 2,
+                explanation: "A liquor normál összfehérje-koncentrációja (15-45 mg/dL) nagyon alacsony a vérplazmáéhoz képest. Ennek oka a vér-liquor gát, amely erősen korlátozza a fehérjék átjutását a keringésből a központi idegrendszerbe."
+            },
+            {
+                question: "Melyik paraméter a vér-liquor gát permeabilitásának legérzékenyebb mutatója?",
+                options: ["Liquor összfehérje", "Liquor glükóz", "Q-albumin (liquor/szérum albumin hányados)", "IgG index"],
+                answer: 2,
+                explanation: "Mivel az albumin kizárólag a vérből jut a liquorba, a liquor és a szérum albuminkoncentrációjának hányadosa (Q-albumin) a legspecifikusabb és legérzékenyebb jelzője a vér-liquor gát integritásának és átjárhatóságának."
+            },
+            {
+                question: "Bakteriális meningitis gyanúja esetén milyen jellegzetes elváltozások várhatók a liquorban?",
+                options: ["Normális sejtszám, emelkedett glükóz, normális fehérje", "Emelkedett sejtszám (lymphocyta túlsúllyal), normális glükóz, enyhén emelkedett fehérje", "Jelentősen emelkedett sejtszám (neutrophil túlsúllyal), csökkent glükóz, emelkedett fehérje és laktát", "Nincs sejtszám-emelkedés, de a fehérje extrém magas"],
+                answer: 2,
+                explanation: "A klasszikus bakteriális meningitis lelet a következő: jelentős pleocytosis (sejtszaporulat) neutrophil granulocyta dominanciával, alacsony glükózszint (hypoglycorrhachia), magas fehérjekoncentráció (hyperproteinorrhachia) és emelkedett laktátszint."
+            },
+            {
+                question: "Mi a jelentősége a liquorban kimutatható liquor-specifikus oligoklonális bandáknak (OCB)?",
+                options: ["Agydaganatra utalnak.", "Bakteriális fertőzés biztos jelei.", "A sclerosis multiplex (SM) egyik legfontosabb diagnosztikai kritériumai, intrathecalis IgG termelésre utalnak.", "Mindig a vér-liquor gát károsodását jelzik."],
+                answer: 2,
+                explanation: "A liquor-specifikus OCB-k (amelyek a liquorban jelen vannak, de a szérumban nem) a központi idegrendszeren belüli, klonális B-sejt aktiváció és immunglobulin (IgG) termelés bizonyítékai. Az SM-es betegek több mint 95%-ában kimutathatók, így a diagnózis fontos pillérét képezik."
+            },
+            {
+                question: "Mi a normál liquor nyitónyomás értéke oldalfekvő helyzetben felnőtteknél?",
+                options: ["0-10 mmH₂O", "30-50 mmH₂O", "70-180 mmH₂O", "Több mint 300 mmH₂O"],
+                answer: 2,
+                explanation: "A normál liquornyomás felnőtteknél, oldalfekvő, relaxált helyzetben mérve általában 70 és 180 mmH₂O (milliméter vízoszlop) között van, bár egyes referenciatartományok 250 mmH₂O-ig is terjedhetnek."
+            },
+            {
+                question: "Milyen sejttípus dominál a normál liquorban?",
+                options: ["Neutrophil granulocyták", "Vörösvértestek", "Lymphocyták és monocyták", "Eosinophil granulocyták"],
+                answer: 2,
+                explanation: "Egészséges felnőttek liquorában a sejtszám nagyon alacsony (0-5 sejt/μl), és a jelenlévő sejtek túlnyomórészt lymphocyták és kisebb arányban monocyták. Más sejttípusok jelenléte általában kóros."
+            },
+            {
+                question: "Mi a kommunikáló hydrocephalus?",
+                options: ["Az agykamrák nem kommunikálnak egymással.", "A liquor áramlása elzáródott a kamrarendszeren belül.", "A probléma a liquor felszívódásának zavara, miközben a kamrarendszeren belüli áramlás szabad.", "Az agyállomány sorvadása miatti másodlagos kamratágulat."],
+                answer: 2,
+                explanation: "Kommunikáló hydrocephalus esetén a liquor szabadon áramlik a kamrarendszer és a subarachnoidalis tér között (azok 'kommunikálnak'), de a felszívódása az arachnoidea bolyhok szintjén károsodott, ami a liquor felhalmozódásához vezet."
+            },
+            {
+                question: "Melyik liquorkémiai paraméter a leghasznosabb a bakteriális és vírusos meningitis elkülönítésében?",
+                options: ["Összfehérje", "Klorid", "Laktát", "Albumin"],
+                answer: 2,
+                explanation: "A liquor laktátszintje az egyik legjobb differenciáldiagnosztikai marker. Bakteriális meningitisben a laktát szintje jellemzően jelentősen megemelkedik (az anaerob metabolizmus miatt), míg vírusos meningitisben általában normális vagy csak enyhén emelkedett."
+            },
+            {
+                question: "Mi az albuminocytológiai disszociáció, és melyik betegségre jellemző?",
+                options: ["Normál fehérje és magas sejtszám; vírusos meningitisre.", "Magas fehérje és normális vagy enyhén emelkedett sejtszám; Guillain-Barré szindrómára.", "Alacsony fehérje és magas sejtszám; agytályogra.", "Normál fehérje és normál sejtszám; sclerosis multiplexre."],
+                answer: 1,
+                explanation: "Az albuminocytológiai disszociáció a liquor fehérjetartalmának jelentős megemelkedését jelenti normális vagy csak enyhén emelkedett sejtszám mellett. Ez a lelet klasszikusan a Guillain-Barré szindrómára (GBS) jellemző."
+            },
+            {
+                question: "Melyik képalkotó módszer képes direkt módon vizsgálni a liquor áramlását?",
+                options: ["Koponya röntgen", "Natív koponya CT", "Liquordinamikai MRI (CSF flow study)", "EEG"],
+                answer: 2,
+                explanation: "A liquordinamikai MRI (phase-contrast MRI) egy speciális MRI technika, amely képes megjeleníteni és mérni a liquor áramlását, például az aquaeductus Sylvii-n keresztül. Ez segít az áramlási akadályok azonosításában."
+            },
+            {
+                question: "Milyen sejtek jelenléte utal a liquorban intrathecalis (KIR-en belüli) antitesttermelésre?",
+                options: ["Neutrophil granulocyták", "Vörösvértestek", "Plazmasejtek", "Ependyma sejtek"],
+                answer: 2,
+                explanation: "A plazmasejtek az antitesteket termelő, differenciálódott B-lymphocyták. Normálisan nem találhatók a liquorban. Megjelenésük krónikus gyulladásra és helyi, KIR-en belüli antitesttermelésre utal, ami jellemző például sclerosis multiplexben vagy neuroborreliosisban."
+            },
+            {
+                question: "Mi a 'csapolási próba' (tap test) célja?",
+                options: ["A liquor bakteriális tenyésztése.", "Nagyobb mennyiségű (30-50 ml) liquor lebocsátása a normál nyomású hydrocephalus (NPH) tüneteire gyakorolt hatás vizsgálatára.", "A liquornyomás mesterséges emelése.", "A vér-liquor gát permeabilitásának tesztelése."],
+                answer: 1,
+                explanation: "A csapolási próba egy diagnosztikus és prognosztikai teszt NPH gyanúja esetén. Nagy mennyiségű liquor lebocsátása után a beteg tüneteinek (főleg a járászavar) átmeneti javulása jó előrejelzője lehet a liquor-shunt műtét várható sikerességének."
+            },
+            {
+                question: "Mi a Froin-szindróma?",
+                options: ["Vírusos meningitis egyik formája.", "A liquor extrém magas fehérjetartalma és sárgás elszíneződése (xanthochromia) alvadással, amit a gerinccsatorna teljes elzáródása okoz.", "A lumbálpunkció utáni fejfájás.", "A liquor keringésének veleszületett zavara."],
+                answer: 1,
+                explanation: "A Froin-szindróma a gerinccsatorna teljes blokádja (pl. tumor, porckorongsérv miatt) alatti liquor térben kialakuló jelenség. A liquor keringése leáll, a fehérje koncentráció extrém magasra nő, a liquor sárgás lesz (xanthochrom) és spontán megalvadhat."
+            },
+            {
+                question: "Melyik állítás igaz az újszülöttek liquorára a felnőttekéhez képest?",
+                options: ["Az újszülöttek liquorának fehérjetartalma és sejtszáma alacsonyabb.", "Az újszülöttek liquorának fehérjetartalma és sejtszáma fiziológiásan magasabb lehet.", "Nincs különbség az újszülött és a felnőtt liquor között.", "Az újszülöttek liquorában nincs glükóz."],
+                answer: 1,
+                explanation: "Az újszülöttek vér-liquor gátja még éretlen, ezért liquorukban a fehérjekoncentráció (akár 150 mg/dL-ig) és a sejtszám (akár 30 sejt/μl-ig) is fiziológiásan magasabb lehet, mint felnőttekben."
+            },
+            {
+                question: "Mi a leptomeningealis carcinomatosis?",
+                options: ["A kemény agyhártya jóindulatú daganata.", "Az agykamrák daganata.", "Daganatsejtek szétszóródása a lágyagyhártyán (leptomeninx) és a liquor térben.", "A gerincvelő primer daganata."],
+                answer: 2,
+                explanation: "A leptomeningealis carcinomatosis (vagy meningealis áttétképződés) azt jelenti, hogy egy primer daganat (pl. tüdő-, emlőrák, melanoma) sejtjei áttétet képeznek a központi idegrendszert borító lágyagyhártyára, és a liquorban is megjelenhetnek. Diagnózisát a liquor cytológiai vizsgálata erősíti meg."
+            },
+            {
+                question: "A liquor/szérum glükóz arány 0.4 alatti értéke mire utal erősen?",
+                options: ["Vírusos meningitisre", "Sclerosis multiplexre", "Stroke-ra", "Bakteriális meningitisre"],
+                answer: 3,
+                explanation: "A liquor glükózszintjének jelentős csökkenése a szérumértékhez képest (az arány < 0.4) a bakteriális meningitis egyik legjellemzőbb laboratóriumi jele, mivel a baktériumok és a gyulladásos sejtek nagy mennyiségű glükózt használnak fel."
+            },
+            {
+                question: "Milyen festést használnak a Cryptococcus gomba kimutatására a liquorban?",
+                options: ["Gram-festés", "Ziehl-Neelsen festés", "Tusfestés (India ink)", "Papanicolaou festés"],
+                answer: 2,
+                explanation: "A tusfestés (India ink) egy negatív festési eljárás, amely a Cryptococcus neoformans gombát körülvevő poliszacharid tokot teszi láthatóvá: a tusfesték részecskéi nem festik meg a tokot, így az egy világos udvarként jelenik meg a sötét háttérben."
+            },
+            {
+                question: "Mi az 'üres sella' (empty sella) jelenség az MRI-n, és melyik liquorkeringési zavarhoz társulhat?",
+                options: ["A sella turcica hiánya; agytumorokhoz.", "A sella turcica megnagyobbodása és liquorral való kitöltődése; idiopátiás intrakraniális hipertenzióhoz (IIH).", "A sella turcica elmeszesedése; SAV-hoz.", "A hipofízis megnagyobbodása; NPH-hoz."],
+                answer: 1,
+                explanation: "Az 'üres sella' egy radiológiai jel, ahol a sella turcica (a hipofízis helye) a megnövekedett liquornyomás hatására kitágul és liquorral telődik fel, összenyomva a hipofízist. Ez a jel gyakran társul az idiopátiás intrakraniális hipertenzióhoz (IIH)."
+            },
+            {
+                question: "Az IgG index emelkedése mit jelez?",
+                options: ["Kizárólag a vér-liquor gát károsodását.", "Intrathecalis (KIR-en belüli) IgG szintézist.", "Szisztémás IgG szint csökkenését.", "Akut bakteriális fertőzést."],
+                answer: 1,
+                explanation: "Az IgG index egy számított érték, amely korrigál a vér-liquor gát állapotára és a szérum IgG szintre. Emelkedése azt jelzi, hogy a központi idegrendszeren belül, helyben fokozott IgG termelés zajlik, ami krónikus gyulladásos vagy autoimmun folyamatokra (pl. SM) jellemző."
+            }
+        ]
+    },
+    {
+        topic: "A véres liquor",
+        questions: [
+            {
+                question: "Melyik a két leggyakoribb oka a véres liquor cerebrospinalisnak?",
+                options: ["Agydaganat és meningitis", "Subarachnoidealis vérzés (SAV) és traumás lumbálpunkció", "Stroke és sclerosis multiplex", "Hydrocephalus és agytályog"],
+                answer: 1,
+                explanation: "A véres liquor messze leggyakoribb okai a valódi, központi idegrendszeri vérzést jelentő subarachnoidealis vérzés (SAV), illetve a mintavétel során bekövetkező érsérülés, azaz a traumás (arteficiális) punkció."
+            },
+            {
+                question: "Mi a három kémcsöves próba lényege a SAV és a traumás punkció elkülönítésében?",
+                options: ["Mindhárom kémcsőben ugyanazt a kémiai vizsgálatot végzik el.", "SAV esetén a vér mennyisége nő, traumás punkciónál csökken a kémcsövekben.", "Traumás punkció esetén a liquor véressége és a vörösvértestszám fokozatosan csökken a kémcsövek során, míg SAV esetén egyenletesen véres marad.", "SAV esetén a liquor megalvad a kémcsőben, traumás punkciónál nem."],
+                answer: 2,
+                explanation: "A három (vagy négy) kémcsöves próba azon az elven alapul, hogy ha a vérzés a punkció elején történt, a liquor a mintavétel során 'tisztul'. Így traumás punkciónál a vörösvértestszám az elsőtől az utolsó csőig csökken, míg SAV esetén a liquor a subarachnoidalis térben már eleve véres, így a minták egyenletesen véresek lesznek."
+            },
+            {
+                question: "Mit jelent a xanthochromia, és mikor jelenik meg SAV után?",
+                options: ["A liquor zavarosságát; azonnal.", "A liquor sárgás/rózsaszínes elszíneződését a vörösvértestek szétesése miatt; általában 2-12 órával a vérzés után.", "A liquor alacsony fehérjetartalmát; napokkal később.", "A liquor magas sejtszámát; hetekkel később."],
+                answer: 1,
+                explanation: "A xanthochromia a liquor felülúszójának sárgás (bilirubin) vagy rózsaszínes (oxyhemoglobin) elszíneződése, ami a vörösvértestek szétesése után alakul ki. Mivel ehhez idő kell, a megjelenése (jellemzően 2-12 órával a vérzés után) valódi, korábbi subarachnoidalis vérzésre utal, és segít elkülöníteni a friss traumás punkciótól."
+            },
+            {
+                question: "Melyik a legmegbízhatóbb módszer a xanthochromia kimutatására?",
+                options: ["Vizuális megtekintés napfénynél", "Mikroszkópos vizsgálat", "Spektrofotometriás mérés", "Gram-festés"],
+                answer: 2,
+                explanation: "Míg a vizuális értékelés szubjektív, a spektrofotometria egy objektív és érzékeny módszer, amely a liquor fényelnyelését méri különböző hullámhosszokon. Képes kimutatni a bilirubin és az oxyhemoglobin jellegzetes abszorpciós csúcsait, így megbízhatóan igazolja a xanthochromiát."
+            },
+            {
+                question: "Miért utal a liquorban emelkedett D-dimer szint subarachnoidealis vérzésre?",
+                options: ["Mert a D-dimer egy gyulladásos fehérje.", "Mert a D-dimer a véralvadékok lebomlási terméke, és SAV esetén véralvadék képződik a liquor térben.", "Mert a D-dimer a vörösvértestek alkotóeleme.", "Mert a D-dimer szintje mindig magas az agyban."],
+                answer: 1,
+                explanation: "SAV esetén a subarachnoidalis térben képződött véralvadék lebomlásakor (fibrinolízis) D-dimer szabadul fel. Ezzel szemben egy friss traumás punkció során nincs idő véralvadék képződésére és lebomlására, így a D-dimer szintje nem emelkedik meg a liquorban. Ezért a magas liquor D-dimer SAV mellett szól."
+            },
+            {
+                question: "Melyik klinikai tünet a legjellemzőbb a subarachnidealis vérzésre?",
+                options: ["Lassan, napok alatt kialakuló tompa fejfájás", "Láz és hidegrázás", "Hirtelen, ütésszerű, rendkívül heves fejfájás ('worst headache of my life')", "Féloldali végtaggyengeség"],
+                answer: 2,
+                explanation: "A SAV klasszikus, legriasztóbb tünete a hirtelen, minden eddiginél erősebb, 'ütésszerű' fejfájás. Gyakran kíséri tarkókötöttség, hányinger, hányás és tudatzavar."
+            },
+            {
+                question: "Milyen cytológiai lelet utal napokkal egy subarachnoidalis vérzés után a liquorban a vérzés korábbi voltára?",
+                options: ["Friss, ép vörösvértestek.", "Nagy számú neutrophil granulocyta.", "Erythrophagok és siderophagok (hemosziderint tartalmazó makrofágok) jelenléte.", "Daganatsejtek."],
+                answer: 2,
+                explanation: "A vérzés után a liquor térbe került vörösvértesteket a makrofágok elkezdik bekebelezni (erythrophagocytosis). A vörösvértestek lebontása során a hemoglobinból hemosziderin képződik, amely a makrofágokban felhalmozódik (siderophagok). Ezeknek a sejteknek a jelenléte a vérzés korábbi megtörténtét bizonyítja."
+            },
+            {
+                question: "Milyen képalkotó vizsgálat az elsődleges választás akut SAV gyanúja esetén?",
+                options: ["Koponya röntgen", "Natív (kontraszt nélküli) koponya CT", "EEG", "Gerinc MRI"],
+                answer: 1,
+                explanation: "Akut SAV gyanúja esetén a natív koponya CT a leggyorsabb és leginkább hozzáférhető vizsgálat. Az első 24 órán belül nagy érzékenységgel (több mint 90%) képes kimutatni a subarachnoidalis térben lévő, hyperdens (világos) vért."
+            },
+            {
+                question: "Mikor indokolt lumbálpunkciót végezni SAV gyanúja esetén?",
+                options: ["Minden esetben, a CT vizsgálat előtt.", "Ha a klinikai gyanú erős, de a koponya CT negatív.", "Csak ha a beteg eszméletlen.", "Soha, mert túl veszélyes."],
+                answer: 1,
+                explanation: "Ha a klinikai tünetek erősen felvetik a SAV gyanúját, de a (jellemzően a tünetek kezdete után több mint 6-12 órával végzett) CT vizsgálat negatív, lumbálpunkció elvégzése indokolt a kisebb vérzések vagy a CT által már nem látható vérzés maradványainak (xanthochromia) kimutatására."
+            },
+            {
+                question: "Mi a leggyakoribb szövődménye a lumbálpunkciónak?",
+                options: ["Fertőzés", "Agytörzsi beékelődés", "Posztpunkciós fejfájás", "Allergiás reakció"],
+                answer: 2,
+                explanation: "A posztpunkciós fejfájás a leggyakoribb szövődmény, amelyet a dura materen keletkezett nyíláson keresztüli liquor szivárgás és az ebből adódó intrakraniális hipotenzió okoz. Jellemzően felálláskor fokozódik és fekvésre enyhül."
+            },
+            {
+                question: "Melyik állítás NEM igaz a traumás punkcióra?",
+                options: ["Gyakrabban fordul elő nehéz anatómiai viszonyok mellett.", "A liquor nyomása általában emelkedett.", "A liquor D-dimer szintje általában normális.", "A centrifugált felülúszó általában tiszta."],
+                answer: 1,
+                explanation: "Traumás punkció esetén a liquornyomás általában normális, hacsak a betegnek nincs egyéb, a koponyaűri nyomást fokozó alapbetegsége. Ezzel szemben SAV esetén a nyitónyomás gyakran emelkedett a megnövekedett vér- és liquor térfogat miatt."
+            },
+            {
+                question: "Álpozitív xanthochromiát okozhat, KIVÉVE:",
+                options: ["Súlyos sárgaság (hyperbilirubinaemia)", "Nagyon magas liquor fehérjetartalom", "Rifampicin szedése", "Akut bakteriális meningitis"],
+                answer: 3,
+                explanation: "A súlyos sárgaság, az extrém magas fehérjeszint és bizonyos gyógyszerek (pl. rifampicin) okozhatnak sárgás elszíneződést, ami összetéveszthető a valódi xanthochromiával. Az akut bakteriális meningitis önmagában jellemzően nem okoz xanthochromiát, hacsak nem társul vérzéssel."
+            },
+            {
+                question: "Mi a teendő, ha egy betegnél a klinikai kép és a CT alapján SAV igazolódik?",
+                options: ["Azonnali lumbálpunkció.", "Fájdalomcsillapítás és hazabocsátás.", "A vérzésforrás (általában aneurizma) felkutatása agyi érfestéssel (angiográfia) és annak ellátása.", "EEG vizsgálat."],
+                answer: 2,
+                explanation: "Ha a SAV diagnózisa képalkotóval megerősítést nyert, a következő, életmentő lépés a vérzés forrásának azonosítása (CT-angiográfia, MR-angiográfia vagy a gold standard DSA segítségével) és az aneurizma mielőbbi ellátása (coiling vagy clipping), hogy megelőzzék az újravérzést."
+            },
+            {
+                question: "A három kémcsöves próba megbízhatóságát csökkentheti, ha...",
+                options: ["...a SAV nagyon enyhe.", "...a traumás vérzés a punkció későbbi szakaszában kezdődik.", "...a betegnek magas a láza.", "...a beteg nyugodtan fekszik a vizsgálat alatt."],
+                answer: 1,
+                explanation: "Ha a punkciós tű a mintavétel során mozdul el és csak a későbbi fázisban sért meg egy eret, akkor az első kémcsövek még tiszták lehetnek, és a későbbi véresség tévesen SAV-nak tűnhet, vagy a csökkenés mértéke nem lesz egyértelmű. Ilyenkor a próba megbízhatósága csökken."
+            },
+            {
+                question: "A liquor centrifugálása után a felülúszó rózsaszínes színe mire utal?",
+                options: ["Bilirubin jelenlétére.", "Oxyhemoglobin jelenlétére, ami viszonylag friss vérzésre utal.", "Magas fehérjeszintre.", "Fertőzésre."],
+                answer: 1,
+                explanation: "A vörösvértestek szétesésekor először az oxyhemoglobin szabadul fel, ami rózsaszínesre festi a liquort. Ez alakul át később bilirubinná, ami sárgás színt ad. A rózsaszínes árnyalat tehát egy frissebb (néhány órás) vérzésre utal, mint a tiszta sárga szín."
+            },
+            {
+                question: "Melyik állítás igaz a véres liquor cytológiai vizsgálatára?",
+                options: ["A vörösvértestek morfológiája alapján el lehet dönteni a vérzés okát.", "A lymphocyták jelenléte SAV-ot igazol.", "Traumás punkció esetén a liquorban nincsenek vörösvértestek.", "Az erythrophagok (vörösvértesteket bekebelező makrofágok) jelenléte valódi, korábbi vérzésre utal."],
+                answer: 3,
+                explanation: "Az erythrophagok és a hemosziderintartalmú makrofágok (siderophagok) jelenléte a liquorban azt bizonyítja, hogy a vérzés már a punkció előtt a subarachnoidalis térben volt, és a helyi 'takarító' sejteknek volt idejük aktiválódni és a vörösvértesteket eltakarítani."
+            },
+            {
+                question: "A lumbálpunkció abszolút ellenjavallatát képezi:",
+                options: ["Enyhe fejfájás", "A punkció helyén lévő bőrfertőzés", "Magas vérnyomás", "Szorongás a beavatkozástól"],
+                answer: 1,
+                explanation: "A punkció helyén lévő aktív bőr- vagy lágyrészfertőzés abszolút kontraindikációt jelent, mivel a tű a kórokozókat a subarachnoidalis térbe juttathatja, iatrogén meningitist okozva."
+            },
+            {
+                question: "Hogyan befolyásolja a vörösvértestek jelenléte a liquor fehérje- és glükózszintjét?",
+                options: ["Növelik a glükózszintet és csökkentik a fehérjeszintet.", "Nem befolyásolják egyiket sem.", "Mesterségesen emelhetik a fehérjeszintet és enyhén csökkenthetik a glükózszintet.", "Csökkentik mind a fehérje-, mind a glükózszintet."],
+                answer: 2,
+                explanation: "A vér bejutása a liquorba mesterségesen megemeli a fehérjekoncentrációt (mivel a vérplazma sok fehérjét tartalmaz). A vörösvértestek saját metabolizmusuk során glükózt használnak fel, így enyhén csökkenthetik a mért glükózszintet. Ezeket a hatásokat figyelembe kell venni a lelet értékelésekor."
+            },
+            {
+                question: "Ha a natív koponya CT negatív, de a klinikai gyanú SAV-ra továbbra is erős, a lumbálpunkciót ideálisan mennyi idővel a tünetek kezdete után érdemes elvégezni a xanthochromia kimutatására?",
+                options: ["Azonnal, a CT után.", "6-12 órával később.", "Csak egy hét múlva.", "Nincs szükség lumbálpunkcióra."],
+                answer: 1,
+                explanation: "Mivel a xanthochromia kialakulásához idő (legalább 2-4 óra, de 12 óra után a legmegbízhatóbb) kell, a lumbálpunkciót negatív CT esetén nem érdemes azonnal elvégezni. A 6-12 órás várakozás növeli a teszt érzékenységét, mert addigra a hemoglobin lebomlási termékei biztosan megjelennek a liquorban."
+            },
+            {
+                question: "Melyik állítás NEM igaz a véres liquor differenciáldiagnosztikájára?",
+                options: ["A három kémcsöves próba, a xanthochromia és a D-dimer vizsgálat mind segíthetnek.", "A klinikai kép kulcsfontosságú.", "Egyetlen teszt önmagában mindig elegendő a biztos diagnózishoz.", "A lumbálpunkció helyes technikája csökkentheti a traumás vérzés esélyét."],
+                answer: 2,
+                explanation: "Nincs egyetlen olyan teszt, ami 100%-os biztonsággal elkülönítené a SAV-ot a traumás punkciótól. A helyes diagnózis mindig a klinikai kép, a képalkotó eredmények és a különböző liquordiagnosztikai módszerek (háromcsöves próba, xanthochromia, cytológia) együttes, komplex értékelésén alapul."
+            }
+        ]
+    },
+    {
+        topic: "Az EEG vizsgálat indikációja",
+        questions: [
+            {
+                question: "Mi az EEG vizsgálat elsődleges és leggyakoribb klinikai indikációja?",
+                options: ["Demencia diagnosztikája", "Agyi keringési zavarok kimutatása", "Epilepszia és görcsállapotok kivizsgálása", "Fejfájás okának felderítése"],
+                answer: 2,
+                explanation: "Az EEG arany standardnak számít az epilepszia diagnosztikájában. Segít azonosítani a rohamok alatt és között jelentkező kóros, epileptiform agyi aktivitást, ami elengedhetetlen a diagnózis felállításához és a terápia beállításához."
+            },
+            {
+                question: "Milyen szerepet játszik az EEG a tudatzavarok és kóma esetén?",
+                options: ["Kizárólag az agy vérellátását méri.", "Segít a kóma mélységének felmérésében, a prognózis becslésében és az agyhalál megállapításában.", "Nincs diagnosztikai értéke ezekben az állapotokban.", "Csak a szívműködést monitorozza."],
+                answer: 1,
+                explanation: "Az EEG kritikus információt nyújt kómás betegeknél az agyi funkciók állapotáról. Jellegzetes mintázatok (pl. burst-suppression) korrelálnak a prognózissal, és az elektrocerebrális csend (lapos EEG) az agyhalál egyik megerősítő kritériuma."
+            },
+            {
+                question: "Melyik betegségre jellemzőek a periodikus laterális epileptiform kisülések (PLEDs) a temporális lebeny felett?",
+                options: ["Alzheimer-kór", "Parkinson-kór", "Herpes simplex encephalitis", "Sclerosis multiplex"],
+                answer: 2,
+                explanation: "A herpes simplex encephalitisben (HSE) gyakran észlelhető jellegzetes EEG eltérés a PLEDs (vagy LPDs), amely egy- vagy kétoldali temporális hangsúlyú, periodikusan ismétlődő éles hullámokból áll. Ez korai és fontos diagnosztikai jel lehet."
+            },
+            {
+                question: "Mire szolgálnak az aktivációs manőverek (pl. hiperventilláció, fotostimuláció) az EEG vizsgálat során?",
+                options: ["A beteg ébren tartására.", "A műtermékek csökkentésére.", "Rejtett vagy latens kóros agyi aktivitás (pl. epileptiform kisülések) provokálására.", "Az agyi véráramlás mérésére."],
+                answer: 2,
+                explanation: "Az aktivációs eljárások célja, hogy olyan fiziológiás stressznek tegyék ki az agyat, ami előhívhatja azokat a kóros jeleket (különösen epileptiform aktivitást), amelyek nyugalmi állapotban nem lennének láthatók, így növelve a vizsgálat diagnosztikus érzékenységét."
+            },
+            {
+                question: "Melyik állítás NEM igaz az EEG-re?",
+                options: ["Funkcionális vizsgálómódszer.", "Kiváló időbeli felbontással rendelkezik.", "Kiváló térbeli felbontással rendelkezik a mély agyi struktúrák vizsgálatára.", "Non-invazív és fájdalommentes."],
+                answer: 2,
+                explanation: "Az EEG térbeli felbontása korlátozott. Mivel a fejbőrről vezet el, elsősorban a felszínes kérgi aktivitást tükrözi, és a mély agyi struktúrák (pl. talamusz, agytörzs) aktivitását nem, vagy csak nagyon közvetetten képes detektálni."
+            },
+            {
+                question: "Miért indokolt az alvásmegvonásos EEG elvégzése?",
+                options: ["Mert olcsóbb, mint a rutin EEG.", "Mert az alvásmegvonás csökkenti az agy görcsküszöbét, így növeli az epileptiform aktivitás kimutatásának esélyét.", "Mert az alvásmegvonás mindig megszünteti a kóros jeleket.", "Mert csak így lehet az alvás fázisait vizsgálni."],
+                answer: 1,
+                explanation: "Az alvásmegvonás egyfajta provokációs módszer. A kialvatlanság, mint fiziológiás stresszor, fokozza a neuronok ingerlékenységét és csökkenti a görcsküszöböt, ezáltal szignifikánsan növelheti a diagnosztikus hozamot, különösen epilepszia gyanúja esetén, ha a rutin EEG negatív volt."
+            },
+            {
+                question: "Milyen esetben a leginkább indokolt a hosszú távú video-EEG monitorozás?",
+                options: ["Általános fejfájás kivizsgálására.", "Az epilepsziás rohamok pontos klasszifikálására és az epilepszia műtét előtti kivizsgálására.", "Demencia korai szűrésére.", "Alvási apnoe diagnosztizálására."],
+                answer: 1,
+                explanation: "A video-EEG a 'gold standard' az epilepszia diagnosztikájában. A klinikai tünetek (videó) és az agyi aktivitás (EEG) egyidejű rögzítése lehetővé teszi a rohamok pontos besorolását, a kiindulási góc lokalizálását (epilepszia sebészet előtt), és a pszichogén rohamok elkülönítését."
+            },
+            {
+                question: "Milyen EEG eltérés jellemző leginkább demencia esetén?",
+                options: ["Generalizált tüske-hullám komplexek", "A háttéraktivitás progresszív lassulása és dezorganizációja", "Normális, gyors béta-aktivitás", "Fokális, periodikus kisülések"],
+                answer: 1,
+                explanation: "Demenciákban, különösen az Alzheimer-kórban, az EEG jellegzetes, bár nem specifikus eltérése a háttéraktivitás általános lassulása: az alfa-ritmus frekvenciája csökken, és a théta, valamint delta aktivitás aránya nő."
+            },
+            {
+                question: "Mi az 'alfa-blokád' jelensége egy normál EEG-n?",
+                options: ["Az alfa-ritmus megjelenése alvás közben.", "Az alfa-ritmus frekvenciájának kóros lelassulása.", "Az alfa-ritmus amplitúdójának csökkenése vagy eltűnése szemnyitásra.", "Az alfa- és béta-hullámok szinkronizációja."],
+                answer: 2,
+                explanation: "Az alfa-blokád (vagy alfa-gátlás) egy fiziológiás jelenség. Amikor a relaxált, csukott szemű személy kinyitja a szemét vagy mentális feladatot végez, a posterior területeken domináns alfa-ritmus elnyomódik, és helyét gyorsabb, deszinkronizált aktivitás veszi át."
+            },
+            {
+                question: "Melyik állítás igaz az EEG és a képalkotó vizsgálatok (CT/MRI) kapcsolatára?",
+                options: ["Az EEG helyettesíti a CT/MRI vizsgálatokat.", "A CT/MRI az agy funkcióját, az EEG a szerkezetét vizsgálja.", "A két módszer kiegészíti egymást: a CT/MRI a strukturális, az EEG a funkcionális eltéréseket mutatja ki.", "Ha a CT/MRI negatív, az EEG is mindig negatív lesz."],
+                answer: 2,
+                explanation: "A képalkotók (CT, MRI) az agy anatómiáját, szerkezetét ábrázolják, míg az EEG az agy elektromos működéséről, funkciójáról ad valós idejű információt. A két módszer nem helyettesíti, hanem kiegészíti egymást a neurológiai diagnosztikában."
+            },
+            {
+                question: "Felnőttkorban újonnan jelentkező epilepsziás roham esetén miért fontos az EEG mellett képalkotó vizsgálatot is végezni?",
+                options: ["Mert a képalkotó megmutatja a roham típusát.", "Mert az EEG nem megbízható felnőttkorban.", "Mert ki kell zárni a roham hátterében álló strukturális agyi elváltozást, pl. agydaganatot.", "Mert a képalkotóval lehet a gyógyszeres kezelést beállítani."],
+                answer: 2,
+                explanation: "Felnőttkorban az újonnan induló epilepszia hátterében gyakran áll valamilyen szerzett, strukturális agyi elváltozás (pl. daganat, stroke utáni heg, trauma). Az EEG a funkciózavart (epileptogén góc) mutatja ki, de a kiváltó ok azonosításához elengedhetetlen a képalkotó vizsgálat."
+            },
+            {
+                question: "Melyik frekvenciasáv dominál egy egészséges, éber, de relaxált, csukott szemű felnőtt EEG-jén?",
+                options: ["Delta", "Théta", "Alfa", "Gamma"],
+                answer: 2,
+                explanation: "A normál, éber, de pihenő, csukott szemű felnőtt agy alapritmusa az alfa-ritmus (8-13 Hz), amely főként a hátsó (parietális, occipitális) agyterületek felett a legkifejezettebb."
+            },
+            {
+                question: "Milyen kóros EEG jel jellemző a Creutzfeldt-Jakob betegség (CJD) késői stádiumára?",
+                options: ["Folyamatos, magas amplitúdójú delta-aktivitás.", "Generalizált, periodikusan ismétlődő, trifázisos éles hullám komplexek (GPEDs).", "Normális alfa-ritmus.", "Fokális tüskék a temporális lebenyben."],
+                answer: 1,
+                explanation: "A CJD későbbi fázisára igen jellegzetes a periodikusan (kb. 1 Hz frekvenciával) ismétlődő, generalizált, magas amplitúdójú, bifázisos vagy trifázisos éles hullámokból álló mintázat (GPEDs), ami a gyorsan progrediáló demencia és myoclonusok mellett fontos diagnosztikai támpont."
+            },
+            {
+                question: "Mikor indokolt ambuláns (Holter) EEG vizsgálat?",
+                options: ["Minden epilepszia gyanúja esetén első lépésként.", "Ha ritkán jelentkező, tisztázatlan eszméletvesztések vagy rohamszerű események hátterét kell vizsgálni.", "Agyhalál megállapítására.", "Akut stroke diagnosztikájára."],
+                answer: 1,
+                explanation: "Az ambuláns EEG egy hosszan tartó (24-72 órás) monitorozás, amely akkor indokolt, ha a vizsgálni kívánt kóros események (pl. ritka rohamok) annyira ritkák, hogy a rövid, 20-40 perces rutin EEG alatt nagy valószínűséggel nem jelennének meg."
+            },
+            {
+                question: "Melyik állítás igaz a normál EEG leletre epilepszia esetén?",
+                options: ["Normál EEG lelet kizárja az epilepszia diagnózisát.", "A normál interiktális (rohamok közötti) EEG lelet nem zárja ki az epilepsziát, mivel a kóros aktivitás lehet intermittáló.", "Minden epilepsziás betegnek folyamatosan kóros az EEG-je.", "Ha az EEG normális, a betegnek biztosan pszichogén rohamai vannak."],
+                answer: 1,
+                explanation: "Az epilepsziás betegek jelentős részének a rohamok közötti időszakban (interiktálisan) teljesen normális lehet az EEG-je. A kóros, epileptiform kisülések gyakran csak időszakosan jelentkeznek. Ezért egy negatív rutin EEG nem zárja ki az epilepszia lehetőségét."
+            },
+            {
+                question: "Milyen EEG eltérés utalhat leginkább fokális agyi lézióra (pl. tumor, stroke)?",
+                options: ["Generalizált 3 Hz-es tüske-hullám komplexek", "Fokális, polimorf delta aktivitás (PDA)", "Normális, reaktív alfa ritmus", "Gyógyszer-indukált béta aktivitás"],
+                answer: 1,
+                explanation: "Egy körülírt, strukturális agykárosodás (pl. tumor, stroke) gyakran a helyi neuronális funkciók zavarát okozza, ami az EEG-n fokális (helyi) lassulásként, leggyakrabban irreguláris, polimorf delta aktivitásként (PDA) jelenik meg."
+            },
+            {
+                question: "Melyik gyógyszercsoport okozhat jellegzetes, fokozott béta-aktivitást az EEG-n?",
+                options: ["Antibiotikumok", "Fájdalomcsillapítók", "Benzodiazepinek és barbiturátok", "Véralvadásgátlók"],
+                answer: 2,
+                explanation: "A benzodiazepinek (pl. diazepam, alprazolam) és barbiturátok (pl. phenobarbital) szedése jellegzetes EEG változást okoz: a béta frekvenciasávba eső aktivitás mennyisége és amplitúdója megnő, ami egy diffúz, szimmetrikus, gyors aktivitásként látható."
+            },
+            {
+                question: "Mi a Burst-Suppression (kitörés-csendesedés) mintázat klinikai jelentősége?",
+                options: ["Normális éber állapotra jellemző.", "Mély, pihentető alvást jelez.", "Súlyos, diffúz agyi diszfunkciót, mély kómát vagy mély anesztéziát jelez.", "Érzelmi stressz hatására jelenik meg."],
+                answer: 2,
+                explanation: "A burst-suppression mintázat, ahol a magas feszültségű aktivitás kitöréseit az elektromos csend periódusai váltják, súlyos agyi diszfunkció jele. Előfordulhat mély kómában (pl. anoxia után), gyógyszer-túladagoláskor vagy mély altatásban, és általában rossz prognózisra utal."
+            },
+            {
+                question: "Melyik aktivációs eljárás a leghatékonyabb a generalizált absence (petit mal) rohamokra jellemző 3 Hz-es tüske-hullám komplexek provokálására?",
+                options: ["Fotostimuláció", "Alvásmegvonás", "Hiperventilláció", "Szemnyitás-csukás"],
+                answer: 2,
+                explanation: "A hiperventilláció (3-5 perces erőltetett, mély légzés) okozta respiratorikus alkalózis és agyi vazokonstrikció specifikusan provokálja az absence rohamokra jellemző generalizált 3 Hz-es tüske-lassú hullám mintázatot, így ez a vizsgálat elengedhetetlen része ezen epilepszia típus gyanújakor."
+            },
+            {
+                question: "Az EEG melyik tulajdonsága teszi alkalmassá a non-konvulzív status epilepticus (NCSE) diagnosztizálására?",
+                options: ["A képessége az agyi struktúrák ábrázolására.", "A képessége a valós idejű, folyamatos agyi elektromos aktivitás monitorozására.", "A képessége az agyi véráramlás mérésére.", "A képessége a liquor összetételének elemzésére."],
+                answer: 1,
+                explanation: "Az NCSE egy olyan állapot, ahol a betegnek folyamatos vagy ismétlődő epilepsziás aktivitása van az agyában, de nincsenek nyilvánvaló görcsmozgásai. Ezt az állapotot csak az EEG képes kimutatni az agyi elektromos aktivitás folyamatos monitorozásával, ami kritikus a diagnózishoz és a kezeléshez."
+            }
+        ]
+    },
+    {
+        topic: "A kiváltott válasz vizsgálatok",
+        questions: [
+            {
+                question: "Mi a kiváltott válasz (EP) vizsgálatok alapelve?",
+                options: ["Az agy spontán aktivitásának mérése.", "Az agy szerkezetének képalkotóval történő vizsgálata.", "Az idegrendszer specifikus ingerekre adott, átlagolással kiemelt elektromos válaszainak regisztrálása.", "A liquor cerebrospinalis nyomásának mérése."],
+                answer: 2,
+                explanation: "A kiváltott potenciálok az idegrendszernek egy adott, ismétlődő ingerre adott, időben kötött, kis amplitúdójú elektromos válaszait jelentik. Az átlagolási technika segítségével ezeket a specifikus válaszokat 'kiemelik' a folyamatos háttér-EEG zajból."
+            },
+            {
+                question: "Melyik kiváltott válasz vizsgálat a legérzékenyebb a látóideg demyelinizációs károsodására (pl. sclerosis multiplex, neuritis optica esetén)?",
+                options: ["Agytörzsi Akusztikus Kiváltott Potenciál (BAEP)", "Szomatoszenzoros Kiváltott Potenciál (SSEP)", "Motoros Kiváltott Potenciál (MEP)", "Vizuális Kiváltott Potenciál (VEP)"],
+                answer: 3,
+                explanation: "A VEP, különösen a pattern-reversal VEP, rendkívül érzékeny a látópálya, főként a látóideg myelinhüvelyének károsodására. A demyelinizáció miatti vezetési lassulás a P100 hullám latenciájának jellegzetes megnyúlását okozza."
+            },
+            {
+                question: "Melyik a VEP vizsgálat legfontosabb és legkonzisztensebb hullámkomponense?",
+                options: ["N75", "P100", "N145", "P200"],
+                answer: 1,
+                explanation: "A P100 egy nagy, pozitív hullám, amely kb. 100 ms-mal az inger után jelenik meg, és a látókéreg aktivitását tükrözi. Ennek a hullámnak a latenciája és amplitúdója a VEP vizsgálat legfontosabb, klinikailag értékelt paramétere."
+            },
+            {
+                question: "Mit jelez leginkább az SSEP vagy MEP vizsgálatok során a latenciaidő megnyúlása?",
+                options: ["Az idegrostok számának csökkenését (axonvesztés).", "Az idegvezetés lassulását, ami leggyakrabban demyelinizációra utal.", "Az izmok fáradtságát.", "A beteg figyelmetlenségét."],
+                answer: 1,
+                explanation: "A latencia az inger és a válasz között eltelt időt méri. Ennek megnyúlása azt jelenti, hogy az idegimpulzus lassabban halad végig a pályán, ami a myelinhüvely-károsodás (demyelinizáció) legfőbb elektrofiziológiai jele."
+            },
+            {
+                question: "Az agytörzsi akusztikus kiváltott potenciál (BAEP) melyik hulláma származik a hallóidegből (N. VIII)?",
+                options: ["I. hullám", "III. hullám", "V. hullám", "VII. hullám"],
+                answer: 0,
+                explanation: "A BAEP hullámsorozatának I. hulláma a leghamarabbi komponens, amely a hallóideg disztális, cochleán belüli szakaszának aktivitását tükrözi. Ennek a hullámnak a jelenléte és latenciája a perifériás hallás épségéről ad információt."
+            },
+            {
+                question: "Mire utal a BAEP vizsgálat során az I-V. interpeak latencia (IPL) megnyúlása?",
+                options: ["Perifériás halláskárosodásra.", "A külső fül betegségére.", "Az agytörzsi vezetés globális lassulására a hallóidegtől a középagyig.", "Az agykéreg károsodására."],
+                answer: 2,
+                explanation: "Az interpeak latenciák (IPL) az egyes hullámok közötti időt mérik, ami a központi vezetés sebességét tükrözi. Az I-V. IPL a teljes agytörzsi átfutási időt jelenti, megnyúlása az agytörzsben lévő vezetési zavarra (pl. demyelinizáció, kompresszió) utal."
+            },
+            {
+                question: "Melyik kiváltott válasz vizsgálat a legfontosabb prognosztikai eszköz posztanoxiás kómában?",
+                options: ["VEP", "BAEP", "SSEP", "MEP"],
+                answer: 2,
+                explanation: "A szomatoszenzoros kiváltott potenciál (SSEP) vizsgálat, különösen a kortikális N20 hullám, kulcsfontosságú prognosztikai marker. A kétoldali N20 hullám hiánya (megtartott perifériás válaszok mellett) rendkívül rossz neurológiai kimenetelt jósol posztanoxiás kómában."
+            },
+            {
+                question: "Milyen ingerlést alkalmaznak a motoros kiváltott potenciál (MEP) vizsgálat során leggyakrabban éber betegnél?",
+                options: ["Fényfelvillanás", "Hang-kattintás", "Perifériás ideg elektromos ingerlése", "Transzkraniális mágneses stimuláció (TMS)"],
+                answer: 3,
+                explanation: "A MEP vizsgálat során a motoros kérget kell ingerelni. Éber betegeknél erre a leggyakrabban használt non-invazív módszer a TMS, amely során egy tekercs által generált erős, gyorsan változó mágneses térrel indukálnak áramot az agykéregben."
+            },
+            {
+                question: "Mit mér a Centrális Motoros Kondukciós Idő (CMCT)?",
+                options: ["A perifériás motoros ideg vezetési sebességét.", "Az izom-összehúzódás idejét.", "A kortikospinális (piramis) pálya vezetési idejét az agykéregtől a gerincvelői motoneuronig.", "A teljes reakcióidőt."],
+                answer: 2,
+                explanation: "A CMCT egy számított érték, amely a motoros pálya centrális szakaszának (agykéregtől a gerincvelőig) vezetési idejét adja meg, kiküszöbölve a perifériás szakasz vezetési idejét. Megnyúlása a központi motoros pálya károsodására utal."
+            },
+            {
+                question: "Intraoperatív monitorozás során melyik két kiváltott válasz vizsgálatot használják leggyakrabban a gerincvelő funkcióinak követésére?",
+                options: ["VEP és BAEP", "SSEP és MEP", "VEP és MEP", "BAEP és SSEP"],
+                answer: 1,
+                explanation: "Gerincműtétek alatt az SSEP a felszálló érzőpályák (hátsó köteg), míg a MEP a leszálló motoros pályák (kortikospinális pálya) épségét monitorozza. A kettő együttes alkalmazása ad teljes körű, valós idejű képet a gerincvelő funkcionális állapotáról."
+            },
+            {
+                question: "Mi a fő különbség az SSEP és az ENG (elektroneurográfia) által vizsgált szenzoros funkciók között?",
+                options: ["Nincs különbség, ugyanazt mérik.", "Az SSEP a fájdalom- és hőérző, míg az ENG a tapintási pályákat vizsgálja.", "Az SSEP a vastag, myelinizált rostok által közvetített pályákat (hátsó köteg), míg a szenzoros ENG a perifériás ideg disztális szakaszát vizsgálja.", "Az SSEP a motoros, az ENG a szenzoros rostokat vizsgálja."],
+                answer: 2,
+                explanation: "Míg az ENG elsősorban a perifériás idegek disztális szakaszának vezetését méri, addig az SSEP a teljes szenzoros pályát vizsgálja a perifériától az agykéregig, különös tekintettel a gerincvelő hátsó kötegében és az agytörzsben futó vastag rostokra."
+            },
+            {
+                question: "Melyik állítás igaz a kiváltott potenciálok amplitúdójára?",
+                options: ["Az amplitúdó a vezetési sebességet tükrözi.", "Az amplitúdó a válaszban részt vevő idegrostok számával és szinkronizációjával függ össze.", "Az amplitúdó mindig állandó.", "Az alacsony amplitúdó mindig demyelinizációt jelez."],
+                answer: 1,
+                explanation: "Az EP válasz amplitúdója (nagysága) a szinkronosan aktiválódó idegrostok számát tükrözi. Az amplitúdócsökkenés ezért leggyakrabban axonvesztésre vagy vezetési blokkra utal."
+            },
+            {
+                question: "Melyik kiváltott válasz vizsgálat a legkevésbé érzékeny a szedatívumok és anesztetikumok hatásaira?",
+                options: ["VEP", "BAEP", "SSEP", "MEP"],
+                answer: 1,
+                explanation: "A BAEP, amely a hallópálya agytörzsi szakaszainak robusztus, szinaptikusan igen biztonságos válaszait méri, rendkívül ellenálló a legtöbb gyógyszerhatással és metabolikus zavarral szemben. Ez teszi különösen értékessé kómás vagy altatott betegek vizsgálatában."
+            },
+            {
+                question: "Milyen ingerrel váltják ki leggyakrabban a VEP választ?",
+                options: ["Folyamatos, egyenletes fénnyel", "Véletlenszerűen felvillanó színes pontokkal", "Periodikusan inverzálódó sakktábla-mintával", "A szemgolyó elektromos ingerlésével"],
+                answer: 2,
+                explanation: "A pattern-reversal (minta-váltakozó) VEP a leggyakrabban használt inger, mivel a kontrasztváltás erőteljesen ingerli a látókérget és érzékenyen jelzi a látópálya demyelinizációs károsodását."
+            },
+            {
+                question: "Mi a VEP legfontosabb klinikai alkalmazási területe?",
+                options: ["Glaukóma diagnózisa", "Sclerosis multiplex és neuritis optica kivizsgálása", "Színlátás zavarainak felmérése", "Retinaleválás kimutatása"],
+                answer: 1,
+                explanation: "A VEP rendkívül érzékeny a látóideg demyelinizációjára, ezért kulcsfontosságú a sclerosis multiplex diagnosztikájában (szubklinikai léziók kimutatása) és a neuritis optica (látóideg-gyulladás) objektív igazolásában és követésében."
+            },
+            {
+                question: "Mire utal, ha a BAEP vizsgálat során az I. hullám normális, de a III. és V. hullám késik vagy hiányzik?",
+                options: ["A belső fül (cochlea) károsodására.", "A hallókéreg sérülésére.", "Centrális, agytörzsi vezetési zavarra.", "A hallójárat elzáródására."],
+                answer: 2,
+                explanation: "A normális I. hullám ép perifériás hallóideg-funkciót jelez. Ha a későbbi, agytörzsi eredetű hullámok (III., V.) kórosak, az egyértelműen a központi idegrendszeren belüli, agytörzsi szintű károsodásra utal."
+            },
+            {
+                question: "Miért fontos a betegnek a saját szemüvegét viselnie a VEP vizsgálat alatt?",
+                options: ["Hogy kényelmesebben érezze magát.", "Mert a szemüveg lencséje felerősíti az agyi jeleket.", "Hogy a retinára éles kép vetüljön, ami a megfelelő agykérgi válasz kiváltásának előfeltétele.", "Csak esztétikai okokból."],
+                answer: 2,
+                explanation: "A pattern-reversal VEP inger egy finom mintázat, amelynek éles leképeződése a retinán elengedhetetlen a maximális agykérgi válasz kiváltásához. A korrigálatlan látáshiba (refrakciós hiba) elmosódott képet eredményez, ami mesterségesen csökkentheti az amplitúdót és megnyújthatja a latenciát, tévesen kóros eredményt produkálva."
+            },
+            {
+                question: "Melyik állítás igaz a kiváltott potenciál vizsgálatokra?",
+                options: ["Teljesen helyettesítik a képalkotó (CT/MRI) vizsgálatokat.", "Az idegpályák funkcionális állapotáról adnak objektív információt.", "Mindig fájdalmasak és invazívak.", "Csak az agykéreg működését vizsgálják."],
+                answer: 1,
+                explanation: "A kiváltott potenciálok az idegpályák működését, az idegi jelek vezetésének sebességét és hatékonyságát mérik, tehát funkcionális vizsgálatok. Objektív adatokat szolgáltatnak a pályák épségéről, kiegészítve a strukturális információt adó képalkotókat."
+            },
+            {
+                question: "Intraoperatív MEP monitorozás során mi a legfontosabb 'vészjelzés' a motoros pálya potenciális sérülésére?",
+                options: ["A MEP latenciájának enyhe rövidülése.", "A MEP amplitúdójának több mint 50%-os csökkenése.", "A MEP küszöbingerének csökkenése.", "A MEP hullámforma bifázisossá válása."],
+                answer: 1,
+                explanation: "A MEP amplitúdójának hirtelen, szignifikáns (jellemzően >50%-os) csökkenése a legfontosabb intraoperatív figyelmeztető jel. Ez a motoros pályák axonjainak sérülésére vagy ischaemiájára utal, ami azonnali beavatkozást igényelhet a sebésztől a maradandó károsodás elkerülése érdekében."
+            },
+            {
+                question: "Az SSEP melyik komponensének kétoldali hiánya a legrosszabb prognosztikai jel kómás betegeknél?",
+                options: ["N9", "N13", "N20", "P25"],
+                answer: 2,
+                explanation: "A kortikális N20 hullám kétoldali, irreverzibilis hiánya (megtartott perifériás és spinális komponensek mellett) a kiterjedt, súlyos agykérgi károsodás jele, és szinte minden esetben kedvezőtlen kimenetelt (halál vagy perzisztáló vegetatív állapot) jósol, különösen posztanoxiás kómában."
+            }
+        ]
+    }
+]
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const topicSelectionDiv = document.getElementById('topic-selection');
+    const quizContainerDiv = document.getElementById('quiz-container');
+    const scoreContainerDiv = document.getElementById('score-container');
+    const topicButtonsContainer = document.getElementById('topic-buttons');
+    const backToTopicsBtn = document.getElementById('back-to-topics');
+
+    let currentTopicIndex = -1;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedOptionButton = null;
+
+    // --- INITIALIZATION ---
+    function init() {
+        showTopicSelection();
+        createTopicButtons();
+        backToTopicsBtn.addEventListener('click', showTopicSelection);
+        document.getElementById('home-btn').addEventListener('click', showTopicSelection);
+    }
+    
+    function createTopicButtons() {
+        topicButtonsContainer.innerHTML = '';
+        quizData.forEach((topic, index) => {
+            const button = document.createElement('button');
+            button.className = 'btn-topic bg-white border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700 font-semibold py-4 px-6 rounded-lg text-left shadow-sm';
+            button.innerHTML = `
+                <div class="flex items-center">
+                    <div class="bg-emerald-100 text-emerald-600 p-3 rounded-full mr-4">
+                        <i class="fas ${getIconForTopic(index)} fa-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">${topic.topic}</h3>
+                        <p class="text-sm text-slate-500">${topic.questions.length} kérdés</p>
+                    </div>
+                </div>`;
+            button.addEventListener('click', () => startQuiz(index));
+            topicButtonsContainer.appendChild(button);
+        });
+    }
+    
+    function getIconForTopic(index) {
+        const icons = ['fa-pills', 'fa-vial', 'fa-droplet', 'fa-wave-square', 'fa-bolt'];
+        return icons[index % icons.length];
+    }
+
+    // --- SCREEN MANAGEMENT ---
+    function showTopicSelection() {
+        topicSelectionDiv.classList.remove('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showQuizContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.remove('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showScoreContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.remove('hidden');
+    }
+
+    // --- QUIZ LOGIC ---
+    function startQuiz(topicIndex) {
+        currentTopicIndex = topicIndex;
+        currentQuestionIndex = 0;
+        score = 0;
+        showQuizContainer();
+        document.getElementById('quiz-title').textContent = quizData[topicIndex].topic;
+        document.getElementById('restart-btn').onclick = () => startQuiz(currentTopicIndex);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        resetState();
+        const currentQuestion = quizData[currentTopicIndex].questions[currentQuestionIndex];
+        document.getElementById('question').textContent = currentQuestion.question;
+        const optionsContainer = document.getElementById('options');
+        
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn w-full text-left bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-4 px-5 rounded-lg';
+            button.textContent = option;
+            button.dataset.index = index;
+            button.addEventListener('click', selectOption);
+            optionsContainer.appendChild(button);
+        });
+        updateProgress();
+    }
+
+    function resetState() {
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('options').innerHTML = '';
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.classList.remove('show');
+        const feedbackContent = document.getElementById('feedback-content');
+        feedbackContent.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        selectedOptionButton = null;
+    }
+    
+    function updateProgress() {
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        progressText.textContent = `Kérdés ${currentQuestionIndex + 1} / ${totalQuestions}`;
+        progressBar.style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+    }
+
+    function selectOption(e) {
+        if (selectedOptionButton) return; // Prevent changing answer
+
+        selectedOptionButton = e.target;
+        const selectedAnswerIndex = parseInt(selectedOptionButton.dataset.index);
+        const correctAnserIndex = quizData[currentTopicIndex].questions[currentQuestionIndex].answer;
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackContent = document.getElementById('feedback-content');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationP = document.getElementById('explanation');
+        
+        // Highlight selected button
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        selectedOptionButton.classList.add('selected');
+
+        if (selectedAnswerIndex === correctAnserIndex) {
+            score++;
+            feedbackTitle.textContent = 'Helyes válasz!';
+            feedbackContent.className = 'p-5 rounded-lg bg-green-100 text-green-800 border-l-4 border-green-500';
+            
+        } else {
+            feedbackTitle.textContent = 'Helytelen válasz.';
+            feedbackContent.className = 'p-5 rounded-lg bg-red-100 text-red-800 border-l-4 border-red-500';
+            
+            // Highlight the correct answer
+            document.querySelector(`.option-btn[data-index='${correctAnserIndex}']`).classList.add('bg-green-200', 'border-green-500');
+        }
+
+        explanationP.textContent = quizData[currentTopicIndex].questions[currentQuestionIndex].explanation;
+        feedbackArea.classList.add('show');
+        
+        document.querySelectorAll('.option-btn').forEach(button => button.disabled = true);
+        document.getElementById('next-btn').disabled = false;
+        document.getElementById('next-btn').focus();
+    }
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData[currentTopicIndex].questions.length) {
+            loadQuestion();
+        } else {
+            showFinalScore();
+        }
+    });
+
+    function showFinalScore() {
+        showScoreContainer();
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
+    }
+
+    init();
+});
+</script>
+
+</body>
+</html>

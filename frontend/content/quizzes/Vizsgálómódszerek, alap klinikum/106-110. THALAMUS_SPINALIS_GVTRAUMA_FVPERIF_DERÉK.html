@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Kvíz - 6. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.correct {
+            background-color: #10B981; /* Emerald-500 */
+            color: white;
+            border-color: #059669; /* Emerald-600 */
+        }
+        .quiz-option.incorrect {
+            background-color: #EF4444; /* Red-500 */
+            color: white;
+            border-color: #DC2626; /* Red-600 */
+        }
+        .quiz-option:not(.disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection -->
+        <div id="topic-selection" class="text-center">
+            <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Neurológiai Kvíz - 6. rész</h1>
+            <p class="text-lg mb-8 text-gray-600 dark:text-gray-400">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quiz-interface" class="hidden">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-gray-900 dark:text-white">Téma</h2>
+                    <div id="score" class="text-lg font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-1 rounded-full">Pontszám: 0 / 0</div>
+                </div>
+                <div id="progress-bar-container" class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-xl font-medium mb-6 text-gray-800 dark:text-gray-200"></p>
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="hidden mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Magyarázat</h3>
+                    <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="back-to-topics" class="py-2 px-5 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Témakörök</button>
+                    <button id="next-question" class="py-2 px-5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Score Screen -->
+        <div id="final-score-screen" class="hidden text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">A kvíz vége!</h2>
+            <p class="text-xl mb-6 text-gray-700 dark:text-gray-300">A pontszámod a(z) <span id="final-topic-title" class="font-semibold"></span> témakörben:</p>
+            <p id="final-score" class="text-6xl font-bold mb-8 text-blue-600 dark:text-blue-400">0 / 20</p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Újra</button>
+                <button id="change-topic" class="py-3 px-6 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Másik téma</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            'thalamus': {
+                title: 'A thalamus károsodásának tünetei',
+                questions: [
+                    { question: "Melyik állítás NEM igaz a thalamus funkcióira?", options: ["Információs reléállomás az agykéreg felé.", "A szaglási információk elsődleges átkapcsoló állomása.", "Szerepet játszik a tudatosság és az ébrenlét szabályozásában.", "Részt vesz a memória és az érzelmek feldolgozásában."], correct: 1, explanation: "A thalamus szinte minden érzékszervi információ (látás, hallás, tapintás, ízérzés) fő átkapcsoló állomása, de a szaglás kivétel, mivel a szaglópályák közvetlenül az agykéregbe vetülnek." },
+                    { question: "Melyik tünetegyüttes a thalamikus károsodás legismertebb, krónikus fájdalommal járó következménye?", options: ["Thalamikus afázia", "Thalamikus demencia", "Dejerine-Roussy szindróma", "Thalamikus neglect"], correct: 2, explanation: "A Dejerine-Roussy szindróma, más néven thalamikus fájdalom szindróma, egy krónikus, nehezen kezelhető neuropátiás fájdalom, amely a thalamus (főleg a VPL/VPM magok) károsodása után alakul ki." },
+                    { question: "Melyik thalamikus magcsoport sérülése okoz leginkább memóriazavart és exekutív diszfunkciót?", options: ["Ventrális posterolateralis (VPL) mag", "Corpus geniculatum laterale (CGL)", "Anterior és dorsomediális (MD) magok", "Nucleus reticularis thalami"], correct: 2, explanation: "Az anterior és a dorsomediális (MD) magok a Papez-kör és a prefrontális körök részei, így károsodásuk súlyos memóriazavarokat (amnézia) és exekutív funkciózavarokat (tervezés, rugalmasság zavara) okozhat." },
+                    { question: "Mi a thalamikus afázia egyik legjellemzőbb megkülönböztető jegye a kérgi afáziákkal szemben?", options: ["Súlyos beszédértési zavar", "Agrammatikus beszéd", "Relatíve jó, megőrzött utánmondási képesség", "Teljes némaság"], correct: 2, explanation: "A thalamikus afáziára jellemző a szótalálási nehézség és a szemantikus parafáziák mellett a viszonylag jól megőrzött utánmondási képesség, ami segít elkülöníteni a legtöbb kérgi afáziától." },
+                    { question: "Melyik artéria elzáródása okozza a leggyakrabban a thalamus károsodását?", options: ["Arteria cerebri anterior (ACA)", "Arteria cerebri media (MCA)", "Arteria cerebri posterior (PCA) és annak ágai", "Arteria carotis interna"], correct: 2, explanation: "A thalamus vérellátását nagyrészt az arteria cerebri posterior (PCA) mély, perforáló ágai (pl. thalamoperforáló, thalamogeniculatus artériák) biztosítják, ezért a stroke a thalamuskárosodás leggyakoribb oka." },
+                    { question: "Milyen motoros tünet jellemző a 'thalamikus kézre'?", options: ["Teljes petyhüdt bénulás", "Gyors, csapkodó mozgások (chorea)", "Dystoniás tartás és lassú, csavaró (pseudo-atetotikus) mozgások", "Nyugalmi tremor"], correct: 2, explanation: "A 'thalamikus kéz' (main thalamique) egy jellegzetes kóros tartás, amelyet akaratlan, lassú, csavaró mozgások kísérnek, és általában a VP és Vim magok károsodásakor figyelhető meg." },
+                    { question: "Melyik állítás igaz a thalamikus neglectre?", options: ["Mindig a bal oldali thalamus sérülése okozza.", "Általában a jobb oldali thalamus léziója okoz bal oldali téri figyelmen kívül hagyást.", "Csak a tapintási ingereket érinti.", "Nem társul hozzá betegségtudat hiánya."], correct: 1, explanation: "Hasonlóan a kérgi neglecthez, a thalamikus neglect is általában a jobb (nem domináns) félteke sérülésekor alakul ki, és a bal téri fél elhanyagolásában nyilvánul meg." },
+                    { question: "Milyen tudatzavar alakulhat ki kétoldali, paramedián thalamikus infarktus esetén?", options: ["Csak enyhe aluszékonyság", "Súlyos tudatzavar, akár akinetikus mutizmus vagy kóma", "Hiperaktivitás és agitáció", "Normális tudatállapot"], correct: 1, explanation: "A thalamus intralamináris és mediális magjainak kétoldali károsodása súlyosan érinti az éberséget fenntartó rendszereket, ami csökkent éberséghez, aluszékonysághoz, súlyos esetben pedig akinetikus mutizmushoz vagy kómához vezethet." },
+                    { question: "A látópálya melyik thalamikus magban kapcsolódik át?", options: ["Corpus geniculatum mediale (CGM)", "Nucleus ventralis posterolateralis (VPL)", "Corpus geniculatum laterale (CGL)", "Pulvinar"], correct: 2, explanation: "A CGL a látópálya fő thalamikus átkapcsoló állomása, amely a retinából érkező vizuális információt fogadja és továbbítja az elsődleges látókéreg felé." },
+                    { question: "Mi a Dejerine-Roussy szindróma egyik jellegzetessége a fájdalom időbeli megjelenését illetően?", options: ["Azonnal a stroke után jelentkezik.", "Gyakran késleltetve, hetekkel vagy hónapokkal a károsodás után alakul ki.", "Csak éjszaka jelentkezik.", "Csak mozgásra jelentkezik."], correct: 1, explanation: "A thalamikus fájdalom szindrómára jellemző a késleltetett kezdet; a krónikus, kínzó fájdalom gyakran csak hetekkel, hónapokkal az alapbetegség (pl. stroke) után jelenik meg." },
+                    { question: "A testből (törzs, végtagok) származó fájdalom és hőérzet melyik thalamikus magban kapcsolódik át?", options: ["VPL (Ventralis posterolateralis mag)", "VPM (Ventralis posteromedialis mag)", "MD (Dorsomediális mag)", "CGL (Corpus geniculatum laterale)"], correct: 0, explanation: "A testből származó szomatoszenzoros információk, beleértve a fájdalmat és a hőt is, a VPL magban kapcsolódnak át a szomatoszenzoros kéreg felé." },
+                    { question: "Mi a pulvinar fő funkciója?", options: ["Primer motoros parancsok továbbítása", "A hallási információk átkapcsolása", "Vizuális figyelem, téri integráció és nyelvi funkciók", "Az éberség fenntartása"], correct: 2, explanation: "A pulvinar, a legnagyobb thalamikus mag, egy másodrendű (higher-order) mag, amely kulcsszerepet játszik a vizuális figyelem irányításában és a multimodális szenzoros információk integrálásában." },
+                    { question: "Milyen tüneteket okoz a tuberothalamikus artéria területének stroke-ja?", options: ["Csak motoros tüneteket", "Csak látótérkiesést", "Memóriazavart, exekutív diszfunkciót és apátiát", "Kizárólag szenzoros kiesést"], correct: 2, explanation: "A tuberothalamikus artéria ellátja az anterior és részben a VA/VL/MD magokat, így károsodása jellemzően neuropszichológiai tüneteket, mint amnézia, exekutív zavar és apátia okoz." },
+                    { question: "Melyik kórképben játszhat szerepet a thalamus specifikus károsodása?", options: ["Alzheimer-kór", "Fatális familiáris insomnia", "Parkinson-kór", "Sclerosis multiplex"], correct: 1, explanation: "A fatális familiáris insomnia egy ritka, örökletes prionbetegség, amely specifikusan a thalamus bizonyos magjait (főleg az MD és anterior magokat) támadja meg, súlyos, gyógyíthatatlan álmatlansághoz és halálhoz vezetve." },
+                    { question: "Hogyan befolyásolja a Nucleus reticularis thalami a többi thalamikus mag működését?", options: ["Serkenti az aktivitásukat.", "Gátolja az aktivitásukat, 'kapuőrként' funkcionál.", "Nincs rájuk hatással.", "Szinkronizálja őket az alvási orsók generálásához."], correct: 1, explanation: "A Nucleus reticularis thalami egy vékony, gátló (GABAerg) neuronokból álló réteg, amely a thalamus külső felszínét borítja. Nem vetít az agykéregbe, hanem a többi thalamikus mag aktivitását szabályozza és gátolja." },
+                    { question: "Milyen típusú ataxiát okozhat a thalamus sérülése?", options: ["Tisztán cerebelláris ataxiát", "Szenzoros ataxiát a propriocepció kiesése miatt", "Vesztibuláris ataxiát", "Optikus ataxiát"], correct: 1, explanation: "A thalamus, különösen a VP magok sérülése, a proprioceptív (helyzet- és mozgásérző) pályák megszakadását okozza, ami szenzoros ataxiához vezet, ami csukott szemmel drámaian rosszabbodik." },
+                    { question: "A thalamus melyik magja játszik szerepet a motoros körökben, fogadva inputot a bazális ganglionokból és a kisagyból?", options: ["Anterior magcsoport", "Dorsomediális mag", "Ventralis anterior (VA) és ventralis lateralis (VL) magok", "Pulvinar"], correct: 2, explanation: "A VA és VL magok a motoros rendszer kulcsfontosságú thalamikus állomásai, amelyek a bazális ganglionokból és a kisagyból érkező információkat integrálják és továbbítják a motoros és premotoros kéreg felé." },
+                    { question: "Mi az allodynia, ami a thalamikus fájdalom szindróma része lehet?", options: ["Fokozott fájdalomérzet egy fájdalmas ingerre.", "Spontán, égető fájdalom.", "Normálisan fájdalmatlan inger (pl. érintés) fájdalmat vált ki.", "A fájdalomérzés teljes hiánya."], correct: 2, explanation: "Az allodynia egy kóros állapot, amikor egy normálisan nem fájdalmas inger, mint a bőr finom simítása, fájdalmas érzetet kelt. Ez a centrális szenzitizáció egyik jele, ami a thalamikus fájdalomra is jellemző." },
+                    { question: "Milyen tüneteket okoz a posterior choroidealis artéria területének károsodása?", options: ["Csak motoros tüneteket", "Látótérkiesést és esetleg memóriazavart, afáziát", "Csak érzészavart az arcon", "Súlyos éberségi zavart"], correct: 1, explanation: "Ez az artéria látja el a CGL-t (látás), a pulvinart (figyelem, nyelv) és a CGM-et (hallás), így károsodása komplex neuropszichológiai tüneteket, elsősorban látótérkiesést okozhat." },
+                    { question: "Igaz vagy hamis: Az izolált thalamikus károsodás gyakran okoz tartós, súlyos bénulást (hemiplegiát).", options: ["Igaz", "Hamis"], correct: 1, explanation: "Hamis. Bár enyhe vagy átmeneti gyengeség (hemiparesis) előfordulhat, a tartós, súlyos bénulás nem jellemző az izolált thalamikus sérülésekre, mivel a fő motoros pályák (pyramispálya) a capsula internában, a thalamustól elkülönülten futnak." }
+                ]
+            },
+            'spinalis_terfoglalas': {
+                title: 'Spinalis térfoglaló folyamatok',
+                questions: [
+                    { question: "Melyik a leggyakoribb anatómiai lokalizációja a spinális térfoglaló folyamatoknak?", options: ["Intramedulláris", "Intradurális-extramedulláris", "Extradurális (epidurális)", "Subarachnoidalis"], correct: 2, explanation: "A spinális térfoglaló folyamatok leggyakrabban a dura materen kívül, az epidurális térben vagy a csontos képletekben helyezkednek el. Ide tartoznak a leggyakoribb okok, a gerincáttétek." },
+                    { question: "Melyik daganattípus a leggyakoribb intradurális-extramedulláris (IDEM) térfoglalás?", options: ["Astrocytoma", "Ependymoma", "Meningeoma és Schwannoma", "Metasztázis"], correct: 2, explanation: "Az IDEM daganatok leggyakoribb típusai az agyhártyából kiinduló meningeomák és az ideghüvelyből eredő schwannomák (neurinómák)." },
+                    { question: "Milyen típusú fájdalom jellemző az ideggyökök direkt kompressziójára?", options: ["Tompa, mély, lokális fájdalom", "Radikuláris (gyöki), kisugárzó, éles fájdalom", "Diffúz, rosszul lokalizálható fájdalom", "Nincs fájdalom, csak zsibbadás"], correct: 1, explanation: "Az ideggyökök kompressziója radikuláris, azaz a gyök beidegzési területének (dermatómájának) megfelelően kisugárzó, éles, nyilalló fájdalmat okoz." },
+                    { question: "Melyik állítás igaz a spinális térfoglalás okozta fájdalomra?", options: ["Mindig csak nappal jelentkezik.", "Pihenésre, fekvésre mindig enyhül.", "Gyakran éjszaka és fekvő helyzetben fokozódik.", "Soha nem sugárzik ki."], correct: 2, explanation: "Jellegzetes, hogy az STF okozta fájdalom éjszaka, fekvéskor rosszabbodik, ami a vénás pangás és a gerinc axiális terhelésének megváltozása miatt alakulhat ki." },
+                    { question: "Milyen típusú bénulást okoz leggyakrabban a gerincvelő direkt kompressziója?", options: ["Petyhüdt parézis", "Spasztikus parézis", "Ataxiás mozgászavar", "Csak a mimikai izmok bénulása"], correct: 1, explanation: "A gerincvelő kompressziója a felső motoneuron (pyramispálya) károsodását okozza, ami a lézió szintje alatt spasztikus (fokozott izomtónussal járó) bénulást és kóros reflexeket eredményez." },
+                    { question: "Melyik kórkép a spinális epidurális tályog (SEA) leggyakoribb hajlamosító tényezője?", options: ["Magas vérnyomás", "Asztma", "Diabetes mellitus", "Allergia"], correct: 2, explanation: "A diabetes mellitus a SEA leggyakoribb ismert rizikófaktora, valószínűleg a csökkent immunvédekezés és a keringési zavarok miatt." },
+                    { question: "Melyik képalkotó eljárás a 'gold standard' a spinális térfoglaló folyamatok diagnosztikájában?", options: ["Natív röntgen", "Ultrahang", "Kontrasztanyagos MRI", "CT-myelográfia"], correct: 2, explanation: "A kontrasztanyagos MRI a legérzékenyebb és legrészletesebb képalkotó módszer, amely kiválóan ábrázolja a gerincvelőt, az ideggyököket és a lágyrészeket, így a legtöbb STF diagnózisában ez a választandó eljárás." },
+                    { question: "Milyen klinikai tünetek alkotják a Cauda Equina Szindróma (CES) jellegzetes képét?", options: ["Egyoldali lábfájás és renyhe Achilles-reflex.", "Kétoldali isiász, 'lovaglónadrág' érzéskiesés és sphincterzavarok.", "Csak derékfájás.", "Csak a lábfej zsibbadása."], correct: 1, explanation: "A CES egy sürgősségi állapot, melynek klasszikus tünetei a kétoldali lábfájdalom/gyengeség, a gáttájéki ('lovaglónadrág') érzéskiesés, valamint a vizelet- és/vagy székletürítés zavara (pl. retenció)." },
+                    { question: "Melyik a leggyakoribb primer intramedulláris daganat felnőttkorban?", options: ["Astrocytoma", "Meningeoma", "Ependymoma", "Schwannoma"], correct: 2, explanation: "Felnőttkorban a leggyakoribb intramedulláris (gerincvelő-állományon belüli) daganat az ependymoma, amely a gerincvelő központi csatornáját bélelő sejtekből indul ki." },
+                    { question: "A spinális epidurális hematóma (SEH) leggyakrabban melyik tényezőhöz társul?", options: ["Dohányzás", "Magas koleszterinszint", "Antikoaguláns (véralvadásgátló) kezelés", "Allergiás hajlam"], correct: 2, explanation: "A spontán SEH gyakran antikoaguláns kezelésben részesülő betegeknél vagy véralvadási zavarok esetén alakul ki. Iatrogén módon gerincközeli beavatkozások is okozhatják." },
+                    { question: "Milyen típusú motoros deficit jellemző a conus medullaris szindrómára?", options: ["Tisztán spasztikus paraparézis", "Tisztán petyhüdt paraparézis", "Kevert, felső és alsó motoneuron jelekkel járó parézis", "Nincs motoros deficit"], correct: 2, explanation: "A conus medullaris a gerincvelő legalsó szakasza, így sérülésekor keveredhetnek az UMN jelek (magából a gerincvelői károsodásból) és az LMN jelek (az érintett szakrális szegmentumokból)." },
+                    { question: "Melyek a leggyakoribb primer tumorok, amelyek gerincáttétet adnak?", options: ["Agydaganatok és bőrrákok", "Máj- és hasnyálmirigyrákok", "Tüdő-, emlő-, prosztatarák", "Gyomor- és bélrendszeri daganatok"], correct: 2, explanation: "A gerinc a metasztázisok harmadik leggyakoribb helye. A leggyakrabban a tüdő, emlő és prosztata rosszindulatú daganatai adnak ide áttétet." },
+                    { question: "Mi jellemző a spinális epidurális tályog (SEA) klasszikus tünettriászára?", options: ["Fejfájás, láz, hányás", "Hátfájás, láz, progrediáló neurológiai deficit", "Derékfájás, hasmenés, fogyás", "Nyaki fájdalom, karzsibbadás, láz"], correct: 1, explanation: "A SEA klasszikus tünetegyüttese a hátfájás, a láz és a fokozatosan súlyosbodó neurológiai tünetek (érzészavar, gyengeség, bénulás)." },
+                    { question: "Melyik állítás igaz a jóindulatú gerincdaganatokra?", options: ["Mindig gyorsan növekednek és áttétet képeznek.", "Lassan növekednek, de kompresszióval tüneteket okozhatnak.", "Soha nem igényelnek kezelést.", "Csak a csigolyákat érintik, az idegeket soha."], correct: 1, explanation: "A jóindulatú (benignus) daganatok, mint a meningeoma vagy a schwannoma, általában lassan növekednek, de méretüknél fogva nyomhatják a gerincvelőt vagy az ideggyököket, és így neurológiai tüneteket okozhatnak." },
+                    { question: "Mi a laminectomia?", options: ["A porckorong eltávolítása", "A csigolyák összeforrasztása", "A csigolyaív egy részének vagy egészének sebészi eltávolítása", "A gerincvelőből történő mintavétel"], correct: 2, explanation: "A laminectomia egy sebészi dekompressziós eljárás, amely során a csigolyaívet (lamina) eltávolítják, hogy helyet csináljanak a kompresszió alatt álló gerincvelőnek vagy ideggyököknek." },
+                    { question: "A 'time is spine' elv mit jelent az akut gerincvelői kompresszió esetén?", options: ["A gerincműtétre sokat kell várni.", "A gerincbetegségek lassan alakulnak ki.", "Minél hamarabb történik meg a dekompresszió, annál nagyobb az esély a neurológiai funkciók megmaradására.", "A gerinc gyógyulása sok időt vesz igénybe."], correct: 2, explanation: "Hasonlóan a stroke 'time is brain' elvéhez, a 'time is spine' hangsúlyozza, hogy az akut gerincvelői kompresszió esetén az időfaktor kritikus. A gyors beavatkozás elengedhetetlen az irreverzibilis idegkárosodás megelőzéséhez." },
+                    { question: "Milyen típusú érzészavart okoz leggyakrabban a thorakális gerincvelő kompressziója?", options: ["'Kesztyű-harisnya' érzészavar", "Köpenyszerű érzéskiesés", "Érzészavar nívóval (egy éles határral a törzsön)", "Csak a lábujjak zsibbadása"], correct: 2, explanation: "A thorakális (háti) gerincvelő kompressziója jellemzően egy éles határral (nívóval) járó érzészavart okoz a törzsön, a lézió szintje alatt." },
+                    { question: "Melyik a leggyakoribb kórokozó a spinális epidurális tályog hátterében?", options: ["Streptococcus pneumoniae", "Escherichia coli", "Staphylococcus aureus", "Pseudomonas aeruginosa"], correct: 2, explanation: "A SEA esetek többségét (kb. 60-70%) a Staphylococcus aureus baktérium okozza, gyakran a véráram útján terjedve más fertőzési gócokból." },
+                    { question: "Milyen prognosztikai jelentősége van a kezelés előtti neurológiai állapotnak?", options: ["Nincs jelentősége.", "A kezelés előtti súlyos neurológiai deficit rosszabb prognózist jelez.", "Aki a kezelés előtt járni tud, az utána biztosan nem fog.", "Csak a fájdalom mértéke számít."], correct: 1, explanation: "A kezelés megkezdése előtti neurológiai károsodás mértéke az egyik legfontosabb prognosztikai faktor. Minél súlyosabb a deficit (pl. teljes bénulás), annál kisebb az esély a teljes funkcionális felépülésre." },
+                    { question: "Miért fontos a kontrasztanyag adása az MRI vizsgálat során STF gyanúja esetén?", options: ["Mert csökkenti a vizsgálati időt.", "Mert segít a csontos struktúrák jobb ábrázolásában.", "Mert a kontrasztanyagot halmozó (pl. gyulladásos, daganatos) képleteket jobban láthatóvá teszi.", "Mert csökkenti a klausztrofóbiát."], correct: 2, explanation: "A gadolínium tartalmú kontrasztanyag segít elkülöníteni a kóros szöveteket az egészségestől. A gyulladásos folyamatok (pl. tályogfal), a legtöbb daganat, valamint a posztoperatív hegszövet is halmozza a kontrasztanyagot, ami elengedhetetlen a pontos diagnózishoz." }
+                ]
+            },
+            'sci': {
+                title: 'A gerincvelő traumás károsodása',
+                questions: [
+                    { question: "Mit jelent a 'komplett' gerincvelő sérülés (ASIA A)?", options: ["A gerincvelő teljesen át van vágva.", "Csak a motoros funkciók estek ki teljesen.", "Nincs motoros vagy szenzoros funkció megőrizve a sérülés szintje alatt, beleértve az S4-S5 szegmentumokat.", "A beteg csak a végtagjait nem tudja mozgatni."], correct: 2, explanation: "Az ASIA A, vagyis komplett sérülés azt jelenti, hogy a neurológiai sérülési szint alatt semmilyen motoros vagy szenzoros funkció nem maradt meg, beleértve a legalsó szakrális szegmentumok (S4-S5) beidegzését is." },
+                    { question: "Melyik gerincvelői szakasz sérülése okoz leggyakrabban tetraplégiát (mind a négy végtag bénulását)?", options: ["Thorakális (háti)", "Lumbális (ágyéki)", "Sacralis (keresztcsonti)", "Cervikális (nyaki)"], correct: 3, explanation: "A nyaki (cervikális) gerincvelő sérülései okoznak tetraplégiát, mivel a karokat, a törzset és a lábakat beidegző pályák mind ezen a szinten vagy felette haladnak." },
+                    { question: "Mi a 'spinális sokk' állapota?", options: ["A gerincvelő elektromos kisülése a trauma pillanatában.", "Egy átmeneti állapot közvetlenül a sérülés után, amelyet petyhüdt bénulás és areflexia jellemez a sérülés szintje alatt.", "A beteg pszichés sokkos állapota a sérülés miatt.", "A gerincvelő bevérzése."], correct: 1, explanation: "A spinális sokk egy átmeneti, a sérülést követő órákban-hetekben fennálló állapot, ahol a gerincvelői reflexműködés ideiglenesen megszűnik a sérülés szintje alatt, ami petyhüdt bénulást és reflexkiesést eredményez." },
+                    { question: "Melyik tünetegyüttesre jellemző a hirtelen, erős fejfájás, kipirulás, izzadás és extrém magas vérnyomás T6 szint feletti gerincsérülteknél?", options: ["Ortosztatikus hipotenzió", "Autonóm diszreflexia", "Spaszticitás", "Neuropátiás fájdalom"], correct: 1, explanation: "Az autonóm diszreflexia egy életveszélyes állapot, amelyet a sérülés szintje alatti káros inger (pl. telt hólyag) vált ki, és a szimpatikus idegrendszer kontrollálatlan túlműködéséhez vezet." },
+                    { question: "Melyik állítás igaz a felső motoneuron (UMN) típusú sérülés jeleire a spinális sokk lezajlása után?", options: ["Petyhüdt bénulás és areflexia", "Spaszticitás és hiperreflexia", "Izomatrófia és fasciculatiók", "Csak érzészavar"], correct: 1, explanation: "Az UMN sérülésekre (a gerincvelő pályáinak károsodása) a spinális sokk után a spaszticitás (fokozott izomtónus), a hiperreflexia (élénk reflexek) és a kóros reflexek (pl. Babinski-jel) megjelenése jellemző." },
+                    { question: "Melyik a traumás gerincvelő sérülések leggyakoribb oka?", options: ["Sportbalesetek", "Erőszakos cselekmények", "Közlekedési balesetek", "Esések"], correct: 2, explanation: "Világszerte a közlekedési balesetek (autó, motor) jelentik a traumás gerincvelő sérülések leggyakoribb okát." },
+                    { question: "Melyik ASIA fokozat jelzi a legjobb prognózist a motoros felépülésre?", options: ["ASIA A", "ASIA B", "ASIA C", "ASIA D"], correct: 3, explanation: "Az ASIA D (motoros inkomplett, ahol a kulcsizmok több mint felének ereje legalább 3-as) jelzi a legjobb prognózist a funkcionális felépülésre, beleértve a járóképességet is." },
+                    { question: "Miért veszélyes a magas (C1-C4) nyaki gerincvelő sérülés a légzés szempontjából?", options: ["Mert a tüdő direkt sérülését okozza.", "Mert a rekeszizmot beidegző nervus phrenicus (C3-C5) sérülhet.", "Mert a beteg nem tud köhögni.", "Mert a szív beidegzését is érinti."], correct: 1, explanation: "A rekeszizom, a legfontosabb légzőizom, beidegzését a C3-C5 szegmentumokból eredő nervus phrenicus adja. Ezen szintek vagy a felettük lévő sérülés a rekeszizom bénulásához és légzési elégtelenséghez vezethet." },
+                    { question: "A gerincvelő sérülés utáni neuropátiás fájdalom...", options: ["...mindig a sérülés szintjében jelentkezik.", "...égő, szúró, áramütésszerű jellegű lehet.", "...csak enyhe és könnyen kezelhető.", "...csak a motoros funkciók visszatérése után alakul ki."], correct: 1, explanation: "A neuropátiás fájdalom az idegkárosodás direkt következménye, és gyakran égő, éles, bizsergő, lüktető vagy szorító jellegű, ami jelentősen ronthatja az életminőséget." },
+                    { question: "Mit jelent a petyhüdt, areflexiás hólyag, és milyen szintű sérülésre jellemző?", options: ["A hólyag görcsösen ürül; magasabb (T12 feletti) sérülésre jellemző.", "A hólyag nem tud összehúzódni, ami vizeletretencióhoz vezet; a conus medullaris vagy cauda equina (LMN) sérülésére jellemző.", "A vizeletürítés akaratlagos marad.", "A hólyag állandóan csepeg."], correct: 1, explanation: "A petyhüdt (LMN) hólyag a szakrális reflexközpont vagy az azt elhagyó idegek sérülésekor alakul ki. A hólyag nem képes összehúzódni, ami vizeletretencióhoz és túlfolyásos inkontinenciához vezet." },
+                    { question: "Mi a másodlagos sérülési mechanizmusok lényege SCI esetén?", options: ["A sérülést egy második, független trauma okozza.", "A kezdeti mechanikai sérülést követő kórélettani folyamatok (pl. ischaemia, gyulladás) tovább károsítják az idegszövetet.", "A sérülés pszichés következményei.", "A sérülés hosszú távú, degeneratív elváltozásai."], correct: 1, explanation: "A másodlagos károsodás egy, a primer trauma által beindított kaszkád, amely magában foglalja az ödémát, ischaemiát, excitotoxicitást és gyulladást, tovább rontva a gerincvelő állapotát." },
+                    { question: "Milyen tünetekkel jár a paraparézis?", options: ["Mind a négy végtag gyengesége.", "A test egyik felének gyengesége.", "Mindkét alsó végtag gyengesége.", "Csak a karok gyengesége."], correct: 2, explanation: "A paraparézis az alsó végtagok részleges bénulását, gyengeségét jelenti, ami tipikusan thorakális vagy lumbális gerincvelő-sérülésre utal." },
+                    { question: "Az ASIA skála 'B' fokozata (Szenzoros Inkomplett) mit jelent?", options: ["Van motoros, de nincs szenzoros funkció.", "Van szenzoros, de nincs motoros funkció a neurológiai szint alatt.", "Sem motoros, sem szenzoros funkció nincs.", "A motoros és szenzoros funkciók normálisak."], correct: 1, explanation: "Az ASIA B sérülés azt jelenti, hogy a sérülési szint alatt van megőrzött érzőfunkció (különösen az S4-S5 szegmentumokban), de akaratlagos motoros működés nincs." },
+                    { question: "Mi a poikilothermia SCI esetén?", options: ["Fokozott izzadás", "A testhőmérséklet hatékony szabályozásának képtelensége.", "Kórosan alacsony testhőmérséklet.", "Lázas állapot."], correct: 1, explanation: "A poikilothermia azt jelenti, hogy a szervezet nem képes fenntartani az állandó belső hőmérsékletét, és az a környezeti hőmérséklethez igazodik. Magas gerincvelő-sérülteknél a hőszabályozó autonóm pályák sérülése miatt alakul ki." },
+                    { question: "Melyik állítás igaz a neurogén, spasztikus (UMN) hólyagra?", options: ["A hólyag petyhüdt és túltágul.", "Jellemzője a detrusor-sphincter dyssynergia (DSD).", "Mindig teljes vizeletretencióval jár.", "Csak a cauda equina sérüléseknél fordul elő."], correct: 1, explanation: "A spasztikus (UMN) hólyagra jellemző, hogy a hólyagizom (detrusor) akaratlanul összehúzódik a zárt külső záróizom (sphincter) ellen, ami magas hólyagnyomást, nem teljes ürülést és inkontinenciát okoz." },
+                    { question: "Melyik a legfontosabb elsősegélynyújtási teendő gerincsérülés gyanúja esetén?", options: ["A sérült felültetése.", "A sérült itatása.", "A sérült mozgatásának kerülése és a gerinc stabilizálása.", "A sérült lábainak megemelése."], correct: 2, explanation: "Gerincsérülés gyanújakor a legfontosabb a további károsodás megelőzése, ezért a sérültet nem szabad mozgatni, a fejét és a nyakát egyenes vonalban, semleges pozícióban kell tartani a szakszerű segítség megérkezéséig." },
+                    { question: "Milyen típusú reflexválasz jellemző UMN sérülésre a spinális sokk után?", options: ["Flexiós talpreflex", "Extenziós talpreflex (Babinski-jel)", "Hiányzó reflexek", "Renyhe reflexek"], correct: 1, explanation: "Az UMN sérülés a pyramispálya károsodását jelenti, ami a gátló funkciók kiesése miatt a kóros, extenziós típusú talpreflex (Babinski-jel) megjelenéséhez vezet." },
+                    { question: "Az autonóm diszreflexia melyik szint feletti sérüléseknél jelent kockázatot?", options: ["L1", "T10", "T6", "C7"], correct: 2, explanation: "Az autonóm diszreflexia tipikusan T6-os vagy afeletti gerincvelő-sérüléseknél fordul elő, mivel e szint felett szakad meg az agyi kontroll a thoracolumbalis szimpatikus idegrendszer felett." },
+                    { question: "Mi az 'excitotoxicitás' a másodlagos sérülési mechanizmusok között?", options: ["Az idegsejtek elektromos túlingerlése.", "A glutamát neurotranszmitter túlzott felszabadulása, ami sejthalálhoz vezet.", "Az idegsejtek mérgező anyagok általi károsodása.", "Az immunsejtek által termelt toxikus anyagok."], correct: 1, explanation: "Az excitotoxicitás az a folyamat, amikor a sérült idegsejtekből nagy mennyiségű serkentő neurotranszmitter, főleg glutamát szabadul fel, ami a környező neuronok túlzott ingerlését, kalcium-beáramlást és végül sejthalált okoz." },
+                    { question: "Melyik állítás igaz a reflexiás (UMN) bélműködésre?", options: ["A székletürítés teljesen akaratlagos.", "A széklet állandóan csepeg.", "A bélműködés a spinális reflexíven keresztül történik, de az akaratlagos kontroll hiányzik.", "A belek teljesen leállnak."], correct: 2, explanation: "UMN típusú béldiszfunkció esetén a székletürítési reflex megmarad, de az agyi kontroll kiesik. Ez székrekedéshez és reflexszerű, kontrollálatlan székletürítéshez vezethet." }
+                ]
+            },
+            'felso_vegtag': {
+                title: 'Felsővégtag perifériás idegbántalmai',
+                questions: [
+                    { question: "Melyik a leggyakrabban előforduló felsővégtagi alagútszindróma?", options: ["Cubitalis alagút szindróma", "Pronator teres szindróma", "Carpalis alagút szindróma", "Guyon-alagút szindróma"], correct: 2, explanation: "A carpalis alagút szindróma, amely a nervus medianus kompresszióját jelenti a csuklónál, messze a leggyakoribb kompressziós mononeuropathia a felső végtagon." },
+                    { question: "Melyik ideg sérülése okozza a jellegzetes 'esőkéz' (wrist drop) tünetet?", options: ["Nervus medianus", "Nervus ulnaris", "Nervus radialis", "Nervus musculocutaneus"], correct: 2, explanation: "A nervus radialis idegzi be a csukló- és ujjfeszítő izmokat. Sérülésekor ezen izmok bénulása miatt a kézfej és az ujjak 'lógnak', ezt nevezik esőkéznek." },
+                    { question: "A nervus ulnaris károsodására utaló Froment-jel mit tesztel?", options: ["A kisujj terpesztési képességét.", "A hüvelykujj és mutatóujj közötti 'csipetfogást'.", "A csukló hajlítási erejét.", "A könyök feszítési képességét."], correct: 1, explanation: "A Froment-jel a nervus ulnaris által beidegzett m. adductor pollicis gyengeségét vizsgálja. A beteg, miközben egy papírlapot próbál a hüvelyk- és mutatóujja között tartani, a gyengeség kompenzálására a hüvelykujját behajlítja." },
+                    { question: "Melyik tünet segít leginkább elkülöníteni a Pronator Teres szindrómát a Carpalis Alagút szindrómától?", options: ["Éjszaka fokozódó zsibbadás", "Az I-III. ujjak zsibbadása", "A thenar (hüvelykpárna) bőrének érzészavara", "A thenar izmok atrophiája"], correct: 2, explanation: "A thenar bőrének érző beidegzését a ramus cutaneus palmaris adja, ami a carpalis alagút felett ered. CTS-ben ez a terület megkímélt, míg a magasabb, Pronator Teres szindrómában érintett lehet." },
+                    { question: "Melyik ideg sérül a 'Saturday night palsy' (szombat esti bénulás) esetén?", options: ["Nervus axillaris", "Nervus medianus", "Nervus ulnaris", "Nervus radialis"], correct: 3, explanation: "A 'Saturday night palsy' a nervus radialis kompresszióját jelenti a humerus spirális barázdájában, ami gyakran mély alvás során, a felkarra nehezedő nyomás miatt alakul ki." },
+                    { question: "A 'karomkéz' (claw hand) a IV-V. ujjakon melyik ideg sérülésére jellemző?", options: ["Nervus radialis", "Nervus ulnaris", "Nervus medianus", "Nervus axillaris"], correct: 1, explanation: "A nervus ulnaris a kéz kisizmainak nagy részét idegzi be. Sérülésekor a lumbricalis és interosseus izmok bénulása miatt az alapízületek hyperextenzióba, a többi ízület flexióba kerül, ami karomállást eredményez a IV-V. ujjon." },
+                    { question: "Melyik ideg felelős a könyök hajlításáért (m. biceps brachii, m. brachialis beidegzése)?", options: ["N. radialis", "N. medianus", "N. musculocutaneus", "N. axillaris"], correct: 2, explanation: "A nervus musculocutaneus idegzi be a felkar elülső, flexor izomrekeszének fő izmait, így a könyök hajlításának elsődleges motoros idege." },
+                    { question: "Az Anterior Interosseus Neuropathia (AIN) milyen tünetekkel jár?", options: ["Súlyos érzészavar a tenyéren.", "Tisztán motoros tünetekkel, az 'OK-jel' képtelenségével.", "A teljes kéz megbénulásával.", "Csak a kisujj zsibbadása."], correct: 1, explanation: "Az AIN a nervus medianus tisztán motoros ágának sérülése. Nem okoz érzészavart, de az FPL és FDP I-II izmok bénulása miatt a beteg nem tudja a hüvelyk- és mutatóujja végét összeérinteni, így nem tud 'OK' jelet formálni." },
+                    { question: "Melyik ideg kompressziója okozza a cubitalis alagút szindrómát?", options: ["N. medianus", "N. radialis", "N. ulnaris", "N. axillaris"], correct: 2, explanation: "A cubitalis alagút szindróma a nervus ulnaris kompresszióját jelenti a könyök medialis oldalán, ahol az ideg egy szűk csatornán halad át." },
+                    { question: "Melyik ideg sérülése okozhatja a 'scapula alata' (szárnyas lapocka) tünetet?", options: ["N. axillaris", "N. suprascapularis", "N. thoracicus longus", "N. medianus"], correct: 2, explanation: "A nervus thoracicus longus idegzi be a m. serratus anteriort, ami a lapockát a mellkasfalhoz fixálja. Sérülésekor a lapocka medialis széle elemelkedik, 'szárnyként' eláll." },
+                    { question: "A plexus brachialis melyik fasciculusából ered a nervus radialis és a nervus axillaris?", options: ["Fasciculus lateralis", "Fasciculus medialis", "Fasciculus posterior", "Nem fasciculusból erednek."], correct: 2, explanation: "A nervus radialis és a nervus axillaris egyaránt a plexus brachialis hátsó kötegéből, a fasciculus posteriorból erednek, amely a C5-T1 gyökök hátsó ágaiból áll össze." },
+                    { question: "Mi a Walleriánus degeneráció?", options: ["Az ideg myelinhüvelyének szegmentális károsodása.", "Az idegrost (axon) sérüléstől disztálisan eső szakaszának elhalása.", "Az ideg gyulladásos folyamata.", "Az ideg daganatos elfajulása."], correct: 1, explanation: "A Walleriánus degeneráció akkor következik be, ha az axon folytonossága megszakad. Az axonnak a sérüléstől távolabb eső szakasza és a mielinhüvelye elpusztul és felszívódik." },
+                    { question: "Melyik ideg felelős a váll 15 fok feletti abductiójáért (oldalra emeléséért)?", options: ["Nervus suprascapularis", "Nervus thoracicus longus", "Nervus axillaris", "Nervus subscapularis"], correct: 2, explanation: "A váll abductióját a m. supraspinatus indítja el (az első 0-15 fok), de a mozgás fő kivitelezője 15 fok felett a nervus axillaris által beidegzett m. deltoideus." },
+                    { question: "Milyen érzészavar jellemző a Guyon-alagút szindrómára, ami megkülönbözteti a cubitalis alagút szindrómától?", options: ["Az egész kéz zsibbad.", "A kézhát ulnaris oldalának érzése megkímélt.", "Csak a hüvelykujj zsibbad.", "Nincs érzészavar, csak motoros kiesés."], correct: 1, explanation: "Guyon-alagút szindrómában a kézhát ulnaris (kisujj felőli) oldalának érzészavara hiányzik, mert a ramus dorsalis nervi ulnaris, ami ezt a területet ellátja, a csukló felett, proximalisabban ágazik le és nem halad át az alagúton." },
+                    { question: "A diabetes mellitus hogyan járul hozzá a neuropathiák kialakulásához?", options: ["Csak direkt neurotoxikus hatással.", "Javítja az idegek vérellátását.", "Károsítja az idegeket ellátó kisereket (vasa nervorum) és direkt toxikus hatása is van a magas vércukornak.", "Csak a motoros rostokat károsítja."], correct: 2, explanation: "A diabetes mellitusban a tartósan magas vércukorszint (hyperglykaemia) egyrészt direkt módon károsítja az idegsejteket, másrészt rontja az őket ellátó kiserek keringését (microangiopathia), ami iszkémiához vezet." },
+                    { question: "Mi a mononeuritis multiplex?", options: ["Egyetlen ideg gyulladása.", "Az összes perifériás ideg szimmetrikus károsodása.", "Több, egymástól távol eső, nem szomszédos ideg egyidejű vagy egymást követő károsodása.", "Csak a felső végtag idegeit érintő gyulladás."], correct: 2, explanation: "A mononeuritis multiplex egy olyan állapot, ahol több, különálló perifériás ideg sérül aszimmetrikusan, ami foltos, multiplex neurológiai kieséseket okoz. Gyakran szisztémás vaszkulitiszekhez társul." },
+                    { question: "Az 'ulnaris paradoxon' mire utal?", options: ["Minél magasabban sérül az n. ulnaris, annál kevésbé kifejezett a karomállás.", "Az ulnaris sérülés soha nem okoz fájdalmat.", "Az ulnaris ideg a legkevésbé sérülékeny.", "A sérülés ellenére a kéz funkciói javulnak."], correct: 0, explanation: "Az ulnaris paradoxon azt a jelenséget írja le, hogy minél magasabban (pl. könyökben) sérül az n. ulnaris, annál kevésbé lesz látványos a IV-V. ujjak karomállása, mivel az FDP izom (amely az ujjak végső perceit hajlítja) bénulása miatt a flexiós komponens is gyengül." },
+                    { question: "Melyik izom átfúrása jellegzetes a nervus musculocutaneus lefutására?", options: ["M. biceps brachii", "M. triceps brachii", "M. coracobrachialis", "M. deltoideus"], correct: 2, explanation: "A nervus musculocutaneus jellegzetes anatómiai viszonya, hogy a felkaron átfúrja a m. coracobrachialist, mielőtt a biceps és a brachialis között haladna tovább." },
+                    { question: "Melyik alagútban van a legnagyobb esélye a nervus radialis mély, motoros ágának kompressziójára?", options: ["Carpalis alagút", "Guyon-csatorna", "Cubitalis alagút", "Supinator alagút (Arcade of Frohse)"], correct: 3, explanation: "A nervus radialis mély ága (ami a n. interosseus posteriorrá válik) a m. supinator két feje között, az Arcade of Frohse nevű fibrotendineus ív alatt halad át, ami a leggyakoribb kompressziós pontja." },
+                    { question: "A Martin-Gruber anastomosis milyen klinikai jelentőséggel bír?", options: ["Nincs klinikai jelentősége.", "A n. medianus és ulnaris közötti összeköttetés az alkaron, ami atipikus beidegzési mintázatot és félrevezető tüneteket okozhat.", "A n. radialis és medianus közötti kapcsolat.", "Egy gyakori kompressziós szindróma."], correct: 1, explanation: "A Martin-Gruber anastomosis egy anatómiai variáció, ahol a n. medianusból származó rostok az alkaron átkereszteződnek a n. ulnarishoz. Ezért egy magas medianus sérülés ulnaris-típusú kézgyengeséget okozhat, vagy egy magas ulnaris sérülésnél a kéz funkciói meglepően jók maradhatnak." }
+                ]
+            },
+            'derekfajas': {
+                title: 'Derékfájás, lumbago, ischias',
+                questions: [
+                    { question: "Mi a legfőbb különbség a lumbágó és az isiász között?", options: ["A lumbágó erősebb fájdalommal jár.", "A lumbágó a derékra lokalizálódik, míg az isiász az alsó végtagba sugárzó fájdalommal jár.", "A lumbágót mindig porckorongsérv okozza.", "Az isiász soha nem jár derékfájással."], correct: 1, explanation: "A lumbágó egy derékra korlátozódó fájdalom, jellemzően ideggyöki érintettség nélkül. Az isiász ezzel szemben az ülőideg irritációja miatti, alsó végtagba sugárzó fájdalom, amihez gyakran neurológiai tünetek is társulnak." },
+                    { question: "Melyik a leggyakoribb oka az isiásznak?", options: ["Gerinccsatorna-szűkület", "Gerincdaganat", "Ágyéki porckorongsérv", "Izomhúzódás"], correct: 2, explanation: "Az isiászos tünetegyüttes hátterében az esetek túlnyomó többségében az ágyéki gerinc egy porckorongsérve áll, amely nyomja az egyik kilépő ideggyököt." },
+                    { question: "A gerinc melyik szakaszán alakul ki leggyakrabban porckorongsérv?", options: ["Nyaki (cervikális)", "Háti (thorakális)", "Ágyéki (lumbális), különösen az L4-L5 és L5-S1 szinteken", "Keresztcsonti (sacralis)"], correct: 2, explanation: "A gerinc ágyéki szakasza, főleg az L4-L5 és L5-S1 szegmentumok, viselik a legnagyobb terhelést és rendelkeznek a legnagyobb mozgékonysággal, ezért itt alakul ki leggyakrabban porckorongsérv." },
+                    { question: "Milyen tünet jellemző a neurogén claudicatiora, amit a gerinccsatorna-szűkület okoz?", options: ["Járás közben jelentkező, előrehajlásra enyhülő alsó végtagi fájdalom és zsibbadás.", "Hirtelen, nyilalló derékfájás emeléskor.", "Nyugalomban jelentkező lábfájás.", "Csak a vádli görcse."], correct: 0, explanation: "A neurogén claudicatio intermittens a gerinccsatorna-szűkület jellegzetes tünete. Járásra, állásra fokozódik a lábfájdalom és a zsibbadás, ami pihenésre, különösen előrehajlásra vagy leülésre (ami tágítja a csatornát) enyhül." },
+                    { question: "Melyik állítás NEM 'vörös zászló' (red flag) tünet derékfájás esetén?", options: ["Hirtelen kialakuló vizelet- vagy székletürítési zavar.", "Ismert daganatos betegség a kórelőzményben.", "Mozgásra fokozódó, de pihenésre enyhülő, kisugárzás nélküli derékfájás.", "Megmagyarázhatatlan testsúlycsökkenés és éjszakai fájdalom."], correct: 2, explanation: "A mozgásra fokozódó, de pihenésre javuló, lokalizált derékfájás a jóindulatú, mechanikai eredetű derékfájás jellemzője. A többi opció súlyos, kivizsgálást igénylő állapotra (Cauda Equina Szindróma, daganat) utal." },
+                    { question: "Mi az a Cauda Equina Szindróma (CES)?", options: ["A lumbágó egy enyhe formája.", "Egy neurológiai vészhelyzet, amit a gerinccsatorna alsó szakaszában lévő ideggyökök kompressziója okoz.", "A derékfájás pszichoszomatikus formája.", "A porckorongsérv műtét utáni szövődménye."], correct: 1, explanation: "A CES egy súlyos, sürgős sebészeti beavatkozást igénylő állapot, ahol a 'lófarok' (cauda equina) ideggyökeinek kompressziója súlyos neurológiai tüneteket, pl. 'lovaglónadrág' érzéskiesést és sphincterzavarokat okoz." },
+                    { question: "Az L5 ideggyök kompressziója milyen jellegzetes motoros gyengeséget okoz?", options: ["Térdfeszítés gyengesége.", "Lábujjhegyre állás nehezítettsége.", "Lábfej és nagylábujj emelésének gyengesége ('lógó lábfej').", "A csípő hajlításának gyengesége."], correct: 2, explanation: "Az L5 gyök idegzi be a lábfej és a lábujjak emelését végző izmokat. Kompressziója ezért dorsalflexiós gyengeséget, ún. 'foot drop'-ot eredményez." },
+                    { question: "Az S1 ideggyök kompressziója melyik ínreflex kiesését okozza?", options: ["Patellareflex", "Bicepsreflex", "Tricepsreflex", "Achilles-reflex"], correct: 3, explanation: "Az Achilles-reflexet (a lábfej plantárflexiója az ín megütésére) az S1 ideggyök közvetíti. Ennek gyöki kompressziója a reflex renyheségéhez vagy teljes kieséséhez vezet." },
+                    { question: "Mit jelent a 'lovaglónadrág' érzéskiesés?", options: ["A comb elülső részének zsibbadása.", "A lábfejek érzéketlensége.", "Érzéskiesés a gáttájékon, a nemi szervek körül és a combok belső felszínén.", "A derék övszerű zsibbadása."], correct: 2, explanation: "A 'lovaglónadrág' (saddle) anaesthesia/paraesthesia az S3-S5 szakrális dermatomáknak megfelelő érzészavart jelenti, és a Cauda Equina Szindróma egyik legfontosabb, alarmírozó tünete." },
+                    { question: "Hogyan befolyásolja a dohányzás a porckorongok állapotát?", options: ["Javítja a vérellátásukat.", "Nincs rá hatással.", "Károsítja a mikrokeringést, rontja a tápanyagellátást és gyorsítja a degenerációt.", "Erősíti a rostos gyűrűt."], correct: 2, explanation: "A dohányzásban lévő nikotin érszűkítő hatása rontja a porckorongok vérellátását és anyagcseréjét, ami felgyorsítja a degeneratív folyamatokat és növeli a derékfájás kockázatát." },
+                    { question: "Mi a porckorongok fő funkciója?", options: ["Izomtapadási helyet biztosítanak.", "Védik a gerincvelőt a direkt ütéstől.", "Lengéscsillapítás és a gerinc mozgékonyságának biztosítása.", "Vért termelnek."], correct: 2, explanation: "A porckorongok rugalmas 'párnákként' funkcionálnak a csigolyák között, elnyelik a terhelést (lengéscsillapítás) és lehetővé teszik a gerinc mozgásait." },
+                    { question: "Mi a nucleus pulposus?", options: ["A porckorong külső, rostos gyűrűje.", "A csigolyatest csontos része.", "A porckorong belső, kocsonyás, gélszerű magja.", "A gerincet stabilizáló szalag."], correct: 2, explanation: "A nucleus pulposus a porckorong központi, magas víztartalmú, kocsonyás magja, amely a hidrosztatikus nyomás révén a lengéscsillapításért felelős." },
+                    { question: "Melyik szalag akadályozza meg a gerinc túlzott előrehajlását (flexio) és a porckorongok hátrafelé türemkedését?", options: ["Ligamentum longitudinale anterius", "Ligamentum flavum", "Ligamentum longitudinale posterius", "Ligamentum supraspinale"], correct: 2, explanation: "A ligamentum longitudinale posterius a csigolyatestek hátsó felszínén fut, és a túlzott flexió gátlásával, valamint a porckorongok hátrafelé való elmozdulásának korlátozásával védi a gerinccsatorna tartalmát." },
+                    { question: "Mi az a spondylolisthesis?", options: ["A gerinccsatorna szűkülete.", "A porckorong gyulladása.", "Egy csigolya elcsúszása az alatta lévőhöz képest.", "A gerinc kóros oldalirányú görbülete."], correct: 2, explanation: "A spondylolisthesis egy csigolya előre- (vagy ritkábban hátra-) csúszását jelenti az alatta lévő csigolyán, ami instabilitást és idegi kompressziót okozhat." },
+                    { question: "A Lasègue-teszt (egyenes lábemelés) pozitivitása mire utal?", options: ["Csípőízületi problémára", "Izomrövidülésre a comb hátsó részén", "Az L4-S1 ideggyökök irritációjára vagy kompressziójára", "Általános derékfájásra"], correct: 2, explanation: "A pozitív Lasègue-teszt, ahol a láb emelése az alsó végtagba sugárzó fájdalmat provokál, az ülőideget alkotó L4-S1 gyökök becsípődésének vagy irritációjának klasszikus jele." },
+                    { question: "Milyen izomcsoport gyengesége okozhat nehézséget a lábujjhegyre állásban?", options: ["Musculus quadriceps femoris", "Musculus tibialis anterior", "A vádli izmai (m. gastrocnemius, m. soleus)", "Csípőhajlító izmok"], correct: 2, explanation: "A lábujjhegyre álláshoz a lábfej erős plantárflexiója szükséges, amit a vádli izmai végeznek. Ezek beidegzését az S1 ideggyök adja, így gyengeségük S1 gyöki kompresszióra utal." },
+                    { question: "Melyik állítás NEM igaz a nem specifikus derékfájásra?", options: ["Ez a derékfájás leggyakoribb formája.", "Hátterében általában izom- vagy szalageredetű probléma áll.", "Mindig az alsó végtagba sugárzó zsibbadással jár.", "Pihenésre, tehermentesítésre általában enyhül."], correct: 2, explanation: "A nem specifikus, mechanikai derékfájásra éppen az a jellemző, hogy a fájdalom a derékra korlátozódik, és nincsenek ideggyöki érintettségre utaló tünetek, mint a zsibbadás vagy a kisugárzó fájdalom." },
+                    { question: "Melyik testtartás enyhíti tipikusan a gerinccsatorna-szűkület tüneteit?", options: ["Homorítás (extensio)", "Egyenesen állás", "Előrehajlás (flexio)", "Oldalra hajlás"], correct: 2, explanation: "Az előrehajlás tágítja a gerinccsatornát és a forameneket, így csökkenti az idegi képletekre nehezedő nyomást. Ezért a betegek gyakran tapasztalnak enyhülést pl. bevásárlókocsi tolásakor vagy előre görnyedve ülve." },
+                    { question: "Miért fontos a törzsizomzat ('core' izomzat) ereje a derékfájás megelőzésében?", options: ["Mert esztétikusabbá teszi a testet.", "Mert stabilizálja a gerincet és csökkenti a porckorongokra nehezedő terhelést.", "Mert növeli a tüdőkapacitást.", "Mert javítja a lábak vérkeringését."], correct: 1, explanation: "Az erős has-, hát- és farizmok egy természetes 'fűzőt' képeznek a gerinc körül, ami stabilizálja az ágyéki szakaszt és tehermentesíti a passzív struktúrákat, mint a porckorongok és a szalagok." },
+                    { question: "Az ülőideg (n. ischiadicus) mely ideggyökökből fonódik össze?", options: ["L1-L3", "L2-L4", "L4-S3", "S2-S4"], correct: 2, explanation: "A nervus ischiadicus a plexus sacralisból ered, és az L4, L5, S1, S2 és S3 gerincvelői idegek elülső ágainak rostjaiból áll össze." }
+                ]
+            }
+        };
+
+        const app = {
+            // DOM Elements
+            topicSelectionScreen: document.getElementById('topic-selection'),
+            quizInterfaceScreen: document.getElementById('quiz-interface'),
+            finalScoreScreen: document.getElementById('final-score-screen'),
+            
+            topicContainer: document.querySelector('#topic-selection .grid'),
+            quizTitle: document.getElementById('quiz-title'),
+            scoreDisplay: document.getElementById('score'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationText: document.getElementById('explanation-text'),
+            
+            backToTopicsBtn: document.getElementById('back-to-topics'),
+            nextQuestionBtn: document.getElementById('next-question'),
+            
+            finalTopicTitle: document.getElementById('final-topic-title'),
+            finalScoreDisplay: document.getElementById('final-score'),
+            restartQuizBtn: document.getElementById('restart-quiz'),
+            changeTopicBtn: document.getElementById('change-topic'),
+
+            // State
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            questions: [],
+
+            init() {
+                this.renderTopicSelection();
+                this.addEventListeners();
+            },
+
+            addEventListeners() {
+                this.backToTopicsBtn.addEventListener('click', () => this.showScreen('topics'));
+                this.nextQuestionBtn.addEventListener('click', () => this.nextQuestion());
+                this.restartQuizBtn.addEventListener('click', () => this.startQuiz(this.currentTopic));
+                this.changeTopicBtn.addEventListener('click', () => this.showScreen('topics'));
+            },
+
+            renderTopicSelection() {
+                this.topicContainer.innerHTML = '';
+                Object.keys(quizData).forEach(key => {
+                    const topic = quizData[key];
+                    const button = document.createElement('button');
+                    button.className = "p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 text-left";
+                    button.innerHTML = `
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${topic.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">${topic.questions.length} kérdés</p>
+                    `;
+                    button.addEventListener('click', () => this.startQuiz(key));
+                    this.topicContainer.appendChild(button);
+                });
+            },
+
+            startQuiz(topicKey) {
+                this.currentTopic = topicKey;
+                this.questions = this.shuffleArray([...quizData[topicKey].questions]);
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.quizTitle.textContent = quizData[topicKey].title;
+                this.updateScore();
+                this.displayQuestion();
+                this.showScreen('quiz');
+            },
+
+            displayQuestion() {
+                this.explanationContainer.classList.add('hidden');
+                this.nextQuestionBtn.classList.add('disabled');
+                
+                if (this.currentQuestionIndex >= this.questions.length) {
+                    this.showFinalScore();
+                    return;
+                }
+
+                const question = this.questions[this.currentQuestionIndex];
+                this.questionText.textContent = question.question;
+                this.optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = "w-full text-left p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent quiz-option";
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.addEventListener('click', (e) => this.selectAnswer(e));
+                    this.optionsContainer.appendChild(button);
+                });
+
+                this.updateProgressBar();
+            },
+
+            selectAnswer(e) {
+                const selectedButton = e.target;
+                const selectedIndex = parseInt(selectedButton.dataset.index);
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedIndex === question.correct;
+
+                if (isCorrect) {
+                    this.score++;
+                    selectedButton.classList.add('correct');
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    // Highlight the correct answer
+                    const correctButton = this.optionsContainer.querySelector(`[data-index='${question.correct}']`);
+                    correctButton.classList.add('correct');
+                }
+
+                this.explanationText.textContent = question.explanation;
+                this.explanationContainer.classList.remove('hidden');
+                
+                Array.from(this.optionsContainer.children).forEach(btn => btn.classList.add('disabled'));
+                
+                this.nextQuestionBtn.classList.remove('disabled');
+                this.updateScore();
+            },
+
+            nextQuestion() {
+                this.currentQuestionIndex++;
+                this.displayQuestion();
+            },
+
+            updateScore() {
+                this.scoreDisplay.textContent = `Pontszám: ${this.score} / ${this.questions.length}`;
+            },
+
+            updateProgressBar() {
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            },
+
+            showFinalScore() {
+                this.finalTopicTitle.textContent = quizData[this.currentTopic].title;
+                this.finalScoreDisplay.textContent = `${this.score} / ${this.questions.length}`;
+                this.showScreen('final');
+            },
+
+            showScreen(screen) {
+                this.topicSelectionScreen.classList.add('hidden');
+                this.quizInterfaceScreen.classList.add('hidden');
+                this.finalScoreScreen.classList.add('hidden');
+
+                if (screen === 'topics') {
+                    this.topicSelectionScreen.classList.remove('hidden');
+                } else if (screen === 'quiz') {
+                    this.quizInterfaceScreen.classList.remove('hidden');
+                } else if (screen === 'final') {
+                    this.finalScoreScreen.classList.remove('hidden');
+                }
+            },
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        };
+
+        app.init();
+    </script>
+
+</body>
+</html>

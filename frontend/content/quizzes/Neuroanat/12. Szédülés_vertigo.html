@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vestibularis Rendszer és Vertigo - Vizuális Útmutató</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-vestibularis: #0ea5e9; /* Sky Blue */
+            --c-vestibularis-light: #f0f9ff;
+            --c-vestibularis-dark: #0369a1;
+            --c-szedules: #f43f5e; /* Rose */
+            --c-szedules-light: #fff1f2;
+            --c-szedules-dark: #be123c;
+            --c-bg: #f8fafc;
+            --c-text: #334155;
+            --c-light-text: #64748b;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--c-bg);
+            color: var(--c-text);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .sidebar {
+            background: linear-gradient(170deg, #1e293b, #0f172a);
+            color: #e2e8f0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--sidebar-width);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease-in-out;
+            z-index: 100;
+        }
+
+        .sidebar a {
+            transition: background-color 0.2s, color 0.2s, border-left-color 0.2s, transform 0.2s;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .sidebar a:hover {
+            background-color: #334155;
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+        .sidebar a.active {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        
+        .sidebar a[data-topic="vestibularis"].active { background-color: #0ea5e920; border-left-color: var(--c-vestibularis); }
+        .sidebar a[data-topic="szedules"].active { background-color: #f43f5e20; border-left-color: var(--c-szedules); }
+
+        .main-content {
+            padding: 2rem 3rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            border-left: 5px solid;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        ul { list-style: none; padding-left: 0.5rem; }
+        li { margin-bottom: 0.75rem; position: relative; padding-left: 1.75rem; }
+        li::before {
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0; top: 3px; font-size: 1rem;
+        }
+
+        .info-box {
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-left-width: 4px;
+        }
+        .info-box h5 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;}
+
+        /* Thematic coloring */
+        #vestibularis-topic .card { border-color: var(--c-vestibularis); }
+        #vestibularis-topic .card-header { background-color: var(--c-vestibularis); }
+        #vestibularis-topic li::before { content: '\f641'; color: var(--c-vestibularis-dark); }
+        #vestibularis-topic .info-box { background-color: var(--c-vestibularis-light); border-color: var(--c-vestibularis); }
+        #vestibularis-topic .info-box h5 { color: var(--c-vestibularis-dark); }
+        #vestibularis-topic thead th { background-color: var(--c-vestibularis); color: white; }
+
+        #szedules-topic .card { border-color: var(--c-szedules); }
+        #szedules-topic .card-header { background-color: var(--c-szedules); }
+        #szedules-topic li::before { content: '\f528'; color: var(--c-szedules-dark); }
+        #szedules-topic .info-box { background-color: var(--c-szedules-light); border-color: var(--c-szedules); }
+        #szedules-topic .info-box h5 { color: var(--c-szedules-dark); }
+        #szedules-topic thead th { background-color: var(--c-szedules); color: white; }
+
+        .img-container { margin: 1.5rem auto; text-align: center; max-width: 600px; }
+        .img-container img { max-width: 100%; height: auto; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .img-container figcaption { margin-top: 0.75rem; font-style: italic; color: var(--c-light-text); font-size: 0.9rem; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #e2e8f0; padding: 0.75rem 1rem; text-align: left; vertical-align: top; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        
+        .menu-button { display: none; }
+
+        @media (min-width: 1024px) {
+            .main-content {
+                margin-left: var(--sidebar-width);
+            }
+        }
+        
+        @media (max-width: 1023px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .menu-button { 
+                display: block; 
+                position: fixed; 
+                top: 1rem; 
+                left: 1rem; 
+                z-index: 110; 
+                background-color: #1e293b; 
+                color: white; 
+                border: none; 
+                padding: 0.75rem; 
+                border-radius: 0.5rem; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <button id="menu-button" class="menu-button">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <h2 class="text-2xl font-bold mb-8 text-center text-white"><i class="fas fa-compass mr-2"></i>Egyensúly Navigátor</h2>
+        <nav class="flex-grow">
+            <p class="text-sm font-bold uppercase text-slate-400 px-4 mb-2">Vestibularis Rendszer</p>
+            <a href="#periferias-szervek" data-topic="vestibularis"><i class="fas fa-ear-listen fa-fw w-6"></i>Perifériás szervek</a>
+            <a href="#centralis-rendszer" data-topic="vestibularis"><i class="fas fa-sitemap fa-fw w-6"></i>Centrális rendszer</a>
+            <a href="#vor" data-topic="vestibularis"><i class="fas fa-eye fa-fw w-6"></i>Vestibulo-Ocularis Reflex</a>
+            
+            <p class="text-sm font-bold uppercase text-slate-400 px-4 mt-6 mb-2">Szédülés és Vertigo</p>
+            <a href="#alapfogalmak" data-topic="szedules"><i class="fas fa-circle-question fa-fw w-6"></i>Alapfogalmak</a>
+            <a href="#periferias-vs-centralis" data-topic="szedules"><i class="fas fa-scale-unbalanced-flip fa-fw w-6"></i>Perifériás vs. Centrális</a>
+            <a href="#korkepek" data-topic="szedules"><i class="fas fa-stethoscope fa-fw w-6"></i>Gyakori kórképek</a>
+            <a href="#diagnosztika" data-topic="szedules"><i class="fas fa-magnifying-glass-chart fa-fw w-6"></i>Diagnosztika & HINTS</a>
+        </nav>
+        <div class="text-xs text-center text-slate-500 mt-4">
+            &copy; 2024 Vizuális Útmutató
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+        <section id="vestibularis-topic">
+            <h1 class="text-5xl font-extrabold text-slate-800 mb-2">A Vestibularis Rendszer</h1>
+            <p class="text-lg text-slate-600 mb-8">A test belső GPS-e és giroszkópja</p>
+
+            <div class="card" id="periferias-szervek">
+                <div class="card-header"><i class="fas fa-ear-listen"></i>Perifériás Vestibularis Szervek</div>
+                <div class="card-body">
+                    <p>A belső fül labirintusában rejtőzik a rendszer "hardvere", amely a fej mozgásait érzékeli.</p>
+                    <div class="img-container">
+                        <img src="https://placehold.co/600x400/e0f2fe/0369a1?text=A+belső+fül+egyensúlyozó+szerve" alt="[A belső fül egyensúlyozó szervének ábrája]">
+                        <figcaption>Az íves járatok és az otolith szervek a belső fülben.</figcaption>
+                    </div>
+
+                    <h4><i class="fa-solid fa-arrows-rotate"></i>Íves járatok (Canales Semicirculares)</h4>
+                    <ul>
+                        <li><strong>Feladat:</strong> A fej <strong>forgó</strong> mozgásainak (szöggyorsulás) érzékelése, mint egy giroszkóp.</li>
+                        <li><strong>Működés:</strong> A fej elfordulásakor a bennük lévő folyadék (endolympha) tehetetlensége miatt elmozdul, és elhajlítja a kocsonyás <strong>cupulát</strong>, ami ingerületbe hozza a benne lévő szőrsejteket. A három járat három különböző síkban érzékeli a forgást.</li>
+                    </ul>
+
+                    <h4><i class="fa-solid fa-car"></i>Otolith szervek (Utriculus & Sacculus)</h4>
+                    <ul>
+                        <li><strong>Feladat:</strong> A <strong>lineáris</strong> gyorsulás (pl. autóban indulás, lift) és a fej statikus, <strong>gravitációs</strong> helyzetének érzékelése.</li>
+                        <li><strong>Működés:</strong> A felületükön lévő nehéz kalcium-karbonát kristályok (<strong>otoconiumok</strong>) a gyorsulás vagy dőlés hatására elmozdítják az alattuk lévő membránt, ami ingerli a szőrsejteket.</li>
+                    </ul>
+                    
+                    <div class="info-box">
+                        <h5><i class="fa-solid fa-lightbulb"></i>Jegyezd meg! - Asszociáció</h5>
+                        <p><strong>Íves járatok:</strong> Képzelj el egy pohár vizet. Ha megforgatod a poharat, a víz "lemarad". Ugyanígy működnek az íves járatok is a forgás érzékelésekor.<br>
+                        <strong>Otolith szervek:</strong> Gondolj egy tál pudingra, aminek a tetején gyöngyök vannak. Ha megdöntöd a tálat, a gyöngyök elgurulnak. Az otoconiumok is így "gurulnak" el a gravitáció hatására.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="centralis-rendszer">
+                <div class="card-header"><i class="fa-solid fa-sitemap"></i>Centrális Vestibularis Rendszer és Pályák</div>
+                <div class="card-body">
+                     <p>A perifériáról érkező jeleket az agytörzs és a kisagy dolgozza fel, és hozza létre a megfelelő válaszokat.</p>
+                     <div class="img-container">
+                        <img src="https://placehold.co/600x500/ecfdf5/047857?text=Centrális+Vestibularis+Pályák" alt="[A vestibularis rendszer centrális pályáinak sematikus ábrája]">
+                        <figcaption>A vestibularis magokból kiinduló pályák összekötik a rendszert a szemmel, a gerincvelővel és a kisaggyal.</figcaption>
+                    </div>
+                    <ul>
+                        <li><strong>Nervus vestibularis (VIII. agyideg):</strong> Az "adatkábel", ami a perifériáról az agytörzsbe szállítja az információt.</li>
+                        <li><strong>Vestibularis magok:</strong> Az "irányítóközpont" az agytörzsben. Itt fut össze a vestibularis, látási és testérzékelő (proprioceptív) információ, hogy teljes képet kapjunk a helyzetünkről.</li>
+                        <li><strong>Főbb Kimeneti Pályák:</strong>
+                            <ul class="!list-['\25CF'] pl-6 mt-4">
+                                <li><strong><i class="fa-solid fa-diagram-project text-blue-500"></i>Kisagy felé:</strong> A mozgáskoordináció finomhangolása, a reflexek adaptálása.</li>
+                                <li><strong><i class="fa-solid fa-eye text-green-500"></i>Szemmozgató magok felé (FLM-en):</strong> Ez a <strong>Vestibulo-Ocularis Reflex (VOR)</strong> alapja, ami stabilizálja a tekintetet.</li>
+                                <li><strong><i class="fa-solid fa-person-walking text-orange-500"></i>Gerincvelő felé (Tr. vestibulospinales):</strong> A testtartás és az egyensúly fenntartása, az antigravitációs izmok tónusának beállítása.</li>
+                                <li><strong><i class="fa-solid fa-brain text-purple-500"></i>Agykéreg felé:</strong> A térbeli helyzet és a mozgás tudatosulása.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card" id="vor">
+                <div class="card-header"><i class="fa-solid fa-eye"></i>Vestibulo-Ocularis Reflex (VOR)</div>
+                <div class="card-body">
+                    <h4>A beépített képstabilizátor</h4>
+                    <p>A VOR egy kritikus fontosságú, szupergyors reflex, amely biztosítja a tiszta látást a fejmozgások közben. A fej bármilyen irányú elmozdulásakor a VOR a fej mozgásával ellentétes irányú, de azonos sebességű kompenzáló szemmozgásokat generál. Ezért tudsz olvasni akár rázós buszon is.</p>
+                    <p class="mt-4"><strong>Működése:</strong> Fejfordítás jobbra <i class="fa-solid fa-arrow-right"></i> VOR <i class="fa-solid fa-arrow-right"></i> Szemek elfordulnak balra.</p>
+                    <p class="mt-2">Sérülésekor a beteg <strong>oscillopsiát</strong> (a környezet látszólagos ugrálását) tapasztalja fejmozgáskor.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="szedules-topic">
+            <h1 class="text-5xl font-extrabold text-slate-800 mb-2">Szédülés és Vertigo</h1>
+            <p class="text-lg text-slate-600 mb-8">Az egyensúlyvesztés labirintusa</p>
+            
+            <div class="card" id="alapfogalmak">
+                <div class="card-header"><i class="fa-solid fa-circle-question"></i>Definíciók: Mit érez a beteg?</div>
+                <div class="card-body">
+                     <p>A "szédülés" egy gyűjtőfogalom. A pontos diagnózishoz kulcsfontosságú tisztázni, mit is él át a páciens valójában.</p>
+                    <ul>
+                        <li><strong>Szédülés (Dizziness):</strong> Bizonytalanság, kábultság, "könnyű fej" érzés.</li>
+                        <li><strong>Vertigo:</strong> A mozgás <strong>illúziója</strong>. A beteg vagy a környezete forog/dől.</li>
+                        <li><strong>Bizonytalanságérzés (Disequilibrium):</strong> Instabilitás állás vagy járás közben.</li>
+                        <li><strong>Presyncope (Ájulásérzés):</strong> Ájulásközeli állapot látászavarral, verejtékezéssel.</li>
+                    </ul>
+                    <div class="info-box">
+                        <h5><i class="fa-solid fa-user-doctor"></i>Klinikai Gyöngyszem</h5>
+                        <p>Mindig kérd meg a beteget, hogy a "szédülés" szó használata nélkül írja le a panaszát! Egy "forgó" érzés teljesen más irányba viszi a kivizsgálást, mint egy "mindjárt elájulok" érzés.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="periferias-vs-centralis">
+                <div class="card-header"><i class="fa-solid fa-scale-unbalanced-flip"></i>Perifériás vs. Centrális Vertigo</div>
+                <div class="card-body">
+                    <p>A vertigo eredetének megkülönböztetése életmentő lehet, mivel a centrális okok (pl. stroke) sürgős beavatkozást igényelhetnek.</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Jellemző</th>
+                                <th>👂 Perifériás Vertigo (Belső fül, ideg)</th>
+                                <th>🧠 Centrális Vertigo (Agytörzs, Kisagy)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Vertigo jellege</strong></td><td><span class="font-bold text-rose-600">🌀 Nagyon heves, forgó, rohamszerű</span></td><td>🌫️ Kevésbé intenzív, elhúzódó, "lebegő"</td></tr>
+                            <tr><td><strong>Nystagmus</strong></td><td>Egyirányú, fixációval gátolható</td><td><span class="font-bold text-rose-600">Irányváltó, vertikális</span>, fixációval nem gátolható</td></tr>
+                            <tr><td><strong>Tünetegyüttes</strong></td><td>🤝 Harmonikus (dőlés a beteg oldal felé)</td><td>🚧 Diszharmonikus (dőlés iránya változó)</td></tr>
+                            <tr><td><strong>Hallási tünetek</strong></td><td>🎧 Gyakori (halláscsökkenés, fülzúgás)</td><td>🔇 Ritka</td></tr>
+                            <tr><td><strong>Vegetatív tünetek</strong></td><td>🤢 Nagyon kifejezett (hányinger, hányás)</td><td>📉 Enyhe vagy hiányzik</td></tr>
+                            <tr><td><strong>Neurológiai gócjelek</strong></td><td>❌ Nincsenek</td><td><span class="font-bold text-rose-600">✔️ Gyakoriak</span> (kettőslátás, bénulás, stb.)</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="info-box">
+                        <h5><i class="fa-solid fa-lightbulb"></i>Asszociáció</h5>
+                        <p><strong>Perifériás:</strong> Gondolj rá úgy, mint egy "meghibásodott szenzorra" (a fül). Erős, de hibás jelet küld, ami heves tüneteket okoz, de a "processzor" (az agy) ép.<br>
+                        <strong>Centrális:</strong> Itt a "processzor" (az agy) a hibás. A bejövő adatok jók lehetnek, de a feldolgozásuk rossz, ami komplexebb és veszélyesebb tünetekhez vezet.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" id="korkepek">
+                <div class="card-header"><i class="fa-solid fa-stethoscope"></i>Gyakori Perifériás Kórképek</div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Benignus Paroxysmalis Pozicionális Vertigo (BPPV):</strong> A leggyakoribb vertigo. Elszabadult belső fül kristályok (otoconiák) okozzák. Fejhelyzet-változtatásra (<1 perc) heves, forgó szédülésrohamot vált ki. Kezelése: <strong>Epley-manőver</strong> (a kristályok "visszaterelése").</li>
+                        <li><strong>Menière-betegség:</strong> A belső fül folyadéknyomásának fokozódása. Klasszikus triász: órákig tartó vertigo rohamok, ingadozó halláscsökkenés, fülzúgás.</li>
+                        <li><strong>Vestibularis Neuritis:</strong> A vesztibuláris ideg gyulladása (vírusfertőzés után). Napokig tartó, heves vertigo, hányinger. <strong>A hallás ép!</strong></li>
+                        <li><strong>Labyrinthitis:</strong> A neuritishez hasonló, de halláscsökkenés és/vagy fülzúgás is társul hozzá.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card" id="diagnosztika">
+                <div class="card-header"><i class="fa-solid fa-magnifying-glass-chart"></i>Diagnosztika: A HINTS Protokoll</div>
+                <div class="card-body">
+                    <p>Akut, folyamatos vertigo esetén használt ágy melletti gyorsteszt a stroke és a neuritis elkülönítésére. Ha a betegnek csak egy tünete is "veszélyes", az centrális okra utal.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-center">
+                        <div class="p-4 rounded-lg bg-red-50 border border-red-200">
+                            <h4 class="text-red-700">H - Head Impulse</h4>
+                            <p><strong>Veszélyes:</strong> Normális (negatív) teszt. A szem a célponton marad a fejfordításkor.</p>
+                            <p class="text-sm">(A kóros teszt jó jel, perifériás okra utal).</p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-red-50 border border-red-200">
+                            <h4 class="text-red-700">IN - Nystagmus</h4>
+                            <p><strong>Veszélyes:</strong> Irányváltó, tekintésirányú vagy vertikális nystagmus.</p>
+                        </div>
+                         <div class="p-4 rounded-lg bg-red-50 border border-red-200">
+                            <h4 class="text-red-700">TS - Test of Skew</h4>
+                            <p><strong>Veszélyes:</strong> Skew deviáció (vertikális szemeltérés) jelenléte.</p>
+                        </div>
+                    </div>
+                     <div class="info-box mt-6 !border-red-500 !bg-red-100">
+                        <h5 class="!text-red-700"><i class="fa-solid fa-triangle-exclamation"></i>Vészjelző!</h5>
+                        <p>Egyetlen "veszélyes" HINTS lelet (negatív HIT, VAGY irányváltó nystagmus, VAGY skew deviáció) nagyon erős gyanút vet fel stroke-ra, még akkor is, ha egyéb neurológiai gócjel nincs! Azonnali MRI vizsgálat szükséges!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.sidebar a');
+            const scrollTargets = document.querySelectorAll('main .card[id]');
+            const sidebar = document.getElementById('sidebar');
+            const menuButton = document.getElementById('menu-button');
+            const mainContent = document.getElementById('main-content');
+
+            // --- Smooth scrolling ---
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        // Calculate position to scroll to
+                        const headerOffset = 20; // Extra space from top
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                    if (window.innerWidth < 1024) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+
+            // --- Active link on scroll using Intersection Observer ---
+            const observer = new IntersectionObserver(entries => {
+                // Find the entry that is most visible in the viewport
+                let bestEntry = null;
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
+                           bestEntry = entry;
+                        }
+                    }
+                });
+                
+                if (bestEntry) {
+                    const id = bestEntry.target.id;
+                    history.replaceState(null, null, `#${id}`);
+                    navLinks.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                    });
+                }
+            }, {
+                threshold: [0.1, 0.5, 0.9], // Fire at multiple visibility thresholds
+            });
+
+            scrollTargets.forEach(target => {
+                observer.observe(target);
+            });
+
+            // --- Mobile Menu Toggle ---
+            menuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('open');
+            });
+
+            // --- Close sidebar on click outside ---
+            document.addEventListener('click', (e) => {
+                 if (window.innerWidth < 1024 && sidebar.classList.contains('open')) {
+                    if (!sidebar.contains(e.target) && e.target !== menuButton) {
+                        sidebar.classList.remove('open');
+                    }
+                 }
+            });
+        });
+    </script>
+</body>
+</html>

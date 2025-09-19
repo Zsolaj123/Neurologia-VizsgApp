@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5; /* green-100 */
+            border-color: #10b981; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .explanation.visible {
+            max-height: 500px; /* Adjust as needed */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-4xl mx-auto">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h1 class="text-3xl font-bold mb-2 text-gray-700">Neurológiai Vizsga Kvíz</h1>
+                <p class="text-gray-600 mb-8">Válasszon egy témakört a kezdéshez.</p>
+                <div id="topic-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Topic buttons will be inserted here by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="quiz-title" class="text-xl md:text-2xl font-bold text-gray-700">Téma Címe</h2>
+                    <span id="question-counter" class="text-sm font-semibold text-gray-500">1 / 20</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-lg md:text-xl font-semibold mb-6 min-h-[60px]"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="mt-6">
+                    <div id="explanation-box" class="explanation bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
+                        <h4 class="font-bold text-gray-700 mb-2">Magyarázat:</h4>
+                        <p id="explanation-text" class="text-gray-600"></p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-question-btn" class="hidden bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-3xl font-bold mb-4 text-gray-700">Eredmények</h2>
+                <p id="score-text" class="text-5xl font-bold my-6 text-blue-600">18 / 20</p>
+                <p id="score-message" class="text-lg text-gray-600 mb-8">Kiváló munka!</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-quiz-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">Teszt újraindítása</button>
+                    <button id="back-to-topics-btn" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors">Vissza a témákhoz</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA: Questions, Options, Explanations ---
+        const quizData = {
+            "transplant": {
+                title: "Szervtranszplantációk neurológiája",
+                questions: [
+                    {
+                        question: "Melyik a leggyakoribb neurológiai szövődmény szolid szervtranszplantációt követően?",
+                        options: ["Görcsrohamok", "Encephalopathia", "Stroke", "KIR fertőzések"],
+                        answer: 1,
+                        explanation: "Az encephalopathia (megváltozott mentális állapot, delírium, letargia, kóma) a leggyakoribb neurológiai zavar a transzplantált betegeknél, incidenciája a szervtől függően 9-75% között mozog."
+                    },
+                    {
+                        question: "Melyik immunszuppresszív gyógyszercsoport okoz leggyakrabban neurotoxicitást, beleértve a PRES-t is?",
+                        options: ["Kortikoszteroidok", "mTOR gátlók (pl. szirolimusz)", "Kalcineurin gátlók (CNI) (pl. takrolimusz, ciklosporin)", "Monoklonális antitestek (pl. OKT3)"],
+                        answer: 2,
+                        explanation: "A kalcineurin gátlók (CNI), mint a ciklosporin és különösen a takrolimusz, a neurotoxicitás legfőbb okozói. Gyakran okoznak tremort, fejfájást, görcsrohamokat, és a Posterior Reversible Encephalopathy Syndrome (PRES) kialakulásában is kulcsszerepet játszanak."
+                    },
+                    {
+                        question: "Mi a Posterior Reversible Encephalopathy Syndrome (PRES) klasszikus tünetegyüttese?",
+                        options: ["Láz, tarkómerevség, fejfájás", "Féloldali bénulás és beszédzavar", "Akut fejfájás, látászavarok, zavartság és görcsrohamok", "Progresszív memóriazavar és apátia"],
+                        answer: 2,
+                        explanation: "A PRES egy klinikai-radiológiai entitás, amelyet akut tünetek, mint fejfájás, látászavarok, zavartság és görcsrohamok jellemeznek, a képalkotón pedig jellegzetes, általában reverzibilis vazogén ödéma látható a hátsó agyi területeken."
+                    },
+                    {
+                        question: "Melyik vírus játszik központi szerepet a poszttranszplantációs limfoproliferatív betegség (PTLD) kialakulásában?",
+                        options: ["Citomegalovírus (CMV)", "Herpes simplex vírus (HSV)", "JC vírus", "Epstein-Barr vírus (EBV)"],
+                        answer: 3,
+                        explanation: "A PTLD eseteinek többsége az Epstein-Barr vírussal (EBV) hozható összefüggésbe, amely az immunszuppresszió miatt reaktiválódik és a B-sejtek kontrollálatlan növekedését okozza."
+                    },
+                    {
+                        question: "Melyik szerv transzplantációja után a leggyakoribb a stroke, mint neurológiai szövődmény?",
+                        options: ["Májtranszplantáció", "Tüdőtranszplantáció", "Vesetranszplantáció", "Szívtranszplantáció"],
+                        answer: 2,
+                        explanation: "Veseátültetett betegeknél a stroke a leggyakoribb neurológiai szövődmény. Szívtranszplantáció után is gyakori, de a vesetranszplantált populációban kiemelkedő."
+                    },
+                    {
+                        question: "Mi a központi pontin myelinolysis (CPM) és melyik transzplantációhoz köthető leginkább?",
+                        options: ["Agyi fertőzés, tüdőtranszplantációhoz", "Demielinizációs szindróma, májtranszplantációhoz", "Agyvérzés, szívtranszplantációhoz", "Agydaganat, vesetranszplantációhoz"],
+                        answer: 1,
+                        explanation: "A központi pontin myelinolysis (CPM) egy demielinizációs szindróma, amely a nátriumszint túl gyors korrekciójához köthető. Viszonylag specifikus a májtranszplantált recipiensekre az intraoperatív elektrolit/ozmolaritás változások miatt."
+                    },
+                    {
+                        question: "Milyen prognózisúak a KIR fertőzések szervátültetettek körében?",
+                        options: ["Általában enyhék és könnyen kezelhetők", "Ritkák, de magas mortalitással és maradandó károsodással járnak", "Gyakoriak, de jó prognózisúak", "Csak a transzplantáció utáni első héten jelentenek veszélyt"],
+                        answer: 1,
+                        explanation: "A KIR fertőzések ritkák, de rendkívül súlyosak, magas (akár 42%-os) halálozási aránnyal és a túlélők körében gyakori (akár 73%-os) hosszú távú neurológiai következményekkel járnak."
+                    },
+                    {
+                        question: "Mi a teendő immunszuppresszáns okozta neurotoxicitás esetén?",
+                        options: ["Azonnal leállítani minden immunszuppresszáns gyógyszert", "A dózis csökkentése vagy a gyógyszer váltása", "Nincs teendő, a tünetek spontán megszűnnek", "Kortikoszteroid lökéskezelés"],
+                        answer: 1,
+                        explanation: "A kezelés az immunszuppresszáns dózisának csökkentéséből, vagy a szer típusának megváltoztatásából (pl. takrolimuszról ciklosporinra) áll, a gyógyszerszintek szigorú monitorozása mellett."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás az elsődleges választás a legtöbb poszttranszplantációs neurológiai szövődmény gyanúja esetén?",
+                        options: ["Koponya CT kontrasztanyaggal", "Agyi MRI gadolínium kontraszttal", "SPECT", "Koponya röntgen"],
+                        answer: 1,
+                        explanation: "Az agyi MRI gadolínium kontraszttal a legtöbb esetben az elsődleges vizsgálat, mivel nagy érzékenységgel képes kimutatni a vaszkuláris eseményeket, a PRES-re jellemző ödémát, fertőzéseket és a PTLD jeleit."
+                    },
+                    {
+                        question: "Milyen tünetekkel jár leggyakrabban a KIR-t érintő PTLD?",
+                        options: ["Csak fejfájással", "Kognitív zavarokkal, fokális neurológiai deficittel, görcsrohamokkal", "Csak meningeális izgalmi jelekkel", "Izomgyengeséggel és érzészavarral a végtagokban"],
+                        answer: 1,
+                        explanation: "A KIR érintettségű PTLD neurológiai tünetei közé tartoznak a kognitív zavarok, fókális neurológiai deficit, fejfájás és görcsrohamok."
+                    },
+                    {
+                        question: "Mi a leggyakoribb neurológiai szövődmény tüdőtranszplantáció után?",
+                        options: ["Stroke", "Görcsrohamok", "Posztoperatív delírium", "PRES"],
+                        answer: 2,
+                        explanation: "Tüdőtranszplantáció után a leggyakoribb szövődmény a posztoperatív delírium (encephalopathia), amely a betegek akár 40%-át is érintheti, és jelentősen meghosszabbítja a kórházi tartózkodást."
+                    },
+                    {
+                        question: "Melyik elektrolitzavar okozhat görcsrohamokat és zavartságot transzplantált betegeknél?",
+                        options: ["Hyperkalaemia", "Hypocalcaemia", "Hypomagnesaemia és hyponatraemia", "Hyperphosphataemia"],
+                        answer: 2,
+                        explanation: "A hypomagnesaemia és a hyponatraemia egyaránt okozhatnak zavartságot és görcsrohamokat, és gyakoriak a poszttranszplantációs időszakban, részben az immunszuppresszánsok hatása miatt."
+                    },
+                    {
+                        question: "Milyen szerepe van az elektroencephalográfiának (EEG) a poszttranszplantációs ellátásban?",
+                        options: ["Agyi daganatok kimutatása", "A stroke diagnosztizálása", "A nem epilepsziás rohamok kizárása és a rohamtípus meghatározása", "A vér-agy gát épségének vizsgálata"],
+                        answer: 2,
+                        explanation: "Az EEG elengedhetetlen a görcsrohamok kivizsgálásában, segít elkülöníteni az epilepsziás rohamokat más eseményektől, és fontos a nem konvulzív status epilepticus diagnosztizálásában, ami a tartós kóma egyik oka lehet."
+                    },
+                    {
+                        question: "Melyik állítás igaz a takrolimusz és a ciklosporin neurotoxicitására?",
+                        options: ["A ciklosporin sokkal neurotoxikusabb", "A takrolimusz gyakrabban és súlyosabban okoz neurotoxicitást", "Mindkettő egyformán neurotoxikus", "Egyik sem okoz neurotoxicitást"],
+                        answer: 1,
+                        explanation: "Bár mindkét CNI neurotoxikus lehet, a klinikai tapasztalatok és a vizsgálatok szerint a takrolimusz gyakrabban és súlyosabb neurotoxikus mellékhatásokkal jár, mint a ciklosporin."
+                    },
+                    {
+                        question: "Milyen diagnosztikai módszer bizonyult különösen értékesnek a nehezen detektálható KIR fertőzések azonosításában?",
+                        options: ["Liquor tenyésztés", "Vérkultúra", "Metagenomikus következő generációs szekvenálás (mNGS) a liquorból", "Agyi biopszia"],
+                        answer: 2,
+                        explanation: "A CSF mNGS kritikusnak bizonyult a diagnózisban, mivel az esetek jelentős részében (79%) ez azonosította a kórokozót, amelyet a hagyományos tenyésztési módszerek nem mutattak ki."
+                    },
+                    {
+                        question: "Melyik gyógyszer okozhat jellegzetesen citokin felszabadulási szindrómát és aszeptikus meningitist?",
+                        options: ["Takrolimusz", "Kortikoszteroidok", "OKT3", "Szirolimusz"],
+                        answer: 2,
+                        explanation: "Az OKT3 egy monoklonális antitest, amelynek jellegzetes mellékhatása a citokin felszabadulási szindróma, ami aszeptikus meningitist és encephalopathiát okozhat."
+                    },
+                    {
+                        question: "Miért fontos a neurológus bevonása a transzplantációs csapat munkájába?",
+                        options: ["Csak a gyógyszerek felírására", "A neurológiai szövődmények korai felismerése, diagnosztizálása és kezelése miatt", "Csak a műtét utáni rehabilitációhoz", "Nincs szükség neurológusra"],
+                        answer: 1,
+                        explanation: "A neurológusok szerepe kulcsfontosságú a transzplantáció előtti értékeléstől a posztoperatív szövődmények (delírium, stroke, görcsök stb.) kezeléséig, javítva a betegek kimenetelét."
+                    },
+                    {
+                        question: "Milyen hosszú távú kockázatot jelent a PRES a betegek számára?",
+                        options: ["Nincs hosszú távú kockázata", "Megnövekedett stroke kockázatot", "Demencia kialakulását", "Krónikus fejfájást"],
+                        answer: 1,
+                        explanation: "Bár a PRES elnevezése a reverzibilitásra utal, a szindrómán átesett betegeknél megnövekedett a hosszú távú stroke kockázata."
+                    },
+                    {
+                        question: "Milyen típusú stroke a leggyakoribb szívtranszplantáció után?",
+                        options: ["Vérzéses stroke", "Ischaemiás stroke", "Vénás sinus thrombosis", "Mindegyik egyforma gyakoriságú"],
+                        answer: 1,
+                        explanation: "Szívtranszplantáció után az ischaemiás stroke a leggyakoribb cerebrovaszkuláris esemény, melynek hátterében gyakran szív eredetű embólia vagy hemodinamikai instabilitás áll."
+                    },
+                    {
+                        question: "A KIR fertőzések leggyakrabban mikor jelentkeznek a transzplantációt követően?",
+                        options: ["Csak a műtét napján", "Az első 1-6 hónapban", "Csak 5 év után", "Bármikor egyforma eséllyel"],
+                        answer: 1,
+                        explanation: "Bár a fertőzések bármikor előfordulhatnak, a legmagasabb incidenciát az első 1-6 hónapban figyelték meg, amikor az immunszuppresszió mértéke a legerősebb."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy transzplantált betegnél a műtét után elmarad az ébredés?",
+                        options: ["Várni türelmesen, ez normális", "Súlyos intraoperatív KIR eseményre (pl. HIE, stroke) kell gyanakodni és kivizsgálni", "További szedatívumokat adni", "Csak a vérnyomást kell ellenőrizni"],
+                        answer: 1,
+                        explanation: "A műtét utáni elmaradt ébredés súlyos intraoperatív központi idegrendszeri eseményre, mint például hipoxiás-ischaemiás encephalopathia (HIE) vagy diffúz vaszkuláris inzultusok gyanúját veti fel, és sürgős neurológiai kivizsgálást (képalkotó, EEG) tesz szükségessé."
+                    }
+                ]
+            },
+            "substance": {
+                title: "Alkohol és kábítószerek neurológiája",
+                questions: [
+                    {
+                        question: "Mi a Wernicke-Korsakoff szindróma (WKS) alapvető oka?",
+                        options: ["B12-vitamin hiány", "Az alkohol direkt neurotoxikus hatása", "B1-vitamin (tiamin) hiány", "Folsavhiány"],
+                        answer: 2,
+                        explanation: "A WKS alapvető oka a tiamin (B1-vitamin) hiánya, amely kulcsszerepet játszik az agy energia-anyagcseréjében. A krónikus alkoholizmus gátolja a tiamin felszívódását és gyakran alultápláltsággal jár."
+                    },
+                    {
+                        question: "Melyik tünetegyüttes NEM része a Wernicke-encephalopathia klasszikus triászának?",
+                        options: ["Ataxia", "Konfúzió", "Ophthalmoplegia", "Amnézia"],
+                        answer: 3,
+                        explanation: "A klasszikus triász a konfúzió (mentális státusz változása), az ataxia (járászavar) és az ophthalmoplegia (szemmozgászavar). Az amnézia a krónikus fázis, a Korsakoff-szindróma fő tünete."
+                    },
+                    {
+                        question: "Milyen típusú neuropathiát okoz leggyakrabban a krónikus alkoholizmus?",
+                        options: ["Főként motoros, demielinizációs neuropathiát", "Akut, felszálló bénulást", "Distalis, szimmetrikus, axonális szenzoros-motoros neuropathiát", "Mononeuritis multiplexet"],
+                        answer: 2,
+                        explanation: "Az alkoholos neuropátia jellemzően egy distalis, szimmetrikus, 'kesztyű-harisnya' eloszlású polyneuropathia, amelynek hátterében elsősorban az axonok károsodása (axonális degeneráció) áll, és a szenzoros tünetek (zsibbadás, égő fájdalom) dominálnak."
+                    },
+                    {
+                        question: "Melyik agyterület károsodik leginkább az alkoholos cerebelláris degeneráció során?",
+                        options: ["A kisagyi féltekék", "A nucleus dentatus", "Az anterior superior vermis", "A flocculonodularis lebeny"],
+                        answer: 2,
+                        explanation: "A cerebelláris degeneráció leggyakrabban az anterior superior vermis szöveti térfogatvesztésével jár, ami elsősorban a Purkinje sejtek károsodásának köszönhető."
+                    },
+                    {
+                        question: "Mi a 'konfabuláció', a Korsakoff-szindróma egyik jellegzetes tünete?",
+                        options: ["Szándékos hazudozás", "Vizuális hallucinációk", "Emlékezeti hézagok kitöltése valótlan, kitalált történetekkel", "A szavak jelentésének meg nem értése"],
+                        answer: 2,
+                        explanation: "A konfabuláció során a beteg a memóriájában lévő hiányosságokat öntudatlanul, nem szándékosan tölti ki valótlan, de számára logikusnak tűnő történetekkel."
+                    },
+                    {
+                        question: "Melyik gyógyszer-asszisztált terápia (MAT) NEM használatos opioidhasználati zavar (OUD) kezelésére?",
+                        options: ["Metadon", "Buprenorfin", "Naltrexon", "Naloxon"],
+                        answer: 3,
+                        explanation: "A naloxon egy gyors hatású opioid antagonista, amelyet akut opioid túladagolás életmentő kezelésére használnak, de nem a hosszú távú fenntartó kezelésre (MAT)."
+                    },
+                    {
+                        question: "Melyik a legjelentősebb, életveszélyes neurológiai kockázata az akut stimuláns (pl. kokain, amfetamin) használatnak?",
+                        options: ["Cerebelláris ataxia", "Perifériás neuropathia", "Cerebrovaszkuláris események (stroke)", "Wernicke-encephalopathia"],
+                        answer: 2,
+                        explanation: "A stimulánsok által kiváltott hirtelen, extrém vérnyomás-emelkedés és érszűkület (vasospasmus) jelentősen növeli az ischaemiás és a vérzéses stroke kockázatát."
+                    },
+                    {
+                        question: "Mi a kannabinoid hyperemesis szindróma (CHS) jellegzetes tünete?",
+                        options: ["Súlyos fejfájás és látászavar", "Kezelhetetlen hányinger, hányás és a forró zuhany iránti vágy", "Izomgörcsök és remegés", "Eufória és hallucinációk"],
+                        answer: 1,
+                        explanation: "A CHS-t a krónikus kannabiszhasználók körében előforduló, kezelhetetlen hányinger, hányás és hasi fájdalom jellemzi, amely paradox módon forró fürdő vagy zuhany hatására enyhül."
+                    },
+                    {
+                        question: "Mi a Hallucinogen Persisting Perception Disorder (HPPD)?",
+                        options: ["A hallucinogén hatásának állandó fennmaradása", "A szerhasználat után is tartósan fennálló vizuális zavarok (flashbackek)", "A hallucinogének által kiváltott akut pszichózis", "A hallucinogénekkel szembeni tolerancia"],
+                        answer: 1,
+                        explanation: "A HPPD egy ritka állapot, ahol a perceptuális zavarok (pl. vizuális torzulások, 'visual snow', flashbackek) hónapokig vagy évekig fennállnak a szerhasználat abbahagyása után is."
+                    },
+                    {
+                        question: "Mi az alkoholos demencia (ARBD) és az Alzheimer-kór közötti fő különbség a progresszió szempontjából?",
+                        options: ["Az ARBD gyorsabban progrediál", "Az ARBD nem progresszív, ha az alkoholfogyasztás megszűnik", "Az Alzheimer-kór visszafordítható", "Nincs különbség"],
+                        answer: 1,
+                        explanation: "Az ARBD nem feltétlenül progrediál tovább, ha a beteg absztinenssé válik, sőt, részleges javulás is lehetséges. Ezzel szemben az Alzheimer-kór egy folyamatosan progrediáló neurodegeneratív betegség."
+                    },
+                    {
+                        question: "Melyik neurotranszmitter rendszer működését zavarják elsődlegesen a klasszikus hallucinogének, mint az LSD?",
+                        options: ["Dopaminerg rendszer", "Szerotonerg rendszer (főleg 5-HT2A receptorok)", "Kolinerg rendszer", "GABAerg rendszer"],
+                        answer: 1,
+                        explanation: "A klasszikus hallucinogének (pl. LSD, pszilocibin) elsősorban az 5-HT2A szerotonin receptorokon keresztül fejtik ki hatásukat, megzavarva a szenzoros információk feldolgozását."
+                    },
+                    {
+                        question: "Mi a legfontosabb első lépés az alkoholos neuropátia kezelésében?",
+                        options: ["Magas dózisú fájdalomcsillapítók", "Azonnali fizikoterápia", "Teljes alkoholabsztinencia", "Sebészeti beavatkozás"],
+                        answer: 2,
+                        explanation: "Az alkoholos neuropátia kezelésének abszolút alapja és legfontosabb lépése az alkoholról való teljes leszokás, mivel ez állíthatja meg az idegkárosodás további progresszióját."
+                    },
+                    {
+                        question: "Melyik állítás igaz a DSM-5 szerhasználati zavarok diagnosztikai rendszerére?",
+                        options: ["Csak a fizikai függőséget veszi figyelembe", "Különbséget tesz abúzus és dependencia között", "11 kritérium alapján, súlyossági fokozatok szerint osztályoz", "Csak illegális szerekre alkalmazható"],
+                        answer: 2,
+                        explanation: "A DSM-5 megszüntette az abúzus/dependencia megkülönböztetést, és egy egységes 'szerhasználati zavar' kategóriát hozott létre, amelyet 11 kritérium alapján, a tünetek számától függően enyhe, közepes vagy súlyos fokozatba sorol."
+                    },
+                    {
+                        question: "Milyen hatással van a kokain a dopamin szintre a szinaptikus résben?",
+                        options: ["Gátolja a dopamin szintézisét", "Blokkolja a dopamin transzportert, növelve a dopamin szintjét", "Lebontja a dopamint", "Nincs hatása a dopaminra"],
+                        answer: 1,
+                        explanation: "A kokain a dopamin transzporter fehérjét blokkolja, megakadályozva a dopamin visszavételét a preszinaptikus sejtbe. Ez a dopamin koncentrációjának növekedéséhez vezet a szinaptikus résben, ami az eufóriáért és a függőségért felelős."
+                    },
+                    {
+                        question: "Milyen autonóm idegrendszeri tünetekkel járhat az alkoholos neuropátia?",
+                        options: ["Csak izzadási zavarokkal", "Orthostaticus hypotensio, emésztési zavarok, szexuális diszfunkció", "Csak szapora szívveréssel", "Csak lassú szívveréssel"],
+                        answer: 1,
+                        explanation: "Az autonóm idegek károsodása széleskörű tüneteket okozhat, beleértve a felálláskor jelentkező vérnyomásesést (orthostaticus hypotensio), emésztési problémákat (hasmenés, székrekedés) és szexuális diszfunkciót."
+                    },
+                    {
+                        question: "Mi a disszociatív anesztetikumok (pl. PCP, ketamin) fő hatásmechanizmusa?",
+                        options: ["A szerotonin receptorok agonistái", "A dopamin receptorok blokkolói", "A glutamát NMDA receptorainak antagonistái", "Az opioid receptorok agonistái"],
+                        answer: 2,
+                        explanation: "A PCP és a ketamin elsődlegesen a glutamát NMDA receptorainak nem-kompetitív antagonistáiként hatnak, ami a glutamát jelátvitel megzavarásához és disszociatív (valóságtól elszakadt) élményekhez vezet."
+                    },
+                    {
+                        question: "Milyen hosszú távú neurológiai károsodást okozhatnak az inhalánsok (szipuzás)?",
+                        options: ["Csak átmeneti fejfájást", "Diffúz fehérállományi károsodást (toxikus leukoencephalopathia) és cerebelláris atrófiát", "Fokozott memóriaképességet", "Csak perifériás neuropathiát"],
+                        answer: 1,
+                        explanation: "Az inhalánsok súlyos és gyakran irreverzibilis agykárosodást okozhatnak, beleértve a diffúz fehérállományi károsodást, a kisagy zsugorodását (cerebelláris atrófia) és súlyos kognitív hanyatlást."
+                    },
+                    {
+                        question: "Mi a 'craving' a szerhasználati zavarok kontextusában?",
+                        options: ["A szer elvonási tünete", "Erős, leküzdhetetlen vágy vagy késztetés a szer használatára", "A szerrel szembeni tolerancia", "A szerhasználat szociális következménye"],
+                        answer: 1,
+                        explanation: "A craving, vagy sóvárgás, a szerhasználati zavarok egyik központi tünete, amely egy intenzív, gyakran kontrollálhatatlan vágyat jelent a szer újbóli használatára."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Wernicke-encephalopathia kezelésére?",
+                        options: ["A tiamint szájon át kell pótolni", "A kezelés megkezdése előtt meg kell várni a laboreredményeket", "Azonnali, nagy dózisú intravénás tiamin adása szükséges", "A kezelés főleg a folyadékpótlásból áll"],
+                        answer: 2,
+                        explanation: "WE gyanúja esetén a kezelést azonnal, a diagnózis megerősítése előtt el kell kezdeni nagy dózisú, parenterális (intravénás) tiaminnal a visszafordíthatatlan agykárosodás (Korsakoff-szindróma) megelőzése érdekében."
+                    },
+                    {
+                        question: "Milyen agyi jutalmazó központok játszanak kulcsszerepet az opioid függőség kialakulásában?",
+                        options: ["Hippokampusz és amygdala", "Cerebellum és agytörzs", "Ventrális tegmentális terület (VTA) és nucleus accumbens (NAc)", "Prefrontális kéreg és talamusz"],
+                        answer: 2,
+                        explanation: "Az opioidok a VTA-ban és a NAc-ben váltanak ki dopamin felszabadulást. Ez az agyi jutalmazó pálya kulcsfontosságú az örömérzet kialakulásában és a függőség neurobiológiai alapjaiban."
+                    },
+                    {
+                        question: "Milyen kockázatot jelent a kannabisz használata serdülőkorban a neurokognitív funkciókra?",
+                        options: ["Javítja a memóriát", "Nincs hatással a kognitív funkciókra", "Tartós figyelem-, memória- és feldolgozási sebesség hiányosságokat okozhat", "Csak átmeneti, rövid távú hatásai vannak"],
+                        answer: 2,
+                        explanation: "A serdülőkori agy különösen érzékeny a kannabisz hatásaira. A korai és rendszeres használat tartós károsodást okozhat a fejlődő kognitív funkciókban, különösen a figyelem, a tanulás és a memória területén."
+                    }
+                ]
+            },
+            "sleep": {
+                title: "Alvászavarok kivizsgálása és kezelése",
+                questions: [
+                    {
+                        question: "Mi a krónikus insomnia első vonalbeli, javasolt kezelése a legtöbb nemzetközi irányelv szerint?",
+                        options: ["Benzodiazepinek", "Kognitív Viselkedésterápia Insomniára (CBT-I)", "Antihisztaminok", "Melatonin"],
+                        answer: 1,
+                        explanation: "A CBT-I az álmatlanság első vonalbeli kezelése, mivel hosszú távon hatékonyabb és kevesebb mellékhatással jár, mint a gyógyszeres kezelések. Célja az alvással kapcsolatos káros gondolatok és viselkedések megváltoztatása."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb alvászavar, amely a felnőtt lakosság jelentős részét érinti?",
+                        options: ["Narkolepszia", "REM Alvás Viselkedészavar (RBD)", "Obstruktív Alvási Apnoe (OSA)", "Nyugtalan Láb Szindróma (RLS)"],
+                        answer: 2,
+                        explanation: "Az obstruktív alvási apnoe (OSA) rendkívül gyakori, a becslések szerint a felnőtt férfiak akár 17%-át és a nők 9%-át is érintheti, de a betegek nagy része diagnosztizálatlan."
+                    },
+                    {
+                        question: "Mi a poliszomnográfia (PSG) szerepe az alvásdiagnosztikában?",
+                        options: ["Egyszerű otthoni szűrővizsgálat", "Az alvásdiagnosztika 'arany standardja', amely átfogóan méri az alvás alatti élettani funkciókat", "Csak a horkolás mérésére szolgál", "Kizárólag a nappali álmosságot méri"],
+                        answer: 1,
+                        explanation: "A PSG az alvásvizsgálatok aranystandardja. Laboratóriumi körülmények között, több csatornán (EEG, EOG, EMG, EKG, légzés, oximetria) rögzíti az alvás alatti élettani paramétereket, lehetővé téve a legtöbb alvászavar pontos diagnózisát."
+                    },
+                    {
+                        question: "Melyik tünetegyüttes NEM része a narkolepszia klasszikus tetrádjának?",
+                        options: ["Túlzott nappali álmosság (EDS)", "Kataplexia", "Alvási paralízis", "Hangos horkolás"],
+                        answer: 3,
+                        explanation: "A narkolepszia klasszikus tünetei az EDS, a kataplexia (érzelmek által kiváltott hirtelen izomtónus-vesztés), a hipnagóg/hipnopompikus hallucinációk és az alvási paralízis. A hangos horkolás az OSA jellemzője."
+                    },
+                    {
+                        question: "Mire utal az 'URGE' mozaikszó a Nyugtalan Láb Szindróma (RLS) diagnosztikájában?",
+                        options: ["A betegség súlyossági fokozataira", "A kezelési lehetőségekre", "A négy kardinális diagnosztikai kritériumra", "A leggyakoribb társbetegségekre"],
+                        answer: 2,
+                        explanation: "Az URGE a négy alapvető diagnosztikai kritériumot foglalja össze: (U)rge to move - mozgáskényszer, (R)est worsens - nyugalomban rosszabbodik, (G)et up and move helps - mozgásra enyhül, (E)vening/night predominance - este/éjjel dominál."
+                    },
+                    {
+                        question: "Milyen neurodegeneratív betegség korai jele lehet a REM Alvás Viselkedészavar (RBD)?",
+                        options: ["Alzheimer-kór", "Huntington-kór", "Parkinson-kór vagy Lewy-testes demencia", "Sclerosis multiplex"],
+                        answer: 2,
+                        explanation: "Az RBD gyakran egy alfa-szinukleinopátia (pl. Parkinson-kór, Lewy-testes demencia, MSA) prodromális, korai tünete, amely évekkel megelőzheti a motoros tünetek megjelenését."
+                    },
+                    {
+                        question: "Mi a Stimulus Kontroll Terápia fő célja a CBT-I részeként?",
+                        options: ["Az alvásidő drasztikus csökkentése", "Az ágy és a hálószoba újra összekapcsolása az alvással", "Relaxációs technikák tanítása", "A beteg gondolatainak átstrukturálása"],
+                        answer: 1,
+                        explanation: "A stimulus kontroll célja, hogy a beteg újra pozitív asszociációt alakítson ki az ággyal és a hálószobával, megszüntetve a frusztráló ébrenlét és az alvási környezet közötti kapcsolatot. Ennek érdekében az ágyat csak alvásra és szexre szabad használni."
+                    },
+                    {
+                        question: "Milyen laboratóriumi vizsgálat elengedhetetlen RLS gyanúja esetén?",
+                        options: ["Vércukorszint", "Pajzsmirigy hormonok", "Szérum ferritin szint", "B12-vitamin szint"],
+                        answer: 2,
+                        explanation: "Az RLS szorosan összefügg a központi idegrendszeri vashiánnyal, ezért a szérum ferritin szint ellenőrzése kötelező. Alacsony szint (<75 mcg/L) esetén vaspótlás javasolt."
+                    },
+                    {
+                        question: "Melyik vizsgálat használható a narkolepszia diagnózisának megerősítésére és a nappali álmosság objektív mérésére?",
+                        options: ["Aktigráfia", "Otthoni Alvási Apnoe Teszt (HSAT)", "Többszörös Alvás Latencia Teszt (MSLT)", "Epworth Álmossági Skála (ESS)"],
+                        answer: 2,
+                        explanation: "Az MSLT a narkolepszia diagnosztikájának kulcsfontosságú eleme. Egy nappali vizsgálat, amely során azt mérik, hogy a beteg milyen gyorsan alszik el több, előre meghatározott időpontban, és megjelenik-e a REM fázis (SOREMP)."
+                    },
+                    {
+                        question: "Melyik állítás igaz az alvási higiéniára a krónikus insomnia kezelésében?",
+                        options: ["Önmagában a leghatékonyabb kezelés", "Önmagában nem javasolt, de a CBT-I fontos része", "Nincs szerepe az insomnia kezelésében", "Csak súlyos esetekben alkalmazandó"],
+                        answer: 1,
+                        explanation: "Bár az alvási higiénia alapvető a jó alváshoz, önmagában általában nem elegendő a krónikus insomnia kezelésére. A hatékonyabb, többkomponensű terápiák, mint a CBT-I, részeként alkalmazzák."
+                    },
+                    {
+                        question: "Mi a kataplexia, a narkolepszia egyik specifikus tünete?",
+                        options: ["Hirtelen, ellenállhatatlan elalvási roham", "Ébredéskor jelentkező átmeneti bénulás", "Erős érzelmek által kiváltott, hirtelen izomtónus-vesztés", "Élénk, félelmetes álmok"],
+                        answer: 2,
+                        explanation: "A kataplexia a hirtelen, rövid ideig tartó izomtónus-vesztés, amelyet erős érzelmek (leggyakrabban nevetés, de harag vagy meglepetés is) váltanak ki, miközben a tudat tiszta marad. Ez az 1-es típusú narkolepszia patognomonikus tünete."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoportot javasolják ma már első vonalban az RLS kezelésére a hosszú távú kockázatok miatt?",
+                        options: ["Dopamin agonisták (pl. pramipexol)", "Benzodiazepinek (pl. clonazepam)", "Gabapentinoidok (pl. gabapentin, pregabalin)", "Opioidok"],
+                        answer: 2,
+                        explanation: "A legújabb irányelvek a gabapentinoidokat javasolják első vonalbeli szerként, mivel a korábban preferált dopamin agonisták hosszú távon augmentációt (tünetek súlyosbodását) és impulzuskontroll-zavarokat okozhatnak."
+                    },
+                    {
+                        question: "Mikor indokolt Otthoni Alvási Apnoe Teszt (HSAT) helyett laboratóriumi poliszomnográfiát (PSG) végezni?",
+                        options: ["Minden esetben a PSG az első választás", "Ha a betegnek jelentős szív- vagy tüdőbetegsége van, vagy más alvászavar gyanúja is fennáll", "Ha a beteg nem akar otthon aludni a készülékkel", "Csak gyermekek esetében"],
+                        answer: 1,
+                        explanation: "A PSG indokolt komplex esetekben: jelentős kardiopulmonális társbetegségek, neuromuszkuláris betegségek, centrális apnoe gyanúja, vagy más alvászavar (pl. parasomnia, RBD) egyidejű gyanúja esetén, illetve ha a HSAT eredménye negatív, de a klinikai gyanú erős."
+                    },
+                    {
+                        question: "Mi az aktigráfia fő alkalmazási területe az alvásdiagnosztikában?",
+                        options: ["Az alvási apnoe súlyosságának mérése", "A REM alvás alatti izomtónus vizsgálata", "Az alvás-ébrenléti mintázatok hosszú távú, objektív monitorozása", "Az agyhullámok elemzése"],
+                        answer: 2,
+                        explanation: "Az aktigráfia egy viselhető eszköz, amely a mozgásaktivitás alapján becsüli meg az alvás-ébrenléti ciklust. Különösen hasznos a cirkadián ritmuszavarok és az insomnia mintázatának felmérésére több napon vagy héten keresztül."
+                    },
+                    {
+                        question: "Milyen kezelés javasolt RBD esetén a sérülések megelőzésére?",
+                        options: ["Nagy dózisú altatók", "A beteg végtagjainak rögzítése", "Clonazepam vagy melatonin és a biztonságos alvási környezet kialakítása", "Nappali stimulánsok"],
+                        answer: 2,
+                        explanation: "Az RBD kezelésének két fő pillére a gyógyszeres terápia (clonazepam vagy melatonin az álom-eljátszó viselkedés csökkentésére) és a biztonságos környezet megteremtése (éles, hegyes tárgyak eltávolítása az ágy környékéről, az ágy földre helyezése)."
+                    },
+                    {
+                        question: "Melyik állítás igaz a CBT-I és a gyógyszeres kezelés hatékonyságára insomnia esetén?",
+                        options: ["A gyógyszerek hosszú távon hatékonyabbak", "A CBT-I rövid távon hatékonyabb, de hosszú távon nem", "A CBT-I hosszú távon jobb és tartósabb eredményeket mutat, mint a gyógyszerek", "A két módszer hatékonysága teljesen megegyezik"],
+                        answer: 2,
+                        explanation: "Számos vizsgálat igazolta, hogy bár a gyógyszerek gyors enyhülést hozhatnak, a CBT-I hosszú távon tartósabb javulást eredményez az alvásminőségben, és nincsenek a gyógyszerekre jellemző mellékhatásai és függőségi kockázata."
+                    },
+                    {
+                        question: "Mi a STOP-BANG kérdőív fő célja?",
+                        options: ["Az insomnia súlyosságának felmérése", "Az obstruktív alvási apnoe (OSA) kockázatának gyors szűrése", "A narkolepszia tüneteinek azonosítása", "A nyugtalan láb szindróma diagnosztizálása"],
+                        answer: 1,
+                        explanation: "A STOP-BANG egy egyszerű, 8 kérdésből álló, validált szűrőeszköz, amelyet az OSA magas kockázatának gyors és hatékony azonosítására fejlesztettek ki, különösen perioperatív környezetben."
+                    },
+                    {
+                        question: "Milyen neurotranszmitter hiánya áll a legtöbb narkolepsziás eset hátterében?",
+                        options: ["Dopamin", "Szerotonin", "Hipokretin (orexin)", "Acetilkolin"],
+                        answer: 2,
+                        explanation: "Az 1-es típusú narkolepszia oka a hipotalamuszban termelődő hipokretin (más néven orexin) nevű neurotranszmittert termelő idegsejtek pusztulása. A hipokretin kulcsszerepet játszik az ébrenlét fenntartásában."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a Nyugtalan Láb Szindrómára (RLS)?",
+                        options: ["A tünetek mozgásra enyhülnek", "A tünetek jellemzően este vagy éjszaka a legrosszabbak", "Gyakran társul periodikus végtagmozgásokkal alvás közben (PLMS)", "A tünetek tipikusan izomgörcsök vagy zsibbadás formájában jelentkeznek"],
+                        answer: 3,
+                        explanation: "Az RLS-ben szenvedők az érzést ritkán írják le izomgörcsként vagy zsibbadásként. Jellemzőbb a nehezen körülírható, mélyről jövő kellemetlen érzés, mint a kúszás, mászás, húzás vagy viszketés."
+                    },
+                    {
+                        question: "Mi az Alvásmegvonás Terápia (SRT) alapelve az insomnia kezelésében?",
+                        options: ["A betegnek minél többet kell aludnia", "Az ágyban töltött idő korlátozása az alvás hatékonyságának javítása érdekében", "Délutáni szunyókálások beiktatása", "Késői lefekvés és korai kelés erőltetése"],
+                        answer: 1,
+                        explanation: "Az SRT célja az alvás konszolidálása azáltal, hogy az ágyban töltött időt a beteg tényleges alvásidejéhez igazítják. Ez átmeneti alvásmegvonást okoz, ami növeli az alváskésztetést és csökkenti az éjszakai ébrenléteket, javítva az alvás hatékonyságát."
+                    },
+                    {
+                        question: "Melyik alvászavar kezelésében NEM javasolt a melatonin-kiegészítők rutinszerű használata az AASM irányelvei szerint?",
+                        options: ["Cirkadián ritmuszavarok (pl. jet lag)", "REM Alvás Viselkedészavar (RBD)", "Insomnia (elalvási vagy átalvási)", "Késleltetett alvásfázis szindróma"],
+                        answer: 2,
+                        explanation: "Bár a melatonin népszerű, az American Academy of Sleep Medicine (AASM) nem javasolja rutinszerű használatát az insomnia kezelésére, mivel a bizonyítékok a hatékonyságára nem egyértelműek."
+                    }
+                ]
+            },
+            "osas": {
+                title: "Obstruktív Alvási Apnoe Szindróma",
+                questions: [
+                    {
+                        question: "Mi az obstruktív alvási apnoe (OSAS) alapvető definíciója?",
+                        options: ["Az agyi légzőközpont működési zavara", "A felső légutak ismétlődő elzáródása alvás közben, a légzési erőfeszítés ellenére", "Krónikus álmatlanság és nappali fáradtság", "Az alvás közbeni lábmozgások miatti gyakori ébredések"],
+                        answer: 1,
+                        explanation: "Az OSAS-t az alvás közbeni ismétlődő felső légúti részleges (hypopnoe) vagy teljes (apnoe) elzáródások jellemezik, amelyek a folyamatos vagy fokozott légzési erőfeszítés ellenére következnek be."
+                    },
+                    {
+                        question: "Melyik a legerősebb, módosítható kockázati tényező az OSAS kialakulásában?",
+                        options: ["Életkor", "Férfi nem", "Túlsúly/elhízás", "Családi anamnézis"],
+                        answer: 2,
+                        explanation: "Az elhízás a legerősebb és leggyakoribb módosítható kockázati tényező. A nyaki és hasi zsírfelhalmozódás jelentősen növeli a légutak összeesési hajlamát."
+                    },
+                    {
+                        question: "Milyen AHI (Apnoe-Hypopnoe Index) érték felel meg a súlyos OSAS kategóriájának felnőtteknél?",
+                        options: ["AHI > 5/óra", "AHI > 10/óra", "AHI 15-29.9/óra", "AHI ≥ 30/óra"],
+                        answer: 3,
+                        explanation: "Az OSAS súlyosságát az AHI alapján osztályozzák: enyhe (5-15), közepes (15-30), súlyos (≥30 esemény/óra)."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb és leginkább zavaró nappali tünete az OSAS-nak?",
+                        options: ["Reggeli fejfájás", "Koncentrációs nehézség", "Túlzott nappali álmosság (EDS)", "Ingerlékenység"],
+                        answer: 2,
+                        explanation: "A túlzott nappali álmosság (EDS) a leggyakoribb és leginkább zavaró nappali panasz, amely során a betegek ellenállhatatlan álmosságot érezhetnek monoton helyzetekben, sőt vezetés közben is."
+                    },
+                    {
+                        question: "Melyik a standard, első vonalbeli kezelés a közepesen súlyos és súlyos OSAS esetén?",
+                        options: ["Sebészeti beavatkozás", "Mandibuláris előretoló sín (MAD)", "Pozitív légúti nyomás (PAP) terápia", "Testsúlycsökkentő gyógyszerek"],
+                        answer: 2,
+                        explanation: "A PAP (leggyakrabban CPAP) terápia az OSAS kezelésének arany standardja. Egy maszk segítségével enyhe légnyomást juttat a légutakba, ami megakadályozza azok összeesését."
+                    },
+                    {
+                        question: "Milyen kardiovaszkuláris betegség kockázatát növeli jelentősen a kezeletlen OSAS?",
+                        options: ["Mélyvénás trombózis", "Perifériás érbetegség", "Hipertónia, stroke és pitvarfibrilláció", "Aorta aneurizma"],
+                        answer: 2,
+                        explanation: "A kezeletlen OSAS számos kardiovaszkuláris betegség független kockázati tényezője, beleértve a hipertóniát (különösen a terápiarezisztens formát), a stroke-ot és a pitvarfibrillációt."
+                    },
+                    {
+                        question: "Mi a 'pozicionális terápia' az OSAS kezelésében?",
+                        options: ["Speciális légzőgyakorlatok", "A hanyatt fekvő alvási pozíció kerülésére szolgáló eszközök", "Az ágy fejvégének megemelése", "A testhelyzet folyamatos változtatása éjszaka"],
+                        answer: 1,
+                        explanation: "A pozicionális terápia célja a hanyatt fekvés megakadályozása alvás közben, mivel ebben a testhelyzetben a légúti elzáródás valószínűsége nagyobb. Ez különösen hatékony a pozíciófüggő OSAS-ban."
+                    },
+                    {
+                        question: "Melyik diagnosztikai eszköz az OSAS diagnózisának 'arany standardja'?",
+                        options: ["Otthoni Alvási Apnoe Teszt (HSAT)", "Éjszakai oximetria", "Poliszomnográfia (PSG)", "STOP-BANG kérdőív"],
+                        answer: 2,
+                        explanation: "A poliszomnográfia (PSG) a legátfogóbb alvásvizsgálat, amelyet az OSAS és más alvászavarok diagnosztizálásának arany standardjának tekintenek."
+                    },
+                    {
+                        question: "Milyen összefüggés van az OSAS és a 2-es típusú diabetes mellitus között?",
+                        options: ["Nincs összefüggés", "Az OSAS csökkenti a diabetes kockázatát", "Az OSAS növeli az inzulinrezisztencia és a 2-es típusú diabetes kockázatát", "A diabetes mindig OSAS-t okoz"],
+                        answer: 2,
+                        explanation: "Az OSAS szorosan összefügg az inzulinrezisztenciával és a 2-es típusú diabetes kialakulásával, függetlenül az elhízástól. Az intermittáló hipoxia és a gyulladás rontja a glükóz-anyagcserét."
+                    },
+                    {
+                        question: "Mikor javasolt a mandibuláris előretoló sín (MAD) használata?",
+                        options: ["Minden súlyos OSAS betegnél", "Enyhe és közepesen súlyos OSAS esetén, vagy ha a beteg nem tolerálja a CPAP-t", "Csak horkolás kezelésére, OSAS nélkül", "Csak centrális alvási apnoéban"],
+                        answer: 1,
+                        explanation: "A MAD terápia elsősorban enyhe és közepesen súlyos OSAS esetén, vagy a CPAP terápiát elutasító/nem toleráló betegeknél javasolt alternatíva."
+                    },
+                    {
+                        question: "Mi a 'RERA' (Respiratory Effort-Related Arousal)?",
+                        options: ["Egy teljes légzéskimaradás", "A légáramlás csökkenése oxigéneséssel", "Légzési erőfeszítéssel járó ébredés, ami nem teljesíti az apnoe/hypopnoe kritériumát", "A horkolás egy típusa"],
+                        answer: 2,
+                        explanation: "A RERA olyan esemény, ahol a fokozott légzési erőfeszítés arousalt (ébredést) okoz az alvás fragmentálása érdekében, de a légáramlás-csökkenés vagy deszaturáció mértéke nem éri el a hypopnoe szintjét."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az OSAS patofiziológiájára?",
+                        options: ["Az alvás alatti izomtónus-csökkenés szerepet játszik", "Az elhízás és a nagy nyakkörfogat növeli a kockázatot", "A légzési erőfeszítés hiánya okozza az elzáródást", "Az anatómiai szűkület a felső légutakban hajlamosít rá"],
+                        answer: 2,
+                        explanation: "Az OSAS-ban a légzési erőfeszítés fennmarad, sőt fokozódik az elzáródás ellenében. A légzési erőfeszítés hiánya a centrális alvási apnoéra jellemző."
+                    },
+                    {
+                        question: "Milyen szerepe van a hypoglossus ideg stimulációnak (HNS) az OSAS kezelésében?",
+                        options: ["A rekeszizmot stimulálja", "A nyelvet előre mozdítja, megakadályozva a garat elzáródását", "Nyugtató hatású, segíti az elalvást", "A vérnyomást csökkenti"],
+                        answer: 1,
+                        explanation: "A HNS egy beültethető eszköz, amely a nyelvmozgató (hypoglossus) ideg stimulálásával a nyelvet előre mozdítja alvás közben, így nyitva tartva a mögötte lévő légúti szakaszt."
+                    },
+                    {
+                        question: "Melyik szűrő kérdőív használatos széles körben az OSAS kockázatának gyors felmérésére, különösen műtétek előtt?",
+                        options: ["Epworth Álmossági Skála (ESS)", "Berlin Kérdőív", "STOP-BANG Kérdőív", "Pittsburgh Alvásminőség Index (PSQI)"],
+                        answer: 2,
+                        explanation: "A STOP-BANG kérdőív egy egyszerű és gyors szűrőeszköz, amelyet gyakran alkalmaznak, különösen a perioperatív kockázatbecslésre, magas érzékenységgel a közepes-súlyos OSAS-ra."
+                    },
+                    {
+                        question: "Miért fontos az OSAS szűrése terápiarezisztens hipertóniában szenvedő betegeknél?",
+                        options: ["Mert a vérnyomáscsökkentők OSAS-t okoznak", "Mert az OSAS a terápiarezisztens hipertónia egyik leggyakoribb másodlagos oka", "Mert az OSAS-os betegek nem szedhetnek vérnyomáscsökkentőt", "Nincs különösebb jelentősége"],
+                        answer: 1,
+                        explanation: "A terápiarezisztens (legalább 3 különböző gyógyszerre nem reagáló) hipertóniában szenvedők körében rendkívül magas (akár 80% feletti) az OSAS prevalenciája. Az OSAS kezelése (pl. CPAP) gyakran javítja a vérnyomáskontrollt."
+                    },
+                    {
+                        question: "Milyen hatással van az alkohol fogyasztása az OSAS-ra?",
+                        options: ["Javítja a légzést", "Nincs hatása", "Súlyosbítja az OSAS-t a felső légúti izmok tónusának csökkentésével", "Csak a horkolást csökkenti"],
+                        answer: 2,
+                        explanation: "Az alkohol ellazítja a felső légúti izmokat és csökkenti az agyi légzőközpont érzékenységét, ami súlyosbítja a légúti elzáródásokat és az apnoék hosszát/gyakoriságát."
+                    },
+                    {
+                        question: "Mi a fő különbség a CPAP és a BiPAP készülék működése között?",
+                        options: ["A CPAP otthoni, a BiPAP kórházi használatra való", "A CPAP fix nyomást, a BiPAP két különböző nyomásszintet biztosít", "A BiPAP csak horkolásra jó", "A CPAP párásít, a BiPAP nem"],
+                        answer: 1,
+                        explanation: "A CPAP (Continuous PAP) egyetlen, fix nyomást biztosít folyamatosan. A BiPAP (Bilevel PAP) két szintű nyomást ad: egy magasabbat belégzéskor (IPAP) és egy alacsonyabbat kilégzéskor (EPAP), ami megkönnyíti a kilégzést magas nyomásigény esetén."
+                    },
+                    {
+                        question: "Milyen neurokognitív funkciókat érint leginkább a kezeletlen OSAS?",
+                        options: ["Hosszú távú memória és nyelvi képességek", "Figyelem, végrehajtó funkciók és epizodikus memória", "Kreativitás és zenei képességek", "Matematikai képességek"],
+                        answer: 1,
+                        explanation: "Az OSAS leginkább a frontális lebenyhez köthető funkciókat károsítja, így a figyelem, a koncentráció, a tervezés, a problémamegoldás (végrehajtó funkciók) és az új emlékek rögzítése (epizodikus memória) szenved zavart."
+                    },
+                    {
+                        question: "Mi a fő limitációja az otthoni alvási apnoe teszteknek (HSAT) a PSG-hez képest?",
+                        options: ["Sokkal drágábbak", "Nem mérik az alvás stádiumait (EEG hiánya miatt)", "Csak gyermekeknél használhatók", "Mindig pontatlan eredményt adnak"],
+                        answer: 1,
+                        explanation: "A HSAT legnagyobb limitációja, hogy nem rögzít EEG-t, így nem tudja megkülönböztetni az alvást az ébrenléttől. Emiatt az AHI-t a teljes rögzítési időre számolja, ami alulbecsülheti a légzészavar valódi súlyosságát."
+                    },
+                    {
+                        question: "Milyen tünet az OSAS-ban szenvedő betegeknél a fokozott baleseti kockázat legfőbb oka?",
+                        options: ["Reggeli fejfájás", "Éjszakai izzadás", "Túlzott nappali álmosság (EDS)", "Hangos horkolás"],
+                        answer: 2,
+                        explanation: "A túlzott nappali álmosság (EDS) miatt a betegek figyelme és reakcióideje csökken, ami jelentősen növeli a közlekedési és munkahelyi balesetek kockázatát."
+                    },
+                    {
+                        question: "Melyik állítás igaz az OSAS és a depresszió kapcsolatára?",
+                        options: ["A két állapot kizárja egymást", "Az OSAS kezelése mindig rontja a depressziót", "Az OSAS és a depresszió gyakran együtt fordul elő és tüneteik átfedhetnek", "A depresszió véd az OSAS ellen"],
+                        answer: 2,
+                        explanation: "Az OSAS és a depresszió között erős, kétirányú kapcsolat van. Gyakran fordulnak elő együtt, és a tüneteik (fáradtság, koncentrációzavar, alvászavar) jelentősen átfedhetnek, ami megnehezíti a diagnózist."
+                    }
+                ]
+            },
+            "parkinsons": {
+                title: "Parkinson-kór",
+                questions: [
+                    {
+                        question: "Melyik a Parkinson-kór diagnózisához elengedhetetlen motoros tünet?",
+                        options: ["Nyugalmi tremor", "Rigiditás", "Poszturális instabilitás", "Bradykinesia"],
+                        answer: 3,
+                        explanation: "A bradykinesia (mozgásmeglassulás) a parkinsonizmus szindróma kötelező eleme. A Parkinson-kór diagnózisához a bradykinesia mellett legalább nyugalmi tremor vagy rigiditás jelenléte szükséges."
+                    },
+                    {
+                        question: "Mi a Parkinson-kór hátterében álló elsődleges patofiziológiai folyamat?",
+                        options: ["A szerotonin termelő sejtek pusztulása", "A dopamint termelő idegsejtek pusztulása a substantia nigrában", "A motoros kéreg atrófiája", "A kisagy sejtjeinek károsodása"],
+                        answer: 1,
+                        explanation: "A Parkinson-kór motoros tüneteinek oka a középagyban (substantia nigra pars compacta) található dopamint termelő neuronok progresszív pusztulása, ami dopaminhiányt okoz a striatumban."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a Parkinson-kórra?",
+                        options: ["Aszimmetrikus kezdet", "Nyugalmi tremor", "Jó válasz a levodopára", "Korai, súlyos demencia"],
+                        answer: 3,
+                        explanation: "A korai (az első egy éven belüli), súlyos demencia a Lewy-testes demenciára jellemzőbb, és a Parkinson-kór diagnózisával szemben szóló 'red flag' (figyelmeztető jel)."
+                    },
+                    {
+                        question: "Mi a 'wearing-off' jelenség a Parkinson-kór kezelésében?",
+                        options: ["A gyógyszer hatásának fokozódása", "A gyógyszeradagok közötti hatás lerövidülése, a tünetek visszatérése", "Akaratlan, táncoló mozgások", "A gyógyszerrel szembeni allergia"],
+                        answer: 1,
+                        explanation: "A 'wearing-off' (dózisvég-hatás) egy motoros fluktuáció, amely során a levodopa hatása a következő adag bevétele előtt elmúlik, és a Parkinson-tünetek újra megjelennek vagy felerősödnek."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport hozható leginkább összefüggésbe az impulzuskontroll-zavarok (pl. kóros játékszenvedély) kialakulásával?",
+                        options: ["Levodopa", "MAO-B gátlók", "Dopamin agonisták", "COMT gátlók"],
+                        answer: 2,
+                        explanation: "Az impulzuskontroll-zavarok (ICD) kialakulása szorosan összefügg a dopamin agonista terápiával, bár ritkábban levodopa mellett is előfordulhatnak."
+                    },
+                    {
+                        question: "Mi a mélyagyi stimuláció (DBS) fő indikációja Parkinson-kórban?",
+                        options: ["A betegség korai stádiuma", "Gyógyszeres kezelésre nem reagáló, súlyos motoros fluktuációk és diszkinéziák", "Csak a nem-motoros tünetek kezelése", "A betegség progressziójának megállítása"],
+                        answer: 1,
+                        explanation: "A DBS olyan előrehaladott Parkinson-kóros betegeknél jön szóba, akiknél a gyógyszeres kezelés ellenére súlyos, életminőséget rontó motoros fluktuációk és/vagy zavaró diszkinéziák állnak fenn, de a tüneteik még jól reagálnak a levodopára."
+                    },
+                    {
+                        question: "Melyik nem-motoros tünet az egyik legkorábbi jele a Parkinson-kórnak, akár évekkel megelőzve a mozgászavarokat?",
+                        options: ["Depresszió", "Szaglásvesztés (hyposmia)", "Székrekedés", "Mindhárom"],
+                        answer: 3,
+                        explanation: "A szaglásvesztés (hyposmia), a REM alvási viselkedészavar (RBD) és a székrekedés a Parkinson-kór ismert prodromális, azaz a motoros tüneteket megelőző jelei."
+                    },
+                    {
+                        question: "Mi a levodopa, a leghatékonyabb Parkinson-gyógyszer hatásmechanizmusa?",
+                        options: ["Közvetlenül stimulálja a dopamin receptorokat", "Gátolja a dopamin lebontását", "A dopamin közvetlen előanyaga (prekurzora)", "Növeli a szerotonin szintjét"],
+                        answer: 2,
+                        explanation: "A levodopa a dopamin prekurzora, amely átjut a vér-agy gáton, és az agyban dopaminná alakul, így pótolva a hiányzó neurotranszmittert."
+                    },
+                    {
+                        question: "Milyen típusú remegés jellemző a Parkinson-kórra?",
+                        options: ["Akciós tremor (mozgás közben)", "Poszturális tremor (testhelyzet megtartásakor)", "Nyugalmi tremor", "Intenciós tremor (célmozgás végén)"],
+                        answer: 2,
+                        explanation: "A Parkinson-kórra a nyugalmi tremor a legjellemzőbb, amely a végtag ellazult állapotában a legkifejezettebb és akaratlagos mozgásra csökken vagy megszűnik."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Parkinson-kór és a demencia kapcsolatára?",
+                        options: ["A demencia sosem alakul ki Parkinson-kórban", "A demencia mindig a betegség kezdetén jelentkezik", "A Parkinson-kór demencia (PDD) a betegség késői szakaszában alakulhat ki", "A Parkinson-kór csak a memóriát érinti"],
+                        answer: 2,
+                        explanation: "A Parkinson-kór demencia (PDD) a betegség előrehaladtával, általában évekkel a motoros tünetek megjelenése után alakul ki, és főként a végrehajtó funkciókat és a figyelmet érinti."
+                    },
+                    {
+                        question: "Mi a 'fogaskerék' tünet a neurológiai vizsgálat során?",
+                        options: ["A járás akadozása", "A végtagok passzív mozgatásakor érzékelt, szakaszosan engedő izommerevség", "A kézujjak remegése", "A beszéd akadozása"],
+                        answer: 1,
+                        explanation: "A 'fogaskerék' tünet a rigiditás (izommerevség) és a nyugalmi tremor együttes jelenlétéből adódik. A végtag passzív mozgatásakor az izomellenállás nem folyamatos, hanem szakaszosan, fogaskerékszerűen enged."
+                    },
+                    {
+                        question: "Milyen célt szolgál a DaTscan vizsgálat a Parkinson-kór diagnosztikájában?",
+                        options: ["Az agyi atrófia mértékének felmérését", "A preszinaptikus dopaminerg rendszer működészavarának kimutatását", "A Lewy-testek direkt kimutatását", "A gyulladásos folyamatok azonosítását"],
+                        answer: 1,
+                        explanation: "A DaTscan a dopamin transzporterek sűrűségét méri a striatumban. Csökkent denzitás Parkinson-kórra és más preszinaptikus dopaminerg deficittel járó parkinsonizmusra utal, segítve az elkülönítést pl. az esszenciális tremortól."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoportot használják a levodopa hatástartamának megnyújtására 'wearing-off' jelenség esetén?",
+                        options: ["Dopamin agonisták", "Antikolinerg szerek", "COMT gátlók és MAO-B gátlók", "Benzodiazepinek"],
+                        answer: 2,
+                        explanation: "Mind a COMT gátlók (pl. entakapon), mind a MAO-B gátlók (pl. raszagilin) a levodopa lebontását gátolják, így meghosszabbítják annak hatását és csökkentik az 'OFF' időszakokat."
+                    },
+                    {
+                        question: "Mi a REM alvási viselkedészavar (RBD)?",
+                        options: ["Nehéz elalvás", "Horkolás és légzéskimaradás", "Az álmok heves mozgásokkal, beszéddel történő 'eljátszása'", "Alvajárás"],
+                        answer: 2,
+                        explanation: "RBD esetén a REM alvás alatti normális izombénulás (atónia) hiányzik, ezért a beteg 'eljátssza' az álmait, ami sérülésveszélyes lehet. Ez a Parkinson-kór egyik legspecifikusabb korai jele."
+                    },
+                    {
+                        question: "Melyik atípusos parkinsonizmusra jellemző a korai esések és a lefelé tekintés zavara?",
+                        options: ["Multiszisztémás atrófia (MSA)", "Progresszív szupranukleáris bénulás (PSP)", "Kortikobazális degeneráció (CBD)", "Demencia Lewy-testekkel (DLB)"],
+                        answer: 1,
+                        explanation: "A progresszív szupranukleáris bénulás (PSP) jellegzetes tünetei a korai (első 3 éven belüli) tartási instabilitás és esések, valamint a vertikális tekintészavar, különösen a lefelé tekintés nehezítettsége."
+                    },
+                    {
+                        question: "Milyen célt szolgál a levodopa-carbidopa intesztinális gél (LCIG) terápia?",
+                        options: ["A Parkinson-kór gyógyítását", "A levodopa stabil, folyamatos adagolását a motoros fluktuációk csökkentésére", "A nem-motoros tünetek elsődleges kezelését", "A DBS műtét helyettesítését minden esetben"],
+                        answer: 1,
+                        explanation: "Az LCIG terápia egy pumpa segítségével, szondán keresztül folyamatosan juttatja a levodopát a vékonybélbe, ami stabil plazmaszintet és a motoros fluktuációk ('on-off' jelenség) jelentős csökkenését eredményezi."
+                    },
+                    {
+                        question: "Mi a 'freezing of gait' (járás lefagyás)?",
+                        options: ["A lábak elnehezülése séta közben", "A járás hirtelen, akaratlan leblokkolása", "Támolygó, bizonytalan járás", "Apró, tipegő léptek"],
+                        answer: 1,
+                        explanation: "A 'freezing' a járás hirtelen, átmeneti leállása, amikor a beteg úgy érzi, mintha a lába a földhöz ragadt volna. Gyakran induláskor, forduláskor vagy szűk helyeken jelentkezik."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoportot kell kerülni Parkinson-kóros betegek pszichózisának kezelésére, mert rontják a motoros tüneteket?",
+                        options: ["Klozapin és kvetiapin", "Tipikus antipszichotikumok (pl. haloperidol) és riszperidon", "SSRI antidepresszánsok", "Benzodiazepinek"],
+                        answer: 1,
+                        explanation: "A tipikus antipszichotikumok és egyes atípusos szerek (pl. riszperidon, olanzapin) erős dopamin-blokkoló hatásuk miatt jelentősen súlyosbíthatják a Parkinson-kór motoros tüneteit, ezért használatuk kerülendő."
+                    },
+                    {
+                        question: "Mi a 'pill-rolling' tremor?",
+                        options: ["A fej remegése", "A láb remegése", "A kézujjak jellegzetes, pénzszámolásra emlékeztető remegése", "Az egész test remegése"],
+                        answer: 2,
+                        explanation: "A 'pill-rolling' a Parkinson-kórra jellemző nyugalmi tremor egyik tipikus megjelenési formája, ahol a hüvelyk- és mutatóujj egymáshoz dörzsölődve pirulasodró vagy pénzszámoló mozgást végez."
+                    },
+                    {
+                        question: "Milyen szerepe van a logopédiai terápiának a Parkinson-kór kezelésében?",
+                        options: ["Csak a nyelési zavarok kezelése", "A beszédérthetőség és hangerő javítása, valamint a nyelészavar kezelése", "A kognitív funkciók javítása", "A depresszió kezelése"],
+                        answer: 1,
+                        explanation: "A logopédus segít a halk, monoton beszéd (hypophonia) és az elkent kiejtés (dysarthria) kezelésében (pl. LSVT LOUD® terápia), valamint a nyelészavar (dysphagia) menedzselésében az aspiráció megelőzése érdekében."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Parkinson-kór tüneteinek kezdetére?",
+                        options: ["Mindig szimmetrikusan kezdődik", "Jellemzően aszimmetrikusan, a test egyik oldalán kezdődik", "Mindig a lábakban kezdődik", "Mindig a fejremegéssel kezdődik"],
+                        answer: 1,
+                        explanation: "A Parkinson-kór egyik fontos diagnosztikai ismérve, hogy a motoros tünetek jellemzően aszimmetrikusan, a test egyik oldalán kezdődnek, és a betegség előrehaladtával is megmarad ez az aszimmetria."
+                    }
+                ]
+            }
+        };
+
+        // --- APPLICATION STATE ---
+        let currentState = {
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            answered: false
+        };
+
+        // --- DOM ELEMENTS ---
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicButtonsContainer = document.getElementById('topic-buttons');
+
+        const quizTitle = document.getElementById('quiz-title');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationBox = document.getElementById('explanation-box');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+
+        const scoreText = document.getElementById('score-text');
+        const scoreMessage = document.getElementById('score-message');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const backToTopicsBtn = document.getElementById('back-to-topics-btn');
+
+        // --- FUNCTIONS ---
+
+        function init() {
+            renderTopicSelection();
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            restartQuizBtn.addEventListener('click', () => {
+                startQuiz(currentState.currentTopic);
+            });
+            backToTopicsBtn.addEventListener('click', () => {
+                showScreen('topic-selection');
+            });
+        }
+
+        function showScreen(screenName) {
+            topicSelectionScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            document.getElementById(`${screenName}-screen`).classList.remove('hidden');
+        }
+
+        function renderTopicSelection() {
+            topicButtonsContainer.innerHTML = '';
+            const topics = [
+                { key: 'transplant', name: 'Szervtranszplantációk neurológiája' },
+                { key: 'substance', name: 'Alkohol és kábítószerek' },
+                { key: 'sleep', name: 'Alvászavarok kivizsgálása' },
+                { key: 'osas', name: 'Obstruktív Alvási Apnoe' },
+                { key: 'parkinsons', name: 'Parkinson-kór' }
+            ];
+
+            topics.forEach(topic => {
+                const button = document.createElement('button');
+                button.className = "w-full bg-blue-500 text-white font-semibold py-4 px-6 rounded-xl hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105";
+                button.textContent = topic.name;
+                button.onclick = () => startQuiz(topic.key);
+                topicButtonsContainer.appendChild(button);
+            });
+        }
+
+        function startQuiz(topicKey) {
+            currentState.currentTopic = topicKey;
+            currentState.currentQuestionIndex = 0;
+            currentState.score = 0;
+            quizTitle.textContent = quizData[topicKey].title;
+            renderQuestion();
+            showScreen('quiz');
+        }
+
+        function renderQuestion() {
+            currentState.answered = false;
+            explanationBox.classList.remove('visible');
+            nextQuestionBtn.classList.add('hidden');
+
+            const topic = quizData[currentState.currentTopic];
+            const question = topic.questions[currentState.currentQuestionIndex];
+            const totalQuestions = topic.questions.length;
+
+            questionCounter.textContent = `${currentState.currentQuestionIndex + 1} / ${totalQuestions}`;
+            progressBar.style.width = `${((currentState.currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+            questionText.textContent = question.question;
+
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = "quiz-option w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:bg-gray-100 hover:border-blue-400 focus:outline-none focus:border-blue-500";
+                button.innerHTML = `<span class="font-bold mr-2">${String.fromCharCode(65 + index)}.</span> ${option}`;
+                button.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (currentState.answered) return;
+            currentState.answered = true;
+
+            const topic = quizData[currentState.currentTopic];
+            const question = topic.questions[currentState.currentQuestionIndex];
+            const options = optionsContainer.children;
+
+            if (selectedIndex === question.answer) {
+                currentState.score++;
+                options[selectedIndex].classList.add('correct');
+            } else {
+                options[selectedIndex].classList.add('incorrect');
+                options[question.answer].classList.add('correct');
+            }
+
+            explanationText.innerHTML = question.explanation;
+            explanationBox.classList.add('visible');
+            nextQuestionBtn.classList.remove('hidden');
+            
+            // Disable all options after answering
+            for (let option of options) {
+                option.disabled = true;
+                option.classList.remove('hover:bg-gray-100', 'hover:border-blue-400');
+            }
+        }
+
+        function nextQuestion() {
+            const topic = quizData[currentState.currentTopic];
+            if (currentState.currentQuestionIndex < topic.questions.length - 1) {
+                currentState.currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                renderResults();
+            }
+        }
+
+        function renderResults() {
+            const topic = quizData[currentState.currentTopic];
+            const totalQuestions = topic.questions.length;
+            const percentage = Math.round((currentState.score / totalQuestions) * 100);
+
+            scoreText.textContent = `${currentState.score} / ${totalQuestions}`;
+            
+            let message = '';
+            if (percentage === 100) {
+                message = 'Tökéletes eredmény, gratulálok!';
+            } else if (percentage >= 80) {
+                message = 'Kiváló munka!';
+            } else if (percentage >= 60) {
+                message = 'Jó eredmény, de van még hova fejlődni.';
+            } else {
+                message = 'Gyakoroljon még egy kicsit!';
+            }
+            scoreMessage.textContent = message;
+
+            showScreen('results');
+        }
+
+        // --- INITIALIZE APP ---
+        init();
+
+    </script>
+</body>
+</html>

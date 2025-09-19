@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .btn-topic {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-topic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .option-btn:hover {
+            transform: scale(1.02);
+            border-color: #4f46e5;
+        }
+        .option-btn.selected {
+            background-color: #6366f1;
+            color: white;
+            border-color: #4338ca;
+        }
+        .feedback {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .feedback.show {
+            max-height: 500px; /* Adjust as needed */
+            opacity: 1;
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app" class="w-full max-w-4xl mx-auto">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 text-slate-900">Neurológiai Ismeretek Teszt</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy témakört a kezdéshez.</p>
+            <div id="topic-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topic buttons will be generated here -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-container" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <button id="back-to-topics" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Témakörök
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-base font-medium text-slate-700">Haladás</span>
+                        <span id="progress-text" class="text-sm font-medium text-slate-700">Kérdés 1 / 20</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 5%"></div>
+                    </div>
+                </div>
+
+                <div id="question-area" class="mb-6">
+                    <p id="question" class="text-xl font-semibold mb-6 text-slate-800 leading-relaxed"></p>
+                    <div id="options" class="space-y-3">
+                        <!-- Option buttons will be generated here -->
+                    </div>
+                </div>
+
+                <div id="feedback-area" class="feedback">
+                    <div id="feedback-content" class="p-5 rounded-lg">
+                        <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                        <p id="explanation" class="text-slate-700 leading-relaxed"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>
+                        Következő kérdés <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Score Screen -->
+        <div id="score-container" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-slate-900">Teszt Vége!</h2>
+            <p class="text-xl text-slate-600 mb-6">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-bold text-indigo-600 mb-8"></p>
+            <button id="restart-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mr-4">
+                <i class="fas fa-redo mr-2"></i>Újrapróbálkozás
+            </button>
+            <button id="home-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition-colors">
+                <i class="fas fa-home mr-2"></i>Főmenü
+            </button>
+        </div>
+    </div>
+
+<script>
+const quizData = [
+    {
+        topic: "Az EEG élettani alapjai",
+        questions: [
+            {
+                question: "Mi az elektroenkefalogram (EEG) elsődleges forrása az agyban?",
+                options: ["Akciós potenciálok az axonokon", "Posztszinaptikus potenciálok (EPSP és IPSP) a kérgi piramissejtek dendritjein", "Az agytörzsi neuronok szinkronizált aktivitása", "A gliasejtek elektromos tevékenysége"],
+                answer: 1,
+                explanation: "Az EEG jelek túlnyomórészt nem az akciós potenciálokból, hanem a kérgi piramissejtek dendritjein keletkező, hosszabb ideig tartó serkentő (EPSP) és gátló (IPSP) posztszinaptikus potenciálok térbeli és időbeli összegződéséből származnak. Ez a hosszabb időtartam teszi lehetővé a nagy neuronpopulációk szinkronizált aktivitásának detektálását a fejbőrön."
+            },
+            {
+                question: "Ki volt az a tudós, aki először regisztrálta sikeresen az emberi EEG-t és leírta az alfa- és béta-hullámokat?",
+                options: ["Richard Caton", "Adrian és Matthews", "Herbert Jasper", "Hans Berger"],
+                answer: 3,
+                explanation: "Bár Richard Caton már korábban is vizsgált állati agyi elektromos aktivitást, Hans Berger osztrák pszichiáter volt az, aki 1924-ben először regisztrált emberi EEG-t, és 1929-es publikációjában bevezette az \"elektroenkefalogram\" kifejezést, valamint leírta az alfa- és béta-ritmusokat."
+            },
+            {
+                question: "Melyik EEG frekvenciasáv jellemző a mély, lassú hullámú alvásra (NREM 3. stádium) felnőtteknél?",
+                options: ["Alfa (α)", "Béta (β)", "Théta (θ)", "Delta (δ)"],
+                answer: 3,
+                explanation: "A delta-hullámok (0.5-4 Hz) a leglassabb és legmagasabb amplitúdójú EEG hullámok. Felnőtt korban a mély, lassú hullámú alvás (NREM 3) legfőbb jellemzői. Éber felnőttben való túlzott jelenlétük kóros állapotra, agyi diszfunkcióra utal."
+            },
+            {
+                question: "Mit jelent az 'alfa-gátlás' vagy 'deszinkronizáció' jelensége az EEG-ben?",
+                options: ["Az alfa-hullámok megjelenését mély relaxációban", "Az alfa-hullámok amplitúdójának csökkenését vagy eltűnését szemnyitásra, mentális aktivitásra", "A béta-hullámok lelassulását és alfa-frekvenciájúvá válását", "Az alfa-hullámok szinkronizációját a théta-hullámokkal alvás közben"],
+                answer: 1,
+                explanation: "Az alfa-gátlás (más néven alfa-blokk vagy deszinkronizáció) az a jelenség, amikor a relaxált, csukott szemű állapotra jellemző, posterior területeken domináns alfa-ritmus szemnyitás, vizuális figyelem vagy mentális erőfeszítés hatására elnyomódik, és helyét egy gyorsabb, alacsonyabb amplitúdójú béta-aktivitás veszi át."
+            },
+            {
+                question: "Milyen típusú idegsejtek játszanak kulcsszerepet az EEG jelek generálásában az agykéregben, és miért?",
+                options: ["Csillagsejtek, mert radiális orientációjúak.", "Gátló interneuronok, mert szinkronizálják a hálózatokat.", "Piramissejtek, mert paliszádszerű, a felszínre merőleges elrendeződésük ('open field') lehetővé teszi az elektromos potenciálok összegződését.", "Granuláris sejtek, mert a legtöbben vannak a IV. rétegben."],
+                answer: 2,
+                explanation: "Az EEG hullámok főként a III., IV. és V. kérgi rétegben található piramissejtek aktivitásából erednek. Ezeknek a sejteknek a felszínre merőleges, párhuzamos elrendeződése (ún. 'nyitott mező') teszi lehetővé, hogy az általuk generált egyedi posztszinaptikus potenciálokból származó elektromos dipólusok összeadódjanak, és a fejbőrön is mérhető, kellő nagyságú jelet hozzanak létre."
+            },
+            {
+                question: "Mi a nemzetközi 10-20-as rendszer célja az EEG regisztrálás során?",
+                options: ["Az elektródák impedanciájának minimalizálása.", "Az EEG-jel 10-20-szoros felerősítése.", "Standardizált, reprodukálható elektródaelhelyezés biztosítása a koponya anatómiai referenciapontjai alapján.", "Az EEG-görbe felbontása 10-20 különböző frekvenciasávra."],
+                answer: 2,
+                explanation: "A 10-20-as rendszer egy nemzetközileg elfogadott standard, amely a koponya anatómiai pontjaihoz (nasion, inion, preaurikuláris pontok) viszonyítva, azok távolságának 10%-os és 20%-os arányaival határozza meg az elektródák helyét. Célja a mérések egységesítése és reprodukálhatósága."
+            },
+            {
+                question: "Melyik biológiai artefaktum utánozhatja leginkább az epileptiform kisüléseket az EEG-n?",
+                options: ["Izzadás", "Pislogás", "EKG (szív) artefaktum", "Légzési artefaktum"],
+                answer: 2,
+                explanation: "Az EKG artefaktum ritmikus, tüske-szerű potenciálként jelenhet meg az EEG-n, amelyet néha össze lehet téveszteni a valódi epileptiform kisülésekkel, különösen ha a referenciaelektróda egy nagyobb ér közelében van."
+            },
+            {
+                question: "Melyik frekvenciasáv kapcsolódik a legszorosabban a magas szintű kognitív funkciókhoz, mint a tanulás és a tudatosság?",
+                options: ["Delta (δ)", "Théta (θ)", "Alfa (α)", "Gamma (γ)"],
+                answer: 3,
+                explanation: "A gamma-hullámokat (30-100 Hz) gyakran a magas szintű kognitív funkciókhoz kötik, mint az érzékszervi információk integrációja, a fókuszált figyelem és a tudatosság. Úgy vélik, hogy a távoli agyterületek közötti neurális szinkronizációt tükrözik."
+            },
+            {
+                question: "Mi a különbség az unipoláris (referenciális) és bipoláris elvezetés között?",
+                options: ["Az unipoláris csak egy, míg a bipoláris két agyféltekét mér.", "Az unipoláris egy aktív elektródát egy 'inaktív' referenciához, míg a bipoláris két aktív elektródát egymáshoz viszonyít.", "Az unipoláris mély, míg a bipoláris felszíni aktivitást mér.", "Az unipoláris csak pozitív, míg a bipoláris pozitív és negatív hullámokat is mutat."],
+                answer: 1,
+                explanation: "Az unipoláris (referenciális) elvezetés minden aktív elektróda potenciálját egy közös, viszonylag inaktívnak tekintett referenciaponthoz (pl. fülcimpa) méri. Ezzel szemben a bipoláris elvezetés két aktív, fejbőrön elhelyezkedő elektróda közötti potenciálkülönbséget regisztrálja."
+            },
+            {
+                question: "Mi a mu-ritmus jellegzetessége?",
+                options: ["Az occipitális lebeny felett jelenik meg és vizuális ingerekre blokkolódik.", "A frontális lebeny felett jelenik meg és gondolkodás közben erősödik.", "A centrális (szenzomotoros) kéreg felett jelenik meg és végtagmozgásra blokkolódik.", "A temporális lebeny felett jelenik meg és hallási ingerekre reagál."],
+                answer: 2,
+                explanation: "A mu-ritmus egy alfa-frekvenciatartományba eső (7.5-12.5 Hz), boltíves hullámmintázat, amely a centrális agyterületek (szenzomotoros kéreg) nyugalmi állapotát tükrözi. A posterior alfa-ritmussal ellentétben nem szemnyitásra, hanem az ellenoldali végtag mozgására, mozgástervezésére vagy akár csak elképzelésére blokkolódik."
+            },
+            {
+                question: "Milyen szerepet játszanak a notch filterek az EEG jelfeldolgozásban?",
+                options: ["A nagyon lassú potenciálváltozások kiszűrését.", "A magas frekvenciájú izomartefaktumok eltávolítását.", "A hálózati frekvencián (50/60 Hz) megjelenő zaj eliminálását.", "Az alfa- és béta-hullámok szétválasztását."],
+                answer: 2,
+                explanation: "A notch filter egy speciális sávzáró szűrő, amelyet arra terveztek, hogy egy nagyon szűk frekvenciatartományt elimináljon a jelből. Az EEG-ben ezt a szűrőt a környezeti elektromos hálózatból származó, zavaró 50 Hz-es (Európában) vagy 60 Hz-es (Észak-Amerikában) zaj kiszűrésére használják."
+            },
+            {
+                question: "Melyik a legfontosabb klinikai alkalmazási területe az EEG-nek?",
+                options: ["Demencia korai felismerése", "Pszichiátriai betegségek diagnózisa", "Epilepszia diagnosztikája és monitorozása", "Agyi keringési zavarok kimutatása"],
+                answer: 2,
+                explanation: "Bár az EEG számos neurológiai kórképben nyújt hasznos információt, a legfontosabb és legismertebb klinikai alkalmazása az epilepszia diagnosztikája. Segítségével kimutathatók a rohamok alatt és között jelentkező jellegzetes epileptiform grafoelemek, ami elengedhetetlen a diagnózis felállításához és a kezelés beállításához."
+            },
+            {
+                question: "Hogyan változik az EEG az életkorral, csecsemőkortól a felnőttkorig?",
+                options: ["A frekvencia csökken, az amplitúdó nő.", "A frekvencia nő, az amplitúdó csökken, és a posterior alfa-ritmus kialakul.", "Az EEG mintázat nem változik jelentősen a születés után.", "A béta-aktivitás dominál csecsemőkorban, amit felvált a delta-dominancia."],
+                answer: 1,
+                explanation: "Az EEG az érés során jellegzetes változásokon megy keresztül. Csecsemőknél a lassabb (delta, théta) hullámok dominálnak. Az életkor előrehaladtával az alapritmus frekvenciája fokozatosan nő, és kialakul a jellegzetes, 8-13 Hz-es posterior alfa-ritmus, amely a felnőttkori éber, relaxált állapotot jellemzi."
+            },
+            {
+                question: "Mit jelent az elektrocerebrális csend (ECS) az EEG-n?",
+                options: ["A mélyalvás legmélyebb fázisát.", "Súlyos epilepsziás roham utáni állapotot.", "Az agyi elektromos aktivitás tartós és irreverzibilis hiányát.", "Anesztézia alatti agyi állapotot."],
+                answer: 2,
+                explanation: "Az elektrocerebrális csend (ECS), más néven izoelektromos EEG, az agyi elektromos aktivitás teljes hiányát jelenti, ami az agyhalál egyik diagnosztikai kritériuma. Megállapításához szigorú technikai protokollok betartása szükséges."
+            },
+            {
+                question: "Mi az eseményhez kötött potenciál (EKP vagy ERP)?",
+                options: ["Egy spontán, nagy amplitúdójú EEG hullám.", "Egy specifikus szenzoros, motoros vagy kognitív esemény által kiváltott, időben fáziskötött EEG-válasz.", "Egy kóros EEG jel, ami betegségre utal.", "A háttér EEG-aktivitás átlagos teljesítménye."],
+                answer: 1,
+                explanation: "Az eseményhez kötött potenciálok (ERP) olyan EEG-válaszok, amelyek egy adott, jól definiált eseményhez (pl. hanginger, kép felvillanása, gombnyomás) időben kötődnek. Ezeket az agyi feldolgozási folyamatok vizsgálatára használják a kognitív idegtudományban."
+            },
+            {
+                question: "Melyik állítás igaz a béta-hullámokra?",
+                options: ["Nagy amplitúdójúak és mély relaxációban jelennek meg.", "Alacsony amplitúdójúak és aktív, koncentrált ébrenlétre jellemzőek.", "A posterior agyterületeken dominálnak csukott szemmel.", "Kizárólag alvás közben figyelhetők meg."],
+                answer: 1,
+                explanation: "A béta-hullámok (13-30 Hz) alacsony amplitúdójú, gyors hullámok, amelyek az aktív, koncentrált éber állapotot, a mentális tevékenységet és a problémamegoldást jellemzik. Főként a frontális és centrális agyterületek felett dominálnak."
+            },
+            {
+                question: "Milyen hatással van a pislogás az EEG-re?",
+                options: ["Nincs hatása.", "Magas frekvenciájú zajt okoz a temporális területeken.", "Jellegzetes, nagy amplitúdójú, lassú hullámú artefaktumot hoz létre a frontális elektródákon.", "Elnyomja az alfa-ritmust az occipitális területeken."],
+                answer: 2,
+                explanation: "A pislogás az egyik leggyakoribb biológiai artefaktum. A szemgolyó, mint elektromos dipólus mozgása miatt jellegzetes, nagy amplitúdójú, lassú hullámként jelenik meg, különösen a frontopoláris elvezetésekben."
+            },
+            {
+                question: "Melyik struktúra diszfunkciója valószínű, ha egy éber felnőtt EEG-jén nagy mennyiségű delta-aktivitás látható?",
+                options: ["Agytörzs", "Kisagy", "Agykéreg", "Gerincvelő"],
+                answer: 2,
+                explanation: "Éber felnőttben a delta-hullámok túlzott jelenléte általában kóros, és az agykéreg strukturális károsodására (pl. tumor, stroke utáni állapot) vagy diffúz diszfunkciójára (enkefalopátia) utal."
+            },
+            {
+                question: "Mi a neurofeedback?",
+                options: ["Egy eljárás, melynek során a személy valós időben visszajelzést kap saját agyi aktivitásáról, és megtanulja azt befolyásolni.", "Az agyi aktivitás modellezése számítógéppel.", "Egy sebészeti eljárás az agyi aktivitás módosítására.", "Egy gyógyszer, amely normalizálja az EEG-t."],
+                answer: 0,
+                explanation: "A neurofeedback (EEG-biofeedback) egy olyan terápiás és tréning módszer, amely valós idejű vizuális vagy auditív visszajelzést ad a személynek a saját EEG aktivitásáról, lehetővé téve, hogy megtanulja tudatosan szabályozni azt. Ezt ADHD, szorongás és egyéb állapotok kezelésére használják."
+            },
+            {
+                question: "Milyen fő oka van annak, hogy az EEG elsősorban a posztszinaptikus potenciálokat (PSP) és nem az akciós potenciálokat (AP) méri?",
+                options: ["Az AP-k túl gyengék ahhoz, hogy detektálhatók legyenek.", "A PSP-k időtartama lényegesen hosszabb, ami lehetővé teszi az időbeli és térbeli összegződést.", "Az AP-k csak a mély agyi struktúrákban keletkeznek.", "A PSP-k frekvenciája magasabb, mint az AP-ké."],
+                answer: 1,
+                explanation: "A posztszinaptikus potenciálok (EPSP, IPSP) több tíz milliszekundumig is tarthatnak, míg az akciós potenciálok csak 1-2 milliszekundumig. Ez a hosszabb időtartam teszi lehetővé, hogy a nagyszámú piramissejt aktivitása időben és térben összeadódjon, és a fejbőrön is mérhető, kellő amplitúdójú jelet hozzon létre."
+            }
+        ]
+    },
+    {
+        topic: "Az alvás fiziológiája",
+        questions: [
+            {
+                question: "Melyik állítás NEM igaz az alvásra?",
+                options: ["Egy aktív, neurobiológiailag szabályozott folyamat.", "Egy passzív állapot, amelyben az agy kikapcsol.", "Reverzibilis tudatállapot-csökkenéssel jár.", "Elengedhetetlen a testi és szellemi egészséghez."],
+                answer: 1,
+                explanation: "Az alvás korántsem egy passzív folyamat, hanem egy rendkívül aktív, összetett neurobiológiai mechanizmusok által szabályozott állapot, amely alatt az agy aktívan dolgozik, például a memóriakonszolidáción vagy a salakanyagok eltávolításán."
+            },
+            {
+                question: "Melyik alvási stádium teszi ki a felnőtt alvásidejének legnagyobb részét (kb. 45-55%)?",
+                options: ["NREM 1", "NREM 2", "NREM 3 (SWS)", "REM"],
+                answer: 1,
+                explanation: "Az NREM 2. stádium, vagyis a felületes alvás, a teljes alvásidő legnagyobb részét, körülbelül 45-55%-át teszi ki felnőtteknél. Ez a stádium a tulajdonképpeni alvás kezdete, amelyben már nehezebb felébreszteni az embert."
+            },
+            {
+                question: "Mi a K-komplexumok és az alvási orsók elsődleges funkciója az NREM 2. stádiumban?",
+                options: ["Az álmok generálása.", "Az alvás védelme a külső ingerektől és a memóriakonszolidáció.", "A testhőmérséklet csökkentése.", "Az izomtónus teljes elvesztésének előkészítése."],
+                answer: 1,
+                explanation: "A K-komplexumok elnyomják a kérgi arousal-t a külső ingerekre, míg az alvási orsók a memórianyomok rögzítésében és az érzékszervi információk 'kapuzásában' játszanak szerepet. Együtt védik az alvást és segítik a memóriafeldolgozást."
+            },
+            {
+                question: "Melyik alvási szakaszban a legmagasabb a növekedési hormon (GH) kiválasztása?",
+                options: ["NREM 1", "NREM 2", "NREM 3 (SWS)", "REM"],
+                answer: 2,
+                explanation: "A mélyalvás, vagyis a lassú hullámú alvás (Slow-Wave Sleep, NREM 3. stádium) kiemelten fontos a testi regenerációban. Ebben a fázisban van a növekedési hormon kiválasztásának maximuma, ami a szövetek javításához elengedhetetlen."
+            },
+            {
+                question: "Mi a REM alvás egyik legjellegzetesebb motoros tünete?",
+                options: ["Lassú, gördülő szemmozgások", "Fokozott izomtónus és mozgás", "Izomatónia (a vázizmok tónusának szinte teljes elvesztése)", "Periodikus lábmozgások"],
+                answer: 2,
+                explanation: "A REM alvás egyik legmeghatározóbb jellemzője a kifejezett izomatónia. Ez a vázizmok (kivéve a szemmozgató- és légzőizmokat) tónusának szinte teljes elvesztését jelenti, ami megakadályozza, hogy az álombeli mozgásokat a valóságban is végrehajtsuk."
+            },
+            {
+                question: "Hogyan változik az alvási ciklus szerkezete az éjszaka folyamán?",
+                options: ["A REM szakaszok egyre rövidebbek, a mélyalvás egyre hosszabb lesz.", "Az alvási ciklusok hossza folyamatosan csökken.", "Az éjszaka első felében a mélyalvás, a második felében a REM alvás dominál.", "A stádiumok aránya az egész éjszaka során állandó."],
+                answer: 2,
+                explanation: "Az alvási architektúra dinamikusan változik. Az éjszaka első felében a mély NREM alvás (SWS) a domináns, míg a reggeli órákhoz közeledve a mélyalvás szakaszai lerövidülnek, és a REM alvás periódusai válnak egyre hosszabbá és intenzívebbé."
+            },
+            {
+                question: "Melyik agyi struktúra funkcionál a szervezet központi cirkadián órájaként ('mesterórájaként')?",
+                options: ["Tobozmirigy (corpus pineale)", "Szuprakiazmatikus mag (SCN)", "Ventrolaterális preoptikus terület (VLPO)", "Locus coeruleus (LC)"],
+                answer: 1,
+                explanation: "A hipotalamuszban található szuprakiazmatikus mag (SCN) a szervezet központi biológiai órája. A retinából kapott fényinformáció alapján szinkronizálja a belső ritmusokat, beleértve az alvás-ébrenlét ciklust is, a külső 24 órás környezeti ciklushoz."
+            },
+            {
+                question: "Mi a melatonin elsődleges szerepe az alvás szabályozásában?",
+                options: ["Közvetlenül kikapcsolja az ébrenléti központokat, mint egy altatószer.", "'Sötétség-jelként' funkcionál, elősegíti az elalvást és szinkronizálja a cirkadián ritmust.", "Fokozza az agyi aktivitást a REM alvás alatt.", "Növeli az alvási nyomást az ébrenlét során."],
+                answer: 1,
+                explanation: "A melatonin nem egy klasszikus altatószer, hanem egy 'sötétség-hormon'. A sötétben történő termelődése jelzi a szervezet számára az alvásra való felkészülés idejét, elősegítve az elalvást és a belső óra szinkronizálását."
+            },
+            {
+                question: "Hogyan fejti ki ébresztő hatását a koffein?",
+                options: ["Növeli a melatonin termelését.", "Közvetlenül serkenti az orexin termelő neuronokat.", "Blokkolja az adenozin receptorokat, megakadályozva az 'alvási nyomás' jelének érvényesülését.", "Fokozza a GABA neurotranszmitter hatását."],
+                answer: 2,
+                explanation: "Az adenozin az ébrenlét során felhalmozódik, és gátló hatásával növeli az alvási nyomást. A koffein az adenozin receptorokhoz kötődve megakadályozza az adenozin hatását, így csökkenti az álmosságot és fenntartja az éberséget."
+            },
+            {
+                question: "Melyik neurotranszmitter játszik kulcsszerepet az ébrenlét stabilizálásában, és hiánya narkolepsziához vezet?",
+                options: ["Szerotonin", "GABA", "Acetilkolin", "Orexin (hipokretin)"],
+                answer: 3,
+                explanation: "Az orexin (vagy hipokretin) egy neuropeptid, amely erősen serkenti az ébrenléti központokat és stabilizálja az éber állapotot. Az orexintermelő neuronok pusztulása a narkolepszia elsődleges oka, ami a stabil ébrenlét fenntartásának képtelenségét jelenti."
+            },
+            {
+                question: "A Borbély-féle kétfolyamatos modell szerint mi a 'Process S'?",
+                options: ["A cirkadián ritmus, ami az alvási hajlandóságot szabályozza.", "A homeosztatikus folyamat, vagyis az 'alvásnyomás', ami az ébrenlét hosszával nő.", "Az alvási stádiumok közötti átmenet folyamata.", "A stressz hatása az alvásra."],
+                answer: 1,
+                explanation: "A 'Process S' a homeosztatikus folyamatot jelenti, amely az alvás iránti fiziológiai igényt, azaz az alvásnyomást reprezentálja. Ez az ébren töltött idővel arányosan növekszik, és alvás során csökken."
+            },
+            {
+                question: "Melyik alvási szakasz játszik kiemelt szerepet a deklaratív memória (tények, események) konszolidációjában?",
+                options: ["NREM 1", "NREM 2", "NREM 3 (SWS)", "REM"],
+                answer: 2,
+                explanation: "A lassú hullámú alvás (SWS, NREM 3) kulcsfontosságú a deklaratív memória konszolidációjában. Úgy vélik, hogy ebben a fázisban a hippokampuszban tárolt friss emlékek újraaktiválódnak és átkerülnek a neokortexbe hosszú távú tárolásra."
+            },
+            {
+                question: "Mi a 'glimfatikus rendszer' alvás alatti fokozott aktivitásának fő funkciója?",
+                options: ["Új idegi kapcsolatok létrehozása.", "Az agyi anyagcsere-melléktermékek, például a béta-amiloid eltávolítása.", "A testhőmérséklet szabályozása.", "Az érzelmi emlékek feldolgozása."],
+                answer: 1,
+                explanation: "A glimfatikus rendszer egy agyi 'tisztító' mechanizmus, amelynek aktivitása alvás alatt, különösen mélyalvásban fokozódik. Ez a rendszer hatékonyan távolítja el a metabolikus salakanyagokat, köztük a neurodegeneratív betegségekkel összefüggő toxikus fehérjéket az agyszövetből."
+            },
+            {
+                question: "Milyen hatással van az alkohol az alvás szerkezetére?",
+                options: ["Növeli a REM alvás arányát az egész éjszaka folyamán.", "Elősegíti a mély, pihentető alvást mellékhatások nélkül.", "Kezdetben segítheti az elalvást, de később fragmentálja az alvást és csökkenti a REM alvás arányát.", "Nincs számottevő hatása az alvásra."],
+                answer: 2,
+                explanation: "Bár az alkohol álmosító hatású lehet, az anyagcseréje során keletkező termékek később az éjszaka folyamán megzavarják az alvást. Növeli az ébredések számát, elnyomja a REM alvást, és ronthatja az alvás minőségét."
+            },
+            {
+                question: "Melyik alvási szakaszra jellemző az éber állapothoz hasonló, gyors, deszinkronizált EEG aktivitás?",
+                options: ["NREM 1", "NREM 2", "NREM 3 (SWS)", "REM"],
+                answer: 3,
+                explanation: "A REM alvást 'paradox' alvásnak is nevezik, mert az agyi aktivitás (EEG) gyors, kis amplitúdójú és deszinkronizált, ami nagyon hasonlít az aktív éber állapothoz, miközben a test izmai (az atónia miatt) mélyen relaxáltak."
+            },
+            {
+                question: "Mi a krónikus alváshiány egyik legjelentősebb anyagcsere-következménye?",
+                options: ["Az étvágy csökkenése és fogyás.", "A 2-es típusú cukorbetegség és az elhízás kockázatának növekedése.", "A koleszterinszint csökkenése.", "Fokozott fizikai teljesítőképesség."],
+                answer: 1,
+                explanation: "A krónikus alváshiány felborítja az étvágyat szabályozó hormonok (leptin, ghrelin) egyensúlyát és rontja az inzulinérzékenységet. Ez fokozott éhségérzethez, súlygyarapodáshoz és a 2-es típusú cukorbetegség kialakulásának jelentősen megnövekedett kockázatához vezet."
+            },
+            {
+                question: "Hogyan befolyásolja az idősödés az alvásmintázatot?",
+                options: ["Nő a mélyalvás és a REM alvás aránya.", "Az alvás mélyebbé és folyamatosabbá válik.", "Csökken a mélyalvás (SWS) mennyisége, és az alvás fragmentáltabbá válik.", "Az alvásigény drasztikusan megnő."],
+                answer: 2,
+                explanation: "Az idősödéssel az alvás szerkezete megváltozik: csökken a legpihentetőbb mélyalvás és a REM alvás aránya, míg a felszínesebb stádiumok aránya nő. Az alvás töredezettebbé válik, gyakoribbak az éjszakai ébredések."
+            },
+            {
+                question: "Melyik neurotranszmitter-rendszer aktivitása szűnik meg szinte teljesen a REM alvás alatt?",
+                options: ["Kolinerg (acetilkolin)", "Monoaminerg (noradrenalin, szerotonin)", "GABAerg (GABA)", "Glutamáterg (glutamát)"],
+                answer: 1,
+                explanation: "A REM alvás létrejöttéhez elengedhetetlen, hogy az agytörzsi monoaminerg rendszerek (locus coeruleus - noradrenalin; raphe magvak - szerotonin) aktivitása drasztikusan lecsökkenjen, szinte teljesen elhallgassanak. Ez teszi lehetővé a kolinerg rendszer dominanciáját, ami a REM-re jellemző."
+            },
+            {
+                question: "Melyik állítás igaz az álmokra?",
+                options: ["Kizárólag REM alvásban álmodunk.", "Az élénk, vizuálisan gazdag, narratív álmok elsődlegesen a REM szakaszhoz kötődnek.", "Az NREM álmok általában intenzívebbek, mint a REM álmok.", "Az álmoknak nincs funkciója, csupán véletlenszerű agyi aktivitás."],
+                answer: 1,
+                explanation: "Bár álmodás (inkább gondolatszerű élmények) NREM fázisokban is előfordul, a klasszikus, élénk, vizuálisan gazdag, érzelmileg telített és történet-szerű álmok a REM alvás legfőbb jellemzői. A REM alvásból ébresztettek szinte mindig beszámolnak álomélményről."
+            },
+            {
+                question: "Mi a 'flip-flop switch' modell lényege az alvás-ébrenlét szabályozásában?",
+                options: ["Az alvás és ébrenlét folyamatosan, lassan váltakozik.", "Az alvást elősegítő és az ébrenlétet fenntartó központok kölcsönösen gátolják egymást, ami gyors és stabil állapotváltást tesz lehetővé.", "Az alvás-ébrenlét ciklust kizárólag a fény szabályozza.", "Minden neurotranszmitter egyszerre aktív vagy inaktív."],
+                answer: 1,
+                explanation: "A 'flip-flop switch' modell szerint az alvásközpontok (pl. VLPO) és az ébrenléti központok (pl. ARAS) kölcsönösen gátolják egymást. Ez egy bistabil rendszert hoz létre, amely lehetővé teszi a gyors és tiszta átmenetet a két állapot között, megakadályozva a köztes, instabil állapotokat."
+            }
+        ]
+    },
+    {
+        topic: "A vizelet- és székletürítés szabályozása",
+        questions: [
+            {
+                question: "Melyik izom felelős a húgyhólyag összehúzódásáért a vizeletürítés során?",
+                options: ["Külső urethralis sphincter", "Belső urethralis sphincter", "Detrusor izom", "Musculus puborectalis"],
+                answer: 2,
+                explanation: "A detrusor izom a húgyhólyag falát alkotó simaizomzat. Ennek az izomnak a paraszimpatikus idegrendszer által vezérelt összehúzódása okozza a vizelet kipréselését a hólyagból a vizelés során."
+            },
+            {
+                question: "Melyik idegrendszeri ág segíti elő a vizelet TÁROLÁSÁT?",
+                options: ["Paraszimpatikus idegrendszer", "Szimpatikus idegrendszer", "Szomatikus idegrendszer", "Enterális idegrendszer"],
+                answer: 1,
+                explanation: "A vizelet tárolási fázisában a szimpatikus idegrendszer dominál. Ellazítja a detrusor izmot (hogy a hólyag tágulhasson) és összehúzza a belső urethralis sphinctert, ezzel megakadályozva a vizelet elfolyását."
+            },
+            {
+                question: "Melyik agytörzsi központ koordinálja a vizeletürítés folyamatát, biztosítva a detrusor kontrakció és a sphincter relaxáció összhangját?",
+                options: ["Periaqueductalis szürkeállomány (PAG)", "Agykérgi micturitiós központ", "Pontin micturitiós központ (PMC) / Barrington mag", "Onuf-mag"],
+                answer: 2,
+                explanation: "A pontin micturitiós központ (PMC), más néven Barrington-mag, a híd területén található, és egyfajta 'kapcsolóközpontként' működik. Ez a központ koordinálja a vizeletürítéshez szükséges komplex folyamatokat: serkenti a detrusor összehúzódását és egyidejűleg gátolja a záróizmokat."
+            },
+            {
+                question: "Melyik záróizom áll akaratlagos kontroll alatt a vizelet- és székletürítés során?",
+                options: ["A belső urethralis sphincter és a belső analis sphincter", "Csak a külső urethralis sphincter", "A külső urethralis sphincter és a külső analis sphincter", "Egyik záróizom sem szabályozható akaratlagosan"],
+                answer: 2,
+                explanation: "Mind a vizelet-, mind a székletürítésben a külső záróizmok (külső urethralis sphincter és külső analis sphincter) harántcsíkolt izomból állnak és a szomatikus idegrendszer (nervus pudendus) által beidegzettek, így lehetővé teszik az ürítés akaratlagos visszatartását vagy elindítását."
+            },
+            {
+                question: "Mi a Rectoanalis Inhibitoros Reflex (RAIR) funkciója?",
+                options: ["A végbél összehúzódását váltja ki.", "A belső analis sphincter akaratlan relaxációját okozza a végbél feszülésére, lehetővé téve a 'mintavételezést'.", "A külső analis sphincter akaratlagos összehúzódását segíti.", "Megakadályozza a gázok távozását."],
+                answer: 1,
+                explanation: "A RAIR egy akaratlan reflex, amely során a végbél feszülése a belső analis sphincter ellazulását okozza. Ez lehetővé teszi, hogy a végbél tartalma (széklet vagy gáz) lejjebb kerüljön az érzékeny analis csatornába, ahol az egyén meg tudja különböztetni a minőségét, és dönthet az ürítésről."
+            },
+            {
+                question: "Melyik állítás igaz a székletürítés szabályozására?",
+                options: ["Kizárólag a központi idegrendszer irányítja.", "Az enterális idegrendszer (ENS) fontos szerepet játszik a bél motilitásának helyi szabályozásában.", "A szimpatikus idegrendszer serkenti a bélmozgást.", "A székletürítés egy teljesen akaratlan folyamat."],
+                answer: 1,
+                explanation: "A székletürítés szabályozásában az enterális idegrendszer (ENS), a bélfal saját ideghálózata, kulcsszerepet játszik a perisztaltika helyi generálásában és koordinálásában. A külső (autonóm) idegrendszer ezt az alapvető aktivitást modulálja."
+            },
+            {
+                question: "Melyik típusú vizeletinkontinencia jellemző köhögés, tüsszentés vagy emelés során?",
+                options: ["Sürgősségi (urge) inkontinencia", "Stresszinkontinencia", "Túlfolyásos inkontinencia", "Funkcionális inkontinencia"],
+                answer: 1,
+                explanation: "A stresszinkontinencia a hasűri nyomás hirtelen megemelkedésekor (pl. köhögés, tüsszentés) bekövetkező akaratlan vizeletvesztést jelenti. Oka általában a medencefenéki izmok vagy a húgycső záróizmának gyengesége."
+            },
+            {
+                question: "Mi a szerepe a prefrontális kéregnek a vizeletürítésben?",
+                options: ["Közvetlenül összehúzza a detrusor izmot.", "Akaratlagos, gátló kontrollt gyakorol a vizelési reflex felett.", "Érzékeli a hólyag teltségét.", "Nincs szerepe a vizeletürítésben."],
+                answer: 1,
+                explanation: "A magasabb agyi központok, különösen a prefrontális kéreg, egyfajta 'szociális kapcsolóként' működnek. Folyamatosan gátolják a pontin micturitiós központot, lehetővé téve, hogy a vizeletürítést a megfelelő időben és helyen, akaratlagosan indítsuk el."
+            },
+            {
+                question: "Melyik idegrendszeri reflex felelős a kontinencia fenntartásáért a vizelet tárolási fázisában?",
+                options: ["Micturitiós reflex", "Defecatiós reflex", "Guarding reflex (őrző reflex)", "Rectoanalis inhibitoros reflex"],
+                answer: 2,
+                explanation: "A 'guarding reflex' egy gerincvelői szintű reflex, amely a vizelet tárolását segíti. A hólyag telítődésével ez a reflex aktiválja a külső záróizmot és a szimpatikus rendszert, miközben gátolja a detrusor izom összehúzódását."
+            },
+            {
+                question: "Milyen hatással van a paraszimpatikus idegrendszer a húgyhólyagra?",
+                options: ["A detrusor izom relaxációját és a belső sphincter kontrakcióját okozza.", "A detrusor izom kontrakcióját és a belső sphincter relaxációját okozza.", "Csak a külső sphinctert szabályozza.", "Gátolja a vizeletürítést."],
+                answer: 1,
+                explanation: "A paraszimpatikus beidegzés (az S2-S4 szegmentumokból) a vizeletürítés 'motorja'. Az általa felszabadított acetilkolin a detrusor izom összehúzódását váltja ki, ami a vizelet kipréseléséhez vezet."
+            },
+            {
+                question: "Mi jellemzi a túlfolyásos inkontinenciát?",
+                options: ["Hirtelen, parancsoló vizelési inger.", "A vizelet szivárgása fizikai terhelésre.", "A hólyag nem tud teljesen kiürülni, ezért a visszamaradó vizelet szivárog.", "Kognitív zavar miatti vizeletvesztés."],
+                answer: 2,
+                explanation: "Túlfolyásos inkontinencia akkor lép fel, ha a hólyag krónikusan túltelített, mert nem képes hatékonyan kiürülni (pl. a detrusor izom gyengesége vagy húgyúti akadály miatt). A megnövekedett nyomás miatt a vizelet folyamatosan vagy időnként szivárog."
+            },
+            {
+                question: "Melyik izom játszik fontos szerepet a székletkontinencia fenntartásában az anorectalis szög biztosításával?",
+                options: ["Detrusor izom", "Külső analis sphincter", "Belső analis sphincter", "Musculus puborectalis"],
+                answer: 3,
+                explanation: "A musculus puborectalis egy hurokszerű izom, amely hátulról-előre 'megtöri' a végbél és az analis csatorna találkozását, létrehozva az anorectalis szöget. Ez a mechanikai gát kulcsfontosságú a széklet nyugalmi állapotban történő visszatartásában."
+            },
+            {
+                question: "Milyen neurológiai betegség okozhat vizeletinkontinenciát a PAG/PMC központok B1-vitamin hiány miatti károsodásával?",
+                options: ["Stroke", "Parkinson-kór", "Wernicke-enkefalopátia", "Sclerosis multiplex"],
+                answer: 2,
+                explanation: "A Wernicke-enkefalopátia, amit a tiamin (B1-vitamin) hiánya okoz, károsíthatja azokat a központi idegrendszeri struktúrákat (pl. PAG, PMC), amelyek a vizeletürítés koordinálásáért felelősek, ami vizeletinkontinenciához vezethet."
+            },
+            {
+                question: "Hogyan befolyásolja a magas rosttartalmú étrend a székletürítést?",
+                options: ["Mindig székrekedést okoz.", "Befolyásolja a széklet konzisztenciáját és a béltranzit idejét, segítve a rendszeres ürítést.", "Csökkenti a széklet mennyiségét.", "Nincs hatással a székletürítésre."],
+                answer: 1,
+                explanation: "A megfelelő rostbevitel növeli a széklet tömegét és víztartalmát, puhábbá és könnyebben üríthetővé téve azt. Ez serkenti a bélmozgást (perisztaltikát) és segít megelőzni a székrekedést."
+            },
+            {
+                question: "Mi a 'salience network' (kiemelkedőségi hálózat) szerepe a vizeletkontrollban, amely stroke után károsodhat?",
+                options: ["A hólyag izmainak közvetlen összehúzása.", "A releváns belső ingerek (pl. hólyagteltség) értékelése és a megfelelő válasz (visszatartás/ürítés) koordinálása.", "A vese vizelettermelésének szabályozása.", "A medencefenék izmainak erősítése."],
+                answer: 1,
+                explanation: "A 'salience network' egy agyi hálózat, amely segít azonosítani és feldolgozni a legfontosabb (legkiemelkedőbb) belső és külső ingereket. A vizeletkontrollban szerepet játszik a teltségérzet tudatosításában és a megfelelő vizelési döntés meghozatalában. Károsodása (pl. stroke után) a kontroll zavarához vezethet."
+            },
+            {
+                question: "Melyik állítás írja le helyesen a vizeletürítés akaratlagos elindítását?",
+                options: ["A detrusor izom akaratlagos összehúzása.", "A prefrontális kéreg gátlásának feloldása a pontin micturitiós központ (PMC) felett.", "A szimpatikus idegrendszer akaratlagos aktiválása.", "A belső sphincter akaratlagos ellazítása."],
+                answer: 1,
+                explanation: "A vizelés akaratlagos elindításához a prefrontális kéregnek 'engedélyt kell adnia'. Ez a PMC feletti tónusos gátlás feloldásával történik, ami lehetővé teszi a vizelési reflex lefutását."
+            },
+            {
+                question: "Melyik neurotranszmitter a legfontosabb a paraszimpatikus rendszer által közvetített detrusor izom kontrakcióban?",
+                options: ["Noradrenalin", "Dopamin", "Szerotonin", "Acetilkolin"],
+                answer: 3,
+                explanation: "A paraszimpatikus idegvégződések acetilkolint (ACh) szabadítanak fel a húgyhólyagban, ami a detrusor izom falában lévő muszkarinos receptorokhoz kötődve váltja ki az izom összehúzódását."
+            },
+            {
+                question: "Mi a fő különbség a vizelet- és székletürítés helyi szabályozásában?",
+                options: ["A vizeletürítésnek van helyi szabályozása, a székletürítésnek nincs.", "Az enterális idegrendszer (ENS) sokkal nagyobb szerepet játszik a székletürítés helyi szabályozásában, mint a vizeletürítésében.", "A vizeletürítés teljesen akaratlan, a székletürítés teljesen akaratlagos.", "Nincs lényeges különbség."],
+                answer: 1,
+                explanation: "A székletürítés szabályozásában az enterális idegrendszer (ENS), a bélfal saját 'agya', központi szerepet játszik a helyi reflexek és a motilitás koordinálásában. Ezzel szemben a húgyhólyag szabályozása sokkal inkább a központi (autonóm) idegrendszer irányítása alatt áll."
+            },
+            {
+                question: "Időskori férfiaknál melyik a leggyakoribb oka a túlfolyásos inkontinenciának?",
+                options: ["Húgyúti fertőzés", "A detrusor izom túlműködése", "Prosztata megnagyobbodás", "Pszichológiai okok"],
+                answer: 2,
+                explanation: "A jóindulatú prosztata megnagyobbodás (BPH) összenyomhatja a húgycsövet, akadályozva a vizelet kiáramlását. Ennek következtében a hólyag nem tud teljesen kiürülni, ami krónikus vizeletretencióhoz és túlfolyásos inkontinenciához vezet."
+            },
+            {
+                question: "Melyik állítás igaz a csecsemőkori ürítési funkciókra?",
+                options: ["A csecsemők akaratlagosan kontrollálják az ürítést.", "A vizelet- és székletürítés elsődlegesen gerincvelői szintű reflexfolyamat.", "A csecsemők hólyagja sosem ürül ki teljesen.", "A csecsemőknek nincs székelési reflexük."],
+                answer: 1,
+                explanation: "Csecsemőkorban a magasabb agyi gátló központok még éretlenek, ezért a vizelet- és székletürítés automatikusan, gerincvelői reflexek által vezérelve történik, amint a hólyag vagy a végbél egy bizonyos mértékig megtelik."
+            }
+        ]
+    },
+    {
+        topic: "Az idegrendszeri szerkezetek plaszticitása",
+        questions: [
+            {
+                question: "Mi a neuroplaszticitás definíciója?",
+                options: ["Az idegsejtek azon képessége, hogy elektromos jeleket vezessenek.", "Az idegrendszer képessége a szerkezetének és működésének megváltoztatására tapasztalat vagy sérülés hatására.", "Az agy vérellátásának dinamikus szabályozása.", "A gliasejtek osztódásának folyamata a felnőtt agyban."],
+                answer: 1,
+                explanation: "A neuroplaszticitás az idegrendszer azon alapvető tulajdonsága, hogy képes fizikailag és funkcionálisan is átszerveződni, alkalmazkodva a tanuláshoz, a környezeti ingerekhez vagy a sérülésekhez."
+            },
+            {
+                question: "Mit jelent a Hebb-i tanulás alapelve: 'neurons that fire together, wire together'?",
+                options: ["A neuronok véletlenszerűen kapcsolódnak össze.", "Két neuron közötti szinaptikus kapcsolat megerősödik, ha aktivitásuk egyidejű és korrelált.", "Azok a neuronok, amelyek nem tüzelnek, elpusztulnak.", "Az idegsejtek csak csoportokban képesek tüzelni."],
+                answer: 1,
+                explanation: "Hebb szabálya szerint, ha egy preszinaptikus neuron ismételten és tartósan hozzájárul egy posztszinaptikus neuron tüzeléséhez, a kettő közötti szinaptikus kapcsolat megerősödik. Ez a szinaptikus plaszticitás és az asszociatív tanulás alapja."
+            },
+            {
+                question: "Melyik két folyamat áll a funkcionális plaszticitás középpontjában?",
+                options: ["Axonális sarjadás és neurogenezis", "Szinaptogenezis és pruning", "Hosszú távú potenciáció (LTP) és hosszú távú depresszió (LTD)", "Mielinizáció és gliasejt-proliferáció"],
+                answer: 2,
+                explanation: "Az LTP (a szinapszisok tartós erősödése) és az LTD (a szinapszisok tartós gyengülése) a funkcionális plaszticitás két alapvető, ellentétes irányú mechanizmusa, amelyek lehetővé teszik a szinaptikus súlyok finomhangolását az idegi aktivitás mintázatának függvényében."
+            },
+            {
+                question: "Melyik receptor játszik kulcsszerepet az LTP indukciójában, mint 'koincidencia detektor'?",
+                options: ["AMPA receptor", "GABA-A receptor", "NMDA receptor", "Dopamin D2 receptor"],
+                answer: 2,
+                explanation: "Az NMDA receptor egyedülálló, mert aktiválásához egyidejűleg két feltételnek kell teljesülnie: glutamát kötődésének (preszinaptikus aktivitás) és a posztszinaptikus membrán depolarizációjának (posztszinaptikus aktivitás). Ezért ideális 'koincidencia detektor' a Hebb-i tanuláshoz."
+            },
+            {
+                question: "Mi a felnőttkori neurogenezis?",
+                options: ["Új gliasejtek képződése a felnőtt agyban.", "Meglévő neuronok méretének növekedése.", "Új, funkcionális neuronok képződése a felnőtt agy specifikus régióiban.", "Az idegsejtek pusztulásának folyamata."],
+                answer: 2,
+                explanation: "A felnőttkori neurogenezis új idegsejtek születését jelenti, ami a felnőtt agyban is folytatódik, bár korlátozott területeken, mint a hippocampus subgranularis zónája (SGZ) és az oldalkamrák subventricularis zónája (SVZ). Szerepet játszik a tanulásban, memóriában és hangulatszabályozásban."
+            },
+            {
+                question: "Mit értünk kritikus periódus alatt a fejlődés során?",
+                options: ["Egy olyan időszakot, amikor az agy már nem képes változni.", "Egy specifikus időablakot, amikor az agy különösen érzékeny a környezeti ingerekre egy adott funkció kialakulásához.", "A serdülőkori hormonális változások időszakát.", "Azt az időszakot, amikor a legtöbb idegsejt elpusztul."],
+                answer: 1,
+                explanation: "A kritikus (vagy szenzitív) periódusok a fejlődés olyan meghatározott időszakai, amikor az idegrendszer plaszticitása maximális egy adott funkció (pl. látás, nyelv) szempontjából. A normális fejlődéshez ebben az időszakban specifikus tapasztalatokra van szükség."
+            },
+            {
+                question: "Mi a 'maladaptív plaszticitás' egyik példája?",
+                options: ["Új hangszeren való tanulás", "Fantomvégtag-fájdalom amputáció után", "Nyelvtanulás gyermekkorban", "Stroke utáni funkció-visszanyerés"],
+                answer: 1,
+                explanation: "A maladaptív plaszticitás azt jelenti, hogy a plasztikus változások káros vagy nem kívánatos következményekkel járnak. A fantomfájdalom jó példa, ahol az agy szenzoros kérgének átszerveződése amputáció után fájdalomérzethez vezet a hiányzó végtag helyén."
+            },
+            {
+                question: "Hogyan segíti elő a testmozgás a neuroplaszticitást?",
+                options: ["Csökkenti az agy vérellátását.", "Gátolja az új neuronok képződését.", "Fokozza a neurotróf faktorok (pl. BDNF) szintjét és a neurogenezist.", "Növeli a krónikus stressz szintjét."],
+                answer: 2,
+                explanation: "A rendszeres fizikai aktivitás az egyik leghatékonyabb módja a neuroplaszticitás serkentésének. Növeli az agyi eredetű neurotróf faktor (BDNF) szintjét, serkenti az új idegsejtek képződését a hippocampusban, és javítja az agyi keringést."
+            },
+            {
+                question: "Mi a különbség a funkcionális és a strukturális plaszticitás között?",
+                options: ["Nincs különbség, a két fogalom szinonima.", "A funkcionális a szinapszisok erősségének, míg a strukturális az agy fizikai szerkezetének (pl. új szinapszisok) megváltozását jelenti.", "A funkcionális csak sérülés után, a strukturális csak tanulás során lép fel.", "A funkcionális a neuronokat, a strukturális a gliasejteket érinti."],
+                answer: 1,
+                explanation: "A funkcionális plaszticitás a meglévő kapcsolatok hatékonyságának változása (pl. LTP/LTD). A strukturális plaszticitás ezzel szemben az idegrendszer fizikai felépítésének módosulását jelenti, mint például új szinapszisok, dendritikus tüskék képződése vagy axonális sarjadás."
+            },
+            {
+                question: "Mit jelent a 'kortikális átstrukturálódás' (cortical remapping) stroke után?",
+                options: ["Az agykéreg teljes zsugorodását.", "A sérült területek funkcióit szomszédos vagy ellenoldali ép agyterületek veszik át.", "Az agykérgi rétegek sorrendjének felcserélődését.", "A sérült agyterület elhalását és hegesedését."],
+                answer: 1,
+                explanation: "A kortikális átstrukturálódás egy plasztikus folyamat, amely során az agykéreg 'térképei' átrendeződnek a megváltozott input hatására. Stroke után egy sérült végtag reprezentációját átvehetik a környező ép területek, ami a funkció részleges visszanyerését teszi lehetővé."
+            },
+            {
+                question: "Mi a szerepe az AMPA receptoroknak az LTP során?",
+                options: ["Kalciumot engednek be a sejtbe, ami elindítja a kaszkádot.", "Gátolják a posztszinaptikus neuront.", "Számuk és vezetőképességük megnő a posztszinaptikus membránon, ami erősíti a szinapszist.", "Retrográd jelként hatnak a preszinaptikus sejtre."],
+                answer: 2,
+                explanation: "Az LTP indukciója során az NMDA receptorokon beáramló kalcium olyan folyamatokat indít el, amelyek hatására több AMPA receptor épül be a posztszinaptikus membránba, és a meglévők vezetőképessége is megnő. Ezáltal ugyanannyi glutamát erősebb választ vált ki, ami a szinaptikus erősödés alapja."
+            },
+            {
+                question: "Melyik állítás IGAZ a dendritikus tüskékre?",
+                options: ["Stabil, változatlan struktúrák a neuronokon.", "A gátló szinapszisok fő helyei.", "Dinamikus struktúrák, amelyek alakja, mérete és száma a szinaptikus aktivitástól függően változik.", "Csak a fejlődés korai szakaszában léteznek."],
+                answer: 2,
+                explanation: "A dendritikus tüskék a serkentő szinapszisok posztszinaptikus oldalát alkotják. Rendkívül dinamikusak; új tüskék képződhetnek (spinogenezis), régiek eltűnhetnek (pruning), és morfológiájuk (pl. fejméret) változhat a tanulás és a szinaptikus aktivitás hatására, ami a strukturális plaszticitás egyik kulcsfontosságú formája."
+            },
+            {
+                question: "Melyik alvási szakasz különösen fontos a memóriakonszolidációhoz és a szinaptikus plaszticitáshoz?",
+                options: ["Ébrenléti relaxáció", "Az alvás egésze egyformán fontos.", "A lassú hullámú alvás (SWS) és a REM alvás.", "Csak az elalvás előtti percek."],
+                answer: 2,
+                explanation: "Mind a lassú hullámú alvás (SWS), mind a REM alvás kritikus szerepet játszik a memóriakonszolidációban és a szinaptikus plaszticitásban. Az SWS alatt főként a deklaratív emlékek, míg a REM alatt a procedurális és emocionális emlékek rögzülnek, és az agy 'újrahuzalozza' magát."
+            },
+            {
+                question: "Mi a 'tapasztalattól elvárt' (experience-expectant) plaszticitás?",
+                options: ["Az agy plaszticitása, ami egyedi, személyes tapasztalatoktól függ.", "Az agy azon képessége, hogy a normális fejlődéshez 'elvár' bizonyos típusú környezeti ingereket.", "A felnőttkori agy plaszticitása.", "A sérülés utáni maladaptív plaszticitás."],
+                answer: 1,
+                explanation: "A tapasztalattól elvárt plaszticitás a fejlődés kritikus periódusaira jellemző. Az agy genetikailag 'fel van készülve' arra, hogy bizonyos ingereket (pl. vizuális minták, hangok) kapjon a környezetből, és ezek szükségesek az adott idegi rendszerek (pl. látórendszer, hallórendszer) normális kialakulásához."
+            },
+            {
+                question: "Mi a 'plasztikus paradoxon' lényege?",
+                options: ["A neuroplaszticitás egyszerre létezik és nem létezik.", "A neuroplaszticitás csökken az életkorral, mégis lehetséges a tanulás.", "A plaszticitás mechanizmusai nemcsak rugalmassághoz, hanem a viselkedés merevebbé válásához (pl. rossz szokások, függőség) is vezethetnek.", "A plaszticitás csak az agy egyik felében működik."],
+                answer: 2,
+                explanation: "A plasztikus paradoxon arra a kettősségre utal, hogy ugyanazok a mechanizmusok, amelyek lehetővé teszik az agy számára a pozitív változást és tanulást, egyben rögzíthetnek maladaptív, merev viselkedési mintázatokat is, mint például a függőség, a krónikus fájdalom vagy a rossz szokások."
+            },
+            {
+                question: "Melyik agyterületen a leginkább vizsgált a felnőttkori neurogenezis?",
+                options: ["Agytörzs", "Kisagy", "Agykéreg", "Hippocampus"],
+                answer: 3,
+                explanation: "A felnőttkori neurogenezis két fő helyszíne az oldalkamrák subventricularis zónája és a hippocampus dentate gyrusának subgranularis zónája. A hippocampusban zajló neurogenezist kutatják a legintenzívebben a tanulásban és memóriában betöltött szerepe miatt."
+            },
+            {
+                question: "Milyen szerepet játszanak a protein foszfatázok (pl. kalcineurin) az LTD-ben?",
+                options: ["Fehérjéket foszforilálnak, ami erősíti a szinapszist.", "Az AMPA receptorok membránba való beépülését segítik.", "Az AMPA receptorokat defoszforilálják, ami azok membránból való eltávolításához (internalizációjához) vezet.", "Gátolják az NMDA receptorokat."],
+                answer: 2,
+                explanation: "Az LTD során a kisebb mértékű kalcium beáramlás protein foszfatázokat (pl. kalcineurin, PP1) aktivál. Ezek eltávolítják a foszfátcsoportokat az AMPA receptorokról és más fehérjékről, ami az AMPA receptorok endocitózisát (membránból való eltávolítását) indítja el, így gyengítve a szinaptikus kapcsolatot."
+            },
+            {
+                question: "Mi az axonális sarjadás (axonal sprouting)?",
+                options: ["Az axonok mielinizációjának folyamata.", "Új axonok növekedése és új kapcsolatok kialakítása, gyakran sérülés után.", "Az axon terminálisának megduzzadása.", "Az akciós potenciál terjedése az axonon."],
+                answer: 1,
+                explanation: "Az axonális sarjadás egy strukturális plasztikus folyamat, amely során a túlélő neuronok új axonnyúlványokat növesztenek, hogy új szinaptikus kapcsolatokat hozzanak létre. Ez egy fontos mechanizmus a sérülés utáni helyreállításban."
+            },
+            {
+                question: "Melyik rehabilitációs stratégia használja ki a neuroplaszticitást a sérült végtag erőltetett használatával?",
+                options: ["Tükörterápia", "Gyógyszeres kezelés", "Constraint-Induced Movement Therapy (CIMT)", "Passzív mozgatás"],
+                answer: 2,
+                explanation: "A CIMT (Kényszer-indukált mozgásterápia) során az ép végtag használatát korlátozzák, így a pácienst a sérült végtag intenzív, ismétlődő használatára 'kényszerítik'. Ez a fokozott aktivitás serkenti a kortikális átszerveződést és a funkcionális felépülést."
+            },
+            {
+                question: "Hogyan járulhat hozzá a krónikus stressz a negatív plasztikus változásokhoz?",
+                options: ["A BDNF szint növelésével.", "A hippocampus neurogenezisének serkentésével.", "A kortizol szintjének tartós emelésével, ami károsíthatja a hippocampus neuronjait és gátolhatja a plaszticitást.", "A szinaptikus kapcsolatok megerősítésével."],
+                answer: 2,
+                explanation: "A krónikus stressz és a magas kortizolszint neurotoxikus hatású lehet, különösen a hippocampusra. Gátolhatja a felnőttkori neurogenezist, csökkentheti a dendritek elágazódását, és hozzájárulhat a szinaptikus kapcsolatok elvesztéséhez, ami negatívan befolyásolja a memóriát és a hangulatszabályozást."
+            }
+        ]
+    },
+    {
+        topic: "Genetikai alapismeretek és genetikai tanácsadás a neurológiában",
+        questions: [
+            {
+                question: "Mi a különbség a genotípus és a fenotípus között?",
+                options: ["A genotípus a gének, a fenotípus a kromoszómák összessége.", "A genotípus egy egyed teljes genetikai összetétele, míg a fenotípus a megfigyelhető tulajdonságainak összessége.", "A genotípus a domináns, a fenotípus a recesszív alléleket jelenti.", "A két fogalom egymás szinonimája."],
+                answer: 1,
+                explanation: "A genotípus az egyed DNS-ében kódolt genetikai információt (az allélok kombinációját) jelenti. A fenotípus pedig ezen genetikai információ és a környezeti hatások kölcsönhatásaként kialakuló, látható vagy mérhető tulajdonságok összessége (pl. betegség tünetei, hajszín)."
+            },
+            {
+                question: "Melyik öröklődésmenet jellemző a Huntington-kórra?",
+                options: ["Autoszomális recesszív", "Autoszomális domináns", "X-kromoszómához kötött recesszív", "Mitokondriális"],
+                answer: 1,
+                explanation: "A Huntington-kór klasszikus példája az autoszomális domináns öröklődésnek. Ez azt jelenti, hogy a betegséget okozó mutáns allél egyetlen példányának jelenléte is elegendő a betegség kialakulásához, és az érintett szülő 50% eséllyel adja tovább a betegséget minden gyermekének."
+            },
+            {
+                question: "Mi a 'trinukleotid repeat expanzió'?",
+                options: ["Egy gén teljes duplikációja.", "Egy három nukleotidból álló DNS-szekvencia kóros mértékű ismétlődése egy génen belül.", "Egy pontmutáció, amely három bázist érint.", "Három kromoszóma jelenléte egy helyett."],
+                answer: 1,
+                explanation: "A trinukleotid repeat expanzió egy dinamikus mutációtípus, ahol egy három bázisból álló ismétlődő egység (pl. CAG a Huntington-kórnál) száma generációról generációra nő. A repeatek száma gyakran korrelál a betegség súlyosságával és kezdeti életkorával."
+            },
+            {
+                question: "Melyik állítás igaz az autoszomális recesszív öröklődésre?",
+                options: ["A betegség minden generációban megjelenik.", "Csak a férfiak lehetnek betegek.", "A betegség csak akkor alakul ki, ha az egyed mindkét szülőtől a mutáns allélt örökli (homozigóta).", "Egy beteg szülő minden gyermeke beteg lesz."],
+                answer: 2,
+                explanation: "Autoszomális recesszív öröklődés esetén a betegség fenotípusosan csak akkor jelenik meg, ha az egyén mindkét homológ kromoszómáján a hibás allélt hordozza (pl. 'aa'). A heterozigóta ('Aa') egyének általában tünetmentes hordozók."
+            },
+            {
+                question: "Mi a 'penetrancia' fogalma a genetikában?",
+                options: ["A tünetek súlyosságának mértéke.", "Annak a valószínűsége, hogy egy adott genotípussal rendelkező egyénnél megjelenik-e a várt fenotípus.", "A gén kifejeződésének sebessége.", "A mutációk spontán kialakulásának gyakorisága."],
+                answer: 1,
+                explanation: "A penetrancia azt adja meg, hogy egy betegséget okozó genotípust hordozó populációban az egyének hány százalékánál jelennek meg ténylegesen a betegség klinikai tünetei. Ha a penetrancia 100%-nál alacsonyabb (csökkent penetrancia), a kóroki gént hordozók egy része tünetmentes maradhat."
+            },
+            {
+                question: "Melyik gén allélváltozata a legjelentősebb genetikai rizikófaktor a késői kezdetű Alzheimer-kórban (LOAD)?",
+                options: ["APP", "PSEN1", "HTT", "APOE"],
+                answer: 3,
+                explanation: "Az apolipoprotein E (APOE) gén ε4 alléjának hordozása a legismertebb és legjelentősebb genetikai kockázati tényező a késői kezdetű Alzheimer-kór esetében. Az ε4 allél jelenléte növeli a betegség kialakulásának esélyét és befolyásolhatja a kezdeti életkort."
+            },
+            {
+                question: "Melyik állítás jellemző az X-kromoszómához kötött recesszív öröklődésre?",
+                options: ["A betegség nőkben gyakoribb.", "Beteg apa minden fiúgyermeke beteg lesz.", "A betegség sokkal gyakoribb férfiakban, és a nők általában tünetmentes hordozók.", "A betegség minden generációt érint."],
+                answer: 2,
+                explanation: "X-kromoszómához kötött recesszív betegségek (pl. Duchenne izomdisztrófia) esetén a férfiak (akiknek csak egy X-kromoszómájuk van) sokkal gyakrabban betegek. A nők (két X-kromoszómával) általában tünetmentes hordozók, mivel a másik X-kromoszómán lévő egészséges allél kompenzál."
+            },
+            {
+                question: "Mi a mitokondriális öröklődés legfőbb jellemzője?",
+                options: ["Kizárólag apai ágon öröklődik.", "Kizárólag anyai ágon öröklődik.", "A férfiak és nők egyenlő arányban örökítik tovább.", "A betegség mindig teljes penetranciájú."],
+                answer: 1,
+                explanation: "A mitokondriumok és a bennük lévő DNS (mtDNS) a petesejtből származnak, a spermium mitokondriumai nem kerülnek be a zigótába. Emiatt a mitokondriális betegségek kizárólag anyai ágon, maternálisan öröklődnek: egy érintett anya minden utódjának továbbadja a mutációt."
+            },
+            {
+                question: "A spinális izomatrófia (SMA) súlyosságát melyik gén kópiaszáma befolyásolja módosító faktorként?",
+                options: ["SMN1", "DMD", "SMN2", "HTT"],
+                answer: 2,
+                explanation: "Az SMA-t az SMN1 gén hibája okozza. Az SMN2 gén egy nagyon hasonló gén, amely kis mennyiségben képes funkcionális SMN fehérjét termelni. Minél több SMN2 kópia van jelen egy betegben, annál több fehérje termelődik, ami részben kompenzálja az SMN1 hiányát és enyhébb betegséglefolyást eredményez."
+            },
+            {
+                question: "Mi a genetikai tanácsadás egyik legfőbb célja?",
+                options: ["A betegek kötelezése a genetikai teszt elvégzésére.", "A pontos diagnózis felállítása orvosi vizsgálat nélkül.", "Segíteni az egyéneknek és családoknak megérteni a genetikai betegségek következményeit és támogatni a tájékozott döntéshozatalt.", "Kizárólag a kutatási célú genetikai adatok gyűjtése."],
+                answer: 2,
+                explanation: "A genetikai tanácsadás egy kommunikációs folyamat, amelynek célja a genetikai kockázatok, a tesztelési lehetőségek, valamint a betegség orvosi, pszichológiai és családi vonzatainak megértetése, hogy a páciens a saját értékei alapján hozhasson tájékozott döntéseket."
+            },
+            {
+                question: "Melyik a leggyakoribb mutációtípus a Charcot-Marie-Tooth betegség 1A (CMT1A) típusában?",
+                options: ["Pontmutáció az MPZ génben", "A PMP22 gén duplikációja", "A GJB1 gén deléciója", "Trinukleotid repeat expanzió"],
+                answer: 1,
+                explanation: "A CMT1A, a leggyakoribb CMT altípus, hátterében a legtöbb esetben a 17-es kromoszómán található PMP22 (Peripheral Myelin Protein 22) gént tartalmazó szakasz duplikációja (megkettőződése) áll."
+            },
+            {
+                question: "Mi az 'anticipáció' jelensége a genetikai betegségekben?",
+                options: ["A betegség tüneteinek előre megérzése.", "A betegség enyhülése a későbbi generációkban.", "A betegség korábbi életkorban való kezdete és/vagy súlyosabb lefolyása a későbbi generációkban.", "A betegség átugrása egy generáción."],
+                answer: 2,
+                explanation: "Az anticipáció jelensége dinamikus mutációval járó betegségekre (pl. Huntington-kór) jellemző. Azt jelenti, hogy a kóros gén (pl. a repeat szekvencia) a generációk során tovább expandálódik, ami a betegség egyre korábbi megjelenéséhez és súlyosabb tünetekhez vezet."
+            },
+            {
+                question: "Mit jelent a 'prediktív' vagy 'preszimptomatikus' genetikai tesztelés?",
+                options: ["Egy már tüneteket mutató beteg diagnózisának megerősítése.", "Hordozóságszűrés egy recesszív betegségre.", "Tünetmentes, de kockázatnak kitett egyén tesztelése egy késői kezdetű betegségre való hajlam kimutatására.", "A magzat genetikai vizsgálata."],
+                answer: 2,
+                explanation: "A prediktív tesztelés olyan tünetmentes személyek genetikai vizsgálatát jelenti, akiknek a családjában előfordult egy öröklődő, gyakran későn manifesztálódó betegség (pl. Huntington-kór). A teszt célja annak megállapítása, hogy az illető hordozza-e a betegségre hajlamosító génhibát."
+            },
+            {
+                question: "Melyik állítás igaz a lizoszomális tárolási betegségekre (LSD)?",
+                options: ["Mindig dominánsan öröklődnek.", "A mitokondriumok működési zavara okozza őket.", "Specifikus lizoszomális enzimek hiánya miatt anyagok halmozódnak fel a sejtekben, gyakran okozva neurológiai tüneteket.", "Kizárólag az izmokat érintik."],
+                answer: 2,
+                explanation: "A lizoszomális tárolási betegségek (pl. Tay-Sachs, Gaucher-kór) általában autoszomális recesszíven öröklődő anyagcserezavarok. Egy-egy specifikus lizoszomális enzim hibája miatt a lebontandó makromolekulák felhalmozódnak a lizoszómákban, ami sejtkárosodáshoz vezet, különösen az idegsejtekben."
+            },
+            {
+                question: "Mi a 'bizonytalan klinikai szignifikanciájú variáns' (VUS)?",
+                options: ["Egyértelműen betegséget okozó mutáció.", "Egyértelműen ártalmatlan, jóindulatú polimorfizmus.", "Egy azonosított genetikai variáns, amelynek hatása a betegség kialakulására jelenleg nem ismert vagy nem egyértelmű.", "A genetikai teszt sikertelen voltát jelző eredmény."],
+                answer: 2,
+                explanation: "A VUS egy olyan genetikai eltérés, amelynek a klinikai jelentőségét a jelenlegi tudásunk alapján nem lehet egyértelműen sem kórokinak (patogén), sem ártalmatlannak (benignus) minősíteni. Ezek értelmezése nagy kihívást jelent a genetikai tanácsadás során."
+            },
+            {
+                question: "Melyik a legfontosabb lépés a genetikai tesztelés előtt a tanácsadás során?",
+                options: ["Azonnali mintavétel.", "A páciens családtagjainak értesítése.", "A tájékozott beleegyezés megszerzése.", "A számla kiállítása."],
+                answer: 2,
+                explanation: "A genetikai vizsgálat előtt elengedhetetlen a páciens önkéntes és tájékozott beleegyezésének megszerzése. Ez biztosítja, hogy a páciens megértette a tesztelés célját, lehetséges következményeit, előnyeit és korlátait, és mindezek tudatában, szabadon dönt a vizsgálat elvégzéséről."
+            },
+            {
+                question: "Mi a 'variábilis expresszivitás' jelensége?",
+                options: ["A gén kifejeződésének teljes hiánya.", "A tünetek súlyosságának és megjelenési formájának változatossága ugyanazon genotípussal rendelkező egyének között.", "A gén mutációjának esélye.", "A betegség átugrása egy generáción."],
+                answer: 1,
+                explanation: "A variábilis expresszivitás azt jelenti, hogy még ha egy kóroki genotípus teljes penetranciájú is (minden hordozó megbetegszik), a tünetek súlyossága, jellege és a betegség lefolyása jelentősen eltérhet az egyes betegek között. Ezt módosító gének és környezeti faktorok okozhatják."
+            },
+            {
+                question: "Melyik gén mutációja okozza a Duchenne izomdisztrófiát (DMD)?",
+                options: ["SMN1", "DMD", "HTT", "PMP22"],
+                answer: 1,
+                explanation: "A DMD-t (és enyhébb változatát, a Becker izomdisztrófiát) az X-kromoszómán található DMD gén mutációi okozzák. Ez a gén a disztrofin nevű fehérjét kódolja, amely elengedhetetlen az izomsejtek stabilitásához."
+            },
+            {
+                question: "Melyik állítás NEM igaz a direkt-piaci (DTC) genetikai tesztekre?",
+                options: ["Orvosi közvetítés nélkül, online is megrendelhetők.", "Eredményeik mindig klinikailag megbízhatóak és teljes körűek.", "Gyakran hiányzik a megfelelő pre- és posztteszt genetikai tanácsadás.", "Komoly etikai és adatvédelmi aggályokat vethetnek fel."],
+                answer: 1,
+                explanation: "A direkt-piaci (DTC) tesztek megbízhatósága és klinikai validitása változó lehet. Gyakran nem adnak teljes diagnosztikai képet, és az eredmények értelmezéséhez elengedhetetlen lenne a szakorvosi/genetikai tanácsadói kontextus, ami sokszor hiányzik."
+            },
+            {
+                question: "Melyik a leggyakoribb oka a korai kezdetű, autoszomális domináns Alzheimer-kórnak?",
+                options: ["Az APP gén mutációi", "A PSEN1 gén mutációi", "A PSEN2 gén mutációi", "Az APOE gén mutációi"],
+                answer: 1,
+                explanation: "A korai kezdetű familiáris Alzheimer-kór eseteinek többségéért a PSEN1 (Presenilin 1) gén mutációi felelősek. Ez a gén a gamma-szekretáz enzimkomplex része, amely kulcsszerepet játszik az amiloid prekurzor protein (APP) hasításában."
+            }
+        ]
+    }
+];
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const topicSelectionDiv = document.getElementById('topic-selection');
+    const quizContainerDiv = document.getElementById('quiz-container');
+    const scoreContainerDiv = document.getElementById('score-container');
+    const topicButtonsContainer = document.getElementById('topic-buttons');
+    const backToTopicsBtn = document.getElementById('back-to-topics');
+
+    let currentTopicIndex = -1;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedOptionButton = null;
+
+    // --- INITIALIZATION ---
+    function init() {
+        showTopicSelection();
+        createTopicButtons();
+        backToTopicsBtn.addEventListener('click', showTopicSelection);
+        document.getElementById('home-btn').addEventListener('click', showTopicSelection);
+    }
+    
+    function createTopicButtons() {
+        topicButtonsContainer.innerHTML = '';
+        quizData.forEach((topic, index) => {
+            const button = document.createElement('button');
+            button.className = 'btn-topic bg-white border-2 border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 text-slate-700 font-semibold py-4 px-6 rounded-lg text-left shadow-sm';
+            button.innerHTML = `
+                <div class="flex items-center">
+                    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full mr-4">
+                        <i class="fas ${getIconForTopic(index)} fa-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">${topic.topic}</h3>
+                        <p class="text-sm text-slate-500">${topic.questions.length} kérdés</p>
+                    </div>
+                </div>`;
+            button.addEventListener('click', () => startQuiz(index));
+            topicButtonsContainer.appendChild(button);
+        });
+    }
+    
+    function getIconForTopic(index) {
+        const icons = ['fa-brain', 'fa-bed', 'fa-toilet', 'fa-cogs', 'fa-dna'];
+        return icons[index % icons.length];
+    }
+
+    // --- SCREEN MANAGEMENT ---
+    function showTopicSelection() {
+        topicSelectionDiv.classList.remove('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showQuizContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.remove('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showScoreContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.remove('hidden');
+    }
+
+    // --- QUIZ LOGIC ---
+    function startQuiz(topicIndex) {
+        currentTopicIndex = topicIndex;
+        currentQuestionIndex = 0;
+        score = 0;
+        showQuizContainer();
+        document.getElementById('quiz-title').textContent = quizData[topicIndex].topic;
+        document.getElementById('restart-btn').onclick = () => startQuiz(currentTopicIndex);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        resetState();
+        const currentQuestion = quizData[currentTopicIndex].questions[currentQuestionIndex];
+        document.getElementById('question').textContent = currentQuestion.question;
+        const optionsContainer = document.getElementById('options');
+        
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn w-full text-left bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-4 px-5 rounded-lg';
+            button.textContent = option;
+            button.dataset.index = index;
+            button.addEventListener('click', selectOption);
+            optionsContainer.appendChild(button);
+        });
+        updateProgress();
+    }
+
+    function resetState() {
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('options').innerHTML = '';
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.classList.remove('show');
+        const feedbackContent = document.getElementById('feedback-content');
+        feedbackContent.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        selectedOptionButton = null;
+    }
+    
+    function updateProgress() {
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        progressText.textContent = `Kérdés ${currentQuestionIndex + 1} / ${totalQuestions}`;
+        progressBar.style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+    }
+
+    function selectOption(e) {
+        if (selectedOptionButton) return; // Prevent changing answer
+
+        selectedOptionButton = e.target;
+        const selectedAnswerIndex = parseInt(selectedOptionButton.dataset.index);
+        const correctAnserIndex = quizData[currentTopicIndex].questions[currentQuestionIndex].answer;
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackContent = document.getElementById('feedback-content');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationP = document.getElementById('explanation');
+        
+        // Highlight selected button
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        selectedOptionButton.classList.add('selected');
+
+        if (selectedAnswerIndex === correctAnserIndex) {
+            score++;
+            feedbackTitle.textContent = 'Helyes válasz!';
+            feedbackContent.className = 'p-5 rounded-lg bg-green-100 text-green-800 border-l-4 border-green-500';
+            
+        } else {
+            feedbackTitle.textContent = 'Helytelen válasz.';
+            feedbackContent.className = 'p-5 rounded-lg bg-red-100 text-red-800 border-l-4 border-red-500';
+            
+            // Highlight the correct answer
+            document.querySelector(`.option-btn[data-index='${correctAnserIndex}']`).classList.add('bg-green-200', 'border-green-500');
+        }
+
+        explanationP.textContent = quizData[currentTopicIndex].questions[currentQuestionIndex].explanation;
+        feedbackArea.classList.add('show');
+        
+        document.querySelectorAll('.option-btn').forEach(button => button.disabled = true);
+        document.getElementById('next-btn').disabled = false;
+        document.getElementById('next-btn').focus();
+    }
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData[currentTopicIndex].questions.length) {
+            loadQuestion();
+        } else {
+            showFinalScore();
+        }
+    });
+
+    function showFinalScore() {
+        showScoreContainer();
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
+    }
+
+    init();
+});
+</script>
+
+</body>
+</html>

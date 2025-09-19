@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Átfogó Neuroanatómia Teszt: Kisagy és Mély Agyi Magvak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Átfogó Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Kisagy, Capsula Interna, Thalamus és Bazális Ganglionok</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- A kérdések dinamikusan itt jelennek meg -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- A részletes eredmények itt jelennek meg -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        const fullQuizData = [
+            // ----- TÉMAKÖR 1: CEREBELLUM -----
+            { question: "Melyik a cerebellum filogenetikailag legősibb része, amely elsősorban az egyensúlyért és a szemmozgások koordinációjáért felelős?", answers: { a: "Spinocerebellum", b: "Cerebrocerebellum", c: "Vestibulocerebellum (Archicerebellum)", d: "Nucleus dentatus" }, correctAnswer: "c", explanation: "A Vestibulocerebellum (archicerebellum), amely anatómiailag a flocculonodularis lebenynek felel meg, a legősibb rész, és a vestibularis rendszerrel való szoros kapcsolata révén az egyensúlyt és a VOR-t szabályozza." },
+            { question: "A kisagykéreg egyetlen kimeneti neuronjai, amelyek gátló (GABAerg) jeleket küldenek a mély kisagyi magvakhoz, a következők:", answers: { a: "Szemcsesejtek", b: "Kosársejtek", c: "Purkinje-sejtek", d: "Golgi-sejtek" }, correctAnswer: "c", explanation: "A Purkinje-sejtek a kisagykéreg egyetlen efferens neuronjai, és gátló hatást fejtenek ki a mély kisagyi magvakra, ezzel modulálva a kisagy kimenetét." },
+            { question: "Melyik afferens rosttípus ered a kontralaterális inferior olivából és képez erős, egy-az-egyhez szinapszist a Purkinje-sejtekkel, fontos szerepet játszva a motoros tanulásban?", answers: { a: "Moharostok", b: "Párhuzamos rostok", c: "Kúszórostok (Climbing fibers)", d: "Kosársejt axonok" }, correctAnswer: "c", explanation: "A kúszórostok kizárólag az inferior olivából erednek, és egyetlen Purkinje-sejttel alkotnak rendkívül erős szinapszist, ún. 'hiba-jelzést' közvetítve a motoros tanuláshoz." },
+            { question: "A törzsataxia (széles alapú, dülöngélő járás) melyik kisagyi funkcionális egység károsodására utal leginkább?", answers: { a: "Cerebrocerebellum (laterális féltekék)", b: "Spinocerebellum (vermis)", c: "Nucleus dentatus", d: "A kisagy elülső lebenye" }, correctAnswer: "b", explanation: "A vermis, a spinocerebellum része, elsősorban a törzs és a proximális végtagizmok mozgásait koordinálja. Sérülése ezért jellegzetes törzsataxiát és járásbizonytalanságot okoz." },
+            { question: "Mi a 'dysdiadochokinesis'?", answers: { a: "A mozgások távolságának rossz felmérése.", b: "Akaratlan, ritmikus szemmozgások.", c: "A gyors, váltakozó mozgások kivitelezésének nehézsége.", d: "Célirányos mozgás közben fokozódó remegés." }, correctAnswer: "c", explanation: "A dysdiadochokinesis a gyors, alternáló mozgások (pl. kéz pronáció-szupináció) szabálytalanná, darabossá válása, ami a cerebrocerebellum károsodásának egyik jele." },
+            { question: "Melyik a legnagyobb és leglaterálisabb kisagyi mag, amely főként a cerebrocerebellumtól kap bemenetet és a mozgástervezésben játszik szerepet?", answers: { a: "Nucleus fastigii", b: "Nucleus globosus", c: "Nucleus emboliformis", d: "Nucleus dentatus" }, correctAnswer: "d", explanation: "A nucleus dentatus a legnagyobb kisagyi mag, amely a cerebrocerebellumtól kapja az információt és a thalamuson keresztül visszajelez a motoros kéregnek, kulcsszerepet játszva a tanult, ügyes mozgások tervezésében." },
+            { question: "A kisagyi sérülések tünetei általában melyik testfélen jelentkeznek a lézióhoz képest?", answers: { a: "Az ellenoldali (kontralaterális) testfélen", b: "Az azonos oldali (ipszilaterális) testfélen", c: "Mindig kétoldaliak", d: "Csak a törzsön, a végtagokon nem" }, correctAnswer: "b", explanation: "A kisagy efferens pályái vagy nem kereszteződnek, vagy kétszeresen kereszteződnek, így a kisagy féltekéinek hatása az azonos oldali testfél mozgásaira vonatkozik." },
+            { question: "Melyik kisagyi réteg tartalmazza a legtöbb idegsejtet a központi idegrendszerben?", answers: { a: "Stratum moleculare", b: "Stratum ganglionare (Purkinje-réteg)", c: "Stratum granulosum (szemcsés réteg)", d: "A kisagy fehérállománya" }, correctAnswer: "c", explanation: "A stratum granulosum rendkívül sűrűn tartalmazza a szemcsesejteket, amelyek a legszámosabb neurontípust alkotják az egész agyban." },
+            { question: "A skandáló, darabos beszéd (dysarthria cerebellaris) melyik kisagyi egység diszfunkciójára utal?", answers: { a: "Vestibulocerebellum", b: "Spinocerebellum", c: "Cerebrocerebellum", d: "Flocculonodularis lebeny" }, correctAnswer: "c", explanation: "A cerebrocerebellum felelős a komplex, időzített mozgássorozatokért, beleértve a beszédképzésben részt vevő izmok koordinációját is. Sérülése a beszéd ritmusának és folyamatosságának zavarát okozza." },
+            { question: "Melyik állítás igaz a párhuzamos rostokra?", answers: { a: "A Purkinje-sejtek axonjai.", b: "A kúszórostok végelágazódásai.", c: "A szemcsesejtek T-alakban elágazódó axonjai a stratum moleculare-ban.", d: "A Golgi-sejtek dendritjei." }, correctAnswer: "c", explanation: "A szemcsesejtek axonjai felszállnak a stratum moleculare-ba, ahol T-alakban elágazva alkotják a párhuzamos rostokat, amelyek serkentő szinapszisokat képeznek a Purkinje-sejtek dendritfáin." },
+            { question: "A kisagy melyik funkcionális egységét látják el elsődlegesen a spinocerebellaris pályák?", answers: { a: "Vestibulocerebellum", b: "Spinocerebellum", c: "Cerebrocerebellum", d: "Mindhármat egyformán" }, correctAnswer: "b", explanation: "Ahogy a neve is mutatja, a spinocerebellum (vermis és intermedier zóna) kapja a gerincvelőből érkező proprioceptív információkat a spinocerebellaris pályákon keresztül a mozgások valós idejű korrekciójához." },
+            { question: "Melyik gátló interneuron fon jellegzetes 'kosarat' a Purkinje-sejtek sejtteste köré?", answers: { a: "Csillagsejt", b: "Golgi-sejt", c: "Szemcsesejt", d: "Kosársejt" }, correctAnswer: "d", explanation: "A kosársejtek axonjai a Purkinje-sejtek sejttestét és axonkezdő szakaszát veszik körül, erőteljes gátló hatást kifejtve, ami a laterális gátlásban fontos." },
+            { question: "Az intenciós tremor melyik kisagyi mag károsodására utalhat leginkább?", answers: { a: "Nucleus fastigii", b: "Nucleus dentatus és/vagy nucleus interpositus", c: "Csak a vestibularis magokra", d: "Nincs köze a mély magokhoz" }, correctAnswer: "b", explanation: "Az intenciós tremor (célremegés) a célirányos mozgások koordinációjának zavara, ami leggyakrabban a kisagyféltekék és a hozzájuk tartozó kimeneti magok (dentatus, interpositus) sérülésekor jelentkezik." },
+            { question: "Melyik struktúra a 'cerebellar cognitive affective syndrome' (CCAS) kialakulásáért felelős?", answers: { a: "A vermis", b: "A flocculonodularis lebeny", c: "A laterális kisagyféltekék és a nucleus dentatus", d: "A spinocerebellum" }, correctAnswer: "c", explanation: "A CCAS a cerebrocerebellum kognitív és affektív funkciókban betöltött szerepének károsodását tükrözi, ami végrehajtó funkciók, vizuospaciális képességek, nyelvi funkciók és az érzelmi szabályozás zavarához vezethet." },
+            { question: "Melyik kisagyi mag küldi a fő kimenetét a vestibularis magokhoz?", answers: { a: "Nucleus dentatus", b: "Nucleus emboliformis", c: "Nucleus fastigii", d: "Nucleus globosus" }, correctAnswer: "c", explanation: "A nucleus fastigii, mint a vestibulocerebellum és a vermis fő kimeneti állomása, elsősorban a vestibularis magokhoz és a formatio reticularishoz projiciál, az egyensúly és a testtartás szabályozása érdekében." },
+            { question: "A moharostok és a szemcsesejtek közötti szinapszisok melyik struktúrában történnek?", answers: { a: "A Purkinje-sejtek dendritfáján", b: "A stratum moleculare-ban", c: "A kisagyi glomerulusokban (stratum granulosumban)", d: "A mély kisagyi magvakban" }, correctAnswer: "c", explanation: "A moharostok a stratum granulosumban, a glomerulusoknak nevezett komplex szinaptikus egységekben kapcsolódnak át a szemcsesejtek dendritjeire." },
+            { question: "A nystagmus és a vertigo melyik kisagyi funkcionális egység károsodásának a legjellemzőbb tünete?", answers: { a: "Spinocerebellum", b: "Cerebrocerebellum", c: "Vestibulocerebellum", d: "Anterior lebeny" }, correctAnswer: "c", explanation: "A nystagmus és a vertigo a vestibularis rendszer zavarára utalnak. A vestibulocerebellum a kisagy ezen rendszerrel legszorosabban együttműködő része, így sérülése ezeket a tüneteket okozza." },
+            { question: "Melyik állítás HAMIS a Purkinje-sejtekre vonatkozóan?", answers: { a: "A kisagykéreg egyetlen kimeneti neuronjai.", b: "Gátló (GABAerg) hatást fejtenek ki.", c: "Dendritfájuk a stratum granulosumban helyezkedik el.", d: "Serkentő bemenetet kapnak a párhuzamos rostoktól és a kúszórostoktól." }, correctAnswer: "c", explanation: "A Purkinje-sejtek hatalmas, legyezőszerű dendritfája a stratum moleculare-ban terül szét, ahol a szinaptikus bemeneteket fogadja. A sejttest a stratum ganglionare-ban, az axon pedig a fehérállományban van." },
+            { question: "Mi a DANISH mnemotechnika 'S' betűjének jelentése a kisagyi tüneteknél?", answers: { a: "Szenzoros kiesés", b: "Skandáló beszéd (Slurred/Scanning speech)", c: "Spaszticitás", d: "Szédülés (sajnos nem)" }, correctAnswer: "b", explanation: "A DANISH mnemotechnika a kisagyi tünetek angol kezdőbetűiből áll: Dysdiadochokinesia, Ataxia, Nystagmus, Intention tremor, Slurred/Scanning speech, Hypotonia." },
+            { question: "A kisagy melyik része felelős a vizuálisan vezérelt, tanult, ügyességet igénylő mozgásokért, mint például a gépírás?", answers: { a: "Vestibulocerebellum", b: "Spinocerebellum", c: "Cerebrocerebellum", d: "Vermis" }, correctAnswer: "c", explanation: "A cerebrocerebellum, amely a nagyagykéreggel áll szoros kapcsolatban, a komplex, tanult, precíziós mozgások tervezéséért és finomhangolásáért felelős." },
+            
+            // ----- TÉMAKÖR 2: CAPSULA INTERNA & THALAMUS -----
+            { question: "Melyik struktúra NEM határolja a capsula internát?", answers: { a: "Nucleus caudatus", b: "Thalamus", c: "Nucleus lentiformis", d: "Hippocampus" }, correctAnswer: "d", explanation: "A capsula interna a nucleus caudatus és a thalamus (mediálisan), valamint a nucleus lentiformis (laterálisan) között helyezkedik el. A hippocampus a temporális lebeny mélyén található." },
+            { question: "A tractus corticospinalis (pyramispálya) a capsula interna melyik részén halad át?", answers: { a: "Crus anterius", b: "Genu", c: "Crus posterius", d: "Pars sublentiformis" }, correctAnswer: "c", explanation: "A pyramispálya, amely a törzs és a végtagok akaratlagos mozgásaiért felelős, a capsula interna hátsó szárában (crus posterius) fut." },
+            { question: "A látósugárzás (radiatio optica) a capsula interna melyik részében található?", answers: { a: "Genu", b: "Crus anterius", c: "Pars retrolentiformis", d: "Crus posterius elülső része" }, correctAnswer: "c", explanation: "A radiatio optica rostjai a CGL-ből a látókéreg felé a lencsemag mögötti (pars retrolentiformis) részen haladnak át." },
+            { question: "A capsula interna vérellátásáért legnagyobbrészt mely artériák felelősek, melyek elzáródása lacunaris infarktust okozhat?", answers: { a: "A. cerebri anterior ágai", b: "A. cerebri posterior ágai", c: "A. cerebri media mély, perforáló ágai (lenticulostriatalis artériák)", d: "A. basilaris ágai" }, correctAnswer: "c", explanation: "A lenticulostriatalis artériák (az MCA ágai) látják el a capsula interna és a bazális ganglionok nagy részét. Ezek vékony, végartéria jellegű erek, így elzáródásuk gyakori." },
+            { question: "A thalamus melyik magcsoportja a látópálya és a hallópálya legfontosabb átkapcsoló állomása?", answers: { a: "Nuclei anteriores", b: "Nucleus mediodorsalis", c: "Metathalamus (Corpus Geniculatum Laterale & Mediale)", d: "Nuclei intralaminares" }, correctAnswer: "c", explanation: "A metathalamust a Corpus Geniculatum Laterale (CGL - látópálya) és a Corpus Geniculatum Mediale (CGM - hallópálya) alkotja, ezek a specifikus szenzoros relémagok." },
+            { question: "Melyik thalamikus magcsoport kapja a fő bemenetét a formatio reticularisból (ARAS) és játszik szerepet az éberség és tudatosság szabályozásában?", answers: { a: "Nucleus ventralis posterior (VPL/VPM)", b: "Nuclei anteriores", c: "Pulvinar", d: "Nuclei intralaminares" }, correctAnswer: "d", explanation: "Az intralamináris magok (pl. CM/Pf komplex) az ARAS felszálló pályáinak fontos állomásai, és diffúz projekcióikkal az agykéreg általános aktivációs szintjét szabályozzák." },
+            { question: "Mi a nucleus reticularis thalami (TRN) egyedülálló tulajdonsága?", answers: { a: "Kizárólag a látókéregbe projiciál.", b: "Nem projiciál az agykéregbe, hanem a thalamus többi magját gátolja.", c: "Ez a thalamus fő motoros kimenete.", d: "Szerotonint termel." }, correctAnswer: "b", explanation: "A TRN egy gátló (GABAerg) 'héj' a thalamus körül, amely nem a kéregbe, hanem vissza a thalamus többi magjába projiciál, így 'kapuőrként' szabályozza a thalamus aktivitását és a kéreg felé irányuló információáramlást." },
+            { question: "A Dejerine-Roussy szindróma (thalamikus fájdalom) melyik thalamikus magcsoport károsodásához köthető leginkább?", answers: { a: "VA/VL", b: "Nuclei anteriores", c: "Nucleus mediodorsalis", d: "VPL/VPM" }, correctAnswer: "d", explanation: "Ez a szindróma a thalamus fő szomatoszenzoros relémagjainak (VPL/VPM) sérülése után alakul ki, és az ellenoldali testfélen jelentkező kínzó, centrális fájdalom jellemzi." },
+            { question: "A tractus corticonuclearis (corticobulbaris) a capsula interna melyik részén halad?", answers: { a: "Crus anterius", b: "Genu", c: "Crus posterius", d: "Pars retrolentiformis" }, correctAnswer: "b", explanation: "A tractus corticonuclearis, amely az agyidegek motoros magvait idegzi be, jellegzetesen a capsula interna térdében (genu) fut." },
+            { question: "A hallósugárzás (radiatio acustica) a capsula interna melyik részében halad?", answers: { a: "Crus anterius", b: "Genu", c: "Pars retrolentiformis", d: "Pars sublentiformis" }, correctAnswer: "d", explanation: "A hallási információkat a CGM-ből a hallókéregbe szállító radiatio acustica a lencsemag alatti (pars sublentiformis) részen keresztül halad a temporális lebeny felé." },
+            { question: "Melyik thalamikus magcsoport a Papez-féle limbikus kör fontos állomása, és kap bemenetet a corpus mammillaréból?", answers: { a: "Nuclei mediales", b: "Nuclei ventrales", c: "Nuclei anteriores", d: "Pulvinar" }, correctAnswer: "c", explanation: "Az anterior thalamikus magok a tractus mammillothalamicuson keresztül kapnak bemenetet a corpus mammillaréból, és a gyrus cinguli felé projiciálnak, fontos szerepet játszva az epizodikus memóriában és az érzelmekben." },
+            { question: "A capsula interna crus posteriusában futó pyramispálya szomatotópiája elölről hátrafelé haladva:", answers: { a: "Láb - Törzs - Kar - Arc", b: "Arc - Kar - Törzs - Láb", c: "Kar - Arc - Láb - Törzs", d: "Nincs szomatotópiás rendeződés." }, correctAnswer: "b", explanation: "A tractus corticospinalis rostjai a crus posteriusban rendezetten haladnak: legelöl az arc, majd a kar, a törzs, és leghátul a láb motoros rostjai találhatók (F-A-T-L: Face-Arm-Trunk-Leg)." },
+            { question: "A thalamus melyik magja a fő célpontja a kisagy (nucleus dentatus) és a bazális ganglionok (GPi) motoros kimenetének?", answers: { a: "VPL/VPM", b: "CGL/CGM", c: "VA/VL", d: "LD/LP" }, correctAnswer: "c", explanation: "A nucleus ventralis anterior (VA) és ventralis lateralis (VL) a motoros rendszer thalamikus relémagjai, amelyek a bazális ganglionok és a kisagy által feldolgozott információt integrálják és továbbítják a motoros kéreg felé." },
+            { question: "Melyik artéria ága a recurrens Heubner-artéria, amely a capsula interna crus anteriusának alsó részét látja el?", answers: { a: "A. cerebri media (MCA)", b: "A. cerebri anterior (ACA)", c: "A. cerebri posterior (PCA)", d: "A. carotis interna (ICA)" }, correctAnswer: "b", explanation: "A Heubner-féle artéria az A. cerebri anterior (ACA) egy jellegzetes, visszakanyarodó ága, amely a capsula interna elülső szárának egy részét és a striatum alsó-mediális részét látja el." },
+            { question: "A nucleus mediodorsalis (MD) thalami melyik kérgi területtel áll a legszorosabb reciprok kapcsolatban?", answers: { a: "Primer motoros kéreg", b: "Látókéreg", c: "Prefrontális kéreg", d: "Hallókéreg" }, correctAnswer: "c", explanation: "Az MD mag kiterjedt, kétirányú kapcsolatban áll a prefrontális kéreggel, és kulcsfontosságú a végrehajtó funkciókban, tervezésben, munkamemóriában és az érzelmek kognitív kontrolljában." },
+            { question: "A capsula interna sérülése miért okoz gyakran egyenletes eloszlású kontralaterális hemiparesist?", answers: { a: "Mert csak a láb rostjai futnak itt.", b: "Mert az arc, a kar és a láb motoros rostjai itt szorosan egymás mellett, kis területen koncentrálódnak.", c: "Mert a sérülés mindig csak a motoros rostokat érinti.", d: "Mert a gerincvelőben kompenzálódik a károsodás." }, correctAnswer: "b", explanation: "A capsula interna egy 'szűk keresztmetszet', ahol a teljes testfelet ellátó pyramispálya rostjai sűrűn együtt futnak. Egy sérülés itt könnyen érinti az összes rostot, egyenletes bénulást okozva, ellentétben a kérgi sérülésekkel, ahol a reprezentációk távolabb vannak egymástól." },
+            { question: "Melyik thalamikus magcsoport játszik fontos szerepet a vizuális figyelemben és a vizuospaciális funkciókban, és kap jelentős bemenetet a colliculus superiorból?", answers: { a: "Nuclei anteriores", b: "VPL/VPM", c: "Pulvinar", d: "CGM" }, correctAnswer: "c", explanation: "A pulvinar, a thalamus legnagyobb asszociációs magja, a látókéreg és a colliculus superior közötti hálózat fontos eleme, és kulcsszerepet játszik a vizuális figyelem irányításában és a komplex vizuális információk integrálásában." },
+            { question: "Melyik struktúra választja el a thalamust a nucleus lentiformistól?", answers: { a: "Capsula externa", b: "Capsula interna (crus posterius)", c: "Claustrum", d: "A III. agykamra" }, correctAnswer: "b", explanation: "A capsula interna hátsó szára (crus posterius) a thalamus (mediálisan) és a nucleus lentiformis (laterálisan) között elhelyezkedő fehérállományi lemez." },
+            { question: "Az arteria choroidea anterior elzáródása a capsula interna mely részeinek károsodását okozhatja?", answers: { a: "Csak a genu", b: "A crus anterius elülső részét", c: "A crus posterius hátsó harmadát, a pars retrolentiformist és a pars sublentiformist", d: "Nem látja el a capsula internát." }, correctAnswer: "c", explanation: "Az a. choroidea anterior (az a. carotis interna ága) a capsula interna hátsó-alsó részének vérellátásáért felelős, beleértve a látó- és hallósugárzás rostjait is." },
+            { question: "Az ízérzési információk a thalamus melyik magjában kapcsolódnak át?", answers: { a: "VPL", b: "VPM", c: "CGL", d: "MD" }, correctAnswer: "b", explanation: "A nucleus tractus solitariiból induló ízérző pályák a thalamus nucleus ventralis posteromedialisában (VPM) végződnek, ugyanott, ahol az arc területéről származó általános érző információk is." },
+            
+            // ----- TÉMAKÖR 3: BAZÁLIS GANGLIONOK -----
+            { question: "Melyik két struktúra alkotja a striatumot?", answers: { a: "Globus pallidus és putamen", b: "Nucleus caudatus és putamen", c: "Thalamus és nucleus caudatus", d: "Substantia nigra és nucleus subthalamicus" }, correctAnswer: "b", explanation: "A striatum (csíkolt test), a bazális ganglionok fő bemeneti struktúrája, a nucleus caudatusból (farkosmag) és a putamenből (héj) áll." },
+            { question: "A Parkinson-kór hátterében melyik struktúra dopaminerg neuronjainak pusztulása áll?", answers: { a: "Substantia nigra pars reticulata (SNr)", b: "Nucleus subthalamicus (STN)", c: "Substantia nigra pars compacta (SNc)", d: "Globus pallidus externus (GPe)" }, correctAnswer: "c", explanation: "A Parkinson-kór fő patológiai oka az SNc dopaminerg neuronjainak elvesztése, ami a nigrostriatális pálya degenerációjához és dopaminhiányhoz vezet a striatumban." },
+            { question: "Melyik pálya felelős a kívánt mozgások facilitálásáért a bazális ganglionokban?", answers: { a: "Indirekt út", b: "Hiperdirekt út", c: "Direkt út", d: "Nigrostriatális út" }, correctAnswer: "c", explanation: "A direkt út (Kéreg -> Striatum -> GPi/SNr -> Thalamus -> Kéreg) a thalamus diszinhibícióján keresztül facilitálja a mozgásindítást." },
+            { question: "A Huntington-kór korai szakaszában melyik struktúra neuronjai pusztulnak elsődlegesen, ami a chorea kialakulásához vezet?", answers: { a: "A direkt utat alkotó striatális neuronok", b: "Az indirekt utat alkotó striatális neuronok", c: "A nucleus subthalamicus neuronjai", d: "A substantia nigra dopaminerg neuronjai" }, correctAnswer: "b", explanation: "Huntington-kórban kezdetben az indirekt út striatális neuronjai (D2 receptoros MSNs) sérülnek, ami a direkt út relatív túlsúlyához és a thalamus gátlásának csökkenéséhez vezet, akaratlan mozgásokat (chorea) eredményezve." },
+            { question: "Melyik a bazális ganglionok fő serkentő (glutamáterg) belső magja?", answers: { a: "Globus pallidus internus (GPi)", b: "Putamen", c: "Nucleus subthalamicus (STN)", d: "Substantia nigra pars reticulata (SNr)" }, correctAnswer: "c", explanation: "Az STN az egyetlen tisztán serkentő mag a BG belső köreiben, amely glutamátot használ neurotranszmitterként, és serkenti a GPi/SNr kimeneti magokat." },
+            { question: "Melyik két struktúra alkotja a bazális ganglionok fő kimeneti állomását?", answers: { a: "Putamen és GPe", b: "Nucleus caudatus és STN", c: "GPi és SNr", d: "Striatum és thalamus" }, correctAnswer: "c", explanation: "A Globus Pallidus internus (GPi) és a Substantia Nigra pars reticulata (SNr) azok a magok, amelyekből a bazális ganglionok fő, gátló kimenete a thalamus és az agytörzs felé indul." },
+            { question: "Milyen hatással van a dopamin a striatumban a direkt és indirekt utakra?", answers: { a: "Mindkettőt serkenti", b: "Mindkettőt gátolja", c: "A direkt utat serkenti (D1 rec.), az indirekt utat gátolja (D2 rec.)", d: "A direkt utat gátolja (D1 rec.), az indirekt utat serkenti (D2 rec.)" }, correctAnswer: "c", explanation: "A dopamin kettős hatást fejt ki: a D1 receptorokon keresztül serkenti a mozgást facilitáló direkt utat, míg a D2 receptorokon keresztül gátolja a mozgást gátló indirekt utat. A nettó hatás a mozgás elősegítése." },
+            { question: "A hemiballismus, a heves, dobáló mozgásokkal járó kórkép, melyik struktúra károsodásának következménye?", answers: { a: "Striatum", b: "Globus pallidus internus", c: "Substantia nigra pars compacta", d: "Nucleus subthalamicus" }, correctAnswer: "d", explanation: "Az STN kiesése miatt az indirekt pálya nem tudja megfelelően serkenteni a GPi/SNr-t, ami a thalamus diszinhibíciójához és a kéreg túlzott serkentéséhez vezet, heves, akaratlan mozgásokat okozva." },
+            { question: "Melyik struktúrát nevezik együttesen nucleus lentiformisnak (lencsemag)?", answers: { a: "Nucleus caudatus és putamen", b: "Putamen és globus pallidus", c: "Globus pallidus és nucleus subthalamicus", d: "Thalamus és putamen" }, correctAnswer: "b", explanation: "A putamen és a globus pallidus (GPe + GPi) együttesen alkotják a lencsemagot (nucleus lentiformis) az anatómiai elhelyezkedésük és alakjuk alapján." },
+            { question: "Mi a hiperdirekt út fő funkciója?", answers: { a: "A mozgások lassú, finomhangolása", b: "A tanult mozgások rögzítése", c: "A mozgások gyors, globális leállítása ('stop jel')", d: "A jutalomérzet közvetítése" }, correctAnswer: "c", explanation: "A hiperdirekt út (Kéreg -> STN -> GPi/SNr) a legrövidebb és leggyorsabb pálya, amely lehetővé teszi a már elindított vagy tervezett mozgások gyors gátlását, ha a helyzet megváltozik." },
+            { question: "A bazális ganglionok melyik része játszik kulcsszerepet a jutalmazó rendszerben és a motivációban?", answers: { a: "Dorzális putamen", b: "Globus pallidus externus", c: "Ventrális striatum (nucleus accumbens)", d: "Nucleus subthalamicus" }, correctAnswer: "c", explanation: "A ventrális striatum, különösen a nucleus accumbens, a limbikus és a motoros rendszerek közötti interfész, és a VTA dopaminerg bemenetén keresztül a jutalom, a motiváció és a függőségek központi eleme." },
+            { question: "Mi a GPi/SNr neuronjainak alapvető működési jellemzője?", answers: { a: "Fázisos, serkentő aktivitás", b: "Tónusos, gátló aktivitás", c: "Csak dopamin hatására aktívak", d: "Nincs spontán aktivitásuk" }, correctAnswer: "b", explanation: "A BG kimeneti magjainak (GPi/SNr) neuronjai nyugalmi állapotban is folyamatosan (tónusosan) tüzelnek, gátló (GABAerg) jeleket küldve a thalamushoz, amit a direkt út ideiglenesen felfüggeszt." },
+            { question: "A procedurális (készség-) memória, mint a biciklizés, mely agyterület működéséhez kötött leginkább?", answers: { a: "Hippocampus", b: "Amygdala", c: "Bazális ganglionok (különösen a striatum)", d: "Prefrontális kéreg" }, correctAnswer: "c", explanation: "Míg az epizodikus memória a hippocampushoz kötött, a procedurális memória (készségek, szokások) kialakítása és tárolása a bazális ganglionok, a cerebellum és a motoros kéreg közötti hurkok feladata." },
+            { question: "A bazális ganglionok hova küldik vissza a feldolgozott információt a motoros körökön keresztül?", answers: { a: "Közvetlenül a gerincvelőbe", b: "A kisagyba", c: "A thalamuson keresztül az agykéregbe", d: "A hypothalamusba" }, correctAnswer: "c", explanation: "A BG fő kimenete a thalamus motoros magjain (VA/VL) keresztül visszajut a motoros, premotoros és szupplementer motoros kéregbe, bezárva a cortico-basalis ganglia-thalamo-corticalis hurkot." },
+            { question: "Melyik állítás HAMIS a bazális ganglionok mozgásszabályozásban betöltött szerepéről?", answers: { a: "Segítenek a megfelelő mozgásprogram kiválasztásában.", b: "Gátolják a nemkívánatos mozgásokat.", c: "Közvetlenül parancsokat küldenek az izmoknak a mozgás végrehajtására.", d: "Részt vesznek a motoros tanulásban és a szokások kialakításában." }, correctAnswer: "c", explanation: "A BG nem küld közvetlen parancsokat a gerincvelői motoneuronoknak vagy az izmoknak. Működése moduláló jellegű, a motoros kéregre gyakorolt hatásán keresztül befolyásolja a mozgásokat." },
+            { question: "A striatumban melyik a fő serkentő és gátló neurotranszmitter?", answers: { a: "Serkentő: Acetilkolin; Gátló: Dopamin", b: "Serkentő: Dopamin; Gátló: Szerotonin", c: "Serkentő: Glutamát; Gátló: GABA", d: "Serkentő: Noradrenalin; Gátló: Glutamát" }, correctAnswer: "c", explanation: "A striatum a kéregből és a thalamusból serkentő (glutamáterg) bemenetet kap. A striatum fő kimeneti neuronjai (MSNs) gátló (GABAerg) hatásúak." },
+            { question: "A dystonia, a tartós izomösszehúzódásokkal járó mozgászavar, minek a diszfunkciójára utal?", answers: { a: "Csak a kisagy sérülésére", b: "Csak a gerincvelő sérülésére", c: "A bazális ganglionok hálózatának gátló mechanizmusainak és szenzorimotoros integrációjának zavarára", d: "A látókéreg sérülésére" }, correctAnswer: "c", explanation: "A dystonia patofiziológiája komplex, de a bazális ganglionok gátló funkcióinak elégtelensége, a mozgásprogramok közötti nem megfelelő elnyomás kulcsszerepet játszik benne." },
+            { question: "Melyik striatális receptorhoz kötődve fejti ki a dopamin a direkt út facilitálását?", answers: { a: "D1 receptorok", b: "D2 receptorok", c: "Szerotonin receptorok", d: "NMDA receptorok" }, correctAnswer: "a", explanation: "A direkt út közepes tüskés neuronjai D1 dopamin receptorokat expresszálnak. A dopamin ezekhez kötődve serkenti ezen neuronok aktivitását, és ezzel a mozgást elősegítő direkt utat." },
+            { question: "Melyik állítás írja le a 'diszinhibíció' jelenségét a direkt út során?", answers: { a: "A thalamus direkt gátlása.", b: "A striatum neuronjainak gátlása.", c: "Egy gátló neuron (GPi/SNr) gátlása egy másik gátló neuron (striatum) által, ami a célsejt (thalamus) felszabadulását eredményezi.", d: "A kéreg serkentése." }, correctAnswer: "c", explanation: "A diszinhibíció egy 'gátlás gátlása' folyamat. A direkt útban a striatum gátolja a GPi/SNr tónusos gátlását, ami 'felszabadítja' a thalamust, és lehetővé teszi, hogy az serkentse a kérget." },
+            { question: "A bazális ganglionok melyik része tekinthető a limbikus-motoros interfésznek?", answers: { a: "Nucleus caudatus dorsalis része", b: "Putamen", c: "Nucleus subthalamicus", d: "Ventrális striatum (Nucleus accumbens)" }, correctAnswer: "d", explanation: "A nucleus accumbens, mint a ventrális striatum része, a limbikus rendszertől (pl. amygdala, hippocampus) kap bemenetet, és a dopaminerg rendszeren keresztül befolyásolja a motivált viselkedést és a motoros kimenetet." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Kezdeti kvíz felépítése
+        startNewRound();
+    </script>
+</body>
+</html>

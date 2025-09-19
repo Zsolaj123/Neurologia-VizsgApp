@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Új Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/80</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Discopathia és discus hernia",
+                questions: [
+                    { question: "Mi a discopathia (degeneratív porckorong betegség) lényege?", options: ["A porckorong gyulladásos betegsége.", "A porckorongok természetes, korral járó elhasználódása és víztartalmuk elvesztése.", "A porckorong fertőzéses megbetegedése.", "A porckorong daganatos elváltozása."], answer: "A porckorongok természetes, korral járó elhasználódása és víztartalmuk elvesztése.", explanation: "A discopathia nem egy betegség, hanem a porckorongok öregedési folyamata, amely során veszítenek rugalmasságukból és magasságukból, ami sérülékenyebbé teszi őket." },
+                    { question: "Melyik a leggyakoribb oka az ágyéki gerincsérvnek (isiász)?", options: ["A gerinc izmainak gyengesége.", "A porckorong belső magjának kitüremkedése, ami nyomja az ideggyököt.", "Csigolyatörés.", "Gerincvelői fertőzés."], answer: "A porckorong belső magjának kitüremkedése, ami nyomja az ideggyököt.", explanation: "A discus hernia akkor alakul ki, amikor a nucleus pulposus átszakítja az annulus fibrosust és nyomást gyakorol a kilépő ideggyökre, ami a lábba sugárzó fájdalmat (ischiast) okoz." },
+                    { question: "Melyik tünet NEM jellemző a discus herniára?", options: ["A lábba sugárzó fájdalom és zsibbadás.", "Köhögésre, tüsszentésre fokozódó fájdalom.", "Magas láz és hidegrázás.", "Izomgyengeség az érintett végtagban."], answer: "Magas láz és hidegrázás.", explanation: "A láz és hidegrázás fertőzésre utal (pl. spondylodiscitis, epidurális tályog), nem pedig egy egyszerű mechanikai porckorongsérvre. Ez egy fontos 'vörös zászló'." },
+                    { question: "Mi a Cauda Equina Szindróma legfontosabb, azonnali beavatkozást igénylő tünete?", options: ["Enyhe derékfájdalom.", "Hólyag- vagy bélműködési zavar és nyeregérzéstelenítés.", "Egyoldali lábzsibbadás.", "Csökkent térdreflex."], answer: "Hólyag- vagy bélműködési zavar és nyeregérzéstelenítés.", explanation: "A Cauda Equina Szindróma egy sebészeti vészhelyzet. A gáttájék zsibbadása (nyeregérzéstelenítés) és a vizelet- vagy székletürítés kontrolljának elvesztése az ideggyökök súlyos, azonnali dekompressziót igénylő kompressziójára utal." },
+                    { question: "Melyik képalkotó eljárás a 'gold standard' a discus hernia diagnosztizálásában?", options: ["Röntgen", "CT", "MRI", "Ultrahang"], answer: "MRI", explanation: "Az MRI a legalkalmasabb vizsgálat, mivel részletesen ábrázolja a lágyrészeket, beleértve a porckorongot, a gerincvelőt és az ideggyököket, így pontosan kimutatja a sérv helyét és az idegi kompresszió mértékét." },
+                    { question: "Mi a Lasègue-jel?", options: ["A térdreflex kiesése.", "Fájdalom a derékban és a lábban a nyújtott láb passzív emelésekor.", "A boka passzív hajlítására jelentkező fájdalom.", "A beteg képtelen lábujjhegyen járni."], answer: "Fájdalom a derékban és a lábban a nyújtott láb passzív emelésekor.", explanation: "A Lasègue-jel egy provokációs teszt, amely az L5-S1 ideggyökök feszülését és irritációját vizsgálja. Pozitivitása erős gyanút vet fel az ágyéki porckorongsérvre." },
+                    { question: "Melyik a discus hernia elsődleges, kezdeti kezelése, ha nincs súlyos neurológiai deficit?", options: ["Azonnali sebészeti beavatkozás.", "Hosszú távú ágynyugalom.", "Konzervatív terápia (fájdalomcsillapítók, gyógytorna).", "Opioid fájdalomcsillapítók."], answer: "Konzervatív terápia (fájdalomcsillapítók, gyógytorna).", explanation: "A legtöbb discus hernia esetében a kezdeti kezelés konzervatív, amely magában foglalja a rövid pihenőt, a gyulladáscsökkentőket és a célzott gyógytornát. A betegek többsége műtét nélkül javul." },
+                    { question: "Milyen célt szolgál az epidurális szteroid injekció?", options: ["A porckorongsérv 'összezsugorítását'.", "Az ideggyök körüli gyulladás és duzzanat csökkentését.", "Az izmok erősítését.", "A csigolyák stabilizálását."], answer: "Az ideggyök körüli gyulladás és duzzanat csökkentését.", explanation: "Az epidurális injekció során erős gyulladáscsökkentő szteroidot juttatnak közvetlenül az érintett ideggyök köré, ami csökkenti a gyulladást és az ödémát, így enyhítve a fájdalmat és lehetővé téve a hatékonyabb gyógytornát." },
+                    { question: "Mikor indokolt a discus hernia sebészeti kezelése?", options: ["Minden esetben, a diagnózis után azonnal.", "Csak ha a beteg kéri.", "Súlyos, progrediáló neurológiai deficit vagy Cauda Equina Szindróma esetén, illetve ha a konzervatív kezelés hatástalan.", "Ha a fájdalom egy hétnél tovább tart."], answer: "Súlyos, progrediáló neurológiai deficit vagy Cauda Equina Szindróma esetén, illetve ha a konzervatív kezelés hatástalan.", explanation: "A műtét abszolút indikációja a CES és a súlyos, romló idegrendszeri károsodás. Relatív indikáció a konzervatív terápiára nem reagáló, tűrhetetlen fájdalom." },
+                    { question: "Mi a mikrodiscectomia?", options: ["A teljes porckorong eltávolítása.", "A csigolyák összeolvasztása.", "Egy minimálisan invazív sebészeti eljárás a kitüremkedett porckorongrészlet eltávolítására.", "A porckorong lézeres kezelése."], answer: "Egy minimálisan invazív sebészeti eljárás a kitüremkedett porckorongrészlet eltávolítására.", explanation: "A mikrodiscectomia során egy kis metszésen keresztül, mikroszkóp segítségével távolítják el csak azt a porckorongdarabot, amely az ideget nyomja, megkímélve a gerinc stabilitását." },
+                    { question: "Melyik életmódbeli tényező növeli jelentősen a discus hernia kockázatát?", options: ["Vegetáriánus étrend", "Rendszeres úszás", "Dohányzás és túlsúly", "Magas iskolai végzettség"], answer: "Dohányzás és túlsúly", explanation: "A dohányzás rontja a porckorongok oxigénellátását, felgyorsítva a degenerációt. A túlsúly pedig folyamatos extra terhelést ró az ágyéki gerincre, növelve a sérvesedés kockázatát." },
+                    { question: "Milyen izomcsoport gyengesége okozhat lábfejcsüngést (a lábfej emelésének képtelenségét)?", options: ["Combhajlítók", "Farizmok", "Lábfej- és lábujjemelő izmok (dorsiflexorok)", "Vádliizmok"], answer: "Lábfej- és lábujjemelő izmok (dorsiflexorok)", explanation: "A lábfej emeléséért felelős izmokat az L4-L5 ideggyökökből eredő nervus peroneus idegzi be. Ezen ideggyökök kompressziója (pl. L4/5 sérv) okozhat lábfejcsüngést." },
+                    { question: "Mi a McKenzie-módszer lényege a gyógytornában?", options: ["Intenzív hasizom-erősítés.", "A gerinc nyújtása trakciós géppel.", "Specifikus, ismétlődő extenziós (homorító) gyakorlatok a fájdalom centralizálására.", "Passzív masszázs és hőterápia."], answer: "Specifikus, ismétlődő extenziós (homorító) gyakorlatok a fájdalom centralizálására.", explanation: "A McKenzie-módszer célja, hogy a kitüremkedett porckorongot specifikus mozdulatokkal 'visszaterelje' a helyére, és a végtagba sugárzó fájdalmat a gerinc középvonalába 'centralizálja', ami a gyógyulás jele." },
+                    { question: "Miért fontos a posztoperatív rehabilitáció a gerincműtét után?", options: ["Nincs jelentősége, a műtét megold mindent.", "Segít megerősíteni a törzsizmokat, javítja a gerinc stabilitását és megelőzi a kiújulást.", "Csak a fájdalomcsillapításra szolgál.", "Csak a profi sportolóknak van rá szükségük."], answer: "Segít megerősíteni a törzsizmokat, javítja a gerinc stabilitását és megelőzi a kiújulást.", explanation: "A sikeres műtét után a rehabilitáció kulcsfontosságú a hosszú távú eredményekhez. A célzott gyógytorna segít a helyes mozgásminták újratanulásában és a gerincet stabilizáló izmok megerősítésében." },
+                    { question: "Melyik állítás NEM igaz a discopathiára?", options: ["A kor előrehaladtával gyakorisága nő.", "Mindig súlyos, a lábba sugárzó fájdalommal jár.", "A porckorongok víztartalmának csökkenése jellemzi.", "Kockázati tényezője a discus herniának."], answer: "Mindig súlyos, a lábba sugárzó fájdalommal jár.", explanation: "A discopathia (degeneráció) önmagában lehet tünetmentes, vagy okozhat lokális derékfájdalmat. A lábba sugárzó idegi fájdalom (radiculopathia) akkor jelentkezik, ha már kialakult a porckorongsérv, ami nyomja az ideggyököt." },
+                    { question: "Mi a spinalis fúzió?", options: ["A porckorong eltávolítása.", "Két vagy több csigolya sebészi összeolvasztása a gerinc stabilizálása érdekében.", "Egyfajta gyógyszeres kezelés.", "A gerincvelő elektromos stimulációja."], answer: "Két vagy több csigolya sebészi összeolvasztása a gerinc stabilizálása érdekében.", explanation: "A fúziós műtétet akkor végzik, ha a gerinc instabillá válik, például egy nagyobb discectomia vagy laminectomia után. A csigolyákat csontátültetéssel és fém rögzítőkkel (csavarok, lemezek) stabilizálják." },
+                    { question: "Melyik a leggyakoribb szakasza a gerincsérvnek?", options: ["Nyaki (cervicalis)", "Háti (thoracalis)", "Ágyéki (lumbalis)", "Keresztcsonti (sacralis)"], answer: "Ágyéki (lumbalis)", explanation: "Az ágyéki gerinc viseli a legnagyobb terhelést és a legmobilisabb, ezért a porckorongsérvek több mint 90%-a itt, leggyakrabban az L4-L5 és L5-S1 szinteken alakul ki." },
+                    { question: "Milyen tevékenységet kell kerülni discus hernia esetén?", options: ["Úszás", "Séta", "Hosszú ideig tartó ülés és nehéz tárgyak emelése helytelen technikával", "Nyújtás"], answer: "Hosszú ideig tartó ülés és nehéz tárgyak emelése helytelen technikával", explanation: "Az ülés és a helytelen emelés jelentősen növeli a porckorongokra nehezedő nyomást, ami súlyosbíthatja a tüneteket és a sérvesedést." },
+                    { question: "Mi a szerepe a gyulladásnak a discus hernia okozta fájdalomban?", options: ["Nincs szerepe, a fájdalom tisztán mechanikai.", "A kitüremkedett porckorongból felszabaduló kémiai anyagok gyulladást és idegirritációt okoznak.", "A gyulladás csak a műtét után jelentkezik.", "A gyulladás mindig bakteriális fertőzés következménye."], answer: "A kitüremkedett porckorongból felszabaduló kémiai anyagok gyulladást és idegirritációt okoznak.", explanation: "A fájdalom nemcsak a mechanikai nyomásból adódik. A nucleus pulposus anyaga erős gyulladáskeltő mediátorokat tartalmaz, amelyek az ideggyököt irritálva kémiai gyulladást és fájdalmat váltanak ki." },
+                    { question: "Milyen prognózisú a legtöbb ágyéki porckorongsérv?", options: ["Mindig műtétre van szükség.", "A betegek többsége konzervatív kezelésre néhány héten vagy hónapon belül jelentősen javul.", "A fájdalom általában egy életen át tart.", "A legtöbb eset bénuláshoz vezet."], answer: "A betegek többsége konzervatív kezelésre néhány héten vagy hónapon belül jelentősen javul.", explanation: "A discus hernia természetes lefolyása általában kedvező. A szervezet gyulladásos válasza és a makrofágok idővel 'eltakarítják' a kitüremkedett porckorongrészt, így a betegek nagy része műtét nélkül is meggyógyul." }
+                ]
+            },
+            {
+                topic: "A szédülős beteg kivizsgálása",
+                questions: [
+                    { question: "Mi a vertigo orvosi definíciója?", options: ["Általános bizonytalanságérzet.", "Ájulásérzés.", "Határozott irányú forgó vagy dőlő mozgásélmény.", "Könnyűfejűség."], answer: "Határozott irányú forgó vagy dőlő mozgásélmény.", explanation: "A vertigo a vesztibuláris rendszer (belső fül vagy központi idegrendszeri pályák) zavarának specifikus tünete, amely a mozgás illúzióját kelti." },
+                    { question: "Melyik a leggyakoribb oka a forgó jellegű szédülésnek (vertigo)?", options: ["Menière-betegség", "Vestibularis neuronitis", "Benignus paroxizmális pozíciós vertigo (BPPV)", "Agyi stroke"], answer: "Benignus paroxizmális pozíciós vertigo (BPPV)", explanation: "A BPPV a vertigo messze leggyakoribb oka, amelyet a belső fül félkörös ívjárataiban elszabadult kalcium-karbonát kristályok (otolithok) okoznak." },
+                    { question: "Milyen manőverrel diagnosztizálható a BPPV?", options: ["Romberg-teszt", "HINTS vizsgálat", "Dix-Hallpike manőver", "Valsalva-manőver"], answer: "Dix-Hallpike manőver", explanation: "A Dix-Hallpike manőver egy provokációs teszt, amely során a beteget specifikus testhelyzetbe hozzák, hogy kiváltsák a BPPV-re jellemző vertigót és nystagmust (szemtekerezgést), így megerősítve a diagnózist." },
+                    { question: "Melyik vizsgálat segít leginkább elkülöníteni az akut vestibuláris szindrómában a stroke-ot a perifériás okoktól?", options: ["Koponya CT", "Dix-Hallpike manőver", "HINTS vizsgálat", "Audiometria"], answer: "HINTS vizsgálat", explanation: "A HINTS (Head Impulse, Nystagmus, Test of Skew) egy háromlépéses ágy melletti vizsgálat, amely nagy érzékenységgel képes elkülöníteni a veszélyes, centrális okokat (pl. stroke) a jóindulatú, perifériás vesztibuláris zavaroktól." },
+                    { question: "Milyen típusú nystagmus utal leginkább centrális (agyi) eredetű szédülésre?", options: ["Horizontális, egyirányú", "Tiszta vertikális vagy többirányú", "Rotáló, fixációra gátlódó", "Néhány másodperc után kifáradó"], answer: "Tiszta vertikális vagy többirányú", explanation: "A perifériás nystagmus általában horizontális és egyirányú. A tiszta vertikális (fel-le mozgó) vagy a tekintés irányával irányt változtató nystagmus erős 'vörös zászló', ami centrális, agytörzsi vagy kisagyi károsodásra utal." },
+                    { question: "Melyik tünetegyüttes jellemző a Menière-betegségre?", options: ["Csak folyamatos szédülés", "Rohamokban jelentkező vertigo, fülzúgás, fluktuáló halláscsökkenés és fülnyomás", "Csak halláscsökkenés", "Hirtelen, fájdalmas fejfájás"], answer: "Rohamokban jelentkező vertigo, fülzúgás, fluktuáló halláscsökkenés és fülnyomás", explanation: "A Menière-betegség a belső fül folyadékháztartásának zavara, amely a négy klasszikus tünet rohamokban történő együttes jelentkezésével jár." },
+                    { question: "Mi a vestibularis neuronitis?", options: ["A belső fül fertőzése.", "A vesztibuláris ideg (VIII. agyideg) gyulladása, halláscsökkenés nélkül.", "A hallóideg daganata.", "A kisagy gyulladása."], answer: "A vesztibuláris ideg (VIII. agyideg) gyulladása, halláscsökkenés nélkül.", explanation: "Ez egy gyakran vírusfertőzés után kialakuló állapot, amely napokig tartó, heves, folyamatos forgó szédülést okoz, de a hallást nem érinti (ellentétben a labyrinthitisszel)." },
+                    { question: "Mire utal a pozitív Head Impulse Test (HIT) a HINTS vizsgálat során?", options: ["Centrális eredetű szédülésre", "Perifériás vesztibuláris károsodásra (pl. neuronitis)", "Normális vesztibuláris funkcióra", "A vizsgálat kivitelezhetetlenségére"], answer: "Perifériás vesztibuláris károsodásra (pl. neuronitis)", explanation: "A pozitív (kóros) HIT azt jelzi, hogy a vestibulo-ocularis reflex (VOR) nem működik megfelelően az egyik oldalon, ami a perifériás vesztibuláris rendszer (belső fül vagy ideg) károsodásának jele. Stroke esetén a HIT általában negatív (normális)." },
+                    { question: "Melyik állítás igaz a szédülés kivizsgálására?", options: ["A képalkotó vizsgálat (MRI) mindig az első lépés.", "A részletes anamnézis és a fizikális vizsgálat a legfontosabb.", "A szédülés mindig pszichés eredetű.", "A laborvizsgálatok mindig kimutatják az okot."], answer: "A részletes anamnézis és a fizikális vizsgálat a legfontosabb.", explanation: "A szédülés okának felderítésében a legfontosabb információkat a tünetek pontos leírása (időtartam, kiváltó okok) és a célzott fizikális vizsgálatok (pl. HINTS, Dix-Hallpike) adják. A képalkotás csak specifikus 'vörös zászlók' esetén indokolt." },
+                    { question: "Mi a presyncope leggyakoribb oka?", options: ["Belső fül gyulladása", "Pánikroham", "Agyi hipoperfúzió (pl. ortosztatikus hipotenzió, kardiológiai okok)", "Migrén"], answer: "Agyi hipoperfúzió (pl. ortosztatikus hipotenzió, kardiológiai okok)", explanation: "A presyncope, vagyis az ájulásérzés, az agy átmeneti vérellátási zavarából adódik, amit leggyakrabban a felálláskor bekövetkező vérnyomásesés (ortosztatikus hipotenzió) vagy szívritmuszavarok okoznak." },
+                    { question: "Melyik állítás NEM igaz a BPPV-re?", options: ["A fej helyzetváltoztatása váltja ki.", "A szédüléses epizódok általában percekig vagy órákig tartanak.", "A Dix-Hallpike manőverrel diagnosztizálható.", "Az Epley-manőverrel hatékonyan kezelhető."], answer: "A szédüléses epizódok általában percekig vagy órákig tartanak.", explanation: "A BPPV-re jellemzőek a rövid, általában egy percnél rövidebb ideig tartó, heves vertigo epizódok, amelyeket specifikus fejmozgások váltanak ki." },
+                    { question: "Milyen neurológiai tünetek utalnak a szédülés centrális (agyi) okára?", options: ["Fülzúgás és fülnyomás", "Hányinger és hányás", "Diplopia (kettőslátás), dysarthria (beszédzavar), végtaggyengeség", "A szédülés forgó jellege"], answer: "Diplopia (kettőslátás), dysarthria (beszédzavar), végtaggyengeség", explanation: "Ezek az ún. fokális neurológiai tünetek az agytörzs vagy a kisagy károsodására utalnak, és 'vörös zászlónak' számítanak, ami sürgős kivizsgálást (pl. MRI) tesz szükségessé a stroke kizárására." },
+                    { question: "Mi a dysequilibrium?", options: ["Forgó jellegű szédülés", "Ájulásérzés", "Járás közbeni bizonytalanságérzet", "Pszichés eredetű szédülés"], answer: "Járás közbeni bizonytalanságérzet", explanation: "A dysequilibrium nem forgó jellegű, hanem egyensúlyzavar, instabilitás, amely elsősorban álláskor és járáskor jelentkezik, és gyakran több érzékszervi rendszer (látás, propriocepció, vesztibuláris rendszer) zavarából adódik." },
+                    { question: "Mikor indokolt sürgősségi agyi képalkotó vizsgálat (MRI) szédülés esetén?", options: ["Minden esetben.", "Csak ha a beteg 50 év feletti.", "Ha a HINTS vizsgálat centrális okra utal, vagy más 'vörös zászló' tünetek (pl. új, súlyos fejfájás, fokális neurológiai deficit) vannak jelen.", "Ha a szédülés 24 óránál tovább tart."], answer: "Ha a HINTS vizsgálat centrális okra utal, vagy más 'vörös zászló' tünetek (pl. új, súlyos fejfájás, fokális neurológiai deficit) vannak jelen.", explanation: "A képalkotás nem rutin vizsgálat szédülés esetén. Akkor szükséges, ha a klinikai kép alapján felmerül a gyanúja egy súlyos, centrális oknak, mint például a stroke." },
+                    { question: "Mi a Romberg-teszt?", options: ["A hallás vizsgálata.", "A szemmozgások vizsgálata.", "Az egyensúly vizsgálata csukott szemmel, összezárt lábakkal.", "A reflexek vizsgálata."], answer: "Az egyensúly vizsgálata csukott szemmel, összezárt lábakkal.", explanation: "A Romberg-teszt a proprioceptív (helyzetérzékelő) és a vesztibuláris rendszer egyensúlyban betöltött szerepét vizsgálja. A dőlés csukott szemmel a propriocepció vagy a vesztibuláris rendszer zavarára utal." },
+                    { question: "Melyik gyógyszercsoport okozhat gyakran szédülést mellékhatásként, különösen időseknél?", options: ["Vitaminok", "Vérnyomáscsökkentők", "Antibiotikumok", "Fájdalomcsillapítók"], answer: "Vérnyomáscsökkentők", explanation: "A vérnyomáscsökkentők, különösen ha túlzottan leviszik a vérnyomást, ortosztatikus hipotenziót és presyncope-szerű szédülést okozhatnak. Időseknél a polifarmácia (több gyógyszer szedése) tovább növeli ezt a kockázatot." },
+                    { question: "Mi a labyrinthitis?", options: ["A hallóideg gyulladása.", "A belső fül (labirintus) gyulladása, amely vertigóval és halláscsökkenéssel is jár.", "A középfül gyulladása.", "A kisagy egy részének gyulladása."], answer: "A belső fül (labirintus) gyulladása, amely vertigóval és halláscsökkenéssel is jár.", explanation: "A labyrinthitis a vestibularis neuronitishez hasonlóan heves, tartós vertigót okoz, de itt a gyulladás a hallószervet (cochlea) is érinti, ezért a szédüléshez halláscsökkenés és/vagy fülzúgás is társul." },
+                    { question: "Milyen típusú szédülést okozhat a vestibuláris migrén?", options: ["Csak folyamatos forgó szédülést.", "Epizodikus, percektől órákig tartó vertigót, gyakran fejfájással vagy anélkül.", "Csak ájulásérzést.", "Csak járási bizonytalanságot."], answer: "Epizodikus, percektől órákig tartó vertigót, gyakran fejfájással vagy anélkül.", explanation: "A vestibuláris migrén a migrén egy formája, ahol a fő tünet a visszatérő vertigo. A rohamok változatosak lehetnek, és nem mindig kíséri őket a tipikus migrénes fejfájás." },
+                    { question: "Mi a 'Test of Skew' a HINTS vizsgálatban?", options: ["A betegnek ferdén kell néznie.", "A szem elfedésekor és felfedésekor a szem függőleges irányú korrekciós mozgását vizsgálják.", "A betegnek egy ferde vonalat kell követnie a szemével.", "A fej oldalra döntésekor a szemmozgásokat figyelik."], answer: "A szem elfedésekor és felfedésekor a szem függőleges irányú korrekciós mozgását vizsgálják.", explanation: "A 'skew deviation' (függőleges szemeltérés) az agytörzsi vesztibuláris pályák károsodásának jele. Jelenléte a HINTS vizsgálat részeként erősen centrális eredetre utal." },
+                    { question: "Melyik állítás igaz a pszichogén szédülésre?", options: ["Mindig forgó jellegű.", "Könnyen diagnosztizálható képalkotóval.", "Gyakran nem specifikus, 'könnyűfejűségként' leírt érzés, és gyakran társul szorongással vagy pánikrohammal.", "Soha nem jár fizikai tünetekkel."], answer: "Gyakran nem specifikus, 'könnyűfejűségként' leírt érzés, és gyakran társul szorongással vagy pánikrohammal.", explanation: "A pszichogén szédülés diagnózisa kizárásos, és a tünetek gyakran bizonytalanok, nem illeszkednek a tipikus vesztibuláris mintázatokba. A háttérben álló pszichés tényezők (szorongás, pánik) azonosítása kulcsfontosságú." }
+                ]
+            },
+            {
+                topic: "Hydrocephalusok elkülönítése",
+                questions: [
+                    { question: "Mi a hydrocephalus alapvető patofiziológiai oka?", options: ["Az agy túlzott víztartalma.", "A liquor cerebrospinalis (CSF) termelődésének, keringésének vagy felszívódásának zavara.", "Az agyi erek kitágulása.", "Az agyszövet gyulladása."], answer: "A liquor cerebrospinalis (CSF) termelődésének, keringésének vagy felszívódásának zavara.", explanation: "A hydrocephalus a CSF kóros felhalmozódása az agykamrákban, ami az agykamrák tágulatához vezet. Ez az egyensúlyzavar a CSF termelődése, áramlása és felszívódása között alakul ki." },
+                    { question: "Mi a különbség a kommunikáló és a nem-kommunikáló (obstruktív) hydrocephalus között?", options: ["A kommunikáló hydrocephalusban a liquornyomás mindig normális.", "A nem-kommunikáló hydrocephalusban a liquor szabadon áramlik, de a felszívódás gátolt.", "A kommunikáló hydrocephalusban a felszívódás gátolt, míg a nem-kommunikálóban a CSF áramlása a kamrarendszeren belül akadályozott.", "Nincs különbség, a két kifejezés szinonima."], answer: "A kommunikáló hydrocephalusban a felszívódás gátolt, míg a nem-kommunikálóban a CSF áramlása a kamrarendszeren belül akadályozott.", explanation: "Obstruktív hydrocephalus esetén egy mechanikai akadály (pl. daganat, szűkület) van a kamrarendszeren belül. Kommunikáló hydrocephalus esetén a kamrák közötti összeköttetés szabad, de a probléma a subarachnoidealis térben, a felszívódás helyén van." },
+                    { question: "Mi a normál nyomású hydrocephalus (NPH) klasszikus tüneti triásza?", options: ["Fejfájás, hányás, papillaödéma", "Járászavar, kognitív hanyatlás, vizeletinkontinencia", "Chorea, demencia, pszichiátriai zavarok", "Vertigo, fülzúgás, halláscsökkenés"], answer: "Járászavar, kognitív hanyatlás, vizeletinkontinencia", explanation: "Az NPH klasszikus klinikai képe a Hakim-Adams triász, amely a 'nedves, billegő, bolondos' (wet, wobbly, wacky) tünetekből áll." },
+                    { question: "Melyik tünet jelenik meg leggyakrabban elsőként NPH esetén?", options: ["Vizeletinkontinencia", "Kognitív hanyatlás", "Járászavar", "Fejfájás"], answer: "Járászavar", explanation: "Az NPH leggyakoribb és általában legelső, legszembetűnőbb tünete a jellegzetes, széles alapú, csoszogó, 'mágneses' járászavar." },
+                    { question: "Mi az Evans-index?", options: ["A harmadik kamra szélességének mérése.", "Az oldalsó kamrák frontális szarvainak maximális szélességének és a koponya belső átmérőjének aránya.", "Az agy és a koponya térfogatának aránya.", "A liquornyomás egy mértékegysége."], answer: "Az oldalsó kamrák frontális szarvainak maximális szélességének és a koponya belső átmérőjének aránya.", explanation: "Az Evans-index egy egyszerű radiológiai mérőszám a kamratágulat (ventriculomegalia) mértékének számszerűsítésére. A >0.30 érték kóros tágulatra utal." },
+                    { question: "Milyen képalkotó jel segít elkülöníteni az NPH-t az agyi atrófiától (hydrocephalus ex vacuo)?", options: ["A kamrák mérete", "A callosalis szög mérése és a DESH-jel", "A fehérállományi elváltozások jelenléte", "A koponyacsont vastagsága"], answer: "A callosalis szög mérése és a DESH-jel", explanation: "NPH-ban a kamrák aránytalanul tágabbak a felső konvexitáson lévő kérgi sulcusokhoz képest (DESH-jel), és a corpus callosum szöge beszűkül. Atrófiában a tágulat arányos." },
+                    { question: "Mi a 'tap test' (nagy volumenű lumbálpunkció) célja az NPH diagnosztikájában?", options: ["A liquornyomás csökkentése.", "A söntműtétre adott várható válasz előrejelzése.", "A liquor összetételének vizsgálata.", "A fejfájás azonnali enyhítése."], answer: "A söntműtétre adott várható válasz előrejelzése.", explanation: "A 'tap test' során 30-50 ml liquor lecsapolása után a beteg tüneteinek (főleg a járás) átmeneti javulását figyelik. A pozitív válasz jó prognosztikai jel a söntműtét sikerességére nézve." },
+                    { question: "Melyik állítás igaz az NPH kezelésére?", options: ["A gyógyszeres kezelés (acetazolamid) a leghatékonyabb.", "Az NPH nem kezelhető.", "Az egyetlen hatékony kezelés a ventriculoperitonealis (VP) sönt beültetése.", "Az intenzív gyógytorna önmagában megoldja a problémát."], answer: "Az egyetlen hatékony kezelés a ventriculoperitonealis (VP) sönt beültetése.", explanation: "Az NPH a kezelhető demenciák egyike. A VP sönt a felesleges liquort az agykamrákból a hasüregbe vezeti, így normalizálva a viszonyokat és enyhítve a tüneteket." },
+                    { question: "Mi az aqueductus stenosis?", options: ["A gerinccsatorna szűkülete.", "Az agykamrák közötti összeköttetés hiánya.", "A harmadik és negyedik agykamra közötti járat (aqueductus Sylvii) szűkülete.", "A felszívódó arachnoidealis granulációk elzáródása."], answer: "A harmadik és negyedik agykamra közötti járat (aqueductus Sylvii) szűkülete.", explanation: "Az aqueductus stenosis az obstruktív hydrocephalus leggyakoribb oka, ami a liquoráramlás akadályozottságához és az oldalsó, valamint a harmadik kamra tágulatához vezet." },
+                    { question: "Mi a hydrocephalus ex vacuo?", options: ["A liquor túlzott termelődése.", "A liquor keringésének akadályozottsága.", "Az agyszövet sorvadása miatti kompenzatorikus kamratágulat.", "A hydrocephalus egy ritka, fertőzéses formája."], answer: "Az agyszövet sorvadása miatti kompenzatorikus kamratágulat.", explanation: "Ez nem valódi hydrocephalus, mivel a kamratágulat nem a liquornyomás emelkedése, hanem az agyállomány pusztulása (pl. Alzheimer-kór, stroke után) miatt alakul ki. Itt a söntműtét nem indokolt." },
+                    { question: "Milyen tünetek jellemzőek a csecsemőkori hydrocephalusra?", options: ["Fejletlen reflexek", "Gyorsan növő fejkerület, elődomborodó kutacs, 'naplemente szem'.", "Lassú szívverés", "Magas láz"], answer: "Gyorsan növő fejkerület, elődomborodó kutacs, 'naplemente szem'.", explanation: "Mivel a csecsemők koponyavarratai még nem záródtak, a koponyaűri nyomásfokozódás a koponya tágulását okozza. A 'naplemente szem' a szemgolyók lefelé tekintő helyzetét jelenti a felső szemhéj visszahúzódása miatt." },
+                    { question: "Melyik állapot okozhat kommunikáló hydrocephalust?", options: ["Aqueductus stenosis", "Colloid ciszta a harmadik kamrában", "Subarachnoidealis vérzés (SAH) vagy meningitis", "A negyedik kamra tumoros elzáródása"], answer: "Subarachnoidealis vérzés (SAH) vagy meningitis", explanation: "A SAH és a meningitis a subarachnoidealis térben okoz hegesedést és gyulladást, ami gátolja a liquor felszívódását az arachnoidealis granulációkon keresztül, így kommunikáló hydrocephalushoz vezet." },
+                    { question: "Mi az endoszkópos harmadik ventrikulosztómia (ETV)?", options: ["Egyfajta sönt beültetése.", "Egy minimálisan invazív eljárás, ahol egy nyílást készítenek a harmadik kamra alján a liquor elfolyásának biztosítására.", "A liquor laboratóriumi vizsgálata.", "Az agykamrák röntgenvizsgálata."], answer: "Egy minimálisan invazív eljárás, ahol egy nyílást készítenek a harmadik kamra alján a liquor elfolyásának biztosítására.", explanation: "Az ETV egy alternatív sebészeti megoldás obstruktív hydrocephalus esetén, amely a sönt beültetése helyett egy belső 'bypass' útvonalat hoz létre a liquor számára." },
+                    { question: "Milyen liquor biomarker profil jellemző NPH-ra?", options: ["Magas Aβ42, magas tau", "Alacsony Aβ42, magas tau", "Alacsony Aβ42, normális tau", "Normális Aβ42, normális tau"], answer: "Alacsony Aβ42, normális tau", explanation: "NPH-ban a liquor Aβ42 szintje gyakran csökkent (hasonlóan az Alzheimer-kórhoz), de a neuronpusztulást jelző tau fehérjék szintje jellemzően normális, ami segíthet az elkülönítésben." },
+                    { question: "Melyik állítás igaz a 'tap test' értékelésére?", options: ["A negatív teszt kizárja a söntműtét sikerességét.", "A pozitív teszt (javulás) magas prediktív értékű a söntműtét sikerére nézve.", "A teszt csak a kognitív funkciókat méri.", "A tesztet mindig álló helyzetben végzik."], answer: "A pozitív teszt (javulás) magas prediktív értékű a söntműtét sikerére nézve.", explanation: "Bár a teszt szenzitivitása nem 100% (azaz a negatív teszt nem zárja ki a sikert), a pozitív teszt, vagyis a tünetek javulása a liquor lecsapolása után, nagyon valószínűvé teszi, hogy a beteg profitálni fog a söntműtétből." },
+                    { question: "Mi a hypersecretoros hydrocephalus leggyakoribb oka?", options: ["Agyi trauma", "Choroid plexus papilloma", "Meningitis", "Subarachnoidealis vérzés"], answer: "Choroid plexus papilloma", explanation: "Ez egy ritka, jóindulatú daganat, amely a liquort termelő choroid plexus sejtekből indul ki, és a CSF túlzott termelését okozza." },
+                    { question: "Mi a 'DESH' jel az MRI-n?", options: ["Az agytörzs atrófiája.", "Diffúz fehérállományi károsodás.", "Az agykamrák és a subarachnoidealis tér arányos tágulata.", "Aránytalanul tágult subarachnoidealis tér a kamrákhoz képest, ami NPH-ra utal."], answer: "Aránytalanul tágult subarachnoidealis tér a kamrákhoz képest, ami NPH-ra utal.", explanation: "A DESH (Disproportionately Enlarged Subarachnoid-space Hydrocephalus) egy jellegzetes NPH-ra utaló radiológiai jel, ahol a kamrák tágulata mellett a felső konvexitáson a sulcusok szűkek, míg a Sylvius-árok tág." },
+                    { question: "Melyik állítás NEM igaz a hydrocephalusra?", options: ["Azonnali kezelést igényelhet.", "Okozhat demenciát és járászavart.", "Mindig magas koponyaűri nyomással jár.", "Kezelhető állapot lehet."], answer: "Mindig magas koponyaűri nyomással jár.", explanation: "Az NPH (normál nyomású hydrocephalus) nevében is benne van, hogy a liquornyomás a lumbálpunkció során lehet normális vagy csak enyhén emelkedett, bár a nyomás időszakosan ingadozhat." },
+                    { question: "Mi a leggyakoribb szövődménye a VP sönt beültetésének?", options: ["Azonnali gyógyulás", "Sönt diszfunkció (elzáródás, fertőzés)", "Látásjavulás", "Memóriazavarok súlyosbodása"], answer: "Sönt diszfunkció (elzáródás, fertőzés)", explanation: "A söntrendszerek leggyakoribb problémája az elzáródás vagy a fertőzés, ami miatt a sönt nem működik megfelelően, és a hydrocephalus tünetei kiújulnak. Ez gyakran újabb műtétet (sönt revíziót) tesz szükségessé." },
+                    { question: "Hogyan különböztethető meg a hydrocephalus ex vacuo a valódi hydrocephalustól?", options: ["A liquornyomás mérésével.", "Az agyi atrófia mértékének és a kamratágulattal való arányának felmérésével.", "A beteg életkora alapján.", "A tünetek jellege alapján."], answer: "Az agyi atrófia mértékének és a kamratágulattal való arányának felmérésével.", explanation: "Hydrocephalus ex vacuo esetén a kamratágulat az agyállomány sorvadásának következménye, így a kamrák és a kérgi barázdák (sulcusok) arányosan tágulnak. Valódi hydrocephalusban a kamratágulat aránytalanul nagy a sulcusok tágulatához képest." }
+                ]
+            },
+            {
+                topic: "Neurológia terhesség alatt és időskorban",
+                questions: [
+                    { question: "Melyik a legfontosabb teendő epilepsziás nőbetegnél terhesség tervezésekor?", options: ["Az összes gyógyszer azonnali elhagyása.", "Prekoncepcionális tanácsadás a gyógyszeres kezelés optimalizálására.", "A terhesség elhalasztása.", "Azonnali teherbe esés."], answer: "Prekoncepcionális tanácsadás a gyógyszeres kezelés optimalizálására.", explanation: "A terhességet ideális esetben tervezni kell, hogy a kezelőorvosnak legyen ideje a lehető legbiztonságosabb és leghatékonyabb antiepileptikumra és dózisra átállítani a beteget a fogamzás előtt." },
+                    { question: "Melyik antiepileptikum (ASM) hordozza a legmagasabb veleszületett rendellenesség (MCM) kockázatát?", options: ["Lamotrigin", "Levetiracetam", "Valproinsav", "Oxkarbazepin"], answer: "Valproinsav", explanation: "A valproinsav használata terhesség alatt szignifikánsan magasabb kockázattal jár a major veleszületett rendellenességekre, különösen a velőcső-záródási hibákra, ezért alkalmazása kerülendő, ha lehetséges." },
+                    { question: "Miért kritikus a folsavpótlás az ASM-et szedő terhes nőknél?", options: ["Mert javítja a rohamkontrollt.", "Mert csökkenti a velőcső-záródási rendellenességek kockázatát.", "Mert megelőzi a terhességi rosszullétet.", "Mert növeli a gyógyszerek hatékonyságát."], answer: "Mert csökkenti a velőcső-záródási rendellenességek kockázatát.", explanation: "A folsavpótlás (legalább napi 0.4 mg) bizonyítottan csökkenti a velőcső-záródási rendellenességek (pl. spina bifida) kockázatát, amelynek esélyét egyes antiepileptikumok növelhetik." },
+                    { question: "Hogyan változik a migrén gyakorisága jellemzően a terhesség alatt?", options: ["Mindig súlyosbodik.", "Nem változik.", "Gyakran javul, különösen a második és harmadik trimeszterben.", "Mindig aurássá válik."], answer: "Gyakran javul, különösen a második és harmadik trimeszterben.", explanation: "A terhesség alatti stabilabb hormonális állapot, különösen a magas ösztrogénszint, a migrénes nők többségénél a rohamok gyakoriságának és intenzitásának csökkenéséhez vezet." },
+                    { question: "Melyik fájdalomcsillapító az elsődleges választás migrénes roham kezelésére terhesség alatt?", options: ["Aspirin", "Ibuprofen", "Paracetamol", "Sumatriptan"], answer: "Paracetamol", explanation: "A paracetamol kiváló biztonsági profillal rendelkezik terhesség alatt, ezért ez az elsőként választandó szer enyhe-közepes migrénes fájdalomra." },
+                    { question: "Melyik betegségmódosító terápia (DMT) alkalmazható viszonylag biztonságosan sclerosis multiplexben (MS) terhesség és szoptatás alatt?", options: ["Fingolimod", "Teriflunomid", "Glatiramer-acetát és interferon-béta", "Kladribin"], answer: "Glatiramer-acetát és interferon-béta", explanation: "A megfigyeléses vizsgálatok alapján az injekciós terápiák, mint a glatiramer-acetát és az interferonok, alacsony kockázatúnak tűnnek, és alkalmazásuk megfontolható a terhesség alatt is, ha a betegség aktivitása indokolja." },
+                    { question: "Milyen hosszú távú neurológiai kockázatot jelent a preeclampsia/eclampsia a nők számára?", options: ["Nincs hosszú távú kockázata.", "Fokozott kockázat a későbbi stroke és demencia kialakulására.", "Csak a fejfájás kockázata nő.", "Csökkenti a neurológiai betegségek kockázatát."], answer: "Fokozott kockázat a későbbi stroke és demencia kialakulására.", explanation: "A preeclampsia egyfajta 'stresszteszt' az érrendszer számára, és a lezajlása után a nőknek megnő a kockázata a későbbi életkorban kialakuló stroke-ra, vaszkuláris demenciára és más kardiovaszkuláris betegségekre." },
+                    { question: "Mi a polifarmácia definíciója?", options: ["Egyetlen gyógyszer nagy dózisban való szedése.", "Több (általában öt vagy több) vényköteles gyógyszer rendszeres, egyidejű használata.", "Gyógyszerallergia.", "A gyógyszerek hatástalansága."], answer: "Több (általában öt vagy több) vényköteles gyógyszer rendszeres, egyidejű használata.", explanation: "A polifarmácia gyakori probléma az időseknél a több társbetegség miatt, és növeli a gyógyszerkölcsönhatások, mellékhatások és a kognitív zavarok kockázatát." },
+                    { question: "Melyik állítás igaz az időskori demencia kivizsgálására?", options: ["A kivizsgálás felesleges, mert az öregedés normális része.", "A kivizsgálás célja a potenciálisan reverzibilis okok (pl. B12-hiány, hypothyreosis) kizárása.", "Minden esetben genetikai tesztelés szükséges.", "A diagnózis csak a memóriateszteken alapul."], answer: "A kivizsgálás célja a potenciálisan reverzibilis okok (pl. B12-hiány, hypothyreosis) kizárása.", explanation: "Mielőtt egy neurodegeneratív demencia diagnózisát felállítanák, elengedhetetlen egy alapos kivizsgálás a kezelhető, demenciát utánzó állapotok kizárására." },
+                    { question: "Melyik nem-motoros tünet előzheti meg évekkel a Parkinson-kór motoros tüneteit?", options: ["Látásromlás", "Halláscsökkenés", "REM alvási viselkedészavar és szaglásvesztés", "Ízületi fájdalom"], answer: "REM alvási viselkedészavar és szaglásvesztés", explanation: "A REM alvási viselkedészavar (RBD) és a szaglás elvesztése (hyposmia) a Parkinson-kór és más szinukleinopátiák ismert prodromális, azaz a motoros tüneteket megelőző jelei." },
+                    { question: "Miért kell óvatosan alkalmazni a levodopát időseknél?", options: ["Mert hatástalan.", "Mert mellékhatásként gyakran okoz ortosztatikus hipotenziót és diszkinéziát.", "Mert súlyosbítja a remegést.", "Mert allergiás reakciót vált ki."], answer: "Mert mellékhatásként gyakran okoz ortosztatikus hipotenziót és diszkinéziát.", explanation: "Bár a levodopa a leghatékonyabb szer a Parkinson-kór motoros tüneteire, időseknél gyakrabban okoz mellékhatásokat, mint a felálláskor jelentkező vérnyomásesést (ortosztatikus hipotenzió) és az akaratlan mozgásokat (diszkinézia)." },
+                    { question: "Melyik állítás igaz a stroke rehabilitációjára időskorban?", options: ["A rehabilitációt csak hetekkel a stroke után szabad elkezdeni.", "A rehabilitáció felesleges, mert az idősek agya már nem plasztikus.", "A korai és intenzív, multidiszciplináris rehabilitáció kulcsfontosságú a funkcionális felépüléshez.", "A rehabilitáció csak a fizikai funkciókra összpontosít."], answer: "A korai és intenzív, multidiszciplináris rehabilitáció kulcsfontosságú a funkcionális felépüléshez.", explanation: "A 'Time is Brain' elv a rehabilitációra is érvényes. A korán megkezdett, célzott terápia (gyógytorna, logopédia, foglalkozásterápia) maximalizálja a neuroplaszticitás adta lehetőségeket és javítja a hosszú távú kimenetelt." },
+                    { question: "Mi a 'deprescribing'?", options: ["Új gyógyszerek felírása.", "A már nem szükséges vagy káros mellékhatásokkal járó gyógyszerek tervszerű, fokozatos elhagyása.", "Gyógyszerek adagjának emelése.", "A gyógyszerek intravénás adagolása."], answer: "A már nem szükséges vagy káros mellékhatásokkal járó gyógyszerek tervszerű, fokozatos elhagyása.", explanation: "A deprescribing egy fontos stratégia a polifarmácia kezelésére, amelynek célja a gyógyszeres terápia racionalizálása és a felesleges, potenciálisan káros gyógyszerek elhagyása az orvos felügyelete mellett." },
+                    { question: "Hogyan befolyásolja a szoptatás az MS lefolyását?", options: ["Növeli a szülés utáni relapszusok kockázatát.", "Nincs hatással a betegségre.", "Csökkentheti a szülés utáni relapszusok kockázatát.", "Mindig súlyosbítja a tüneteket."], answer: "Csökkentheti a szülés utáni relapszusok kockázatát.", explanation: "Több vizsgálat is azt sugallja, hogy a kizárólagos szoptatás védő hatású lehet, és csökkentheti a posztpartum időszakban egyébként megnövekedett relapszus-kockázatot." },
+                    { question: "Melyik triptán preferált migrén kezelésére terhesség alatt, ha szükséges?", options: ["Naratriptan", "Zolmitriptan", "Szumatriptán", "Rizatriptan"], answer: "Szumatriptán", explanation: "Bár minden triptánt óvatosan kell alkalmazni, a szumatriptánnal van a legtöbb terhességi tapasztalat és adat, ezért általában ezt preferálják, ha a paracetamol nem hatékony." },
+                    { question: "Milyen kockázatot jelent a fenobarbitál szedése terhesség alatt?", options: ["Velőcső-záródási rendellenességek", "Szívfejlődési rendellenességek és szájpadhasadék", "Vese-rendellenességek", "Végtaghiány"], answer: "Szívfejlődési rendellenességek és szájpadhasadék", explanation: "A fenobarbitál a régebbi antiepileptikumok közé tartozik, és használata terhesség alatt a szívfejlődési hibák és a szájpadhasadék magasabb kockázatával jár." },
+                    { question: "Mi a stroke leggyakoribb oka terhes vagy nemrég szült nőknél?", options: ["Veleszületett szívhiba", "Magas vérnyomás (pl. preeclampsia)", "Dohányzás", "Agyi aneurizma"], answer: "Magas vérnyomás (pl. preeclampsia)", explanation: "A terhességi magas vérnyomásos kórképek, különösen a preeclampsia, jelentősen növelik a peripartum időszakban a stroke (mind iszkémiás, mind vérzéses) kockázatát." },
+                    { question: "Melyik állítás igaz az időskori perifériás neuropathiára?", options: ["Mindig cukorbetegség okozza.", "Ritka állapot.", "Az esetek jelentős részében az ok ismeretlen marad (idiopátiás).", "Könnyen gyógyítható vitaminokkal."], answer: "Az esetek jelentős részében az ok ismeretlen marad (idiopátiás).", explanation: "Bár a cukorbetegség és a vitaminhiány gyakori okok, az időskori perifériás neuropathia eseteinek akár 20-25%-ában alapos kivizsgálás után sem található egyértelmű ok." },
+                    { question: "Milyen nem-motoros tünetekre kell rákérdezni Parkinson-kór gyanúja esetén?", options: ["Csak a memóriazavarra.", "Depresszió, szorongás, alvászavar, székrekedés, szaglászavar.", "Ízületi fájdalomra.", "Bőrkiütésekre."], answer: "Depresszió, szorongás, alvászavar, székrekedés, szaglászavar.", explanation: "A nem-motoros tünetek gyakran megelőzik a klasszikus mozgászavarokat, és jelentősen rontják az életminőséget. Proaktív szűrésük elengedhetetlen a holisztikus ellátáshoz." },
+                    { question: "Miért fontos a gyógyszerész bevonása az idős betegek ellátásába?", options: ["Mert ő írja fel a recepteket.", "Mert segít a gyógyszerkölcsönhatások azonosításában és a helyes gyógyszerhasználatban.", "Mert elvégzi a fizikoterápiát.", "Mert pszichológiai tanácsadást nyújt."], answer: "Mert segít a gyógyszerkölcsönhatások azonosításában és a helyes gyógyszerhasználatban.", explanation: "A gyógyszerészek fontos szerepet játszanak a polifarmácia kezelésében. Képesek azonosítani a potenciális interakciókat, tanácsot adni a helyes bevételről, és segíteni a gyógyszeres terápia optimalizálásában az orvossal együttműködve." }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

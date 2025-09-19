@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt 4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f3ff; /* violet-50 */
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .btn-topic {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-topic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .option-btn:hover {
+            transform: scale(1.02);
+            border-color: #7c3aed; /* violet-600 */
+        }
+        .option-btn.selected {
+            background-color: #6d28d9; /* violet-700 */
+            color: white;
+            border-color: #5b21b6; /* violet-800 */
+        }
+        .feedback {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .feedback.show {
+            max-height: 500px; /* Adjust as needed */
+            opacity: 1;
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-violet-50 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app" class="w-full max-w-4xl mx-auto">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 text-slate-900">Neurológiai Ismeretek Teszt 4</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy újabb témakört a tudáspróbához.</p>
+            <div id="topic-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topic buttons will be generated here -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-container" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <button id="back-to-topics" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Témakörök
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-base font-medium text-slate-700">Haladás</span>
+                        <span id="progress-text" class="text-sm font-medium text-slate-700">Kérdés 1 / 20</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-violet-600 h-2.5 rounded-full" style="width: 5%"></div>
+                    </div>
+                </div>
+
+                <div id="question-area" class="mb-6">
+                    <p id="question" class="text-xl font-semibold mb-6 text-slate-800 leading-relaxed"></p>
+                    <div id="options" class="space-y-3">
+                        <!-- Option buttons will be generated here -->
+                    </div>
+                </div>
+
+                <div id="feedback-area" class="feedback">
+                    <div id="feedback-content" class="p-5 rounded-lg">
+                        <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                        <p id="explanation" class="text-slate-700 leading-relaxed"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>
+                        Következő kérdés <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Score Screen -->
+        <div id="score-container" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-slate-900">Teszt Vége!</h2>
+            <p class="text-xl text-slate-600 mb-6">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-bold text-violet-600 mb-8"></p>
+            <button id="restart-btn" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mr-4">
+                <i class="fas fa-redo mr-2"></i>Újrapróbálkozás
+            </button>
+            <button id="home-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition-colors">
+                <i class="fas fa-home mr-2"></i>Főmenü
+            </button>
+        </div>
+    </div>
+
+<script>
+const quizData = [
+    {
+        topic: "Haemorheológiai és véralvadás vizsgálatok",
+        questions: [
+            {
+                question: "Melyik a legfontosabb tényező, amely a teljes vér viszkozitását meghatározza?",
+                options: ["Plazmafehérjék szintje", "Hematokritérték", "Vérlemezkék száma", "Fehérvérsejtek száma"],
+                answer: 1,
+                explanation: "A hematokrit, azaz a vörösvértestek aránya a teljes vérben, a legfontosabb tényező, amely meghatározza a vér viszkozitását. A magasabb hematokritérték magasabb viszkozitást eredményez."
+            },
+            {
+                question: "Melyik véralvadási tesztet használják elsődlegesen a kumarin típusú orális antikoaguláns terápia (pl. warfarin) monitorozására?",
+                options: ["Aktivált parciális tromboplasztin idő (APTI)", "Trombin idő (TT)", "Protrombin idő (PI) / INR", "D-dimer"],
+                answer: 2,
+                explanation: "A protrombin idő (PI), és annak standardizált formája, az INR (International Normalized Ratio), az extrinsic és közös véralvadási utat méri, és a K-vitamin antagonisták (kumarinok) hatásának monitorozására szolgál."
+            },
+            {
+                question: "Mire utal az emelkedett D-dimer szint?",
+                options: ["Fokozott vérlemezke-termelésre.", "A szervezetben zajló aktív véralvadási és fibrinolitikus (vérrögoldó) folyamatra.", "Súlyos vérszegénységre.", "A máj csökkent fehérjeszintetizáló képességére."],
+                answer: 1,
+                explanation: "A D-dimer a stabilizált fibrin háló lebomlási terméke. Emelkedett szintje azt jelzi, hogy a szervezetben valahol vérrög képződött, és a szervezet megpróbálja azt feloldani. Magas negatív prediktív értéke miatt a normális szint kizárja a trombózist."
+            },
+            {
+                question: "Mi a vörösvértestek deformabilitásának jelentősége?",
+                options: ["Meghatározza a vér színét.", "Lehetővé teszi, hogy a vörösvértestek áthaladjanak a náluk szűkebb kapillárisokon.", "Befolyásolja a véralvadási faktorok termelődését.", "Nincs klinikai jelentősége."],
+                answer: 1,
+                explanation: "A vörösvértestek deformabilitása (alakváltoztató képessége) elengedhetetlen a mikrokeringéshez, mivel lehetővé teszi számukra, hogy átpréselődjenek a hajszálereken, biztosítva a szövetek oxigénellátását. Csökkenése rontja a perfúziót."
+            },
+            {
+                question: "Melyik állítás igaz a vérre, mint folyadékra?",
+                options: ["Egyszerű, Newtoni folyadék, állandó viszkozitással.", "Komplex, nem-Newtoni folyadék, amelynek viszkozitása függ a nyíróerőtől.", "Viszkozitása csak a hőmérséklettől függ.", "Nincs belső súrlódása."],
+                answer: 1,
+                explanation: "A vér egy komplex szuszpenzió, ezért nem-Newtoni folyadékként viselkedik. Viszkozitása változik az áramlási sebesség (nyíróerő) függvényében: alacsony sebességnél magasabb, míg magas sebességnél alacsonyabb."
+            },
+            {
+                question: "Melyik a leggyakoribb örökletes thrombophilia (fokozott véralvadási hajlam) oka?",
+                options: ["Protein C hiány", "Antithrombin hiány", "Faktor V Leiden mutáció", "Protrombin G20210A mutáció"],
+                answer: 2,
+                explanation: "A Faktor V Leiden mutáció a leggyakoribb örökletes trombózishajlam. A mutáció miatt az V-ös alvadási faktor rezisztenssé válik az aktivált Protein C (APC) általi lebontással szemben, ami fokozott trombin képződéshez vezet."
+            },
+            {
+                question: "Melyik folyamat a primer hemosztázis központi eleme?",
+                options: ["A fibrin háló kialakulása.", "A vérlemezkék kitapadása, aktivációja és aggregációja.", "Az alvadási faktorok kaszkádszerű aktiválódása.", "A véralvadék feloldódása."],
+                answer: 1,
+                explanation: "A primer hemosztázis az érsérülésre adott első, gyors válasz. Fő lépései a vérlemezkék (thrombocyták) sérült érfalhoz való kitapadása (adhézió) és összecsapzódása (aggregáció), ami egy laza vérlemezke-dugót hoz létre."
+            },
+            {
+                question: "Melyik plazmafehérje a legfontosabb a plazma viszkozitásának és a vörösvértest-aggregációnak a meghatározásában?",
+                options: ["Albumin", "Fibrinogén", "Transzferrin", "Immunglobulin G"],
+                answer: 1,
+                explanation: "A fibrinogén egy nagy, asszimetrikus molekula, amely jelentősen növeli a plazma viszkozitását. Emellett elősegíti a vörösvértestek összetapadását (aggregáció) azáltal, hogy 'hidakat' képez közöttük."
+            },
+            {
+                question: "Melyik laboratóriumi vizsgálat méri az intrinsic (belső) véralvadási út működését?",
+                options: ["Protrombin idő (PI/INR)", "Trombin idő (TT)", "Fibrinogén szint", "Aktivált parciális tromboplasztin idő (APTI)"],
+                answer: 3,
+                explanation: "Az APTI az intrinsic és a közös véralvadási út működését méri. Klinikailag leggyakrabban a nem frakcionált heparin terápia monitorozására és a hemofília szűrésére használják."
+            },
+            {
+                question: "Milyen haemorheológiai elváltozás jellemző az akut ischaemiás stroke-ra?",
+                options: ["Csökkent vérviszkozitás és csökkent fibrinogénszint.", "Fokozott vérviszkozitás, emelkedett fibrinogénszint és fokozott VVT-aggregáció.", "Csak a vörösvértestek deformabilitása nő meg.", "A haemorheológiai paraméterek normálisak maradnak."],
+                answer: 1,
+                explanation: "Akut ischaemiás stroke-ban a vér jellemzően 'sűrűbbé' válik: nő a viszkozitása, a plazma fibrinogénszintje (mint akutfázis fehérje), és a vörösvértestek jobban összetapadnak, ami tovább ronthatja a mikrokeringést."
+            },
+            {
+                question: "Mi a Fahraeus-Lindqvist effektus?",
+                options: ["A vér viszkozitásának növekedése kis erekben.", "A vér látszólagos viszkozitásának csökkenése, ahogy az ér átmérője egy bizonyos pontig csökken.", "A vérlemezkék teljes hiánya.", "A vörösvértestek gyors szétesése."],
+                answer: 1,
+                explanation: "Ez a jelenség leírja, hogy ahogy az artériák átmérője csökken (kb. 300 μm-ről lefelé), a vér látszólagos viszkozitása is csökken, mivel a vörösvértestek a cső közepén, egy tengelyáramban haladnak. Ez a hatás segíti a mikrokeringést."
+            },
+            {
+                question: "Milyen véralvadási zavarra utalhat a megnyúlt APTI, ami paradox módon trombózisra hajlamosít?",
+                options: ["Hemofília A", "Von Willebrand betegség", "Lupus antikoaguláns jelenléte", "K-vitamin hiány"],
+                answer: 2,
+                explanation: "A lupus antikoaguláns egy antifoszfolipid antitest, amely in vitro (a kémcsőben) megnyújtja a foszfolipid-függő alvadási időket (mint az APTI), de in vivo (a szervezetben) prokoaguláns hatású, és fokozza a trombózis kockázatát."
+            },
+            {
+                question: "Melyik állítás NEM igaz a cerebrovascularis betegségek (CVB) rizikófaktoraira?",
+                options: ["A hypertonia és a diabetes mellitus növeli a kockázatot.", "A dohányzás és a hyperlipidaemia fontos rizikófaktor.", "Az alacsony vérnyomás a legfőbb kockázati tényező.", "A pitvarfibrilláció növeli az emboliás stroke kockázatát."],
+                answer: 2,
+                explanation: "Az alacsony vérnyomás nem számít a CVB fő rizikófaktorának. Éppen ellenkezőleg, a magas vérnyomás (hypertonia) az egyik legjelentősebb módosítható kockázati tényező mind az ischaemiás, mind a haemorrhagiás stroke esetében."
+            },
+            {
+                question: "Milyen szerepe van a véralvadási vizsgálatoknak a trombolízis (vérrögoldó kezelés) előtt?",
+                options: ["Nincs szerepük, a kezelés azonnal indítható.", "Segítenek a megfelelő dózis kiválasztásában.", "A kóros alvadási értékek (pl. magas INR, alacsony thrombocytaszám) kizáró okot jelenthetnek a kezelésre a vérzéses szövődmények magas kockázata miatt.", "Csak a kezelés után végzik el őket."],
+                answer: 2,
+                explanation: "A trombolízis előtt kötelező az alapvető véralvadási paraméterek (thrombocytaszám, PI/INR, APTI) ellenőrzése. Ha a betegnek eleve véralvadási zavara van vagy antikoagulánsokat szed, a trombolízis végzetes vérzést okozhat, ezért ilyenkor a kezelés kontraindikált."
+            },
+            {
+                question: "Mi a TIA (tranziens ischaemiás attack) definíciója?",
+                options: ["Egy maradandó károsodással járó, enyhe stroke.", "Egy átmeneti, 24 órán belül teljesen megszűnő, fokális neurológiai tünetekkel járó keringészavar.", "Egyfajta agyvérzés.", "Egy epilepsziás roham típusa."],
+                answer: 1,
+                explanation: "A TIA egy 'mini-stroke', ahol a tünetek (pl. féloldali zsibbadás, beszédzavar) átmenetiek és maradandó agykárosodás nélkül, 24 órán belül teljesen elmúlnak. Fontos figyelmeztető jel, mert jelentősen növeli a manifeszt stroke kockázatát."
+            },
+            {
+                question: "A haemorheológiai paraméterek kóros elváltozásai mely rizikócsoportokban a legkifejezettebbek?",
+                options: ["Fiatal, sportos egyénekben.", "Cukorbetegekben, hyperlipidaemiásokban és dohányosokban.", "Alacsony koleszterinszintű betegekben.", "Vegetáriánusokban."],
+                answer: 1,
+                explanation: "A klasszikus vaszkuláris rizikófaktorok, mint a cukorbetegség, a magas vérzsírszint és a dohányzás, nemcsak az érfalat károsítják, hanem a vér áramlási tulajdonságait is negatívan befolyásolják, így ezekben a betegcsoportokban a haemorheológiai zavarok dominánsabbak."
+            },
+            {
+                question: "Hogyan befolyásolja a plazma fibrinogén szintje a vér viszkozitását?",
+                options: ["Csökkenti a viszkozitást.", "Növeli a plazma viszkozitását és elősegíti a VVT-aggregációt, ezzel növelve a teljes vér viszkozitását.", "Nincs hatása a viszkozitásra.", "Csak alacsony hőmérsékleten van hatása."],
+                answer: 1,
+                explanation: "A fibrinogén egy nagy, asszimetrikus plazmafehérje, amely hozzájárul a plazma belső súrlódásához (viszkozitásához) és 'hídként' működve elősegíti a vörösvértestek összetapadását (aggregációját), ami különösen alacsony áramlási sebességnél növeli a teljes vér viszkozitását."
+            },
+            {
+                question: "Mi az antifoszfolipid szindróma (APS)?",
+                options: ["Egy örökletes vérzékenység.", "Egy szerzett, autoimmun thrombophilia, amit artériás/vénás trombózis és specifikus antitestek jellemeznek.", "A vörösvértestek fokozott szétesésével járó állapot.", "Egyfajta vasculitis."],
+                answer: 1,
+                explanation: "Az APS egy autoimmun betegség, ahol a szervezet foszfolipidekhez kötődő fehérjék ellen termel antitesteket (pl. lupus antikoaguláns). Ezek az antitestek paradox módon fokozzák a véralvadási hajlamot, ami artériás és vénás trombózisokhoz, így stroke-hoz is vezethet."
+            },
+            {
+                question: "A subarachnoidealis vérzés (SAV) leggyakoribb oka:",
+                options: ["Magas vérnyomás", "Agyi érmalformáció (AVM)", "Agyi aneurizma megrepedése", "Fejsérülés"],
+                answer: 2,
+                explanation: "A spontán (nem traumás) subarachnoidealis vérzések túlnyomó többségének hátterében egy agyi artérián lévő, veleszületett érfalgyengeség talaján kialakult aneurizma megrepedése áll."
+            },
+            {
+                question: "Mi a 'penumbra' az ischaemiás stroke-ban?",
+                options: ["A véglegesen elhalt agyszövet (infarktusmag).", "A vérzés körüli duzzanat.", "A csökkent keringésű, de még potenciálisan megmenthető agyszövet az infarktusmag körül.", "Az elzáródott érben lévő vérrög."],
+                answer: 2,
+                explanation: "A penumbra az a 'veszélyeztetett zóna', amely az infarktusmagot veszi körül. Ebben a területben a sejtek funkciója károsodott, de még nem haltak el. Az akut stroke terápia célja a véráramlás helyreállítása és a penumbra megmentése."
+            }
+        ]
+    },
+    {
+        topic: "Szaglászavarok",
+        questions: [
+            {
+                question: "Hol helyezkedik el a szaglóhám (regio olfactoria)?",
+                options: ["Az orr bejáratánál.", "A garat hátsó falán.", "Az orrüreg felső részén, a lamina cribrosa környékén.", "A nyelvgyökön."],
+                answer: 2,
+                explanation: "A szaglóhám egy specializált, kb. 1,5-2,5 cm²-es terület az orrüreg legfelső részén, amely magában foglalja az orrsövény felső részét, a lamina cribrosát és a felső orrkagylót. A szagmolekuláknak ide kell eljutniuk az érzékeléshez."
+            },
+            {
+                question: "Melyik állítás NEM igaz a szaglóhámra?",
+                options: ["Közvetlenül érintkezik a külső környezettel.", "A sejtjei körülbelül 60 naponta megújulnak.", "Teljesen védett a vírusok és toxikus anyagok ellen.", "Milliónyi szaglósejtet tartalmaz."],
+                answer: 2,
+                explanation: "A szaglóhám, mivel közvetlenül érintkezik a belélegzett levegővel, rendkívül sérülékeny és ki van téve a környezeti ártalmaknak, mint a vírusok, szennyező anyagok és vegyi anyagok, amelyek károsíthatják."
+            },
+            {
+                question: "Mi a parozmia?",
+                options: ["A szaglás teljes hiánya.", "Csökkent szaglóképesség.", "Valós szaginger torzult, gyakran kellemetlen érzékelése.", "Nem létező szagok érzékelése."],
+                answer: 2,
+                explanation: "A parozmia a szagérzékelés minőségi zavara, ahol egy létező, ismert szag (pl. kávé) helyett a beteg egy teljesen más, tipikusan kellemetlen szagot (pl. égett, rothadt) érez. Gyakori a COVID-19 utáni szaglásvesztés gyógyulási fázisában."
+            },
+            {
+                question: "Melyik neurodegeneratív betegség egyik legkorábbi tünete lehet a szaglásromlás (hipozmia)?",
+                options: ["Sclerosis multiplex", "Huntington-kór", "Parkinson-kór", "Amiotrófiás laterális szklerózis (ALS)"],
+                answer: 2,
+                explanation: "A szaglás csökkenése gyakran évekkel megelőzi a Parkinson-kór jellegzetes motoros tüneteinek (remegés, meglassultság) megjelenését, így fontos prodromális (bevezető) jelnek számít."
+            },
+            {
+                question: "Mi a szaglástréning (olfaktorius rehabilitáció) lényege?",
+                options: ["Az orrüreg sebészi tágítása.", "Erős, irritáló anyagok szagolgatása.", "Különböző, ismert illatok rendszeres, tudatos szagolgatása a szaglórendszer regenerációjának serkentésére.", "Vitaminok injekciózása az orrba."],
+                answer: 2,
+                explanation: "A szaglástréning a szaglórendszer neuroplaszticitását használja ki. A betegek naponta többször, hónapokon keresztül szagolnak 4-6 féle markáns illatot (pl. rózsa, citrom, eukaliptusz), ami serkenti a szaglóhám regenerációját és az agyi feldolgozást."
+            },
+            {
+                question: "Mi a fantozmia?",
+                options: ["Fokozott szaglási érzékenység.", "A szagok felismerésének képtelensége.", "Valós szaginger nélküli, hallucinált szagérzékelés.", "A szagok kellemesnek való érzékelése."],
+                answer: 2,
+                explanation: "A fantozmia esetében a beteg olyan szagot érez (gyakran kellemetlent, pl. füst, vegyszer), amelynek nincs valós forrása a környezetben. Ez egyfajta szaglási hallucináció, amelynek hátterében gyakran központi idegrendszeri okok állnak."
+            },
+            {
+                question: "Melyik állítás igaz az ízérzékelés és a szaglás kapcsolatára?",
+                options: ["A két érzékelés teljesen független egymástól.", "Az alapízeket (édes, sós stb.) a szaglóhám érzékeli.", "Az ételek komplex ízét, aromáját a szaglás (retro-nazális úton) és az ízérzékelés együtt alakítja ki.", "Szaglás nélkül az ízérzékelésünk élesebbé válik."],
+                answer: 2,
+                explanation: "Az ételek 'íze' valójában egy komplex érzet, amit az öt alapíz (nyelven) és a rengeteg aroma (szaglással) együttesen hoz létre. A szaglás elvesztése ezért az ételek ízének drámai elszegényedésével jár."
+            },
+            {
+                question: "Melyik a leggyakoribb oka a vezető (perifériás) típusú szaglászavaroknak?",
+                options: ["Agydaganat", "Fejsérülés", "Orr- és melléküreg-betegségek (pl. orrpolip, krónikus szinuszitisz)", "Parkinson-kór"],
+                answer: 2,
+                explanation: "Az orr- és melléküreg-betegségek, mint a krónikus gyulladások vagy az orrpolipok, a leggyakoribb okai a szaglászavaroknak. Ilyenkor a probléma az, hogy a szagmolekulák mechanikusan nem tudnak eljutni a szaglóhámhoz."
+            },
+            {
+                question: "Mi a presbyosmia?",
+                options: ["Veleszületett szaglásvesztés.", "Fertőzés utáni szaglásvesztés.", "Az időskori, korral járó szaglásromlás.", "Szaglási hallucináció."],
+                answer: 2,
+                explanation: "A presbyosmia az életkor előrehaladtával bekövetkező, természetes, fokozatos szaglásgyengülést jelenti, amely a szaglórendszer sejtjeinek csökkenésével és a receptorok érzékenységének mérséklődésével magyarázható."
+            },
+            {
+                question: "Melyik képalkotó vizsgálat az elsődleges választás a központi idegrendszeri eredetű szaglászavarok (pl. agydaganat, SM) gyanúja esetén?",
+                options: ["Orrmelléküreg CT", "Koponya röntgen", "Koponya MRI", "Nyaki ultrahang"],
+                answer: 2,
+                explanation: "Az MRI, kiváló lágyrész-felbontása miatt, a legalkalmasabb a szaglóideg, a szaglóhagyma és a központi szaglópályák állapotának megítélésére, így centrális ok gyanúja esetén ez a választandó képalkotó módszer."
+            },
+            {
+                question: "Melyik állítás NEM igaz a COVID-19 okozta szaglásvesztésre?",
+                options: ["Gyakori és jellegzetes tünet.", "A vírus elsősorban a szaglóneuronokat támadja.", "Gyakran társul parozmiával a gyógyulási fázisban.", "Hátterében a szaglóhám támasztósejtjeinek károsodása és a gyulladás áll."],
+                answer: 1,
+                explanation: "A jelenlegi kutatások szerint a SARS-CoV-2 vírus nem direkt módon a szaglóneuronokat, hanem a szaglóhám működését támogató, ún. szusztentakuláris sejteket fertőzi meg, és az ebből adódó gyulladás és diszfunkció okozza a szaglásvesztést."
+            },
+            {
+                question: "Milyen biztonsági kockázatot jelent az anozmia a mindennapi életben?",
+                options: ["A beteg nem hallja a vészjelzéseket.", "A veszélyes szagok (pl. füst, gázszivárgás, romlott étel) felismerésének hiánya.", "Fokozott esésveszély.", "Nincs biztonsági kockázata."],
+                answer: 1,
+                explanation: "A szaglás fontos figyelmeztető rendszer. A szaglás hiánya (anozmia) miatt a beteg nem észleli a tüzet jelző füstöt, a gázszivárgást vagy az ételmérgezést okozó romlott ételt, ami komoly biztonsági kockázatot jelent."
+            },
+            {
+                question: "Mi a Kallmann-szindróma?",
+                options: ["Időskori szaglásvesztés.", "Egy genetikai rendellenesség, amely veleszületett szaglásvesztéssel és a nemi érés zavarával (hypogonadismussal) jár.", "Traumás eredetű szaglásvesztés.", "Vírusfertőzés okozta szaglásvesztés."],
+                answer: 1,
+                explanation: "A Kallmann-szindróma egy ritka, genetikai eredetű állapot, ahol a szaglóhagyma fejlődésének zavara miatt veleszületett anozmia áll fenn, ami a nemi hormonok termelését szabályozó agyi központok fejlődési zavarával társul."
+            },
+            {
+                question: "Milyen típusú szaglászavar az agnózia?",
+                options: ["A szaglás teljes hiánya.", "Fokozott szaglási érzékenység.", "A szagok felismerésének és azonosításának zavara, megtartott érzékelés mellett.", "Szaglási hallucináció."],
+                answer: 2,
+                explanation: "Olfaktórikus agnózia esetén a beteg érzi a szagot, de nem képes azt felismerni, megnevezni vagy a forrásához kötni. Ez a probléma a szagok központi idegrendszeri feldolgozásának és értelmezésének zavarára utal."
+            },
+            {
+                question: "Az alábbiak közül melyik NEM tartozik a vezető (perifériás) típusú szaglászavarok okai közé?",
+                options: ["Orrpolip", "Allergiás rhinitis", "Fejsérülés okozta szaglóideg-szakadás", "Krónikus szinuszitisz"],
+                answer: 2,
+                explanation: "A szaglóideg szakadása vagy a központi szaglópályák sérülése a központi (centrális) típusú szaglászavarok közé tartozik. A vezető (perifériás) okok azokat az állapotokat jelentik, amelyek az orrüregben akadályozzák a szagmolekulák eljutását a receptorokhoz."
+            },
+            {
+                question: "Melyik vitamin hiánya hozható összefüggésbe a szaglászavarokkal?",
+                options: ["C-vitamin", "D-vitamin", "K-vitamin", "B12-vitamin"],
+                answer: 3,
+                explanation: "Bizonyos táplálkozási hiányállapotok, köztük a cink- és a B12-vitamin hiánya is okozhat szaglási és ízérzési zavarokat, mivel ezek elengedhetetlenek az idegrendszer megfelelő működéséhez."
+            },
+            {
+                question: "Melyik állítás igaz a veleszületett anozmiára?",
+                options: ["Gyakran okoz depressziót és libidócsökkenést.", "A betegek általában jobban alkalmazkodnak a szaglás hiányához, mint a szerzett anozmiások.", "Mindig együtt jár mentális retardációval.", "Könnyen gyógyítható szaglástréninggel."],
+                answer: 1,
+                explanation: "Mivel a veleszületett anozmiával élők soha nem tapasztalták meg a szagok világát, agyuk és viselkedésük adaptálódhatott ehhez az állapothoz. Így gyakran kevésbé élik meg negatívan a hiányt, és nem jellemző rájuk a szerzett anozmiánál gyakori libidócsökkenés vagy depresszió."
+            },
+            {
+                question: "Mi a kakozmia?",
+                options: ["A szaglás teljes hiánya.", "Csak kellemes szagok érzékelése.", "Elviselhetetlenül rossz, undort keltő szagok érzékelése.", "Fokozott szaglás."],
+                answer: 2,
+                explanation: "A kakozmia extrém módon kellemetlen, undorító szagok érzékelését jelenti. Ez lehet parozmia (egy valós szag torzul undorítóvá) vagy fantozmia (a rossz szag inger nélkül, hallucinációként jelenik meg) egyik formája."
+            },
+            {
+                question: "Hogyan hat a túlzásba vitt érszűkítő orrcseppek használata a szaglásra?",
+                options: ["Javítja a szaglást a jobb orrlégzés miatt.", "Nincs hatása a szaglásra.", "Krónikus nyálkahártya-károsodást (rhinitis medicamentosa) és a szaglóreceptorok érzékenységének csökkenését okozhatja.", "Csak az ízérzékelést befolyásolja."],
+                answer: 2,
+                explanation: "Az érszűkítő orrcseppek tartós, túlzott használata egyfajta függőséghez és a nyálkahártya krónikus duzzanatához, károsodásához vezet (rhinitis medicamentosa). Ez rontja a szaglóhám működését és szaglásromlást okozhat."
+            },
+            {
+                question: "Az alábbiak közül melyik terápia a legígéretesebb a COVID-19 utáni tartós szaglásvesztés kezelésére?",
+                options: ["Antibiotikumok", "Szaglástréning és kísérleti regeneratív terápiák (pl. PRP)", "Sebészeti beavatkozás", "Antihisztaminok"],
+                answer: 1,
+                explanation: "Mivel a COVID-19 utáni szaglásvesztés hátterében idegi-gyulladásos folyamatok állnak, a terápia a szaglórendszer regenerációjának serkentésére fókuszál. A szaglástréning bizonyítottan hatékony, és olyan új, kísérleti módszerek, mint a PRP-injekció, szintén ígéretes eredményeket mutatnak."
+            }
+        ]
+    },
+    {
+        topic: "Tekintés- és szemmozgászavarok",
+        questions: [
+            {
+                question: "Melyik agyideg felelős a szem kifelé történő mozgásáért (abdukció)?",
+                options: ["III. agyideg (N. oculomotorius)", "IV. agyideg (N. trochlearis)", "V. agyideg (N. trigeminus)", "VI. agyideg (N. abducens)"],
+                answer: 3,
+                explanation: "A VI. agyideg, a nervus abducens, kizárólag a külső egyenes szemizmot (musculus rectus lateralis) idegzi be, amely a szemgolyót kifelé, a halánték irányába mozdítja el."
+            },
+            {
+                question: "Mi a III. agyideg (N. oculomotorius) komplett bénulásának jellegzetes tünetegyüttese?",
+                options: ["A szem csak kifelé tud mozogni, a pupilla szűk.", "A szem lefelé és kifelé tekint ('down and out'), a szemhéj csüng (ptosis), és a pupilla tág.", "A szem csak befelé tud nézni, a pupilla normális.", "A szem nem mozog vertikálisan, de horizontálisan igen."],
+                answer: 1,
+                explanation: "A III. agyideg bénulásakor a négy általa beidegzett külső szemizom működése kiesik. Az ép IV. és VI. agyideg által mozgatott izmok (m. obliquus superior, m. rectus lateralis) relatív túlsúlya miatt a szem lefelé és kifelé fordul. Ezt kíséri a szemhéjcsüngés (ptosis) és gyakran a pupillatágulat."
+            },
+            {
+                question: "Mire utal leggyakrabban egy fájdalmas, pupillát is érintő (tág, fénymerev pupilla) III. agyideg bénulás?",
+                options: ["Diabeteses mikroangiopátiára", "Egy arteria communicans posterior (PCOM) aneurizma kompressziójára", "Vírusfertőzésre", "Sclerosis multiplexre"],
+                answer: 1,
+                explanation: "A pupilláért felelős paraszimpatikus rostok a III. agyideg felszínén futnak, ezért különösen érzékenyek a külső nyomásra. Egy PCOM aneurizma nyomása tipikusan fájdalmas, pupillatágulattal járó bénulást okoz, ami neurológiai vészhelyzetnek tekintendő."
+            },
+            {
+                question: "Mi a IV. agyideg (N. trochlearis) bénulásának legjellemzőbb tünete?",
+                options: ["Horizontális kettőslátás", "Szemhéjcsüngés", "Vertikális vagy torzionális (koszorúirányú) kettőslátás", "Teljes szemmozgásképtelenség"],
+                answer: 2,
+                explanation: "A IV. agyideg a felső ferde szemizmot (m. obliquus superior) idegzi be, amelynek fő funkciója a szem süllyesztése és befelé forgatása. Bénulása vertikális és/vagy elforduló kettőslátást okoz, ami különösen lefelé tekintéskor (pl. lépcsőn járás, olvasás) fokozódik."
+            },
+            {
+                question: "Melyik agytörzsi központ felelős a horizontális konjugált tekintés (oldalra nézés) generálásáért?",
+                options: ["Frontális tekintésközpont (FEF)", "Pontin Paramedian Reticular Formation (PPRF)", "Rostralis interstitialis nucleus (riMLF)", "Edinger-Westphal mag"],
+                answer: 1,
+                explanation: "A PPRF a hídban (pons) található, és a horizontális tekintés 'végső közös generátoraként' működik. Ez a központ koordinálja az azonos oldali VI. és az ellenoldali III. agyidegmag működését, hogy a két szem együtt tudjon oldalra mozdulni."
+            },
+            {
+                question: "Mi az internukleáris oftalmoplégia (INO) oka és tünete?",
+                options: ["A VI. agyideg magjának sérülése; kifelé tekintés képtelensége.", "A fasciculus longitudinalis medialis (FLM) sérülése; az addukáló (befelé néző) szem mozgásának elégtelensége, abdukáló nystagmussal.", "A látókéreg sérülése; vakság.", "A kisagy sérülése; ataxia."],
+                answer: 1,
+                explanation: "Az INO-t az FLM károsodása okozza, ami megszakítja a kapcsolatot a VI. és a III. agyidegmag között. Ennek következtében horizontális tekintéskor az azonos oldali szem nem tud befelé (addukció) mozdulni, míg az ellenoldali, kifelé néző (abdukáló) szemen nystagmus (szemremegés) jelenik meg."
+            },
+            {
+                question: "Mi a vesztibulo-okuláris reflex (VOR) funkciója?",
+                options: ["A közeli tárgyakra való fókuszálás.", "A tekintet gyors áthelyezése egyik pontról a másikra.", "A látott kép stabilizálása a retinán a fej mozgása közben.", "A szemhéjak reflexes zárása."],
+                answer: 2,
+                explanation: "A VOR egy reflex, amely a fej mozgásakor a szemeket a mozgással ellentétes irányba mozdítja. Ez a kompenzáló mozgás biztosítja, hogy a vizuális kép stabil maradjon a retinán, miközben mozgunk."
+            },
+            {
+                question: "Melyik állítás igaz a VI. agyideg (N. abducens) bénulására?",
+                options: ["Mindig egy közeli agydaganat jele.", "Hosszú intrakraniális lefutása miatt sérülékeny, és gyakran koponyaűri nyomásfokozódás 'nem lokalizáló' jele.", "Kizárólag traumás sérülés okozhatja.", "Soha nem jár kettőslátással."],
+                answer: 1,
+                explanation: "A VI. agyideg rendkívül hosszú utat tesz meg a koponyaüregben, mielőtt elérné a szemizmot. Emiatt diffúz koponyaűri nyomásfokozódás (pl. hydrocephalus, agyduzzanat) is okozhatja a bénulását anélkül, hogy a kiváltó ok közvetlenül az ideg mellett lenne. Ezért nevezik 'nem lokalizáló' jelnek."
+            },
+            {
+                question: "Melyik teszt segít a vertikális szemizombénulások, különösen a IV. agyideg bénulásának azonosításában?",
+                options: ["Romberg-teszt", "Babinski-jel", "Parks–Bielschowsky háromlépéses teszt", "Weber-teszt"],
+                answer: 2,
+                explanation: "A Parks–Bielschowsky teszt (vagy fejdöntési teszt) egy diagnosztikai manőversorozat, amely a hypertropia (az egyik szem magasabban állása) változását vizsgálja különböző tekintési irányokban és fejdöntéskor. Segítségével nagy pontossággal azonosítható a paretikus (bénult) ciklovertikális szemizom."
+            },
+            {
+                question: "Mi az akkomodációs triász három komponense?",
+                options: ["Pupillatágulat, konvergencia, távolra nézés", "Pupillaszűkület, akkomodáció, konvergencia", "Könnyezés, pislogás, szemhéjzárás", "Szakkád, követő mozgás, VOR"],
+                answer: 1,
+                explanation: "Amikor közeli tárgyra fókuszálunk, három dolog történik egyszerre: 1. A szemlencse domborúbbá válik (akkomodáció). 2. A két szem befelé fordul (konvergencia). 3. A pupillák beszűkülnek (miosis). Ez a három folyamat együttesen biztosítja a közeli tárgyak éles látását."
+            },
+            {
+                question: "Milyen típusú szemmozgásokat használunk olvasás közben a sorok vagy szavak közötti váltáshoz?",
+                options: ["Követő szemmozgások", "Vergence mozgások", "Szakkádok", "Nystagmus"],
+                answer: 2,
+                explanation: "Az olvasás gyors, ugrásszerű szemmozgások (szakkádok) sorozatából áll, amelyek a tekintetet a szöveg egyik pontjáról a másikra irányítják. A szavak felismerése a szakkádok közötti rövid fixációs periódusok alatt történik."
+            },
+            {
+                question: "Mi a leggyakoribb oka a szerzett IV. agyideg bénulásnak?",
+                options: ["Agydaganat", "Diabetes", "Zárt koponyasérülés (trauma)", "Vírusfertőzés"],
+                answer: 2,
+                explanation: "A IV. agyideg (nervus trochlearis) vékony és hosszú intrakraniális lefutása miatt különösen sérülékeny. Ezért a zárt fejsérülések, még az enyhébbek is, a leggyakoribb okai a szerzett bénulásának."
+            },
+            {
+                question: "A frontális tekintésközpont (FEF) akut, destrukciós sérülése milyen jellegzetes tünetet okoz?",
+                options: ["A beteg nem tud lefelé nézni.", "A beteg 'a lézió felé néz' (ipszilaterális konjugált deviáció).", "A beteg 'a lézióval ellentétes oldalra néz' (kontralaterális deviáció).", "Folyamatos, körkörös szemmozgások."],
+                answer: 1,
+                explanation: "Az FEF az ellenoldalra történő akaratlagos tekintésért felelős. Ha az egyik oldali FEF károsodik, az ép oldali központ túlsúlya miatt a szemek azonos (ipszilaterális) oldalra, a sérülés felé fognak deviálni."
+            },
+            {
+                question: "Melyik izmot NEM a III. agyideg idegzi be?",
+                options: ["Musculus rectus medialis (belső egyenes)", "Musculus rectus superior (felső egyenes)", "Musculus obliquus superior (felső ferde)", "Musculus levator palpebrae superioris (szemhéjemelő)"],
+                answer: 2,
+                explanation: "A musculus obliquus superior-t (felső ferde szemizom) a IV. agyideg (nervus trochlearis) idegzi be. A III. agyideg a többi felsorolt izmot, valamint a m. rectus inferiort és a m. obliquus inferiort is beidegzi."
+            },
+            {
+                question: "Mi az 'aberráns regeneráció' a III. agyideg bénulása után?",
+                options: ["A bénulás teljes és gyors gyógyulása.", "A regenerálódó idegrostok 'rossz vágányra futnak', ami kóros, összekapcsolt mozgásokat eredményez.", "A bénulás átterjedése a másik szemre.", "Az ideg daganatos elfajulása."],
+                answer: 1,
+                explanation: "Traumás vagy kompressziós III. agyideg sérülés után a gyógyuló axonok összekeveredhetnek és rossz izmokat idegezhetnek be. Ennek eredményeként kóros, szinkron mozgások jelennek meg, pl. a szemhéj emelkedik, amikor a beteg befelé néz."
+            },
+            {
+                question: "Melyik agytörzsi szinten található a vertikális tekintés központja (riMLF)?",
+                options: ["Nyúltvelő (Medulla oblongata)", "Híd (Pons)", "Középagy (Mesencephalon)", "Talamusz"],
+                answer: 2,
+                explanation: "A vertikális és torzionális szakkádok generálásáért felelős központ, a rostralis interstitialis nucleus fasciculi longitudinalis medialis (riMLF), a középagy elülső (rostralis) részén helyezkedik el."
+            },
+            {
+                question: "A VI. agyideg (n. abducens) bénulása esetén milyen kompenzáló fejtartás jellemző?",
+                options: ["Fej előrehajtása", "Fej hátrahajtása", "Fej az ép oldal felé döntése", "Az arc elfordítása az érintett oldal felé"],
+                answer: 3,
+                explanation: "A VI. agyideg bénulásakor a kifelé tekintés (abdukció) korlátozott. A beteg az arcát az érintett oldal felé fordítja, hogy a szemét a 'középvonalba' hozza, és így elkerülje a kettőslátást, ami a legkifejezettebb lenne az érintett oldal felé tekintéskor."
+            },
+            {
+                question: "Melyik állítás igaz a veleszületett IV. agyideg bénulásra?",
+                options: ["Mindig súlyos tünetekkel jár már csecsemőkorban.", "Gyakran sokáig kompenzált marad, és csak felnőttkorban okoz tüneteket.", "Képalkotóval mindig kimutatható az ideg hiánya.", "Gyógyszeresen jól kezelhető."],
+                answer: 1,
+                explanation: "A veleszületett IV. agyideg bénulás gyakran kompenzált állapotban marad gyermek- és fiatal felnőttkorban, a beteg egy jellegzetes fejtartással (fejdöntés) korrigálja a kettőslátást. A tünetek gyakran csak később, a fúziós kapacitás csökkenésével válnak nyilvánvalóvá."
+            },
+            {
+                question: "Melyik agyideg bénulása okozhat esotropiát (befelé kancsalságot)?",
+                options: ["III. agyideg", "IV. agyideg", "V. agyideg", "VI. agyideg"],
+                answer: 3,
+                explanation: "A VI. agyideg a külső egyenes szemizmot idegzi be, ami a szemet kifelé húzza. Ennek bénulásakor a belső egyenes szemizom (m. rectus medialis, III. agyideg beidegzése) tónusa túlsúlyba kerül, ami a szem befelé fordulását, esotropiát okoz."
+            },
+            {
+                question: "Mi a diplopia?",
+                options: ["Homályos látás", "Fényérzékenység", "Kettőslátás", "Látótérkiesés"],
+                answer: 2,
+                explanation: "A diplopia, vagyis kettőslátás, az a jelenség, amikor a két szem nem képes a képet ugyanarra a pontra vetíteni a retinán, mert a szemtengelyek nem párhuzamosak (kancsalság). Ennek következtében a beteg egy tárgyról két képet lát."
+            }
+        ]
+    },
+    {
+        topic: "A pupilla beidegzésének zavarai",
+        questions: [
+            {
+                question: "Melyik izom felelős a pupilla szűkítéséért (miosis), és milyen beidegzés alatt áll?",
+                options: ["M. dilatator pupillae; szimpatikus", "M. sphincter pupillae; paraszimpatikus", "M. ciliaris; szimpatikus", "M. levator palpebrae; paraszimpatikus"],
+                answer: 1,
+                explanation: "A pupillaszűkítő izom (musculus sphincter pupillae) egy körkörös izom az irisben, amelyet a III. agyideg által közvetített paraszimpatikus rostok idegeznek be. Összehúzódása miosist eredményez."
+            },
+            {
+                question: "Mi a Horner-szindróma klasszikus tüneti triásza?",
+                options: ["Mydriasis, ptosis, hyperhidrosis", "Miosis, ptosis, anhidrosis", "Mydriasis, exophthalmus, tremor", "Miosis, lagoftalmus, könnyezés"],
+                answer: 1,
+                explanation: "A Horner-szindrómát a szimpatikus beidegzés sérülése okozza, és három fő tünete van: miosis (pupillaszűkület), ptosis (enyhe szemhéjcsüngés a Müller-izom bénulása miatt), és anhidrosis (az arc érintett oldalán a verejtékezés csökkenése vagy hiánya)."
+            },
+            {
+                question: "Mi a fényreflex afferens (befelé vezető) pályájának fő idegi struktúrája?",
+                options: ["Nervus facialis (VII. agyideg)", "Nervus opticus (II. agyideg)", "Nervus oculomotorius (III. agyideg)", "Nervus trigeminus (V. agyideg)"],
+                answer: 1,
+                explanation: "A fényreflexet a retinára eső fényinger váltja ki. Ezt az információt a látóideg (nervus opticus) szállítja a középagyi pretectalis areába, tehát a reflexív afferens szárát a II. agyideg alkotja."
+            },
+            {
+                question: "Mi a magyarázata a konszenzuális fényreakciónak (amikor az egyik szem megvilágítására a másik pupillája is szűkül)?",
+                options: ["A fény átszűrődik a másik szembe.", "A pretectalis magból a rostok mindkét oldali Edinger-Westphal maghoz futnak.", "A szimpatikus idegrendszer aktiválódása.", "Ez egy tanult reflex."],
+                answer: 1,
+                explanation: "A konszenzuális fényreakció anatómiai alapja, hogy a pretectalis areából az ingerület mindkét oldali Edinger-Westphal maghoz eljut, részben a commissura posterioron keresztül kereszteződve. Így a fényinger mindkét oldali efferens (paraszimpatikus) pályát aktiválja."
+            },
+            {
+                question: "Melyik állapotra jellemző az Argyll Robertson pupilla?",
+                options: ["Akut glaukómás roham", "Neurosyphilis", "Diabetes mellitus", "Migrén"],
+                answer: 1,
+                explanation: "Az Argyll Robertson pupilla egy klasszikus, bár ma már ritka tünete a neurosyphilisnek. Jellemzője a fény-közeli disszociáció (a fényreakció hiányzik, de a közeli reakció megtartott), valamint a szűk, szabálytalan pupillák."
+            },
+            {
+                question: "Mi az Adie-féle tónusos pupilla?",
+                options: ["Egy mindig szűk, fénymerev pupilla.", "Egy tág, a fényre és a közeli ingerre is csak lassan, tónusosan reagáló pupilla.", "Egy gyorsan, ritmikusan pulzáló pupilla.", "Egy normális pupillareakció."],
+                answer: 1,
+                explanation: "Az Adie-pupillát a ganglion ciliare vagy a posztganglionáris rostok károsodása okozza. Jellemzője egy általában egyoldali, tág pupilla, amely a fényre alig vagy egyáltalán nem, míg közeli ingerre nagyon lassan, tónusosan szűkül, majd lassan tágul vissza."
+            },
+            {
+                question: "Melyik farmakológiai teszttel lehet megerősíteni az Adie-pupilla diagnózisát?",
+                options: ["Híg (0.125%) pilocarpin cseppentésével.", "Tömény (4%) kokain cseppentésével.", "Hydroxyamphetamin cseppentésével.", "Atropin cseppentésével."],
+                answer: 0,
+                explanation: "Az Adie-pupillára jellemző a denervációs túlérzékenység. A híg pilocarpin, ami egy gyenge paraszimpatomimetikum, normál pupillára nincs hatással, de az Adie-pupillát a kolinerg receptorok felszaporodása miatt jelentősen beszűkíti."
+            },
+            {
+                question: "Mi a Relatív Afferens Pupilla Defektus (RAPD) vagy Marcus Gunn pupilla?",
+                options: ["Az efferens (paraszimpatikus) pálya sérülésének jele.", "Az afferens (látóidegi) pálya egyoldali károsodásának jele.", "A szimpatikus pálya sérülésének jele.", "Normális jelenség."],
+                answer: 1,
+                explanation: "A RAPD a látóideg vagy a retina súlyos, egyoldali károsodását jelzi. A 'swinging flashlight' teszt során, amikor a fényt az ép szemről a beteg szemre visszük, a beteg szem pupillája paradox módon kitágul, mert az általa közvetített, csökkent fényinger nem elegendő a pupillaszűkület fenntartásához."
+            },
+            {
+                question: "A szimpatikus pupillatágító pálya hol kapcsol át a preganglionáris neuronról a posztganglionárisra?",
+                options: ["Edinger-Westphal mag", "Ganglion ciliare", "Ganglion cervicale superius", "Gerincvelő oldalsó szarva"],
+                answer: 2,
+                explanation: "A szimpatikus pálya második, preganglionáris neuronja a gerincvelőből kilépve a szimpatikus dúcláncon keresztül felszáll a nyakba, és a felső nyaki dúcban (ganglion cervicale superius) kapcsolódik át a harmadik, posztganglionáris neuronra."
+            },
+            {
+                question: "Milyen pupillaeltérés várható agytörzsi, pontin lézió esetén?",
+                options: ["Kétoldali tág, fénymerev pupillák", "Egyoldali tág pupilla", "Kétoldali, pontszerű (pinpoint), fénymerev pupillák", "Normális pupillák"],
+                answer: 2,
+                explanation: "A hídban (pons) található léziók gyakran károsítják a leszálló szimpatikus pályákat, miközben a paraszimpatikus pupillaszűkítő központok (a középagyban) épek maradnak. Ez a paraszimpatikus túlsúly kétoldali, extrém szűk, pontszerű pupillákat eredményez."
+            },
+            {
+                question: "Mi a 'fény-közeli disszociáció' lényege?",
+                options: ["A pupilla fényre szűkül, de közelre nem.", "A pupilla fényre nem, vagy csak renyhén szűkül, de a közeli reakció (akkomodáció melletti miosis) megtartott.", "A két pupilla eltérő mértékben reagál a fényre.", "A pupilla egyáltalán nem reagál semmire."],
+                answer: 1,
+                explanation: "A fény-közeli disszociáció azt jelenti, hogy a fényreflex és a közeli reakció pályái szétválnak. Ez leggyakrabban a középagy dorsalis részének károsodásakor (pl. Argyll Robertson pupilla, Parinaud-szindróma) vagy a ganglion ciliare károsodásakor (Adie-pupilla) fordul elő."
+            },
+            {
+                question: "Melyik állítás igaz a fiziológiás anisocoriára?",
+                options: ["Mindig súlyos betegség jele.", "A két pupilla méretkülönbsége >2 mm.", "A populáció kb. 20%-ában előfordul, a méretkülönbség <1 mm és állandó fényviszonyoktól függetlenül.", "Csak sötétben látható."],
+                answer: 2,
+                explanation: "A fiziológiás anisocoria egy ártalmatlan variáció, ahol a két pupilla között egy enyhe (<1 mm) méretkülönbség van, ami mind világosban, mind sötétben nagyjából azonos mértékű marad, és a fényreakciók normálisak."
+            },
+            {
+                question: "Pancoast-tumor (tüdőcsúcsi daganat) milyen jellegzetes neurológiai szindrómát okozhat?",
+                options: ["Parinaud-szindróma", "III. agyideg bénulás", "Horner-szindróma", "Adie-szindróma"],
+                answer: 2,
+                explanation: "A tüdőcsúcsban növő Pancoast-tumor összenyomhatja a mellette felszálló szimpatikus dúcláncot, károsítva a preganglionáris szimpatikus rostokat. Ez a Horner-szindróma klasszikus, preganglionáris formájához vezet."
+            },
+            {
+                question: "Mi a 'swinging flashlight' teszt?",
+                options: ["A szemfenék vizsgálatára szolgáló eszköz.", "A közeli reakció kiváltására szolgáló módszer.", "A direkt és konszenzuális fényreakciók összehasonlítására szolgáló teszt, amellyel a RAPD kimutatható.", "A szemnyomás mérésének egyik módja."],
+                answer: 2,
+                explanation: "A 'swinging flashlight' teszt során a fényforrást ritmikusan mozgatják a két szem között. Ezzel összehasonlítható a két szem által kiváltott direkt és konszenzuális fényreakció erőssége, és kimutatható az afferens pálya egyoldali gyengesége, a RAPD."
+            },
+            {
+                question: "A III. agyideg melyik része szállítja a paraszimpatikus rostokat a pupillához?",
+                options: ["Az ideg centrális, mag körüli része", "Az ideg felszíni, dorzomediális része", "Az ideg inferior ága", "Az ideg nem tartalmaz paraszimpatikus rostokat"],
+                answer: 1,
+                explanation: "A pupillaszűkítésért és akkomodációért felelős paraszimpatikus rostok az oculomotorius idegköteg felszínén, a hátulsó-belső (dorzomediális) részen helyezkednek el. Ezért érzékenyek a külső kompresszióra."
+            },
+            {
+                question: "Mire utal, ha egy anisocoria (pupillakülönbség) sötétben fokozódik?",
+                options: ["Paraszimpatikus beidegzési zavarra (a tágabb pupilla a kóros).", "Szimpatikus beidegzési zavarra (a szűkebb pupilla a kóros).", "Fiziológiás anisocoriára.", "Optikai csalódásra."],
+                answer: 1,
+                explanation: "Sötétben a pupilláknak ki kellene tágulniuk a szimpatikus rendszer hatására. Ha az egyik oldali szimpatikus beidegzés sérült (Horner-szindróma), az az oldali pupilla nem tud megfelelően kitágulni, így a méretkülönbség a két szem között sötétben lesz a legkifejezettebb."
+            },
+            {
+                question: "Mi az a Parinaud-szindróma?",
+                options: ["A horizontális tekintés bénulása.", "A középagy dorsalis részének károsodása miatti tünetegyüttes (felfelé tekintés bénulása, fény-közeli disszociáció, konvergencia-retrakciós nystagmus).", "A kisagy betegsége.", "A III. agyideg teljes bénulása."],
+                answer: 1,
+                explanation: "A Parinaud-szindróma (vagy dorsalis középagyi szindróma) a középagyi tectum kompressziója vagy sérülése miatt alakul ki. Jellegzetes tünetei a felfelé tekintés bénulása, a fény-közeli disszociációval járó tág pupillák és a konvergencia-retrakciós nystagmus."
+            },
+            {
+                question: "Melyik állítás igaz a Horner-szindróma okozta ptosisra?",
+                options: ["Teljes ptosis, a szemhéj teljesen lefedi a pupillát.", "Enyhe (1-2 mm-es) ptosis a felső szemhéj simaizmainak (Müller-izom) bénulása miatt.", "Csak az alsó szemhéj érintett.", "A ptosis pislogáskor javul."],
+                answer: 1,
+                explanation: "A Horner-szindrómában a ptosis enyhe, mert csak a szimpatikus beidegzésű Müller-féle simaizom bénul, ami a szemhéj emelésében csak kis mértékben segít. Ezzel szemben a III. agyideg bénulásakor a fő szemhéjemelő izom (m. levator palpebrae) bénul, ami súlyos ptosist okoz."
+            },
+            {
+                question: "A carotis interna disszekciója (az érfal rétegeinek szétválása) milyen pupillazavart okozhat?",
+                options: ["Egyoldali tág, fénymerev pupillát.", "Kétoldali pontszerű pupillákat.", "Fájdalmas Horner-szindrómát.", "Fény-közeli disszociációt."],
+                answer: 2,
+                explanation: "A pupillát tágító posztganglionáris szimpatikus rostok a carotis interna falában, azzal szoros kapcsolatban haladnak. Az ér disszekciója károsíthatja ezeket a rostokat, ami az érintett oldalon Horner-szindrómát (miosis, ptosis) okoz, amihez gyakran társul nyaki vagy arcfájdalom."
+            },
+            {
+                question: "Melyik állítás igaz a pupilla normál reakcióira?",
+                options: ["A pupilla sötétben szűkül, világosban tágul.", "A pupilla fényre tágul.", "A pupilla fényre és közeli tárgyra fókuszáláskor is szűkül.", "A pupilla mérete állandó."],
+                answer: 2,
+                explanation: "A pupilla normális esetben két fő ingerre szűkül (miosis): erős fény hatására (fényreflex) és amikor közeli tárgyra fókuszálunk (az akkomodációs triász részeként). Sötétben vagy távolra nézéskor a pupilla kitágul (mydriasis)."
+            }
+        ]
+    }
+];
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const topicSelectionDiv = document.getElementById('topic-selection');
+    const quizContainerDiv = document.getElementById('quiz-container');
+    const scoreContainerDiv = document.getElementById('score-container');
+    const topicButtonsContainer = document.getElementById('topic-buttons');
+    const backToTopicsBtn = document.getElementById('back-to-topics');
+
+    let currentTopicIndex = -1;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedOptionButton = null;
+
+    // --- INITIALIZATION ---
+    function init() {
+        showTopicSelection();
+        createTopicButtons();
+        backToTopicsBtn.addEventListener('click', showTopicSelection);
+        document.getElementById('home-btn').addEventListener('click', showTopicSelection);
+    }
+    
+    function createTopicButtons() {
+        topicButtonsContainer.innerHTML = '';
+        quizData.forEach((topic, index) => {
+            const button = document.createElement('button');
+            button.className = 'btn-topic bg-white border-2 border-slate-200 hover:border-violet-500 hover:bg-violet-50 text-slate-700 font-semibold py-4 px-6 rounded-lg text-left shadow-sm';
+            button.innerHTML = `
+                <div class="flex items-center">
+                    <div class="bg-violet-100 text-violet-600 p-3 rounded-full mr-4">
+                        <i class="fas ${getIconForTopic(index)} fa-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">${topic.topic}</h3>
+                        <p class="text-sm text-slate-500">${topic.questions.length} kérdés</p>
+                    </div>
+                </div>`;
+            button.addEventListener('click', () => startQuiz(index));
+            topicButtonsContainer.appendChild(button);
+        });
+    }
+    
+    function getIconForTopic(index) {
+        const icons = ['fa-vials', 'fa-wind', 'fa-eye', 'fa-dot-circle'];
+        return icons[index % icons.length];
+    }
+
+    // --- SCREEN MANAGEMENT ---
+    function showTopicSelection() {
+        topicSelectionDiv.classList.remove('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showQuizContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.remove('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showScoreContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.remove('hidden');
+    }
+
+    // --- QUIZ LOGIC ---
+    function startQuiz(topicIndex) {
+        currentTopicIndex = topicIndex;
+        currentQuestionIndex = 0;
+        score = 0;
+        showQuizContainer();
+        document.getElementById('quiz-title').textContent = quizData[topicIndex].topic;
+        document.getElementById('restart-btn').onclick = () => startQuiz(currentTopicIndex);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        resetState();
+        const currentQuestion = quizData[currentTopicIndex].questions[currentQuestionIndex];
+        document.getElementById('question').textContent = currentQuestion.question;
+        const optionsContainer = document.getElementById('options');
+        
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn w-full text-left bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-4 px-5 rounded-lg';
+            button.textContent = option;
+            button.dataset.index = index;
+            button.addEventListener('click', selectOption);
+            optionsContainer.appendChild(button);
+        });
+        updateProgress();
+    }
+
+    function resetState() {
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('options').innerHTML = '';
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.classList.remove('show');
+        const feedbackContent = document.getElementById('feedback-content');
+        feedbackContent.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        selectedOptionButton = null;
+    }
+    
+    function updateProgress() {
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        progressText.textContent = `Kérdés ${currentQuestionIndex + 1} / ${totalQuestions}`;
+        progressBar.style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+    }
+
+    function selectOption(e) {
+        if (selectedOptionButton) return; // Prevent changing answer
+
+        selectedOptionButton = e.target;
+        const selectedAnswerIndex = parseInt(selectedOptionButton.dataset.index);
+        const correctAnserIndex = quizData[currentTopicIndex].questions[currentQuestionIndex].answer;
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackContent = document.getElementById('feedback-content');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationP = document.getElementById('explanation');
+        
+        // Highlight selected button
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        selectedOptionButton.classList.add('selected');
+
+        if (selectedAnswerIndex === correctAnserIndex) {
+            score++;
+            feedbackTitle.textContent = 'Helyes válasz!';
+            feedbackContent.className = 'p-5 rounded-lg bg-green-100 text-green-800 border-l-4 border-green-500';
+            
+        } else {
+            feedbackTitle.textContent = 'Helytelen válasz.';
+            feedbackContent.className = 'p-5 rounded-lg bg-red-100 text-red-800 border-l-4 border-red-500';
+            
+            // Highlight the correct answer
+            document.querySelector(`.option-btn[data-index='${correctAnserIndex}']`).classList.add('bg-green-200', 'border-green-500');
+        }
+
+        explanationP.textContent = quizData[currentTopicIndex].questions[currentQuestionIndex].explanation;
+        feedbackArea.classList.add('show');
+        
+        document.querySelectorAll('.option-btn').forEach(button => button.disabled = true);
+        document.getElementById('next-btn').disabled = false;
+        document.getElementById('next-btn').focus();
+    }
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData[currentTopicIndex].questions.length) {
+            loadQuestion();
+        } else {
+            showFinalScore();
+        }
+    });
+
+    function showFinalScore() {
+        showScoreContainer();
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
+    }
+
+    init();
+});
+</script>
+
+</body>
+</html>

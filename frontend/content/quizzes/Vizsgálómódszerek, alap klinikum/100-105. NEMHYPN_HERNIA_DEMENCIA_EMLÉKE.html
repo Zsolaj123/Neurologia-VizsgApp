@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Kvíz - 5. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.correct {
+            background-color: #10B981; /* Emerald-500 */
+            color: white;
+            border-color: #059669; /* Emerald-600 */
+        }
+        .quiz-option.incorrect {
+            background-color: #EF4444; /* Red-500 */
+            color: white;
+            border-color: #DC2626; /* Red-600 */
+        }
+        .quiz-option:not(.disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection -->
+        <div id="topic-selection" class="text-center">
+            <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Neurológiai Kvíz - 5. rész</h1>
+            <p class="text-lg mb-8 text-gray-600 dark:text-gray-400">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quiz-interface" class="hidden">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-gray-900 dark:text-white">Téma</h2>
+                    <div id="score" class="text-lg font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-1 rounded-full">Pontszám: 0 / 0</div>
+                </div>
+                <div id="progress-bar-container" class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-xl font-medium mb-6 text-gray-800 dark:text-gray-200"></p>
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="hidden mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Magyarázat</h3>
+                    <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="back-to-topics" class="py-2 px-5 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Témakörök</button>
+                    <button id="next-question" class="py-2 px-5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Score Screen -->
+        <div id="final-score-screen" class="hidden text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">A kvíz vége!</h2>
+            <p class="text-xl mb-6 text-gray-700 dark:text-gray-300">A pontszámod a(z) <span id="final-topic-title" class="font-semibold"></span> témakörben:</p>
+            <p id="final-score" class="text-6xl font-bold mb-8 text-blue-600 dark:text-blue-400">0 / 20</p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Újra</button>
+                <button id="change-topic" class="py-3 px-6 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Másik téma</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            'nem_hypnoid': {
+                title: 'Nem-hypnoid tudatzavarok',
+                questions: [
+                    { question: "Melyik állítás jellemzi leginkább a nem-hypnoid tudatzavarokat?", options: ["A beteg mélyen alszik és nem ébreszthető.", "A beteg ébernek tűnik, de a tudat tartalma, integrációja súlyosan zavart.", "Mindig súlyos motoros bénulással járnak.", "Kizárólag pszichogén eredetűek."], correct: 1, explanation: "A nem-hypnoid tudatzavarok fő jellemzője, hogy a beteg éberségi szintje (vigilitás) viszonylag megtartott, de a tudatosság (awareness) és a tudattartalom (gondolkodás, észlelés) súlyosan károsodott." },
+                    { question: "Mi a locked-in szindróma (LIS) lényege?", options: ["A beteg kómában van.", "A beteg tudata teljesen ép, de a teste szinte teljesen bénult.", "Egyfajta disszociatív állapot, ahol a beteg nem emlékszik a személyazonosságára.", "Súlyos afázia, ahol a beteg nem képes beszélni."], correct: 1, explanation: "A LIS nem valódi tudatzavar. A beteg tudata és kognitív funkciói épek, de a súlyos motoros bénulás (kvadriplégia és anartria) miatt 'be van zárva' a saját testébe, és általában csak szemmozgásokkal tud kommunikálni." },
+                    { question: "Melyik állapotra jellemző, hogy a betegnek van alvás-ébrenlét ciklusa, de nincsenek tudatos reakciói?", options: ["Kóma", "Szopor", "Apalliumos állapot (perzisztens vegetatív állapot)", "Akinetikus mutizmus"], correct: 2, explanation: "Az apalliumos állapotot (vagy nem reaktív ébrenléti szindróma - UWS) az éberség megléte (spontán szemnyitás, alvás-ébrenlét ciklusok), de a tudatosság teljes hiánya jellemzi." },
+                    { question: "Mi a fő különbség a vegetatív állapot (VS/UWS) és a minimálisan tudatos állapot (MCS) között?", options: ["Az MCS súlyosabb, mint a VS.", "VS esetén a beteg nem nyitja ki a szemét.", "MCS esetén minimális, de egyértelmű tudatossági jelek mutathatók ki, míg VS esetén nem.", "Nincs lényegi különbség."], correct: 2, explanation: "Az MCS-ben szenvedő beteg, a VS-sel ellentétben, mutat minimális, de egyértelmű és reprodukálható viselkedéses jeleket a tudatosságra (pl. egyszerű parancsok követése, igen/nem válaszok, vizuális követés)." },
+                    { question: "Melyik skála a legalkalmasabb a súlyos agysérültek (pl. VS, MCS) tudatállapotának finomabb megkülönböztetésére?", options: ["Glasgow Coma Scale (GCS)", "AVPU Skála", "Coma Recovery Scale-Revised (CRS-R)", "Mini-Mental State Examination (MMSE)"], correct: 2, explanation: "A CRS-R egy részletes neurobehaviorális skála, amelyet kifejezetten a súlyosan csökkent tudatú betegek állapotának pontosabb felmérésére és a VS, MCS és az abból való kilábalás megkülönböztetésére fejlesztettek ki." },
+                    { question: "Mi az akinetikus mutizmus?", options: ["A beteg nem beszél, mert afáziás.", "A beteg éber, de nem mozog és nem beszél a motiváció hiánya miatt.", "A beteg a gége bénulása miatt nem tud beszélni.", "A beteg alszik és nem ébreszthető."], correct: 1, explanation: "Akinetikus mutizmusban a beteg ébernek tűnik, de súlyos apátia, kezdeményezéshiány jellemzi, ezért nem mozog és nem beszél, bár motoros és nyelvi pályái épek lehetnek." },
+                    { question: "Melyik agyterület sérüléséhez köthető leginkább az akinetikus mutizmus?", options: ["Kisagy", "Temporális lebeny", "Frontális lebeny (különösen a mediális rész, ACC)", "Occipitális lebeny"], correct: 2, explanation: "Az akinetikus mutizmus gyakran a frontális lebeny mediális részének, különösen az anterior cinguláris kéreg (ACC) kétoldali károsodásához köthető, ami a motivációs és kezdeményező rendszerek központja." },
+                    { question: "Mi a 'covert consciousness' (rejtett tudatosság)?", options: ["A beteg csak álmában tudatos.", "A beteg tudatossága, ami viselkedésesen nem, de funkcionális képalkotóval (pl. fMRI) kimutatható.", "A beteg titokban tudja, mi történik körülötte.", "A tudatosság egy alacsonyabb szintje."], correct: 1, explanation: "A rejtett tudatosság azt jelenti, hogy a beteg, aki külsőleg nem mutat tudatos reakciókat (pl. vegetatív állapotban van), az agyi aktivitása alapján (pl. fMRI-ben parancsra aktiválódó agyterületek) mégis képes lehet a tudatos feldolgozásra." },
+                    { question: "Melyik állítás NEM igaz a locked-in szindrómára?", options: ["A beteg tudata ép.", "A beteg általában kvadriplégiás (mind a négy végtagja bénult).", "Az agytörzs sérülése okozza.", "Ez egy kvantitatív (hypnoid) tudatzavar."], correct: 3, explanation: "A LIS nem tudatzavar, hanem egy súlyos motoros károsodás. A tudat és a kognitív funkciók épek, a probléma a motoros kimenet szinte teljes hiányában van." },
+                    { question: "Melyik tudatzavar tekinthető a delírium egyik formájának is?", options: ["Amencia", "Szopor", "Kóma", "Locked-in szindróma"], correct: 0, explanation: "Az amencia egy súlyos, konfúzióval és dezorganizációval járó állapot, amelyet a klasszikus pszichiátria a delíriumhoz hasonló, akut exogén reakciótípusnak tekintett." },
+                    { question: "Mi jellemző az oneiroid (álomszerű) állapotra?", options: ["Logikus, rendezett gondolkodás.", "Álomszerű, fantasztikus-deluzív élmények, a valóság és képzelet keveredése.", "Fokozott éberség és figyelem.", "Csak a memória érintett."], correct: 1, explanation: "Az oneiroid állapotot álomszerű, gyakran színpadias, élénk hallucinációkkal és téveszmékkel teli élmények jellemzik, ahol a valóságérzékelés súlyosan torzul." },
+                    { question: "A nem-hypnoid tudatzavarok mely agyi struktúrák diszfunkciójára utalnak leginkább?", options: ["Csak az agytörzsi formatio reticularisra.", "A talamuszra és a kortikális (agykérgi) területekre.", "A gerincvelőre.", "A perifériás idegekre."], correct: 1, explanation: "Míg a hypnoid zavarok (kóma stb.) az agytörzsi éberségi rendszer (ARAS) károsodásához köthetők, a nem-hypnoid (kvalitatív) zavarok inkább a talamusz és a kiterjedt agykérgi hálózatok működési zavarát jelzik." },
+                    { question: "Milyen tudatzavarra utalhat, ha a beteg ébernek tűnik, de teljesen közönyös, nem kezdeményez semmilyen mozgást vagy kommunikációt?", options: ["Delírium", "Akinetikus mutizmus", "Szopor", "Konfabuláció"], correct: 1, explanation: "Az akinetikus mutizmusra a súlyos apátia és a spontán mozgásos és verbális aktivitás hiánya jellemző, ép motoros és nyelvi képességek mellett." },
+                    { question: "Az 'apalliumos állapot' kifejezés melyik állapottal rokonértelmű?", options: ["Kóma", "Locked-in szindróma", "Perzisztens vegetatív állapot", "Minimálisan tudatos állapot"], correct: 2, explanation: "Az apalliumos állapot a perzisztens vegetatív állapot (PVS) egy régebbi, de még használt elnevezése, ami az 'éberség tudatosság nélkül' állapotát írja le." },
+                    { question: "Melyik vizsgálat elengedhetetlen a nonkonvulzív status epilepticus (NCSE) kizárására egy nem reagáló betegnél?", options: ["Koponya CT", "Lumbálpunkció", "EEG (Elektroenkefalográfia)", "Vérvétel"], correct: 2, explanation: "Az NCSE egy olyan állapot, ahol a betegnek folyamatos, tudatzavart okozó epilepsziás agyi aktivitása van látható görcsök nélkül. Ennek diagnosztizálására az EEG az egyetlen megbízható módszer." },
+                    { question: "Melyik állítás igaz a tudat kvalitatív zavaraira?", options: ["Mindig csökkent éberséggel járnak.", "Az éberség megtartott lehet, de a tudat tartalma, integrációja sérül.", "Csak gyógyszermérgezés okozhatja őket.", "A GCS skála tökéletesen méri őket."], correct: 1, explanation: "A kvalitatív (nem-hypnoid) tudatzavarok lényege, hogy a tudat tartalma (gondolkodás, észlelés) sérül, miközben az éberség szintje viszonylag megőrzött lehet." },
+                    { question: "Mi a homályállapot?", options: ["A kóma egy enyhe formája.", "Egyfajta tudatszűkült állapot, ahol a beteg viselkedése rendezettnek tűnhet, de utólag amnéziás a történtekre.", "A narkolepszia egyik tünete.", "Mindig agresszív viselkedéssel jár."], correct: 1, explanation: "A homályállapot egy tudatszűkült állapot, ahol a tudatosság egy specifikus tartalomra vagy cselekvéssorra fókuszál, miközben a környezet többi része kizáródik. Jellemző az utólagos amnézia. Előfordulhat epilepsziában vagy disszociatív zavarokban." },
+                    { question: "Melyik neurotranszmitter rendszer diszfunkciója játszik szerepet a delírium kialakulásában?", options: ["Kizárólag a szerotonin rendszer.", "Elsősorban a kolinerg és a dopaminerg rendszer egyensúlyának zavara.", "Csak a GABA rendszer.", "A neurotranszmittereknek nincs szerepük."], correct: 1, explanation: "A delírium patofiziológiájában komplex neurotranszmitter zavar áll, de a legfontosabbnak a kolinerg rendszer hipofunkcióját és a dopaminerg rendszer relatív túlműködését tartják." },
+                    { question: "Mi a 'kettős orientáció' jelensége az oneiroid állapotban?", options: ["A beteg nem tudja megkülönböztetni a jobb és a bal oldalt.", "A beteg egyszerre tudatában van a valós környezetének és a saját fantasztikus, álomszerű élményvilágának.", "A beteg két különböző nyelven beszél egyszerre.", "A beteg két személyiségre hasad."], correct: 1, explanation: "A 'kettős orientáció' azt jelenti, hogy az oneiroid állapotban lévő beteg egyszerre éli át a saját, belső, álomszerű valóságát, miközben részlegesen tudatában van a külső, reális környezetének is (pl. tudja, hogy kórházban van)." },
+                    { question: "Melyik állapotban a legkedvezőbb a prognózis a tudat visszatérésére?", options: ["Perzisztens vegetatív állapot (PVS)", "Kóma", "Locked-in szindróma", "Minimálisan tudatos állapot (MCS)"], correct: 3, explanation: "A locked-in szindróma nem tudatzavar, a tudat végig ép. A többi közül az MCS prognózisa a legkedvezőbb, mivel itt már kimutathatók a tudatosság jelei, ami nagyobb esélyt jelez a további javulásra a PVS-hez vagy a kómához képest." }
+                ]
+            },
+            'icp_herniatio': {
+                title: 'Intracranialis nyomásfokozódás és herniatiok',
+                questions: [
+                    { question: "Mi a Monro-Kellie doktrína lényege?", options: ["A koponyaűri nyomás mindig állandó.", "A koponya egy zárt tér, ahol az agy, a vér és a liquor térfogatának összege állandó.", "Az agy térfogata az életkorral csökken.", "Az agyi véráramlás független a vérnyomástól."], correct: 1, explanation: "A Monro-Kellie doktrína szerint a merev koponyán belül az agyszövet, a vér és a liquor térfogatának összege állandó, így ha az egyik komponens térfogata nő, egy másiknak kompenzatórikusan csökkennie kell, hogy a nyomás ne emelkedjen." },
+                    { question: "Mi a normál intracranialis nyomás (ICP) tartomány fekvő felnőttben?", options: ["0-5 Hgmm", "7-15 Hgmm", "25-35 Hgmm", "40-50 Hgmm"], correct: 1, explanation: "Felnőtteknél fekvő helyzetben a normál ICP tartomány általában 7–15 mmHg (kb. 9.5–20 cmH2O). A 20-25 mmHg feletti tartós emelkedés már kórosnak számít." },
+                    { question: "Mi a Cushing-triász három komponense?", options: ["Hypertonia, Tachycardia, Tachypnoe", "Hypotonia, Bradycardia, Apnoe", "Hypertonia, Bradycardia, Irreguláris légzés", "Hypotonia, Tachycardia, Cheyne-Stokes légzés"], correct: 2, explanation: "A Cushing-triász, ami súlyos agytörzsi kompresszió jele, a következőkből áll: 1. Artériás hypertonia (magas vérnyomás), 2. Bradycardia (lassú pulzus), 3. Kóros, irreguláris légzés." },
+                    { question: "Melyik agyideg sérül leggyakrabban és legkorábban uncalis (laterális transtentorialis) herniatio esetén?", options: ["N. opticus (II.)", "N. oculomotorius (III.)", "N. trigeminus (V.)", "N. abducens (VI.)"], correct: 1, explanation: "Uncalis herniatiónál a temporális lebeny mediális része (uncus) komprimálja az azonos oldali III. agyideget, ami jellegzetesen azonos oldali pupillatágulatot és fénymerevséget okoz." },
+                    { question: "Melyik agyi herniatio típus a leggyakoribb?", options: ["Uncalis herniatio", "Centrális transtentorialis herniatio", "Subfalcin herniatio", "Tonsillaris herniatio"], correct: 2, explanation: "A subfalcin herniatio, ahol a gyrus cinguli a falx cerebri alatt átnyomódik az ellenkező oldalra, a leggyakrabban előforduló herniatiós típus." },
+                    { question: "Milyen tünetet okoz az arteria cerebri anterior (ACA) kompressziója subfalcin herniatio során?", options: ["Felső végtagi gyengeség", "Beszédzavar", "Ellenoldali alsó végtagi gyengeség", "Látótérkiesés"], correct: 2, explanation: "Az ACA elsősorban a frontális lebeny mediális részét és a paracentrális lebenyt látja el, ami az alsó végtag motoros kérgét tartalmazza. Kompressziója ezért az ellenoldali alsó végtag gyengeségét okozza." },
+                    { question: "Mi a pangásos papilla (papillaoedema)?", options: ["A látóideg gyulladása.", "A látóidegfő duzzanata a koponyaűri nyomásfokozódás miatt.", "Veleszületett látóideg-anomália.", "Az ideghártya leválása."], correct: 1, explanation: "A papillaoedema a látóidegfő ödémája, duzzanata, amit a megnövekedett intracranialis nyomás okoz, ami a látóideghüvelyen keresztül a látóidegfőre terjed." },
+                    { question: "Melyik herniatiós típus okozza a nyúltvelő beékelődését a foramen magnumon keresztül?", options: ["Subfalcin herniatio", "Uncalis herniatio", "Felfelé irányuló transtentorialis herniatio", "Tonsillaris herniatio"], correct: 3, explanation: "Tonsillaris herniatiónál a kisagyi tonsillák nyomódnak be az öreglyukba (foramen magnum), közvetlenül komprimálva a nyúltvelőt, ami a légző- és keringési központok bénulásához vezethet." },
+                    { question: "Mit jelent a cerebralis perfúziós nyomás (CPP)?", options: ["Az agyi erekben uralkodó nyomást.", "A nettó nyomásgradienst, ami az agyi véráramlást biztosítja.", "A liquor nyomását.", "Az agyszövet rugalmasságát."], correct: 1, explanation: "A CPP az a nyomáskülönbség (CPP = MAP - ICP), amely az agy vérellátását fenntartja. Megfelelő szintje elengedhetetlen az agyi ischaemia elkerüléséhez." },
+                    { question: "Miért veszélyes a lumbálpunkció (LP) koponyaűri nyomásfokozódás esetén, ha térfoglaló folyamat van jelen?", options: ["Mert fájdalmas.", "Mert fertőzést okozhat.", "Mert a nyomás hirtelen csökkenése a gerincvelői térben beékelődést (herniatiót) provokálhat.", "Mert nem ad diagnosztikus információt."], correct: 2, explanation: "Ha a koponyaüregben egy térfoglaló folyamat miatt magas a nyomás, a lumbálpunkcióval létrehozott alacsonyabb nyomás a gerincvelői térben 'leszívhatja' az agyat, ami agytörzsi (tonsillaris) beékelődéshez vezethet. Ezért LP előtt képalkotó vizsgálat szükséges a térfoglalás kizárására." },
+                    { question: "A rostrocaudalis deterioráció melyik herniatiós típusra jellemző?", options: ["Subfalcin herniatio", "Centrális leszálló transtentorialis herniatio", "Tonsillaris herniatio", "Transcalvarialis herniatio"], correct: 1, explanation: "A rostrocaudalis (felülről lefelé haladó) deterioráció a centrális transtentorialis herniatio klasszikus lefolyása, ahol az agytörzsi kompresszió és károsodás szekvenciálisan halad a diencephalontól a nyúltvelő felé." },
+                    { question: "A Kernohan-notch jelenség milyen paradox tünetet okozhat?", options: ["Azonos oldali pupillatágulat", "Kétoldali hemiparesis", "Azonos oldali hemiparesis", "Nincs motoros tünet"], correct: 2, explanation: "A Kernohan-notch egy ritka jelenség, amikor a középagy eltolódása miatt az ellenoldali crus cerebri nyomódik a tentoriumhoz. Mivel a pyramispálya alacsonyabban kereszteződik, ez paradox módon a herniációval azonos oldali végtagbénulást okoz." },
+                    { question: "Melyik állítás igaz a normál nyomású hydrocephalusra (NPH)?", options: ["Nem okoz koponyaűri nyomásfokozódást.", "Jellemzője az akut, súlyos fejfájás.", "Ez egy krónikus, kommunikáló hydrocephalus, ami demenciát, járászavart és inkontinenciát okozhat.", "Csak csecsemőkorban fordul elő."], correct: 2, explanation: "Bár a neve 'normál nyomású', az NPH is a liquor-dinamika zavara, ahol a nyomás csak intermittálóan vagy enyhén emelkedett. A klasszikus tünet-triász a demencia, a járászavar és a vizeletinkontinencia." },
+                    { question: "Mi az agyi autoreguláció lényege?", options: ["Az agy képes a saját sérüléseit kijavítani.", "Az agy képes a véráramlását állandó szinten tartani a vérnyomás változásai ellenére.", "Az agy szabályozza a testhőmérsékletet.", "Az agy képes új idegsejteket termelni."], correct: 1, explanation: "Az agyi autoreguláció az a mechanizmus, amely az agyi erek átmérőjének változtatásával (vazokonstrikció/vazodilatáció) biztosítja a stabil agyi véráramlást a szisztémás vérnyomás ingadozásai ellenére, egy bizonyos tartományon belül." },
+                    { question: "Melyik a leggyakoribb oka az epiduralis haematomának?", options: ["Vénás vérzés", "A hídvénák szakadása", "Az arteria meningea media sérülése", "Aneurysma ruptura"], correct: 2, explanation: "Az epiduralis haematoma tipikusan artériás eredetű, és leggyakrabban a halántékcsont törésekor sérülő arteria meningea media szakadása okozza." },
+                    { question: "Milyen tünetegyüttest okozhat a középagyi tectum kompressziója?", options: ["Cushing-triász", "Parinaud-szindróma", "Wallenberg-szindróma", "Horner-szindróma"], correct: 1, explanation: "A Parinaud-szindróma (dorsalis középagyi szindróma) a középagyi tectum károsodására utal, jellegzetes tünetei a vertikális tekintésbénulás, a konvergencia-retrakciós nystagmus és a fény-közeli disszociáció." },
+                    { question: "Mi az a 'repedt cserép' hang?", options: ["Az agytörzsi stroke egyik hallási tünete.", "A koponya kopogtatási hangjának megváltozása csecsemőknél KNyF esetén.", "A migrénes aura egyik formája.", "A fülzúgás egy típusa."], correct: 1, explanation: "Csecsemőknél, ha a koponyaűri nyomásfokozódás miatt a koponyavarratok szétválnak, a koponya kopogtatása jellegzetes, a repedt cseréphez hasonló hangot adhat." },
+                    { question: "Milyen típusú agyödéma alakul ki leginkább agyi ischaemia következtében?", options: ["Vazogén ödéma", "Intersticiális ödéma", "Citotoxikus ödéma", "Ozmótikus ödéma"], correct: 2, explanation: "Agyi ischaemia esetén az energiahiány miatt az ionpumpák leállnak, a sejtek megduzzadnak (nátrium és víz áramlik beléjük), ami citotoxikus ödémához vezet." },
+                    { question: "Mi a 'fungus cerebri'?", options: ["Gombás agyi fertőzés.", "A transcalvarialis herniatio egy formája, ahol az agyszövet a koponyadefektuson kitüremkedik.", "Egy jóindulatú agydaganat.", "A liquorcsorgás egyik jele."], correct: 1, explanation: "A 'fungus cerebri' (agysérv) a transcalvarialis herniatio elnevezése, amikor a duzzadt agyállomány egy koponyadefektuson (pl. törés, műtéti nyílás) keresztül a koponyán kívülre türemkedik." },
+                    { question: "Hogyan befolyásolja a magas szén-dioxid szint (hypercapnia) az agyi ereket?", options: ["Erős vazokonstrikciót (érszűkületet) okoz.", "Erős vazodilatációt (értágulatot) okoz.", "Nincs hatása rájuk.", "Csökkenti az erek áteresztőképességét."], correct: 1, explanation: "A szén-dioxid egy erős agyi értágító (vazodilatátor). A vér emelkedett CO2 szintje (hypercapnia) az agyi erek kitágulását okozza, ami növeli az agyi véráramlást és a koponyaűri nyomást." }
+                ]
+            },
+            'fejfajas': {
+                title: 'A fejfájás, mint tünet',
+                questions: [
+                    { question: "Mi a különbség az elsődleges és a másodlagos fejfájások között?", options: ["Az elsődleges mindig erősebb.", "Az elsődleges a fejfájás maga a betegség, a másodlagos egy másik állapot tünete.", "Az elsődleges csak a fej egyik, a másodlagos mindkét oldalát érinti.", "Az elsődlegesre nincs, a másodlagosra van gyógyszer."], correct: 1, explanation: "Az elsődleges fejfájások (pl. migrén, tenziós fejfájás) önálló kórképek. A másodlagos fejfájások egy másik, háttérben álló ok (pl. fertőzés, daganat, sérülés) tüneteként jelentkeznek." },
+                    { question: "Melyik a leggyakoribb elsődleges fejfájástípus?", options: ["Cluster fejfájás", "Migrén", "Tenziós típusú fejfájás (TTH)", "Primer szúró fejfájás"], correct: 2, explanation: "A tenziós típusú fejfájás (TTH) a leggyakoribb fejfájásforma a teljes népességben, amelyet a legtöbb ember élete során megtapasztal." },
+                    { question: "Milyen jellegű fájdalom jellemző leginkább a migrénre?", options: ["Tompa, szorító", "Éles, szúró", "Féloldali, lüktető", "Diffúz, nyomó"], correct: 2, explanation: "A migrénes fejfájás klasszikusan közepes vagy súlyos intenzitású, féloldali (unilaterális), lüktető vagy pulzáló jellegű fájdalom." },
+                    { question: "Mi a migrén aura?", options: ["A fejfájás utáni kimerültség.", "A fejfájást megelőző vagy kísérő, átmeneti neurológiai tünetegyüttes.", "A migrén kiváltó oka.", "A fejfájás legerősebb pontja."], correct: 1, explanation: "Az aura egy teljesen reverzibilis neurológiai tünetegyüttes, amely leggyakrabban vizuális (pl. villogó fények, látótérkiesés), de lehet szenzoros vagy nyelvi is, és a fejfájást előzi meg vagy kíséri." },
+                    { question: "Melyik állítás igaz a cluster fejfájásra?", options: ["Enyhe, tompa fájdalommal jár.", "Hónapokig tart egy roham.", "Rendkívül heves, szigorúan egyoldali, szem körüli fájdalom, autonóm tünetekkel.", "Fizikai aktivitásra enyhül."], correct: 2, explanation: "A cluster fejfájás rövid (15-180 perces), de rendkívül kínzó, szigorúan egyoldali, szem körüli fájdalomrohamokkal jár, melyeket azonos oldali vegetatív tünetek (könnyezés, orrfolyás, ptosis) kísérnek." },
+                    { question: "Mit jelent a 'thunderclap' (ütésszerű) fejfájás, és mi a klinikai jelentősége?", options: ["Fokozatosan erősödő fejfájás; nem igényel sürgős ellátást.", "Hirtelen, másodpercek alatt maximális intenzitást elérő fejfájás; sürgősségi kivizsgálást igényel.", "Lüktető fejfájás; a migrén jele.", "Hideg hatására kialakuló fejfájás."], correct: 1, explanation: "Az ütésszerű fejfájás egy 'vörös zászló' tünet. Sürgős kivizsgálást tesz szükségessé, mert potenciálisan életveszélyes állapot, leggyakrabban subarachnoidalis vérzés (SAH) első jele lehet." },
+                    { question: "Melyik NEM a tenziós típusú fejfájás jellemzője?", options: ["Kétoldali lokalizáció", "Nyomó, szorító jelleg", "Enyhe vagy közepes intenzitás", "Fizikai aktivitásra való rosszabbodás"], correct: 3, explanation: "A tenziós típusú fejfájást a migrénnel szemben az jellemzi, hogy a rutin fizikai aktivitás (pl. séta) általában nem rontja, sőt, néha enyhítheti." },
+                    { question: "Mi a gyógyszer-túlfogyasztásos fejfájás (MOH) lényege?", options: ["Allergiás reakció egy fájdalomcsillapítóra.", "Egyetlen nagy dózisú fájdalomcsillapító bevétele utáni fejfájás.", "Az akut fejfájás-csillapítók rendszeres, túlzott használata miatti krónikussá váló fejfájás.", "A gyógyszerek hatástalansága."], correct: 2, explanation: "Az MOH egy másodlagos fejfájás, ami akkor alakul ki, ha egy primer fejfájásos beteg túl gyakran (pl. >10-15 nap/hónap) használ akut fájdalomcsillapítókat, ami a fejfájás krónikussá válásához vezet." },
+                    { question: "A bakteriális meningitis okozta fejfájást milyen tünetek kísérik leggyakrabban?", options: ["Féloldali végtaggyengeség", "Látótérkiesés", "Láz és tarkókötöttség", "Izomfájdalom és hasmenés"], correct: 2, explanation: "A bakteriális meningitis klasszikus tünet-triásza a fejfájás, a láz és a tarkókötöttség (meningeális izgalmi jel). Gyakran társul tudatzavarral és fotofóbiával is." },
+                    { question: "Mi a post-duralis punkciós fejfájás jellegzetessége?", options: ["Fekvő helyzetben a legerősebb.", "Mindig azonnal a punkció után jelentkezik.", "Ortosztatikus jellegű: felállásra rosszabbodik, fekvésre enyhül.", "Csak a tarkótájékon érezhető."], correct: 2, explanation: "A lumbálpunkció utáni fejfájás legfontosabb jellemzője az ortosztatikus jelleg. A függőleges testhelyzetben a liquornyomás tovább csökken a szivárgás miatt, ami fokozza a fájdalmat, míg fekvéskor a nyomásviszonyok normalizálódnak." },
+                    { question: "A hemicrania continua melyik gyógyszerre mutat drámai terápiás választ?", options: ["Paracetamol", "Ibuprofen", "Sumatriptan", "Indometacin"], correct: 3, explanation: "A hemicrania continua (és a paroxizmális hemikránia) diagnózisának kulcsa és egyben terápiája is az indometacinra adott abszolút, teljes terápiás válasz." },
+                    { question: "Milyen típusú fejfájás jellemző a temporalis arteritisre (óriássejtes arteritis)?", options: ["Rövid, szúró fájdalom", "Új keletű, halántéktáji, perzisztáló fájdalom, gyakran rágási fájdalommal", "Hirtelen, ütésszerű fájdalom", "Reggeli, hányással járó fájdalom"], correct: 1, explanation: "Az óriássejtes arteritis egy 50 év felett jelentkező érgyulladás. Jellemzője az új keletű, általában halántéktáji fejfájás, a fejbőr érzékenysége, és gyakran a rágóizmok fájdalma (rágási claudicatio)." },
+                    { question: "A migrénes roham melyik fázisa előzheti meg órákkal-napokkal a fejfájást?", options: ["Aura fázis", "Posztdromális fázis", "Prodromális fázis", "Iktális fázis"], correct: 2, explanation: "A prodromális fázis a fejfájást megelőző időszak, melyet olyan tünetek jellemezhetnek, mint a hangulatváltozások, étvágyváltozás vagy a nyakmerevség." },
+                    { question: "Milyen jellegű fejfájást okoz a koffeinmegvonás?", options: ["Éles, nyilalló, egyoldali", "Kétoldali, lüktető vagy nyomó jellegű", "Csak a tarkótájékra lokalizálódó", "Mindig hányingerrel jár"], correct: 1, explanation: "A koffeinmegvonásos fejfájás tipikusan kétoldali, lüktető vagy nyomó jellegű, és a koffeinfogyasztás elhagyása után 24 órán belül jelentkezik." },
+                    { question: "A primer terhelési fejfájást mi váltja ki?", options: ["Stressz", "Bizonyos ételek", "Bármilyen típusú fizikai terhelés", "Alváshiány"], correct: 2, explanation: "A primer terhelési fejfájás definíció szerint fizikai terhelés során vagy azt követően alakul ki. Fontos kizárni a másodlagos, súlyosabb okokat." },
+                    { question: "Melyik állítás igaz a krónikus migrénre?", options: ["A fejfájás legalább 15 napon jelentkezik havonta, több mint 3 hónapon át.", "A rohamok mindig aurával járnak.", "Könnyebben kezelhető, mint az epizodikus migrén.", "Csak 60 év felett fordul elő."], correct: 0, explanation: "A krónikus migrén diagnózisának kritériuma, hogy a betegnek legalább 3 hónapon keresztül, havonta 15 vagy több napon legyen fejfájása, melyek közül legalább 8 napon migrénes jellegű a fejfájás." },
+                    { question: "Melyik NEM tipikus autonóm tünete a cluster fejfájásnak?", options: ["Könnyezés", "Orrdugulás", "Pupillatágulat (mydriasis)", "Szemhéjödéma"], correct: 2, explanation: "A cluster fejfájás autonóm tünetei a paraszimpatikus túlműködés (könnyezés, orrfolyás) és a szimpatikus alulműködés (miosis - pupillaszűkület, ptosis - szemhéjcsüngés) jelei. A pupillatágulat nem jellemző." },
+                    { question: "Mi az a 'status migrainosus'?", options: ["Nagyon enyhe migrénes roham.", "Migrén, ami csak 1 óráig tart.", "Több mint 72 órán át tartó, súlyos, legyengítő migrénes roham.", "A migrén és a tenziós fejfájás együttes jelenléte."], correct: 2, explanation: "A status migrainosus egy migrénes komplikáció, egy olyan súlyos roham, amely kezeletlenül vagy sikertelen kezelés mellett több mint 72 órán át fennáll." },
+                    { question: "Melyik fejfájás típusra jellemző a nyugtalanság, agitáltság a roham alatt?", options: ["Tenziós típusú fejfájás", "Migrén aura nélkül", "Hypnicus fejfájás", "Cluster fejfájás"], correct: 3, explanation: "A cluster fejfájásban szenvedő betegek a kínzó fájdalom miatt jellemzően motorosan nyugtalanok, nem tudnak egy helyben maradni, járkálnak, dörzsölik a fejüket. Ez éles ellentétben áll a migrénes betegekkel, akik a nyugalmat keresik." },
+                    { question: "Az 'új mindennapos perzisztáló fejfájás' (NDPH) diagnózisához mi a legfontosabb időbeli kritérium?", options: ["A fejfájás fokozatosan alakul ki évek alatt.", "A fejfájás egyértelműen és jól emlékezhetően kezdődik, és a kezdetétől napi szinten fennáll.", "A fejfájás csak hétvégente jelentkezik.", "A fejfájás csak reggelente tart egy órán át."], correct: 1, explanation: "Az NDPH kulcsfontosságú jellemzője a 'de novo' kezdet: a beteg pontosan emlékszik a napra, amikor a fejfájása elkezdődött, és az onnantól kezdve folyamatosan, napi szinten fennáll." }
+                ]
+            },
+            'demencia': {
+                title: 'Demenciák tünettana',
+                questions: [
+                    { question: "Melyik a leggyakoribb demenciatípus?", options: ["Vaszkuláris demencia", "Lewy-testes demencia", "Frontotemporális demencia", "Alzheimer-kór"], correct: 3, explanation: "Az Alzheimer-kór a demenciák messze leggyakoribb formája, az összes eset körülbelül 60-70%-áért felelős." },
+                    { question: "Mi az Alzheimer-kór legkorábbi és legdominánsabb kognitív tünete?", options: ["Viselkedési zavarok", "Járászavar", "Epizodikus memóriazavar", "Vizuális hallucinációk"], correct: 2, explanation: "Az Alzheimer-kór legkorábbi és legjellegzetesebb tünete a rövid távú, epizodikus memória zavara, azaz az új információk és a közelmúltbeli események megjegyzésének nehézsége." },
+                    { question: "Melyik demencia típusra jellemző a 'lépcsőzetes' hanyatlás és a korai exekutív diszfunkció?", options: ["Alzheimer-kór", "Vaszkuláris demencia", "Lewy-testes demencia", "Frontotemporális demencia"], correct: 1, explanation: "A vaszkuláris demenciára jellemző a 'lépcsőzetes' lefolyás, ahol a kognitív állapot hirtelen romlik (egy-egy stroke után), majd egy ideig stabil marad. Gyakori a tervezés és problémamegoldás (exekutív funkciók) korai zavara." },
+                    { question: "Melyik tünetegyüttes a legjellemzőbb a Lewy-testes demenciára?", options: ["Súlyos afázia és apraxia.", "Fluktuáló kogníció, vizuális hallucinációk és parkinzonizmus.", "Csak memóriazavar.", "Korai, súlyos személyiségváltozás."], correct: 1, explanation: "A Lewy-testes demencia három központi diagnosztikus tünete a kognitív funkciók és az éberség jelentős ingadozása, a részletes, jól formált vizuális hallucinációk és a Parkinson-kórhoz hasonló motoros tünetek." },
+                    { question: "Melyik demencia típusra jellemző a korai személyiség- és viselkedésváltozás (pl. gátlástalanság, apátia)?", options: ["Alzheimer-kór", "Vaszkuláris demencia", "Frontotemporális demencia (viselkedési variáns)", "Lewy-testes demencia"], correct: 2, explanation: "A frontotemporális demencia viselkedési variánsában (bvFTD) a betegség korai és domináns tünetei a személyiség, a szociális viselkedés és az érzelmi kontroll megváltozása, mint az apátia vagy a diszinhibíció." },
+                    { question: "Mi az a BPSD?", options: ["A demencia egy ritka típusa.", "Egy agyi képalkotó eljárás.", "A demencia viselkedési és pszichológiai tüneteinek összefoglaló neve.", "Egy kognitív teszt."], correct: 2, explanation: "A BPSD (Behavioral and Psychological Symptoms of Dementia) a demenciához társuló nem-kognitív tüneteket jelöli, mint az agitáció, agresszió, apátia, depresszió, téveszmék és hallucinációk." },
+                    { question: "Melyik állítás NEM igaz a demenciára?", options: ["Az öregedés normális, elkerülhetetlen velejárója.", "A kognitív funkciók hanyatlásával jár.", "Befolyásolja a mindennapi életvitelt.", "Számos különböző betegség okozhatja."], correct: 0, explanation: "Bár a kockázata az életkorral nő, a demencia nem a normális öregedés része. Ez egy kóros állapot, amit specifikus agyi betegségek okoznak." },
+                    { question: "Mi az anómia?", options: ["Írászavar", "Olvasászavar", "Szótalálási nehézség", "Számolási zavar"], correct: 2, explanation: "Az anómia a szótalálás, szómegnevezés zavara, ami a demenciák (és afáziák) egyik leggyakoribb nyelvi tünete. A beteg nehezen találja a megfelelő szavakat." },
+                    { question: "Melyik demencia típusra jellemző leginkább a REM-alvási viselkedészavar (RBD)?", options: ["Alzheimer-kór", "Vaszkuláris demencia", "Frontotemporális demencia", "Lewy-testes demencia"], correct: 3, explanation: "Az RBD, amikor a beteg 'eljátssza' az álmait, az alfa-szinukleinopátiák (mint a Lewy-testes demencia és a Parkinson-kór) egyik legjellegzetesebb, gyakran korai tünete." },
+                    { question: "Milyen típusú memóriazavar a legjellemzőbb a korai Alzheimer-kórban?", options: ["Hosszú távú memória zavara", "Procedurális memória zavara", "Rövid távú (epizodikus) memória zavara", "Szemantikus memória zavara"], correct: 2, explanation: "Az Alzheimer-kór jellegzetesen a rövid távú, epizodikus memória zavarával kezdődik. A beteg nehezen jegyzi meg a közelmúlt eseményeit, míg a régebbi emlékek kezdetben jobban megőrzöttek." },
+                    { question: "Mit jelent az apátia a demencia kontextusában?", options: ["Fokozott szorongás", "Érdeklődés elvesztése, motivációhiány, közönyösség", "Túlzott vidámság", "Agresszív viselkedés"], correct: 1, explanation: "Az apátia a motiváció és a kezdeményezőkészség hiányát, az érzelmi reaktivitás csökkenését és az érdeklődés elvesztését jelenti. Ez a demencia egyik leggyakoribb viselkedési tünete." },
+                    { question: "Melyik állítás igaz a Primer Progresszív Afáziára (PPA)?", options: ["Ez egy gyorsan javuló állapot.", "A demencia egy formája, ahol a nyelvi képességek progresszív elvesztése a fő tünet.", "Mindig a memóriazavar a legelső tünete.", "Csak az olvasási képességet érinti."], correct: 1, explanation: "A PPA a frontotemporális demencia egyik alcsoportja, ahol a betegség a nyelvi funkciók fokozatos és domináns hanyatlásával kezdődik, míg más kognitív képességek kezdetben viszonylag megkíméltek." },
+                    { question: "Mi az enyhe kognitív zavar (MCI)?", options: ["A demencia egy súlyos formája.", "Egy átmeneti állapot, ami mindig teljesen meggyógyul.", "A normál öregedés és a demencia közötti átmeneti állapot, ami növeli a demencia kockázatát.", "A delírium egy másik neve."], correct: 2, explanation: "Az MCI egy olyan állapot, ahol a kognitív funkciók (gyakran a memória) enyhén, de mérhetően hanyatlanak, de ez még nem befolyásolja jelentősen a mindennapi önállóságot. Az MCI növeli a demencia kialakulásának kockázatát." },
+                    { question: "Milyen viselkedészavar jellemző a frontotemporális demencia viselkedési variánsára (bvFTD)?", options: ["Súlyos memóriavesztés", "Kényszeres, repetitív viselkedés és gátlástalanság", "Vizuális hallucinációk", "Járászavar"], correct: 1, explanation: "A bvFTD-re a kényszeres, sztereotip viselkedések, valamint a szociális gátlások elvesztése, az impulzív, tapintatlan viselkedés a legjellemzőbb." },
+                    { question: "Miért fontos a demencia elkülönítése a delíriumtól?", options: ["Mert a delírium kevésbé súlyos.", "Mert a delírium gyakran reverzibilis, ha a kiváltó okot kezelik, míg a demencia progresszív.", "Mert a demencia fertőző.", "Mert a delírium csak fiatalokat érint."], correct: 1, explanation: "A két állapot elkülönítése kritikus, mert a delírium egy akut, gyakran visszafordítható állapot, ami sürgős orvosi beavatkozást igényel az alap ok kezelésére, míg a demencia egy krónikus, progresszív betegség." },
+                    { question: "Melyik demencia típushoz társulhatnak leginkább parkinzonizmus tünetei?", options: ["Alzheimer-kór", "Vaszkuláris demencia", "Lewy-testes demencia", "Frontotemporális demencia"], correct: 2, explanation: "A parkinzonizmus (izommerevség, mozgáslassulás, tremor) a Lewy-testes demencia egyik központi tünete." },
+                    { question: "A demencia súlyos stádiumában milyen fizikai tünetek a legjellemzőbbek?", options: ["Fokozott sportteljesítmény", "Járásképtelenség, nyelési nehézségek, inkontinencia", "Javuló látás és hallás", "Nincs fizikai tünet"], correct: 1, explanation: "A demencia végső stádiumában a beteg teljesen elveszíti önállóságát, súlyos mozgási (járásképtelenség), nyelési (diszfágia) és kontrollfunkciók (inkontinencia) zavara alakul ki." },
+                    { question: "A 'lépcsőzetes hanyatlás' mit jelent a vaszkuláris demencia kontextusában?", options: ["A beteg nehezen megy fel a lépcsőn.", "A beteg állapota egyenletesen, lassan romlik.", "A kognitív funkciók hirtelen romlanak (egy-egy stroke után), majd egy ideig stabilak maradnak.", "A beteg csak lépésről-lépésre tud gondolkodni."], correct: 2, explanation: "A 'lépcsőzetes' lefolyás azt jelenti, hogy a kognitív hanyatlás nem egyenletes, hanem hirtelen rosszabbodási periódusokból (amelyek egy-egy újabb vaszkuláris eseményhez köthetők) és azt követő stabilabb időszakokból áll." },
+                    { question: "Melyik állítás igaz a demencia és a depresszió kapcsolatára?", options: ["A depresszió soha nem jár együtt demenciával.", "A depresszió tünetei (pl. apátia, koncentrációzavar) utánozhatják a demenciát (pszeudodemencia).", "A demens betegek soha nem depressziósak.", "A demencia gyógyítható antidepresszánsokkal."], correct: 1, explanation: "A súlyos depresszió (különösen időskorban) okozhat a demenciához hasonló kognitív tüneteket (pszeudodemencia), ami fontos differenciáldiagnosztikai kihívást jelent. Emellett a depresszió a demencia gyakori kísérő tünete is." },
+                    { question: "Miért fontos a korai diagnózis a demencia esetében?", options: ["Mert a korai stádiumú demencia teljesen gyógyítható.", "Mert a korai kezelés lassíthatja a betegség progresszióját és javíthatja az életminőséget.", "Mert a diagnózis után a beteg azonnal intézetbe kerül.", "Nincs jelentősége, a kimenetel ugyanaz."], correct: 1, explanation: "Bár a legtöbb demencia nem gyógyítható, a korai diagnózis lehetővé teszi a megfelelő kezelések és támogató stratégiák időben történő elindítását, ami lassíthatja a hanyatlást, kezeli a tüneteket és segít a betegnek és a családnak a jövő tervezésében." }
+                ]
+            },
+            'amnezia': {
+                title: 'Emlékezetzavarok és amnesztikus szindrómák',
+                questions: [
+                    { question: "Mi az anterográd amnézia?", options: ["A sérülés előtti emlékek elvesztése.", "Az új emlékek képzésének képtelensége a sérülés után.", "Csak a rövid távú memória zavara.", "A motoros készségek elfelejtése."], correct: 1, explanation: "Az anterográd amnézia az új információk elsajátításának és új, tartós emléknyomok képzésének képtelenségét jelenti a kiváltó eseményt (pl. agysérülés) követően." },
+                    { question: "Melyik agyi struktúra kétoldali sérülése okozza leggyakrabban a súlyos anterográd amnéziát?", options: ["Kisagy", "Frontális lebeny", "Mediális temporális lebeny (benne a hippokampusz)", "Occipitális lebeny"], correct: 2, explanation: "A hippokampusz és a környező mediális temporális lebeny struktúrái kritikusak az új deklaratív emlékek kódolásában és konszolidációjában, ezért kétoldali károsodásuk súlyos anterográd amnéziához vezet." },
+                    { question: "Mi a Korsakoff-szindróma leggyakoribb oka?", options: ["Traumás agysérülés", "Herpes encephalitis", "Tiamin (B1-vitamin) hiánya, leggyakrabban krónikus alkoholizmus miatt", "Agyi daganat"], correct: 2, explanation: "A Korsakoff-szindrómát a B1-vitamin súlyos hiánya okozza, ami leggyakrabban krónikus alkoholizmus következtében alakul ki az elégtelen táplálkozás és a felszívódási zavarok miatt." },
+                    { question: "Mi a konfabuláció?", options: ["Szándékos hazudozás.", "Az emlékezeti hézagok kitöltése valótlan, de a beteg számára hihető történetekkel.", "A szavak jelentésének összekeverése.", "Ismétlődő, kényszeres gondolatok."], correct: 1, explanation: "A konfabuláció nem szándékos hazugság, hanem a sérült memóriarendszer hibás rekonstrukciós kísérlete, ahol a beteg az emlékezeti hézagokat valószínűnek tűnő, de valótlan történetekkel tölti ki. Jellemző a Korsakoff-szindrómára." },
+                    { question: "Mi a Tranziens Globális Amnézia (TGA) legfőbb jellemzője?", options: ["Hosszú, évekig tartó emlékezetkiesés.", "Hirtelen kezdetű, átmeneti, súlyos anterográd amnézia, ismétlődő kérdezgetéssel.", "Csak a személyes emlékek elvesztése.", "Mindig epilepsziás roham okozza."], correct: 1, explanation: "A TGA egy hirtelen kialakuló, de néhány órán belül teljesen oldódó súlyos anterográd amnézia, amely alatt a beteg tudata tiszta, de zavart és ismételten ugyanazokat a tájékozódó kérdéseket teszi fel." },
+                    { question: "Melyik állítás igaz a retrográd amnéziára?", options: ["A beteg nem tud új dolgokat megtanulni.", "A beteg a sérülést megelőző eseményekre nem emlékszik.", "Mindig a teljes múltat érinti.", "Csak pszichés trauma okozhatja."], correct: 1, explanation: "A retrográd amnézia a kiváltó esemény (pl. agysérülés) előtti emlékek, információk felidézésének zavarát jelenti." },
+                    { question: "Mi a Ribot-törvény (temporális grádiens) a retrográd amnéziában?", options: ["A frissebb emlékek jobban megmaradnak, mint a régiek.", "A régebbi, jobban rögzült emlékek kevésbé sérülékenyek, mint a frissebbek.", "Minden emlék egyformán sérül.", "Csak az érzelmi töltetű emlékek maradnak meg."], correct: 1, explanation: "A Ribot-törvény szerint retrográd amnéziában a károsodás előtti legutóbbi emlékek vesznek el a legsúlyosabban, míg a régebbi, jobban konszolidált emlékek viszonylag megkíméltek maradnak." },
+                    { question: "Melyik agyi pályarendszer sérülése okozhat súlyos amnéziát a hippokampusz és a diencephalon közötti kapcsolat megszakítása miatt?", options: ["Pyramispálya", "Fasciculus arcuatus", "Fornix", "Hátsó köteg"], correct: 2, explanation: "A fornix egy kulcsfontosságú fehérállományi köteg, amely a hippokampuszt köti össze a diencephalon memóriastruktúráival (pl. mammilláris testek). Sérülése megszakítja a Papez-kört és súlyos anterográd amnéziát okozhat." },
+                    { question: "A híres beteg, H.M. esete mit bizonyított a memóriával kapcsolatban?", options: ["A memória egy egységes, oszthatatlan funkció.", "A memória különböző alrendszerekből áll (pl. rövid- vs. hosszú távú, explicit vs. implicit).", "A memória a frontális lebenyben található.", "Az emlékek soha nem vesznek el, csak elfelejtjük őket."], correct: 1, explanation: "H.M. esete, aki kétoldali hippokampusz-eltávolítás után súlyos anterográd amnéziát szenvedett, de motoros tanulási képessége megmaradt, bizonyította, hogy a memória nem egységes, és a deklaratív (explicit) és procedurális (implicit) memória anatómiailag és funkcionálisan is elkülönül." },
+                    { question: "Melyik gyógyszercsoport okozhat mellékhatásként átmeneti anterográd amnéziát?", options: ["Antibiotikumok", "Nem-szteroid gyulladáscsökkentők", "Benzodiazepinek", "Vitaminok"], correct: 2, explanation: "A benzodiazepinek (egyfajta nyugtatók/altatók) közismert mellékhatása az anterográd amnézia, azaz a gyógyszer bevétele utáni időszakra vonatkozó emlékezetkiesés." },
+                    { question: "Milyen memóriazavar jellemző a Wernicke-Korsakoff szindrómára?", options: ["Csak retrográd amnézia", "Súlyos anterográd és változó mértékű retrográd amnézia konfabulációval", "Csak a rövid távú memória zavara", "Csak a procedurális memória zavara"], correct: 1, explanation: "A Korsakoff-szindróma klasszikus tünetegyüttese a súlyos anterográd amnézia, a kiterjedt retrográd amnézia, és a jellegzetes konfabuláció (emlékezeti hézagok kitöltése)." },
+                    { question: "Melyik állítás NEM igaz a Tranziens Globális Amnéziára (TGA)?", options: ["Hirtelen kezdődik és általában 24 órán belül teljesen elmúlik.", "Gyakran ismétlődik, és a demencia előjele.", "A beteg az epizód alatt ismételgetve kérdezget.", "Kiválthatja erős fizikai vagy érzelmi stressz."], correct: 1, explanation: "A TGA egy jóindulatú állapot, ami általában nem ismétlődik (az ismétlődés kockázata alacsony), és nem növeli a stroke vagy demencia kockázatát." },
+                    { question: "Az 'explicit (deklaratív) memória' mire vonatkozik?", options: ["Motoros készségekre és szokásokra.", "Tudatosan felidézhető tényekre és eseményekre.", "Érzelmi válaszokra.", "Reflexekre."], correct: 1, explanation: "Az explicit vagy deklaratív memória a tudatosan hozzáférhető emlékeket foglalja magába, amely tovább osztható szemantikus (tények, tudás) és epizodikus (személyes élmények) memóriára." },
+                    { question: "Melyik neuropszichológiai teszt méri a mindennapi életben előforduló emlékezeti problémákat?", options: ["Stroop teszt", "Wisconsin Kártyaszortírozási Teszt", "Rivermead Viselkedéses Memória Teszt (RVMT)", "Torony tesztek"], correct: 2, explanation: "Az RVMT egy ökológiailag valid teszt, amely a mindennapi élethelyzetekhez hasonló feladatokon keresztül (pl. név-arc tanulás, üzenet átadása) méri a memória működését." },
+                    { question: "Melyik agyterület sérülése okozhat egyszerre amnéziát és afáziát?", options: ["Jobb oldali hippokampusz", "Bal oldali temporális lebeny", "Kisagy", "Agytörzs"], correct: 1, explanation: "A bal temporális lebeny kritikus szerepet játszik mind a nyelvi funkciókban (Wernicke-terület), mind a verbális memória folyamataiban (hippokampusz), így sérülése egyszerre okozhat afáziát és amnéziát." },
+                    { question: "Milyen típusú memória marad általában ép anterográd amnéziában?", options: ["Epizodikus memória", "Szemantikus memória", "Implicit (procedurális) memória", "Rövid távú memória"], correct: 2, explanation: "Súlyos anterográd amnéziában (mint H.M. esetében) az implicit memória, azaz a készségek és szokások (pl. motoros készségek, mint a biciklizés vagy tükörírás) tanulása gyakran megőrzött marad." },
+                    { question: "A Korsakoff-szindrómát okozó tiaminhiány mely agyi struktúrákat károsítja leginkább?", options: ["Agykéreg", "Kisagy", "Diencephalikus struktúrák (mammilláris testek, thalamus)", "Gerincvelő"], correct: 2, explanation: "A tiaminhiány különösen a diencephalon struktúráit, mint a mammilláris testeket és a thalamus magjait károsítja, amelyek a Papez-kör részeként elengedhetetlenek a memóriához." },
+                    { question: "Melyik állítás igaz a fornix lézióra?", options: ["Soha nem okoz amnéziát.", "Súlyos anterográd amnéziát okozhat a hippokampális kör megszakítása miatt.", "Mindig kétoldali bénulással jár.", "Csak a vizuális memóriát érinti."], correct: 1, explanation: "Egyoldali, de stratégiailag fontos helyen lévő lézió, mint a fornix sérülése is súlyos anterográd amnéziát okozhat, mivel megszakítja a hippokampusz és a diencephalon közötti kritikus összeköttetést." },
+                    { question: "Mit mér a Mini Mentál Teszt (MMSE) emlékezettel kapcsolatos része?", options: ["Csak a hosszú távú memóriát.", "A megjegyző és felidéző emlékezetet (3 szó megjegyzése és későbbi felidézése).", "Az arcfelismerést.", "A procedurális tanulást."], correct: 1, explanation: "Az MMSE a rövid távú verbális memóriát teszteli azáltal, hogy a betegnek meg kell jegyeznie három szót, majd néhány perccel később, egy figyelemelterelő feladat után fel kell idéznie azokat." },
+                    { question: "Mi az 'Errorless Learning' (Hibátlan Tanulás) rehabilitációs módszer lényege?", options: ["A betegnek addig kell próbálkoznia, amíg hibátlanul meg nem old egy feladatot.", "A tanulási folyamat során minimalizálják a hibázás lehetőségét, a helyes válasz azonnali megadásával.", "Csak hibátlan memóriájú betegeknél alkalmazható.", "A betegnek a saját hibáiból kell tanulnia."], correct: 1, explanation: "A Hibátlan Tanulás egy olyan technika, ami a hibák elkerülésére törekszik, mivel súlyos amnéziában a hibás válaszok is rögzülhetnek. A módszer a megmaradt implicit tanulási képességekre építve segít új információk elsajátításában." }
+                ]
+            }
+        };
+
+        const app = {
+            // DOM Elements
+            topicSelectionScreen: document.getElementById('topic-selection'),
+            quizInterfaceScreen: document.getElementById('quiz-interface'),
+            finalScoreScreen: document.getElementById('final-score-screen'),
+            
+            topicContainer: document.querySelector('#topic-selection .grid'),
+            quizTitle: document.getElementById('quiz-title'),
+            scoreDisplay: document.getElementById('score'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationText: document.getElementById('explanation-text'),
+            
+            backToTopicsBtn: document.getElementById('back-to-topics'),
+            nextQuestionBtn: document.getElementById('next-question'),
+            
+            finalTopicTitle: document.getElementById('final-topic-title'),
+            finalScoreDisplay: document.getElementById('final-score'),
+            restartQuizBtn: document.getElementById('restart-quiz'),
+            changeTopicBtn: document.getElementById('change-topic'),
+
+            // State
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            questions: [],
+
+            init() {
+                this.renderTopicSelection();
+                this.addEventListeners();
+            },
+
+            addEventListeners() {
+                this.backToTopicsBtn.addEventListener('click', () => this.showScreen('topics'));
+                this.nextQuestionBtn.addEventListener('click', () => this.nextQuestion());
+                this.restartQuizBtn.addEventListener('click', () => this.startQuiz(this.currentTopic));
+                this.changeTopicBtn.addEventListener('click', () => this.showScreen('topics'));
+            },
+
+            renderTopicSelection() {
+                this.topicContainer.innerHTML = '';
+                Object.keys(quizData).forEach(key => {
+                    const topic = quizData[key];
+                    const button = document.createElement('button');
+                    button.className = "p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 text-left";
+                    button.innerHTML = `
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${topic.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">${topic.questions.length} kérdés</p>
+                    `;
+                    button.addEventListener('click', () => this.startQuiz(key));
+                    this.topicContainer.appendChild(button);
+                });
+            },
+
+            startQuiz(topicKey) {
+                this.currentTopic = topicKey;
+                this.questions = this.shuffleArray([...quizData[topicKey].questions]);
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.quizTitle.textContent = quizData[topicKey].title;
+                this.updateScore();
+                this.displayQuestion();
+                this.showScreen('quiz');
+            },
+
+            displayQuestion() {
+                this.explanationContainer.classList.add('hidden');
+                this.nextQuestionBtn.classList.add('disabled');
+                
+                if (this.currentQuestionIndex >= this.questions.length) {
+                    this.showFinalScore();
+                    return;
+                }
+
+                const question = this.questions[this.currentQuestionIndex];
+                this.questionText.textContent = question.question;
+                this.optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = "w-full text-left p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent quiz-option";
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.addEventListener('click', (e) => this.selectAnswer(e));
+                    this.optionsContainer.appendChild(button);
+                });
+
+                this.updateProgressBar();
+            },
+
+            selectAnswer(e) {
+                const selectedButton = e.target;
+                const selectedIndex = parseInt(selectedButton.dataset.index);
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedIndex === question.correct;
+
+                if (isCorrect) {
+                    this.score++;
+                    selectedButton.classList.add('correct');
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    // Highlight the correct answer
+                    const correctButton = this.optionsContainer.querySelector(`[data-index='${question.correct}']`);
+                    correctButton.classList.add('correct');
+                }
+
+                this.explanationText.textContent = question.explanation;
+                this.explanationContainer.classList.remove('hidden');
+                
+                Array.from(this.optionsContainer.children).forEach(btn => btn.classList.add('disabled'));
+                
+                this.nextQuestionBtn.classList.remove('disabled');
+                this.updateScore();
+            },
+
+            nextQuestion() {
+                this.currentQuestionIndex++;
+                this.displayQuestion();
+            },
+
+            updateScore() {
+                this.scoreDisplay.textContent = `Pontszám: ${this.score} / ${this.questions.length}`;
+            },
+
+            updateProgressBar() {
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            },
+
+            showFinalScore() {
+                this.finalTopicTitle.textContent = quizData[this.currentTopic].title;
+                this.finalScoreDisplay.textContent = `${this.score} / ${this.questions.length}`;
+                this.showScreen('final');
+            },
+
+            showScreen(screen) {
+                this.topicSelectionScreen.classList.add('hidden');
+                this.quizInterfaceScreen.classList.add('hidden');
+                this.finalScoreScreen.classList.add('hidden');
+
+                if (screen === 'topics') {
+                    this.topicSelectionScreen.classList.remove('hidden');
+                } else if (screen === 'quiz') {
+                    this.quizInterfaceScreen.classList.remove('hidden');
+                } else if (screen === 'final') {
+                    this.finalScoreScreen.classList.remove('hidden');
+                }
+            },
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        };
+
+        app.init();
+    </script>
+
+</body>
+</html>

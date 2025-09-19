@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .quiz-option:hover {
+            background-color: #f0f9ff; /* light sky blue */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* light green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        /* Javított CSS a magyarázat animációjához */
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+            transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out, padding-bottom 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+        }
+        .explanation.show {
+            max-height: 500px; /* Elegendő magasság a tartalomhoz */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            margin-top: 1.5rem; /* Hozzáadva a jobb térközért */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-slate-900 mb-2">Interaktív Neurológiai Teszt</h1>
+            <p class="text-center text-slate-500 mb-8">Válasszon egy témakört a teszt indításához.</p>
+            <div id="topic-list" class="space-y-4">
+                <!-- Topics will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="quiz-title" class="text-xl font-bold text-slate-900">Témakör</h2>
+                <span id="question-counter" class="text-sm font-medium text-slate-500 bg-slate-200 px-3 py-1 rounded-full"></span>
+            </div>
+            
+            <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+
+            <div id="question-container" class="mb-6">
+                <p id="question-text" class="text-lg font-semibold leading-relaxed mb-6"></p>
+                <div id="options-container" class="space-y-3">
+                    <!-- Options will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div id="explanation-container" class="explanation bg-slate-50 border-l-4 border-slate-300 p-4 rounded-r-lg">
+                <h4 class="font-bold text-slate-800 mb-2">Magyarázat</h4>
+                <p id="explanation-text" class="text-slate-700"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-question-btn" class="hidden bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed">Következő</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h1>
+            <p id="score-text" class="text-xl text-slate-600 mb-6"></p>
+            <div class="w-48 h-48 mx-auto mb-8 flex items-center justify-center rounded-full" id="score-circle">
+                 <span id="score-percentage" class="text-4xl font-bold text-slate-800"></span>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button id="restart-quiz-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Újra a témakörben</button>
+                <button id="back-to-topics-btn" class="bg-slate-200 text-slate-800 font-semibold py-3 px-6 rounded-lg hover:bg-slate-300 transition-colors">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Idegrendszeri károsodást okozó vérképzőszervi betegségek",
+                questions: [
+                    {
+                        question: "Melyik a legspecifikusabb neurológiai szindróma, amely B12-vitamin-hiányos anémiához társul?",
+                        options: ["Myelosis funicularis", "Guillain-Barré szindróma", "Limbikus enkefalitisz", "Stroke"],
+                        answer: "Myelosis funicularis",
+                        explanation: "A B12-vitamin hiánya a mielinhüvely károsodásához vezet, ami a gerincvelő hátsó és oldalsó kötegeinek degenerációját (myelosis funicularis) okozza, mélyérzészavarral, izomgyengeséggel és kóros reflexekkel."
+                    },
+                    {
+                        question: "Mi a sarlósejtes anémia elsődleges neurológiai szövődménye?",
+                        options: ["Ischaemiás stroke", "Intrakraniális vérzés", "Perifériás neuropathia", "Epilepsziás rohamok"],
+                        answer: "Ischaemiás stroke",
+                        explanation: "A sarló alakú vörösvértestek elzárják az agy kis ereit, ami agyi ischaemiát és stroke-ot okoz. Ez a betegség egyik legsúlyosabb szövődménye."
+                    },
+                    {
+                        question: "Melyik hematológiai malignitás esetében a leggyakoribb a központi idegrendszer (KIR) direkt infiltrációja?",
+                        options: ["Akut limfoid leukémia (ALL)", "Hodgkin-limfóma", "Myeloma multiplex", "Krónikus mieloid leukémia (CML)"],
+                        answer: "Akut limfoid leukémia (ALL)",
+                        explanation: "Az ALL esetében a leukémiás sejtek gyakran infiltrálják a központi idegrendszert, ami fejfájást, hányást és agyidegtüneteket okozhat."
+                    },
+                    {
+                        question: "Mi a Hodgkin-limfómához társuló paraneopláziás szindrómák (pl. szenzoros neuropátia) patomechanizmusa?",
+                        options: ["A daganatra adott kóros, távoli hatású immunreakció", "A daganatsejtek direkt idegrendszeri infiltrációja", "A vér hiperviszkozitása", "Véralvadási zavarok"],
+                        answer: "A daganatra adott kóros, távoli hatású immunreakció",
+                        explanation: "A Hodgkin-kórral társuló paraneopláziás szindrómákat nem a daganat közvetlen terjedése, hanem a tumor ellen indított, de az idegrendszer saját struktúráit is megtámadó immunválasz okozza."
+                    },
+                    {
+                        question: "Melyik lehet a myeloma multiplex gyakori kezdeti neurológiai manifesztációja?",
+                        options: ["Polyneuropathia", "Heves fejfájás", "Görcsroham", "Akut pszichózis"],
+                        answer: "Polyneuropathia",
+                        explanation: "A myeloma multiplex első megjelenése lehet polyneuropathia, különösen a POEMS szindróma részeként, melyet a paraproteinek okozhatnak."
+                    },
+                    {
+                        question: "Mi a thrombocytopenia (alacsony vérlemezkeszám) legrettegettebb neurológiai szövődménye?",
+                        options: ["Intrakraniális vérzés", "Ischaemiás stroke", "Vénás sinus trombózis", "Enkefalopátia"],
+                        answer: "Intrakraniális vérzés",
+                        explanation: "Az alacsony vérlemezkeszám miatt a véralvadás elégtelenné válik, ami fokozott vérzési hajlamhoz és potenciálisan halálos kimenetelű agyvérzéshez vezethet."
+                    },
+                    {
+                        question: "A Polycythemia Vera (PV) milyen neurológiai események kockázatát növeli elsősorban?",
+                        options: ["Stroke és tranziens ischaemiás attak (TIA)", "Intrakraniális és subarachnoidalis vérzés", "Meningitis és encephalitis", "Myelopathia és radiculopathia"],
+                        answer: "Stroke és tranziens ischaemiás attak (TIA)",
+                        explanation: "A PV-ben a megnövekedett vörösvértestszám miatti hiperviszkozitás (sűrűbb vér) fokozza a trombózishajlamot, ami agyi infarktushoz (stroke) vagy TIA-hoz vezethet."
+                    },
+                    {
+                        question: "Melyik anémia típusra jellemző a myelosis funicularis, paresztézia és ataxia?",
+                        options: ["B12-vitamin-hiányos anémia", "Vashiányos anémia", "Sarlósejtes anémia", "Krónikus betegséghez társuló anémia"],
+                        answer: "B12-vitamin-hiányos anémia",
+                        explanation: "Ezek a specifikus neurológiai tünetek a B12-vitamin hiánya okozta mielinkárosodás következményei, és kulcsfontosságúak a differenciáldiagnózisban."
+                    },
+                    {
+                        question: "Mi okozza a „zsibbadt áll szindrómát” (numb chin syndrome) myeloma multiplexben?",
+                        options: ["A nervus mentalis leptomeningealis infiltrációja", "Hiperkalcémia", "Paraproteinemia", "KIR-infekció"],
+                        answer: "A nervus mentalis leptomeningealis infiltrációja",
+                        explanation: "A 'numb chin syndrome' a n. alveolaris inferior ágának, a n. mentalisnak a daganatos sejtek általi infiltrációja vagy kompressziója miatt alakul ki, gyakran myeloma multiplex vagy más malignitások esetén."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző az ADAMTS13 enzim súlyos hiánya, ami kisér-trombózisokhoz vezet?",
+                        options: ["Trombotikus trombocitopéniás purpura (TTP)", "Immun trombocitopéniás purpura (ITP)", "Polycythemia Vera", "Myeloma multiplex"],
+                        answer: "Trombotikus trombocitopéniás purpura (TTP)",
+                        explanation: "A TTP patomechanizmusának lényege az ADAMTS13 enzim hiánya, ami miatt a von Willebrand faktor multikémerek nem hasadnak, ezáltal a vérlemezkék kórosan összetapadnak és mikrotrombusokat képeznek."
+                    },
+                    {
+                        question: "Milyen neurológiai tünet NEM jellemző a vashiányos anémiára?",
+                        options: ["Ataxia", "Fejfájás", "Szédülés", "Fülzúgás"],
+                        answer: "Ataxia",
+                        explanation: "Míg a fejfájás, szédülés és fülzúgás az agyi oxigénhiány általános tünetei lehetnek bármely anémiában, az ataxia (mozgáskoordinációs zavar) specifikusan a B12-vitamin hiányra jellemző."
+                    },
+                    {
+                        question: "Melyik állítás igaz a B12-vitamin-hiány neurológiai tüneteire?",
+                        options: ["Megelőzhetik az anémia hematológiai jeleit.", "Mindig enyhék és átmenetiek.", "Csak súlyos anémia esetén jelentkeznek.", "A folsavpótlás mindig javítja őket."],
+                        answer: "Megelőzhetik az anémia hematológiai jeleit.",
+                        explanation: "Fontos klinikai tény, hogy a neurológiai károsodás néha már azelőtt kialakul, hogy a vérképben az anémia kimutatható lenne. A folsavpótlás javíthatja a vérképet, de súlyosbíthatja a neurológiai tüneteket."
+                    },
+                    {
+                        question: "Melyik vérképzőszervi daganat okozhat cerebrális vénás sinus trombózist?",
+                        options: ["Myeloma multiplex", "Akut limfoid leukémia (ALL)", "Hodgkin-limfóma", "Krónikus limfoid leukémia (CLL)"],
+                        answer: "Myeloma multiplex",
+                        explanation: "A myeloma multiplex a hiperviszkozitás és a paraproteinek miatt növelheti a trombózis kockázatát, beleértve a ritkább lokalizációjú cerebrális vénás sinus trombózist is."
+                    },
+                    {
+                        question: "Milyen típusú vérzés alakulhat ki enyhe fejsérülés után is súlyos thrombocytopeniában?",
+                        options: ["Szubdurális hematóma", "Epidurális hematóma", "Parenchimális vérzés", "Subarachnoidalis vérzés"],
+                        answer: "Szubdurális hematóma",
+                        explanation: "A súlyos thrombocytopenia miatti vérzékenység következtében akár minimális trauma is a hídvénák szakadásához és szubdurális hematóma kialakulásához vezethet."
+                    },
+                    {
+                        question: "Mi a Polycythemia Verára jellemző, forró víz által kiváltott viszketés neve?",
+                        options: ["Aquagenic pruritus", "Urticaria", "Erythromelalgia", "Petechia"],
+                        answer: "Aquagenic pruritus",
+                        explanation: "Az aquagenic pruritus, a forró fürdő vagy zuhany után jelentkező intenzív viszketés, a Polycythemia Vera egyik jellegzetes, bár nem specifikus tünete."
+                    },
+                    {
+                        question: "Melyik mechanizmus NEM játszik szerepet a myeloma multiplex neurológiai tüneteiben?",
+                        options: ["A KIR direkt infiltrációja T-sejtekkel", "A daganatos plazmasejtek infiltrációja", "Paraproteinek okozta neuropathia", "Csontléziók okozta kompresszió"],
+                        answer: "A KIR direkt infiltrációja T-sejtekkel",
+                        explanation: "A myeloma multiplex neurológiai szövődményeit a plazmasejtek direkt infiltrációja, a paraproteinek toxikus hatása, a hiperviszkozitás vagy a csontokat érintő elváltozások miatti idegi kompresszió okozza, nem pedig T-sejtes infiltráció."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS a krónikus anémiával kapcsolatban?",
+                        options: ["A szervezet rosszul alkalmazkodik hozzá, így már enyhe hemoglobin-csökkenés is súlyos tünetekkel jár.", "A szervezet jól alkalmazkodik hozzá, és jelentős hemoglobin-csökkenés is lehet tünetmentes.", "Egy akut stressz (pl. fertőzés) dekompenzálhatja az állapotot.", "A tünetek gyakran csak terhelésre jelentkeznek."],
+                        answer: "A szervezet rosszul alkalmazkodik hozzá, így már enyhe hemoglobin-csökkenés is súlyos tünetekkel jár.",
+                        explanation: "A lassan kialakuló, krónikus anémiához a szervezet kompenzációs mechanizmusai (keringés, légzés) jól alkalmazkodnak, ezért a betegek sokáig, akár súlyos hemoglobin-szint csökkenés mellett is tünetmentesek lehetnek nyugalomban."
+                    },
+                    {
+                        question: "Milyen típusú neurológiai károsodást okoz a limfóma paraneopláziás szindrómaként?",
+                        options: ["Szenzoros neuropátia és limbikus enkefalitisz", "Stroke és TIA", "Intrakraniális vérzés", "Myelosis funicularis"],
+                        answer: "Szenzoros neuropátia és limbikus enkefalitisz",
+                        explanation: "A Hodgkin-limfóma paraneopláziás szindrómaként leggyakrabban szenzoros neuropátiát és limbikus enkefalitiszt okoz, melyek immunológiai mechanizmusúak."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a Thrombotic Thrombocytopenic Purpura (TTP) neurológiai manifesztációira?",
+                        options: ["Myelosis funicularis", "Stroke", "Epilepszia", "Kognitív hanyatlás"],
+                        answer: "Myelosis funicularis",
+                        explanation: "A TTP az agyi kiserek elzáródása miatt stroke-ot, rohamokat, enkefalopátiát és kognitív zavarokat okozhat. A myelosis funicularis a B12-vitamin-hiány jellegzetes tünete."
+                    },
+                    {
+                        question: "Mi a közös patomechanizmus a Polycythemia Vera és a sarlósejtes anémia okozta agyi keringési zavarokban?",
+                        options: ["A véráramlás akadályozottsága", "Fokozott vérzési hajlam", "Autoimmun gyulladás", "Direkt daganatos infiltráció"],
+                        answer: "A véráramlás akadályozottsága",
+                        explanation: "Bár a kiváltó ok más, mindkét betegségben az agyi keringési zavart a véráramlás akadályozottsága okozza: a PV-ben a hiperviszkozitás miatti lassult áramlás és trombózis, a sarlósejtes anémiában pedig a kóros vörösvértestek okozta érelzáródás."
+                    }
+                ]
+            },
+            {
+                topic: "A neurológiában használatos gyógyszerek intoxikációjának tünettana",
+                questions: [
+                    {
+                        question: "Mi a jellegzetes tünettriász az antiepileptikumok túladagolásakor?",
+                        options: ["KIR depresszió, ataxia, nystagmus", "Hipertónia, tachycardia, hipertermia", "Izommerevség, tremor, bradykinesia", "Pszichózis, hallucinációk, agitáció"],
+                        answer: "KIR depresszió, ataxia, nystagmus",
+                        explanation: "Az antiepileptikumok túladagolása leggyakrabban a központi idegrendszer depressziójával (álmosság, kóma), ataxiával (egyensúlyzavar) és nystagmussal (szemtekerezgés) jár."
+                    },
+                    {
+                        question: "Milyen specifikus metabolikus eltérést és szövődményt okozhat a valproinsav túladagolás?",
+                        options: ["Hiperammonémia és agyödéma", "Hiperkalémia és szívleállás", "Hiponatrémia és görcsrohamok", "Hipoglikémia és májelégtelenség"],
+                        answer: "Hiperammonémia és agyödéma",
+                        explanation: "A valproinsav-toxicitás jellegzetes következménye a hyperammonaemiás encephalopathia, ami agyödémához és kómához vezethet."
+                    },
+                    {
+                        question: "Melyik életveszélyes szövődményre jellemző a súlyos izommerevség, hipertermia és autonóm instabilitás antipszichotikumok szedése mellett?",
+                        options: ["Neuroleptikus malignus szindróma (NMS)", "Szerotonin szindróma", "Malignus hyperthermia", "Extrapyramidális szindróma"],
+                        answer: "Neuroleptikus malignus szindróma (NMS)",
+                        explanation: "Az NMS egy ritka, de potenciálisan halálos szövődmény, melyet a súlyos izommerevség ('ólomcső rigiditás'), magas láz, autonóm diszfunkció és tudatzavar jellemez."
+                    },
+                    {
+                        question: "Melyik antidepresszáns csoport hordozza a legnagyobb kardiotoxicitási kockázatot túladagolás esetén?",
+                        options: ["Triciklikus antidepresszánsok (TCA)", "Szelektív szerotonin-visszavétel gátlók (SSRI)", "Szerotonin-noradrenalin visszavétel gátlók (SNRI)", "Monoamin-oxidáz gátlók (MAOI)"],
+                        answer: "Triciklikus antidepresszánsok (TCA)",
+                        explanation: "A TCA-k nátriumcsatorna-blokkoló hatásuk miatt súlyos, gyakran halálos szívritmuszavarokat (széles QRS, kamrai tachycardia) és hipotóniát okozhatnak túladagoláskor."
+                    },
+                    {
+                        question: "Mi a specifikus antidotuma a benzodiazepin túladagolásnak?",
+                        options: ["Flumazenil", "Naloxon", "N-acetilcisztein", "Nátrium-bikarbonát"],
+                        answer: "Flumazenil",
+                        explanation: "A flumazenil egy kompetitív benzodiazepin-receptor antagonista, amely gyorsan visszafordítja a benzodiazepinek szedatív és légzésdeprimáló hatását."
+                    },
+                    {
+                        question: "Mi a flumazenil adásának egyik fő kockázata?",
+                        options: ["Görcsrohamok provokálása", "Súlyos légzésdepresszió okozása", "Hirtelen vérnyomás-emelkedés indukálása", "Akut májelégtelenség kiváltása"],
+                        answer: "Görcsrohamok provokálása",
+                        explanation: "Flumazenil adása görcsrohamot válthat ki, különösen benzodiazepin-toleráns/függő betegeknél, vagy ha a beteg egyidejűleg görcsküszöb-csökkentő szert (pl. TCA) is bevett."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a szerotonin szindrómára?",
+                        options: ["Ólomcső-szerű izommerevség", "Klónus és hyperreflexia", "Autonóm instabilitás (láz, tachycardia)", "Mentális státusz változása (agitáció, zavartság)"],
+                        answer: "Ólomcső-szerű izommerevség",
+                        explanation: "A súlyos, ólomcső-szerű rigiditás a neuroleptikus malignus szindrómára jellemző. A szerotonin szindrómában inkább a hyperreflexia, a spontán vagy provokálható klónus és a tremor a domináns neuromuscularis tünet."
+                    },
+                    {
+                        question: "Milyen EKG eltérést okoz a carbamazepin és a TCA túladagolás, és mi a kezelése?",
+                        options: ["Széles QRS komplexus, nátrium-bikarbonát adásával", "Megnyúlt QT-intervallum, magnézium adásával", "ST-eleváció, azonnali coronarographiával", "Magas, csúcsos T-hullámok, kalcium-glukonát adásával"],
+                        answer: "Széles QRS komplexus, nátrium-bikarbonát adásával",
+                        explanation: "Mindkét gyógyszercsoport gátolja a gyors nátriumcsatornákat a szívben, ami a QRS-komplexus kiszélesedéséhez vezet. Az intravénás nátrium-bikarbonát növeli a szérum nátriumszintjét és pH-ját, ezzel segítve a blokk oldását."
+                    },
+                    {
+                        question: "Melyik antiepileptikum túladagolása utánozhatja az opiátmérgezést a szűk pupillák miatt?",
+                        options: ["Valproinsav", "Fenitoin", "Levetiracetam", "Karbamazepin"],
+                        answer: "Valproinsav",
+                        explanation: "A súlyos valproinsav-mérgezés kómával és jellegzetesen szűk pupillákkal (miosis) járhat, ami a differenciáldiagnózis során felvetheti az opiát-túladagolás gyanúját."
+                    },
+                    {
+                        question: "Melyik a legfontosabb első lépés bármilyen gyógyszer-intoxikáció ellátásában?",
+                        options: ["A légút, légzés és keringés stabilizálása (ABC)", "Gyomormosás elvégzése", "Specifikus antidotum beadása", "Aktív szén adása"],
+                        answer: "A légút, légzés és keringés stabilizálása (ABC)",
+                        explanation: "A beteg vitális funkcióinak (légútbiztosítás, légzéstámogatás, keringéstámogatás) biztosítása minden más beavatkozást megelőz, mivel a hypoxia és a sokk percek alatt visszafordíthatatlan károsodást okozhat."
+                    },
+                    {
+                        question: "Milyen extrapyramidális tünet (EPS) NEM tartozik az antipszichotikumok mellékhatásai közé?",
+                        options: ["Klónus", "Akut disztónia", "Akathisia", "Parkinsonizmus"],
+                        answer: "Klónus",
+                        explanation: "Az akut disztónia (izomgörcs), az akathisia (mozgáskényszer) és a parkinsonizmus (remegés, merevség) klasszikus EPS-ek. A klónus (ritmikus izomrángás) inkább a szerotonin szindrómára vagy a felső motoneuron károsodására jellemző."
+                    },
+                    {
+                        question: "Mi a specifikus terápia a valproinsav okozta hiperammonémia esetén?",
+                        options: ["Levokarnitin", "Flumazenil", "Naloxon", "N-acetilcisztein"],
+                        answer: "Levokarnitin",
+                        explanation: "A levokarnitin segít a valproinsav metabolizmusában és csökkenti a toxikus metabolitok felhalmozódását, így javíthatja a hyperammonaemiás encephalopathia tüneteit."
+                    },
+                    {
+        
+                question: "Melyik gyógyszer elvonása okozhat delírium tremens-hez hasonló tüneteket?",
+                        options: ["Benzodiazepinek", "Antipszichotikumok", "Levodopa", "SSRI antidepresszánsok"],
+                        answer: "Benzodiazepinek",
+                        explanation: "Nagy dózisú, hosszan tartó benzodiazepin-szedés hirtelen abbahagyása súlyos elvonási szindrómát okozhat, amelynek tünetei (szorongás, remegés, hallucinációk, delírium) hasonlítanak az alkoholmegvonásos delírium tremensre."
+                    },
+                    {
+                        question: "Mi a naloxon hatásmechanizmusa opioid túladagolásban?",
+                        options: ["Kompetitív antagonista az opioid receptorokon", "Fokozza az opioidok metabolizmusát", "Gátolja az opioidok felszívódását", "Közvetlenül stimulálja a légzőközpontot"],
+                        answer: "Kompetitív antagonista az opioid receptorokon",
+                        explanation: "A naloxon nagyobb affinitással kötődik az opioid receptorokhoz, mint maguk az opioidok, így leszorítja azokat a receptorról és felfüggeszti a hatásukat, beleértve a légzésdepressziót is."
+                    },
+                    {
+                        question: "Miért szükséges a beteg folyamatos megfigyelése naloxon adása után?",
+                        options: ["Mert a naloxon felezési ideje rövidebb, mint a legtöbb opioidé", "Mert a naloxon maga is légzésdepressziót okozhat", "Mert a naloxon súlyos allergiás reakciót válthat ki", "Mert a naloxon kumulálódhat a szervezetben"],
+                        answer: "Mert a naloxon felezési ideje rövidebb, mint a legtöbb opioidé",
+                        explanation: "A naloxon hatása (30-90 perc) hamarabb elmúlhat, mint a túladagolt opioidé, ezért a beteg visszaszedálódhat és újra légzésdepresszió alakulhat ki, ami ismételt naloxon adását teheti szükségessé."
+                    },
+                    {
+                        question: "Melyik tünetegyüttesre jellemző a mentális státusz változása, autonóm hiperaktivitás és neuromuscularis abnormalitások?",
+                        options: ["Szerotonin szindróma", "Neuroleptikus malignus szindróma", "Antikolinerg delírium", "Benzodiazepin elvonás"],
+                        answer: "Szerotonin szindróma",
+                        explanation: "Ez a klasszikus tünettriász (tudatzavar, autonóm instabilitás, neuromuscularis tünetek mint klónus és hyperreflexia) a szerotonin szindróma diagnózisának alapja."
+                    },
+                    {
+                        question: "Melyik gyógyszer okozhat gyógyszer-indukált parkinsonizmust (DIP)?",
+                        options: ["Antipszichotikumok", "Benzodiazepinek", "Levetiracetam", "Opioidok"],
+                        answer: "Antipszichotikumok",
+                        explanation: "A dopamin-receptorokat blokkoló gyógyszerek, különösen a tipikus antipszichotikumok, a dopaminerg rendszer gátlásával Parkinson-kórhoz hasonló tüneteket (remegés, merevség, lelassultság) okozhatnak."
+                    },
+                    {
+                        question: "Mikor indokolt a gyomormosás gyógyszermérgezés esetén?",
+                        options: ["Potenciálisan életveszélyes túladagolásnál, a bevételtől számított 1 órán belül, védett légút mellett", "Minden eszméletlen betegnél, a bevétel időpontjától függetlenül", "Csak akkor, ha aktív szén nem áll rendelkezésre", "Soha nem indokolt a magas aspirációs kockázat miatt"],
+                        answer: "Potenciálisan életveszélyes túladagolásnál, a bevételtől számított 1 órán belül, védett légút mellett",
+                        explanation: "A gyomormosás rutinszerű alkalmazása már nem javasolt. Csak nagyon szűk indikációval, súlyos, életveszélyes mérgezés korai szakaszában, intubált betegnél jön szóba."
+                    },
+                    {
+                        question: "Melyik gyógyszer túladagolása okozhat hirtelen nappali elalvást és pszichotikus tüneteket?",
+                        options: ["Parkinson-kór gyógyszerei (pl. dopamin agonisták)", "Antiepileptikumok", "Benzodiazepinek", "Opioidok"],
+                        answer: "Parkinson-kór gyógyszerei (pl. dopamin agonisták)",
+                        explanation: "A dopaminerg rendszer túlstimulálása a dopamin agonistákkal hirtelen elalvást (sleep attacks), hallucinációkat, téveszméket és pszichózist okozhat, különösen idősebb betegeknél."
+                    },
+                    {
+                        question: "Melyik állítás igaz a gyógyszer-indukált parkinsonizmusra (DIP)?",
+                        options: ["A kiváltó gyógyszer elhagyása után a tünetek általában visszafejlődnek.", "Ez egy irreverzibilis, progresszív állapot.", "Mindig szimmetrikus tünetekkel jár.", "Levodopára kiválóan reagál."],
+                        answer: "A kiváltó gyógyszer elhagyása után a tünetek általában visszafejlődnek.",
+                        explanation: "A DIP és az idiopátiás Parkinson-kór közötti legfontosabb különbség, hogy a DIP a kiváltó gyógyszer leállítása után hetek-hónapok alatt jellemzően megszűnik. A Levodopa-kezelés hatástalan."
+                    }
+                ]
+            },
+            {
+                topic: "Idegrendszeri paraneoplaziás kórképek",
+                questions: [
+                    {
+                        question: "Mi a paraneopláziás neurológiai szindrómák (PNS) alapvető patomechanizmusa?",
+                        options: ["Autoimmun keresztreakció a daganat és az idegrendszer között", "A daganat direkt áttétképzése az agyba", "A daganat által termelt metabolitok toxikus hatása", "A kemoterápia mellékhatása"],
+                        answer: "Autoimmun keresztreakció a daganat és az idegrendszer között",
+                        explanation: "A PNS lényege a 'molekuláris mimikri': az immunrendszer a daganat ellen termel antitesteket/T-sejteket, amelyek tévesen az idegrendszer hasonló antigénjeit is megtámadják."
+                    },
+                    {
+                        question: "Melyik daganattípus társul a leggyakrabban klasszikus paraneopláziás szindrómákhoz?",
+                        options: ["Kissejtes tüdőrák (SCLC)", "Emlőrák", "Prosztatarák", "Vastagbélrák"],
+                        answer: "Kissejtes tüdőrák (SCLC)",
+                        explanation: "Az SCLC különösen immunogén, gyakran expresszál onkoneurális antigéneket, ezért számos klasszikus PNS (LEMS, cerebelláris degeneráció, limbikus enkefalitisz) hátterében áll."
+                    },
+                    {
+                        question: "Melyik PNS-re jellemző a memóriazavar, epilepsziás rohamok és személyiségváltozás?",
+                        options: ["Limbikus enkefalitisz", "Cerebelláris degeneráció", "Opsoclonus-myoclonus szindróma", "Stiff Person szindróma"],
+                        answer: "Limbikus enkefalitisz",
+                        explanation: "Ezek a tünetek a limbikus rendszer (hippocampus, amygdala) gyulladására utalnak, ami a limbikus enkefalitisz klasszikus megjelenési formája."
+                    },
+                    {
+                        question: "Az anti-Yo antitestek melyik PNS-sel és milyen daganattal társulnak leggyakrabban?",
+                        options: ["Cerebelláris degeneráció, petefészek- vagy emlőrákkal", "Limbikus enkefalitisz, kissejtes tüdőrákkal", "LEMS, kissejtes tüdőrákkal", "Myasthenia gravis, thymomával"],
+                        answer: "Cerebelláris degeneráció, petefészek- vagy emlőrákkal",
+                        explanation: "Az anti-Yo (PCA-1) antitest a paraneopláziás cerebelláris degeneráció klasszikus markere, és az esetek többségében petefészek- vagy emlőrák áll a háttérben."
+                    },
+                    {
+                        question: "Mi a paraneopláziás szindrómák kezelésének elsődleges és legfontosabb lépése?",
+                        options: ["A háttérben álló daganat kezelése", "Nagy dózisú kortikoszteroid terápia önmagában", "Csak tüneti kezelés", "Hosszú távú fizikoterápia"],
+                        answer: "A háttérben álló daganat kezelése",
+                        explanation: "A PNS kezelésének sarokköve az autoimmun reakciót kiváltó forrás, azaz a tumor mielőbbi és leghatékonyabb kezelése (sebészet, kemo-, sugárterápia)."
+                    },
+                    {
+                        question: "Milyen típusú PNS esetén a leghatékonyabb a plazmaferézis és az IVIg kezelés?",
+                        options: ["Amelyeket sejtfelszíni antigének elleni antitestek közvetítenek", "Amelyeket intracelluláris antigének elleni T-sejtek közvetítenek", "Minden típusú PNS esetén egyformán hatékonyak", "Kizárólag Lambert-Eaton myastheniás szindrómában"],
+                        answer: "Amelyeket sejtfelszíni antigének elleni antitestek közvetítenek",
+                        explanation: "A plazmaferézis és az IVIg a keringő antitestek eltávolításán/semlegesítésén alapul, ezért akkor a leghatékonyabbak, ha a kóroki antitestek a sejtfelszínen lévő célpontokat támadják (pl. anti-NMDAR, anti-VGCC)."
+                    },
+                    {
+                        question: "A Lambert-Eaton myastheniás szindróma (LEMS) melyik daganattal mutat a legerősebb asszociációt?",
+                        options: ["Kissejtes tüdőrák (SCLC)", "Thymoma", "Emlőrák", "Neuroblasztóma"],
+                        answer: "Kissejtes tüdőrák (SCLC)",
+                        explanation: "A LEMS-esetek körülbelül felében paraneopláziás eredetű, és ezek döntő többségében kissejtes tüdőrák áll a háttérben."
+                    },
+                    {
+                        question: "Melyik autoantitest NEM intracelluláris antigén ellen irányul?",
+                        options: ["Anti-NMDAR", "Anti-Hu", "Anti-Yo", "Anti-Ri"],
+                        answer: "Anti-NMDAR",
+                        explanation: "Az anti-Hu, -Yo, -Ri antitestek intracelluláris (sejtmagi, citoplazmatikus) fehérjéket céloznak. Az anti-NMDAR (N-metil-D-aszpartát receptor) antitest sejtfelszíni receptort támad."
+                    },
+                    {
+                        question: "Melyik szindrómára jellemző a progresszív izommerevség és a fájdalmas izomgörcsök, főként a törzsön és a lábakon?",
+                        options: ["Stiff Person szindróma", "Myasthenia Gravis", "Szerzett neuromyotonia", "Motoros neuron betegség"],
+                        answer: "Stiff Person szindróma",
+                        explanation: "Ez a klinikai kép a Stiff Person szindróma klasszikus leírása. Paraneopláziás formája gyakran anti-amfifizin antitest pozitivitással és emlő- vagy tüdőrákkal társul."
+                    },
+                    {
+                        question: "Mi a klinikai jelentősége annak, hogy a PNS neurológiai tünetei gyakran megelőzik a daganat diagnózisát?",
+                        options: ["Lehetőséget ad a háttérdaganat korai felfedezésére.", "Azt jelenti, hogy a neurológiai tünetek mindig enyhék.", "Azt jelenti, hogy a daganat már előrehaladott.", "Nincs különösebb klinikai jelentősége."],
+                        answer: "Lehetőséget ad a háttérdaganat korai felfedezésére.",
+                        explanation: "A PNS korai felismerése és a célzott tumorkeresés elindítása esélyt ad a daganat egy korábbi, jobban kezelhető stádiumban történő diagnosztizálására, ami javíthatja a beteg prognózisát."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás a leghasznosabb rejtett, okkult tumorok felkutatására PNS gyanúja esetén?",
+                        options: ["PET/CT", "Koponya MRI", "Mellkas röntgen", "Hasi ultrahang"],
+                        answer: "PET/CT",
+                        explanation: "A PET/CT az egész test metabolikus aktivitását térképezi fel, így képes kimutatni olyan kis méretű vagy atipikus helyen lévő daganatokat is, amelyeket más képalkotó eljárások nem feltétlenül detektálnak."
+                    },
+                    {
+                        question: "Melyik betegség NEM tartozik a klasszikus paraneopláziás szindrómák közé?",
+                        options: ["Akut diszautonómia", "Limbikus enkefalitisz", "Lambert-Eaton myastheniás szindróma", "Szubakut cerebelláris degeneráció"],
+                        answer: "Akut diszautonómia",
+                        explanation: "Míg a limbikus enkefalitisz, LEMS és cerebelláris degeneráció klasszikus, daganatokkal szorosan összefüggő PNS-ek, addig az akut diszautonómia a nem-klasszikus, kevésbé specifikus szindrómák közé tartozik."
+                    },
+                    {
+                        question: "Milyen neurológiai kórkép társul a thymomához az esetek 15%-ában?",
+                        options: ["Myasthenia Gravis (MG)", "Stiff Person szindróma", "Opsoclonus-myoclonus", "Szenzoros neuronopátia"],
+                        answer: "Myasthenia Gravis (MG)",
+                        explanation: "A Myasthenia Gravis és a thymoma (a csecsemőmirigy daganata) között nagyon erős az asszociáció; a thymomás betegek jelentős részében alakul ki MG."
+                    },
+                    {
+                        question: "Melyik antitest társul leggyakrabban kissejtes tüdőrák okozta enkefalomielitiszhez és szenzoros neuronopátiához?",
+                        options: ["Anti-Hu (ANNA-1)", "Anti-Yo (PCA-1)", "Anti-Ma2", "Anti-Ri (ANNA-2)"],
+                        answer: "Anti-Hu (ANNA-1)",
+                        explanation: "Az anti-Hu a leggyakoribb onkoneurális antitest, és klasszikusan a kissejtes tüdőrák által okozott diffúz idegrendszeri károsodáshoz (enkefalomielitisz, szenzoros neuronopátia) társul."
+                    },
+                    {
+                        question: "Mire utal, ha egy PNS-es beteg liquorában és szérumában is kimutatható ugyanaz az onkoneurális antitest?",
+                        options: ["Erős bizonyíték a paraneopláziás eredet mellett.", "A daganat központi idegrendszeri áttétét jelzi.", "Rossz prognózist jelent a daganat szempontjából.", "Azt jelenti, hogy az immunterápia hatástalan lesz."],
+                        answer: "Erős bizonyíték a paraneopláziás eredet mellett.",
+                        explanation: "Az antitest intratekális (gerincfolyadékon belüli) szintézise azt bizonyítja, hogy az immunreakció a központi idegrendszerben is zajlik, ami a PNS diagnózisát erősen alátámasztja."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport alkalmazása általában NEM javasolt PNS esetén?",
+                        options: ["Immunkontrollpont-gátlók (ICI)", "Kortikoszteroidok", "Intravénás immunglobulin (IVIg)", "Rituximab"],
+                        answer: "Immunkontrollpont-gátlók (ICI)",
+                        explanation: "Az ICI-k az immunrendszer aktiválásával hatnak, ami egy már meglévő autoimmun folyamatot, mint a PNS, súlyosbíthat, ezért alkalmazásuk általában kontraindikált vagy nagy körültekintést igényel."
+                    },
+                    {
+                        question: "Melyik szindróma jellemző gyermekkorban neuroblasztómához, felnőttkorban pedig kissejtes tüdőrákhoz társulva?",
+                        options: ["Opsoclonus-myoclonus szindróma", "Limbikus enkefalitisz", "Cerebelláris degeneráció", "LEMS"],
+                        answer: "Opsoclonus-myoclonus szindróma",
+                        explanation: "Ez a szindróma a 'táncoló szemek, táncoló lábak' kórképe, amelynek paraneopláziás háttere jellegzetesen korfüggő: gyermekeknél neuroblasztóma, felnőtteknél leggyakrabban SCLC."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS a PNS-re vonatkozóan?",
+                        options: ["Az idegrendszeri károsodás mértéke mindig arányos a tumor méretével.", "A neurológiai tünetek súlyosak és gyorsan progrediálhatnak.", "A diagnózis felállításához ki kell zárni a metasztázist, fertőzést és kezelési mellékhatásokat.", "Az alapbetegség egy rejtett, okkult tumor is lehet."],
+                        answer: "Az idegrendszeri károsodás mértéke mindig arányos a tumor méretével.",
+                        explanation: "A PNS egyik jellemzője, hogy a neurológiai károsodás súlyossága gyakran aránytalanul nagy a tumormérethez képest; egy egészen kicsi, rejtett daganat is rendkívül súlyos, kiterjedt idegrendszeri pusztulást okozhat."
+                    },
+                    {
+                        question: "Melyik antitest társul heredaganattal összefüggő limbikus enkefalitiszhez?",
+                        options: ["Anti-Ma2", "Anti-Yo", "Anti-Hu", "Anti-amfifizin"],
+                        answer: "Anti-Ma2",
+                        explanation: "Az anti-Ma2 antitest-pozitív limbikus és agytörzsi enkefalitisz klasszikusan fiatal férfiakban, heredaganathoz társulva fordul elő."
+                    },
+                    {
+                        question: "Mi a másodvonalbeli terápia a PNS kezelésében, ha a kortikoszteroidok, IVIg és plazmaferézis hatástalan?",
+                        options: ["Erősebb immunszuppresszánsok (pl. rituximab, ciklofoszfamid)", "Kísérleti génterápia", "A háttérdaganat ismételt műtéte", "Nagy dózisú B-vitaminok"],
+                        answer: "Erősebb immunszuppresszánsok (pl. rituximab, ciklofoszfamid)",
+                        explanation: "Ha az első vonalbeli immunterápiák nem hoznak javulást, a kezelést eszkalálni kell erősebb, a B-sejteket (rituximab) vagy általánosan a limfocitákat (ciklofoszfamid) célzó immunszuppresszánsokkal."
+                    }
+                ]
+            },
+            {
+                topic: "Onkológiai betegségek kezelésének neurológiai szövődményei",
+                questions: [
+                    {
+                        question: "Mi a kemoterápia okozta perifériás neuropátia (CIPN) jellegzetes eloszlása?",
+                        options: ["Kesztyű-harisnya eloszlás", "Törzsi eloszlás", "Agyidegeket érintő eloszlás", "Foltos, véletlenszerű eloszlás"],
+                        answer: "Kesztyű-harisnya eloszlás",
+                        explanation: "A CIPN tünetei (zsibbadás, fájdalom) jellemzően a leghosszabb idegrostokat érintik először, ezért a kezeken és a lábakon, kesztyű-harisnya eloszlásban jelentkeznek."
+                    },
+                    {
+                        question: "Melyik az egyetlen FDA által jóváhagyott gyógyszer a fájdalmas CIPN tüneti kezelésére?",
+                        options: ["Duloxetin", "Gabapentin", "Pregabalin", "Amitriptilin"],
+                        answer: "Duloxetin",
+                        explanation: "A duloxetin, egy SNRI típusú antidepresszáns, bizonyítottan hatásos a kemoterápia okozta neuropátiás fájdalom enyhítésében."
+                    },
+                    {
+                        question: "Mi a koponyabesugárzás utáni kognitív hanyatlás megelőzésének egyik kulcsfontosságú stratégiája?",
+                        options: ["Hippokampusz-kímélő sugárterápia", "Profilaktikus kortikoszteroid adása", "Alacsonyabb dózisú teljes agyi besugárzás", "Kezelés előtti memantin adása"],
+                        answer: "Hippokampusz-kímélő sugárterápia",
+                        explanation: "A hippokampusz kulcsszerepet játszik a memóriafunkciókban és különösen érzékeny a sugárzásra. A modern sugárterápiás technikák lehetővé teszik e terület kímélését, csökkentve a kognitív mellékhatások kockázatát."
+                    },
+                    {
+                        question: "Mi az első vonalbeli kezelés az immunkontrollpont-gátlók (ICI) által okozott súlyos, immun-mediált neurológiai mellékhatások (irAEs) esetén?",
+                        options: ["Nagy dózisú kortikoszteroidok", "Plazmaferézis", "Intravénás immunglobulin (IVIg)", "Csak az ICI terápia leállítása"],
+                        answer: "Nagy dózisú kortikoszteroidok",
+                        explanation: "A kezelés sarokköve az immunrendszer gyors és hatékony elnyomása, amire a nagy dózisú intravénás kortikoszteroidok a legalkalmasabbak."
+                    },
+                    {
+                        question: "Egy beteg célzott terápiaként bevacizumabot kap, majd fejfájás, görcsroham és látászavar alakul ki nála. Az MRI vazogén ödémát mutat a posterior agyi régiókban. Mi a legvalószínűbb diagnózis?",
+                        options: ["Posterior Reversible Encephalopathy Syndrome (PRES)", "Sugárnekrózis", "Agyi áttét", "ICI-indukált enkefalitisz"],
+                        answer: "Posterior Reversible Encephalopathy Syndrome (PRES)",
+                        explanation: "A PRES egy jellegzetes klinikai-radiológiai szindróma, amelyet gyakran váltanak ki bizonyos daganatellenes (pl. bevacizumab) és immunszuppresszív szerek. Jellemző tünetei és a posterior lokalizációjú ödéma a diagnózis kulcsa."
+                    },
+                    {
+                        question: "Melyik kezeléshez társuló, különösen súlyos és potenciálisan halálos kimenetelű mellékhatás a myositis és myocarditis kombinációja?",
+                        options: ["Immunkontrollpont-gátlók (ICI)", "Platina-alapú kemoterápia", "Sugárterápia", "Proteaszóma-gátlók"],
+                        answer: "Immunkontrollpont-gátlók (ICI)",
+                        explanation: "Bár ritka, a vázizomzat (myositis) és a szívizom (myocarditis) együttes gyulladása az ICI-terápia egyik legrettegettebb, magas mortalitású szövődménye."
+                    },
+                    {
+                        question: "Mit jelent a \"chemo brain\" kifejezés?",
+                        options: ["Daganatos betegséggel összefüggő kognitív diszfunkció", "A kemoterápia által okozott agydaganat", "Az agy fertőzése a kemoterápia alatt", "Májelégtelenség okozta enkefalopátia"],
+                        answer: "Daganatos betegséggel összefüggő kognitív diszfunkció",
+                        explanation: "A \"chemo brain\" vagy rákkal kapcsolatos kognitív diszfunkció egy tünetegyüttes, amely a gondolkodás és a memória zavarait (feledékenység, koncentrációs nehézség) foglalja magában a daganatellenes kezelések alatt és után."
+                    },
+                    {
+                        question: "Melyik állítás igaz a sugárterápia okozta agyi károsodás (RIBI) késői szövődményeire?",
+                        options: ["Hónapokkal vagy évekkel a kezelés után jelentkeznek.", "Mindig enyhék és átmenetiek.", "Csak az 50 Gy feletti dózisnál fordulnak elő.", "Kortikoszteroidokra mindig jól reagálnak."],
+                        answer: "Hónapokkal vagy évekkel a kezelés után jelentkeznek.",
+                        explanation: "A késői szövődmények, mint a kognitív hanyatlás vagy a sugárnekrózis, egy hosszú latenciaidő után, hónapokkal vagy akár évekkel a sugárkezelés befejezését követően válnak klinikailag manifesztté."
+                    },
+                    {
+                        question: "Mi a fő klinikai dilemma a CIPN kezelésében?",
+                        options: ["Dóziskorlátozó toxicitás, ami a hatékony rákkezelés megszakításához vezethet.", "A betegek gyakran nem veszik észre a tüneteket.", "Nincsenek hatékony fájdalomcsillapítók.", "A diagnózis felállítása rendkívül nehéz."],
+                        answer: "Dóziskorlátozó toxicitás, ami a hatékony rákkezelés megszakításához vezethet.",
+                        explanation: "A CIPN súlyossága gyakran a kemoterápia dózisának csökkentését vagy a kezelés leállítását teszi szükségessé, ami kompromittálhatja a daganatellenes terápia hatékonyságát és ronthatja a beteg túlélési esélyeit."
+                    },
+                    {
+                        question: "Melyik gyógyszer hatékony a sugárnekrózis okozta agyödéma csökkentésében azáltal, hogy gátolja az angiogenezist?",
+                        options: ["Bevacizumab", "Dexametazon", "Memantin", "Pentoxifillin"],
+                        answer: "Bevacizumab",
+                        explanation: "A bevacizumab egy VEGF-gátló, amely csökkenti a kóros érképződést és az érfal permeabilitását, ezáltal hatékonyan mérsékli a sugárnekrózis körüli vasogén ödémát."
+                    },
+                    {
+        
+                question: "Milyen típusú neurológiai mellékhatást okoznak leggyakrabban a proteaszóma-gátlók (pl. bortezomib)?",
+                        options: ["Perifériás neuropátia", "Enkefalitisz", "Görcsrohamok", "Myositis"],
+                        answer: "Perifériás neuropátia",
+                        explanation: "A bortezomib és más proteaszóma-gátlók egyik leggyakoribb és dóziskorlátozó mellékhatása a perifériás neuropátia, amely a CIPN-hez hasonló tünetekkel jár."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS az ICI-terápia okozta neurológiai mellékhatásokra (irAEs)?",
+                        options: ["Gyakoriak, a betegek több mint 20%-át érintik.", "Súlyosak és életveszélyesek is lehetnek.", "Kezelésük alapja a kortikoszteroid adása.", "Kialakulhat myasthenia gravis vagy Guillain-Barré szindróma is."],
+                        answer: "Gyakoriak, a betegek több mint 20%-át érintik.",
+                        explanation: "A neurológiai irAE-k ritkák, az ICI-vel kezelt betegeknek csak körülbelül 1-3%-ában fordulnak elő. Ritkaságuk ellenére súlyosságuk miatt nagy a klinikai jelentőségük."
+                    },
+                    {
+                        question: "Mi a Posterior Reversible Encephalopathy Syndrome (PRES) kezelésének egyik legfontosabb eleme?",
+                        options: ["A vérnyomás kontrollja és a kiváltó szer elhagyása", "Azonnali sebészi dekompresszió", "Nagy dózisú antibiotikum terápia", "Hosszú távú antikoaguláns kezelés"],
+                        answer: "A vérnyomás kontrollja és a kiváltó szer elhagyása",
+                        explanation: "A PRES kezelésének alapja a kiváltó ok (pl. gyógyszer, hipertónia) megszüntetése. A vérnyomás óvatos, fokozatos csökkentése és a provokáló szer leállítása általában a tünetek teljes visszafejlődéséhez vezet."
+                    },
+                    {
+                        question: "Milyen patofiziológiai folyamat NEM játszik szerepet a sugárterápia okozta agyi károsodásban?",
+                        options: ["Onkoneurális antitestek termelődése", "A vér-agy gát diszrupciója", "Neuroinflammáció és mikroglia aktiváció", "Oligodendroglia károsodás és demielinizáció"],
+                        answer: "Onkoneurális antitestek termelődése",
+                        explanation: "Az onkoneurális antitestek a paraneopláziás szindrómákra jellemzőek. A sugárkárosodás patomechanizmusa a direkt sejtkárosodáson, gyulladáson és vaszkuláris sérülésen alapul."
+                    },
+                    {
+                        question: "Mire utalhat, ha egy ICI-kezelés során fellépő neurológiai mellékhatás hátterében klasszikus onkoneurális antitestet (pl. anti-Hu) mutatnak ki?",
+                        options: ["Az ICI-terápia egy szubklinikai paraneopláziás hajlamot 'leplezett le'.", "A daganat rezisztenssé vált az ICI-terápiára.", "A betegnek rejtett központi idegrendszeri fertőzése van.", "Ez egy téves laboratóriumi eredmény."],
+                        answer: "Az ICI-terápia egy szubklinikai paraneopláziás hajlamot 'leplezett le'.",
+                        explanation: "Ez a jelenség elmoshatja a határt a paraneopláziás szindróma és a kezelés mellékhatása között. Valószínűsíthető, hogy az immunrendszer általános aktiválása felerősít egy már meglévő, de tüneteket még nem okozó, daganat elleni autoimmun választ."
+                    },
+                    {
+                        question: "Melyik kezelési modalitás neurológiai toxicitása a leginkább dózisfüggő és reverzibilis a kiváltó szer elhagyása után?",
+                        options: ["Célzott terápiák (pl. PRES)", "Immunkontrollpont-gátlók (irAEs)", "Paraneopláziás szindrómák", "Sugárterápia (késői hatások)"],
+                        answer: "Célzott terápiák (pl. PRES)",
+                        explanation: "Ellentétben az immun-mediált vagy a késői, irreverzibilis sugárkárosodással, a célzott terápiák sok neurológiai mellékhatása (mint a PRES) közvetlen farmakológiai hatáson alapul, és a szer dózisának módosításával vagy elhagyásával általában visszafordítható."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb neurológiai szövődménye a daganatellenes kezeléseknek összességében?",
+                        options: ["Kemoterápia okozta perifériás neuropátia (CIPN)", "Sugárnekrózis", "Immun-mediált enkefalitisz", "Paraneopláziás cerebelláris degeneráció"],
+                        answer: "Kemoterápia okozta perifériás neuropátia (CIPN)",
+                        explanation: "A CIPN a daganatellenes kezelések egyik leggyakoribb mellékhatása, amely a betegek jelentős részét érinti, és komoly hatással van az életminőségükre."
+                    },
+                    {
+                        question: "Milyen típusú sejtek károsodása vezet a sugárterápia utáni demielinizációhoz?",
+                        options: ["Oligodendrociták", "Asztrociták", "Neuronok", "Mikrogliasejtek"],
+                        answer: "Oligodendrociták",
+                        explanation: "Az oligodendrociták felelősek a központi idegrendszerben a mielinhüvely képzéséért. Sugárkárosodásuk demielinizációhoz és a jelátvitel lassulásához vezet, ami a korai-késői és késői szövődmények egyik alapja."
+                    },
+                    {
+                        question: "Mi a diagnosztikus eljárás alapja az ICI-indukált neurológiai mellékhatásoknál?",
+                        options: ["Más lehetséges okok (pl. áttét, fertőzés) kizárása", "Specifikus antitestek kimutatása minden esetben", "Jellegzetes MRI lelet", "Gyors javulás szteroidokra"],
+                        answer: "Más lehetséges okok (pl. áttét, fertőzés) kizárása",
+                        explanation: "Az irAE diagnózisa egy kizárásos diagnózis. Először mindig ki kell zárni a daganat progresszióját (pl. agyi áttét), fertőzést, metabolikus vagy egyéb toxikus okokat, mielőtt a tüneteket az ICI-terápiának tulajdonítanánk."
+                    },
+                    {
+                        question: "Melyik állítás igaz a 'chemo brain'-re?",
+                        options: ["Multifaktoriális, a rák és a kezelések egyaránt okozhatják.", "Kizárólag a kemoterápia okozza.", "Mindig maradandó és progresszív.", "Csak idős betegeknél fordul elő."],
+                        answer: "Multifaktoriális, a rák és a kezelések egyaránt okozhatják.",
+                        explanation: "A 'chemo brain' egy komplex jelenség, amelynek hátterében nemcsak a kemoterápia, hanem maga a daganat, a stressz, hormonterápiák, sugárkezelés és egyéb tényezők is állhatnak."
+                    }
+                ]
+            },
+            {
+                topic: "A botulinum toxin a neurológiai therápiában",
+                questions: [
+                    {
+                        question: "Mi a botulinum toxin A (BoNT-A) primer hatásmechanizmusa a neuromuszkuláris junkcióban?",
+                        options: ["A SNAP-25 fehérje hasítása, gátolva az acetilkolin felszabadulását", "A posztszinaptikus acetilkolin receptorok blokkolása", "Az acetilkolin-észteráz enzim gátlása", "A nátriumcsatornák blokkolása az izomsejteken"],
+                        answer: "A SNAP-25 fehérje hasítása, gátolva az acetilkolin felszabadulását",
+                        explanation: "A BoNT-A a preszinaptikus idegvégződésbe jutva specifikusan hasítja a SNAP-25 fehérjét, ami megakadályozza az acetilkolint tartalmazó vezikulák fúzióját a sejtmembránnal, így gátolva a neurotranszmitter felszabadulását."
+                    },
+                    {
+                        question: "Melyik kórképben számít a botulinum toxin első vonalbeli kezelésnek?",
+                        options: ["Fokális dystoniák (pl. cervicalis dystonia, blepharospasmus)", "Parkinson-kór", "Sclerosis multiplex", "Alzheimer-kór"],
+                        answer: "Fokális dystoniák (pl. cervicalis dystonia, blepharospasmus)",
+                        explanation: "Számos fokális dystonia, mint a cervicalis dystonia (torticollis) vagy a blepharospasmus, kezelésében a BoNT-A az elsőként választandó, leghatékonyabb terápia."
+                    },
+                    {
+                        question: "Milyen mechanizmussal hat a botulinum toxin krónikus migrénben?",
+                        options: ["A fájdalommal kapcsolatos neurotranszmitterek (pl. CGRP, P-anyag) felszabadulásának gátlása", "A pericranialis izmok tartós bénítása", "A vér-agy gát áteresztőképességének csökkentése", "A szerotonin szintjének növelése az agyban"],
+                        answer: "A fájdalommal kapcsolatos neurotranszmitterek (pl. CGRP, P-anyag) felszabadulásának gátlása",
+                        explanation: "Krónikus migrénben a BoNT-A nemcsak az izmokat lazítja, hanem gátolja a szenzoros idegvégződésekből a fájdalomérzet kialakulásában és fenntartásában szerepet játszó neuropeptidek (pl. CGRP) felszabadulását is."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS a botulinum toxin terápiával kapcsolatban?",
+                        options: ["A különböző BoNT-A készítmények (Botox, Dysport) egységei szabadon felcserélhetők.", "A hatás általában 3-4 hónapig tart.", "A kezelés célja a tüneti enyhülés, nem a gyógyítás.", "A hatás kialakulása általában napokat, heteket vesz igénybe."],
+                        answer: "A különböző BoNT-A készítmények (Botox, Dysport) egységei szabadon felcserélhetők.",
+                        explanation: "A különböző gyártók BoNT-A készítményeinek potenciaegységei nem azonosak és nem cserélhetők fel egymással 1:1 arányban. A váltás mindig a specifikus készítményre vonatkozó adagolási útmutató alapján történhet."
+                    },
+                    {
+                        question: "Mi a leggyakoribb mellékhatása a cervicalis dystonia botulinum toxinnal történő kezelésének?",
+                        options: ["Dysphagia (nyelészavar) és nyaki gyengeség", "Generalizált izomgyengeség", "Láz és hidegrázás", "Súlyos allergiás reakció"],
+                        answer: "Dysphagia (nyelészavar) és nyaki gyengeség",
+                        explanation: "A toxin lokális terjedése a nyak mély izmaiba vagy a nyelőcső körüli izmokba átmeneti nyelészavart és a kezelt izmok gyengülése miatti nyaki gyengeséget okozhat."
+                    },
+                    {
+                        question: "Melyik állapot esetén kell különös óvatossággal alkalmazni a botulinum toxint a súlyos mellékhatások fokozott kockázata miatt?",
+                        options: ["Amyotrophiás lateralsclerosis (ALS)", "Esszenciális tremor", "Krónikus migrén", "Hyperhidrosis"],
+                        answer: "Amyotrophiás lateralsclerosis (ALS)",
+                        explanation: "Olyan alapbetegségként fennálló neuromuszkuláris betegségekben, mint az ALS vagy a myasthenia gravis, a betegek fokozottan érzékenyek a toxin hatására, és már terápiás dózisok is súlyos, generalizált gyengeséget, légzési- és nyelési nehézséget okozhatnak."
+                    },
+                    {
+                        question: "Hogyan kezeli a botulinum toxin a sialorrheát (fokozott nyálfolyás)?",
+                        options: ["A nyálmirigyekbe injektálva csökkenti a nyáltermelést.", "A nyelőizmokba injektálva javítja a nyelést.", "Központi idegrendszeri hatással csökkenti a nyálelválasztást.", "Gátolja a száj körüli izmokat."],
+                        answer: "A nyálmirigyekbe injektálva csökkenti a nyáltermelést.",
+                        explanation: "A BoNT-A-t közvetlenül a nagy nyálmirigyekbe (glandula parotis, submandibularis) injektálják, ahol gátolja az acetilkolin-mediált szekréciót, így csökkentve a nyáltermelést."
+                    },
+                    {
+                        question: "Milyen kiegészítő terápia maximalizálja a botulinum toxin hatékonyságát spaszticitás kezelésekor?",
+                        options: ["Fizikoterápia és nyújtás", "Nagy dózisú fájdalomcsillapítók", "Pszichoterápia", "Kizárólag pihentetés"],
+                        answer: "Fizikoterápia és nyújtás",
+                        explanation: "A BoNT-A egy 'terápiás ablakot' nyit a spaszticitás csökkentésével. Ezt az időszakot kell kihasználni intenzív gyógytornával, nyújtással és funkcionális gyakorlatokkal a mozgástartomány növelése és a kontraktúrák megelőzése érdekében."
+                    },
+                    {
+                        question: "Mennyi idővel az injekció után kezdődik általában a botulinum toxin hatása és mikor éri el a csúcsát?",
+                        options: ["A hatás 5-7 nap múlva kezdődik, a csúcsát 2 hét múlva éri el.", "A hatás azonnali, és 24 órán belül eléri a csúcsát.", "A hatás 2 hét múlva kezdődik, a csúcsát 1 hónap múlva éri el.", "A hatás 1 hónap múlva kezdődik, és 3 hónapig fokozódik."],
+                        answer: "A hatás 5-7 nap múlva kezdődik, a csúcsát 2 hét múlva éri el.",
+                        explanation: "A BoNT-A hatása nem azonnali. A klinikai javulás általában az injekció utáni első héten belül kezdődik, és a maximális hatás körülbelül 2-4 hét alatt alakul ki."
+                    },
+                    {
+                        question: "Mi az immunrezisztencia kialakulásának oka a botulinum toxin terápia során?",
+                        options: ["Neutralizáló antitestek képződése a toxin fehérje ellen", "A toxin receptorainak down-regulációja", "A toxin gyorsabb lebomlása", "A SNAP-25 fehérje mutációja"],
+                        answer: "Neutralizáló antitestek képződése a toxin fehérje ellen",
+                        explanation: "Ismételt kezelések során a szervezet idegen fehérjeként ismerheti fel a toxint, és ellene neutralizáló antitesteket termelhet, amelyek megakadályozzák a toxin kötődését és hatását, így a kezelés hatástalanná válik."
+                    },
+                    {
+                        question: "Melyik a PREEMPT protokoll szerinti indikációja a botulinum toxinnak?",
+                        options: ["Krónikus migrén", "Epizodikus migrén", "Tenziós fejfájás", "Cluster fejfájás"],
+                        answer: "Krónikus migrén",
+                        explanation: "A PREEMPT (Phase 3 REsearch Evaluating Migraine Prophylaxis Therapy) vizsgálatok igazolták a BoNT-A hatékonyságát a krónikus migrén profilaktikus kezelésében, ami alapján az FDA jóváhagyta ezt az indikációt."
+                    },
+                    {
+                        question: "Milyen mechanizmussal hat a botulinum toxin a húgyhólyag túlműködés kezelésében?",
+                        options: ["A detrusor izomzatba injektálva gátolja annak akaratlan összehúzódásait", "A hólyag szenzoros beidegzését blokkolja", "Növeli a hólyagkapacitást a központi idegrendszeren keresztül", "Gátolja a vizeletürítési reflexet a gerincvelőben"],
+                        answer: "A detrusor izomzatba injektálva gátolja annak akaratlan összehúzódásait",
+                        explanation: "A toxint a hólyag falába (detrusor izom) injektálják, ahol az acetilkolin-felszabadulás gátlásával csökkenti az izom túlzott, akaratlan összehúzódásait, így enyhítve a sürgősségi vizelési ingert és az inkontinenciát."
+                    },
+                    {
+                        question: "Mi a botulinum toxinnal kezelt blepharospasmus leggyakoribb mellékhatása?",
+                        options: ["Ptosis (szemhéjcsüngés)", "Kettőslátás", "Szemszárazság", "Fényérzékenység"],
+                        answer: "Ptosis (szemhéjcsüngés)",
+                        explanation: "A szem körüli izomba (m. orbicularis oculi) adott injekció során a toxin átterjedhet a szemhéjemelő izomra (m. levator palpebrae), annak átmeneti gyengeségét és a szemhéj csüngését okozva."
+                    },
+                    {
+                        question: "A botulinum toxin kezelés hatása reverzibilis. Mi ennek az élettani alapja?",
+                        options: ["Új idegvégződések sarjadzása (sprouting)", "A SNAP-25 fehérje regenerációja", "A toxin lebomlása a keringésben", "A toxin elleni antitestek gyors képződése"],
+                        answer: "Új idegvégződések sarjadzása (sprouting)",
+                        explanation: "A toxin által blokkolt idegvégződésből idővel új nyúlványok (sprouts) nőnek ki, amelyek új, működőképes neuromuszkuláris junkciókat hoznak létre, így az izomösszehúzódás képessége helyreáll."
+                    },
+                    {
+                        question: "Milyen képalkotó vagy elektrofiziológiai módszer segíti a legpontosabb izomlokalizációt a BoNT-A injekciók során?",
+                        options: ["Ultrahang (UH) vagy elektromiográfia (EMG) vezérlés", "Röntgen átvilágítás", "CT-vezérlés", "Kizárólag anatómiai tájékozódási pontok"],
+                        answer: "Ultrahang (UH) vagy elektromiográfia (EMG) vezérlés",
+                        explanation: "Különösen mélyen fekvő vagy kis izmok esetén az EMG (az izomaktivitás detektálása) vagy az UH (az izom és a tű vizualizálása) vezérlés biztosítja a legpontosabb célzást, növelve a hatékonyságot és csökkentve a mellékhatásokat."
+                    },
+                    {
+                        question: "Melyik állítás igaz a botulinum toxin terápiára?",
+                        options: ["A hatás dózisfüggő.", "A hatás nem dózisfüggő.", "Minél nagyobb a dózis, annál hosszabb a hatás.", "A hatás azonnal kialakul."],
+                        answer: "A hatás dózisfüggő.",
+                        explanation: "A BoNT-A hatásának mértéke és a mellékhatások kockázata is dózisfüggő. Az optimális terápia a legalacsonyabb hatékony dózis alkalmazása a kívánt eredmény eléréséhez, minimális mellékhatások mellett."
+                    },
+                    {
+                        question: "Milyen típusú tremort lehet hatékonyan kezelni botulinum toxinnal?",
+                        options: ["Fokális, gyógyszerrezisztens tremort", "Nyugalmi tremort Parkinson-kórban", "Minden típusú tremort", "Pszichogén tremort"],
+                        answer: "Fokális, gyógyszerrezisztens tremort",
+                        explanation: "A BoNT-A elsősorban a fokális (egy testrészt érintő), például a fej-, hangszalag- vagy kéztremor kezelésében hatékony, ha az a gyógyszeres terápiára nem reagál."
+                    },
+                    {
+                        question: "Miért nem jut át a botulinum toxin a vér-agy gáton?",
+                        options: ["Mert egy nagy méretű fehérje molekula.", "Mert gyorsan lebomlik a vérben.", "Mert a vér-agy gát receptorai kilökik.", "Mert zsírban nem oldódik."],
+                        answer: "Mert egy nagy méretű fehérje molekula.",
+                        explanation: "A botulinum toxin egy viszonylag nagy (kb. 150 kDa) fehérje, amely méreténél fogva nem képes passzívan átjutni a vér-agy gát szoros sejtkapcsolatain."
+                    },
+                    {
+                        question: "Melyik állítás igaz a botulinum toxinnal történő spaszticitás kezelésére?",
+                        options: ["Nem szünteti meg a fixált kontraktúrákat.", "Mindig javítja a végtag funkcionális használatát.", "Megszünteti a spaszticitás okát.", "A hatás végleges."],
+                        answer: "Nem szünteti meg a fixált kontraktúrákat.",
+                        explanation: "A BoNT-A az izomtónus dinamikus komponensét csökkenti. Ha már kialakult egy fixált ízületi merevség (kontraktúra), azt a toxin önmagában nem képes oldani, ahhoz egyéb (pl. sebészi) beavatkozás szükséges."
+                    },
+                    {
+                        question: "Hogyan kell tárolni a feloldott Botox készítményt?",
+                        options: ["Hűtőszekrényben (2-8°C), és 24 órán belül felhasználni", "Szobahőmérsékleten, és 4 órán belül felhasználni", "Fagyasztva, és egy héten belül felhasználni", "Fénytől védve, és 48 órán belül felhasználni"],
+                        answer: "Hűtőszekrényben (2-8°C), és 24 órán belül felhasználni",
+                        explanation: "A gyártói előírás szerint a feloldott készítményt hűtve kell tárolni és 24 órán belül fel kell használni a hatékonyság és a sterilitás megőrzése érdekében."
+                    }
+                ]
+            },
+            {
+                topic: "Járászavarok differenciáldiagnózisa",
+                questions: [
+                    {
+                        question: "Milyen neurológiai kórkép okozza leggyakrabban a hemiplegiás járást?",
+                        options: ["Stroke", "Parkinson-kór", "Sclerosis multiplex", "Perifériás neuropathia"],
+                        answer: "Stroke",
+                        explanation: "A hemiplegiás járás, melyet az egyik testfél gyengesége és spaszticitása jellemez (körző mozgású láb, behajlított kar), leggyakrabban stroke utáni maradványtünetként figyelhető meg."
+                    },
+                    {
+                        question: "Mi a spasztikus diplegiás (ollózó) járás hátterében álló leggyakoribb ok?",
+                        options: ["Agyi bénulás (cerebral palsy)", "Gerincvelő sérülés", "Guillain-Barré szindróma", "Izomdisztrófia"],
+                        answer: "Agyi bénulás (cerebral palsy)",
+                        explanation: "Az ollózó járás, melyet a csípő adduktor izmainak extrém feszessége okoz, jellegzetesen a kétoldali periventricularis léziókban, például az agyi bénulás spasztikus diplegiás formájában látható."
+                    },
+                    {
+                        question: "Melyik tünet jellemző a neuropátiás (lépcsőző) járásra?",
+                        options: ["A láb magasra emelése a lábfejcsüngés kompenzálására", "Kis, csoszogó lépések", "Széles alapú, tántorgó járás", "A medence kacsázó mozgása"],
+                        answer: "A láb magasra emelése a lábfejcsüngés kompenzálására",
+                        explanation: "A lábfej emelő izmainak gyengesége (lábcsüngés) miatt a betegnek magasra kell emelnie a térdét, hogy a lábujjai ne akadjanak a talajba, ami a 'lépcsőző' (steppage) járásmintát eredményezi."
+                    },
+                    {
+                        question: "A myopathiás (kacsázó) járást melyik izomcsoport gyengesége okozza elsősorban?",
+                        options: ["Csípő abductorok (pl. gluteus medius)", "Térdfeszítők (quadriceps)", "Lábfej emelők (tibialis anterior)", "Vádli izmok (gastrocnemius)"],
+                        answer: "Csípő abductorok (pl. gluteus medius)",
+                        explanation: "A csípő abductor izmok (főleg a m. gluteus medius) gyengesége miatt a medence a lengő láb oldalára billen (Trendelenburg-tünet). Kétoldali gyengeség esetén ez a medencebillenés oldalváltva jelentkezik, ami a jellegzetes kacsázó járást okozza."
+                    },
+                    {
+                        question: "Mi a 'marche à petits pas'?",
+                        options: ["Kis, csoszogó lépésekből álló járás", "Magasra emelt lábakkal történő járás", "Táncoló, akaratlan mozgásokkal tarkított járás", "Félkörben húzott lábbal történő járás"],
+                        answer: "Kis, csoszogó lépésekből álló járás",
+                        explanation: "A 'marche à petits pas' (francia: 'kis lépésekkel járás') a Parkinsonos járás jellegzetessége, melyet a bradikinézia és rigiditás miatti rövid, csoszogó lépések jellemeznek."
+                    },
+                    {
+                        question: "Melyik járásmintára jellemző a széles alap, a tántorgás és a tandemjárás képtelensége?",
+                        options: ["Cerebelláris ataxiás járás", "Szenzoros ataxiás járás", "Parkinsonos járás", "Hemiplegiás járás"],
+                        answer: "Cerebelláris ataxiás járás",
+                        explanation: "Ezek a tünetek a kisagy (cerebellum) károsodására utalnak, amely az egyensúly és a mozgáskoordináció központja. A járás bizonytalan, 'részeges' jellegű."
+                    },
+                    {
+                        question: "Mi a legfontosabb különbség a cerebelláris és a szenzoros ataxia között?",
+                        options: ["A szenzoros ataxia jelentősen rosszabbodik a vizuális kontroll hiányában (csukott szemmel).", "A cerebelláris ataxia csak az alsó végtagokat érinti.", "A szenzoros ataxiára nem jellemző a széles alapú járás.", "A cerebelláris ataxia mindig akut kezdetű."],
+                        answer: "A szenzoros ataxia jelentősen rosszabbodik a vizuális kontroll hiányában (csukott szemmel).",
+                        explanation: "Szenzoros ataxiában a beteg a mélyérzés (propriocepció) kiesését a látásával kompenzálja. Ha ezt a vizuális kontrollt megszüntetjük (pl. a beteg becsukja a szemét), az egyensúlyzavar drámaian fokozódik (pozitív Romberg-tünet)."
+                    },
+                    {
+                        question: "Melyik agyi struktúra károsodása okoz koreiform járást?",
+                        options: ["Bazális ganglionok (striatum)", "Kisagy (cerebellum)", "Frontális lebeny", "Gerincvelő hátsó kötegei"],
+                        answer: "Bazális ganglionok (striatum)",
+                        explanation: "A chorea (szabálytalan, 'táncoló' mozgások) a bazális ganglionok, különösen a striatum (nucleus caudatus és putamen) diszfunkciójának következménye, mint például Huntington-kórban."
+                    },
+                    {
+                        question: "Melyik betegségben a legjellemzőbb a járás lefagyása (freezing of gait)?",
+                        options: ["Parkinson-kór", "Stroke", "Agyi bénulás", "Izomdisztrófia"],
+                        answer: "Parkinson-kór",
+                        explanation: "A 'freezing' a Parkinson-kór egyik jellegzetes és súlyosan invalidizáló tünete, amikor a beteg hirtelen képtelenné válik a lépések elindítására vagy folytatására, mintha a lába a földhöz ragadt volna."
+                    },
+                    {
+                        question: "Miért kulcsfontosságú a járásvizsgálat a neurológiai diagnosztikában?",
+                        options: ["Mert a jellegzetes járásminták segítenek a neurológiai károsodás helyének meghatározásában (lokalizáció).", "Mert minden neurológiai betegség járászavarral jár.", "Mert ez a legegyszerűbb vizsgálat.", "Mert helyettesíti a képalkotó vizsgálatokat."],
+                        answer: "Mert a jellegzetes járásminták segítenek a neurológiai károsodás helyének meghatározásában (lokalizáció).",
+                        explanation: "A különböző járásminták (pl. spasztikus, ataxiás, parkinsonos) az idegrendszer különböző rendszereinek (piramispálya, kisagy, bazális ganglionok) károsodására utalnak, így a járás elemzése segít a klinikusnak a lézió helyének beazonosításában."
+                    },
+                    {
+                        question: "Melyik járástípusra jellemző a lábfej félkörívben történő előrelendítése (circumductio)?",
+                        options: ["Hemiplegiás járás", "Ataxiás járás", "Myopathiás járás", "Parkinsonos járás"],
+                        answer: "Hemiplegiás járás",
+                        explanation: "A spasztikus, kinyújtott alsó végtag és a lábfejcsüngés miatt a beteg nem tudja a lábát egyszerűen előrelendíteni, ezért egy jellegzetes félköríves mozgással, a medence megemelésével 'körző' mozdulatot végez."
+                    },
+                    {
+                        question: "Melyik járászavar hátterében állhat L5 gyöki károsodás (radiculopathia)?",
+                        options: ["Neuropátiás (lépcsőző) járás", "Spasztikus járás", "Ataxiás járás", "Myopathiás járás"],
+                        answer: "Neuropátiás (lépcsőző) járás",
+                        explanation: "Az L5 gyök látja el a lábfej és a lábujjak emeléséért felelős izmokat. Károsodása lábfejcsüngést és következményes lépcsőző járást okoz."
+                    },
+                    {
+                        question: "Melyik járásmintázatot utánozza az akut alkoholmérgezés?",
+                        options: ["Cerebelláris ataxiás járás", "Parkinsonos járás", "Spasztikus járás", "Koreiform járás"],
+                        answer: "Cerebelláris ataxiás járás",
+                        explanation: "Az alkohol átmenetileg károsítja a kisagy működését, ami a cerebelláris ataxiára jellemző széles alapú, tántorgó, koordinálatlan járást eredményez."
+                    },
+                    {
+                        question: "Mi az antalgiás járás?",
+                        options: ["Fájdalom miatti sántítás, az érintett végtag tehermentesítésével", "Akaratlan mozgásokkal tarkított járás", "Lelki okokból kialakuló bizarr járásminta", "Túlzottan lassú, óvatos járás"],
+                        answer: "Fájdalom miatti sántítás, az érintett végtag tehermentesítésével",
+                        explanation: "Az antalgiás járás egy védekező mechanizmus, ahol a beteg a fájdalmas végtagon a lehető legrövidebb ideig tartja a testsúlyát, ami jellegzetes, aszimmetrikus sántítást eredményez."
+                    },
+                    {
+                        question: "Melyik állítás igaz a disztóniás járásra?",
+                        options: ["Akaratlan izomösszehúzódások okozta kóros testtartás nehezíti.", "Mindig szimmetrikus és ritmusos.", "Csak a törzs izmait érinti.", "A beteg akaratlagosan tudja korrigálni."],
+                        answer: "Akaratlan izomösszehúzódások okozta kóros testtartás nehezíti.",
+                        explanation: "A disztóniás járást a végtagok vagy a törzs akaratlan, tartós izomösszehúzódásai által létrehozott kóros, csavaró testtartások jellemzik, amelyek akadályozzák a normális mozgásmintát."
+                    },
+                    {
+                        question: "Melyik járászavart jellemzi a Trendelenburg-tünet?",
+                        options: ["Myopathiás (kacsázó) járás", "Spasztikus járás", "Parkinsonos járás", "Szenzoros ataxiás járás"],
+                        answer: "Myopathiás (kacsázó) járás",
+                        explanation: "A Trendelenburg-tünet (a medence lebillenése a lengő láb oldalára) a csípő abductor izmainak gyengeségét jelzi, ami a myopathiás járás alapja."
+                    },
+                    {
+                        question: "Melyik betegség NEM okoz jellemzően spasztikus járást?",
+                        options: ["Huntington-kór", "Stroke", "Sclerosis multiplex", "Gerincvelő-sérülés"],
+                        answer: "Huntington-kór",
+                        explanation: "A Huntington-kór a bazális ganglionok betegsége és koreiform (táncoló) járást okoz. A spasztikus járás a piramispálya (felső motoneuron) károsodásának a jele, ami a másik három kórképben előfordul."
+                    },
+                    {
+                        question: "Melyik vizsgálat segít elkülöníteni a neuropátiás és myopathiás járászavart?",
+                        options: ["Elektromiográfia (EMG) és idegvezetési vizsgálat (ENG)", "Koponya MRI", "Liquorvizsgálat", "Vérvétel"],
+                        answer: ["Elektromiográfia (EMG) és idegvezetési vizsgálat (ENG)"],
+                        explanation: "Az EMG/ENG vizsgálatok képesek megkülönböztetni az idegkárosodás (neuropathia) és az izomkárosodás (myopathia) jeleit, így segítve a két, hasonló tünetekkel járó állapot differenciáldiagnózisát."
+                    },
+                    {
+                        question: "Melyik járászavarban fordulhat elő festináció (akaratlan gyorsulás)?",
+                        options: ["Parkinsonos járás", "Ataxiás járás", "Spasztikus járás", "Hemiplegiás járás"],
+                        answer: "Parkinsonos járás",
+                        explanation: "A festináció a Parkinsonos járás egyik paradox jelensége, amikor a beteg apró, csoszogó lépései akaratlanul felgyorsulnak, és szinte 'üldözi a saját súlypontját', ami növeli az esés kockázatát."
+                    },
+                    {
+                        question: "Idős, eleséstől félő betegnél milyen típusú járás figyelhető meg gyakran?",
+                        options: ["Óvatos (cautious) járás", "Koreiform járás", "Ollózó járás", "Lépcsőző járás"],
+                        answer: "Óvatos (cautious) járás",
+                        explanation: "Az óvatos járás egy nem-specifikus, pszichogén vagy multifaktoriális eredetű járászavar, melyet a széles alap, lassú tempó, rövid lépések és a test merevsége jellemez, az eleséstől való félelem miatt."
+                    }
+                ]
+            },
+            {
+                topic: "Idegsebészeti beavatkozások mozgászavarokban",
+                questions: [
+                    {
+                        question: "Mi a mélyagyi stimuláció (DBS) legfőbb előnye az ablatív (roncsolásos) eljárásokkal szemben?",
+                        options: ["Reverzibilis és állítható", "Olcsóbb és gyorsabb", "Nem igényel beültetett eszközt", "Kisebb a fertőzés kockázata"],
+                        answer: "Reverzibilis és állítható",
+                        explanation: "A DBS legnagyobb előnye, hogy a stimulációs paraméterek a beteg állapotának változásához igazíthatók, a mellékhatások minimalizálhatók, és az eljárás elméletileg visszafordítható az eszköz eltávolításával, ellentétben az irreverzibilis léziókkal."
+                    },
+                    {
+                        question: "Melyik a mélyagyi stimuláció (DBS) leggyakoribb célpontja esszenciális tremor kezelésében?",
+                        options: ["A thalamus ventrális intermedius magja (VIM)", "A nucleus subthalamicus (STN)", "A globus pallidus interna (GPi)", "A nucleus accumbens"],
+                        answer: "A thalamus ventrális intermedius magja (VIM)",
+                        explanation: "A VIM a motoros thalamus része, amely kulcsszerepet játszik a tremor-generátor hálózatban. Ennek a magnak a stimulálása rendkívül hatékonyan csökkenti az esszenciális tremort."
+                    },
+                    {
+                        question: "Melyik a legfontosabb indikációja a DBS-nek Parkinson-kórban?",
+                        options: ["Gyógyszeres kezelésre már nem reagáló súlyos motoros fluktuációk és diszkinéziák", "A betegség korai, enyhe stádiuma", "Kizárólag a nem-motoros tünetek (pl. depresszió)", "Súlyos demencia és egyensúlyzavar"],
+                        answer: "Gyógyszeres kezelésre már nem reagáló súlyos motoros fluktuációk és diszkinéziák",
+                        explanation: "A DBS akkor a leghatékonyabb, ha a beteg a levodopára még jól reagál, de a gyógyszerhatás időtartama lerövidül ('on-off' fluktuációk) és a csúcsdózisban zavaró, akaratlan mozgások (diszkinéziák) jelentkeznek."
+                    },
+                    {
+                        question: "Mi a mágneses rezonancia vezérelt fókuszált ultrahang (MRgFUS) működési elve?",
+                        options: ["Nagy energiájú hanghullámokkal, MRI vezérlés mellett hő-indukált léziót hoz létre.", "Mágneses mezővel gátolja a kóros agyi aktivitást.", "Ultrahanggal juttat gyógyszert a célterületre.", "Lézersugárral roncsolja a célsejteket."],
+                        answer: "Nagy energiájú hanghullámokkal, MRI vezérlés mellett hő-indukált léziót hoz létre.",
+                        explanation: "Az MRgFUS egy non-invazív ablatív eljárás, amely több száz ultrahang-nyalábot fókuszál egyetlen pontba az agyban, ott a hőmérsékletet megemelve precíz, körülírt szöveti roncsolást (termoablációt) végez."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS a mélyagyi stimulációval (DBS) kapcsolatban?",
+                        options: ["Meggyógyítja a Parkinson-kórt.", "Javítja a motoros tüneteket, mint a tremor, rigiditás, bradykinesia.", "Csökkentheti a gyógyszerigényt.", "A hatékonyság előrejelzésében fontos a levodopa-tesztre adott válasz."],
+                        answer: "Meggyógyítja a Parkinson-kórt.",
+                        explanation: "A DBS egy tüneti kezelés, amely jelentősen javíthatja az életminőséget és a motoros funkciókat, de nem állítja meg és nem fordítja vissza a neurodegeneratív folyamatot, azaz nem gyógyítja meg a betegséget."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb célpont dystonia kezelésére végzett DBS műtét során?",
+                        options: ["Globus pallidus interna (GPi)", "Nucleus subthalamicus (STN)", "Thalamus (VIM)", "Pedunculopontine nucleus (PPN)"],
+                        answer: "Globus pallidus interna (GPi)",
+                        explanation: "A GPi a bazális ganglionok egyik kimeneti struktúrája, amelynek kóros, túlműködése kulcsszerepet játszik a dystoniás testtartások és mozgások kialakulásában. A GPi stimulációja gátolja ezt a kóros kimenetet."
+                    },
+                    {
+                        question: "Melyik állapot jelent általában kontraindikációt a DBS műtétre?",
+                        options: ["Előrehaladott demencia", "Gyógyszerrezisztens tremor", "Súlyos diszkinéziák", "Fiatal életkor"],
+                        answer: "Előrehaladott demencia",
+                        explanation: "Mivel a DBS súlyosbíthatja a kognitív problémákat és a műtét alatti kooperáció is szükséges, a jelentős kognitív hanyatlás vagy demencia általában kizáró ok."
+                    },
+                    {
+                        question: "Mi a szelektív denerváció (SD) műtét fő indikációja?",
+                        options: ["Cervicalis dystonia (torticollis)", "Esszenciális tremor", "Parkinson-kór", "Huntington-kór"],
+                        answer: "Cervicalis dystonia (torticollis)",
+                        explanation: "A szelektív denerváció egy perifériás idegsebészeti eljárás, melynek során a kóros fejtartásért felelős nyaki izmokat beidegző idegágakat vágják át. Elsősorban botulinum toxinra nem reagáló cervicalis dystoniában alkalmazzák."
+                    },
+                    {
+                        question: "Miért végzik a DBS elektróda beültetését gyakran éber állapotban?",
+                        options: ["A stimuláció hatásának és mellékhatásainak valós idejű tesztelése miatt.", "Mert az altatás túl kockázatos.", "Hogy a beteg irányíthassa a műtétet.", "Mert így gyorsabb a beavatkozás."],
+                        answer: "A stimuláció hatásának és mellékhatásainak valós idejű tesztelése miatt.",
+                        explanation: "Az intraoperatív tesztelés (mikroelektróda-regisztráció és tesztstimuláció) során a sebész és a neurológus ellenőrizni tudja az elektróda optimális pozícióját a tünetek javulása és a mellékhatások (pl. zsibbadás, beszédzavar) elkerülése alapján."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb, stimulációval összefüggő mellékhatása a DBS-nek?",
+                        options: ["Dysarthria (beszédzavar) és paresztézia (zsibbadás)", "Agyi vérzés", "Fertőzés", "Elektródatörés"],
+                        answer: "Dysarthria (beszédzavar) és paresztézia (zsibbadás)",
+                        explanation: "Ezek a mellékhatások akkor jelentkeznek, ha a stimulációs áram a motoros célterületről átterjed a szomszédos szenzoros vagy beszédért felelős pályákra. Általában a stimulációs paraméterek módosításával megszüntethetők."
+                    },
+                    {
+                        question: "Melyik non-invazív ablatív eljárás fő indikációja a gyógyszerrezisztens esszenciális tremor?",
+                        options: ["MR-vezérelt fókuszált ultrahang (MRgFUS)", "Lézeres intersticiális hőterápia (LITT)", "Gamma-kés sugársebészet", "Rádiófrekvenciás termoabláció"],
+                        answer: "MR-vezérelt fókuszált ultrahang (MRgFUS)",
+                        explanation: "Az MRgFUS thalamotomia egy teljesen non-invazív, bemetszés nélküli eljárás, amelyet az FDA jóváhagyott a gyógyszerrezisztens esszenciális tremor kezelésére."
+                    },
+                    {
+                        question: "Mi a Vagus Ideg Stimuláció (VNS) egyik fő neurológiai indikációja?",
+                        options: ["Gyógyszerrezisztens epilepszia", "Akut stroke", "Alzheimer-kór", "Amiotrófiás lateralsclerosis (ALS)"],
+                        answer: "Gyógyszerrezisztens epilepszia",
+                        explanation: "A VNS egy elfogadott kiegészítő terápia a gyógyszerekre nem reagáló fokális epilepsziás rohamok számának csökkentésére felnőtteknél és gyermekeknél."
+                    },
+                    {
+                        question: "Melyik állítás igaz az ablatív idegsebészeti eljárásokra?",
+                        options: ["Visszafordíthatatlan (irreverzibilis) léziót hoznak létre.", "A hatásuk mindig állítható.", "Kizárólag daganatok kezelésére használják.", "Nincsenek mellékhatásaik."],
+                        answer: "Visszafordíthatatlan (irreverzibilis) léziót hoznak létre.",
+                        explanation: "Az ablatív eljárások lényege egy kis, célzott agyterület elpusztítása, ami egy tartós, visszafordíthatatlan változást jelent, ellentétben a DBS reverzibilis neuromodulációjával."
+                    },
+                    {
+                        question: "Milyen szakemberekből áll a DBS-t végző multidiszciplináris csapat?",
+                        options: ["Neurológus, idegsebész, neuropszichológus", "Csak idegsebész", "Csak neurológus", "Háziorvos és gyógytornász"],
+                        answer: "Neurológus, idegsebész, neuropszichológus",
+                        explanation: "A megfelelő betegkiválasztáshoz, a műtét precíz elvégzéséhez és a posztoperatív beállításokhoz elengedhetetlen a mozgászavar specialista neurológus, a funkcionális idegsebész és a kognitív/pszichés állapotot felmérő neuropszichológus szoros együttműködése."
+                    },
+                    {
+                        question: "Melyik eljárás jár a legkisebb hardverrel kapcsolatos szövődmény kockázatával?",
+                        options: ["Fókuszált ultrahang (MRgFUS)", "Mélyagyi stimuláció (DBS)", "Vagus ideg stimuláció (VNS)", "Gerincvelő stimuláció (SCS)"],
+                        answer: "Fókuszált ultrahang (MRgFUS)",
+                        explanation: "Mivel az MRgFUS egy non-invazív eljárás, amely nem igényel semmilyen eszköz (elektróda, vezeték, generátor) beültetését, így nincsenek hardverrel kapcsolatos szövődményei sem (pl. törés, fertőzés, elmozdulás)."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb és legsúlyosabb műtéti szövődménye a DBS-nek?",
+                        options: ["Intracerebrális vérzés", "Fertőzés", "Roham", "Elektróda elmozdulás"],
+                        answer: "Intracerebrális vérzés",
+                        explanation: "Bár ritka (1-5%), az elektróda bevezetése során egy ér megsérülhet, ami agyvérzést okozhat, ez a beavatkozás legsúlyosabb, potenciálisan maradandó károsodással járó szövődménye."
+                    },
+                    {
+                        question: "Melyik tünetet NEM javítja általában a DBS Parkinson-kórban?",
+                        options: ["Egyensúlyzavar és kognitív hanyatlás", "Tremor", "Rigiditás", "Diszkinézia"],
+                        answer: "Egyensúlyzavar és kognitív hanyatlás",
+                        explanation: "A DBS elsősorban a levodopára reagáló motoros tüneteket javítja. Az axiális tünetekre, mint az egyensúly- és járászavar, valamint a nem-motoros tünetekre, mint a demencia, kevésbé hatékony, sőt, utóbbit ronthatja is."
+                    },
+                    {
+                        question: "Mi a lézeres intersticiális hőterápia (LITT) lényege?",
+                        options: ["Minimálisan invazív eljárás, ahol lézerrel melegítik és roncsolják a kóros szövetet.", "A lézerfény stimulálja az agysejteket.", "A lézerrel gyógyszert juttatnak be az agyba.", "A lézerrel vágják át a kóros idegpályákat."],
+                        answer: "Minimálisan invazív eljárás, ahol lézerrel melegítik és roncsolják a kóros szövetet.",
+                        explanation: "A LITT során egy kis koponyanyíláson keresztül egy lézerszondát vezetnek a célterületre, és a lézer energiájával felmelegítik, majd elpusztítják a kóros sejteket, például egy daganatot vagy epilepsziás fókuszt."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Vagus Ideg Stimuláció (VNS) hatásmechanizmusára?",
+                        options: ["Modulálja a neurotranszmitterek (noradrenalin, szerotonin) felszabadulását az agyban.", "Közvetlenül gátolja a motoros kérget.", "Növeli az acetilkolin szintjét a neuromuszkuláris junkcióban.", "Blokkolja a vagus ideg működését."],
+                        answer: "Modulálja a neurotranszmitterek (noradrenalin, szerotonin) felszabadulását az agyban.",
+                        explanation: "A vagus ideg stimulálása az agytörzsi magokon (főleg a nucleus tractus solitarii-n) keresztül befolyásolja a felszálló, agykérgi és limbikus területeket moduláló neurotranszmitter rendszereket, így fejtve ki hatását."
+                    },
+                    {
+                        question: "Melyik mozgászavar kezelésére NEM alkalmazzák rutinszerűen a DBS-t?",
+                        options: ["Huntington-kór choreája", "Esszenciális tremor", "Parkinson-kór", "Dystonia"],
+                        answer: "Huntington-kór choreája",
+                        explanation: "Bár kutatások folynak a DBS alkalmazására a Huntington-kór choreájának enyhítésére, ez jelenleg nem számít standard, rutinszerűen alkalmazott terápiának, ellentétben a másik három kórképpel."
+                    }
+                ]
+            },
+            {
+                topic: "Az autonom idegrendszer zavarainak vizsgálata",
+                questions: [
+                    {
+                        question: "Mi a neurogén ortosztatikus hipotenzió (nOH) definíciója?",
+                        options: ["A szisztolés vérnyomás ≥20 Hgmm vagy a diasztolés ≥10 Hgmm esése felálláskor, elégtelen pulzusemelkedés mellett.", "A pulzusszám ≥30/perc emelkedése felálláskor, vérnyomásesés nélkül.", "Hirtelen vérnyomásesés és bradycardia, ami ájuláshoz vezet.", "Magas vérnyomás fekvő helyzetben."],
+                        answer: "A szisztolés vérnyomás ≥20 Hgmm vagy a diasztolés ≥10 Hgmm esése felálláskor, elégtelen pulzusemelkedés mellett.",
+                        explanation: "Az nOH lényege a vérnyomás kóros esése testhelyzet-változtatáskor, ami az autonóm idegrendszer elégtelen kompenzatorikus válasza (elmaradó vazokonstrikció és pulzusemelkedés) miatt következik be."
+                    },
+                    {
+                        question: "Melyik autonóm funkciós teszt vizsgálja specifikusan a posztganglionáris szimpatikus szudomotoros (verejtékező) rostok működését?",
+                        options: ["Kvantitatív Szudomotoros Axon Reflexteszt (QSART)", "Thermoregulatoros Verejtékteszt (TST)", "Valsalva-manőver", "Billenőasztal-vizsgálat (HUTT)"],
+                        answer: "Kvantitatív Szudomotoros Axon Reflexteszt (QSART)",
+                        explanation: "A QSART acetilkolinnal egy axonreflexet vált ki, amely a posztganglionáris szimpatikus rostokon terjed, így direkt módon méri ezen rostok integritását. A TST a teljes pályát vizsgálja."
+                    },
+                    {
+                        question: "Melyik kórképben jellemző a megtartott szív MIBG felvétel súlyos autonóm diszfunkció mellett?",
+                        options: ["Multiplex Szisztémás Atrófia (MSA)", "Parkinson-kór", "Tiszta Autonóm Elégtelenség (PAF)", "Lewy-testes demencia"],
+                        answer: "Multiplex Szisztémás Atrófia (MSA)",
+                        explanation: "MSA-ban a károsodás preganglionáris (centrális), így a szív posztganglionáris szimpatikus idegvégződései épek maradnak, és felveszik az MIBG-t. A többi felsorolt kórképben (synucleinopathiák) a posztganglionáris rostok károsodnak, ami csökkent MIBG felvételhez vezet."
+                    },
+                    {
+                        question: "Mi a Poszturális Ortosztatikus Tachycardia Szindróma (POTS) diagnosztikus kritériuma?",
+                        options: ["A pulzusszám ≥30/perc emelkedése felálláskor, jelentős vérnyomásesés nélkül.", "A pulzusszám ≥30/perc csökkenése felálláskor.", "A szisztolés vérnyomás ≥30 Hgmm esése felálláskor.", "Mindig jelenlévő autoantitestek."],
+                        answer: "A pulzusszám ≥30/perc emelkedése felálláskor, jelentős vérnyomásesés nélkül.",
+                        explanation: "A POTS lényege a túlzott, kompenzatorikus tachycardia ortosztatikus stresszre, miközben a vérnyomás nem esik le kóros mértékben. A diagnózishoz az ortosztatikus intolerancia tünetei is szükségesek."
+                    },
+                    {
+                        question: "Melyik a diabéteszes kardiovaszkuláris autonóm neuropátia (CAN) legkorábbi, gyakran szubklinikai jele?",
+                        options: ["A szívfrekvencia-variabilitás (HRV) csökkenése", "Súlyos ortosztatikus hipotenzió", "Gastroparesis", "Erectilis diszfunkció"],
+                        answer: "A szívfrekvencia-variabilitás (HRV) csökkenése",
+                        explanation: "A leghosszabb autonóm ideg, a nervus vagus károsodik először, ami a légzéssel szinkron szívfrekvencia-ingadozás (respiratoros sinus arrhythmia) csökkenésében vagy eltűnésében nyilvánul meg."
+                    },
+                    {
+                        question: "Melyik betegség hátterében állnak a ganglionáris nikotinos acetilkolin receptorok elleni autoantitestek?",
+                        options: ["Autoimmun Autonóm Ganglionopátia (AAG)", "Multiplex Szisztémás Atrófia (MSA)", "Tiszta Autonóm Elégtelenség (PAF)", "POTS"],
+                        answer: "Autoimmun Autonóm Ganglionopátia (AAG)",
+                        explanation: "Az AAG egy immunmediált betegség, ahol az autoantitestek az autonóm ganglionok acetilkolin receptorait támadják, gátolva az ingerületátvitelt és generalizált autonóm elégtelenséget okozva."
+                    },
+                    {
+                        question: "Mi a Valsalva-manőver során a IV. fázisban megfigyelhető vérnyomás 'overshoot' és bradycardia élettani alapja?",
+                        options: ["A baroreflex által mediált, a vérnyomás-emelkedésre adott vagus-aktiváció.", "A szimpatikus idegrendszer kimerülése.", "A hasprés megszűnése miatti hirtelen vénás pooling.", "A paraszimpatikus idegrendszer direkt stimulációja."],
+                        answer: "A baroreflex által mediált, a vérnyomás-emelkedésre adott vagus-aktiváció.",
+                        explanation: "A préselés megszűnése után a vénás visszaáramlás helyreáll, és a korábban aktivált szimpatikus tónus miatt a vérnyomás a kiindulási érték fölé lő. Ezt a magas vérnyomást érzékelik a baroreceptorok, ami reflexes vagus-aktivációt és következményes pulzusszám-csökkenést (bradycardia) vált ki."
+                    },
+                    {
+                        question: "Melyik állítás igaz a szimpatikus és paraszimpatikus idegrendszer kapcsolatára?",
+                        options: ["Dinamikus egyensúlyban, koordináltan működnek.", "Mindig antagonisztikusan, egymás ellen hatnak.", "A szimpatikus rendszer csak vészhelyzetben aktív.", "A paraszimpatikus rendszer csak alvás közben aktív."],
+                        answer: "Dinamikus egyensúlyban, koordináltan működnek.",
+                        explanation: "Bár sok szervben ellentétes hatásúak, a két rendszer működése egy finoman hangolt, dinamikus egyensúlyon alapul, amely folyamatosan alkalmazkodik a szervezet belső és külső környezeti igényeihez a homeosztázis fenntartása érdekében."
+                    },
+                    {
+                        question: "Melyik a leghatékonyabb nem-farmakológiai módszer a POTS hosszú távú kezelésében?",
+                        options: ["Fokozatos fizikai tréning (rekondicionálás)", "Nagy mennyiségű só fogyasztása", "Kizárólag kompressziós harisnya viselése", "Teljes ágynyugalom"],
+                        answer: "Fokozatos fizikai tréning (rekondicionálás)",
+                        explanation: "A lassan, fokozatosan felépített edzésprogram (különösen fekvő helyzetű mozgásformák, mint úszás, evezés) bizonyítottan javítja az ortosztatikus toleranciát és a funkcionális kapacitást, és a kezelés sarokkövét képezi."
+                    },
+                    {
+                        question: "Melyik kórképre jellemző a korai és súlyos urogenitális diszfunkció (erektilis zavar, inkontinencia) és az éjszakai stridor?",
+                        options: ["Multiplex Szisztémás Atrófia (MSA)", "Parkinson-kór", "Tiszta Autonóm Elégtelenség (PAF)", "Diabéteszes autonóm neuropátia"],
+                        answer: "Multiplex Szisztémás Atrófia (MSA)",
+                        explanation: "Az MSA-ra jellemző a korai és súlyos autonóm elégtelenség, amelynek markáns tünete az urogenitális zavar és a gégeizmok parézise miatti, potenciálisan életveszélyes éjszakai stridor."
+                    },
+                    {
+                        question: "Mi a 'néma' myocardialis infarctus jelensége diabéteszes autonóm neuropátiában?",
+                        options: ["A szívizominfarktus a jellegzetes mellkasi fájdalom nélkül zajlik le.", "Az infarktus nem látható az EKG-n.", "Az infarktus nem okoz szívizom-károsodást.", "Az infarktus csak alvás közben következik be."],
+                        answer: "A szívizominfarktus a jellegzetes mellkasi fájdalom nélkül zajlik le.",
+                        explanation: "A kardialis afferens (érző) idegrostok károsodása miatt a szívizom oxigénhiánya nem váltja ki a jellegzetes anginás fájdalmat, ami rendkívül veszélyessé teszi, mert a beteg észrevétlenül eshet át szívinfarktuson."
+                    },
+                    {
+                        question: "Melyik gyógyszer hatásmechanizmusa a perifériás alfa-1 adrenerg receptorok stimulálása, ami vazokonstrikciót okoz?",
+                        options: ["Midodrin", "Fludrokortizon", "Piridosztigmin", "Ivabradin"],
+                        answer: "Midodrin",
+                        explanation: "A midodrin egy alfa-1 agonista, amely az artériák és vénák simaizomzatának összehúzásával emeli a vérnyomást, így hatékony az ortosztatikus hipotenzió kezelésében."
+                    },
+                    {
+                        question: "Melyik központi idegrendszeri struktúra játszik kulcsszerepet az autonóm és endokrin funkciók integrálásában?",
+                        options: ["Hypothalamus", "Kisagy", "Bazális ganglionok", "Hippocampus"],
+                        answer: "Hypothalamus",
+                        explanation: "A hypothalamus a homeosztázis legfőbb központi szabályozója, amely összehangolja az autonóm idegrendszeri, endokrin és viselkedési válaszokat a szervezet belső egyensúlyának fenntartása érdekében."
+                    },
+                    {
+                        question: "Mi a szimpatikus idegrendszer preganglionáris neuronjainak neurotranszmittere?",
+                        options: ["Acetilkolin", "Noradrenalin", "Dopamin", "Szerotonin"],
+                        answer: "Acetilkolin",
+                        explanation: "Az autonóm idegrendszerben minden preganglionáris neuron (mind a szimpatikus, mind a paraszimpatikus rendszerben) kolinerg, azaz acetilkolint használ neurotranszmitterként."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS a Tiszta Autonóm Elégtelenséggel (PAF) kapcsolatban?",
+                        options: ["Jellemzőek rá a korai, súlyos cerebelláris tünetek.", "Ez egy lassan progrediáló neurodegeneratív betegség.", "A kórosodás a perifériás, posztganglionáris neuronokat érinti.", "Gyakori tünete az ortosztatikus hipotenzió."],
+                        answer: "Jellemzőek rá a korai, súlyos cerebelláris tünetek.",
+                        explanation: "A PAF definíció szerint 'tiszta' autonóm elégtelenség, ami azt jelenti, hogy nincsenek szomatikus (motoros, cerebelláris, piramis) neurológiai tünetek. Ha ezek jelen vannak, más diagnózis (pl. MSA) merül fel."
+                    },
+                    {
+                        question: "Milyen célt szolgál az ágy fejének megemelése nOH kezelésében?",
+                        options: ["Csökkenti az éjszakai fekvő hipertóniát és a nokturiát.", "Közvetlenül növeli a nappali vérnyomást.", "Javítja az alvás minőségét.", "Megakadályozza a refluxot."],
+                        answer: "Csökkenti az éjszakai fekvő hipertóniát és a nokturiát.",
+                        explanation: "Az ágy fejének megemelése csökkenti a vénás visszaáramlást és a vese artériás nyomását éjszaka, ami mérsékli a nyomás-diurézist (nokturia) és a renin-angiotenzin rendszer szuppresszióját, így enyhítve a reggeli ortosztatikus hipotenziót és a fekvő hipertóniát."
+                    },
+                    {
+                        question: "Melyik vizsgálat segít a kisrost neuropátia (SFN) diagnózisában?",
+                        options: ["Bőrbiopszia az intraepidermalis idegrostsűrűség mérésére", "Motoros idegvezetési vizsgálat (ENG)", "Koponya MRI", "Izombiopszia"],
+                        answer: "Bőrbiopszia az intraepidermalis idegrostsűrűség mérésére",
+                        explanation: "Az SFN szelektíven a vékony A-delta és C rostokat érinti, amelyeket a standard idegvezetési vizsgálat nem mér. A bőrbiopszia és az idegrostsűrűség csökkenésének kimutatása az SFN diagnózisának arany standardja."
+                    },
+                    {
+                        question: "Melyik nem-farmakológiai módszer a 'víz-bolus' technika?",
+                        options: ["Kb. 500 ml hideg víz gyors elfogyasztása a vérnyomás átmeneti emelésére.", "A test gyors lehűtése hideg vízzel.", "Víz alatti torna.", "Nagy mennyiségű víz lassú, egész napos kortyolgatása."],
+                        answer: "Kb. 500 ml hideg víz gyors elfogyasztása a vérnyomás átmeneti emelésére.",
+                        explanation: "A hideg víz gyors megivása egy osmotikus reflexet vált ki a gyomorban, ami átmeneti szimpatikus aktivációt és vérnyomás-emelkedést okoz, segítve az ortosztatikus tünetek megelőzését."
+                    },
+                    {
+                        question: "Melyik kórképben a leggyakoribb a 'non-dipping' vagy 'reverse dipping' vérnyomás-profil?",
+                        options: ["Diabéteszes autonóm neuropátia (CAN)", "Esszenciális hipertónia", "POTS", "Vazovagális syncope"],
+                        answer: "Diabéteszes autonóm neuropátia (CAN)",
+                        explanation: "A normális cirkadián vérnyomás-ritmus (éjszakai 10-20%-os esés) elvesztése, azaz a 'non-dipping' az autonóm diszfunkció egyik jele, és gyakran megfigyelhető CAN-ban."
+                    },
+                    {
+                        question: "Melyik állítás igaz az autoimmun autonóm ganglionopátia (AAG) kezelésére?",
+                        options: ["Potenciálisan kezelhető immunterápiával (pl. IVIG, plazmaferézis).", "Kizárólag tüneti kezelés lehetséges.", "Mindig spontán gyógyul.", "A kezelés alapja a dopamin pótlása."],
+                        answer: "Potenciálisan kezelhető immunterápiával (pl. IVIG, plazmaferézis).",
+                        explanation: "Mivel az AAG egy immunmediált betegség, az immunterápiák, amelyek az autoantitestek eltávolítására vagy termelésük gátlására irányulnak, hatékonyak lehetnek a tünetek javításában és a betegség progressziójának megállításában."
+                    }
+                ]
+            },
+            {
+                topic: "Bakteriális meningitisek és agytályog",
+                questions: [
+                    {
+                        question: "Mi a bakteriális meningitis klasszikus klinikai tünettriásza?",
+                        options: ["Láz, fejfájás, tarkókötöttség", "Kiütés, hasmenés, köhögés", "Ízületi fájdalom, sárgaság, tudatzavar", "Magas vérnyomás, bradycardia, eszméletlenség"],
+                        answer: "Láz, fejfájás, tarkókötöttség",
+                        explanation: "Bár nem minden betegnél van jelen mindhárom tünet, a láz, a súlyos fejfájás és a tarkókötöttség (meningizmus) a bakteriális meningitis klasszikus triászának számít."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb bakteriális meningitis kórokozó felnőttek körében a védőoltások korában?",
+                        options: ["Streptococcus pneumoniae", "Neisseria meningitidis", "Haemophilus influenzae", "Listeria monocytogenes"],
+                        answer: "Streptococcus pneumoniae",
+                        explanation: "A pneumococcus (Streptococcus pneumoniae) a leggyakoribb kórokozója a bakteriális meningitisnek csecsemők, kisgyermekek és felnőttek körében azokban az országokban, ahol a Hib és meningococcus elleni védőoltások elterjedtek."
+                    },
+                    {
+                        question: "Milyen a jellegzetes liquor lelet bakteriális meningitisben?",
+                        options: ["Magas sejtszám neutrofil dominanciával, alacsony glükóz, magas fehérje", "Magas sejtszám limfocita dominanciával, normál glükóz, enyhén emelkedett fehérje", "Normál sejtszám, normál glükóz, normál fehérje", "Vörösvértestek jelenléte, magas fehérje, normál glükóz"],
+                        answer: "Magas sejtszám neutrofil dominanciával, alacsony glükóz, magas fehérje",
+                        explanation: "A bakteriális fertőzésre a gennyes gyulladás jellemző, ami a liquorban magas neutrofil granulocita számot eredményez. A baktériumok glükózt fogyasztanak (alacsony glükóz), és a gyulladás miatti vér-agy gát károsodás miatt a fehérje a liquorba jut (magas fehérje)."
+                    },
+                    {
+                        question: "Miért általában kontraindikált a lumbálpunkció agytályog gyanúja esetén?",
+                        options: ["A beékelődés (herniatio) veszélye miatt", "Mert a liquor lelet soha nem kóros", "Mert a beavatkozás agytályogot okozhat", "Mert a tűvel a tályogba lehet szúrni"],
+                        answer: "A beékelődés (herniatio) veszélye miatt",
+                        explanation: "Az agytályog egy térfoglaló folyamat, ami fokozza a koponyaűri nyomást. A lumbálpunkció során a gerinccsatornában hirtelen nyomáscsökkenés jön létre, ami az agytörzs beékelődéséhez vezethet a foramen magnumon keresztül, ami halálos."
+                    },
+                    {
+                        question: "Mi az agytályog diagnózisának elsődleges módszere?",
+                        options: ["Kontrasztanyagos koponya MRI vagy CT", "Lumbálpunkció és liquorvizsgálat", "Elektroenkefalográfia (EEG)", "Vérkultúra"],
+                        answer: "Kontrasztanyagos koponya MRI vagy CT",
+                        explanation: "Az agytályog egy strukturális elváltozás, amelyet a képalkotó vizsgálatok, különösen a kontrasztanyagos MRI, tudnak a legpontosabban kimutatni. A jellegzetes gyűrűszerű kontraszthalmozás a diagnózis kulcsa."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport adása javasolt az antibiotikumok mellett bakteriális meningitisben a neurológiai szövődmények csökkentésére?",
+                        options: ["Kortikoszteroidok (pl. dexametazon)", "Vízhajtók (diuretikumok)", "Fájdalomcsillapítók (analgetikumok)", "Véralvadásgátlók (antikoagulánsok)"],
+                        answer: "Kortikoszteroidok (pl. dexametazon)",
+                        explanation: "Az antibiotikumokkal együtt vagy közvetlenül azok előtt adott dexametazon csökkenti a gyulladásos választ az agyhártyákon, mérsékli az agyödémát, és bizonyítottan csökkenti a halláskárosodás és egyéb neurológiai szövődmények kockázatát, különösen pneumococcus meningitis esetén."
+                    },
+                    {
+                        question: "Melyik kórokozó okozta meningitisre jellemző a bőrön megjelenő, nyomásra el nem halványuló kiütés (petechia)?",
+                        options: ["Neisseria meningitidis (meningococcus)", "Streptococcus pneumoniae", "Listeria monocytogenes", "Haemophilus influenzae"],
+                        answer: "Neisseria meningitidis (meningococcus)",
+                        explanation: "A meningococcus fertőzés gyakran jár szeptikémiával (meningococcemia), aminek jellegzetes tünete a disszeminált intravaszkuláris koaguláció (DIC) miatti bőrvérzés, a petechiák és purpurák megjelenése."
+                    },
+                    {
+                        question: "Mikor indokolt agytályog esetén a sebészi beavatkozás (aspiráció vagy eltávolítás)?",
+                        options: ["Ha a tályog nagy (>2.5 cm) és jelentős tömeghatással jár", "Minden esetben, amint a diagnózis megszületik", "Csak akkor, ha a beteg eszméletlen", "Soha nem indokolt, a kezelés mindig gyógyszeres"],
+                        answer: "Ha a tályog nagy (>2.5 cm) és jelentős tömeghatással jár",
+                        explanation: "A sebészi beavatkozás célja a nyomás csökkentése, a fertőzés forrásának megszüntetése és a kórokozó azonosítása. Ez különösen indokolt nagy, felszínes, a gyógyszeres kezelésre nem reagáló, vagy ruptúra veszélyével fenyegető tályogok esetén."
+                    },
+                    {
+                        question: "Melyik kórokozó okoz leggyakrabban meningitist újszülötteknél?",
+                        options: ["B-csoportú Streptococcus (S. agalactiae)", "Escherichia coli", "Listeria monocytogenes", "Streptococcus pneumoniae"],
+                        answer: "B-csoportú Streptococcus (S. agalactiae)",
+                        explanation: "A B-csoportú Streptococcus (GBS) gyakran kolonizálja a hüvelyt, és a szülés során fertőzheti meg az újszülöttet, korai kezdetű szepszist és meningitist okozva."
+                    },
+                    {
+                        question: "Mi az agytályog leggyakoribb terjedési módja?",
+                        options: ["Hematogén szórás egy távoli fertőzési gócból", "Direkt terjedés a középfülből vagy az arcüregekből", "Penetráló koponyasérülés", "Idegsebészeti beavatkozás szövődménye"],
+                        answer: "Hematogén szórás egy távoli fertőzési gócból",
+                        explanation: "Bár a direkt terjedés is gyakori, a legtöbb agytályog úgy alakul ki, hogy a kórokozók a vérárammal jutnak el az agyba egy távoli fertőzésből, például endocarditisből, tüdőgyulladásból vagy bőrfertőzésből."
+                    },
+                    {
+                        question: "Melyik képalkotó szekvencia segít leginkább elkülöníteni az agytályogot a nekrotikus agydaganattól?",
+                        options: ["Diffúzió-súlyozott képalkotás (DWI)", "T1-súlyozott natív MRI", "T2-FLAIR szekvencia", "Kontrasztanyagos CT"],
+                        answer: "Diffúzió-súlyozott képalkotás (DWI)",
+                        explanation: "Az agytályog üregében lévő sűrű, viszkózus genny a vízmolekulák diffúziójának korlátozottságát okozza, ami a DWI képeken jellegzetes, erős jelintenzitásként (restriktív diffúzió) jelenik meg. A nekrotikus tumorok cisztás részében a diffúzió általában nem korlátozott."
+                    },
+                    {
+                        question: "Milyen típusú sejtek dominálnak a liquorban virális meningitis esetén?",
+                        options: ["Limfociták", "Neutrofilek", "Eozinofilek", "Bazofilek"],
+                        answer: "Limfociták",
+                        explanation: "A virális fertőzésekre a limfocitás immunválasz a jellemző, így a liquorban limfocita pleocytosis látható, ellentétben a bakteriális meningitis neutrofil dominanciájával."
+                    },
+                    {
+                        question: "Melyik vakcina bevezetése csökkentette drámaian a gyermekkori bakteriális meningitis előfordulását?",
+                        options: ["Haemophilus influenzae B típus (Hib) elleni vakcina", "Morbilli-mumpsz-rubeola (MMR) vakcina", "Pneumococcus elleni konjugált vakcina", "Meningococcus C elleni vakcina"],
+                        answer: "Haemophilus influenzae B típus (Hib) elleni vakcina",
+                        explanation: "A Hib elleni védőoltás bevezetése előtt a H. influenzae volt a csecsemő- és kisgyermekkori bakteriális meningitis leggyakoribb oka. A vakcinációnak köszönhetően az általa okozott invazív betegségek száma drasztikusan lecsökkent."
+                    },
+                    {
+                        question: "Melyik állítás igaz az agytályog klinikai képére?",
+                        options: ["A fokális neurológiai tünetek gyakoriak és a tályog helyétől függnek.", "A láz mindig magas és állandó.", "A tarkókötöttség mindig jelen van.", "A tünetek mindig hirtelen, órák alatt alakulnak ki."],
+                        answer: "A fokális neurológiai tünetek gyakoriak és a tályog helyétől függnek.",
+                        explanation: "Az agytályog térfoglaló jellege miatt nyomja a környező agyszövetet, ami a lokalizációnak megfelelő kiesési tüneteket (pl. gyengeség, beszédzavar) okoz. Ez a legfontosabb elkülönítő jel a diffúz tünetekkel járó meningitistől."
+                    },
+                    {
+                        question: "Milyen kezelés szükséges a legtöbb agytályog esetén az antibiotikum terápia mellett?",
+                        options: ["Sebészi drenázs vagy aspiráció", "Lumbálpunkció sorozat", "Sugárterápia", "Véralvadásgátló kezelés"],
+                        answer: "Sebészi drenázs vagy aspiráció",
+                        explanation: "A legtöbb esetben, különösen nagyobb tályogoknál, a gyógyszeres kezelés nem elegendő. A genny sebészi lecsapolása (aspiráció) vagy a tályog tokkal együtt történő eltávolítása szükséges a gyógyuláshoz és a nyomás csökkentéséhez."
+                    },
+                    {
+                        question: "Melyik rizikócsoportban kell gondolni Listeria monocytogenes okozta meningitisre?",
+                        options: ["Idősek, újszülöttek, immunszupprimáltak", "Egészséges tinédzserek és fiatal felnőttek", "Középkorú, dohányzó férfiak", "Intravénás droghasználók"],
+                        answer: "Idősek, újszülöttek, immunszupprimáltak",
+                        explanation: "A Listeria egy opportunista kórokozó, amely elsősorban a gyengült celluláris immunitású egyéneket, például az időseket, újszülötteket, terhes nőket és immunszuppresszív kezelésben részesülőket betegíti meg."
+                    },
+                    {
+                        question: "Mi az agytályog ruptúrájának legveszélyesebb következménye?",
+                        options: ["Akut, gennyes ventriculitis és meningitis", "Agyi vérzés", "Hidrokefalusz kialakulása", "Epilepsziás státusz"],
+                        answer: "Akut, gennyes ventriculitis és meningitis",
+                        explanation: "Ha a tályog áttör a kamrarendszerbe (ventriculitis) vagy a subarachnoidalis térbe, a gennyes tartalom szétterjed, ami egy rendkívül súlyos, magas mortalitású diffúz gyulladást okoz."
+                    },
+                    {
+                        question: "Mennyi ideig tart általában az agytályog intravénás antibiotikumos kezelése?",
+                        options: ["Legalább 4-8 hétig", "7-10 napig", "Pontosan 2 hétig", "Több mint 6 hónapig"],
+                        answer: "Legalább 4-8 hétig",
+                        explanation: "Az agytályog kezelése hosszú, mivel az antibiotikumoknak be kell hatolniuk a tályog tokján és el kell pusztítaniuk a kórokozókat a rossz vérellátású, gennyes közegben. A kezelés időtartamát a klinikai és radiológiai válasz alapján határozzák meg."
+                    },
+                    {
+                        question: "Mi a teendő bakteriális meningitis gyanúja esetén, ha a betegnél papillaödéma és gócos neurológiai tünetek észlelhetők?",
+                        options: ["Azonnal koponya CT-t végezni, majd empirikus antibiotikum terápia és csak utána lumbálpunkció, ha a CT nem mutat ellenjavallatot.", "Azonnal lumbálpunkciót végezni a diagnózis érdekében.", "Várni, amíg a tünetek enyhülnek.", "Csak antibiotikumot adni, és eltekinteni a lumbálpunkciótól."],
+                        answer: "Azonnal koponya CT-t végezni, majd empirikus antibiotikum terápia és csak utána lumbálpunkció, ha a CT nem mutat ellenjavallatot.",
+                        explanation: "A papillaödéma és a góctünetek koponyaűri nyomásfokozódásra és/vagy térfoglaló folyamatra (pl. tályog) utalnak. Ilyenkor a lumbálpunkció a beékelődés veszélye miatt kontraindikált lehet. Először képalkotóval kell kizárni a tömeghatást, és a terápia megkezdése nem késlekedhet."
+                    },
+                    {
+                        question: "Melyik állítás igaz a bakteriális meningitis prognózisára?",
+                        options: ["Még időben elkezdett kezelés mellett is jelentős a mortalitása és a maradandó károsodások aránya.", "Megfelelő antibiotikummal mindenki teljesen meggyógyul.", "A prognózis nem függ a kórokozó típusától.", "A gyermekek mindig jobban gyógyulnak, mint a felnőttek."],
+                        answer: "Még időben elkezdett kezelés mellett is jelentős a mortalitása és a maradandó károsodások aránya.",
+                        explanation: "A bakteriális meningitis egy rendkívül súlyos betegség. A halálozás aránya 10-15% körüli, és a túlélők jelentős részénél (kb. 20%) maradandó neurológiai szövődmények (pl. halláskárosodás, kognitív zavarok, epilepszia) alakulnak ki."
+                    }
+                ]
+            }
+        ];
+
+        // DOM Elements
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const quizTitle = document.getElementById('quiz-title');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const scoreText = document.getElementById('score-text');
+        const scoreCircle = document.getElementById('score-circle');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const backToTopicsBtn = document.getElementById('back-to-topics-btn');
+
+        // State
+        let currentTopicIndex = 0;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentQuestions = [];
+
+        function init() {
+            // Populate topic list
+            topicList.innerHTML = '';
+            quizData.forEach((topic, index) => {
+                const topicButton = document.createElement('button');
+                topicButton.className = 'w-full text-left bg-white p-5 rounded-xl shadow-md border border-slate-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200';
+                topicButton.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 text-blue-700 font-bold rounded-lg w-12 h-12 flex items-center justify-center mr-5 text-lg">${index + 1}</div>
+                        <div>
+                            <h3 class="font-semibold text-slate-800">${topic.topic}</h3>
+                            <p class="text-sm text-slate-500">${topic.questions.length} kérdés</p>
+                        </div>
+                    </div>
+                `;
+                topicButton.onclick = () => startQuiz(index);
+                topicList.appendChild(topicButton);
+            });
+        }
+
+        function startQuiz(topicIndex) {
+            currentTopicIndex = topicIndex;
+            currentQuestionIndex = 0;
+            score = 0;
+            currentQuestions = quizData[topicIndex].questions;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTitle.textContent = quizData[topicIndex].topic;
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // Javított rész: Csak a 'show' osztályt távolítjuk el
+            explanationContainer.classList.remove('show');
+            nextQuestionBtn.classList.add('hidden');
+            
+            const question = currentQuestions[currentQuestionIndex];
+            
+            // Update progress
+            questionCounter.textContent = `Kérdés ${currentQuestionIndex + 1} / ${currentQuestions.length}`;
+            const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            questionText.textContent = question.question;
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach(option => {
+                const optionButton = document.createElement('button');
+                optionButton.className = 'quiz-option w-full text-left p-4 rounded-lg border-2 border-slate-200 bg-white';
+                optionButton.textContent = option;
+                optionButton.onclick = () => selectAnswer(optionButton, option);
+                optionsContainer.appendChild(optionButton);
+            });
+        }
+
+        function selectAnswer(button, selectedOption) {
+            const question = currentQuestions[currentQuestionIndex];
+            const isCorrect = selectedOption === question.answer;
+
+            if (isCorrect) {
+                score++;
+                button.classList.add('correct');
+            } else {
+                button.classList.add('incorrect');
+            }
+            
+            // Disable all options and show correct answer
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === question.answer) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            // Show explanation
+            explanationText.textContent = question.explanation;
+            explanationContainer.classList.add('show');
+
+            // Show next button
+            nextQuestionBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            const percentage = Math.round((score / currentQuestions.length) * 100);
+            scoreText.textContent = `Eredményed: ${score} a ${currentQuestions.length} kérdésből helyes.`;
+            scorePercentage.textContent = `${percentage}%`;
+            
+            let circleColorClass = 'bg-red-200';
+            if (percentage >= 80) {
+                circleColorClass = 'bg-green-200';
+            } else if (percentage >= 50) {
+                circleColorClass = 'bg-yellow-200';
+            }
+            scoreCircle.className = `w-48 h-48 mx-auto mb-8 flex items-center justify-center rounded-full ${circleColorClass}`;
+        }
+
+        nextQuestionBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        restartQuizBtn.addEventListener('click', () => {
+            startQuiz(currentTopicIndex);
+        });
+
+        backToTopicsBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        });
+
+        // Initial load
+        init();
+    </script>
+</body>
+</html>

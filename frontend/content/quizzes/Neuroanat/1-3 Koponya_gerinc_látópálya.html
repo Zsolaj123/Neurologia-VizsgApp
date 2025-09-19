@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Kvíz: Koponya, Gerinc és Látórendszer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Dinamikus Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Koponya, Gerinc és Látórendszer</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- A kérdések dinamikusan itt jelennek meg -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- A részletes eredmények itt jelennek meg -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        const fullQuizData = [
+            // Koponya és gerinc
+            { question: "Melyik koponyagödörben található a sella turcica, amely a hypophysist fogadja be?", answers: { a: "Fossa cranii anterior", b: "Fossa cranii media", c: "Fossa cranii posterior", d: "A sella turcica nem koponyagödörben van." }, correctAnswer: "b", explanation: "A sella turcica (töröknyereg) az ékcsont testének felszínén, a középső koponyagödör (fossa cranii media) központi, páratlan részében helyezkedik el." },
+            { question: "A felsorolt agyidegek közül melyik NEM halad át a fissura orbitalis superioron?", answers: { a: "N. oculomotorius (III.)", b: "N. trochlearis (IV.)", c: "N. opticus (II.)", d: "N. abducens (VI.)" }, correctAnswer: "c", explanation: "A N. opticus (II. agyideg) a canalis opticuson keresztül lép be a szemüregbe. A fissura orbitalis superioron a III., IV., V/1. és VI. agyidegek haladnak át." },
+            { question: "Mi a C2-es csigolya (axis) legjellegzetesebb képlete, amely lehetővé teszi a fej forgó mozgását?", answers: { a: "Foramen transversarium", b: "Processus spinosus bifidus", c: "Dens axis", d: "Massae laterales" }, correctAnswer: "c", explanation: "Az axis (C2) legfontosabb képlete a testéből felfelé nyúló fognyúlvány (dens axis), amely az atlas (C1) elülső ívével ízesülve egy forgóízületet alkot, ami a fejrotáció nagy részéért felelős." },
+            { question: "Melyik szalag akadályozza meg a gerinc túlzott előrehajlását (flexio) és található a gerinccsatorna elülső falán?", answers: { a: "Lig. longitudinale anterius", b: "Lig. longitudinale posterius", c: "Lig. flava", d: "Lig. supraspinale" }, correctAnswer: "b", explanation: "A ligamentum longitudinale posterius a csigolyatestek hátsó felszínén, a gerinccsatornán belül fut, és a gerinc túlzott flexióját gátolja, valamint korlátozza a porckorongok hátrafelé türemkedését." },
+            { question: "Koponyaalapi törés esetén a fül mögötti bevérzés (Battle-jel) melyik koponyagödör sérülésére utal leginkább?", answers: { a: "Fossa cranii anterior", b: "Fossa cranii media", c: "Fossa cranii posterior", d: "Nem utal specifikus koponyagödörre." }, correctAnswer: "b", explanation: "A Battle-jel (a csecsnyúlvány feletti bevérzés) a középső koponyagödör (fossa cranii media) törésére utal, amely gyakran a halántékcsont sérülésével jár." },
+            { question: "Melyik csont NEM vesz részt a szemüreg (orbita) csontos falának alkotásában?", answers: { a: "Os zygomaticum", b: "Os lacrimale", c: "Os temporale", d: "Os palatinum" }, correctAnswer: "c", explanation: "A szemüreg falát 7 csont alkotja: os frontale, os sphenoidale, os ethmoidale, os lacrimale, os zygomaticum, maxilla és os palatinum. A halántékcsont (os temporale) nem vesz részt benne." },
+            { question: "Melyik csigolya tövisnyúlványát nevezik 'vertebra prominens'-nek, mivel az könnyen tapintható a nyak alsó részén?", answers: { a: "C1 (Atlas)", b: "C2 (Axis)", c: "C7", d: "T1" }, correctAnswer: "c", explanation: "A C7-es csigolya tövisnyúlványa hosszú és nem kettéágazó, ezért a legkiemelkedőbb a nyaki szakaszon, és fontos anatómiai tájékozódási pont." },
+            { anulus: "Mi a porckorong (discus intervertebralis) külső, erős, rostos gyűrűjének neve?", answers: { a: "Nucleus pulposus", b: "Anulus fibrosus", c: "Lamina cribrosa", d: "Porcos zárólemez" }, correctAnswer: "b", explanation: "A porckorong külső, strapabíró részét az anulus fibrosus (rostos gyűrű) alkotja, amely a belső, kocsonyás magot (nucleus pulposus) veszi körül." },
+            { question: "A foramen magnumon az alábbi képletek közül melyik NEM halad át?", answers: { a: "Medulla oblongata (nyúltvelő)", b: "Aa. vertebrales", c: "N. vagus (X.)", d: "N. accessorius (XI.) gerincvelői gyökerei" }, correctAnswer: "c", explanation: "A N. vagus (X. agyideg) a foramen jugularén keresztül lép ki a koponyából. A foramen magnumon a nyúltvelő, a gerincartériák és a XI. agyideg gerincvelői gyökerei haladnak át." },
+            { question: "Melyik koponyavarrat választja el a két falcsontot (os parietale) egymástól?", answers: { a: "Sutura coronalis", b: "Sutura lambdoidea", c: "Sutura squamosa", d: "Sutura sagittalis" }, correctAnswer: "d", explanation: "A sutura sagittalis (nyílvarrat) a koponya középvonalában, a két os parietale között húzódik." },
+            
+            // Látópálya
+            { question: "A látópályán hol történik a két szemből érkező információ elsődleges, jelentős mértékű egyesülése (fúziója)?", answers: { a: "Chiasma opticum", b: "Corpus geniculatum laterale (CGL)", c: "Elsődleges látókéreg (V1)", d: "A retinában, az amakrin sejtek szintjén" }, correctAnswer: "c", explanation: "A CGL-ben a két szem információja még külön rétegekben dolgozódik fel. A V1 az első hely a látópályán, ahol a legtöbb sejt binokuláris, azaz mindkét szemből kap bemenetet, és itt jön létre a sztereopszis (mélységlátás) alapja." },
+            { question: "A retina mely sejtjei felelősek a laterális gátlásért, ami a vizuális kontrasztok kiemelésében fontos?", answers: { a: "Pálcikák és csapok", b: "Bipoláris sejtek", c: "Horizontális sejtek", d: "Ganglionsejtek" }, correctAnswer: "c", explanation: "A horizontális sejtek laterális (oldalirányú) gátló kapcsolatokat hoznak létre a külső plexiform rétegben, ami élesíti a kontúrokat és kiemeli az éleket a látott képen." },
+            { question: "A halántéklebeny (lobus temporalis) mélyén futó látósugárzás-hurok (Meyer-féle hurok) sérülése milyen típusú látótérkiesést okoz?", answers: { a: "Ipszilaterális centrális scotoma", b: "Bitemporális hemianopia", c: "Kontralaterális homonym alsó quadrantanopia", d: "Kontralaterális homonym felső quadrantanopia" }, correctAnswer: "d", explanation: "A Meyer-hurok a látótér felső negyedéből származó információt szállítja. Sérülése ezért 'pie in the sky' defektust, azaz az ellenoldali látótér felső negyedének kiesését (kontralaterális homonym felső quadrantanopia) okozza." },
+            { question: "A Corpus Geniculatum Laterale (CGL) mely rétegei kapnak bemenetet az azonos oldali (ipszilaterális) szemből?", answers: { a: "1, 4, 6", b: "2, 3, 5", c: "1, 2, 3", d: "4, 5, 6" }, correctAnswer: "b", explanation: "A CGL rétegei váltakozva kapnak bemenetet a két szemből: a 2., 3. és 5. réteg az ipszilaterális (azonos oldali), míg az 1., 4. és 6. réteg a kontralaterális (ellenoldali) szemből." },
+            { question: "Mi a 'kérgi nagyítás' (cortical magnification) jelenségének lényege a V1 látókéregben?", answers: { a: "A perifériás látótér nagyobb területet kap a kérgen.", b: "A fovea (éleslátás helye) aránytalanul nagy területet foglal el a kérgen a perifériához képest.", c: "A mozgásérzékelő sejtek száma nagyobb, mint a formaérzékelőké.", d: "A látókéreg mérete a korral növekszik." }, correctAnswer: "b", explanation: "A kérgi nagyítás azt jelenti, hogy a sűrűn beidegzett, nagy felbontású fovea egy jóval nagyobb kérgi területre vetül, mint a ritkábban beidegzett retina-periféria, ami lehetővé teszi a részletgazdag központi látást." },
+            { question: "Melyik ganglionsejt-típusból kiinduló pálya felelős elsődlegesen a mozgás- és mélységészlelésért?", answers: { a: "Parvocelluláris (P) pálya", b: "Magnocelluláris (M) pálya", c: "Koniocelluláris (K) pálya", d: "Mindhárom egyformán" }, correctAnswer: "b", explanation: "A magnocelluláris (M) pálya a nagy, gyorsan vezető M-típusú ganglionsejtekből indul, és a mozgás, a mélység és a gyorsan változó, alacsony kontrasztú ingerek feldolgozására specializálódott." },
+            { question: "A látópálya melyik részének komplett sérülése okoz bitemporális heteronym hemianopsiát ('szemellenzős látás')?", answers: { a: "A jobb oldali látóideg", b: "A bal oldali tractus opticus", c: "A chiasma opticum középső része", d: "A bal oldali radiatio optica" }, correctAnswer: "c", explanation: "A chiasma opticum középső részén kereszteződnek át a két szem nazális retinafeléből származó rostok, amelyek a temporális látótereket reprezentálják. Ezen rostok kompressziója (pl. hypophysis daganat által) okozza a jellegzetes bitemporális látótérkiesést." },
+            { question: "Melyik extrastriatális látókérgi terület specializálódott a mozgásérzékelésre?", answers: { a: "V2", b: "V3", c: "V4", d: "V5/MT" }, correctAnswer: "d", explanation: "A V5 (medio-temporális) terület a dorzális ('Hol?') pályán helyezkedik el, és kulcsfontosságú a vizuális mozgás irányának és sebességének feldolgozásában." },
+            { question: "Melyik állítás igaz a retina pálcikáira?", answers: { a: "A fovea centralisban a legsűrűbbek.", b: "A nappali, éles- és színlátásért felelősek.", c: "Nagy a konvergenciájuk a ganglionsejtek felé, ami növeli a fényérzékenységet.", d: "Három különböző típusuk van a vörös, zöld és kék fény érzékelésére." }, correctAnswer: "c", explanation: "A pálcikák a szürkületi látásért felelősek, a foveában nincsenek, és nem látnak színeket. A magas konvergencia (sok pálcika egy ganglionsejtre) lehetővé teszi a gyenge fényjelek összegződését, növelve az érzékenységet, de csökkentve a felbontást." },
+            { question: "A 'ventrális' vagy 'Mi?' feldolgozási útvonal melyik agylebenyben végződik és mi a fő funkciója?", answers: { a: "Parietális lebeny; Téri információ feldolgozása", b: "Frontális lebeny; Szemmozgások tervezése", c: "Temporális lebeny; Tárgyfelismerés", d: "Occipitális lebeny; Élek detektálása" }, correctAnswer: "c", explanation: "A ventrális pálya a V1-ből a halántéklebeny (lobus temporalis) alsó részébe fut, és a tárgyak, formák, színek és arcok felismeréséért felelős." },
+            
+            // Papilla elváltozásai
+            { question: "Mi a pangásos papilla (papillaödéma) és a papillitis (látóidegfő-gyulladás) közötti legfontosabb klinikai különbség az akut szakaszban?", answers: { a: "A pangásos papilla mindig egyoldali, a papillitis mindig kétoldali.", b: "Pangásos papillánál a látásélesség kezdetben jó, míg papillitisnél korai és jelentős a látásromlás.", c: "Papillitisnél soha nincsenek vérzések a papillán.", d: "Pangásos papillát soha nem kísér fejfájás." }, correctAnswer: "b", explanation: "Ez a legfontosabb differenciáldiagnosztikai jel. A papillaödéma az ICP fokozódásának jele, és amíg a látóideg nem szenved másodlagos károsodást, a látásélesség jó marad. Ezzel szemben a papillitis a látóideg primer gyulladása, ami azonnali funkcióromlást okoz." },
+            { question: "Melyik állítás NEM IGAZ a látóidegfő drusenjére?", answers: { a: "Veleszületett, meszes lerakódások a papillán.", b: "Pszeudo-papillaödémát okozhat, utánozva a koponyaűri nyomásfokozódás jelét.", c: "Jellemzően hirtelen, fájdalmas látásromlást okoz.", d: "Szemészeti ultrahanggal vagy OCT-vel jól kimutatható." }, correctAnswer: "c", explanation: "A drusen általában jóindulatú, és ha okoz is látáskárosodást, az lassan, évek alatt alakul ki. A hirtelen, fájdalmas látásromlás a látóideg-gyulladásra jellemző." },
+            { question: "Melyik vizsgálómódszer a legérzékenyebb a látóideg demyelinisatiós folyamatának (pl. neuritis retrobulbaris) kimutatására, még normális szemfenéki kép esetén is?", answers: { a: "Direkt oftalmoszkópia", b: "Konfrontális látótérvizsgálat", c: "Vizuális kiváltott potenciál (VEP)", d: "Szemészeti ultrahang" }, correctAnswer: "c", explanation: "A VEP a látópálya vezetési sebességét méri. Demyelinisatio esetén a P100 hullám latenciája jellegzetesen megnyúlik, ami a károsodott myelinhüvely miatti lassabb vezetés következménye. Ez az eltérés már akkor is kimutatható, amikor a szemfenék még normális." },
+            { question: "Milyen típusú látóideg-sorvadás alakul ki egy krónikus, kezeletlen pangásos papilla következtében?", answers: { a: "Primer látóideg-sorvadás", b: "Szekunder látóideg-sorvadás", c: "Glaucomás látóideg-sorvadás", d: "Traumás látóideg-sorvadás" }, correctAnswer: "b", explanation: "A szekunder (másodlagos) látóideg-sorvadás definíció szerint olyan állapotok után alakul ki, amelyek előzetes papillaödémával vagy gyulladással jártak. A papilla szélei ilyenkor elmosódottak, hegesek lehetnek." },
+            { question: "A látóideg-hypoplasia (veleszületett alulfejlettség) gyanúja esetén, különösen kétoldali esetben, milyen társuló rendellenességet kell keresni agyi képalkotóval és endokrinológiai vizsgálattal?", answers: { a: "Sclerosis multiplex", b: "Arteritis temporalis", c: "Septo-opticus dysplasia (de Morsier-szindróma)", d: "Látóidegfő drusen" }, correctAnswer: "c", explanation: "A látóideg-hypoplasia társulhat központi idegrendszeri fejlődési zavarokkal. A septo-opticus dysplasia a hypoplasiát az agyi középvonali struktúrák (pl. septum pellucidum) hiányával és a hypothalamus-hypophysis tengely diszfunkciójával (hormonhiány) kombinálja." },
+            { question: "Melyik tünetegyüttes NEM jellemző a látóideg-gyulladásra?", answers: { a: "Szemmozgásra fokozódó retrobulbaris fájdalom", b: "Relatív afferens pupilladefektus (RAPD)", c: "Kifejezett papilla-prominencia (>4-5 D) és kiterjedt lángnyelv-vérzések", d: "Színlátászavar (dyschromatopsia)" }, correctAnswer: "c", explanation: "A nagyfokú papilla-előemelkedés és a kiterjedt vérzések inkább a súlyos pangásos papillára jellemzőek. Papillitis esetén a duzzanat általában enyhébb, és a vérzések ritkábbak." },
+            { question: "Mi a 'tilted disc' (ferde belépésű papilla) legfontosabb differenciáldiagnosztikai jelentősége?", answers: { a: "Akut látásvesztést okoz.", b: "Gyakran társul agydaganattal.", c: "Utánozhat bitemporális látótérkiesést, ami chiasma-kompresszió gyanúját vetítheti fel.", d: "Mindig fájdalmas." }, correctAnswer: "c", explanation: "A ferde papilla jellegzetes superotemporális látótérkiesést okozhat, ami a vertikális középvonalat is áthidalhatja, így egy hamis bitemporális hemianopia képét keltheti, felesleges neuroradiológiai vizsgálatokat indikálva." },
+            { question: "Melyik diagnosztikai eszköz képes 'optikai biopsziaként' megjeleníteni és mérni a retina idegrost rétegének (RNFL) vastagságát?", answers: { a: "Oftalmoszkóp", b: "Periméter", c: "Szemészeti ultrahang", d: "Optikai koherencia tomográfia (OCT)" }, correctAnswer: "d", explanation: "Az OCT egy non-invazív, mikroszkopikus felbontású képalkotó eljárás, amely pontosan méri az RNFL és a ganglionsejt-komplex vastagságát, lehetővé téve a látóideg-károsodás objektív és kvantitatív követését." },
+            { question: "Leber-féle herediter opticus neuropathia (LHON) esetén mi a jellemző klinikai kép?", answers: { a: "Gyermekkorban kezdődő, lassan progrediáló látásromlás.", b: "Fiatal férfiaknál jelentkező, akut, fájdalmatlan, kétoldali centrális látásvesztés.", c: "Időskori, fájdalmas, egyoldali látásvesztés.", d: "Veleszületett, stabil látáskárosodás nystagmussal." }, correctAnswer: "b", explanation: "A LHON egy mitochondriális öröklődésű betegség, amely tipikusan fiatal férfiakban okoz hirtelen, fájdalom nélküli, de súlyos és általában maradandó centrális látásvesztést mindkét szemen (gyakran egymás után rövid időn belül)." },
+            { question: "Melyik állítás NEM igaz a pangásos papilla patomechanizmusára?", answers: { a: "A megemelkedett koponyaűri nyomás okozza.", b: "A látóidegfő szintjén az axoplazmaáramlás akadályozottá válik.", c: "A látóideg primer gyulladása okozza a duzzanatot.", d: "A látóideget körülvevő subarachnoidealis tér nyomásnövekedése szerepet játszik benne." }, correctAnswer: "c", explanation: "A pangásos papilla definíció szerint NEM gyulladásos eredetű. A duzzanatot a megemelkedett koponyaűri nyomás miatti mechanikai kompresszió és az ebből fakadó axoplazma-transzport zavar okozza. A primer gyulladás a papillitis." },
+            
+            // Vegyes, integráló kérdések
+            { question: "Egy betegnél bitemporális hemianopsiát észlelnek. Melyik struktúra kompressziója a legvalószínűbb ok?", answers: { a: "A bal oldali tractus opticus", b: "A látóidegfő", c: "A chiasma opticum", d: "A V1 látókéreg" }, correctAnswer: "c", explanation: "A chiasma opticumban kereszteződnek a temporális látótereket reprezentáló nazális retina-rostok. Ennek kompressziója (pl. hypophysis daganat) okozza a klasszikus bitemporális látótérkiesést." },
+            { question: "Melyik csigolyán található a foramen transversarium, amelyen az arteria vertebralis halad át?", answers: { a: "Minden háti csigolyán", b: "Minden nyaki csigolyán (C1-C7)", c: "Minden ágyéki csigolyán", d: "Csak az atlason (C1) és az axison (C2)" }, correctAnswer: "b", explanation: "A foramen transversarium a nyaki csigolyák egyedi jellegzetessége, amely védett csatornát biztosít az agy vérellátásában fontos szerepet játszó arteria vertebralis számára (a C7-en általában már nem halad át)." },
+            { question: "Melyik agyideg-kombináció lép ki a fissura orbitalis superioron keresztül a koponyából?", answers: { a: "I, II, III", b: "II, III, IV, VI", c: "III, IV, V/1, VI", d: "V/2, V/3, VII" }, correctAnswer: "c", explanation: "A fissura orbitalis superioron keresztül lépnek be a szemüregbe a szemmozgató idegek (III, IV, VI) és a N. trigeminus első, szemészeti ága (V/1)." },
+            { question: "A látópálya melyik állomásán történik az információ szétválogatása magnocelluláris, parvocelluláris és koniocelluláris csatornákra?", answers: { a: "Már a retinában, a különböző ganglionsejt-típusokkal", b: "A chiasma opticumban", c: "Csak az elsődleges látókéregben (V1)", d: "A colliculus superiorban" }, correctAnswer: "a", explanation: "A párhuzamos feldolgozási csatornák már a retinában kialakulnak az eltérő morfológiájú és funkciójú ganglionsejtekkel (M, P, K típusok), és ez a szegregáció végig megmarad a CGL-en keresztül a V1-ig." },
+            { question: "Egy koponyaalapi törés, ami a foramen jugularét érinti, mely agyidegek sérülését okozhatja?", answers: { a: "VII, VIII", b: "V/3, VI, VII", c: "IX, X, XI", d: "II, III, IV" }, correctAnswer: "c", explanation: "A foramen jugularén keresztül lép ki a koponyából a IX. (glossopharyngeus), X. (vagus) és XI. (accessorius) agyideg, valamint itt kezdődik a v. jugularis interna." },
+            { question: "A neuritis retrobulbaris akut szakaszában a beteg súlyos látásromlásra és fájdalomra panaszkodik. Mi a legvalószínűbb szemfenéki lelet?", answers: { a: "Súlyos papillaödéma vérzésekkel", b: "Látóideg-sorvadás", c: "Normális szemfenéki kép", d: "A retinaerek elzáródása" }, correctAnswer: "c", explanation: "Neuritis retrobulbaris esetén a gyulladás a szemgolyó mögött van, így a látóidegfő (papilla) az akut fázisban épnek tűnhet. Ez a 'beteg sem lát, orvos sem lát' klasszikus esete." },
+            { question: "Melyik állítás írja le helyesen az elsődleges (primer) és másodlagos (szekunder) gerincgörbületek kialakulását?", answers: { a: "Minden görbület veleszületett.", b: "A kyphosisok (háti, sacralis) másodlagosak, a lordosisok (nyaki, ágyéki) elsődlegesek.", c: "A kyphosisok elsődlegesek, a lordosisok a posztnatális fejlődés során (fejemelés, járás) alakulnak ki.", d: "A nyaki lordosis elsődleges, a többi másodlagos." }, correctAnswer: "c", explanation: "Az újszülött gerince egyetlen nagy kyphosisban van (primer görbület). A nyaki lordosis a fejemeléssel, az ágyéki lordosis pedig az üléssel és a járás megtanulásával alakul ki, mint másodlagos, adaptív görbület." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Kezdeti kvíz felépítése
+        startNewRound();
+    </script>
+</body>
+</html>

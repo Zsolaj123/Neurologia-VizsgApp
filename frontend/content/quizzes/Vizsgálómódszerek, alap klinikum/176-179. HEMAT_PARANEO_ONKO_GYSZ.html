@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .quiz-option:hover {
+            background-color: #f0f9ff; /* light sky blue */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* light green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        /* Javított CSS a magyarázat animációjához */
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+            transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out, padding-bottom 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+        }
+        .explanation.show {
+            max-height: 500px; /* Elegendő magasság a tartalomhoz */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            margin-top: 1.5rem; /* Hozzáadva a jobb térközért */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
+
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-slate-900 mb-2">Interaktív Neurológiai Teszt</h1>
+            <p class="text-center text-slate-500 mb-8">Válasszon egy témakört a teszt indításához.</p>
+            <div id="topic-list" class="space-y-4">
+                <!-- Topics will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="quiz-title" class="text-xl font-bold text-slate-900">Témakör</h2>
+                <span id="question-counter" class="text-sm font-medium text-slate-500 bg-slate-200 px-3 py-1 rounded-full"></span>
+            </div>
+            
+            <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+
+            <div id="question-container" class="mb-6">
+                <p id="question-text" class="text-lg font-semibold leading-relaxed mb-6"></p>
+                <div id="options-container" class="space-y-3">
+                    <!-- Options will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div id="explanation-container" class="explanation bg-slate-50 border-l-4 border-slate-300 p-4 rounded-r-lg">
+                <h4 class="font-bold text-slate-800 mb-2">Magyarázat</h4>
+                <p id="explanation-text" class="text-slate-700"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-question-btn" class="hidden bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed">Következő</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h1>
+            <p id="score-text" class="text-xl text-slate-600 mb-6"></p>
+            <div class="w-48 h-48 mx-auto mb-8 flex items-center justify-center rounded-full" id="score-circle">
+                 <span id="score-percentage" class="text-4xl font-bold text-slate-800"></span>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button id="restart-quiz-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors">Újra a témakörben</button>
+                <button id="back-to-topics-btn" class="bg-slate-200 text-slate-800 font-semibold py-3 px-6 rounded-lg hover:bg-slate-300 transition-colors">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Idegrendszeri károsodást okozó vérképzőszervi betegségek",
+                questions: [
+                    {
+                        question: "Melyik a legspecifikusabb neurológiai szindróma, amely B12-vitamin-hiányos anémiához társul?",
+                        options: ["Myelosis funicularis", "Guillain-Barré szindróma", "Limbikus enkefalitisz", "Stroke"],
+                        answer: "Myelosis funicularis",
+                        explanation: "A B12-vitamin hiánya a mielinhüvely károsodásához vezet, ami a gerincvelő hátsó és oldalsó kötegeinek degenerációját (myelosis funicularis) okozza, mélyérzészavarral, izomgyengeséggel és kóros reflexekkel."
+                    },
+                    {
+                        question: "Mi a sarlósejtes anémia elsődleges neurológiai szövődménye?",
+                        options: ["Ischaemiás stroke", "Intrakraniális vérzés", "Perifériás neuropathia", "Epilepsziás rohamok"],
+                        answer: "Ischaemiás stroke",
+                        explanation: "A sarló alakú vörösvértestek elzárják az agy kis ereit, ami agyi ischaemiát és stroke-ot okoz. Ez a betegség egyik legsúlyosabb szövődménye."
+                    },
+                    {
+                        question: "Melyik hematológiai malignitás esetében a leggyakoribb a központi idegrendszer (KIR) direkt infiltrációja?",
+                        options: ["Akut limfoid leukémia (ALL)", "Hodgkin-limfóma", "Myeloma multiplex", "Krónikus mieloid leukémia (CML)"],
+                        answer: "Akut limfoid leukémia (ALL)",
+                        explanation: "Az ALL esetében a leukémiás sejtek gyakran infiltrálják a központi idegrendszert, ami fejfájást, hányást és agyidegtüneteket okozhat."
+                    },
+                    {
+                        question: "Mi a Hodgkin-limfómához társuló paraneopláziás szindrómák (pl. szenzoros neuropátia) patomechanizmusa?",
+                        options: ["A daganatra adott kóros, távoli hatású immunreakció", "A daganatsejtek direkt idegrendszeri infiltrációja", "A vér hiperviszkozitása", "Véralvadási zavarok"],
+                        answer: "A daganatra adott kóros, távoli hatású immunreakció",
+                        explanation: "A Hodgkin-kórral társuló paraneopláziás szindrómákat nem a daganat közvetlen terjedése, hanem a tumor ellen indított, de az idegrendszer saját struktúráit is megtámadó immunválasz okozza."
+                    },
+                    {
+                        question: "Melyik lehet a myeloma multiplex gyakori kezdeti neurológiai manifesztációja?",
+                        options: ["Polyneuropathia", "Heves fejfájás", "Görcsroham", "Akut pszichózis"],
+                        answer: "Polyneuropathia",
+                        explanation: "A myeloma multiplex első megjelenése lehet polyneuropathia, különösen a POEMS szindróma részeként, melyet a paraproteinek okozhatnak."
+                    },
+                    {
+                        question: "Mi a thrombocytopenia (alacsony vérlemezkeszám) legrettegettebb neurológiai szövődménye?",
+                        options: ["Intrakraniális vérzés", "Ischaemiás stroke", "Vénás sinus trombózis", "Enkefalopátia"],
+                        answer: "Intrakraniális vérzés",
+                        explanation: "Az alacsony vérlemezkeszám miatt a véralvadás elégtelenné válik, ami fokozott vérzési hajlamhoz és potenciálisan halálos kimenetelű agyvérzéshez vezethet."
+                    },
+                    {
+                        question: "A Polycythemia Vera (PV) milyen neurológiai események kockázatát növeli elsősorban?",
+                        options: ["Stroke és tranziens ischaemiás attak (TIA)", "Intrakraniális és subarachnoidalis vérzés", "Meningitis és encephalitis", "Myelopathia és radiculopathia"],
+                        answer: "Stroke és tranziens ischaemiás attak (TIA)",
+                        explanation: "A PV-ben a megnövekedett vörösvértestszám miatti hiperviszkozitás (sűrűbb vér) fokozza a trombózishajlamot, ami agyi infarktushoz (stroke) vagy TIA-hoz vezethet."
+                    },
+                    {
+                        question: "Melyik anémia típusra jellemző a myelosis funicularis, paresztézia és ataxia?",
+                        options: ["B12-vitamin-hiányos anémia", "Vashiányos anémia", "Sarlósejtes anémia", "Krónikus betegséghez társuló anémia"],
+                        answer: "B12-vitamin-hiányos anémia",
+                        explanation: "Ezek a specifikus neurológiai tünetek a B12-vitamin hiánya okozta mielinkárosodás következményei, és kulcsfontosságúak a differenciáldiagnózisban."
+                    },
+                    {
+                        question: "Mi okozza a „zsibbadt áll szindrómát” (numb chin syndrome) myeloma multiplexben?",
+                        options: ["A nervus mentalis leptomeningealis infiltrációja", "Hiperkalcémia", "Paraproteinemia", "KIR-infekció"],
+                        answer: "A nervus mentalis leptomeningealis infiltrációja",
+                        explanation: "A 'numb chin syndrome' a n. alveolaris inferior ágának, a n. mentalisnak a daganatos sejtek általi infiltrációja vagy kompressziója miatt alakul ki, gyakran myeloma multiplex vagy más malignitások esetén."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző az ADAMTS13 enzim súlyos hiánya, ami kisér-trombózisokhoz vezet?",
+                        options: ["Trombotikus trombocitopéniás purpura (TTP)", "Immun trombocitopéniás purpura (ITP)", "Polycythemia Vera", "Myeloma multiplex"],
+                        answer: "Trombotikus trombocitopéniás purpura (TTP)",
+                        explanation: "A TTP patomechanizmusának lényege az ADAMTS13 enzim hiánya, ami miatt a von Willebrand faktor multikémerek nem hasadnak, ezáltal a vérlemezkék kórosan összetapadnak és mikrotrombusokat képeznek."
+                    },
+                    {
+                        question: "Milyen neurológiai tünet NEM jellemző a vashiányos anémiára?",
+                        options: ["Ataxia", "Fejfájás", "Szédülés", "Fülzúgás"],
+                        answer: "Ataxia",
+                        explanation: "Míg a fejfájás, szédülés és fülzúgás az agyi oxigénhiány általános tünetei lehetnek bármely anémiában, az ataxia (mozgáskoordinációs zavar) specifikusan a B12-vitamin hiányra jellemző."
+                    },
+                    {
+                        question: "Melyik állítás igaz a B12-vitamin-hiány neurológiai tüneteire?",
+                        options: ["Megelőzhetik az anémia hematológiai jeleit.", "Mindig enyhék és átmenetiek.", "Csak súlyos anémia esetén jelentkeznek.", "A folsavpótlás mindig javítja őket."],
+                        answer: "Megelőzhetik az anémia hematológiai jeleit.",
+                        explanation: "Fontos klinikai tény, hogy a neurológiai károsodás néha már azelőtt kialakul, hogy a vérképben az anémia kimutatható lenne. A folsavpótlás javíthatja a vérképet, de súlyosbíthatja a neurológiai tüneteket."
+                    },
+                    {
+                        question: "Melyik vérképzőszervi daganat okozhat cerebrális vénás sinus trombózist?",
+                        options: ["Myeloma multiplex", "Akut limfoid leukémia (ALL)", "Hodgkin-limfóma", "Krónikus limfoid leukémia (CLL)"],
+                        answer: "Myeloma multiplex",
+                        explanation: "A myeloma multiplex a hiperviszkozitás és a paraproteinek miatt növelheti a trombózis kockázatát, beleértve a ritkább lokalizációjú cerebrális vénás sinus trombózist is."
+                    },
+                    {
+                        question: "Milyen típusú vérzés alakulhat ki enyhe fejsérülés után is súlyos thrombocytopeniában?",
+                        options: ["Szubdurális hematóma", "Epidurális hematóma", "Parenchimális vérzés", "Subarachnoidalis vérzés"],
+                        answer: "Szubdurális hematóma",
+                        explanation: "A súlyos thrombocytopenia miatti vérzékenység következtében akár minimális trauma is a hídvénák szakadásához és szubdurális hematóma kialakulásához vezethet."
+                    },
+                    {
+                        question: "Mi a Polycythemia Verára jellemző, forró víz által kiváltott viszketés neve?",
+                        options: ["Aquagenic pruritus", "Urticaria", "Erythromelalgia", "Petechia"],
+                        answer: "Aquagenic pruritus",
+                        explanation: "Az aquagenic pruritus, a forró fürdő vagy zuhany után jelentkező intenzív viszketés, a Polycythemia Vera egyik jellegzetes, bár nem specifikus tünete."
+                    },
+                    {
+                        question: "Melyik mechanizmus NEM játszik szerepet a myeloma multiplex neurológiai tüneteiben?",
+                        options: ["A KIR direkt infiltrációja T-sejtekkel", "A daganatos plazmasejtek infiltrációja", "Paraproteinek okozta neuropathia", "Csontléziók okozta kompresszió"],
+                        answer: "A KIR direkt infiltrációja T-sejtekkel",
+                        explanation: "A myeloma multiplex neurológiai szövődményeit a plazmasejtek direkt infiltrációja, a paraproteinek toxikus hatása, a hiperviszkozitás vagy a csontokat érintő elváltozások miatti idegi kompresszió okozza, nem pedig T-sejtes infiltráció."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS a krónikus anémiával kapcsolatban?",
+                        options: ["A szervezet rosszul alkalmazkodik hozzá, így már enyhe hemoglobin-csökkenés is súlyos tünetekkel jár.", "A szervezet jól alkalmazkodik hozzá, és jelentős hemoglobin-csökkenés is lehet tünetmentes.", "Egy akut stressz (pl. fertőzés) dekompenzálhatja az állapotot.", "A tünetek gyakran csak terhelésre jelentkeznek."],
+                        answer: "A szervezet rosszul alkalmazkodik hozzá, így már enyhe hemoglobin-csökkenés is súlyos tünetekkel jár.",
+                        explanation: "A lassan kialakuló, krónikus anémiához a szervezet kompenzációs mechanizmusai (keringés, légzés) jól alkalmazkodnak, ezért a betegek sokáig, akár súlyos hemoglobin-szint csökkenés mellett is tünetmentesek lehetnek nyugalomban."
+                    },
+                    {
+                        question: "Milyen típusú neurológiai károsodást okoz a limfóma paraneopláziás szindrómaként?",
+                        options: ["Szenzoros neuropátia és limbikus enkefalitisz", "Stroke és TIA", "Intrakraniális vérzés", "Myelosis funicularis"],
+                        answer: "Szenzoros neuropátia és limbikus enkefalitisz",
+                        explanation: "A Hodgkin-limfóma paraneopláziás szindrómaként leggyakrabban szenzoros neuropátiát és limbikus enkefalitiszt okoz, melyek immunológiai mechanizmusúak."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a Thrombotic Thrombocytopenic Purpura (TTP) neurológiai manifesztációira?",
+                        options: ["Myelosis funicularis", "Stroke", "Epilepszia", "Kognitív hanyatlás"],
+                        answer: "Myelosis funicularis",
+                        explanation: "A TTP az agyi kiserek elzáródása miatt stroke-ot, rohamokat, enkefalopátiát és kognitív zavarokat okozhat. A myelosis funicularis a B12-vitamin-hiány jellegzetes tünete."
+                    },
+                    {
+                        question: "Mi a közös patomechanizmus a Polycythemia Vera és a sarlósejtes anémia okozta agyi keringési zavarokban?",
+                        options: ["A véráramlás akadályozottsága", "Fokozott vérzési hajlam", "Autoimmun gyulladás", "Direkt daganatos infiltráció"],
+                        answer: "A véráramlás akadályozottsága",
+                        explanation: "Bár a kiváltó ok más, mindkét betegségben az agyi keringési zavart a véráramlás akadályozottsága okozza: a PV-ben a hiperviszkozitás miatti lassult áramlás és trombózis, a sarlósejtes anémiában pedig a kóros vörösvértestek okozta érelzáródás."
+                    }
+                ]
+            },
+            {
+                topic: "A neurológiában használatos gyógyszerek intoxikációjának tünettana",
+                questions: [
+                    {
+                        question: "Mi a jellegzetes tünettriász az antiepileptikumok túladagolásakor?",
+                        options: ["KIR depresszió, ataxia, nystagmus", "Hipertónia, tachycardia, hipertermia", "Izommerevség, tremor, bradykinesia", "Pszichózis, hallucinációk, agitáció"],
+                        answer: "KIR depresszió, ataxia, nystagmus",
+                        explanation: "Az antiepileptikumok túladagolása leggyakrabban a központi idegrendszer depressziójával (álmosság, kóma), ataxiával (egyensúlyzavar) és nystagmussal (szemtekerezgés) jár."
+                    },
+                    {
+                        question: "Milyen specifikus metabolikus eltérést és szövődményt okozhat a valproinsav túladagolás?",
+                        options: ["Hiperammonémia és agyödéma", "Hiperkalémia és szívleállás", "Hiponatrémia és görcsrohamok", "Hipoglikémia és májelégtelenség"],
+                        answer: "Hiperammonémia és agyödéma",
+                        explanation: "A valproinsav-toxicitás jellegzetes következménye a hyperammonaemiás encephalopathia, ami agyödémához és kómához vezethet."
+                    },
+                    {
+                        question: "Melyik életveszélyes szövődményre jellemző a súlyos izommerevség, hipertermia és autonóm instabilitás antipszichotikumok szedése mellett?",
+                        options: ["Neuroleptikus malignus szindróma (NMS)", "Szerotonin szindróma", "Malignus hyperthermia", "Extrapyramidális szindróma"],
+                        answer: "Neuroleptikus malignus szindróma (NMS)",
+                        explanation: "Az NMS egy ritka, de potenciálisan halálos szövődmény, melyet a súlyos izommerevség ('ólomcső rigiditás'), magas láz, autonóm diszfunkció és tudatzavar jellemez."
+                    },
+                    {
+                        question: "Melyik antidepresszáns csoport hordozza a legnagyobb kardiotoxicitási kockázatot túladagolás esetén?",
+                        options: ["Triciklikus antidepresszánsok (TCA)", "Szelektív szerotonin-visszavétel gátlók (SSRI)", "Szerotonin-noradrenalin visszavétel gátlók (SNRI)", "Monoamin-oxidáz gátlók (MAOI)"],
+                        answer: "Triciklikus antidepresszánsok (TCA)",
+                        explanation: "A TCA-k nátriumcsatorna-blokkoló hatásuk miatt súlyos, gyakran halálos szívritmuszavarokat (széles QRS, kamrai tachycardia) és hipotóniát okozhatnak túladagoláskor."
+                    },
+                    {
+                        question: "Mi a specifikus antidotuma a benzodiazepin túladagolásnak?",
+                        options: ["Flumazenil", "Naloxon", "N-acetilcisztein", "Nátrium-bikarbonát"],
+                        answer: "Flumazenil",
+                        explanation: "A flumazenil egy kompetitív benzodiazepin-receptor antagonista, amely gyorsan visszafordítja a benzodiazepinek szedatív és légzésdeprimáló hatását."
+                    },
+                    {
+                        question: "Mi a flumazenil adásának egyik fő kockázata?",
+                        options: ["Görcsrohamok provokálása", "Súlyos légzésdepresszió okozása", "Hirtelen vérnyomás-emelkedés indukálása", "Akut májelégtelenség kiváltása"],
+                        answer: "Görcsrohamok provokálása",
+                        explanation: "Flumazenil adása görcsrohamot válthat ki, különösen benzodiazepin-toleráns/függő betegeknél, vagy ha a beteg egyidejűleg görcsküszöb-csökkentő szert (pl. TCA) is bevett."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a szerotonin szindrómára?",
+                        options: ["Ólomcső-szerű izommerevség", "Klónus és hyperreflexia", "Autonóm instabilitás (láz, tachycardia)", "Mentális státusz változása (agitáció, zavartság)"],
+                        answer: "Ólomcső-szerű izommerevség",
+                        explanation: "A súlyos, ólomcső-szerű rigiditás a neuroleptikus malignus szindrómára jellemző. A szerotonin szindrómában inkább a hyperreflexia, a spontán vagy provokálható klónus és a tremor a domináns neuromuscularis tünet."
+                    },
+                    {
+                        question: "Milyen EKG eltérést okoz a carbamazepin és a TCA túladagolás, és mi a kezelése?",
+                        options: ["Széles QRS komplexus, nátrium-bikarbonát adásával", "Megnyúlt QT-intervallum, magnézium adásával", "ST-eleváció, azonnali coronarographiával", "Magas, csúcsos T-hullámok, kalcium-glukonát adásával"],
+                        answer: "Széles QRS komplexus, nátrium-bikarbonát adásával",
+                        explanation: "Mindkét gyógyszercsoport gátolja a gyors nátriumcsatornákat a szívben, ami a QRS-komplexus kiszélesedéséhez vezet. Az intravénás nátrium-bikarbonát növeli a szérum nátriumszintjét és pH-ját, ezzel segítve a blokk oldását."
+                    },
+                    {
+                        question: "Melyik antiepileptikum túladagolása utánozhatja az opiátmérgezést a szűk pupillák miatt?",
+                        options: ["Valproinsav", "Fenitoin", "Levetiracetam", "Karbamazepin"],
+                        answer: "Valproinsav",
+                        explanation: "A súlyos valproinsav-mérgezés kómával és jellegzetesen szűk pupillákkal (miosis) járhat, ami a differenciáldiagnózis során felvetheti az opiát-túladagolás gyanúját."
+                    },
+                    {
+                        question: "Melyik a legfontosabb első lépés bármilyen gyógyszer-intoxikáció ellátásában?",
+                        options: ["A légút, légzés és keringés stabilizálása (ABC)", "Gyomormosás elvégzése", "Specifikus antidotum beadása", "Aktív szén adása"],
+                        answer: "A légút, légzés és keringés stabilizálása (ABC)",
+                        explanation: "A beteg vitális funkcióinak (légútbiztosítás, légzéstámogatás, keringéstámogatás) biztosítása minden más beavatkozást megelőz, mivel a hypoxia és a sokk percek alatt visszafordíthatatlan károsodást okozhat."
+                    },
+                    {
+                        question: "Milyen extrapyramidális tünet (EPS) NEM tartozik az antipszichotikumok mellékhatásai közé?",
+                        options: ["Klónus", "Akut disztónia", "Akathisia", "Parkinsonizmus"],
+                        answer: "Klónus",
+                        explanation: "Az akut disztónia (izomgörcs), az akathisia (mozgáskényszer) és a parkinsonizmus (remegés, merevség) klasszikus EPS-ek. A klónus (ritmikus izomrángás) inkább a szerotonin szindrómára vagy a felső motoneuron károsodására jellemző."
+                    },
+                    {
+                        question: "Mi a specifikus terápia a valproinsav okozta hiperammonémia esetén?",
+                        options: ["Levokarnitin", "Flumazenil", "Naloxon", "N-acetilcisztein"],
+                        answer: "Levokarnitin",
+                        explanation: "A levokarnitin segít a valproinsav metabolizmusában és csökkenti a toxikus metabolitok felhalmozódását, így javíthatja a hyperammonaemiás encephalopathia tüneteit."
+                    },
+                    {
+        
+                question: "Melyik gyógyszer elvonása okozhat delírium tremens-hez hasonló tüneteket?",
+                        options: ["Benzodiazepinek", "Antipszichotikumok", "Levodopa", "SSRI antidepresszánsok"],
+                        answer: "Benzodiazepinek",
+                        explanation: "Nagy dózisú, hosszan tartó benzodiazepin-szedés hirtelen abbahagyása súlyos elvonási szindrómát okozhat, amelynek tünetei (szorongás, remegés, hallucinációk, delírium) hasonlítanak az alkoholmegvonásos delírium tremensre."
+                    },
+                    {
+                        question: "Mi a naloxon hatásmechanizmusa opioid túladagolásban?",
+                        options: ["Kompetitív antagonista az opioid receptorokon", "Fokozza az opioidok metabolizmusát", "Gátolja az opioidok felszívódását", "Közvetlenül stimulálja a légzőközpontot"],
+                        answer: "Kompetitív antagonista az opioid receptorokon",
+                        explanation: "A naloxon nagyobb affinitással kötődik az opioid receptorokhoz, mint maguk az opioidok, így leszorítja azokat a receptorról és felfüggeszti a hatásukat, beleértve a légzésdepressziót is."
+                    },
+                    {
+                        question: "Miért szükséges a beteg folyamatos megfigyelése naloxon adása után?",
+                        options: ["Mert a naloxon felezési ideje rövidebb, mint a legtöbb opioidé", "Mert a naloxon maga is légzésdepressziót okozhat", "Mert a naloxon súlyos allergiás reakciót válthat ki", "Mert a naloxon kumulálódhat a szervezetben"],
+                        answer: "Mert a naloxon felezési ideje rövidebb, mint a legtöbb opioidé",
+                        explanation: "A naloxon hatása (30-90 perc) hamarabb elmúlhat, mint a túladagolt opioidé, ezért a beteg visszaszedálódhat és újra légzésdepresszió alakulhat ki, ami ismételt naloxon adását teheti szükségessé."
+                    },
+                    {
+                        question: "Melyik tünetegyüttesre jellemző a mentális státusz változása, autonóm hiperaktivitás és neuromuscularis abnormalitások?",
+                        options: ["Szerotonin szindróma", "Neuroleptikus malignus szindróma", "Antikolinerg delírium", "Benzodiazepin elvonás"],
+                        answer: "Szerotonin szindróma",
+                        explanation: "Ez a klasszikus tünettriász (tudatzavar, autonóm instabilitás, neuromuscularis tünetek mint klónus és hyperreflexia) a szerotonin szindróma diagnózisának alapja."
+                    },
+                    {
+                        question: "Melyik gyógyszer okozhat gyógyszer-indukált parkinsonizmust (DIP)?",
+                        options: ["Antipszichotikumok", "Benzodiazepinek", "Levetiracetam", "Opioidok"],
+                        answer: "Antipszichotikumok",
+                        explanation: "A dopamin-receptorokat blokkoló gyógyszerek, különösen a tipikus antipszichotikumok, a dopaminerg rendszer gátlásával Parkinson-kórhoz hasonló tüneteket (remegés, merevség, lelassultság) okozhatnak."
+                    },
+                    {
+                        question: "Mikor indokolt a gyomormosás gyógyszermérgezés esetén?",
+                        options: ["Potenciálisan életveszélyes túladagolásnál, a bevételtől számított 1 órán belül, védett légút mellett", "Minden eszméletlen betegnél, a bevétel időpontjától függetlenül", "Csak akkor, ha aktív szén nem áll rendelkezésre", "Soha nem indokolt a magas aspirációs kockázat miatt"],
+                        answer: "Potenciálisan életveszélyes túladagolásnál, a bevételtől számított 1 órán belül, védett légút mellett",
+                        explanation: "A gyomormosás rutinszerű alkalmazása már nem javasolt. Csak nagyon szűk indikációval, súlyos, életveszélyes mérgezés korai szakaszában, intubált betegnél jön szóba."
+                    },
+                    {
+                        question: "Melyik gyógyszer túladagolása okozhat hirtelen nappali elalvást és pszichotikus tüneteket?",
+                        options: ["Parkinson-kór gyógyszerei (pl. dopamin agonisták)", "Antiepileptikumok", "Benzodiazepinek", "Opioidok"],
+                        answer: "Parkinson-kór gyógyszerei (pl. dopamin agonisták)",
+                        explanation: "A dopaminerg rendszer túlstimulálása a dopamin agonistákkal hirtelen elalvást (sleep attacks), hallucinációkat, téveszméket és pszichózist okozhat, különösen idősebb betegeknél."
+                    },
+                    {
+                        question: "Melyik állítás igaz a gyógyszer-indukált parkinsonizmusra (DIP)?",
+                        options: ["A kiváltó gyógyszer elhagyása után a tünetek általában visszafejlődnek.", "Ez egy irreverzibilis, progresszív állapot.", "Mindig szimmetrikus tünetekkel jár.", "Levodopára kiválóan reagál."],
+                        answer: "A kiváltó gyógyszer elhagyása után a tünetek általában visszafejlődnek.",
+                        explanation: "A DIP és az idiopátiás Parkinson-kór közötti legfontosabb különbség, hogy a DIP a kiváltó gyógyszer leállítása után hetek-hónapok alatt jellemzően megszűnik. A Levodopa-kezelés hatástalan."
+                    }
+                ]
+            },
+            {
+                topic: "Idegrendszeri paraneoplaziás kórképek",
+                questions: [
+                    {
+                        question: "Mi a paraneopláziás neurológiai szindrómák (PNS) alapvető patomechanizmusa?",
+                        options: ["Autoimmun keresztreakció a daganat és az idegrendszer között", "A daganat direkt áttétképzése az agyba", "A daganat által termelt metabolitok toxikus hatása", "A kemoterápia mellékhatása"],
+                        answer: "Autoimmun keresztreakció a daganat és az idegrendszer között",
+                        explanation: "A PNS lényege a 'molekuláris mimikri': az immunrendszer a daganat ellen termel antitesteket/T-sejteket, amelyek tévesen az idegrendszer hasonló antigénjeit is megtámadják."
+                    },
+                    {
+                        question: "Melyik daganattípus társul a leggyakrabban klasszikus paraneopláziás szindrómákhoz?",
+                        options: ["Kissejtes tüdőrák (SCLC)", "Emlőrák", "Prosztatarák", "Vastagbélrák"],
+                        answer: "Kissejtes tüdőrák (SCLC)",
+                        explanation: "Az SCLC különösen immunogén, gyakran expresszál onkoneurális antigéneket, ezért számos klasszikus PNS (LEMS, cerebelláris degeneráció, limbikus enkefalitisz) hátterében áll."
+                    },
+                    {
+                        question: "Melyik PNS-re jellemző a memóriazavar, epilepsziás rohamok és személyiségváltozás?",
+                        options: ["Limbikus enkefalitisz", "Cerebelláris degeneráció", "Opsoclonus-myoclonus szindróma", "Stiff Person szindróma"],
+                        answer: "Limbikus enkefalitisz",
+                        explanation: "Ezek a tünetek a limbikus rendszer (hippocampus, amygdala) gyulladására utalnak, ami a limbikus enkefalitisz klasszikus megjelenési formája."
+                    },
+                    {
+                        question: "Az anti-Yo antitestek melyik PNS-sel és milyen daganattal társulnak leggyakrabban?",
+                        options: ["Cerebelláris degeneráció, petefészek- vagy emlőrákkal", "Limbikus enkefalitisz, kissejtes tüdőrákkal", "LEMS, kissejtes tüdőrákkal", "Myasthenia gravis, thymomával"],
+                        answer: "Cerebelláris degeneráció, petefészek- vagy emlőrákkal",
+                        explanation: "Az anti-Yo (PCA-1) antitest a paraneopláziás cerebelláris degeneráció klasszikus markere, és az esetek többségében petefészek- vagy emlőrák áll a háttérben."
+                    },
+                    {
+                        question: "Mi a paraneopláziás szindrómák kezelésének elsődleges és legfontosabb lépése?",
+                        options: ["A háttérben álló daganat kezelése", "Nagy dózisú kortikoszteroid terápia önmagában", "Csak tüneti kezelés", "Hosszú távú fizikoterápia"],
+                        answer: "A háttérben álló daganat kezelése",
+                        explanation: "A PNS kezelésének sarokköve az autoimmun reakciót kiváltó forrás, azaz a tumor mielőbbi és leghatékonyabb kezelése (sebészet, kemo-, sugárterápia)."
+                    },
+                    {
+                        question: "Milyen típusú PNS esetén a leghatékonyabb a plazmaferézis és az IVIg kezelés?",
+                        options: ["Amelyeket sejtfelszíni antigének elleni antitestek közvetítenek", "Amelyeket intracelluláris antigének elleni T-sejtek közvetítenek", "Minden típusú PNS esetén egyformán hatékonyak", "Kizárólag Lambert-Eaton myastheniás szindrómában"],
+                        answer: "Amelyeket sejtfelszíni antigének elleni antitestek közvetítenek",
+                        explanation: "A plazmaferézis és az IVIg a keringő antitestek eltávolításán/semlegesítésén alapul, ezért akkor a leghatékonyabbak, ha a kóroki antitestek a sejtfelszínen lévő célpontokat támadják (pl. anti-NMDAR, anti-VGCC)."
+                    },
+                    {
+                        question: "A Lambert-Eaton myastheniás szindróma (LEMS) melyik daganattal mutat a legerősebb asszociációt?",
+                        options: ["Kissejtes tüdőrák (SCLC)", "Thymoma", "Emlőrák", "Neuroblasztóma"],
+                        answer: "Kissejtes tüdőrák (SCLC)",
+                        explanation: "A LEMS-esetek körülbelül felében paraneopláziás eredetű, és ezek döntő többségében kissejtes tüdőrák áll a háttérben."
+                    },
+                    {
+                        question: "Melyik autoantitest NEM intracelluláris antigén ellen irányul?",
+                        options: ["Anti-NMDAR", "Anti-Hu", "Anti-Yo", "Anti-Ri"],
+                        answer: "Anti-NMDAR",
+                        explanation: "Az anti-Hu, -Yo, -Ri antitestek intracelluláris (sejtmagi, citoplazmatikus) fehérjéket céloznak. Az anti-NMDAR (N-metil-D-aszpartát receptor) antitest sejtfelszíni receptort támad."
+                    },
+                    {
+                        question: "Melyik szindrómára jellemző a progresszív izommerevség és a fájdalmas izomgörcsök, főként a törzsön és a lábakon?",
+                        options: ["Stiff Person szindróma", "Myasthenia Gravis", "Szerzett neuromyotonia", "Motoros neuron betegség"],
+                        answer: "Stiff Person szindróma",
+                        explanation: "Ez a klinikai kép a Stiff Person szindróma klasszikus leírása. Paraneopláziás formája gyakran anti-amfifizin antitest pozitivitással és emlő- vagy tüdőrákkal társul."
+                    },
+                    {
+                        question: "Mi a klinikai jelentősége annak, hogy a PNS neurológiai tünetei gyakran megelőzik a daganat diagnózisát?",
+                        options: ["Lehetőséget ad a háttérdaganat korai felfedezésére.", "Azt jelenti, hogy a neurológiai tünetek mindig enyhék.", "Azt jelenti, hogy a daganat már előrehaladott.", "Nincs különösebb klinikai jelentősége."],
+                        answer: "Lehetőséget ad a háttérdaganat korai felfedezésére.",
+                        explanation: "A PNS korai felismerése és a célzott tumorkeresés elindítása esélyt ad a daganat egy korábbi, jobban kezelhető stádiumban történő diagnosztizálására, ami javíthatja a beteg prognózisát."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás a leghasznosabb rejtett, okkult tumorok felkutatására PNS gyanúja esetén?",
+                        options: ["PET/CT", "Koponya MRI", "Mellkas röntgen", "Hasi ultrahang"],
+                        answer: "PET/CT",
+                        explanation: "A PET/CT az egész test metabolikus aktivitását térképezi fel, így képes kimutatni olyan kis méretű vagy atipikus helyen lévő daganatokat is, amelyeket más képalkotó eljárások nem feltétlenül detektálnak."
+                    },
+                    {
+                        question: "Melyik betegség NEM tartozik a klasszikus paraneopláziás szindrómák közé?",
+                        options: ["Akut diszautonómia", "Limbikus enkefalitisz", "Lambert-Eaton myastheniás szindróma", "Szubakut cerebelláris degeneráció"],
+                        answer: "Akut diszautonómia",
+                        explanation: "Míg a limbikus enkefalitisz, LEMS és cerebelláris degeneráció klasszikus, daganatokkal szorosan összefüggő PNS-ek, addig az akut diszautonómia a nem-klasszikus, kevésbé specifikus szindrómák közé tartozik."
+                    },
+                    {
+                        question: "Milyen neurológiai kórkép társul a thymomához az esetek 15%-ában?",
+                        options: ["Myasthenia Gravis (MG)", "Stiff Person szindróma", "Opsoclonus-myoclonus", "Szenzoros neuronopátia"],
+                        answer: "Myasthenia Gravis (MG)",
+                        explanation: "A Myasthenia Gravis és a thymoma (a csecsemőmirigy daganata) között nagyon erős az asszociáció; a thymomás betegek jelentős részében alakul ki MG."
+                    },
+                    {
+                        question: "Melyik antitest társul leggyakrabban kissejtes tüdőrák okozta enkefalomielitiszhez és szenzoros neuronopátiához?",
+                        options: ["Anti-Hu (ANNA-1)", "Anti-Yo (PCA-1)", "Anti-Ma2", "Anti-Ri (ANNA-2)"],
+                        answer: "Anti-Hu (ANNA-1)",
+                        explanation: "Az anti-Hu a leggyakoribb onkoneurális antitest, és klasszikusan a kissejtes tüdőrák által okozott diffúz idegrendszeri károsodáshoz (enkefalomielitisz, szenzoros neuronopátia) társul."
+                    },
+                    {
+                        question: "Mire utal, ha egy PNS-es beteg liquorában és szérumában is kimutatható ugyanaz az onkoneurális antitest?",
+                        options: ["Erős bizonyíték a paraneopláziás eredet mellett.", "A daganat központi idegrendszeri áttétét jelzi.", "Rossz prognózist jelent a daganat szempontjából.", "Azt jelenti, hogy az immunterápia hatástalan lesz."],
+                        answer: "Erős bizonyíték a paraneopláziás eredet mellett.",
+                        explanation: "Az antitest intratekális (gerincfolyadékon belüli) szintézise azt bizonyítja, hogy az immunreakció a központi idegrendszerben is zajlik, ami a PNS diagnózisát erősen alátámasztja."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport alkalmazása általában NEM javasolt PNS esetén?",
+                        options: ["Immunkontrollpont-gátlók (ICI)", "Kortikoszteroidok", "Intravénás immunglobulin (IVIg)", "Rituximab"],
+                        answer: "Immunkontrollpont-gátlók (ICI)",
+                        explanation: "Az ICI-k az immunrendszer aktiválásával hatnak, ami egy már meglévő autoimmun folyamatot, mint a PNS, súlyosbíthat, ezért alkalmazásuk általában kontraindikált vagy nagy körültekintést igényel."
+                    },
+                    {
+                        question: "Melyik szindróma jellemző gyermekkorban neuroblasztómához, felnőttkorban pedig kissejtes tüdőrákhoz társulva?",
+                        options: ["Opsoclonus-myoclonus szindróma", "Limbikus enkefalitisz", "Cerebelláris degeneráció", "LEMS"],
+                        answer: "Opsoclonus-myoclonus szindróma",
+                        explanation: "Ez a szindróma a 'táncoló szemek, táncoló lábak' kórképe, amelynek paraneopláziás háttere jellegzetesen korfüggő: gyermekeknél neuroblasztóma, felnőtteknél leggyakrabban SCLC."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS a PNS-re vonatkozóan?",
+                        options: ["Az idegrendszeri károsodás mértéke mindig arányos a tumor méretével.", "A neurológiai tünetek súlyosak és gyorsan progrediálhatnak.", "A diagnózis felállításához ki kell zárni a metasztázist, fertőzést és kezelési mellékhatásokat.", "Az alapbetegség egy rejtett, okkult tumor is lehet."],
+                        answer: "Az idegrendszeri károsodás mértéke mindig arányos a tumor méretével.",
+                        explanation: "A PNS egyik jellemzője, hogy a neurológiai károsodás súlyossága gyakran aránytalanul nagy a tumormérethez képest; egy egészen kicsi, rejtett daganat is rendkívül súlyos, kiterjedt idegrendszeri pusztulást okozhat."
+                    },
+                    {
+                        question: "Melyik antitest társul heredaganattal összefüggő limbikus enkefalitiszhez?",
+                        options: ["Anti-Ma2", "Anti-Yo", "Anti-Hu", "Anti-amfifizin"],
+                        answer: "Anti-Ma2",
+                        explanation: "Az anti-Ma2 antitest-pozitív limbikus és agytörzsi enkefalitisz klasszikusan fiatal férfiakban, heredaganathoz társulva fordul elő."
+                    },
+                    {
+                        question: "Mi a másodvonalbeli terápia a PNS kezelésében, ha a kortikoszteroidok, IVIg és plazmaferézis hatástalan?",
+                        options: ["Erősebb immunszuppresszánsok (pl. rituximab, ciklofoszfamid)", "Kísérleti génterápia", "A háttérdaganat ismételt műtéte", "Nagy dózisú B-vitaminok"],
+                        answer: "Erősebb immunszuppresszánsok (pl. rituximab, ciklofoszfamid)",
+                        explanation: "Ha az első vonalbeli immunterápiák nem hoznak javulást, a kezelést eszkalálni kell erősebb, a B-sejteket (rituximab) vagy általánosan a limfocitákat (ciklofoszfamid) célzó immunszuppresszánsokkal."
+                    }
+                ]
+            },
+            {
+                topic: "Onkológiai betegségek kezelésének neurológiai szövődményei",
+                questions: [
+                    {
+                        question: "Mi a kemoterápia okozta perifériás neuropátia (CIPN) jellegzetes eloszlása?",
+                        options: ["Kesztyű-harisnya eloszlás", "Törzsi eloszlás", "Agyidegeket érintő eloszlás", "Foltos, véletlenszerű eloszlás"],
+                        answer: "Kesztyű-harisnya eloszlás",
+                        explanation: "A CIPN tünetei (zsibbadás, fájdalom) jellemzően a leghosszabb idegrostokat érintik először, ezért a kezeken és a lábakon, kesztyű-harisnya eloszlásban jelentkeznek."
+                    },
+                    {
+                        question: "Melyik az egyetlen FDA által jóváhagyott gyógyszer a fájdalmas CIPN tüneti kezelésére?",
+                        options: ["Duloxetin", "Gabapentin", "Pregabalin", "Amitriptilin"],
+                        answer: "Duloxetin",
+                        explanation: "A duloxetin, egy SNRI típusú antidepresszáns, bizonyítottan hatásos a kemoterápia okozta neuropátiás fájdalom enyhítésében."
+                    },
+                    {
+                        question: "Mi a koponyabesugárzás utáni kognitív hanyatlás megelőzésének egyik kulcsfontosságú stratégiája?",
+                        options: ["Hippokampusz-kímélő sugárterápia", "Profilaktikus kortikoszteroid adása", "Alacsonyabb dózisú teljes agyi besugárzás", "Kezelés előtti memantin adása"],
+                        answer: "Hippokampusz-kímélő sugárterápia",
+                        explanation: "A hippokampusz kulcsszerepet játszik a memóriafunkciókban és különösen érzékeny a sugárzásra. A modern sugárterápiás technikák lehetővé teszik e terület kímélését, csökkentve a kognitív mellékhatások kockázatát."
+                    },
+                    {
+                        question: "Mi az első vonalbeli kezelés az immunkontrollpont-gátlók (ICI) által okozott súlyos, immun-mediált neurológiai mellékhatások (irAEs) esetén?",
+                        options: ["Nagy dózisú kortikoszteroidok", "Plazmaferézis", "Intravénás immunglobulin (IVIg)", "Csak az ICI terápia leállítása"],
+                        answer: "Nagy dózisú kortikoszteroidok",
+                        explanation: "A kezelés sarokköve az immunrendszer gyors és hatékony elnyomása, amire a nagy dózisú intravénás kortikoszteroidok a legalkalmasabbak."
+                    },
+                    {
+                        question: "Egy beteg célzott terápiaként bevacizumabot kap, majd fejfájás, görcsroham és látászavar alakul ki nála. Az MRI vazogén ödémát mutat a posterior agyi régiókban. Mi a legvalószínűbb diagnózis?",
+                        options: ["Posterior Reversible Encephalopathy Syndrome (PRES)", "Sugárnekrózis", "Agyi áttét", "ICI-indukált enkefalitisz"],
+                        answer: "Posterior Reversible Encephalopathy Syndrome (PRES)",
+                        explanation: "A PRES egy jellegzetes klinikai-radiológiai szindróma, amelyet gyakran váltanak ki bizonyos daganatellenes (pl. bevacizumab) és immunszuppresszív szerek. Jellemző tünetei és a posterior lokalizációjú ödéma a diagnózis kulcsa."
+                    },
+                    {
+                        question: "Melyik kezeléshez társuló, különösen súlyos és potenciálisan halálos kimenetelű mellékhatás a myositis és myocarditis kombinációja?",
+                        options: ["Immunkontrollpont-gátlók (ICI)", "Platina-alapú kemoterápia", "Sugárterápia", "Proteaszóma-gátlók"],
+                        answer: "Immunkontrollpont-gátlók (ICI)",
+                        explanation: "Bár ritka, a vázizomzat (myositis) és a szívizom (myocarditis) együttes gyulladása az ICI-terápia egyik legrettegettebb, magas mortalitású szövődménye."
+                    },
+                    {
+                        question: "Mit jelent a \"chemo brain\" kifejezés?",
+                        options: ["Daganatos betegséggel összefüggő kognitív diszfunkció", "A kemoterápia által okozott agydaganat", "Az agy fertőzése a kemoterápia alatt", "Májelégtelenség okozta enkefalopátia"],
+                        answer: "Daganatos betegséggel összefüggő kognitív diszfunkció",
+                        explanation: "A \"chemo brain\" vagy rákkal kapcsolatos kognitív diszfunkció egy tünetegyüttes, amely a gondolkodás és a memória zavarait (feledékenység, koncentrációs nehézség) foglalja magában a daganatellenes kezelések alatt és után."
+                    },
+                    {
+                        question: "Melyik állítás igaz a sugárterápia okozta agyi károsodás (RIBI) késői szövődményeire?",
+                        options: ["Hónapokkal vagy évekkel a kezelés után jelentkeznek.", "Mindig enyhék és átmenetiek.", "Csak az 50 Gy feletti dózisnál fordulnak elő.", "Kortikoszteroidokra mindig jól reagálnak."],
+                        answer: "Hónapokkal vagy évekkel a kezelés után jelentkeznek.",
+                        explanation: "A késői szövődmények, mint a kognitív hanyatlás vagy a sugárnekrózis, egy hosszú latenciaidő után, hónapokkal vagy akár évekkel a sugárkezelés befejezését követően válnak klinikailag manifesztté."
+                    },
+                    {
+                        question: "Mi a fő klinikai dilemma a CIPN kezelésében?",
+                        options: ["Dóziskorlátozó toxicitás, ami a hatékony rákkezelés megszakításához vezethet.", "A betegek gyakran nem veszik észre a tüneteket.", "Nincsenek hatékony fájdalomcsillapítók.", "A diagnózis felállítása rendkívül nehéz."],
+                        answer: "Dóziskorlátozó toxicitás, ami a hatékony rákkezelés megszakításához vezethet.",
+                        explanation: "A CIPN súlyossága gyakran a kemoterápia dózisának csökkentését vagy a kezelés leállítását teszi szükségessé, ami kompromittálhatja a daganatellenes terápia hatékonyságát és ronthatja a beteg túlélési esélyeit."
+                    },
+                    {
+                        question: "Melyik gyógyszer hatékony a sugárnekrózis okozta agyödéma csökkentésében azáltal, hogy gátolja az angiogenezist?",
+                        options: ["Bevacizumab", "Dexametazon", "Memantin", "Pentoxifillin"],
+                        answer: "Bevacizumab",
+                        explanation: "A bevacizumab egy VEGF-gátló, amely csökkenti a kóros érképződést és az érfal permeabilitását, ezáltal hatékonyan mérsékli a sugárnekrózis körüli vasogén ödémát."
+                    },
+                    {
+        
+                question: "Milyen típusú neurológiai mellékhatást okoznak leggyakrabban a proteaszóma-gátlók (pl. bortezomib)?",
+                        options: ["Perifériás neuropátia", "Enkefalitisz", "Görcsrohamok", "Myositis"],
+                        answer: "Perifériás neuropátia",
+                        explanation: "A bortezomib és más proteaszóma-gátlók egyik leggyakoribb és dóziskorlátozó mellékhatása a perifériás neuropátia, amely a CIPN-hez hasonló tünetekkel jár."
+                    },
+                    {
+                        question: "Melyik állítás HAMIS az ICI-terápia okozta neurológiai mellékhatásokra (irAEs)?",
+                        options: ["Gyakoriak, a betegek több mint 20%-át érintik.", "Súlyosak és életveszélyesek is lehetnek.", "Kezelésük alapja a kortikoszteroid adása.", "Kialakulhat myasthenia gravis vagy Guillain-Barré szindróma is."],
+                        answer: "Gyakoriak, a betegek több mint 20%-át érintik.",
+                        explanation: "A neurológiai irAE-k ritkák, az ICI-vel kezelt betegeknek csak körülbelül 1-3%-ában fordulnak elő. Ritkaságuk ellenére súlyosságuk miatt nagy a klinikai jelentőségük."
+                    },
+                    {
+                        question: "Mi a Posterior Reversible Encephalopathy Syndrome (PRES) kezelésének egyik legfontosabb eleme?",
+                        options: ["A vérnyomás kontrollja és a kiváltó szer elhagyása", "Azonnali sebészi dekompresszió", "Nagy dózisú antibiotikum terápia", "Hosszú távú antikoaguláns kezelés"],
+                        answer: "A vérnyomás kontrollja és a kiváltó szer elhagyása",
+                        explanation: "A PRES kezelésének alapja a kiváltó ok (pl. gyógyszer, hipertónia) megszüntetése. A vérnyomás óvatos, fokozatos csökkentése és a provokáló szer leállítása általában a tünetek teljes visszafejlődéséhez vezet."
+                    },
+                    {
+                        question: "Milyen patofiziológiai folyamat NEM játszik szerepet a sugárterápia okozta agyi károsodásban?",
+                        options: ["Onkoneurális antitestek termelődése", "A vér-agy gát diszrupciója", "Neuroinflammáció és mikroglia aktiváció", "Oligodendroglia károsodás és demielinizáció"],
+                        answer: "Onkoneurális antitestek termelődése",
+                        explanation: "Az onkoneurális antitestek a paraneopláziás szindrómákra jellemzőek. A sugárkárosodás patomechanizmusa a direkt sejtkárosodáson, gyulladáson és vaszkuláris sérülésen alapul."
+                    },
+                    {
+                        question: "Mire utalhat, ha egy ICI-kezelés során fellépő neurológiai mellékhatás hátterében klasszikus onkoneurális antitestet (pl. anti-Hu) mutatnak ki?",
+                        options: ["Az ICI-terápia egy szubklinikai paraneopláziás hajlamot 'leplezett le'.", "A daganat rezisztenssé vált az ICI-terápiára.", "A betegnek rejtett központi idegrendszeri fertőzése van.", "Ez egy téves laboratóriumi eredmény."],
+                        answer: "Az ICI-terápia egy szubklinikai paraneopláziás hajlamot 'leplezett le'.",
+                        explanation: "Ez a jelenség elmoshatja a határt a paraneopláziás szindróma és a kezelés mellékhatása között. Valószínűsíthető, hogy az immunrendszer általános aktiválása felerősít egy már meglévő, de tüneteket még nem okozó, daganat elleni autoimmun választ."
+                    },
+                    {
+                        question: "Melyik kezelési modalitás neurológiai toxicitása a leginkább dózisfüggő és reverzibilis a kiváltó szer elhagyása után?",
+                        options: ["Célzott terápiák (pl. PRES)", "Immunkontrollpont-gátlók (irAEs)", "Paraneopláziás szindrómák", "Sugárterápia (késői hatások)"],
+                        answer: "Célzott terápiák (pl. PRES)",
+                        explanation: "Ellentétben az immun-mediált vagy a késői, irreverzibilis sugárkárosodással, a célzott terápiák sok neurológiai mellékhatása (mint a PRES) közvetlen farmakológiai hatáson alapul, és a szer dózisának módosításával vagy elhagyásával általában visszafordítható."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb neurológiai szövődménye a daganatellenes kezeléseknek összességében?",
+                        options: ["Kemoterápia okozta perifériás neuropátia (CIPN)", "Sugárnekrózis", "Immun-mediált enkefalitisz", "Paraneopláziás cerebelláris degeneráció"],
+                        answer: "Kemoterápia okozta perifériás neuropátia (CIPN)",
+                        explanation: "A CIPN a daganatellenes kezelések egyik leggyakoribb mellékhatása, amely a betegek jelentős részét érinti, és komoly hatással van az életminőségükre."
+                    },
+                    {
+                        question: "Milyen típusú sejtek károsodása vezet a sugárterápia utáni demielinizációhoz?",
+                        options: ["Oligodendrociták", "Asztrociták", "Neuronok", "Mikrogliasejtek"],
+                        answer: "Oligodendrociták",
+                        explanation: "Az oligodendrociták felelősek a központi idegrendszerben a mielinhüvely képzéséért. Sugárkárosodásuk demielinizációhoz és a jelátvitel lassulásához vezet, ami a korai-késői és késői szövődmények egyik alapja."
+                    },
+                    {
+                        question: "Mi a diagnosztikus eljárás alapja az ICI-indukált neurológiai mellékhatásoknál?",
+                        options: ["Más lehetséges okok (pl. áttét, fertőzés) kizárása", "Specifikus antitestek kimutatása minden esetben", "Jellegzetes MRI lelet", "Gyors javulás szteroidokra"],
+                        answer: "Más lehetséges okok (pl. áttét, fertőzés) kizárása",
+                        explanation: "Az irAE diagnózisa egy kizárásos diagnózis. Először mindig ki kell zárni a daganat progresszióját (pl. agyi áttét), fertőzést, metabolikus vagy egyéb toxikus okokat, mielőtt a tüneteket az ICI-terápiának tulajdonítanánk."
+                    },
+                    {
+                        question: "Melyik állítás igaz a 'chemo brain'-re?",
+                        options: ["Multifaktoriális, a rák és a kezelések egyaránt okozhatják.", "Kizárólag a kemoterápia okozza.", "Mindig maradandó és progresszív.", "Csak idős betegeknél fordul elő."],
+                        answer: "Multifaktoriális, a rák és a kezelések egyaránt okozhatják.",
+                        explanation: "A 'chemo brain' egy komplex jelenség, amelynek hátterében nemcsak a kemoterápia, hanem maga a daganat, a stressz, hormonterápiák, sugárkezelés és egyéb tényezők is állhatnak."
+                    }
+                ]
+            }
+        ];
+
+        // DOM Elements
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const quizTitle = document.getElementById('quiz-title');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const scoreText = document.getElementById('score-text');
+        const scoreCircle = document.getElementById('score-circle');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const backToTopicsBtn = document.getElementById('back-to-topics-btn');
+
+        // State
+        let currentTopicIndex = 0;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentQuestions = [];
+
+        function init() {
+            // Populate topic list
+            topicList.innerHTML = '';
+            quizData.forEach((topic, index) => {
+                const topicButton = document.createElement('button');
+                topicButton.className = 'w-full text-left bg-white p-5 rounded-xl shadow-md border border-slate-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200';
+                topicButton.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 text-blue-700 font-bold rounded-lg w-12 h-12 flex items-center justify-center mr-5 text-lg">${index + 1}</div>
+                        <div>
+                            <h3 class="font-semibold text-slate-800">${topic.topic}</h3>
+                            <p class="text-sm text-slate-500">${topic.questions.length} kérdés</p>
+                        </div>
+                    </div>
+                `;
+                topicButton.onclick = () => startQuiz(index);
+                topicList.appendChild(topicButton);
+            });
+        }
+
+        function startQuiz(topicIndex) {
+            currentTopicIndex = topicIndex;
+            currentQuestionIndex = 0;
+            score = 0;
+            currentQuestions = quizData[topicIndex].questions;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTitle.textContent = quizData[topicIndex].topic;
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // Javított rész: Csak a 'show' osztályt távolítjuk el
+            explanationContainer.classList.remove('show');
+            nextQuestionBtn.classList.add('hidden');
+            
+            const question = currentQuestions[currentQuestionIndex];
+            
+            // Update progress
+            questionCounter.textContent = `Kérdés ${currentQuestionIndex + 1} / ${currentQuestions.length}`;
+            const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            questionText.textContent = question.question;
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach(option => {
+                const optionButton = document.createElement('button');
+                optionButton.className = 'quiz-option w-full text-left p-4 rounded-lg border-2 border-slate-200 bg-white';
+                optionButton.textContent = option;
+                optionButton.onclick = () => selectAnswer(optionButton, option);
+                optionsContainer.appendChild(optionButton);
+            });
+        }
+
+        function selectAnswer(button, selectedOption) {
+            const question = currentQuestions[currentQuestionIndex];
+            const isCorrect = selectedOption === question.answer;
+
+            if (isCorrect) {
+                score++;
+                button.classList.add('correct');
+            } else {
+                button.classList.add('incorrect');
+            }
+            
+            // Disable all options and show correct answer
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === question.answer) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            // Show explanation
+            explanationText.textContent = question.explanation;
+            explanationContainer.classList.add('show');
+
+            // Show next button
+            nextQuestionBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            const percentage = Math.round((score / currentQuestions.length) * 100);
+            scoreText.textContent = `Eredményed: ${score} a ${currentQuestions.length} kérdésből helyes.`;
+            scorePercentage.textContent = `${percentage}%`;
+            
+            let circleColorClass = 'bg-red-200';
+            if (percentage >= 80) {
+                circleColorClass = 'bg-green-200';
+            } else if (percentage >= 50) {
+                circleColorClass = 'bg-yellow-200';
+            }
+            scoreCircle.className = `w-48 h-48 mx-auto mb-8 flex items-center justify-center rounded-full ${circleColorClass}`;
+        }
+
+        nextQuestionBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        restartQuizBtn.addEventListener('click', () => {
+            startQuiz(currentTopicIndex);
+        });
+
+        backToTopicsBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        });
+
+        // Initial load
+        init();
+    </script>
+</body>
+</html>

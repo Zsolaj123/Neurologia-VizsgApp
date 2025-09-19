@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Átfogó Neuroanatómia Teszt: Agytörzs és Kapcsolódó Rendszerek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .quiz-option:hover {
+            background-color: #f0f4f8; /* Light blue-gray hover */
+        }
+        .quiz-option.selected {
+            background-color: #e0e7ff; /* Indigo-100 for selected */
+            border-color: #6366f1; /* Indigo-500 border */
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* Green-100 */
+            border-color: #22c55e !important; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* Red-100 */
+            border-color: #ef4444 !important; /* Red-500 */
+        }
+        .explanation {
+            border-left: 4px solid #6366f1; /* Indigo-500 */
+            background-color: #f5f5f5; /* Neutral-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="main-container" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Átfogó Neuroanatómia Teszt</h1>
+            <p class="text-lg text-gray-600 mt-2">Agytörzs, Bulbaris Idegkek, Hallás, Szaglás és Egyensúly</p>
+            <p id="question-counter" class="text-md text-indigo-600 font-semibold mt-4"></p>
+        </header>
+
+        <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <!-- A kérdések dinamikusan itt jelennek meg -->
+        </div>
+
+        <div id="navigation-buttons" class="mt-8 flex justify-center">
+            <button id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Kör kiértékelése
+            </button>
+        </div>
+
+        <div id="results-container" class="mt-10 hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                 <h2 class="text-2xl font-bold mb-4 text-center">Kör Eredményei</h2>
+                 <p id="score" class="text-center text-xl font-semibold mb-6"></p>
+                 <div id="results-breakdown">
+                     <!-- A részletes eredmények itt jelennek meg -->
+                 </div>
+                 <div class="text-center mt-8">
+                    <button id="next-round-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-transform transform hover:scale-105">
+                        Következő 5 kérdés
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const resultsBreakdown = document.getElementById('results-breakdown');
+        const nextRoundButton = document.getElementById('next-round-btn');
+        const questionCounterElement = document.getElementById('question-counter');
+
+        const fullQuizData = [
+            // ----- TÉMAKÖR 1: SZÉDÜLÉS ÉS VERTIGO -----
+            { question: "Melyik a vertigo leggyakoribb oka, amelyet a fejhelyzet-változtatásra jelentkező, rövid, heves szédülésrohamok jellemeznek?", answers: { a: "Menière-betegség", b: "Vestibularis neuritis", c: "Benignus Paroxysmalis Pozicionális Vertigo (BPPV)", d: "Agytörzsi stroke" }, correctAnswer: "c", explanation: "A BPPV a leggyakoribb vertigo-ok, melyet a belső fül íves járataiba került otoconia kristályok okoznak, és jellegzetesen fejhelyzet-változtatásra váltódik ki." },
+            { question: "Mi a legfontosabb különbség a perifériás és a centrális vertigo által okozott nystagmus között?", answers: { a: "A perifériás nystagmus mindig vertikális, a centrális mindig horizontális.", b: "A centrális nystagmus gyakran tekintésirányú vagy tisztán vertikális/rotatoros, míg a perifériás általában horizonto-rotatoros és fixációval gátolható.", c: "A perifériás nystagmust soha nem kíséri szédülés.", d: "A centrális nystagmus mindig gyorsabb, mint a perifériás." }, correctAnswer: "b", explanation: "A centrális nystagmus atípusos, iránya változhat, és nem gátolja a fixáció. A perifériás nystagmus általában horizonto-rotatoros, egyirányú, és a fixáció csökkenti." },
+            { question: "A HINTS protokoll melyik eleme utal leginkább centrális (stroke) eredetre akut vestibularis szindrómában?", answers: { a: "Kóros (pozitív) fejimpulzus teszt", b: "Egyirányú, horizontális nystagmus", c: "Normális (negatív) fejimpulzus teszt", d: "Kifejezett hányinger és hányás" }, correctAnswer: "c", explanation: "Akut vestibularis szindróma esetén a normális (negatív) fejimpulzus teszt (vagyis ép VOR) nagyon gyanús centrális okra, pl. stroke-ra, mivel a perifériás károsodás (pl. neuritis) tipikusan kóros teszttel jár." },
+            { question: "Melyik kórképre jellemző a fluktuáló halláscsökkenés, a fülzúgás és a több órán át tartó vertigo rohamok triásza?", answers: { a: "Labyrinthitis", b: "BPPV", c: "Acusticus neurinoma", d: "Menière-betegség" }, correctAnswer: "d", explanation: "A Menière-betegség klasszikus tünetegyüttese a rohamokban jelentkező vertigo, a kezdetben a mély hangokat érintő, ingadozó halláscsökkenés és a fülzúgás, melyet az endolymphaticus hydrops okoz." },
+            { question: "Mi a Dix-Hallpike manőver célja?", answers: { a: "A Menière-betegség kezelése", b: "A hátsó ívjárat BPPV-jének diagnosztizálása és provokálása", c: "A centrális vertigo kizárása", d: "A hallás vizsgálata" }, correctAnswer: "b", explanation: "A Dix-Hallpike manőver egy specifikus provokációs teszt, amely a beteget ülő helyzetből gyorsan hanyatt fektetve, elfordított fejjel a hátsó ívjárat BPPV-jére jellemző vertigót és nystagmust váltja ki." },
+            { question: "Melyik állítás írja le helyesen a vestibularis neuritis és a labyrinthitis közötti különbséget?", answers: { a: "A neuritis bakteriális, a labyrinthitis vírusos eredetű.", b: "Neuritisben a szédülés enyhe, labyrinthitisben súlyos.", c: "Labyrinthitisben a vertigo mellett hallási tünetek (halláscsökkenés, fülzúgás) is vannak, neuritisben nincsenek.", d: "A neuritis a centrális, a labyrinthitis a perifériás rendszer betegsége." }, correctAnswer: "c", explanation: "A két kórkép tünettanilag nagyon hasonló (hirtelen, heves vertigo), de a labyrinthitis a teljes belső fület érinti (egyensúly- és hallószerv), így halláscsökkenéssel is jár, míg a neuritis csak a vestibularis ideget vagy dúcot, a hallást megkímélve." },
+            { question: "Melyik struktúrák felelősek a lineáris gyorsulás érzékeléséért?", answers: { a: "Íves járatok", b: "Otolith szervek (utriculus, sacculus)", c: "Vestibularis magok", d: "Fasciculus longitudinalis medialis" }, correctAnswer: "b", explanation: "Az otolith szervekben lévő maculák és otoconia kristályok a lineáris gyorsulást és a fej gravitációhoz viszonyított helyzetét érzékelik." },
+            { question: "A szédülés melyik formáját jellemzi az ájulás közeli állapot, látászavar és verejtékezés, melyet leggyakrabban átmeneti agyi vérellátási zavar okoz?", answers: { a: "Vertigo", b: "Disequilibrium", c: "Presyncope", d: "BPPV" }, correctAnswer: "c", explanation: "A presyncope (ájulás előtti állapot) tüneteit tipikusan a globális agyi hypoperfúzió (csökkent vérellátás) okozza, és nem jár mozgásillúzióval, mint a vertigo." },
+            { question: "Mi az 'Alexander-törvény' a nystagmussal kapcsolatban?", answers: { a: "A nystagmus iránya megfordul, ha a beteg csukja a szemét.", b: "A nystagmus intenzitása fokozódik, ha a beteg a nystagmus gyors komponensének irányába tekint.", c: "A nystagmus mindig a laesio oldala felé üt.", d: "A vertikális nystagmus mindig centrális eredetű." }, correctAnswer: "b", explanation: "Az Alexander-törvény a perifériás nystagmus egyik jellemzője: a szemtekerezgés intenzitása nagyobb, ha a beteg a gyors fázis irányába néz, és csökken, ha az ellenkező irányba." },
+            { question: "Mi az Epley-manőver célja?", answers: { a: "A vestibularis neuritis diagnózisa", b: "A hátsó ívjárat BPPV-jének kezelése a kristályok visszajuttatásával", c: "A centrális nystagmus provokálása", d: "A Menière-roham enyhítése" }, correctAnswer: "b", explanation: "Az Epley-manőver egy repozíciós eljárás, amely specifikus fej- és testhelyzet-változtatásokkal kimozgatja az elszabadult otoconia kristályokat a hátsó ívjáratból vissza az utriculusba." },
+            { question: "Melyik vestibularis pálya felelős az antigravitációs izmok tónusának fenntartásáért?", answers: { a: "Tractus vestibulospinalis medialis", b: "Tractus vestibulospinalis lateralis", c: "Fasciculus longitudinalis medialis (FLM)", d: "Parieto-insularis vestibularis cortex (PIVC)" }, correctAnswer: "b", explanation: "A tractus vestibulospinalis lateralis (főként a Deiters-magból) az extensor izmok tónusát fokozza, segítve a testtartás és egyensúly fenntartását a gravitációval szemben." },
+            { question: "Melyik agytörzsi struktúra az elsődleges központ, ahol a két fülből érkező vestibularis, valamint a látási és proprioceptív információk integrálódnak?", answers: { a: "Colliculus superior", b: "Nucleus ruber", c: "Vestibularis magok", d: "Formatio reticularis" }, correctAnswer: "c", explanation: "A híd és nyúltvelő határán elhelyezkedő vestibularis magok központi integrációs szerepet töltenek be, összefuttatva a különböző, egyensúlyozáshoz szükséges szenzoros információkat." },
+            { question: "Mi a 'harmonikus' vestibularis tünetegyüttes lényege perifériás károsodás esetén?", answers: { a: "A tünetek gyorsan javulnak.", b: "A nystagmus gyors fázisának iránya és a dőlés/félremutatás iránya megegyezik.", c: "A nystagmus gyors fázisának iránya és a dőlés/félremutatás iránya ellentétes.", d: "Nincsenek vegetatív tünetek." }, correctAnswer: "c", explanation: "Harmonikus tünetegyüttesnél (ami perifériás okra utal) a nystagmus gyors komponense az ép oldal felé, míg a dőlés és a végtagok deviációja a beteg (laesio) oldal felé irányul." },
+            { question: "Milyen típusú nystagmus utal leginkább centrális eredetre?", answers: { a: "Horizonto-rotatoros, fixációval gátolható", b: "Tisztán vertikális vagy tisztán torzionális", c: "Egyirányú, a gyors fázis mindig azonos irányú", d: "Fárasztható, ismételt provokációra csökkenő" }, correctAnswer: "b", explanation: "A tisztán vertikális (fel- vagy leütő) vagy tisztán torzionális (forgó) nystagmus szinte mindig centrális (agytörzsi, kisagyi) patológiát jelez." },
+            { question: "Milyen vegetatív tünetek kísérik gyakran a heves, akut perifériás vertigót?", answers: { a: "Láz és hidegrázás", b: "Magas vérnyomás és szapora pulzus", c: "Hányinger, hányás, sápadtság, verejtékezés", d: "Étvágytalanság és fogyás" }, correctAnswer: "c", explanation: "A vestibularis rendszer és az agytörzsi autonóm központok (pl. hányásközpont) közötti szoros kapcsolatok miatt a heves vestibularis ingerlés gyakran vált ki kifejezett vegetatív reakciókat." },
+            { question: "Melyik állítás igaz a cupulolithiasis patomechanizmusára?", answers: { a: "A kristályok szabadon lebegnek az ívjáratban.", b: "A kristályok megtapadnak a cupula felszínén, gravitáció-érzékennyé téve azt.", c: "A vestibularis ideg gyulladása okozza.", d: "A belső fül folyadéktereinek nyomása nő meg." }, correctAnswer: "b", explanation: "A ritkább cupulolithiasis esetén az otoconia kristályok a cupulára tapadva teszik azt nehezebbé és érzékennyé a gravitációra, ami tartósabb vertigót és nystagmust okoz az adott fejhelyzetben." },
+            { question: "Az 'akut vestibularis szindróma' (AVS) NEM tartalmazza az alábbi tünetet:", answers: { a: "Hirtelen kezdődő, napokig tartó vertigo", b: "Hányinger/hányás", c: "Nystagmus", d: "Fokozatosan kialakuló, enyhe bizonytalanságérzés" }, correctAnswer: "d", explanation: "Az AVS-t a hirtelen, akut kezdet és a napokig tartó, folyamatos súlyos tünetek (vertigo, nystagmus, hányinger, testtartási instabilitás) jellemzik. A fokozatosan kialakuló, enyhe bizonytalanság nem felel meg a definíciónak." },
+            { question: "Melyik struktúrával képeznek szinapszist a vestibularis szőrsejtek?", answers: { a: "A hallóideg rostjaival", b: "A ganglion vestibulareban lévő bipoláris neuronok perifériás nyúlványaival", c: "A vestibularis magok neuronjaival", d: "A kisagy Purkinje-sejtjeivel" }, correctAnswer: "b", explanation: "A perifériás vestibularis receptorsejtek (szőrsejtek) a ganglion vestibulareban (Scarpa-dúc) található elsődleges afferens neuronokkal szinaptizálnak." },
+            { question: "A 'Test of Skew' a HINTS protokoll részeként mit vizsgál?", answers: { a: "A szemmozgások sebességét", b: "A nystagmus irányát", c: "A szemek vertikális eltérését (skew deviation)", d: "A hallást" }, correctAnswer: "c", explanation: "A Test of Skew a szemek vertikális tengelyeltérését vizsgálja a szemek felváltott takarásával. A skew deviation jelenléte centrális (agytörzsi/kisagyi) károsodásra utal." },
+            { question: "Melyik gyógyszercsoportot alkalmazzák rövid távon a heves vertigo és a vegetatív tünetek enyhítésére?", answers: { a: "Antibiotikumok", b: "Vitaminkészítmények", c: "Vestibularis szuppresszánsok (pl. antihisztaminok, benzodiazepinek)", d: "Fájdalomcsillapítók" }, correctAnswer: "c", explanation: "A vestibularis szuppresszánsok csökkentik az agytörzsi vestibularis központok aktivitását, így enyhítik a heves szédülést és hányingert. Hosszú távú használatuk gátolja a centrális kompenzációt, ezért csak az akut szakaszban, rövid ideig javasoltak." },
+
+            // ----- TÉMAKÖR 2: BULBARIS AGYIDEGEK -----
+            { question: "Melyik agyideg felelős a m. sternocleidomastoideus és a m. trapezius motoros beidegzéséért?", answers: { a: "N. vagus (X)", b: "N. accessorius (XI)", c: "N. hypoglossus (XII)", d: "N. glossopharyngeus (IX)" }, correctAnswer: "b", explanation: "A nervus accessorius (XI) spinalis gyökere idegzi be a m. sternocleidomastoideust (fejfordítás) és a m. trapeziust (vállemelés)." },
+            { question: "A nyelv féloldali bénulása esetén, kiöltéskor a nyelv a sérült oldal felé deviál. Melyik agyideg perifériás sérülésére utal ez?", answers: { a: "N. glossopharyngeus (IX)", b: "N. vagus (X)", c: "N. trigeminus (V)", d: "N. hypoglossus (XII)" }, correctAnswer: "d", explanation: "A XII. agyideg perifériás sérülésekor az azonos oldali m. genioglossus bénul. Mivel ez a nyelv fő kiöltő izma, az ép oldali izom túlsúlya a nyelvet a bénult (sérült) oldal felé tolja." },
+            { question: "Melyik mag a fő motoros magja a garat és a gége izmainak, és mely agyidegekhez ad rostokat?", answers: { a: "Nucleus tractus solitarii; VII, IX, X", b: "Nucleus ambiguus; IX, X, XI (cranialis)", c: "Nucleus dorsalis n. vagi; csak a X", d: "Nucleus n. hypoglossi; csak a XII" }, correctAnswer: "b", explanation: "A nucleus ambiguus egy speciális visceralis motoros mag, amely a IX., X. és XI. (cranialis részén keresztül) agyideghez ad rostokat, beidegezve a garat, lágy szájpad és gége izmait." },
+            { question: "A garatreflex afferens (érző) és efferens (mozgató) szárát mely agyidegek alkotják?", answers: { a: "Afferens: VII, Efferens: IX", b: "Afferens: IX, Efferens: X", c: "Afferens: X, Efferens: XII", d: "Afferens: V, Efferens: VII" }, correctAnswer: "b", explanation: "A garatfal érintését a IX. agyideg (N. glossopharyngeus) érzékeli (afferens szár), a reflexos garat-összehúzódást pedig főként a X. agyideg (N. vagus) motoros rostjai végzik (efferens szár)." },
+            { question: "A 'függöny-tünet' (az uvula deviációja az ép oldal felé) melyik agyideg bénulására a legjellemzőbb?", answers: { a: "IX. (Glossopharyngeus)", b: "X. (Vagus)", c: "XI. (Accessorius)", d: "XII. (Hypoglossus)" }, correctAnswer: "b", explanation: "Az uvula és a lágyszájpadív emelését főként a N. vagus által beidegzett izmok végzik. Egyoldali bénulásakor az ép oldali izmok felhúzzák a lágyszajpadot, így az uvula az ép oldal felé tér ki." },
+            { question: "Mi a bulbaris és a pseudobulbaris paresis közötti legfontosabb különbség a nyelv vizsgálatakor?", answers: { a: "Bulbaris parézisben a nyelv az ép oldal felé deviál.", b: "Pseudobulbaris parézisben a nyelv mozgása gyors és ügyes.", c: "Bulbaris parézisben (LMN sérülés) nyelvatrophia és fasciculatio látható, pseudobulbarisban (UMN sérülés) nem.", d: "Nincs különbség." }, correctAnswer: "c", explanation: "A bulbaris paresis alsó motoros neuron (LMN) károsodás, ami izomsorvadással (atrophia) és izomrángásokkal (fasciculatio) jár. A pseudobulbaris paresis felső motoros neuron (UMN) károsodás, ahol ezek a jelek hiányoznak." },
+            { question: "A Vernet-szindróma melyik koponyalapi nyílás sérülésére utal, és mely agyidegeket érinti?", answers: { a: "Fissura orbitalis superior; III, IV, VI", b: "Foramen rotundum; V/2", c: "Foramen jugulare; IX, X, XI", d: "Canalis nervi hypoglossi; XII" }, correctAnswer: "c", explanation: "A Vernet-szindróma (foramen jugulare szindróma) a IX., X. és XI. agyidegek együttes károsodása, melyek közösen lépnek ki ezen a nyíláson." },
+            { question: "Melyik agyideg látja el paraszimpatikusan a glandula parotist (fültőmirigy)?", answers: { a: "N. facialis (VII)", b: "N. vagus (X)", c: "N. glossopharyngeus (IX)", d: "N. trigeminus (V)" }, correctAnswer: "c", explanation: "A N. glossopharyngeus (IX) praeganglionaris paraszimpatikus rostjai a nucleus salivatorius inferiorból erednek, a ganglion oticumban kapcsolódnak át, és a postganglionaris rostok idegzik be a parotist." },
+            { question: "A bal oldali nervus laryngeus recurrens sérülése (pl. mellkasi daganat miatt) milyen tünetet okoz?", answers: { a: "Jobb oldali hangszalagbénulás és rekedtség", b: "Bal oldali hangszalagbénulás és rekedtség", c: "Nyelési nehézség (dysphagia)", d: "A nyelv balra deviál" }, correctAnswer: "b", explanation: "A N. laryngeus recurrens (a N. vagus ága) a gége belső izmainak nagy részét idegzi be. Sérülése az azonos oldali hangszalag bénulását és rekedtséget okoz." },
+            { question: "A Wallenberg-szindróma (laterális nyúltvelő szindróma) tünetei között melyik NEM szerepel?", answers: { a: "Ipsilateralis Horner-szindróma", b: "Kontralaterális hemiparesis", c: "Ipsilateralis ataxia", d: "Vertigo és nystagmus" }, correctAnswer: "b", explanation: "A Wallenberg-szindróma a nyúltvelő lateralis részét érinti, megkímélve a mediálisan futó pyramispályát, így hemiparesis (végtagbénulás) nem alakul ki. A hemiparesis a mediális nyúltvelő szindróma (Dejerine) tünete." },
+            { question: "A nyelv hátsó egyharmadának ízérzését melyik agyideg közvetíti?", answers: { a: "N. facialis (VII)", b: "N. trigeminus (V)", c: "N. glossopharyngeus (IX)", d: "N. hypoglossus (XII)" }, correctAnswer: "c", explanation: "A N. glossopharyngeus felelős a nyelv hátsó 1/3-ának ízérző és általános érző beidegzéséért. Az elülső 2/3 ízérzését a N. facialis (chorda tympani) látja el." },
+            { question: "Melyik agyidegnek van spinalis és cranialis gyökere is?", answers: { a: "N. vagus (X)", b: "N. accessorius (XI)", c: "N. trigeminus (V)", d: "N. facialis (VII)" }, correctAnswer: "b", explanation: "A N. accessorius egyedülálló módon egy a nyúltvelőből (cranialis) és egy a felső gerincvelői szegmentumokból (spinalis) eredő gyökérből áll." },
+            { question: "A sinus caroticus baroreceptoraiból származó információkat melyik agyideg szállítja az agytörzsbe?", answers: { a: "N. vagus (X)", b: "N. hypoglossus (XII)", c: "N. trigeminus (V)", d: "N. glossopharyngeus (IX)" }, correctAnswer: "d", explanation: "A sinus caroticus (a. carotis interna tágulata) vérnyomásérzékelő receptorainak afferens rostjai a N. glossopharyngeusban futnak a nucleus tractus solitariihoz, kulcsszerepet játszva a vérnyomás-szabályozásban." },
+            { question: "Melyik izmot NEM a XII. agyideg (N. hypoglossus) idegzi be?", answers: { a: "M. genioglossus", b: "M. styloglossus", c: "M. palatoglossus", d: "M. hyoglossus" }, correctAnswer: "c", explanation: "A m. palatoglossus, bár a nyelvizmok közé tartozik, a lágy szájpad izmaiból fejlődik, és beidegzését a plexus pharyngeus (főként a X. agyideg rostjai) látja el." },
+            { question: "Kétoldali felső motoros neuron (kortikobulbaris pálya) sérülésére jellemző tünetegyüttes:", answers: { a: "Bulbaris paresis", b: "Pseudobulbaris paresis", c: "Locked-in szindróma", d: "Wallenberg-szindróma" }, correctAnswer: "b", explanation: "A pseudobulbaris paresist a felső motoros neuronok kétoldali károsodása okozza, ami spasztikus dysarthriával, dysphagiával és kóros affektív reakciókkal (kényszersírás/nevetés) jár, de nincs izomatrófia." },
+            { question: "Melyik mag a fő paraszimpatikus központja a mellkasi és hasi zsigereknek?", answers: { a: "Nucleus salivatorius inferior", b: "Edinger-Westphal mag", c: "Nucleus dorsalis nervi vagi", d: "Nucleus ambiguus" }, correctAnswer: "c", explanation: "A nucleus dorsalis nervi vagi a legnagyobb paraszimpatikus mag, amely a N. vaguson keresztül kiterjedt beidegzést ad a szívnek, tüdőnek és az emésztőrendszer nagy részének." },
+            { question: "A Collet-Sicard szindróma mely agyidegek együttes bénulását jelenti?", answers: { a: "IX, X, XI", b: "VII, VIII", c: "IX, X, XI, XII", d: "V, VII, IX" }, correctAnswer: "c", explanation: "A Collet-Sicard szindróma a IX., X., XI. és XII. agyidegek együttes, általában koponyaalapi vagy retroparotidealis sérülését jelenti." },
+            { question: "Melyik agyideg lép ki a sulcus preolivarisból (az oliva és a pyramis között)?", answers: { a: "IX. (Glossopharyngeus)", b: "X. (Vagus)", c: "XI. (Accessorius)", d: "XII. (Hypoglossus)" }, correctAnswer: "d", explanation: "A N. hypoglossus gyökérszálai jellegzetesen a nyúltvelő elülső felszínén, a pyramis és az oliva közötti barázdában (sulcus preolivaris/anterolateralis) lépnek elő." },
+            { question: "Melyik agyideg felelős a m. cricothyroideus (a gége hangszalagfeszítő izma) beidegzéséért?", answers: { a: "N. laryngeus recurrens", b: "N. laryngeus superior, ramus externus", c: "N. glossopharyngeus", d: "N. accessorius" }, correctAnswer: "b", explanation: "A m. cricothyroideus az egyetlen belső gégeizom, amelyet nem a n. laryngeus recurrens, hanem a n. laryngeus superior külső ága idegez be." },
+            { question: "A Tapia-szindróma melyik két agyideg perifériás, extracranialis sérülésére utal?", answers: { a: "IX és X", b: "X és XII", c: "XI és XII", d: "VII és IX" }, correctAnswer: "b", explanation: "A Tapia-szindróma a N. vagus (jellemzően a recurrens ág) és a N. hypoglossus nyaki szakaszának sérülése, ami hangszalagbénulást és nyelvbénulást okoz, de a lágyszájpad funkciója megtartott." },
+
+            // ----- TÉMAKÖR 3: HÍD ÉS NYÚLTVELŐ SZERKEZETE -----
+            { question: "Melyik nagy, harántirányú rostköteg található a híd ventrális felszínén, amely a kisagy felé szállít információt?", answers: { a: "Pyramis", b: "Lemniscus medialis", c: "Fibrae pontis transversae", d: "Fasciculus longitudinalis medialis" }, correctAnswer: "c", explanation: "A basis pontis jellegzetes harántcsíkolatát a fibrae pontis transversae (pontocerebellaris rostok) adják, amelyek a nuclei pontisból eredve a pedunculus cerebellaris mediuson keresztül a kisagyba futnak." },
+            { question: "Mi a pyramisok (pyramides medullae oblongatae) tartalma?", answers: { a: "Felszálló érző rostok", b: "A tractus corticospinalis leszálló motoros rostjai", c: "Kisagyi összekötő rostok", d: "Vestibularis pályák" }, correctAnswer: "b", explanation: "A nyúltvelő elülső felszínén lévő két kiemelkedést, a pyramisokat, a pyramispálya (tractus corticospinalis) rostjai alkotják, mielőtt azok a decussatio pyramidumban kereszteződnének." },
+            { question: "A nyúltvelő melyik részén található a légzési és keringési központ?", answers: { a: "A pyramisokban", b: "A nucleus olivaris inferiorban", c: "A formatio reticularisban", d: "A nucleus gracilis és cuneatusban" }, correctAnswer: "c", explanation: "Az életfontosságú vegetatív központok (légzés, keringés, hányás stb.) a nyúltvelő tegmentumában elhelyezkedő, diffúz neuronhálózatban, a formatio reticularisban találhatók." },
+            { question: "Melyik struktúrát látja el elsődlegesen az arteria spinalis anterior a nyúltvelőben?", answers: { a: "A lateralis részt (Wallenberg-szindróma területe)", b: "A dorsalis részt (hátsó kötegi magok)", c: "A mediális részt (pyramis, lemniscus medialis, hypoglossus mag)", d: "Csak a gerincvelőt, a nyúltvelőt nem" }, correctAnswer: "c", explanation: "Az arteria spinalis anterior a nyúltvelő mediális részének vérellátásáért felelős. Elzáródása a mediális nyúltvelő szindrómát (Dejerine) okozza." },
+            { question: "Hol történik a fasciculus gracilis és cuneatus rostjainak átkapcsolódása?", answers: { a: "A gerincvelő hátsó szarvában", b: "A hídban, a nuclei pontisban", c: "A nyúltvelő dorsalis részén, a nucleus gracilisban és cuneatusban", d: "A thalamusban" }, correctAnswer: "c", explanation: "A hátsó kötegi rendszer elsődleges neuronjai a nyúltvelő azonos nevű magjaiban (nucleus gracilis et cuneatus) kapcsolódnak át a másodlagos neuronokra, amelyek axonjai a lemniscus medialist alkotják." },
+            { question: "Melyik agyideg motoros magja körül kanyarodik a nervus facialis belső térde (genu internum), létrehozva a colliculus facialist?", answers: { a: "V. (Trigeminus)", b: "VI. (Abducens)", c: "VIII. (Vestibulocochlearis)", d: "IX. (Glossopharyngeus)" }, correctAnswer: "b", explanation: "A VII. agyideg motoros rostjai a hídban egy jellegzetes hurkot képeznek a VI. agyideg magja körül. Ez a kiemelkedés látható a IV. agykamra fenekén, mint colliculus facialis." },
+            { question: "A 'locked-in' szindrómát mely struktúra kétoldali, kiterjedt károsodása okozza leggyakrabban?", answers: { a: "A nyúltvelő tegmentuma", b: "A középagy tectuma", c: "A basis pontis (híd ventrális része)", d: "A kisagy vermise" }, correctAnswer: "c", explanation: "A 'locked-in' szindróma a basis pontis kétoldali sérülésének (pl. a. basilaris trombózis) következménye. A leszálló motoros pályák megszakadnak (tetraplegia, anarthria), de az éberségért felelős felszálló rendszerek a tegmentumban megkíméltek lehetnek." },
+            { question: "Melyik struktúra a fő bemeneti kapuja a kisagynak a hídból?", answers: { a: "Pedunculus cerebellaris superior", b: "Pedunculus cerebellaris medius", c: "Pedunculus cerebellaris inferior", d: "Lemniscus lateralis" }, correctAnswer: "b", explanation: "A pedunculus cerebellaris medius (brachium pontis) a legnagyobb kisagykar, amely szinte kizárólag a hídból (nuclei pontis) a kisagy felé tartó afferens rostokat (fibrae pontis transversae) tartalmaz." },
+            { question: "Mi a nyúltvelői oliva inferior komplexum legfontosabb funkcionális kapcsolata?", answers: { a: "Reciprok kapcsolat a kisaggyal a motoros tanulásban", b: "Az ízérzés feldolgozása", c: "A hallási információk átkapcsolása", d: "A fájdalomérzet modulálása" }, correctAnswer: "a", explanation: "Az inferior oliva a cortico-ponto-cerebellaris kör fontos része, és a kisaggyal (különösen a Purkinje-sejtekkel) való, ún. 'climbing fiber' (kúszórost) kapcsolatain keresztül alapvető szerepet játszik a mozgások koordinációjában és a motoros tanulásban." },
+            { question: "Melyik struktúra NEM található a nyúltvelő ventrális felszínén?", answers: { a: "Pyramis", b: "Oliva", c: "Sulcus basilaris", d: "A XII. agyideg kilépése" }, correctAnswer: "c", explanation: "A sulcus basilaris a híd (pons) ventrális felszínén található, benne fut az arteria basilaris. A pyramis, az oliva és a XII. agyideg kilépése mind a nyúltvelő elülső felszínének képletei." },
+            { question: "A lemniscus medialis mely típusú érző információkat szállít?", answers: { a: "Fájdalom és hő", b: "Propriocepció és finom tapintás", c: "Hallás", d: "Egyensúly" }, correctAnswer: "b", explanation: "A lemniscus medialis a hátsó kötegi rendszer folytatása, és az epikritikus (finom tapintás, vibráció) és tudatos proprioceptív (helyzet- és mozgásérzés) információkat szállítja a thalamus felé." },
+            { question: "Mely agyidegmagok találhatók a híd és a nyúltvelő határán, a pedunculus cerebellaris inferiorhoz kapcsolódva?", answers: { a: "Nuclei vestibulares és cochleares (VIII)", b: "Nucleus nervi hypoglossi (XII)", c: "Nucleus motorius nervi trigemini (V)", d: "Nucleus nervi facialis (VII)" }, correctAnswer: "a", explanation: "A VIII. agyideghez tartozó vestibularis és cochlearis magkomplexum a híd alsó és a nyúltvelő felső részének határán, a IV. agykamra lateralis részén, a pedunculus cerebellaris inferior közelében helyezkedik el." },
+            { question: "Melyik struktúra tartalmazza a fájdalom- és hőérzést szállító tractus spinothalamicus rostjait a nyúltvelőben?", answers: { a: "Pyramis", b: "Lemniscus medialis", c: "A lateralis nyúltvelői régió, a lemniscus medialis-tól laterálisan", d: "Fasciculus cuneatus" }, correctAnswer: "c", explanation: "A tractus spinothalamicus a nyúltvelőben (és a hídban) a lemniscus medialis-tól laterálisan és dorsálisan helyezkedik el, a laterális nyúltvelő szindróma (Wallenberg) során tipikusan sérül." },
+            { question: "A IV. agykamra fenekének (fossa rhomboidea) alsó, háromszögletű részét melyik agytörzsi struktúra alkotja?", answers: { a: "A középagy tegmentuma", b: "A híd dorsalis felszíne", c: "A nyúltvelő dorsalis (nyílt) felszíne", d: "A kisagy vermise" }, correctAnswer: "c", explanation: "A fossa rhomboidea felső, nagyobb háromszögét a híd, míg alsó, kisebb háromszögét a nyúltvelő nyílt (dorsalis) része képezi." },
+            { question: "A decussatio pyramidum szintjében melyik érző mag alsó pólusa található meg?", answers: { a: "Nucleus principalis n. V", b: "Nucleus gracilis", c: "Nucleus olivaris inferior", d: "Nucleus tractus spinalis n. V" }, correctAnswer: "d", explanation: "A nucleus tractus spinalis nervi trigemini egy hosszú mag, amely a hídtól egészen a gerincvelő felső (C2-C3) szelvényéig lehúzódik, így a decussatio pyramidum szintjében még jelen van." },
+            { question: "Mi az area postrema funkciója?", answers: { a: "Légzés szabályozása", b: "Vérnyomás szabályozása", c: "Kemoceptív trigger zóna, a hányás kiváltása", d: "Hallási információ feldolgozása" }, correctAnswer: "c", explanation: "Az area postrema a IV. agykamra fenekén található circumventricularis szerv, ahol a vér-agy gát hiányos. Képes érzékelni a vérben lévő toxinokat és emetikus anyagokat, és kulcsszerepet játszik a hányási reflex kiváltásában." },
+            { question: "Melyik a tractus corticospinalis rostjainak kereszteződési helye?", answers: { a: "A híd basisában", b: "A középagy tegmentumában", c: "A nyúltvelő alsó részén (decussatio pyramidum)", d: "A gerincvelőben, a belépés szintjén" }, correctAnswer: "c", explanation: "A pyramispálya rostjainak kb. 85-90%-a a nyúltvelő kaudális végén, a decussatio pyramidumban (motoros kereszteződés) kereszteződik át az ellenoldalra." },
+            { question: "Az arteria cerebelli inferior posterior (PICA) elzáródása melyik klasszikus agytörzsi szindrómát okozza?", answers: { a: "Mediális nyúltvelő szindróma (Dejerine)", b: "Laterális nyúltvelő szindróma (Wallenberg)", c: "Mediális pontin szindróma", d: "Locked-in szindróma" }, correctAnswer: "b", explanation: "A PICA látja el a nyúltvelő lateralis részét, így elzáródása a Wallenberg-szindróma jellegzetes tünetegyüttesét (pl. ipsilaterális Horner, ataxia, arcfél érzészavar; kontralaterális testfél fájdalom/hőérzés kiesés) okozza." },
+            { question: "A híd tegmentumában a fasciculus longitudinalis medialis (MLF) hol helyezkedik el?", answers: { a: "A legventrálisabban, a basis pontis határán", b: "A leglaterálisabban, a pedunculus cerebellaris medius mellett", c: "A középvonalhoz közel, a IV. agykamra feneke alatt", d: "Diffúzan, a formatio reticularisban" }, correctAnswer: "c", explanation: "Az MLF egy jól körülhatárolható pálya, amely az agytörzs tegmentumának dorsalis részén, a középvonal közelében, közvetlenül a motoros agyidegmagok (pl. VI., XII.) előtt és a IV. agykamra feneke alatt fut." },
+            { question: "A híd és a nyúltvelő közötti határt melyik képlet jelöli a ventrális felszínen?", answers: { a: "Sulcus basilaris", b: "Sulcus pontomesencephalicus", c: "Sulcus bulbopontinus", d: "Fissura mediana anterior" }, correctAnswer: "c", explanation: "A sulcus bulbopontinus (vagy medullopontinus) az a haránt barázda, amely elválasztja a híd alsó szélét a nyúltvelő felső szélétől, és ahol a VI., VII. és VIII. agyidegek kilépnek." },
+
+            // ----- TÉMAKÖR 4: AGYTÖRZSI AKTIVÁLÓ RENDSZEREK -----
+            { question: "Mi az ARAS (Ascending Reticular Activating System) elsődleges funkciója?", answers: { a: "Az izomtónus szabályozása", b: "Az agykéreg általános aktiválása és az ébrenlét fenntartása", c: "A fájdalomérzet továbbítása", d: "A mozgáskoordináció" }, correctAnswer: "b", explanation: "Az ARAS egy felszálló pályarendszer, amely a formatio reticularisból ered, és felelős az agykéreg tónusos aktiválásáért, ami az ébrenlét és a tudatosság alapfeltétele." },
+            { question: "Melyik magcsoport a fő noradrenalin-forrás az agyban, és kulcsszerepet játszik a figyelemben és a stresszválaszban?", answers: { a: "Raphe magok", b: "Locus coeruleus", c: "Ventralis tegmentalis area (VTA)", d: "Tuberomammillaris nucleus (TMN)" }, correctAnswer: "b", explanation: "A locus coeruleus a hídban található noradrenerg mag, amely kiterjedt projekcióival alapvetően befolyásolja az éberséget, a figyelmet és a stresszreakciókat." },
+            { question: "Melyik neurotranszmitter hiánya okozza a narcolepsiát, az ébrenlét instabilitásával járó alvászavart?", answers: { a: "Szerotonin", b: "Dopamin", c: "Hisztamin", d: "Orexin (Hypokretin)" }, correctAnswer: "d", explanation: "A narcolepsiát a lateralis hypothalamusban termelődő orexin/hypokretin neuropeptidek hiánya okozza. Az orexin stabilizálja az ébrenléti állapotot az ARAS többi komponensének serkentésével." },
+            { question: "Az ARAS melyik két fő felszálló pályán keresztül fejti ki hatását az agykéregre?", answers: { a: "Mediális és laterális pálya", b: "Elülső és hátulsó pálya", c: "Dorsalis (thalamikus) és ventralis (extrathalamikus) pálya", d: "Spinothalamicus és spinoreticularis pálya" }, correctAnswer: "c", explanation: "Az ARAS egyrészt a thalamus intralaminaris magjain átkapcsolódva (dorsalis pálya), másrészt a thalamust megkerülve, a lateralis hypothalamuson és basalis előagyon keresztül (ventralis pálya) éri el az agykérget." },
+            { question: "Az antihisztaminok álmosító mellékhatása melyik rendszer gátlásán alapul?", answers: { a: "Kolinerg rendszer", b: "Szerotonerg rendszer", c: "Hisztaminerg rendszer (TMN)", d: "Noradrenerg rendszer (Locus Coeruleus)" }, correctAnswer: "c", explanation: "A hypothalamus tuberomammillaris magja (TMN) által termelt hisztamin egy erőteljes ébrenlét-fenntartó neurotranszmitter. Az első generációs antihisztaminok átjutnak a vér-agy gáton és gátolják ezt a rendszert, álmosságot okozva." },
+            { question: "Melyik állítás igaz a formatio reticularisra (FR)?", answers: { a: "Egyetlen, jól körülhatárolt mag az agytörzs közepén.", b: "Kizárólag felszálló, érző pályákat tartalmaz.", c: "Egy diffúz neuronhálózat az agytörzs tegmentumában, amely számos vitális funkciót szabályoz.", d: "Csak a nyúltvelőben található meg." }, correctAnswer: "c", explanation: "A formatio reticularis egy komplex, az egész agytörzsön végighúzódó hálózat, amely motoros, szenzoros és vegetatív funkciókban, valamint az éberség szabályozásában is részt vesz." },
+            { question: "Milyen következménnyel jár a híd felső és a középagy tegmentumának kiterjedt, kétoldali károsodása?", answers: { a: "Izolált memóriazavar", b: "Locked-in szindróma", c: "Tartós kóma", d: "Akut vertigo" }, correctAnswer: "c", explanation: "Az ARAS kulcsfontosságú magjai és pályái ebben a régióban sűrűsödnek. Kiterjedt, kétoldali sérülésük megszakítja az agykéreg aktiválását, ami irreverzibilis eszméletvesztéshez, kómához vezet." },
+            { question: "Melyik neurotranszmitter szintje magas mind az ébrenlét, mind a REM alvás alatt?", answers: { a: "Noradrenalin", b: "Szerotonin", c: "Acetilkolin", d: "Hisztamin" }, correctAnswer: "c", explanation: "Az acetilkolin (ACh) szintje magas mind az éber, mind a REM (álmodó) fázisban, hozzájárulva a kéreg deszinkronizált, aktív állapotához. A monoaminok (NA, 5-HT, Hisztamin) szintje REM alatt drasztikusan lecsökken." },
+            { question: "Melyik magcsoport a fő szerotonin-forrás az agyban?", answers: { a: "Locus Coeruleus", b: "Nuclei raphes", c: "Substantia nigra", d: "Pedunculopontin nucleus (PPN)" }, correctAnswer: "b", explanation: "A raphe magok, amelyek az agytörzs középvonalában helyezkednek el, termelik a szerotonint, amelynek kiterjedt hatása van a hangulatra, alvásra és egyéb funkciókra." },
+            { question: "Mi a 'flip-flop switch' modell lényege az alvás-ébrenlét szabályozásában?", answers: { a: "A jobb és bal agyfélteke aktivitásának váltakozása.", b: "A REM és NREM alvás közötti ciklikus váltás.", c: "Az ébrenlétet fenntartó (ARAS) és az alvást elősegítő (pl. VLPO) központok közötti kölcsönös gátló kapcsolat.", d: "A szimpatikus és paraszimpatikus idegrendszer egyensúlya." }, correctAnswer: "c", explanation: "A 'flip-flop switch' modell szerint az ARAS és a hypothalamus alvás-központja (VLPO) kölcsönösen gátolják egymást. Ez a bistabil kapcsoló biztosítja a gyors és stabil átmenetet az éber és az alvó állapot között, megakadályozva a köztes, instabil állapotokat." },
+            { question: "A formatio reticularis laterális (parvocellularis) zónájának mi a fő funkciója?", answers: { a: "Leszálló motoros parancsok küldése a gerincvelőbe.", b: "Felszálló szenzoros információk fogadása és feldolgozása.", c: "Szerotonin termelése.", d: "Az alvás-ébrenlét ciklus direkt szabályozása." }, correctAnswer: "b", explanation: "A laterális zóna főként afferens rostokat fogad különböző érzőpályákról, és bemenetet ad a mediális zónának és az ARAS többi részének, így a szenzoros információk integrálásában játszik szerepet." },
+            { question: "Melyik rendszer felelős az ébrenlét során a motiváció és a célorientált viselkedés fenntartásáért?", answers: { a: "A locus coeruleus noradrenerg rendszere", b: "A raphe magok szerotonerg rendszere", c: "A VTA mezokortikális és mezolimbikus dopaminerg rendszere", d: "A PPN/LDT kolinerg rendszere" }, correctAnswer: "c", explanation: "A VTA-ból kiinduló dopaminerg pályák a jutalmazó rendszer kulcsfontosságú elemei, és alapvető szerepet játszanak a motiváció, a jutalomérzet és az ébrenlét fenntartásában." },
+            { question: "Melyik állítás HAMIS az ARAS-ra vonatkozóan?", answers: { a: "Redundáns, több neurotranszmittert használó rendszer.", b: "Sérülése tudatzavarokhoz vezethet.", c: "Kizárólag a thalamuson keresztül éri el az agykérget.", d: "Részt vesz a figyelem szabályozásában." }, correctAnswer: "c", explanation: "Az ARAS-nak két fő felszálló pályája van: egy dorsalis, ami a thalamuson keresztül halad, és egy ventralis, ami a thalamust megkerülve, a hypothalamus és a basalis előagy érintésével éri el a kérget." },
+            { question: "A tractus reticulospinalis mely funkciókban játszik szerepet?", answers: { a: "Finom, precíziós mozgások", b: "Csak az érző információk továbbítása", c: "Izomtónus, testtartás és durvább mozgások szabályozása", d: "Ízérzés és szaglás" }, correctAnswer: "c", explanation: "A formatio reticularis mediális zónájából eredő reticulospinalis pályák fontos leszálló extrapyramidális pályák, amelyek az izomtónust, a testtartást és a reflexeket modulálják." },
+            { question: "Melyik magcsoport tekinthető az ARAS kolinerg komponensének fő forrásának az agytörzsben?", answers: { a: "Locus coeruleus", b: "Nuclei raphes", c: "Ventralis tegmentalis area", d: "Pedunculopontin (PPN) és laterodorsalis tegmentalis (LDT) magok" }, correctAnswer: "d", explanation: "A PPN és LDT magok a híd-középagy határán található kolinerg sejtcsoportok, amelyek a thalamushoz és a kéreghez projiciálva fontos szerepet játszanak az ébrenlétben és a REM alvásban." },
+            { question: "Miért vezethet kiterjedt agytörzsi sérülés kómához, míg egy hasonló méretű kérgi sérülés nem feltétlenül?", answers: { a: "Mert az agytörzs vérellátása rosszabb.", b: "Mert az agytörzsben sűrűsödnek az ARAS éberségért felelős központjai és pályái.", c: "Mert az agykéregnek nagyobb a regenerációs képessége.", d: "Mert az agytörzs védi a gerincvelőt." }, correctAnswer: "b", explanation: "A tudatosság fenntartásához elengedhetetlen az agykéreg aktiválása, amit az agytörzsi ARAS végez. Az ARAS sérülése megszünteti ezt az aktivációt, kómát okozva, még ép agykéreg mellett is." },
+            { question: "Az ARAS ventrális, extrathalamikus pályája mely struktúrákon keresztül éri el az agykérget?", answers: { a: "Csak a nucleus reticularis thalami-n keresztül.", b: "A gerincvelőn keresztül.", c: "A lateralis hypothalamuson és a basalis előagyon keresztül.", d: "A kisagyon keresztül." }, correctAnswer: "c", explanation: "A ventrális pálya a monoaminerg és hypothalamicus magokból indul, és a thalamust megkerülve, a lateralis hypothalamus és a basalis előagy (pl. nucleus basalis Meynerti) érintésével, direkt módon projiciál a kéregbe." },
+            { question: "Melyik állítás jellemzi a kóma állapotát?", answers: { a: "A beteg hangos szóra ébreszthető.", b: "A beteg a szemét spontán kinyitja, de nem követi a tárgyakat.", c: "A beteg semmilyen ingerre nem reagál, a szeme csukva van.", d: "A beteg tudatánál van, de nem tud mozogni." }, correctAnswer: "c", explanation: "A kóma a tudat és az éberség teljes elvesztése, ahol a beteg nem ébreszthető, nem reagál külső ingerekre, és a szemei csukva maradnak. A tudatánál lévő, de mozgásképtelen állapot a locked-in szindróma." },
+            { question: "Melyik neurotranszmitter játszik szerepet a leszálló fájdalomcsillapító pályákban, melyek a formatio reticularisból (pl. raphe magok) indulnak?", answers: { a: "Hisztamin", b: "Orexin", c: "Szerotonin és noradrenalin", d: "Dopamin" }, correctAnswer: "c", explanation: "A formatio reticularisból, különösen a raphe magokból és a locus coeruleusból induló leszálló szerotonerg és noradrenerg pályák a gerincvelő hátsó szarvában gátolják a fájdalomérző neuronok aktivitását." },
+            { question: "Az általános érzéstelenítők hatásmechanizmusában melyik rendszer reverzibilis gátlása játszik kulcsszerepet?", answers: { a: "A limbikus rendszer", b: "A kisagy", c: "Az agytörzsi aktiváló rendszer (ARAS)", d: "A bazális ganglionok" }, correctAnswer: "c", explanation: "Sok általános anesztetikum fokozza a GABAerg gátlást vagy gátolja a glutamáterg serkentést az ARAS-ban és a thalamo-kortikális hálózatokban, ami az éberség és a tudatosság reverzibilis elvesztéséhez vezet." }
+        ];
+
+        let currentQuizData = [];
+        let usedIndices = new Set();
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startNewRound() {
+            if (usedIndices.size >= fullQuizData.length) {
+                usedIndices.clear();
+                alert("Gratulálok, a tesztbank végére értél! A kérdések újra kezdődnek.");
+            }
+            
+            let availableIndices = [];
+            for (let i = 0; i < fullQuizData.length; i++) {
+                if (!usedIndices.has(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            shuffleArray(availableIndices);
+            const selectedIndices = availableIndices.slice(0, 5);
+            
+            currentQuizData = [];
+            selectedIndices.forEach(index => {
+                currentQuizData.push(fullQuizData[index]);
+                usedIndices.add(index);
+            });
+            
+            buildQuiz();
+        }
+
+        function buildQuiz() {
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.classList.remove('hidden');
+            submitButton.disabled = false;
+
+            const output = [];
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answers = [];
+                for (const letter in currentQuestion.answers) {
+                    answers.push(
+                        `<label class="quiz-option block w-full p-4 my-2 border-2 border-gray-200 rounded-lg cursor-pointer transition-colors duration-200">
+                            <input type="radio" name="question${questionNumber}" value="${letter}" class="mr-3">
+                            <span class="font-semibold">${letter.toUpperCase()}.</span> ${currentQuestion.answers[letter]}
+                        </label>`
+                    );
+                }
+
+                output.push(
+                    `<div class="mb-8" id="q${questionNumber}">
+                        <div class="question text-lg font-semibold mb-4">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="answers">${answers.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+            questionCounterElement.textContent = `A tesztbankban összesen ${fullQuizData.length} kérdés található.`;
+            
+            document.querySelectorAll('.quiz-option input[type="radio"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const questionNumber = event.target.name;
+                    document.querySelectorAll(`input[name="${questionNumber}"]`).forEach(radio => {
+                        radio.parentElement.classList.remove('selected');
+                    });
+                    event.target.parentElement.classList.add('selected');
+                });
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.answers');
+            let numCorrect = 0;
+            let breakdownHTML = '';
+
+            currentQuizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+                
+                let questionResultHTML = `<div class="mb-8 p-4 rounded-lg border-2">
+                    <p class="text-lg font-semibold mb-2">${questionNumber + 1}. ${currentQuestion.question}</p>`;
+
+                for (const letter in currentQuestion.answers) {
+                    let answerClass = '';
+                    if (letter === currentQuestion.correctAnswer) {
+                        answerClass = 'correct';
+                    } else if (letter === userAnswer && userAnswer !== currentQuestion.correctAnswer) {
+                        answerClass = 'incorrect';
+                    }
+
+                    questionResultHTML += `<div class="p-3 my-2 border-2 rounded-lg ${answerClass}">
+                        <strong>${letter.toUpperCase()}.</strong> ${currentQuestion.answers[letter]}
+                    </div>`;
+                }
+
+                if (userAnswer === currentQuestion.correctAnswer) {
+                    numCorrect++;
+                } else {
+                     questionResultHTML += `<div class="explanation mt-4 p-3 rounded-md">
+                        <strong class="text-indigo-700">Magyarázat:</strong> ${currentQuestion.explanation}
+                    </div>`;
+                }
+                
+                questionResultHTML += `</div>`;
+                breakdownHTML += questionResultHTML;
+            });
+
+            const scorePercent = Math.round((numCorrect / currentQuizData.length) * 100);
+            scoreElement.textContent = `Eredményed ebben a körben: ${numCorrect} / ${currentQuizData.length} (${scorePercent}%)`;
+            scoreElement.className = 'text-center text-2xl font-bold mb-6 ';
+            if (scorePercent >= 80) {
+                 scoreElement.classList.add('text-green-600');
+            } else if (scorePercent >= 50) {
+                scoreElement.classList.add('text-yellow-600');
+            } else {
+                scoreElement.classList.add('text-red-600');
+            }
+
+            quizContainer.classList.add('hidden');
+            submitButton.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            resultsBreakdown.innerHTML = breakdownHTML;
+            window.scrollTo(0, 0);
+        }
+
+        submitButton.addEventListener('click', showResults);
+        nextRoundButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+            startNewRound();
+        });
+
+        // Kezdeti kvíz felépítése
+        startNewRound();
+    </script>
+</body>
+</html>

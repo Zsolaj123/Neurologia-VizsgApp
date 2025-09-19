@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt - 3. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.selected {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Neurológia Tesztek - 3. rész</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy témakört a tudása teszteléséhez.</p>
+            <div id="topic-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <p id="progress-text" class="text-slate-500"></p>
+                </div>
+                <button id="back-to-topics" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2 px-4 border border-slate-300 rounded-lg shadow-sm">Vissza</button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+                
+                <div id="feedback-container" class="mt-6">
+                    <div id="explanation" class="explanation p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                        <h4 class="font-bold mb-2">Magyarázat</h4>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="next-button" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h2>
+            <p id="score-text" class="text-xl text-slate-600 mb-2"></p>
+            <p id="score-percentage" class="text-4xl font-bold text-blue-600 mb-6"></p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Újra</button>
+                <button id="back-to-topics-from-results" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 border border-slate-300 rounded-lg shadow-sm">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            "craniocervicalis_atmenet": {
+                title: "A craniocervicalis átmenet károsodásának tünettana",
+                questions: [
+                    {
+                        question: "Mi a Chiari I malformáció legjellemzőbb tünete?",
+                        options: ["Láz", "Hasi fájdalom", "Köhögésre, erőlködésre fokozódó tarkótáji fejfájás", "Bőrkiütés"],
+                        answer: "Köhögésre, erőlködésre fokozódó tarkótáji fejfájás",
+                        explanation: "A Chiari I malformáció klasszikus tünete a Valsalva-manőver (köhögés, tüsszentés, erőlködés) által provokált, jellemzően a tarkótájon jelentkező fejfájás, ami a CSF keringés átmeneti megzavarásával magyarázható."
+                    },
+                    {
+                        question: "Melyik szalag játszik kulcsszerepet a dens axis stabilizálásában?",
+                        options: ["Ligamentum flavum", "Ligamentum transversum atlantis", "Ligamentum nuchae", "Ligamentum longitudinale anterius"],
+                        answer: "Ligamentum transversum atlantis",
+                        explanation: "A ligamentum transversum atlantis az atlas (C1) két oldalsó tömege között feszül ki a dens axis (C2) mögött, azt az atlas elülső ívéhez szorítva. Sérülése súlyos atlantoaxiális instabilitáshoz vezet."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás a legalkalmasabb a lágyrészek, mint a gerincvelő és a szalagok, vizsgálatára a craniocervicalis átmenetben?",
+                        options: ["Röntgen (RTG)", "Computer Tomográfia (CT)", "Mágneses Rezonancia Képalkotás (MRI)", "Ultrahang"],
+                        answer: "Mágneses Rezonancia Képalkotás (MRI)",
+                        explanation: "Az MRI kiválóan ábrázolja a lágyrészeket, így ez az elsődleges módszer a gerincvelő, agytörzs, szalagok, valamint a Chiari malformáció vagy syringomyelia kimutatására."
+                    },
+                    {
+                        question: "Mi a basilaris invaginatio?",
+                        options: ["Az atlas csigolya törése.", "A dens axis és/vagy a foramen magnum körüli csontok benyomulása a koponyaüregbe.", "A nyaki gerinc túlzott mozgékonysága.", "A kisagyi mandulák lecsúszása."],
+                        answer: "A dens axis és/vagy a foramen magnum körüli csontok benyomulása a koponyaüregbe.",
+                        explanation: "A basilaris invaginatio (vagy impressio) a craniocervicalis átmenet felső részének a koponyaüregbe történő kóros benyomulását jelenti, ami az agytörzs és a gerincvelő kompresszióját okozhatja."
+                    },
+                    {
+                        question: "Melyik betegség a szerzett atlantoaxiális instabilitás (AAI) leggyakoribb oka?",
+                        options: ["Down-szindróma", "Rheumatoid arthritis (RA)", "Paget-kór", "Osteoporosis"],
+                        answer: "Rheumatoid arthritis (RA)",
+                        explanation: "A rheumatoid arthritis egy krónikus gyulladásos autoimmun betegség, amely gyakran támadja meg a nyaki gerinc ízületeit és szalagjait, így az AAI egyik leggyakoribb szerzett okának számít."
+                    },
+                    {
+                        question: "Milyen neurológiai jel a 'downbeat nystagmus', és melyik kórképben jellemző?",
+                        options: ["Felfelé irányuló szemmozgás, agytörzsi daganatokban.", "Gyors, lefelé irányuló szemmozgás, Chiari malformációban.", "Vízszintes szemmozgás, fülészeti problémákban.", "Forgó szemmozgás, alkoholmérgezésben."],
+                        answer: "Gyors, lefelé irányuló szemmozgás, Chiari malformációban.",
+                        explanation: "A downbeat nystagmus egy jellegzetes, centrális eredetű szemmozgászavar, amely a craniocervicalis átmenet károsodására, különösen a Chiari malformációra jellemző."
+                    },
+                    {
+                        question: "Melyik artéria sérülékeny különösen a craniocervicalis átmenet traumáinál?",
+                        options: ["Arteria carotis interna", "Arteria cerebri media", "Arteria vertebralis", "Arteria basilaris"],
+                        answer: "Arteria vertebralis",
+                        explanation: "Az arteria vertebralis speciális lefutása miatt (áthalad a nyakcsigolyák harántnyúlványain, majd az atlas barázdájában kanyarog) különösen ki van téve sérülésnek (disszekció, elzáródás) a CCJ traumái során."
+                    },
+                    {
+                        question: "Mi a syringomyelia?",
+                        options: ["A gerincvelő daganata.", "Folyadékkal telt üreg a gerincvelőben.", "A gerincvelő gyulladása.", "A gerincvelő vérellátási zavara."],
+                        answer: "Folyadékkal telt üreg a gerincvelőben.",
+                        explanation: "A syringomyelia (vagy syrinx) egy kóros, folyadékkal telt üreg (ciszta) kialakulása a gerincvelő állományán belül, amely gyakran a Chiari malformáció okozta CSF áramlási zavar következménye."
+                    },
+                    {
+                        question: "A Lhermitte-jel mire utal?",
+                        options: ["Agyideg-sérülésre", "Izomgyengeségre", "A gerincvelő hátsó kötegeinek irritációjára", "Kisagyi károsodásra"],
+                        answer: "A gerincvelő hátsó kötegeinek irritációjára",
+                        explanation: "A Lhermitte-jel egy áramütésszerű érzés, amely a nyak előrehajlításakor a gerinc mentén lefelé sugárzik. A gerincvelő hátsó kötegeinek (amelyek a mélyérzést szállítják) mechanikai irritációjára vagy demielinizációjára utal."
+                    },
+                    {
+                        question: "Melyik állítás írja le a 'funkcionális instabilitást' a CCJ-ben?",
+                        options: ["Mindig súlyos csonttörés okozza.", "Jelentős képalkotó eltérés nélkül is okozhat tüneteket, feltehetően a proprioceptív rendszer zavara miatt.", "Csak Down-szindrómában fordul elő.", "Mindig műtéti megoldást igényel."],
+                        answer: "Jelentős képalkotó eltérés nélkül is okozhat tüneteket, feltehetően a proprioceptív rendszer zavara miatt.",
+                        explanation: "A funkcionális instabilitás esetén a tünetek hátterében nem kimutatható strukturális hiba, hanem a CCJ régió idegi szabályozásának, a proprioceptív információk feldolgozásának zavara áll, ami fájdalmat, szédülést és egyensúlyzavarokat okozhat."
+                    },
+                    {
+                        question: "A Jefferson-féle törés melyik csigolyát érinti?",
+                        options: ["Occiput", "Atlas (C1)", "Axis (C2)", "C7"],
+                        answer: "Atlas (C1)",
+                        explanation: "A Jefferson-törés az atlas (C1) gyűrűjének robbanásos törése, amely jellemzően a fejtetőre ható, tengelyirányú kompressziós erő hatására jön létre."
+                    },
+                    {
+                        question: "Melyik mozgásért felelős elsődlegesen az atlanto-axialis ízületi komplexum?",
+                        options: ["Bólintás (flexio-extensio)", "Oldalra hajlás (lateralflexio)", "Fejforgatás (rotatio)", "Előre-hátra csúszás"],
+                        answer: "Fejforgatás (rotatio)",
+                        explanation: "A fej forgó mozgásának mintegy 50%-a az atlas és az axis közötti ízületekben, a dens axis körül történik."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző az alsó agyidegek (IX-XII) kompressziójára?",
+                        options: ["Nyelési nehézség (dysphagia)", "Rekedtség (dysphonia)", "Látótérkiesés (hemianopia)", "Nyelvmozgás zavara"],
+                        answer: "Látótérkiesés (hemianopia)",
+                        explanation: "A IX-XII. agyidegek a nyelést, hangképzést, nyelvmozgást szabályozzák. A látótérkiesés a látópálya vagy a látókéreg károsodására utal, ami jóval a craniocervicalis átmenet felett helyezkedik el."
+                    },
+                    {
+                        question: "Mi a Klippel-Feil szindróma?",
+                        options: ["Egy vagy több nyaki csigolya veleszületett fúziója.", "A koponyaalap ellapulása.", "A dens axis hiánya.", "A gerincvelő kóros rögzülése."],
+                        answer: "Egy vagy több nyaki csigolya veleszületett fúziója.",
+                        explanation: "A Klippel-Feil szindróma egy veleszületett rendellenesség, amelyet a nyaki csigolyák egy vagy több szegmentumának összecsontosodása jellemez, ami a nyak mozgásainak korlátozottságához vezet."
+                    },
+                    {
+                        question: "Melyik képalkotó vizsgálat a legalkalmasabb a csontos anomáliák, mint a basilaris invaginatio, részletes megítélésére?",
+                        options: ["MRI", "Ultrahang", "Röntgen", "CT (Computer Tomográfia)"],
+                        answer: "CT (Computer Tomográfia)",
+                        explanation: "A CT kiváló térbeli felbontással ábrázolja a csontos struktúrákat, így ez a legpontosabb módszer a csontos fejlődési rendellenességek, törések és a csontok térbeli viszonyainak részletes elemzésére."
+                    },
+                    {
+                        question: "Mi a 'bobble-head' tünet?",
+                        options: ["Akaratlan fejremegés", "A beteg úgy érzi, a feje túl nehéz és nehezen tudja megtartani", "A fej kórosan kicsi", "A fej kórosan nagy"],
+                        answer: "A beteg úgy érzi, a feje túl nehéz és nehezen tudja megtartani",
+                        explanation: "Ez a szubjektív instabilitás érzése, amely a CCJ instabilitására utalhat. A beteg úgy érezheti, mintha a feje egy rugón ülne, és aktív izommunkát igényelne a megtartása, ami a proprioceptív zavar és izomgyengeség következménye."
+                    },
+                    {
+                        question: "Milyen típusú fejfájás jellemző a CCJ problémákra?",
+                        options: ["Mindig a homlokon jelentkező, szorító fájdalom", "Tarkótáji, gyakran mozgásra vagy erőlködésre fokozódó fájdalom", "Féloldali, lüktető, hányingerrel járó fájdalom", "Epizodikus, éles, áramütésszerű arcidegfájdalom"],
+                        answer: "Tarkótáji, gyakran mozgásra vagy erőlködésre fokozódó fájdalom",
+                        explanation: "A CCJ eredetű fejfájás (cervicogén fejfájás) tipikusan a tarkótájon (suboccipitalisan) kezdődik, és kisugározhat a fejtető vagy a szem mögé. Jellemzően a nyakmozgások vagy a Valsalva-manőver provokálja."
+                    },
+                    {
+                        question: "Milyen vegetatív tünetek társulhatnak a CCJ károsodásához?",
+                        options: ["Csak izzadás", "Szívdobogásérzés, szédülés, fülzúgás, emésztési panaszok", "Csak alacsony vérnyomás", "Csak magas pulzus"],
+                        answer: "Szívdobogásérzés, szédülés, fülzúgás, emésztési panaszok",
+                        explanation: "A CCJ régióban futó szimpatikus és paraszimpatikus (vagus) idegrostok irritációja vagy kompressziója változatos autonóm tüneteket okozhat, amelyek a keringést, hallást, egyensúlyt és emésztést is érinthetik."
+                    },
+                    {
+                        question: "Melyik állítás igaz a CCJ károsodások diagnosztikájára?",
+                        options: ["A diagnózis mindig egyszerű és egyértelmű.", "A képalkotó lelet mindig egyértelműen korrelál a tünetek súlyosságával.", "A diagnózis gyakran késik a tünetek sokfélesége és aspecifikus jellege miatt.", "A diagnózishoz elegendő egy egyszerű vérvétel."],
+                        answer: "A diagnózis gyakran késik a tünetek sokfélesége és aspecifikus jellege miatt.",
+                        explanation: "A CCJ patológiák polimorf tüneteket okoznak, amelyek számos más, gyakoribb kórképet utánozhatnak. Ezért a betegek gyakran hosszú kivizsgáláson esnek át, mire a helyes diagnózis megszületik."
+                    },
+                    {
+                        question: "A myelopathia tünetei mire utalnak a CCJ károsodása esetén?",
+                        options: ["Agyideg-károsodásra", "Gerincvelő-károsodásra", "Kisagyi károsodásra", "Perifériás ideg károsodására"],
+                        answer: "Gerincvelő-károsodásra",
+                        explanation: "A myelopathia a gerincvelő működési zavarát jelenti. A CCJ régióban ez a felső nyaki gerincvelő kompressziója miatt alakul ki, és a végtagokon jelentkező gyengeséggel, érzészavarral, spaszticitással és kóros reflexekkel jár."
+                    }
+                ]
+            },
+            "atherogenezis": {
+                title: "Atherogenezis",
+                questions: [
+                    {
+                        question: "Mi az atherogenesis legkorábbi, iniciáló lépése?",
+                        options: ["Plakkruptúra", "Endothelialis diszfunkció", "Thrombosis", "Simaizomsejt-proliferáció"],
+                        answer: "Endothelialis diszfunkció",
+                        explanation: "Az atherogenesis legkorábbi, még kimutatható elváltozása az artériák belső felszínét borító endothel réteg funkciózavara, amely fokozott permeabilitáshoz és gyulladásos állapothoz vezet."
+                    },
+                    {
+                        question: "Melyik lipoprotein játszik központi szerepet a plakkok kialakulásában?",
+                        options: ["HDL (High-Density Lipoprotein)", "VLDL (Very Low-Density Lipoprotein)", "LDL (Low-Density Lipoprotein)", "Kilomikron"],
+                        answer: "LDL (Low-Density Lipoprotein)",
+                        explanation: "Az LDL-koleszterin ('rossz koleszterin') az a lipoprotein, amely az érfalba jutva, ott felhalmozódva és oxidálódva elindítja az atherogenetikus kaszkádot."
+                    },
+                    {
+                        question: "Mik azok a 'habos sejtek' (foam cells)?",
+                        options: ["Lipidekkel telt makrofágok", "Elhalt simaizomsejtek", "Aktivált vérlemezkék", "Keringő zsírsejtek"],
+                        answer: "Lipidekkel telt makrofágok",
+                        explanation: "A habos sejtek olyan makrofágok, amelyek az érfalban nagy mennyiségű módosult (oxidált) LDL-t vettek fel. Ezek a sejtek a korai atheroscleroticus lézió, a zsírcsík fő alkotóelemei."
+                    },
+                    {
+                        question: "Mi a fibrotikus sapka fő funkciója egy előrehaladott plakkban?",
+                        options: ["A plakk lipidtermelése", "A plakk stabilizálása és a nekrotikus mag elválasztása a véráramtól", "A vérrögképződés elősegítése", "Az ér tágítása"],
+                        answer: "A plakk stabilizálása és a nekrotikus mag elválasztása a véráramtól",
+                        explanation: "A fibrotikus sapka, amelyet főként simaizomsejtek és általuk termelt kollagén alkot, egy védőréteget képez a plakk lipidben gazdag, trombogén nekrotikus magja felett, így megakadályozva a plakkruptúrát."
+                    },
+                    {
+                        question: "Melyik esemény vezet leggyakrabban akut kardiovaszkuláris eseményhez (pl. szívinfarktus, stroke)?",
+                        options: ["A plakk lassú, folyamatos növekedése", "A plakk elmeszesedése", "A vulnerábilis plakk ruptúrája és következményes trombózis", "Az ér falának gyulladása önmagában"],
+                        answer: "A vulnerábilis plakk ruptúrája és következményes trombózis",
+                        explanation: "Az akut események hátterében leggyakrabban egy instabil, gyulladt plakk megrepedése áll, ami a plakk trombogén tartalmának a véráramba kerülését és hirtelen vérrögképződést (trombózist) vált ki."
+                    },
+                    {
+                        question: "Milyen hatással van a turbulens véráramlás az artériás elágazódásoknál az atherogenesisre?",
+                        options: ["Védő hatású, megakadályozza a plakk-képződést.", "Elősegíti az endothelialis diszfunkciót és a plakkok kialakulását.", "Nincs hatással a folyamatra.", "Csak a vérnyomást emeli."],
+                        answer: "Elősegíti az endothelialis diszfunkciót és a plakkok kialakulását.",
+                        explanation: "Az artériás elágazódásoknál és görbületeknél kialakuló zavart, turbulens áramlás (alacsony nyírófeszültség) károsítja az endothelt, és kedvez a lipidek lerakódásának, ezért a plakkok jellemzően ezeken a helyeken alakulnak ki."
+                    },
+                    {
+                        question: "Mi a nitrogén-monoxid (NO) szerepe az egészséges érfalban?",
+                        options: ["Érszűkítő és gyulladáskeltő", "Értágító és atheroprotektív (védő) hatású", "Csak a véralvadást serkenti", "Nincs ismert szerepe"],
+                        answer: "Értágító és atheroprotektív (védő) hatású",
+                        explanation: "A nitrogén-monoxid egy kulcsfontosságú molekula, amelyet az egészséges endothel termel. Potens vazodilatátor, gátolja a vérlemezke-aggregációt, a gyulladást és a simaizomsejt-proliferációt, így véd az atherosclerosis ellen."
+                    },
+                    {
+                        question: "Mi a 'zsírcsík' (fatty streak)?",
+                        options: ["Az atherosclerosis késői, komplikált formája.", "Az atherosclerosis legkorábbi, makroszkóposan látható elváltozása.", "Egyfajta érfali vérzés.", "A plakk elmeszesedett része."],
+                        answer: "Az atherosclerosis legkorábbi, makroszkóposan látható elváltozása.",
+                        explanation: "A zsírcsík az atherogenesis első, szemmel is látható jele, amelyet főként habos sejtek felhalmozódása alkot az intima rétegben. Gyakran már fiatal korban megjelenik."
+                    },
+                    {
+                        question: "Melyik állítás NEM jellemző egy vulnerábilis (sérülékeny) plakkra?",
+                        options: ["Nagy, lipidben gazdag nekrotikus mag", "Vastag, stabil, meszes fibrotikus sapka", "Intenzív gyulladásos aktivitás", "Vékony, kevés simaizomsejtet tartalmazó fibrotikus sapka"],
+                        answer: "Vastag, stabil, meszes fibrotikus sapka",
+                        explanation: "A vulnerábilis, ruptúrára hajlamos plakkot éppen a vékony, gyulladt, gyenge fibrotikus sapka jellemzi. A vastag, meszes sapka inkább a stabil plakkokra jellemző."
+                    },
+                    {
+                        question: "Milyen szerepet játszanak a mátrix metalloproteinázok (MMP-k) a plakk instabilitásában?",
+                        options: ["Erősítik a fibrotikus sapkát.", "Lebontják a fibrotikus sapka kollagén rostjait, gyengítve azt.", "Csökkentik a plakk lipid tartalmát.", "Gátolják a gyulladást."],
+                        answer: "Lebontják a fibrotikus sapka kollagén rostjait, gyengítve azt.",
+                        explanation: "Az MMP-k olyan enzimek, amelyeket főként a gyulladásos sejtek (makrofágok) termelnek a plakkban. Képesek lebontani az extracelluláris mátrixot, így a fibrotikus sapka elvékonyodásához és a plakk ruptúrájához vezethetnek."
+                    },
+                    {
+                        question: "Mi a különbség az arteriosclerosis és az atherosclerosis között?",
+                        options: ["A két fogalom szinonima.", "Az arteriosclerosis az artériák általános megkeményedése, míg az atherosclerosis ennek egy specifikus, plakk-képződéssel járó formája.", "Az arteriosclerosis a vénákat, az atherosclerosis az artériákat érinti.", "Az arteriosclerosis gyulladásos, az atherosclerosis degeneratív betegség."],
+                        answer: "Az arteriosclerosis az artériák általános megkeményedése, míg az atherosclerosis ennek egy specifikus, plakk-képződéssel járó formája.",
+                        explanation: "Az arteriosclerosis egy gyűjtőfogalom az artériák rugalmasságának elvesztésére és megkeményedésére. Ennek leggyakoribb és klinikailag legjelentősebb oka az atherosclerosis, azaz a zsíros plakkok képződése."
+                    },
+                    {
+                        question: "Melyik sejttípus felelős a fibrotikus sapka kollagén tartalmának termeléséért?",
+                        options: ["Endothelsejtek", "Makrofágok", "T-limfociták", "Vaszkuláris simaizomsejtek (VSMC)"],
+                        answer: "Vaszkuláris simaizomsejtek (VSMC)",
+                        explanation: "A szintetikus fenotípusra váltott simaizomsejtek vándorolnak az intimába, ahol nagy mennyiségű kollagént és más extracelluláris mátrix komponenst termelnek, létrehozva ezzel a plakkot stabilizáló fibrotikus sapkát."
+                    },
+                    {
+                        question: "Mi a PCSK9 szerepe a koleszterin-anyagcserében?",
+                        options: ["Fokozza az LDL-koleszterin felvételét a májba.", "Elősegíti az LDL receptorok lebontását, ezáltal növeli a keringő LDL-koleszterin szintjét.", "Csökkenti a HDL-koleszterin szintjét.", "Közvetlenül oxidálja az LDL-t."],
+                        answer: "Elősegíti az LDL receptorok lebontását, ezáltal növeli a keringő LDL-koleszterin szintjét.",
+                        explanation: "A PCSK9 egy enzim, amely az LDL receptorokhoz kötődve azok lebontását okozza a májsejtekben. Ez csökkenti a máj LDL-felvételi képességét, ami a vér LDL-szintjének emelkedéséhez vezet."
+                    },
+                    {
+                        question: "Melyik gyulladásos jelátviteli út játszik kulcsszerepet a koleszterin kristályok által kiváltott gyulladásban?",
+                        options: ["Wnt jelátvitel", "Notch jelátvitel", "NLRP3 inflammaszóma", "Ösztrogén receptor jelátvitel"],
+                        answer: "NLRP3 inflammaszóma",
+                        explanation: "A plakkban kicsapódó koleszterin kristályok 'veszélyjelként' működnek, és aktiválják a makrofágokban az NLRP3 inflammaszóma komplexet, ami az erős proinflammatorikus citokin, az IL-1β termeléséhez vezet."
+                    },
+                    {
+                        question: "Melyik citokin rendelkezik elsődlegesen gyulladáscsökkentő, atheroprotektív hatással?",
+                        options: ["TNF-α", "IL-1β", "IL-6", "IL-10"],
+                        answer: "IL-10",
+                        explanation: "Az Interleukin-10 (IL-10) az egyik legfontosabb anti-inflammatorikus citokin, amely gátolja a proinflammatorikus citokinek termelését és a gyulladásos sejtek aktivitását, így védő szerepet játszik az atherogenesisben."
+                    },
+                    {
+                        question: "Mi a 'pozitív remodelling' jelensége a plakkfejlődés során?",
+                        options: ["A plakk zsugorodása.", "Az artéria kifelé történő tágulása, amellyel kompenzálja a plakk növekedését, fenntartva a lumen átmérőjét.", "A plakk gyors benövése a lumenbe.", "A plakk elmeszesedése."],
+                        answer: "Az artéria kifelé történő tágulása, amellyel kompenzálja a plakk növekedését, fenntartva a lumen átmérőjét.",
+                        explanation: "A korai fázisban az érfal képes kifelé tágulni (pozitív remodelling), hogy kompenzálja a növekvő plakk térfoglalását. Ezért egy jelentős plakk is lehet angiográfiásan nem szignifikáns, mert nem okoz lumenszűkületet."
+                    },
+                    {
+                        question: "Melyik T-sejt alcsoport a leginkább pro-atherogenikus?",
+                        options: ["Th1 sejtek", "Th2 sejtek", "Regulatórikus T-sejtek (Treg)", "Th17 sejtek"],
+                        answer: "Th1 sejtek",
+                        explanation: "A Th1 sejtek által termelt citokinek, különösen az interferon-gamma (IFN-γ), fokozzák a makrofágok gyulladásos aktivitását és gyengíthetik a fibrotikus sapkát, így pro-atherogenikus hatásúak."
+                    },
+                    {
+                        question: "Mi a plakk erózió?",
+                        options: ["A plakk teljes megrepedése.", "A plakkot borító endothelréteg lekopása a fibrotikus sapka átszakadása nélkül.", "A plakk belsejében történő vérzés.", "A plakk zsugorodása."],
+                        answer: "A plakkot borító endothelréteg lekopása a fibrotikus sapka átszakadása nélkül.",
+                        explanation: "A plakk erózió egy másik mechanizmus, ami trombózishoz vezethet. Itt nem a sapka reped meg, hanem a felszíni endothel válik le, szabaddá téve a trombogén alatti rétegeket."
+                    },
+                    {
+                        question: "Melyik állítás igaz a vaszkuláris simaizomsejtek (VSMC) szerepére?",
+                        options: ["Mindig károsak, mert növelik a plakk méretét.", "Mindig hasznosak, mert stabilizálják a plakkot.", "Szerepük kettős: a korai fázisban a sapka képzésével stabilizálhatnak, de az előrehaladott plakkban az apoptózisuk destabilizálhat.", "Nincs szerepük az atherogenesisben."],
+                        answer: "Szerepük kettős: a korai fázisban a sapka képzésével stabilizálhatnak, de az előrehaladott plakkban az apoptózisuk destabilizálhat.",
+                        explanation: "A VSMC-k szerepe komplex. Míg a proliferációjuk és kollagéntermelésük egy stabil fibrotikus sapkát hozhat létre, addig a későbbi fázisban a pusztulásuk a sapka gyengüléséhez és a plakk instabilitásához vezet."
+                    },
+                    {
+                        question: "Melyik a legfontosabb, módosítható rizikófaktora az atherogenesisnek?",
+                        options: ["Életkor", "Genetika", "Diszlipidémia (magas LDL-koleszterin)", "Férfi nem"],
+                        answer: "Diszlipidémia (magas LDL-koleszterin)",
+                        explanation: "Bár az életkor és a genetika fontos nem módosítható tényezők, a módosítható rizikófaktorok közül a magas LDL-koleszterin szint a legközvetlenebb és legfontosabb hajtóereje az atherogenesisnek."
+                    }
+                ]
+            },
+            "cv_betegsegek_riziko": {
+                title: "Cerebrovascularis betegségek rizikó tényezői",
+                questions: [
+                    {
+                        question: "Melyik a cerebrovascularis betegségek (CVB) legjelentősebb, leggyakoribb módosítható rizikófaktora?",
+                        options: ["Dohányzás", "Magas vérnyomás (Hypertensio)", "Elhízás", "Magas koleszterinszint"],
+                        answer: "Magas vérnyomás (Hypertensio)",
+                        explanation: "A magas vérnyomás messze a legfontosabb módosítható rizikófaktor, amely a stroke esetek több mint felében kimutatható kóroki tényezőként, és a stroke-os betegek 75%-a hipertóniás."
+                    },
+                    {
+                        question: "Melyik szívritmuszavar növeli a stroke kockázatát a leginkább, és milyen mechanizmussal?",
+                        options: ["Sinus bradycardia, hypoperfúzióval", "Kamrai extrasystole, érgörccsel", "Pitvarfibrilláció, kardioembolizációval", "AV-blokk, vérnyomáseséssel"],
+                        answer: "Pitvarfibrilláció, kardioembolizációval",
+                        explanation: "A pitvarfibrilláció a legfontosabb kardiológiai rizikófaktor. A pitvarok remegése miatt a vér pang a szívben, ami vérrögképződéshez vezet, és az innen leszakadó vérrög (embólus) agyi érelzáródást okozhat."
+                    },
+                    {
+                        question: "Melyik állítás igaz a dohányzás és a stroke kockázatára?",
+                        options: ["Csak a napi 20 szál feletti dohányzás veszélyes.", "A passzív dohányzás nem növeli a kockázatot.", "A dohányzás minden formája jelentősen növeli a stroke kockázatát az érfalkárosító és trombózist elősegítő hatásai miatt.", "A dohányzás csak a vérzéses stroke kockázatát növeli."],
+                        answer: "A dohányzás minden formája jelentősen növeli a stroke kockázatát az érfalkárosító és trombózist elősegítő hatásai miatt.",
+                        explanation: "A dohányzás az egyik legjelentősebb, teljesen megelőzhető rizikófaktor. A benne lévő toxikus anyagok károsítják az ereket, fokozzák az érelmeszesedést és a vérrögképződést. A passzív dohányzás is bizonyítottan kockázatnövelő."
+                    },
+                    {
+                        question: "Melyik NEM tartozik a nem módosítható rizikófaktorok közé?",
+                        options: ["Életkor", "Fizikai inaktivitás", "Genetikai hajlam", "Etnikum"],
+                        answer: "Fizikai inaktivitás",
+                        explanation: "A fizikai inaktivitás (mozgásszegény életmód) egy életmódbeli tényező, amelyen lehet változtatni. Az életkor, a genetikai háttér és az etnikum nem módosítható rizikófaktorok."
+                    },
+                    {
+                        question: "Hogyan növeli a cukorbetegség (diabetes mellitus) a stroke kockázatát?",
+                        options: ["Csak a testsúly növelésével.", "Felgyorsítja az érelmeszesedést és károsítja a kisereket.", "Csökkenti a vérnyomást.", "Javítja a vérzsír-profilt."],
+                        answer: "Felgyorsítja az érelmeszesedést és károsítja a kisereket.",
+                        explanation: "A cukorbetegség a krónikus magas vércukorszint révén károsítja az erek falát (endothel diszfunkció), felgyorsítja az atherosclerosis folyamatát (macroangiopathia) és a kiserek betegségét (microangiopathia) is okozza."
+                    },
+                    {
+                        question: "Mi a TIA (Tranziens Ischaemiás Attack) jelentősége?",
+                        options: ["Egy ártalmatlan, átmeneti rosszullét.", "Egy komoly figyelmeztető jel, amely a stroke magas, közvetlen kockázatára utal.", "A vérzéses stroke előjele.", "Mindig fejfájással jár."],
+                        answer: "Egy komoly figyelmeztető jel, amely a stroke magas, közvetlen kockázatára utal.",
+                        explanation: "A TIA egy 'mini-stroke', amely után a stroke kialakulásának kockázata drámaian megnő a következő napokban és hetekben. Ezért a TIA-t orvosi vészhelyzetként kell kezelni, és azonnali kivizsgálást, valamint prevenciós kezelést igényel."
+                    },
+                    {
+                        question: "Melyik a gyakoribb stroke típus?",
+                        options: ["Ischaemiás stroke", "Vérzéses stroke", "Egyforma gyakoriságúak", "A gyakoriság évszakonként változik"],
+                        answer: "Ischaemiás stroke",
+                        explanation: "Az ischaemiás stroke (agyi érelzáródás) teszi ki az összes stroke eset mintegy 80-87%-át, tehát lényegesen gyakoribb, mint a vérzéses stroke."
+                    },
+                    {
+                        question: "Milyen mechanizmussal okoz stroke-ot az elhízás?",
+                        options: ["Csak a megnövekedett testsúly miatti mechanikai terheléssel.", "Szorosan társul más rizikófaktorokkal (magas vérnyomás, cukorbetegség, diszlipidémia) és krónikus gyulladást tart fenn.", "Csökkenti a véralvadékonyságot.", "Javítja az endothel funkciót."],
+                        answer: "Szorosan társul más rizikófaktorokkal (magas vérnyomás, cukorbetegség, diszlipidémia) és krónikus gyulladást tart fenn.",
+                        explanation: "Az elhízás egy komplex rizikófaktor, amely a metabolikus szindróma részeként hozzájárul a stroke főbb rizikófaktorainak kialakulásához, valamint a zsírszövet által termelt gyulladásos anyagok révén közvetlenül is károsítja az érrendszert."
+                    },
+                    {
+                        question: "Milyen típusú stroke-ot okoz leggyakrabban egy agyi aneurizma megrepedése?",
+                        options: ["Trombotikus ischaemiás stroke", "Embóliás ischaemiás stroke", "Intracerebralis vérzés", "Szubarachnoideális vérzés (SAV)"],
+                        answer: "Szubarachnoideális vérzés (SAV)",
+                        explanation: "Az agyi artériákon lévő aneurizmák megrepedése a leggyakoribb oka a szubarachnoideális vérzésnek, amikor a vér az agy felszínén, a pókhálóhártya alatti térbe ömlik."
+                    },
+                    {
+                        question: "A stroke rizikófaktorai hogyan hatnak egymásra?",
+                        options: ["Mindig függetlenek egymástól.", "Gyakran együtt fordulnak elő és erősítik egymás károsító hatását.", "Az egyik rizikófaktor jelenléte kizárja a másikét.", "Csak egy rizikófaktor lehet jelen egyszerre."],
+                        answer: "Gyakran együtt fordulnak elő és erősítik egymás károsító hatását.",
+                        explanation: "A rizikófaktorok (pl. elhízás, magas vérnyomás, cukorbetegség) gyakran halmozottan jelentkeznek (pl. metabolikus szindróma részeként), és hatásuk nem csupán összeadódik, hanem szinergikusan, egymást erősítve növelik a stroke kockázatát."
+                    },
+                    {
+                        question: "Melyik állítás igaz a férfiak és nők stroke kockázatára?",
+                        options: ["A nők kockázata minden életkorban magasabb.", "A férfiak kockázata minden életkorban magasabb.", "A férfiak kockázata fiatalabb korban magasabb, de a menopauza után a nők kockázata utoléri vagy meg is haladja azt.", "Nincs különbség a nemek között."],
+                        answer: "A férfiak kockázata fiatalabb korban magasabb, de a menopauza után a nők kockázata utoléri vagy meg is haladja azt.",
+                        explanation: "Az ösztrogén védő hatása miatt a premenopauzában lévő nők kockázata alacsonyabb. A menopauza után ez a védelem megszűnik, és a nők kockázata felzárkózik a férfiakéhoz."
+                    },
+                    {
+                        question: "Milyen típusú stroke-ra hajlamosít leginkább a sarlósejtes anémia?",
+                        options: ["Vérzéses stroke", "Ischaemiás stroke", "Mindkettőre egyformán", "Nem növeli a stroke kockázatát"],
+                        answer: "Ischaemiás stroke",
+                        explanation: "A sarlósejtes anémia egy örökletes vérképzőszervi betegség, ahol a kóros vörösvértestek elzárhatják a kisereket, így ischaemiás stroke-ot okozva, különösen gyermek- és fiatal felnőttkorban."
+                    },
+                    {
+                        question: "Hogyan befolyásolja a túlzott alkoholfogyasztás a véralvadást?",
+                        options: ["Csökkenti a véralvadékonyságot.", "Nincs hatása a véralvadásra.", "Májkárosodáson keresztül a véralvadási faktorok termelésének zavarához vezethet, növelve a vérzéses stroke kockázatát.", "Csak a vérlemezkék számát növeli."],
+                        answer: "Májkárosodáson keresztül a véralvadási faktorok termelésének zavarához vezethet, növelve a vérzéses stroke kockázatát.",
+                        explanation: "A krónikus, nagy mennyiségű alkoholfogyasztás károsítja a májat, ahol a véralvadási faktorok jelentős része termelődik. Ennek hiánya véralvadási zavarokhoz és a vérzéses stroke fokozott kockázatához vezet."
+                    },
+                    {
+                        question: "Mi a 'metabolikus szindróma'?",
+                        options: ["Egy ritka genetikai betegség.", "Több kardiovaszkuláris rizikófaktor (hasi elhízás, magas vérnyomás, magas vércukor, diszlipidémia) együttes előfordulása.", "Az anyagcsere lelassulása.", "Csak a pajzsmirigy betegsége."],
+                        answer: "Több kardiovaszkuláris rizikófaktor (hasi elhízás, magas vérnyomás, magas vércukor, diszlipidémia) együttes előfordulása.",
+                        explanation: "A metabolikus szindróma egy rizikófaktor-halmozódás, amely drámaian megnöveli a 2-es típusú cukorbetegség és a kardiovaszkuláris betegségek, köztük a stroke kockázatát."
+                    },
+                    {
+                        question: "Milyen típusú stroke-ot okozhat a kokain- vagy amfetamin-használat?",
+                        options: ["Csak ischaemiás stroke-ot", "Csak vérzéses stroke-ot", "Mind ischaemiás (pl. érgörcs, vasculitis miatt), mind vérzéses stroke-ot (pl. hirtelen vérnyomás-emelkedés miatt).", "Nem okoz stroke-ot."],
+                        answer: "Mind ischaemiás (pl. érgörcs, vasculitis miatt), mind vérzéses stroke-ot (pl. hirtelen vérnyomás-emelkedés miatt).",
+                        explanation: "A stimuláns drogok akut érszűkületet és extrém vérnyomás-emelkedést okozhatnak, ami mind érelzáródáshoz (ischaemia), mind érrepedéshez (vérzés) vezethet."
+                    },
+                    {
+                        question: "Melyik állítás igaz a diszlipidémia kezelésére a stroke prevenciójában?",
+                        options: ["Csak a HDL-koleszterint kell emelni.", "A statin terápia csak a koleszterinszintet csökkenti.", "A statin terápia az LDL-szint csökkentése mellett gyulladáscsökkentő és plakkstabilizáló hatással is bír.", "A kezelés csak diétával lehetséges."],
+                        answer: "A statin terápia az LDL-szint csökkentése mellett gyulladáscsökkentő és plakkstabilizáló hatással is bír.",
+                        explanation: "A statinok ún. pleiotróp hatásokkal is rendelkeznek, amelyek a lipidszint-csökkentéstől függetlenül is hozzájárulnak a stroke kockázatának mérsékléséhez, például az érfali gyulladás csökkentésével."
+                    },
+                    {
+                        question: "A stroke-on átesett betegek mekkora hányada hipertóniás?",
+                        options: ["Kb. 10%", "Kb. 25%", "Kb. 50%", "Kb. 75%"],
+                        answer: "Kb. 75%",
+                        explanation: "A magas vérnyomás rendkívül gyakori a stroke-os betegek körében, az esetek mintegy háromnegyedében jelen van, ami aláhúzza központi szerepét a betegség kialakulásában."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a kardioemboliás stroke-nak?",
+                        options: ["Szívinfarktus", "Szívbillentyű-betegség", "Pitvarfibrilláció", "Szívtumor"],
+                        answer: "Pitvarfibrilláció",
+                        explanation: "A pitvarfibrilláció a leggyakoribb tartós szívritmuszavar és a kardioemboliás stroke messze legfontosabb forrása."
+                    },
+                    {
+                        question: "Miért fontos a 'néma' vagy paroxizmális pitvarfibrilláció szűrése?",
+                        options: ["Mert esztétikailag zavaró.", "Mert a tünetmentes pitvarfibrilláció is jelentős stroke kockázatot hordoz, és kezelés nélkül maradna.", "Mert mindig súlyos mellkasi fájdalmat okoz.", "Mert csak sportolókat érint."],
+                        answer: "Mert a tünetmentes pitvarfibrilláció is jelentős stroke kockázatot hordoz, és kezelés nélkül maradna.",
+                        explanation: "A pitvarfibrilláció gyakran nem okoz tüneteket, így felderítetlen maradhat. A 'néma' forma azonban ugyanolyan magas stroke kockázattal jár, mint a tünetes, ezért a szűrése kulcsfontosságú a megelőzés szempontjából."
+                    },
+                    {
+                        question: "Milyen típusú stroke-ra jellemző, hogy a tünetek fokozatosan, órák vagy napok alatt alakulnak ki?",
+                        options: ["Embóliás stroke", "Trombotikus stroke", "Szubarachnoideális vérzés", "Mindig a vérzéses stroke"],
+                        answer: "Trombotikus stroke",
+                        explanation: "Míg az embóliás stroke általában hirtelen, maximális deficittel kezdődik, addig a helyben képződő trombus okozta elzáródásnál a tünetek lehetnek ingadozóak vagy fokozatosan rosszabbodóak, ahogy a trombus növekszik és a kollaterális keringés kimerül."
+                    }
+                ]
+            },
+            "primer_prevencio": {
+                title: "Primer prevenció",
+                questions: [
+                    {
+                        question: "Mi a primer prevenció legfőbb célja a stroke esetében?",
+                        options: ["A stroke utáni rehabilitáció.", "A stroke tüneteinek enyhítése.", "A stroke elsődleges kialakulásának megelőzése.", "Az újabb stroke megelőzése egy korábbi után."],
+                        answer: "A stroke elsődleges kialakulásának megelőzése.",
+                        explanation: "A primer prevenció célja a betegség első megjelenésének megakadályozása az arra fogékony, de még tünetmentes populációban, a rizikófaktorok csökkentésével."
+                    },
+                    {
+                        question: "A stroke esetek hány százaléka lenne megelőzhető a rizikófaktorok megfelelő kontrolljával?",
+                        options: ["Kb. 20%", "Kb. 40%", "Kb. 60%", "Kb. 80%"],
+                        answer: "Kb. 80%",
+                        explanation: "Szakértői becslések szerint a stroke-ok mintegy 80%-a megelőzhető lenne a módosítható rizikófaktorok (pl. magas vérnyomás, dohányzás, egészségtelen életmód) hatékony kezelésével."
+                    },
+                    {
+                        question: "Melyik étrend bizonyítottan csökkenti a kardiovaszkuláris események kockázatát magas rizikójú egyéneknél?",
+                        options: ["Magas fehérjetartalmú diéta", "Mediterrán diéta", "Alacsony szénhidráttartalmú diéta", "Csak folyadék diéta"],
+                        answer: "Mediterrán diéta",
+                        explanation: "A PREDIMED vizsgálat és más kutatások is igazolták, hogy a zöldségekben, gyümölcsökben, halban, olívaolajban és diófélékben gazdag Mediterrán diéta szignifikánsan csökkenti a stroke és más kardiovaszkuláris betegségek kockázatát."
+                    },
+                    {
+                        question: "Mennyi a felnőttek számára javasolt heti közepes intenzitású aerob testmozgás minimuma?",
+                        options: ["30 perc", "60 perc", "150 perc", "300 perc"],
+                        answer: "150 perc",
+                        explanation: "Az American Heart Association és más nemzetközi szervezetek ajánlása szerint heti legalább 150 perc közepes intenzitású (vagy 75 perc erős intenzitású) aerob mozgás szükséges az egészség megőrzéséhez."
+                    },
+                    {
+                        question: "Milyen vérnyomás célérték javasolt a legtöbb felnőtt számára a stroke prevenció érdekében?",
+                        options: ["<160/100 Hgmm", "<150/90 Hgmm", "<140/90 Hgmm", "<130/80 Hgmm"],
+                        answer: "<130/80 Hgmm",
+                        explanation: "A legtöbb modern kardiovaszkuláris prevenciós irányelv, beleértve az AHA 2024-es ajánlását is, a <130/80 Hgmm célértéket javasolja a magas vérnyomás kezelésére a stroke kockázatának csökkentése érdekében."
+                    },
+                    {
+                        question: "Mikor javasolt az aszpirin rutinszerű alkalmazása primer stroke prevenció céljából?",
+                        options: ["Minden 40 év feletti felnőttnek.", "Csak nőknek.", "Általánosságban nem javasolt, csak egyedi, magas kockázatú esetekben, a vérzési kockázat mérlegelésével.", "Minden cukorbetegnek."],
+                        answer: "Általánosságban nem javasolt, csak egyedi, magas kockázatú esetekben, a vérzési kockázat mérlegelésével.",
+                        explanation: "Az aszpirin rutinszerű primer prevenciós alkalmazásának nettó haszna (ischaemiás események csökkenése vs. vérzések növekedése) az átlagos kockázatú populációban nem egyértelmű. Alkalmazása egyéni mérlegelést igényel."
+                    },
+                    {
+                        question: "Melyik gyógyszercsoport bizonyította kardiovaszkuláris védő hatását 2-es típusú cukorbetegeknél a vércukorcsökkentésen túl?",
+                        options: ["Szulfonilureák", "GLP-1 receptor agonisták és SGLT2-inhibitorok", "Metformin önmagában", "Inzulin"],
+                        answer: "GLP-1 receptor agonisták és SGLT2-inhibitorok",
+                        explanation: "Ezek az újabb típusú antidiabetikumok a vércukorszint csökkentésén túlmenően önálló, bizonyított kardiovaszkuláris (és stroke) rizikócsökkentő hatással is rendelkeznek, ezért alkalmazásuk előnyben részesítendő a magas kockázatú cukorbetegeknél."
+                    },
+                    {
+                        question: "Mi a 'Life's Essential 8' koncepció lényege?",
+                        options: ["8 alapvető gyógyszer, amit mindenkinek szednie kell.", "8 életmódbeli és egészségügyi tényező, amely kulcsfontosságú a szív- és érrendszeri egészséghez.", "8 tiltott élelmiszer.", "8 kötelező szűrővizsgálat."],
+                        answer: "8 életmódbeli és egészségügyi tényező, amely kulcsfontosságú a szív- és érrendszeri egészséghez.",
+                        explanation: "Az AHA által kidolgozott koncepció 8 tényezőt (táplálkozás, mozgás, dohányzás, alvás, testsúly, koleszterin, vércukor, vérnyomás) emel ki, amelyek optimális kontrollja elengedhetetlen a kardiovaszkuláris egészséghez."
+                    },
+                    {
+                        question: "Mi a leghatékonyabb stratégia a dohányzásról való leszokás támogatására?",
+                        options: ["Csak az akaraterőre bízni.", "A dohányzás fokozatos csökkentése.", "Komplex támogatás: tanácsadás és gyógyszeres terápia kombinációja.", "Az e-cigarettára való áttérés."],
+                        answer: "Komplex támogatás: tanácsadás és gyógyszeres terápia kombinációja.",
+                        explanation: "A nikotinfüggőség erős addikció, ezért a legsikeresebb leszokási stratégiák a viselkedésterápiás tanácsadást kombinálják a megvonási tüneteket enyhítő gyógyszeres támogatással (pl. nikotinpótlás)."
+                    },
+                    {
+                        question: "Milyen szerepe van a szűrővizsgálatoknak a primer prevencióban?",
+                        options: ["Nincs szerepük, mert a betegségek úgyis kialakulnak.", "Céljuk a rejtett, tünetmentes rizikófaktorok (pl. magas vérnyomás, cukorbetegség, pitvarfibrilláció) korai felismerése.", "Csak a már kialakult betegségek súlyosságát mérik.", "Csak a genetikai hajlamot vizsgálják."],
+                        answer: "Céljuk a rejtett, tünetmentes rizikófaktorok (pl. magas vérnyomás, cukorbetegség, pitvarfibrilláció) korai felismerése.",
+                        explanation: "A szűrővizsgálatok lehetővé teszik a tünetmentes stádiumban lévő rizikóállapotok azonosítását, így időben megkezdhető a kezelés, megelőzve a súlyosabb szövődmények, mint a stroke, kialakulását."
+                    },
+                    {
+                        question: "Milyen célérték javasolt az LDL-koleszterinre egy magas kardiovaszkuláris kockázatú egyén primer prevenciójában?",
+                        options: ["< 4.0 mmol/L", "< 3.0 mmol/L", "< 2.6 mmol/L", "< 1.8 mmol/L"],
+                        answer: "< 1.8 mmol/L",
+                        explanation: "Magas kockázatú betegeknél az európai irányelvek agresszív lipidszint-csökkentést javasolnak, a célérték <1.8 mmol/L (70 mg/dL), vagy legalább 50%-os csökkentés a kiindulási értékhez képest."
+                    },
+                    {
+                        question: "Miért fontos a káliumban gazdag ételek fogyasztása a stroke prevenciójában?",
+                        options: ["Mert növeli a koleszterinszintet.", "Mert segít a vérnyomás csökkentésében.", "Mert javítja az alvásminőséget.", "Mert csökkenti az étvágyat."],
+                        answer: "Mert segít a vérnyomás csökkentésében.",
+                        explanation: "A kálium ellensúlyozza a nátrium (só) vérnyomásemelő hatását, így a káliumban gazdag étrend (sok zöldség, gyümölcs) hozzájárul a vérnyomás kontrolljához és a stroke kockázatának csökkentéséhez."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a primer prevencióra?",
+                        options: ["Az egészséges életmód alapvető fontosságú.", "A rizikófaktorok gyógyszeres kezelése is része lehet.", "Csak azokra vonatkozik, akik már átestek stroke-on.", "Célja az új stroke esetek számának csökkentése."],
+                        answer: "Csak azokra vonatkozik, akik már átestek stroke-on.",
+                        explanation: "A primer prevenció azokra irányul, akiknél még NEM alakult ki a betegség. Azokat, akik már átestek stroke-on, szekunder prevencióban részesítik egy újabb esemény megelőzése érdekében."
+                    },
+                    {
+                        question: "Milyen szerepet játszik az alvási apnoe a stroke kockázatában?",
+                        options: ["Nincs hatása.", "Csökkenti a stroke kockázatát.", "Növeli a stroke kockázatát a hipoxia, a szimpatikus aktiváció és a magas vérnyomás révén.", "Csak horkolást okoz, más következménye nincs."],
+                        answer: "Növeli a stroke kockázatát a hipoxia, a szimpatikus aktiváció és a magas vérnyomás révén.",
+                        explanation: "Az obstruktív alvási apnoe egy komoly rizikófaktor, amely kezeletlenül magas vérnyomáshoz, pitvarfibrillációhoz és más kardiovaszkuláris problémákhoz vezethet, így növelve a stroke kockázatát."
+                    },
+                    {
+                        question: "Mi a DASH diéta?",
+                        options: ["Egy fogyókúrás gyorsdiéta.", "Egy étrendi minta, amelyet kifejezetten a magas vérnyomás csökkentésére fejlesztettek ki.", "Egy magas zsírtartalmú diéta.", "Egy csak gyümölcsökön alapuló étrend."],
+                        answer: "Egy étrendi minta, amelyet kifejezetten a magas vérnyomás csökkentésére fejlesztettek ki.",
+                        explanation: "A DASH (Dietary Approaches to Stop Hypertension) diéta zöldségekben, gyümölcsökben, teljes kiőrlésű gabonákban, sovány fehérjékben gazdag, és alacsony a só-, cukor- és telített zsírtartalma, így hatékonyan csökkenti a vérnyomást."
+                    },
+                    {
+                        question: "Hogyan befolyásolja a primer prevenciót a szocioökonómiai státusz?",
+                        options: ["Nincs hatással rá.", "A kedvezőtlenebb szociális és gazdasági helyzet megnehezítheti az egészséges életmód követését és az ellátáshoz való hozzáférést.", "A gazdagabb emberek mindig egészségesebben élnek.", "Csak az iskolázottság számít."],
+                        answer: "A kedvezőtlenebb szociális és gazdasági helyzet megnehezítheti az egészséges életmód követését és az ellátáshoz való hozzáférést.",
+                        explanation: "A társadalmi-gazdasági tényezők (jövedelem, lakhatás, oktatás) jelentősen befolyásolják az egyén lehetőségeit az egészséges életmódra és a prevenciós szolgáltatások igénybevételére, ezért a hatékony prevenciós programoknak ezeket is figyelembe kell venniük."
+                    },
+                    {
+                        question: "Melyik a legfontosabb teendő pitvarfibrilláció diagnózisa esetén a stroke megelőzésére?",
+                        options: ["Azonnali szívműtét", "Rendszeres testmozgás", "A kockázatbecslés (pl. CHA2DS2-VASc) és az ennek megfelelő véralvadásgátló (antikoaguláns) kezelés bevezetése.", "Csak a pulzusszám csökkentése."],
+                        answer: "A kockázatbecslés (pl. CHA2DS2-VASc) és az ennek megfelelő véralvadásgátló (antikoaguláns) kezelés bevezetése.",
+                        explanation: "Pitvarfibrillációban a stroke prevenciójának alapja a véralvadásgátló terápia, amely megakadályozza a vérrögök képződését a szívben. Az, hogy kinek van szüksége kezelésre, kockázatbecslő skálák alapján dől el."
+                    },
+                    {
+                        question: "A testsúlycsökkentés milyen mechanizmusokon keresztül csökkenti a stroke kockázatát?",
+                        options: ["Csak esztétikai okokból fontos.", "Javítja a vérnyomást, a vércukor- és lipidprofilt, valamint csökkenti a gyulladást.", "Növeli a pulzusszámot.", "Csökkenti az izomtömeget."],
+                        answer: "Javítja a vérnyomást, a vércukor- és lipidprofilt, valamint csökkenti a gyulladást.",
+                        explanation: "A testsúlycsökkentés komplex hatást fejt ki: egyszerre több fontos rizikófaktort (magas vérnyomás, cukorbetegség, diszlipidémia) is kedvezően befolyásol, így hatékonyan csökkenti a stroke kockázatát."
+                    },
+                    {
+                        question: "Miért fontos a rejtett sótartalomra figyelni az élelmiszerekben?",
+                        options: ["Mert javítja az ízüket.", "Mert a napi sóbevitel nagy része a feldolgozott élelmiszerekből származik, és a túlzott sófogyasztás emeli a vérnyomást.", "Mert a rejtett só egészségesebb, mint a konyhasó.", "Nincs jelentősége."],
+                        answer: "Mert a napi sóbevitel nagy része a feldolgozott élelmiszerekből származik, és a túlzott sófogyasztás emeli a vérnyomást.",
+                        explanation: "A pékárukban, felvágottakban, készételekben lévő rejtett só jelentősen hozzájárul a magas sóbevitelhez, ami a magas vérnyomás egyik fő oka. Az élelmiszerek címkéjének olvasása és a kevésbé feldolgozott termékek választása segíthet a csökkentésében."
+                    },
+                    {
+                        question: "Melyik állítás igaz a primer prevencióra?",
+                        options: ["A primer prevenció csak gyógyszerekkel lehetséges.", "A primer prevenció egy komplex, az életmódot és a rizikófaktorok orvosi kezelését is magában foglaló stratégia.", "A primer prevenció csak a 65 év felettieknél fontos.", "A primer prevenció a stroke utáni állapotot jelenti."],
+                        answer: "A primer prevenció egy komplex, az életmódot és a rizikófaktorok orvosi kezelését is magában foglaló stratégia.",
+                        explanation: "A hatékony primer prevenció mindig egy többtényezős megközelítést igényel, amelynek alapja az egészséges életmód, de szükség esetén magában foglalja a rizikófaktorok (pl. vérnyomás, koleszterin) gyógyszeres kezelését is."
+                    }
+                ]
+            },
+            "stroke_etiologia": {
+                title: "Az Ischaemiás stroke etiológiája",
+                questions: [
+                    {
+                        question: "Mi a TOAST klasszifikáció célja?",
+                        options: ["A stroke súlyosságának mérése.", "Az ischaemiás stroke etiológiai (oki) alcsoportokba sorolása.", "A rehabilitációs potenciál becslése.", "A vérzéses stroke típusainak elkülönítése."],
+                        answer: "Az ischaemiás stroke etiológiai (oki) alcsoportokba sorolása.",
+                        explanation: "A TOAST klasszifikáció egy széles körben használt rendszer, amely az ischaemiás stroke-okat öt fő oki kategóriába sorolja (nagyér-atherosclerosis, kardioembolizáció, kisérbetegség, egyéb, ismeretlen), segítve a diagnózist és a másodlagos prevenciót."
+                    },
+                    {
+                        question: "Melyik a két fő patomechanizmusa a nagyér atherosclerosis (LAA) okozta stroke-nak?",
+                        options: ["Vénás trombózis és érgörcs", "Hypoperfúzió (hemodinamikai) és artery-to-artery embólia", "Csak vérzés", "Autoimmun reakció és fertőzés"],
+                        answer: "Hypoperfúzió (hemodinamikai) és artery-to-artery embólia",
+                        explanation: "A nagyér-atherosclerosis vagy a szűkület miatti csökkent véráramlás (hypoperfúzió), vagy – ami gyakoribb – a plakkról leszakadó vérrög (artery-to-artery embólia) révén okoz stroke-ot."
+                    },
+                    {
+                        question: "Mi a kardioemboliás stroke leggyakoribb forrása?",
+                        options: ["Szívtumor (myxoma)", "Mechanikus műbillentyű", "Pitvarfibrilláció (AFib)", "Szívinfarktus utáni fali trombus"],
+                        answer: "Pitvarfibrilláció (AFib)",
+                        explanation: "A pitvarfibrilláció a leggyakoribb tartós szívritmuszavar és az összes kardioemboliás stroke messze leggyakoribb oka, a pitvarokban pangó vérben képződő trombusok miatt."
+                    },
+                    {
+                        question: "Mi jellemzi a lacunaris infarktusokat?",
+                        options: ["Nagy, az agykérget érintő elhalások.", "Kis (<15-20 mm), szubkortikális infarktusok, amelyeket egyetlen perforáló artéria elzáródása okoz.", "Mindig vérzéses átalakulással járnak.", "Csak a kisagyat érintik."],
+                        answer: "Kis (<15-20 mm), szubkortikális infarktusok, amelyeket egyetlen perforáló artéria elzáródása okoz.",
+                        explanation: "A lacunaris infarktusok a kisérbetegség manifesztációi, amelyek az agy mély struktúráit (pl. bazális ganglionok, thalamus, pons) ellátó kis, végartéria-szerű erek elzáródása miatt alakulnak ki."
+                    },
+                    {
+                        question: "Melyik állapot NEM tartozik az 'egyéb meghatározott etiológiájú' stroke kategóriába?",
+                        options: ["Arteria dissectio", "Vasculitis", "Atheroscleroticus carotis stenosis", "Antifoszfolipid szindróma"],
+                        answer: "Atheroscleroticus carotis stenosis",
+                        explanation: "A szignifikáns atheroscleroticus carotis stenosis a 'Nagyér Atherosclerosis (LAA)' kategóriába tartozik. Az 'egyéb' kategória a ritkább okokat, mint a dissectio, vasculitis vagy véralvadási zavarok, foglalja magában."
+                    },
+                    {
+                        question: "Mit jelent az ESUS (Embolic Stroke of Undetermined Source)?",
+                        options: ["Minden ismeretlen eredetű stroke.", "Egy nem-lacunaris, feltételezhetően emboliás stroke, ahol a rutin kivizsgálás nem talál egyértelmű embóliaforrást.", "Egy vérzéses stroke típus.", "Egy nagyon enyhe stroke."],
+                        answer: "Egy nem-lacunaris, feltételezhetően emboliás stroke, ahol a rutin kivizsgálás nem talál egyértelmű embóliaforrást.",
+                        explanation: "Az ESUS a kriptogén stroke egy alcsoportja, ahol a stroke mintázata embóliára utal, de a standard kivizsgálás nem azonosít major kardioemboliás vagy artériás embóliaforrást."
+                    },
+                    {
+                        question: "Mi az ischaemiás penumbra?",
+                        options: ["A már véglegesen elhalt agyszövet (infarktusmag).", "Az infarktusmagot körülvevő, csökkent keringésű, de még megmenthető agyszövet.", "Az agyödéma.", "A stroke utáni hegszövet."],
+                        answer: "Az infarktusmagot körülvevő, csökkent keringésű, de még megmenthető agyszövet.",
+                        explanation: "A penumbra az a 'veszélyeztetett zóna', ahol a sejtek még élnek, de funkciójuk zavart. Az akut stroke terápia (pl. trombolízis, trombektómia) célja a penumbra megmentése a véráramlás helyreállításával."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb stroke-ok fiatalabb (<50 év) korban?",
+                        options: ["Csak a lacunaris infarktusok", "Arteria dissectio és kardioembolizáció (pl. PFO-n keresztül)", "Csak a nagyér atherosclerosis", "Mindig ismeretlen eredetű"],
+                        answer: "Arteria dissectio és kardioembolizáció (pl. PFO-n keresztül)",
+                        explanation: "Fiatalabb betegeknél a klasszikus atheroscleroticus rizikófaktorok ritkábbak, ezért gyakrabban fordulnak elő olyan okok, mint a nyaki artériák disszekciója (spontán vagy traumás) vagy a patent foramen ovale-n keresztüli paradox embólia."
+                    },
+                    {
+                        question: "Milyen szerepet játszik a bal pitvari fülcse (LAA) a kardioemboliás stroke-ban?",
+                        options: ["Vért termel.", "Szűri a vért.", "Pitvarfibrilláció esetén itt képződik a vérrögök több mint 90%-a.", "Nincs szerepe."],
+                        answer: "Pitvarfibrilláció esetén itt képződik a vérrögök több mint 90%-a.",
+                        explanation: "A bal pitvari fülcse egy kis, zsákszerű kitüremkedés a bal pitvaron. Pitvarfibrillációban a vér pangása miatt ez a leggyakoribb helye a stroke-ot okozó vérrögök kialakulásának."
+                    },
+                    {
+                        question: "Mi a Moyamoya betegség?",
+                        options: ["Egyfajta agydaganat.", "Az agyi kiserek gyulladása.", "A Willis-kör artériáinak progresszív szűkülete kóros kollaterális érhálózattal.", "Egy veleszületett szívhiba."],
+                        answer: "A Willis-kör artériáinak progresszív szűkülete kóros kollaterális érhálózattal.",
+                        explanation: "A Moyamoya egy ritka, krónikus cerebrovaszkuláris betegség, amely a fő agyi artériák lassú elzáródásához és kompenzatórikus, de gyenge minőségű kisérhálózat ('füstgomolyag') kialakulásához vezet, ischaemiás és vérzéses stroke-ot is okozva."
+                    },
+                    {
+                        question: "Miért fontos az ischaemiás stroke etiológiájának pontos meghatározása?",
+                        options: ["Csak tudományos érdeklődésből.", "Mert meghatározza a másodlagos prevenciós kezelést.", "Mert befolyásolja a beteg kórházi tartózkodásának hosszát.", "Nincs klinikai jelentősége."],
+                        answer: "Mert meghatározza a másodlagos prevenciós kezelést.",
+                        explanation: "A másodlagos prevenció célja egy újabb stroke megelőzése. A kezelés (pl. véralvadásgátló vs. vérlemezke-gátló) alapvetően függ a stroke okától, ezért az etiológia tisztázása kulcsfontosságú."
+                    },
+                    {
+                        question: "Milyen típusú stroke-ra utalnak a multiplex, több artériás területet érintő, egyidejű infarktusok?",
+                        options: ["Lacunaris infarktusra", "Hemodinamikai stroke-ra", "Embóliás eredetre (leggyakrabban kardiális)", "Vénás trombózisra"],
+                        answer: "Embóliás eredetre (leggyakrabban kardiális)",
+                        explanation: "Ha egy embólus a szívből vagy az aortaívből származik, az a vérárammal szétágazhat, és egyszerre több, egymástól távol eső agyi érterületen is okozhat elzáródást. Ez a mintázat erősen felveti az embóliás eredet gyanúját."
+                    },
+                    {
+                        question: "Mi az a 'paradox embólia'?",
+                        options: ["Amikor egy artériás trombus a vénás keringésbe jut.", "Amikor egy vénás rendszerből származó trombus egy szív-söntön (pl. PFO) keresztül az artériás keringésbe jut.", "Amikor az embólus feloldódik, mielőtt elzáródást okozna.", "Amikor az embólus a tüdőbe kerül."],
+                        answer: "Amikor egy vénás rendszerből származó trombus egy szív-söntön (pl. PFO) keresztül az artériás keringésbe jut.",
+                        explanation: "Normálisan a vénás trombusok a tüdőbe jutnak. Paradox embólia esetén egy kóros összeköttetésen (söntön), leggyakrabban egy nyitott foramen ovale-n keresztül a vérrög átkerül a szív bal felébe, és onnan az agyba embolizálódhat."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az ischaemiás kaszkádra?",
+                        options: ["A folyamat az energiahiánnyal és az ionpumpák leállásával kezdődik.", "A glutamát excitotoxicitás kulcsszerepet játszik benne.", "A folyamat mindig teljesen reverzibilis.", "Fokozott oxidatív stresszhez és sejthalálhoz vezet."],
+                        answer: "A folyamat mindig teljesen reverzibilis.",
+                        explanation: "Az ischaemiás kaszkád egy sejtkárosodási folyamat. Ha a véráramlás nem áll helyre időben, a folyamat irreverzibilis sejthalálhoz és maradandó agykárosodáshoz (infarktushoz) vezet."
+                    },
+                    {
+                        question: "Milyen diagnosztikai módszer szükséges a PFO kimutatásához?",
+                        options: ["Koponya CT", "Mellkasröntgen", "Szívultrahang (TTE vagy TEE), gyakran kontrasztanyaggal (buborék teszt)", "Standard 12 elvezetéses EKG"],
+                        answer: "Szívultrahang (TTE vagy TEE), gyakran kontrasztanyaggal (buborék teszt)",
+                        explanation: "A PFO kimutatására a szívultrahang a legalkalmasabb. A 'buborék teszt' során mikrobuborékokat tartalmazó sóoldatot injektálnak a vénába, és figyelik, hogy a buborékok átjutnak-e a jobb szívfélből a balba, ami a sönt jelenlétét igazolja."
+                    },
+                    {
+                        question: "Melyik TOAST kategória teszi ki az ischaemiás stroke-ok legnagyobb, de legkevésbé megértett részét?",
+                        options: ["Nagyér atherosclerosis", "Kardioembolizáció", "Kisérbetegség", "Ismeretlen etiológia (kriptogén/ESUS)"],
+                        answer: "Ismeretlen etiológia (kriptogén/ESUS)",
+                        explanation: "Az ismeretlen eredetű stroke-ok teszik ki az esetek akár egyharmadát is, ami komoly diagnosztikus és terápiás kihívást jelent, és a kutatások egyik fő fókuszterülete."
+                    },
+                    {
+                        question: "Milyen típusú stroke-ot okozhat a sarlósejtes anémia?",
+                        options: ["Csak vérzéses stroke-ot", "Ischaemiás stroke-ot, a kiserek elzáródása miatt", "Csak TIA-t", "Nem okoz stroke-ot"],
+                        answer: "Ischaemiás stroke-ot, a kiserek elzáródása miatt",
+                        explanation: "A sarló alakú vörösvértestek összetapadhatnak és elzárhatják a kis agyi artériákat, ami ischaemiás infarktushoz vezet. Ez a sarlósejtes anémia egyik legsúlyosabb szövődménye."
+                    },
+                    {
+                        question: "Mi a CADASIL?",
+                        options: ["Egyfajta szívbetegség", "Egy örökletes, genetikai eredetű agyi kisérbetegség", "Egy gyógyszer neve", "Egy stroke rehabilitációs módszer"],
+                        answer: "Egy örökletes, genetikai eredetű agyi kisérbetegség",
+                        explanation: "A CADASIL (Cerebral Autosomal Dominant Arteriopathy with Subcortical Infarcts and Leukoencephalopathy) egy ritka, öröklődő betegség, amelyet a NOTCH3 gén mutációja okoz, és ismétlődő szubkortikális stroke-okhoz, migrénhez és korai demenciához vezet."
+                    },
+                    {
+                        question: "A Trousseau szindróma milyen állapotra utal?",
+                        options: ["Drogabúzusra", "Rejtett daganatos betegséghez társuló, fokozott véralvadékonyságra", "Autoimmun betegségre", "Veleszületett véralvadási zavarra"],
+                        answer: "Rejtett daganatos betegséghez társuló, fokozott véralvadékonyságra",
+                        explanation: "A Trousseau szindróma egy paraneoplasiás jelenség, ahol egy rejtett, gyakran hasnyálmirigy- vagy tüdődaganat által termelt anyagok hyperkoagulábilis állapotot hoznak létre, ami vándorló trombózisokhoz, így stroke-hoz is vezethet."
+                    },
+                    {
+                        question: "Miért fontos a láz (hipertermia) elkerülése akut stroke után?",
+                        options: ["Mert kényelmetlen a betegnek.", "Mert a magas testhőmérséklet gyorsítja az ischaemiás kaszkádot és súlyosbítja az agykárosodást.", "Mert a láz mindig fertőzést jelez.", "Nincs jelentősége."],
+                        answer: "Mert a magas testhőmérséklet gyorsítja az ischaemiás kaszkádot és súlyosbítja az agykárosodást.",
+                        explanation: "A hipertermia bizonyítottan rontja a stroke kimenetelét, mivel fokozza az agyi metabolizmust, a szabad gyökök képződését és az excitotoxicitást. Ezért az akut ellátás része a normotermia fenntartása."
+                    }
+                ]
+            }
+        };
+
+        const app = document.getElementById('app');
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizTitle = document.getElementById('quiz-title');
+        const progressText = document.getElementById('progress-text');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const explanationContainer = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreText = document.getElementById('score-text');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizButton = document.getElementById('restart-quiz');
+        const backToTopicsButton = document.getElementById('back-to-topics');
+        const backToTopicsFromResultsButton = document.getElementById('back-to-topics-from-results');
+
+        let currentQuizId = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function init() {
+            // Populate topic list
+            topicList.innerHTML = '';
+            for (const topicId in quizData) {
+                const topic = quizData[topicId];
+                const topicCard = document.createElement('div');
+                topicCard.className = 'bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-slate-200 hover:border-blue-500';
+                topicCard.innerHTML = `<h3 class="text-xl font-semibold text-slate-800">${topic.title}</h3>`;
+                topicCard.addEventListener('click', () => startQuiz(topicId));
+                topicList.appendChild(topicCard);
+            }
+
+            backToTopicsButton.addEventListener('click', showTopicSelection);
+            backToTopicsFromResultsButton.addEventListener('click', showTopicSelection);
+            nextButton.addEventListener('click', nextQuestion);
+            restartQuizButton.addEventListener('click', () => startQuiz(currentQuizId));
+        }
+
+        function startQuiz(topicId) {
+            currentQuizId = topicId;
+            questions = quizData[topicId].questions;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            quizTitle.textContent = quizData[topicId].title;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            resetState();
+            const questionData = questions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            progressText.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${questions.length}`;
+
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'w-full text-left p-4 bg-slate-100 rounded-lg hover:bg-slate-200 quiz-option border border-slate-200';
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextButton.disabled = true;
+            explanationContainer.style.maxHeight = '0';
+            explanationContainer.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            explanationContainer.classList.add('border-blue-500', 'bg-blue-50');
+
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correctAnswer = questions[currentQuestionIndex].answer;
+
+            // Disable all options
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (selectedButton.textContent === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-green-500', 'bg-green-50');
+            } else {
+                selectedButton.classList.add('incorrect');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-red-500', 'bg-red-50');
+            }
+            
+            explanationText.textContent = questions[currentQuestionIndex].explanation;
+            explanationContainer.style.maxHeight = explanationContainer.scrollHeight + "px";
+
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            const percentage = Math.round((score / questions.length) * 100);
+            scoreText.textContent = `Helyes válaszok: ${score} / ${questions.length}`;
+            scorePercentage.textContent = `${percentage}%`;
+        }
+        
+        function showTopicSelection() {
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Initialize the app
+        init();
+    </script>
+
+</body>
+</html>

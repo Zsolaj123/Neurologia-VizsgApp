@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt 3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* sky-50 */
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .btn-topic {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-topic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .option-btn:hover {
+            transform: scale(1.02);
+            border-color: #0ea5e9; /* sky-500 */
+        }
+        .option-btn.selected {
+            background-color: #0284c7; /* sky-600 */
+            color: white;
+            border-color: #0369a1; /* sky-700 */
+        }
+        .feedback {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .feedback.show {
+            max-height: 500px; /* Adjust as needed */
+            opacity: 1;
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-sky-50 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app" class="w-full max-w-4xl mx-auto">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 text-slate-900">Neurológiai Ismeretek Teszt 3</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy újabb témakört a tudáspróbához.</p>
+            <div id="topic-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topic buttons will be generated here -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-container" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <button id="back-to-topics" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Témakörök
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-base font-medium text-slate-700">Haladás</span>
+                        <span id="progress-text" class="text-sm font-medium text-slate-700">Kérdés 1 / 20</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-sky-600 h-2.5 rounded-full" style="width: 5%"></div>
+                    </div>
+                </div>
+
+                <div id="question-area" class="mb-6">
+                    <p id="question" class="text-xl font-semibold mb-6 text-slate-800 leading-relaxed"></p>
+                    <div id="options" class="space-y-3">
+                        <!-- Option buttons will be generated here -->
+                    </div>
+                </div>
+
+                <div id="feedback-area" class="feedback">
+                    <div id="feedback-content" class="p-5 rounded-lg">
+                        <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                        <p id="explanation" class="text-slate-700 leading-relaxed"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>
+                        Következő kérdés <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Score Screen -->
+        <div id="score-container" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-slate-900">Teszt Vége!</h2>
+            <p class="text-xl text-slate-600 mb-6">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-bold text-sky-600 mb-8"></p>
+            <button id="restart-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mr-4">
+                <i class="fas fa-redo mr-2"></i>Újrapróbálkozás
+            </button>
+            <button id="home-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-lg transition-colors">
+                <i class="fas fa-home mr-2"></i>Főmenü
+            </button>
+        </div>
+    </div>
+
+<script>
+const quizData = [
+    {
+        topic: "EMG és ENG vizsgálatok",
+        questions: [
+            {
+                question: "Mi a alapvető különbség az EMG és az ENG vizsgálat között?",
+                options: ["Az EMG az agyat, az ENG a gerincvelőt vizsgálja.", "Az EMG az izmok, az ENG a perifériás idegek működését vizsgálja.", "Az EMG invazív, az ENG non-invazív módszer.", "Az EMG a motoros, az ENG az érző funkciókat méri."],
+                answer: 1,
+                explanation: "Az elektromiográfia (EMG) az izmok elektromos aktivitását, míg az elektroneurográfia (ENG) a perifériás idegek ingerületvezetési képességét vizsgálja. A két módszert gyakran együtt, egymást kiegészítve alkalmazzák."
+            },
+            {
+                question: "Melyik spontán aktivitás a legspecifikusabb jele az aktív denervációnak a tű EMG vizsgálat során?",
+                options: ["Fasciculatiós potenciál", "Myotoniás kisülés", "Fibrillációs potenciál és pozitív éles hullám", "Komplex repetitív kisülés"],
+                answer: 2,
+                explanation: "A fibrillációs potenciálok és a pozitív éles hullámok (PÉH) az egyes, beidegzésüket vesztett izomrostok spontán kisüléseit jelzik, és az aktív denerváció legfontosabb elektrofiziológiai jelei."
+            },
+            {
+                question: "Milyen morfológiai változások jellemzik a motoros egység potenciálokat (MUAP) krónikus neurogén károsodás esetén?",
+                options: ["Csökkent amplitúdó és rövidült időtartam", "Megnőtt amplitúdó és megnőtt időtartam ('óriás potenciálok')", "Kizárólag bifázisos alak", "Változatlan morfológia, de csökkent szám"],
+                answer: 1,
+                explanation: "Krónikus neurogén károsodásban a megmaradt motoros egységek reinnerválják a denervált izomrostokat. Ennek eredményeként egy motoros egység több izomrostot lát el, ami a MUAP-ok amplitúdójának és időtartamának növekedéséhez (ún. 'óriás potenciálok' kialakulásához) vezet."
+            },
+            {
+                question: "Az ENG vizsgálat során a vezetési sebesség jelentős lelassulása mire utal elsődlegesen?",
+                options: ["Axonális károsodásra (axonvesztésre)", "Demyelinizációs károsodásra (myelinhüvely-sérülésre)", "Izomrost-károsodásra", "A neuromuszkuláris junkció zavarára"],
+                answer: 1,
+                explanation: "A myelinhüvely feladata az ingerületvezetés gyorsítása. Ennek károsodása (demyelinizáció) az idegimpulzusok lassulásához vezet, ami az ENG-n a vezetési sebesség csökkenésében és a latenciaidők megnyúlásában nyilvánul meg."
+            },
+            {
+                question: "Melyik vizsgálati módszer a legérzékenyebb a Myasthenia Gravis diagnosztikájában?",
+                options: ["Rutin tű EMG", "Motoros idegvezetés (ENG)", "Repetitív idegingerlés (RNS)", "Single Fiber EMG (SFEMG)"],
+                answer: 3,
+                explanation: "Míg a repetitív idegingerlés is fontos, a Single Fiber EMG (SFEMG) a legérzékenyebb módszer a neuromuszkuláris transzmisszió zavarának kimutatására. A 'jitter' (két izomrost aktivációja közötti időbeli variabilitás) mérésével már szubklinikai szinten is képes jelezni a problémát."
+            },
+            {
+                question: "Mi jellemzi a myogén károsodás EMG képét?",
+                options: ["Korai recruitment, csökkent amplitúdójú és rövidült tartamú MUAP-ok", "Késői recruitment, nagy amplitúdójú és hosszú tartamú MUAP-ok", "Normál MUAP-ok, de folyamatos spontán aktivitás", "Teljes elektromos csend akaratlagos kontrakció alatt"],
+                answer: 0,
+                explanation: "Myopathiákban (elsődleges izombetegségekben) az izomrostok száma csökken egy motoros egységen belül. Ezért a MUAP-ok kisebbek (alacsonyabb amplitúdó) és rövidebbek lesznek. Az izomerő fenntartásához pedig már kis erőkifejtésnél is sok motoros egységet kell aktiválni (korai recruitment)."
+            },
+            {
+                question: "Mi az F-hullám vizsgálat célja az ENG-n belül?",
+                options: ["A disztális érzőrostok vizsgálata.", "Az izom-összehúzódás erejének mérése.", "A motoros idegpálya proximális (gerincvelőhöz közelebbi) szakaszának és az ideggyököknek a vizsgálata.", "A vegetatív idegrendszer működésének felmérése."],
+                answer: 2,
+                explanation: "Az F-hullám egy késői motoros válasz, amely a motoneuronok antidromos (retrográd) aktivációja után jön létre a gerincvelőben. Latenciájának mérése információt ad a motoros ideg teljes hosszáról, beleértve a proximális szakaszokat és a gyököket is."
+            },
+            {
+                question: "Mire utal a 'vezetési blokk' az ENG vizsgálat során?",
+                options: ["Az ideg teljes elhalására.", "Az ingerület terjedésének lokális gátlására egy idegszakaszon, az axon folytonosságának megőrzése mellett.", "Az izom képtelenségére az összehúzódásra.", "A központi idegrendszer gátló hatására."],
+                answer: 1,
+                explanation: "A vezetési blokk azt jelenti, hogy az akciós potenciál nem tud átjutni egy adott, körülírt idegszakaszon. Ezt a CMAP amplitúdójának és területének jelentős csökkenése jelzi a blokk feletti ingerléskor. Tipikusan szerzett, demyelinizációs károsodásra (pl. GBS, CIDP, alagút szindrómák) utal."
+            },
+            {
+                question: "Amyotrophiás laterális sclerosis (ALS) esetén mit mutat tipikusan az EMG/ENG vizsgálat?",
+                options: ["Csak myogén károsodás jeleit.", "Kiterjedt, aktív és krónikus neurogén károsodás jeleit több testtájékon, normál szenzoros idegvezetés mellett.", "Csak demyelinizációs jeleket.", "Teljesen normális leletet."],
+                answer: 1,
+                explanation: "Az ALS diagnózisának egyik alapja az alsó motoros neuronok kiterjedt károsodásának kimutatása. Az EMG aktív (fibrillációk) és krónikus (óriás MUAP-ok) denervációs jeleket mutat egyszerre több, különböző gyöki beidegzésű régióban, miközben az érző idegek vezetése jellemzően normális marad."
+            },
+            {
+                question: "Milyen típusú EMG vizsgálatot használunk nagyobb izomcsoportok globális aktivitásának non-invazív vizsgálatára, pl. mozgáselemzés során?",
+                options: ["Tű EMG", "Single Fiber EMG", "Felszíni EMG (sEMG)", "Kvantitatív EMG"],
+                answer: 2,
+                explanation: "A felszíni EMG (sEMG) során a bőrfelszínre helyezett elektródákkal mérik az izmok aktivitását. Mivel non-invazív és nagyobb területet fed le, kiválóan alkalmas a mozgáselemzésre, sporttudományra és rehabilitációs biofeedbackre, de kevésbé részletes, mint a tű EMG."
+            },
+            {
+                question: "Mi a 'myotoniás kisülés' jellegzetes hangja az EMG-n?",
+                options: ["Halk pukkanás", "Folyamatos zúgás", "'Zuhanóbombázó' vagy 'láncfűrész' hang", "Csend"],
+                answer: 2,
+                explanation: "A myotoniás kisülések jellegzetessége a viaszoló és fogyatkozó amplitúdó és frekvencia, ami a hangszórón keresztül egy nagyon karakteres, ereszkedő majd emelkedő hangmagasságú hangot ad, amit gyakran zuhanóbombázóhoz hasonlítanak."
+            },
+            {
+                question: "Melyik állítás igaz a fasciculatiós potenciálokra?",
+                options: ["Mindig súlyos betegség jelei.", "Egyetlen izomrost spontán kisülését jelentik.", "Előfordulhatnak jóindulatú állapotokban és egészséges egyénekben is.", "Klinikailag sosem láthatók."],
+                answer: 2,
+                explanation: "A fasciculatiók (egy egész motoros egység spontán kisülései) bár jellemzőek motoneuron betegségekre, gyakran előfordulnak teljesen jóindulatú állapotokban is (pl. kimerültség, stressz, benignus fasciculatio szindróma). A kóros formák elkülönítéséhez az egyéb EMG jeleket is figyelembe kell venni."
+            },
+            {
+                question: "Mi a 'temporális diszperzió' az ENG vizsgálat során?",
+                options: ["A válasz amplitúdójának növekedése.", "A válaszpotenciál időtartamának megnyúlása és alakjának szétesése a különböző sebességgel vezető rostok miatt.", "Az inger és a válasz közötti idő állandósága.", "A motoros válasz teljes hiánya."],
+                answer: 1,
+                explanation: "Temporális diszperzió akkor lép fel, ha egy idegen belül az egyes axonok vezetési sebessége jelentősen eltér egymástól (jellemzően demyelinizáció miatt). Emiatt a válasz 'szétcsúszik' az időben, a kiváltott potenciál időtartama megnyúlik és amplitúdója csökken."
+            },
+            {
+                question: "Milyen előkészület a legfontosabb az ENG vizsgálat pontossága szempontjából?",
+                options: ["Legalább 12 órás koplalás.", "A vizsgálandó végtag megfelelő hőmérsékletének biztosítása.", "Nagy mennyiségű folyadék fogyasztása.", "Nyugtatók bevétele a vizsgálat előtt."],
+                answer: 1,
+                explanation: "Az alacsony bőrhőmérséklet jelentősen lelassítja az idegvezetési sebességet. Ezért a pontos és megbízható eredmények érdekében kritikus, hogy a vizsgált végtag kellően meleg legyen (bőrhőmérséklet > 32-34 °C)."
+            },
+            {
+                question: "Melyik állítás írja le a carpalis alagút szindróma jellegzetes ENG leletét?",
+                options: ["A nervus ulnaris vezetési sebességének lassulása a könyökben.", "A nervus medianus disztális motoros és szenzoros latenciájának megnyúlása a csuklószakaszon.", "Generalizált, szimmetrikus polyneuropathia jelei.", "Normális ENG lelet, de kóros EMG a kézizmokban."],
+                answer: 1,
+                explanation: "Carpalis alagút szindrómában a nervus medianus a csuklóalagútban nyomás alá kerül. Ez az ENG-n a csuklószakaszon áthaladó idegvezetés fokális lassulásában nyilvánul meg, ami a disztális latenciák megnyúlását és a csukló feletti/alatti szakaszokhoz képest lassabb vezetési sebességet eredményez."
+            },
+            {
+                question: "Mi a különbség az axonális és demyelinizációs polyneuropathia ENG képe között?",
+                options: ["Nincs különbség, az ENG nem tudja elkülöníteni őket.", "Axonálisnál a vezetési sebesség, demyelinizációnál az amplitúdó csökken.", "Axonálisnál a CMAP/SNAP amplitúdók csökkennek, míg demyelinizációnál a vezetési sebesség lassul jelentősen.", "Mindkettőre csak az F-hullám latenciájának megnyúlása jellemző."],
+                answer: 2,
+                explanation: "Az axonális károsodás a működő idegrostok számának csökkenésével jár, ami a kiváltott válaszok amplitúdójának csökkenését okozza. A demyelinizáció a vezetés lassulását eredményezi, ami a vezetési sebesség csökkenésében és a latenciák megnyúlásában mutatkozik meg."
+            },
+            {
+                question: "A tű EMG vizsgálat során mit jelent a 'recruitment'?",
+                options: ["A motoros egységek számának csökkenését.", "Az izomrostok regenerációját.", "Az akaratlagos erőkifejtés fokozásával egyre több motoros egység bevonását az aktivitásba.", "A kóros spontán aktivitás megjelenését."],
+                answer: 2,
+                explanation: "A recruitment (behívás) az a folyamat, ahogyan az idegrendszer az izomerőt szabályozza: az erőkifejtés növelésével egyre több motoros egységet aktivál, és a már aktívak kisülési frekvenciáját is növeli."
+            },
+            {
+                question: "Miért fontos a tű EMG vizsgálat radiculopathia (ideggyök-károsodás) gyanúja esetén?",
+                options: ["Mert megmutatja a porckorongsérv méretét.", "Mert kimutatja az aktív denerváció jeleit az érintett ideggyök által ellátott izmokban (myotomában).", "Mert a szenzoros ENG mindig kóros radiculopathiában.", "Mert csak ezzel lehet a fájdalmat csillapítani."],
+                answer: 1,
+                explanation: "Radiculopathiában az ideggyök kompressziója axonkárosodást okozhat. Az EMG képes kimutatni ennek következményeit: az aktív denerváció jeleit (fibrillációk, PÉH-ek) az adott myotomába tartozó izmokban, ami segít a diagnózis megerősítésében és a károsodás szintjének lokalizálásában."
+            },
+            {
+                question: "Melyik állítás NEM igaz az EMG/ENG vizsgálatokra?",
+                options: ["Funkcionális vizsgálatok, amelyek az idegek és izmok működését mérik.", "Kiegészítik a képalkotó vizsgálatokat.", "A leletet mindig a klinikai képpel együtt kell értékelni.", "Mindig pontosan megmondják a betegség kiváltó okát."],
+                answer: 3,
+                explanation: "Az EMG/ENG vizsgálatok a funkciózavar helyét és jellegét (pl. neurogén vs. myogén, axonális vs. demyelinizációs) mutatják meg, de önmagukban nem betegség-specifikusak. Nem tárják fel a károsodás okát (pl. cukorbetegség, autoimmun folyamat), ehhez további vizsgálatok szükségesek."
+            },
+            {
+                question: "Melyik egy ritka, de súlyos szövődménye a mellkasfalhoz közeli izmok (pl. rekeszizom) tű EMG vizsgálatának?",
+                options: ["Bőrfertőzés", "Véraláfutás", "Pneumothorax (légmell)", "Izomláz"],
+                answer: 2,
+                explanation: "Ha a tűvel a mellkasfal izmait vizsgálják, nagyon ritkán, de fennáll a veszélye a mellhártya átszúrásának, ami légmell (pneumothorax) kialakulásához vezethet. Ezért az ilyen vizsgálatok különös óvatosságot és anatómiai ismereteket igényelnek."
+            }
+        ]
+    },
+    {
+        topic: "CT és MR vizsgálatok a neurológiában",
+        questions: [
+            {
+                question: "Mi a komputertomográfia (CT) vizsgálat alapvető működési elve?",
+                options: ["Erős mágneses tér és rádióhullámok használata.", "Röntgensugarak szöveteken való eltérő mértékű elnyelődésének mérése.", "Magas frekvenciájú hanghullámok visszaverődése.", "Radioaktív izotópok által kibocsátott sugárzás detektálása."],
+                answer: 1,
+                explanation: "A CT képalkotás a röntgensugarak használatán alapul. A készülék a test körül forogva több szögből készít felvételeket, és a szövetek eltérő sugárelnyeléséből egy számítógép rekonstruálja a keresztmetszeti képeket."
+            },
+            {
+                question: "Melyik képalkotó módszer az elsődleges választás akut koponyasérülés vagy stroke gyanúja esetén a vérzés gyors kizárására?",
+                options: ["Mágneses rezonancia képalkotás (MRI)", "Pozitronemissziós tomográfia (PET)", "Natív (kontraszt nélküli) komputertomográfia (CT)", "Ultrahang"],
+                answer: 2,
+                explanation: "A CT rendkívül gyors és széles körben elérhető, továbbá kiválóan ábrázolja a friss vérzést, ami a képen hyperdens (világos) területként jelenik meg. Ezért a sürgősségi neurológiai ellátásban ez az elsődleges vizsgálat a vérzés gyors kizárására vagy megerősítésére."
+            },
+            {
+                question: "Melyik állítás igaz az MRI vizsgálatra?",
+                options: ["Ionizáló sugárzást használ.", "Kiváló lágyrész-kontraszttal rendelkezik, de a vizsgálati idő hosszabb.", "A csontok ábrázolására a legalkalmasabb.", "Olcsóbb és gyorsabb, mint a CT."],
+                answer: 1,
+                explanation: "Az MRI nem használ röntgensugarakat, hanem mágneses téren és rádióhullámokon alapul. Legnagyobb előnye a páratlanul jó lágyrész-felbontás, ami részletgazdag képet ad az agy és a gerincvelő struktúráiról. Hátránya a hosszabb vizsgálati idő és a magasabb költség."
+            },
+            {
+                question: "Mire utal leggyakrabban a 'hyperdens arteria cerebri media jel' egy natív CT felvételen akut stroke gyanúja esetén?",
+                options: ["Az ér meszesedésére.", "Az érben lévő friss vérrögre (trombusra).", "Egy aneurizma jelenlétére.", "Az ér normális állapotára."],
+                answer: 1,
+                explanation: "A 'hyperdens ér jel' az ischaemiás stroke egyik legkorábbi CT jele. Azt jelzi, hogy az elzáródott agyi artériában (leggyakrabban az arteria cerebri mediában) egy sűrű vérrög található, ami a környező agyállománynál világosabbként, hyperdensként jelenik meg."
+            },
+            {
+                question: "Melyik MR szekvencia a legérzékenyebb az akut (perceken belüli) ischaemiás stroke kimutatására?",
+                options: ["T1 súlyozott (T1W)", "T2 súlyozott (T2W)", "FLAIR", "Diffúziósúlyozott képalkotás (DWI)"],
+                answer: 3,
+                explanation: "A DWI a vízmolekulák diffúziójának korlátozottságát méri. Akut ischaemiában a sejtek megduzzadnak (citotoxikus oedema), ami korlátozza a víz szabad mozgását. Ez a DWI képen már percekkel az esemény után magas jelintenzitásként jelenik meg, jóval hamarabb, mint a többi szekvencián."
+            },
+            {
+                question: "Mi a FLAIR szekvencia legfőbb előnye a hagyományos T2 súlyozott képekkel szemben?",
+                options: ["Gyorsabban elkészíthető.", "Elnyomja a liquor jelét, így a kamrák melletti (periventricularis) elváltozások jobban látszanak.", "Jobban ábrázolja a csontokat.", "Érzékenyebb a friss vérzésre."],
+                answer: 1,
+                explanation: "A FLAIR (Fluid Attenuated Inversion Recovery) egy T2 súlyozott szekvencia, amely specifikusan elnyomja a szabad víz, vagyis a liquor jelét. Ennek köszönhetően a liquorral határos, kóros területek (pl. sclerosis multiplex plakkok) sokkal jobban elkülönülnek és láthatóvá válnak."
+            },
+            {
+                question: "Milyen célt szolgál a kontrasztanyag adása CT és MR vizsgálatok során?",
+                options: ["A beteg megnyugtatását.", "Azoknak a területeknek a kiemelését, ahol a vér-agy gát sérült (pl. daganat, gyulladás).", "A csontok sűrűségének mérését.", "A vizsgálati idő lerövidítését."],
+                answer: 1,
+                explanation: "A kontrasztanyagok normál esetben nem jutnak át a vér-agy gáton. Ha a gát sérül (pl. daganat vagy gyulladás miatt), a kontrasztanyag bejut a kóros szövetbe és ott jelfokozódást (halmozást) okoz, láthatóvá téve az elváltozást."
+            },
+            {
+                question: "Melyik állítás írja le helyesen az epidurális haematoma (EDH) tipikus CT képét?",
+                options: ["Sarló alakú, a koponya belső kontúrját követő vérgyülem.", "Lencse alakú, bikonvex, hyperdens vérgyülem a koponyacsont és a dura mater között.", "Apró, pontszerű vérzések a fehérállományban.", "Vér a kamrarendszerben."],
+                answer: 1,
+                explanation: "Az epidurális haematoma jellegzetesen lencse (bikonvex) alakú, mivel a dura mater erősen tapad a koponyacsont belső felszínén lévő varratokhoz, ami korlátozza a vérzés terjedését. Akut esetben a friss vér hyperdens."
+            },
+            {
+                question: "Melyik képalkotó módszer az elsődleges választás sclerosis multiplex (SM) gyanúja esetén?",
+                options: ["Natív koponya CT", "Ultrahang", "Mágneses rezonancia képalkotás (MRI)", "Angiográfia"],
+                answer: 2,
+                explanation: "Az MRI az SM diagnosztikájának 'gold standard'-ja. Kiváló lágyrész-kontrasztja miatt rendkívül érzékeny a fehérállományban elhelyezkedő demyelinizációs plakkok kimutatására, ami a betegség diagnózisának alapja."
+            },
+            {
+                question: "Mi a DWI-PWI 'mismatch' jelentősége akut stroke-ban?",
+                options: ["A vérzés és az ischaemia együttes jelenlétét jelzi.", "Azt jelzi, hogy a diffúziós zavar (infarktusmag) kisebb, mint a perfúziós zavar területe, ami potenciálisan megmenthető agyszövetre (penumbra) utal.", "A képalkotó készülék hibáját jelzi.", "Azt jelenti, hogy a beteg nem alkalmas a kezelésre."],
+                answer: 1,
+                explanation: "A DWI-PWI mismatch koncepció lényege, hogy ha a perfúziós zavar (PWI) által jelzett terület nagyobb, mint a már visszafordíthatatlanul károsodott infarktusmag (DWI), a kettő közötti különbség (a 'mismatch' zóna) a penumbra, ami reperfúziós terápiával (pl. thrombectomia) még megmenthető."
+            },
+            {
+                question: "Melyik MR szekvencia a legérzékenyebb a krónikus vérzések maradványainak (hemosziderin) és a mikro-vérzéseknek a kimutatására?",
+                options: ["T1 súlyozott", "FLAIR", "DWI", "Szuszceptibilitás súlyozott képalkotás (SWI) / T2* gradiens echo"],
+                answer: 3,
+                explanation: "Az SWI és a T2* GRE szekvenciák rendkívül érzékenyek a mágneses tér lokális inhomogenitásaira, amiket a vérlebomlási termékek (különösen a hemosziderin) okoznak. Ezért ezek a legjobb módszerek a régi vérzések és az apró mikro-vérzések detektálására."
+            },
+            {
+                question: "Mi a CT-angiográfia (CTA) lényege?",
+                options: ["Az agy anyagcseréjének vizsgálata.", "Gyors, intravénás kontrasztanyag-adást követő vékony szeletes CT vizsgálat az erek 3D ábrázolására.", "Mágneses tér alkalmazása az erek vizsgálatára.", "Az agyi elektromos aktivitás és a keringés egyidejű mérése."],
+                answer: 1,
+                explanation: "A CTA során egy gyors kontrasztanyag-bólus beadása után, az artériás fázisban készítenek vékony szeletes CT-sorozatot, amiből a számítógép részletgazdag 3D képeket rekonstruál az érrendszerről, kimutatva pl. aneurizmákat vagy érelzáródásokat."
+            },
+            {
+                question: "Melyik állítás igaz a gadolínium alapú MR kontrasztanyagokra?",
+                options: ["Súlyos vesekárosodásban szenvedő betegeknél is mindig biztonságosan adhatók.", "Gyakrabban okoznak súlyos allergiás reakciót, mint a jódos CT kontrasztanyagok.", "A vér-agy gáton keresztül normál esetben nem jutnak át.", "A csontok halmozzák a leginkább."],
+                answer: 2,
+                explanation: "A gadolínium alapú kontrasztanyagok a vér-agy gát épsége esetén az érpályában maradnak. Csak a gát sérülése esetén (pl. daganat, gyulladás) jutnak ki a kóros szövetbe, jelfokozódást okozva a T1 súlyozott képeken."
+            },
+            {
+                question: "Melyik technika teszi lehetővé a fehérállományi pályák lefutásának ábrázolását?",
+                options: ["MR spektroszkópia (MRS)", "Funkcionális MRI (fMRI)", "Digitális szubtrakciós angiográfia (DSA)", "Diffúziós tenzor képalkotás (DTI) és tractographia"],
+                answer: 3,
+                explanation: "A DTI a vízmolekulák irányfüggő diffúzióját méri, ami a fehérállományi rostkötegek mentén a legkifejezettebb. A tractographia algoritmusok ezen adatok alapján képesek rekonstruálni a fő idegpályák 3D lefutását."
+            },
+            {
+                question: "Melyik képalkotó módszer jár ionizáló sugárterheléssel?",
+                options: ["MRI", "Ultrahang", "CT", "EEG"],
+                answer: 2,
+                explanation: "A komputertomográfia (CT) röntgensugarakat használ a képalkotáshoz, ami ionizáló sugárzást jelent. Ezzel szemben az MRI és az ultrahang nem használ ionizáló sugárzást."
+            },
+            {
+                question: "Hogyan jelenik meg egy akut subdurális haematoma (SDH) a CT képen?",
+                options: ["Lencse alakú, hypodens területként.", "Sarló alakú, hyperdens területként, ami követi az agy felszínét.", "Jól körülírt, kerek, kontrasztot halmozó elváltozásként.", "Diffúz agyduzzanatként, vérzés nélkül."],
+                answer: 1,
+                explanation: "Az akut SDH sarló alakban helyezkedik el a dura mater és az arachnoidea között, követi a hemiszfériumok kontúrját. A friss vér hyperdens. A hídvénák szakadása miatt általában vénás eredetű."
+            },
+            {
+                question: "Mire használják leggyakrabban az MR spektroszkópiát (MRS) a neurológiában?",
+                options: ["Agyi erek tágasságának mérésére.", "Agydaganatok differenciáldiagnózisára és a terápia utáni változások megítélésére.", "Akut stroke kimutatására.", "A liquor keringésének vizsgálatára."],
+                answer: 1,
+                explanation: "Az MRS az agyszövet metabolit-összetételét méri. A különböző metabolitok (pl. kolin, NAA, laktát) arányainak változása segíthet elkülöníteni a daganatokat más elváltozásoktól, megbecsülni a malignitás fokát, és elkülöníteni a tumor kiújulását a sugárkezelés utáni nekrózistól."
+            },
+            {
+                question: "Milyen előnye van a CT-nek az MR-rel szemben egy nyugtalan, kooperációra képtelen beteg vizsgálatakor?",
+                options: ["Nincs előnye, az MR jobb ilyenkor.", "A CT vizsgálat sokkal gyorsabb, így kevésbé érzékeny a mozgási műtermékekre.", "A CT halkabb, ami megnyugtatja a beteget.", "A CT-hez nem kell a betegnek mozdulatlanul feküdnie."],
+                answer: 1,
+                explanation: "Egy koponya CT vizsgálat akár egy percen belül elvégezhető, míg egy MR vizsgálat 20-40 percig vagy tovább is tarthat. A rövidebb vizsgálati idő miatt a CT kevésbé érzékeny a beteg mozgására, ami nagy előny sürgősségi vagy nem kooperáló betegek esetén."
+            },
+            {
+                question: "Melyik állítás igaz a kontrasztanyagos MR vizsgálatra súlyos vesekárosodás esetén?",
+                options: ["Mindig biztonságos és ajánlott.", "Ellenjavallt lehet a nephrogen systemas fibrosis (NSF) kockázata miatt.", "A jódos kontrasztanyagot preferálják ilyenkor.", "A vesekárosodás nem befolyásolja a kontrasztanyag adását."],
+                answer: 1,
+                explanation: "Súlyos vesekárosodásban szenvedő betegeknél a gadolínium alapú kontrasztanyagok adása a nephrogen systemas fibrosis (NSF), egy ritka, de súlyos, a bőrt és belső szerveket érintő fibrotikus betegség kockázatát hordozza. Ezért ilyenkor az alkalmazása ellenjavallt vagy csak szigorú mérlegelés után, a legbiztonságosabb szerekkel történhet."
+            },
+            {
+                question: "Epilepszia strukturális okának keresésekor melyik a legérzékenyebb vizsgálómódszer?",
+                options: ["Natív koponya CT", "Koponya röntgen", "Dedikált epilepszia protokollal végzett MRI", "Nyaki ultrahang"],
+                answer: 2,
+                explanation: "Az epilepszia hátterében álló finom strukturális elváltozások (pl. hippocampus sclerosis, fokális kortikális diszplázia, kis tumorok) kimutatására a nagy felbontású, vékony szeletes, speciális szekvenciákat (pl. T2, FLAIR) tartalmazó, dedikált epilepszia protokollal végzett MR vizsgálat a legérzékenyebb módszer."
+            }
+        ]
+    },
+    {
+        topic: "Angiographia, DSA, MRA",
+        questions: [
+            {
+                question: "Mi a digitális szubtrakciós angiográfia (DSA) alapelve?",
+                options: ["Mágneses térrel képezi le az ereket.", "A kontrasztanyag beadása előtti (maszk) kép digitális kivonása a kontrasztanyagos képből.", "Ultrahanghullámok segítségével méri a véráramlást.", "Az erekben lévő oxigén szintjét méri."],
+                answer: 1,
+                explanation: "A DSA lényege a szubtrakció: a kontrasztanyag beadása után készült képekből a számítógép kivonja a kontrasztanyag nélküli, ún. maszk képet. Ennek eredményeként a zavaró anatómiai képletek (csont, lágyrészek) eltűnnek, és csak a kontrasztanyaggal feltöltött érrendszer válik láthatóvá, nagy kontraszttal."
+            },
+            {
+                question: "Melyik képalkotó eljárás számít az 'arany standard'-nak az agyi érrendszeri betegségek diagnosztikájában?",
+                options: ["Mágneses Rezonancia Angiográfia (MRA)", "Komputertomográfiás Angiográfia (CTA)", "Digitális Szubtrakciós Angiográfia (DSA)", "Doppler Ultrahang"],
+                answer: 2,
+                explanation: "A DSA, invazív jellege ellenére, a legmagasabb térbeli felbontása és a hemodinamikai információk (áramlási viszonyok) megjelenítése miatt továbbra is az 'arany standard'-nak számít az agyi érbetegségek, különösen az aneurizmák és AVM-ek részletes vizsgálatában."
+            },
+            {
+                question: "Mi az MRA legfőbb előnye a DSA-val és a CTA-val szemben?",
+                options: ["Nagyobb térbeli felbontás", "Gyorsabb vizsgálati idő", "Nem használ ionizáló sugárzást", "Mindig kontrasztanyagot igényel"],
+                answer: 2,
+                explanation: "Az MRA legnagyobb előnye, hogy nem használ ionizáló (röntgen) sugárzást, így biztonságosan ismételhető, és alkalmas fiatal betegek vagy terhesek (bizonyos korlátokkal) vizsgálatára is. Emellett léteznek kontrasztanyag nélküli MRA technikák is (pl. TOF)."
+            },
+            {
+                question: "Mi a Time-of-Flight (TOF) MRA technika működésének alapja?",
+                options: ["Gadolinium kontrasztanyag használata.", "Az áramló vér és a stacioner szövetek közötti jelkülönbség kihasználása.", "A vérerek falának ultrahangos vizsgálata.", "A vérben lévő radioaktív izotópok detektálása."],
+                answer: 1,
+                explanation: "A TOF-MRA a kontrasztanyag nélküli MRA egyik leggyakoribb formája. Az elv az, hogy a képalkotó szeletbe folyamatosan beáramló, 'friss' protonokkal rendelkező vér jele erősebb, mint a szeletben lévő, már telített (szaturált) stacioner szöveteké. Ez a jelkülönbség teszi láthatóvá az ereket."
+            },
+            {
+                question: "Melyik a DSA legjelentősebb, bár ritka neurológiai szövődménye?",
+                options: ["Fejfájás", "Allergiás reakció", "Vesekárosodás", "Stroke"],
+                answer: 3,
+                explanation: "Mivel a DSA egy invazív, katéteres eljárás, a legrettegettebb szövődménye a stroke, amit a katéter által elmozdított plakk vagy a katéter hegyén képződött vérrög okozhat. Bár a kockázata alacsony (tapasztalt kezekben <0.5-1%), ez a legfontosabb megfontolás a vizsgálat indikálásakor."
+            },
+            {
+                question: "Milyen esetben hajlamos a TOF-MRA túlbecsülni egy érszűkület mértékét?",
+                options: ["Lassú áramlás esetén", "Súlyos szűkületekben a turbulens áramlás miatt", "Normális, tág erekben", "Csak vénás szűkületek esetén"],
+                answer: 1,
+                explanation: "A szűkületben felgyorsuló és turbulenssé váló véráramlás az MRA képen jelvesztést okozhat (flow-related dephasing). Emiatt a szűkület súlyosabbnak és hosszabbnak tűnhet, mint amilyen valójában. Ez a TOF-MRA egyik ismert korlátja."
+            },
+            {
+                question: "Akut stroke gyanúja esetén miért a CTA a leggyakrabban választott sürgősségi érvizsgálat a natív CT után?",
+                options: ["Mert nincs sugárterhelése.", "Mert a legolcsóbb.", "Mert rendkívül gyorsan elvégezhető és jól kimutatja a nagyér-elzáródást.", "Mert a legérzékenyebb a mikro-vérzésekre."],
+                answer: 2,
+                explanation: "Akut stroke-ban az idő kritikus. A CTA percek alatt elvégezhető, és nagy pontossággal képes kimutatni a nagy agyi artériák elzáródását, ami a mechanikus thrombectomia (vérrög-eltávolítás) indikációjának alapja. Gyorsasága és elérhetősége miatt ideális sürgősségi helyzetekben."
+            },
+            {
+                question: "Mi a 'korai vénás drenázs' jele a DSA vizsgálaton, és mire utal?",
+                options: ["A vénák lassú telődése; normális lelet.", "A vénák kontrasztanyaggal való korai, már az artériás fázisban történő megjelenése; arteriovenosus shunt (pl. AVM, dAVF) jele.", "A vénák teljes hiánya; vénás trombózisra utal.", "A vénák tágulata; magas vénás nyomás jele."],
+                answer: 1,
+                explanation: "Normális esetben a vér az artériákból a kapillárisokon keresztül jut a vénákba. Ha az artériás és vénás rendszer között kóros, rövidre záró összeköttetés (shunt) van, mint egy arteriovenosus malformációban (AVM), a kontrasztanyag a kapillárisokat kikerülve, felgyorsulva jut a vénákba. Ez a korai vénás telődés az AVM egyik legfontosabb hemodinamikai jele a DSA-n."
+            },
+            {
+                question: "Milyen kontrasztanyagot használnak az MRA vizsgálatokhoz?",
+                options: ["Jód alapú kontrasztanyagot", "Gadolínium alapú kontrasztanyagot", "Bárium alapú kontrasztanyagot", "Nincs szükség kontrasztanyagra"],
+                answer: 1,
+                explanation: "Ha kontrasztanyagos MRA (CE-MRA) vizsgálatra van szükség, gadolínium tartalmú kontrasztanyagot adnak intravénásan. A gadolínium egy paramágneses fém, ami lerövidíti a T1 relaxációs időt, jelfokozódást okozva a T1 súlyozott képeken."
+            },
+            {
+                question: "Melyik állítás NEM igaz a DSA-ra?",
+                options: ["Invazív eljárás.", "Hemodinamikai információt is szolgáltat.", "Nem használ ionizáló sugárzást.", "Képes kimutatni 2 mm-nél kisebb aneurizmákat is."],
+                answer: 2,
+                explanation: "A DSA röntgen-sugárzáson alapuló technika, így ionizáló sugárterheléssel jár. Ez az egyik fő hátránya a sugárzásmentes MRA-val szemben."
+            },
+            {
+                question: "Melyik non-invazív módszer hajlamosabb műtermékekre fém implantátumok (pl. sebészeti klipek) közelében?",
+                options: ["DSA", "MRA", "CTA", "Mindegyik egyformán"],
+                answer: 2,
+                explanation: "A CTA, mivel röntgensugarakat használ, érzékenyebb a fémek által okozott műtermékekre (beam hardening, streak artifact). Ez megnehezítheti az értékelést például egy korábban operált aneurizma (clipping) vagy beültetett stent környékén."
+            },
+            {
+                question: "Mi az MRA egyik fő korlátja az agyi erek vizsgálatában?",
+                options: ["A csontok túl jó ábrázolása, ami zavarja a képet.", "Nem képes kimutatni a nagyér-elzáródásokat.", "Kevésbé jól ábrázolja a nagyon kis ereket és a lassú áramlást.", "Mindig nyugtatást igényel."],
+                answer: 2,
+                explanation: "Az MRA, különösen a TOF technika, a lassú vagy komplex áramlási viszonyokra érzékeny, és a nagyon kis, perifériás artériák ábrázolása korlátozottabb, mint a DSA esetében. Ezen területeken a jel gyenge lehet, vagy műtermékek jelenhetnek meg."
+            },
+            {
+                question: "Mire használják a 3D rotációs angiográfiát a DSA során?",
+                options: ["A sugárterhelés csökkentésére.", "A vizsgálati idő lerövidítésére.", "Az aneurizmák és más éranomáliák részletes, háromdimenziós morfológiai elemzésére.", "Kizárólag a vénás rendszer vizsgálatára."],
+                answer: 2,
+                explanation: "A 3D rotációs angiográfia során a röntgencső-detektor egység körbefordul a páciens feje körül, és az így nyert adatokból egy háromdimenziós modellt rekonstruálnak az érrendszerről. Ez lehetővé teszi az aneurizma nyakának, a környező erekhez való viszonyának sokkal pontosabb megítélését, ami a kezelés (pl. coiling, clipping) tervezéséhez elengedhetetlen."
+            },
+            {
+                question: "Mi a fő oka annak, hogy a betegeket sok víz fogyasztására kérik a jódos kontrasztanyaggal végzett vizsgálatok (DSA, CTA) után?",
+                options: ["A kontrasztanyag jobb felszívódása érdekében.", "A kontrasztanyag vesén keresztüli kiürülésének elősegítésére és a vesekárosodás kockázatának csökkentésére.", "A szomjúság enyhítésére.", "A vérnyomás emelésére."],
+                answer: 1,
+                explanation: "A jódos kontrasztanyagok a vesén keresztül ürülnek ki. A bőséges folyadékfogyasztás (hidratáció) segít 'átmosni' a veséket, felgyorsítva a kontrasztanyag kiürülését és csökkentve a potenciális nefrotoxikus hatásokat."
+            },
+            {
+                question: "Mi a vasospasmus, és melyik módszerrel monitorozzák leggyakrabban SAV után?",
+                options: ["Az erek tágulata; ultrahanggal.", "Az erek gyulladása; MR-rel.", "Az erek görcsös összehúzódása; transcranialis Dopplerrel (TCD) és DSA-val.", "Vérrögképződés az erekben; CT-vel."],
+                answer: 2,
+                explanation: "A vasospasmus a subarachnoidalis vérzés egy súlyos szövődménye, ahol az agyi artériák görcsösen beszűkülnek. A TCD egy non-invazív módszer a monitorozására (a szűkületben felgyorsuló áramlás detektálásával), míg a DSA a legpontosabb a spazmus mértékének és helyének kimutatására, és lehetőséget ad intraarteriális kezelésre is."
+            },
+            {
+                question: "Melyik állítás igaz az MRA-ra akut SAH gyanúja esetén?",
+                options: ["Ez az elsőként választandó módszer.", "Az MRA alkalmazását korlátozhatja, hogy a beteg gyakran nyugtalan és nehezen kooperál.", "Érzékenyebb a friss vér kimutatására, mint a CT.", "Nincs szerepe SAH diagnosztikában."],
+                answer: 1,
+                explanation: "Akut SAH esetén a betegek gyakran zavartak, nyugtalanok, fejfájósak, ami megnehezíti a hosszabb, mozdulatlanságot igénylő MRA vizsgálatot. Ilyenkor a gyorsabb CTA vagy a DSA a preferált érvizsgálat."
+            },
+            {
+                question: "Milyen előkészület szükséges a DSA vizsgálat előtt a vérzési szövődmények miatt?",
+                options: ["Nincs szükség speciális előkészületre.", "A véralvadási paraméterek ellenőrzése és a véralvadásgátló gyógyszerek esetleges módosítása.", "Magas zsírtartalmú étkezés.", "Intenzív testmozgás."],
+                answer: 1,
+                explanation: "Mivel a DSA egy invazív, artériás punkcióval járó eljárás, kritikus a beteg véralvadási státuszának felmérése. Az antikoaguláns vagy antiaggregáns terápiát gyakran módosítani vagy átmenetileg szüneteltetni kell a vizsgálat előtt a vérzési komplikációk minimalizálása érdekében."
+            },
+            {
+                question: "Milyen információt ad a DSA, amit a CTA és MRA nem vagy csak korlátozottan?",
+                options: ["Az erek anatómiai lefutását.", "Az erek tágasságát.", "Részletes hemodinamikai információt (pl. áramlás iránya, sebessége, kollaterális keringés).", "Az érfal szerkezetét."],
+                answer: 2,
+                explanation: "A DSA legnagyobb előnye a non-invazív módszerekkel szemben, hogy valós időben, dinamikusan ábrázolja a kontrasztanyag áramlását. Ez részletes információt ad a véráramlás sebességéről, irányáról, a kollaterális hálózatok működéséről, ami elengedhetetlen a komplex érrendszeri betegségek (pl. AVM-ek) megértéséhez és kezeléséhez."
+            },
+            {
+                question: "Mikor lehet előnyös a kontraszttal erősített MRA (CE-MRA) a TOF-MRA-val szemben?",
+                options: ["Gyermekek vizsgálatakor.", "Ha a betegnek fém implantátuma van.", "Lassú vagy komplex áramlási viszonyok esetén, ahol a TOF műtermékeket produkálhat.", "Ha a lehető leggyorsabb vizsgálatra van szükség."],
+                answer: 2,
+                explanation: "A TOF-MRA a lassú, turbulens vagy komplex áramlások esetén jelvesztést mutathat, ami tévesen szűkületnek vagy elzáródásnak tűnhet. A kontrasztanyag adása (CE-MRA) függetleníti a jelintenzitást az áramlási viszonyoktól, így ilyen esetekben pontosabb képet adhat az érlumenről."
+            },
+            {
+                question: "Melyik állítás írja le helyesen a DSA és a non-invazív angio-módszerek (MRA, CTA) viszonyát?",
+                options: ["A DSA teljesen elavulttá tette a non-invazív módszereket.", "Az MRA és a CTA teljesen feleslegessé tette a DSA-t.", "A módszerek kiegészítik egymást: az MRA/CTA kiváló szűrővizsgálat, míg a DSA a végső diagnózis és terápia eszköze lehet.", "Mindhárom módszer ugyanazt az információt nyújtja."],
+                answer: 2,
+                explanation: "A modern gyakorlatban az MRA és a CTA az elsődleges, non-invazív szűrővizsgálatok az érbetegségek gyanújakor. A DSA-t akkor alkalmazzák, ha a non-invazív vizsgálatok eredménye nem egyértelmű, vagy ha már terápiás beavatkozást is terveznek, kihasználva a DSA kiváló felbontását és intervenciós lehetőségeit."
+            }
+        ]
+    },
+    {
+        topic: "Funkcionális képalkotó vizsgálatok",
+        questions: [
+            {
+                question: "Mi a alapvető különbség a strukturális és a funkcionális képalkotás között?",
+                options: ["A strukturális képet ad, a funkcionális nem.", "A strukturális az agy anatómiáját, a funkcionális az agy működését, aktivitását vizsgálja.", "A strukturális sugárzással jár, a funkcionális nem.", "A strukturális csak a csontokat, a funkcionális csak a lágyrészeket mutatja."],
+                answer: 1,
+                explanation: "Míg a strukturális képalkotók (pl. CT, anatómiai MRI) az agy felépítését, szerkezetét, az esetleges anatómiai elváltozásokat (pl. tumor, vérzés) mutatják meg, addig a funkcionális képalkotók (pl. fMRI, PET, EEG) az agyi aktivitásról, anyagcseréről vagy elektromos működésről adnak információt."
+            },
+            {
+                question: "Mi a funkcionális MRI (fMRI) működésének alapja?",
+                options: ["A neuronok elektromos kisüléseinek direkt mérése.", "Radioaktív izotópok detektálása.", "A vér oxigénszint-változásain alapuló (BOLD) kontraszt mérése.", "Ultrahanghullámok visszaverődése."],
+                answer: 2,
+                explanation: "Az fMRI a BOLD (Blood-Oxygen-Level Dependent) hatást használja ki. Amikor egy agyterület aktív, megnő a vérellátása, és a vér oxigenizált hemoglobintartalma megnő a dezoxigenizáltéhoz képest. Ez a változás mérhető mágneses tulajdonságokkal rendelkezik, amit az fMRI detektál."
+            },
+            {
+                question: "Melyik funkcionális képalkotó módszer rendelkezik a legjobb időbeli (temporális) felbontással?",
+                options: ["fMRI", "PET", "SPECT", "EEG/MEG"],
+                answer: 3,
+                explanation: "Az EEG és a MEG közvetlenül a neuronok elektromos vagy mágneses aktivitását mérik, ami rendkívül gyors folyamat. Ezért ezek a módszerek milliszekundumos időbeli felbontásra képesek, messze felülmúlva a hemodinamikai válaszon alapuló fMRI-t vagy a lassú anyagcserét mérő PET/SPECT-et."
+            },
+            {
+                question: "Mire használják leggyakrabban az ¹⁸F-FDG PET vizsgálatot a neurológiában?",
+                options: ["A fehérállományi pályák lefutásának követésére.", "Az agyi glükózmetabolizmus (anyagcsere) feltérképezésére.", "Az agyi véráramlás mérésére.", "Az agyi elektromos aktivitás lokalizálására."],
+                answer: 1,
+                explanation: "A fluorodezoxiglükóz (FDG) a glükóz analógja. A sejtek felveszik, de nem tudják tovább bontani, így felhalmozódik az aktívabb területeken. Az ¹⁸F-FDG PET tehát az agyi glükózfelhasználás mértékét mutatja meg, ami a neuronális aktivitás jó mutatója."
+            },
+            {
+                question: "Mi a SPECT vizsgálat egyedi előnye az epilepsziás rohamok vizsgálatában?",
+                options: ["Jobb a térbeli felbontása, mint az MRI-nek.", "Nem használ sugárzást.", "Lehetőség van egy 'pillanatfelvétel' készítésére: a nyomjelző beadható a roham alatt, és a képalkotás később is elvégezhető.", "Közvetlenül az elektromos kisüléseket méri."],
+                answer: 2,
+                explanation: "A SPECT egyedülálló tulajdonsága, hogy a radiofarmakont (nyomjelzőt) be lehet adni a betegnek a roham (iktális esemény) alatt, akár a kórházi ágy mellett is. A nyomjelző 'megőrzi' a roham alatti agyi véráramlási mintázatot, és a képalkotást (a szkennerben) később, a beteg stabil állapotában is el lehet végezni. Ez más módszerekkel kivitelezhetetlen."
+            },
+            {
+                question: "Melyik képalkotó technika alkalmas a fehérállományi pályák integritásának és lefutásának non-invazív vizsgálatára?",
+                options: ["fMRI", "PET", "Diffúziós Tenzor Képalkotás (DTI)", "CT angiográfia"],
+                answer: 2,
+                explanation: "A DTI egy MRI technika, amely a vízmolekulák irányfüggő mozgását méri. Mivel a víz a fehérállományi rostkötegek mentén könnyebben diffundál, a DTI képes feltérképezni ezen pályák lefutását és integritását (tractographia)."
+            },
+            {
+                question: "Melyik állítás igaz az EEG-re és az fMRI-re?",
+                options: ["Az EEG-nek jobb a térbeli, az fMRI-nek az időbeli felbontása.", "Az EEG-nek jobb az időbeli, az fMRI-nek a térbeli felbontása.", "Mindkettőnek kiváló a térbeli és időbeli felbontása.", "Mindkettő a véráramlást méri."],
+                answer: 1,
+                explanation: "Ez a neuroképalkotás klasszikus kompromisszuma: az EEG kiválóan méri az agyi események időzítését (mikor történik valami), de a helyét (hol) csak pontatlanul tudja meghatározni. Ezzel szemben az fMRI nagy pontossággal lokalizálja az aktivitást, de a hemodinamikai válasz késleltetése miatt az időbeli felbontása gyengébb."
+            },
+            {
+                question: "Mire használják az MR Spektroszkópiát (MRS) agydaganatok esetében?",
+                options: ["A daganat pontos méretének lemérésére.", "A daganat vérellátásának vizsgálatára.", "A daganatos szövet metabolit-összetételének (biokémiai ujjlenyomatának) elemzésére.", "A daganat műtéti eltávolítására."],
+                answer: 2,
+                explanation: "Az MRS képes kimutatni különböző agyi metabolitok (pl. kolin, NAA, laktát) koncentrációját. A daganatokban a metabolit-profil jellegzetesen megváltozik (pl. a kolin/NAA arány megnő), ami segíthet a daganat típusának, gradusának meghatározásában és a kiújulás azonosításában."
+            },
+            {
+                question: "Melyik állítás NEM igaz a PET vizsgálatra?",
+                options: ["Sugárterheléssel jár.", "Kiváló időbeli felbontással rendelkezik.", "Képes specifikus receptorok kötődését vizsgálni.", "Drága és komplex infrastruktúrát igényel."],
+                answer: 1,
+                explanation: "A PET időbeli felbontása gyenge (percekben mérhető), mivel a radioaktív nyomjelzők felhalmozódásához és a képalkotáshoz időre van szükség. Az EEG és a MEG rendelkezik kiváló (milliszekundumos) időbeli felbontással."
+            },
+            {
+                question: "Mire használják leggyakrabban a feladathoz kötött (task-based) fMRI-t a klinikai gyakorlatban?",
+                options: ["A beteg alvási fázisainak meghatározására.", "Műtét előtti tervezéshez, az eloquens (pl. beszéd, mozgató) agykérgi területek lokalizálására.", "Demencia szűrésére.", "Fejfájás okának felderítésére."],
+                answer: 1,
+                explanation: "Agydaganatok vagy epilepsziás gócok műtéte előtt kulcsfontosságú azonosítani a funkcionálisan fontos agyterületeket (pl. Broca-terület, motoros kéreg). Az fMRI során a betegnek specifikus feladatokat kell végeznie, és az ezalatt aktív területek feltérképezhetők, segítve a sebészt a károsodás minimalizálásában."
+            },
+            {
+                question: "Az Alzheimer-kór korai diagnózisában melyik PET vizsgálat lehet a leghasznosabb?",
+                options: ["Dopamin-transzporter PET", "Amiloid-PET", "Oxigén-PET", "Szerotonin-receptor PET"],
+                answer: 1,
+                explanation: "Az Alzheimer-kór egyik patológiai fémjelzője az amiloid plakkok felhalmozódása az agyban. Az amiloid-PET speciális nyomjelzőkkel (pl. ¹¹C-PIB) képes ezeket a plakkokat már a tünetek megjelenése előtt kimutatni, segítve a korai diagnózist."
+            },
+            {
+                question: "Mi a 'default mode network' (DMN)?",
+                options: ["Az agy motoros hálózata.", "A vizuális feldolgozásért felelős hálózat.", "Egy nyugalmi állapotban is aktív agyi hálózat, amit resting-state fMRI-vel vizsgálnak.", "Az epilepsziás rohamokért felelős hálózat."],
+                answer: 2,
+                explanation: "A DMN egy nagy kiterjedésű agyi hálózat, amely akkor a legaktívabb, amikor az agy 'nyugalomban' van, és nem fókuszál külső feladatra (pl. álmodozás, jövő tervezgetése). Működésének zavarát számos neurológiai és pszichiátriai kórképben (pl. Alzheimer-kór, depresszió) leírták."
+            },
+            {
+                question: "Melyik képalkotó módszer elve, hogy a mágneses mezőket kevésbé torzítja a koponya és a fejbőr, mint az elektromos jeleket?",
+                options: ["EEG", "fMRI", "MEG", "SPECT"],
+                answer: 2,
+                explanation: "A magnetoenkefalográfia (MEG) a neuronális aktivitás által generált mágneses mezőket méri. Mivel a mágneses mezők kevésbé torzulnak a koponyán áthaladva, mint az EEG által mért elektromos mezők, a MEG elméletileg jobb térbeli forráslokalizációt tesz lehetővé."
+            },
+            {
+                question: "A DaTSCAN egy speciális SPECT vizsgálat. Melyik betegség diagnózisában segít a dopamin transzporterek vizsgálatával?",
+                options: ["Sclerosis multiplex", "Alzheimer-kór", "Parkinson-kór", "Stroke"],
+                answer: 2,
+                explanation: "A DaTSCAN a striatumban lévő preszinaptikus dopamin transzporterek sűrűségét méri. Parkinson-kórban és más parkinsonos szindrómákban (ahol a dopaminerg neuronok pusztulnak) a jelintenzitás jellegzetesen csökken, ami segít a diagnózis megerősítésében és az esszenciális tremor-tól való elkülönítésben."
+            },
+            {
+                question: "Mi a funkcionális közeli infravörös spektroszkópia (fNIRS) egyik legnagyobb előnye az fMRI-vel szemben?",
+                options: ["Jobb a térbeli felbontása.", "Képes a mély agyi struktúrákat vizsgálni.", "Hordozható és természetesebb, mozgást is megengedő környezetben használható.", "Nem méri a hemodinamikai változásokat."],
+                answer: 2,
+                explanation: "Az fNIRS egy hordozható eszköz, amely nem igényli a beteg mozdulatlanságát egy szűk szkennerben. Ez lehetővé teszi az agyi aktivitás vizsgálatát valósághűbb, mozgással járó feladatok (pl. járás, rehabilitációs gyakorlatok) vagy csecsemők vizsgálata közben."
+            },
+            {
+                question: "Az epilepszia műtét előtti kivizsgálásában melyik funkcionális képalkotó mutatja ki az interiktális (rohamok közötti) hipometabolizmust?",
+                options: ["fMRI", "DTI", "FDG-PET", "MRA"],
+                answer: 2,
+                explanation: "Az FDG-PET vizsgálat az epileptogén zónában (a rohamok kiindulási helyén) a rohamok közötti időszakban gyakran csökkent glükóz-anyagcserét (hipometabolizmust) mutat. Ez az információ segít az epilepsziás góc pontosabb lokalizálásában."
+            },
+            {
+                question: "A multimodális képalkotás (pl. EEG-fMRI) célja:",
+                options: ["A vizsgálatok olcsóbbá tétele.", "A különböző módszerek előnyeinek kombinálása a hátrányok kiküszöbölésére.", "A beteg sugárterhelésének növelése.", "A vizsgálati idő lerövidítése."],
+                answer: 1,
+                explanation: "A multimodális megközelítések, mint az EEG-fMRI, célja, hogy a különböző technikák erősségeit egyesítsék. Az EEG kiváló időbeli felbontását kombinálják az fMRI kiváló térbeli felbontásával, hogy az agyi aktivitásról egy teljesebb, térben és időben is pontos képet kapjanak."
+            },
+            {
+                question: "Melyik állítás igaz a funkcionális képalkotásra?",
+                options: ["Mindig közvetlenül a neuronok tüzelését mérik.", "A BOLD fMRI a neuronális aktivitás közvetett mércéje.", "Nincs szükségük bonyolult statisztikai elemzésre.", "Mindig invazívak."],
+                answer: 1,
+                explanation: "Az fMRI BOLD jele nem direkt neuronális aktivitást, hanem annak következményét, a hemodinamikai választ (véráramlás- és oxigenizáció-változást) méri. Ezért a neuronális aktivitás közvetett, késleltetett mutatójának tekinthető."
+            },
+            {
+                question: "Az MRS vizsgálat során az emelkedett laktát csúcs mire utalhat?",
+                options: ["Normális agyi anyagcserére.", "Neuronális integritásra.", "Anaerob metabolizmusra (pl. ischaemia, tályog, nekrotikus tumor).", "Fokozott sejtmembrán-szintézisre."],
+                answer: 2,
+                explanation: "A laktát az anaerob (oxigén nélküli) glükóz-lebontás végterméke. Felszaporodása az agyszövetben oxigénhiányos állapotra (ischaemia), vagy olyan kóros folyamatokra utal, ahol az anyagcsere az anaerob útvonal felé tolódik el, mint például agytályogok vagy bizonyos tumorok."
+            },
+            {
+                question: "Miért fontos a funkcionális képalkotás a rehabilitációs kutatásokban?",
+                options: ["Mert megmutatja a csonttöréseket.", "Mert segít megérteni, hogyan szerveződik át az agy (plaszticitás) egy sérülés után, és hogyan hat a terápia erre a folyamatra.", "Mert csak ezzel lehet a fájdalmat mérni.", "Nincs szerepe a rehabilitációban."],
+                answer: 1,
+                explanation: "A funkcionális képalkotók lehetővé teszik az agyi hálózatok átszerveződésének (reorganizáció, plaszticitás) nyomon követését agysérülés (pl. stroke) után. Segítenek felmérni, hogy egy adott rehabilitációs terápia milyen változásokat idéz elő az agyi aktivitásban, és ez hogyan korrelál a funkcionális javulással."
+            }
+        ]
+    },
+    {
+        topic: "A nyaki és intracranialis erek ultrahang vizsgálata",
+        questions: [
+            {
+                question: "Milyen fizikai elven alapul az ultrahangos képalkotás?",
+                options: ["Röntgensugarak elnyelődése", "Mágneses rezonancia", "Magas frekvenciájú hanghullámok visszaverődése (visszhang)", "Radioaktív izotópok bomlása"],
+                answer: 2,
+                explanation: "Az ultrahang vizsgálat magas frekvenciájú (emberi fül számára nem hallható) hanghullámokat használ, amelyeket a vizsgálófej bocsát ki. A különböző sűrűségű szövetekről visszaverődő hanghullámokból (visszhangokból) a gép valós idejű képet alkot."
+            },
+            {
+                question: "Mire szolgál a Doppler-effektus az érvizsgálatok során?",
+                options: ["Az érfal vastagságának mérésére.", "A véráramlás sebességének és irányának meghatározására.", "A plakkok összetételének elemzésére.", "Az agyi elektromos aktivitás mérésére."],
+                answer: 1,
+                explanation: "A Doppler-effektus a mozgó vörösvértestekről visszaverődő ultrahanghullámok frekvenciaváltozását méri. Ez a frekvenciaeltolódás arányos a véráramlás sebességével, iránya pedig megmutatja, hogy a vér a vizsgálófej felé vagy attól távolodva áramlik."
+            },
+            {
+                question: "Melyik ér a leggyakoribb helye az atheroscleroticus plakk-képződésnek a nyakon?",
+                options: ["Arteria vertebralis", "Arteria carotis externa (ACE)", "Az arteria carotis communis (ACC) oszlása és a carotis bulbus", "Arteria subclavia"],
+                answer: 2,
+                explanation: "Az áramlási viszonyok miatt az atheroscleroticus plakkok leggyakrabban az arteria carotis communis elágazódásánál, a carotis bulbusban és az arteria carotis interna (ACI) kezdeti szakaszán alakulnak ki."
+            },
+            {
+                question: "Mi a Transcranialis Doppler (TCD) vizsgálat lényege?",
+                options: ["A nyaki erek részletes anatómiai vizsgálata.", "A koponyán belüli (intracranialis) artériák véráramlásának vizsgálata a koponya 'akusztikus ablakain' keresztül.", "A koponyacsontok sűrűségének mérése.", "Az agyi vénák trombózisának kimutatása."],
+                answer: 1,
+                explanation: "A TCD egy speciális ultrahangos módszer, amely a koponyacsont vékonyabb területein (akusztikus ablakok, pl. halánték) keresztül képes vizsgálni a nagy agyi artériák (pl. MCA, ACA, PCA) véráramlási viszonyait."
+            },
+            {
+                question: "Milyen ultrahangos lelet utal súlyos (>70%) carotis szűkületre?",
+                options: ["Alacsony (<50 cm/s) áramlási sebesség.", "Jelentősen megnövekedett áramlási sebesség (PSV > 230 cm/s).", "Normális intima-media vastagság.", "Az ér teljes hiánya."],
+                answer: 1,
+                explanation: "A hemodinamika törvényei szerint egy szűkületben a véráramlás felgyorsul. A 230 cm/s feletti szisztolés csúcssebesség (PSV) az arteria carotis internában általában 70%-ot meghaladó, súlyos szűkületet jelez."
+            },
+            {
+                question: "Mi a 'duplex' ultrahang vizsgálat?",
+                options: ["Két különböző vizsgálófej használata.", "A B-módú (anatómiai) és a Doppler (áramlási) vizsgálat egyidejű alkalmazása.", "A vizsgálat kétszeri megismétlése.", "Csak a kétoldali nyaki erek vizsgálata."],
+                answer: 1,
+                explanation: "A duplex ultrahang a szürkeskálás, B-módú képalkotást (amely az anatómiai struktúrát mutatja) kombinálja a spektrális vagy színes Doppler vizsgálattal (amely az áramlási viszonyokat méri). Ez a kombináció ad teljes képet az érről."
+            },
+            {
+                question: "Mi a Willis-kör funkciója?",
+                options: ["Az agy hűtése.", "Kollaterális (kisegítő) keringés biztosítása az elülső és hátsó agyi keringés, valamint a két oldal között.", "A liquor cerebrospinalis termelése.", "Az agyi vénás vér elvezetése."],
+                answer: 1,
+                explanation: "A Willis-kör egy artériás anasztomózis-rendszer az agy alapján, amely összeköti a kétoldali carotis és vertebrobasilaris rendszert. Fő szerepe, hogy egy fő ér elzáródása esetén alternatív útvonalakon keresztül biztosítsa az agy vérellátását."
+            },
+            {
+                question: "Milyen típusú plakk hordozza a legnagyobb embóliás kockázatot?",
+                options: ["Kicsi, kemény, meszes plakk", "Sima felszínű, homogén plakk", "Echolucens (lipidben gazdag), egyenetlen felszínű vagy ulcerált plakk", "Fali, vékony plakk"],
+                answer: 2,
+                explanation: "Az echolucens, 'puha', lipidben gazdag plakkok instabilabbak, hajlamosabbak a megrepedésre (ruptúrára). Ha a felszínük egyenetlen vagy fekélyes (ulcerált), arról könnyebben szakadhatnak le vérrögök (embólusok), amelyek stroke-ot okozhatnak."
+            },
+            {
+                question: "Melyik állítás NEM igaz a nyaki ultrahang vizsgálatra?",
+                options: ["Non-invazív és fájdalommentes.", "Ionizáló sugárzást használ.", "Valós idejű képet ad.", "Alkalmas a kezelés utáni állapot követésére."],
+                answer: 1,
+                explanation: "Az ultrahang vizsgálat nem használ ionizáló sugárzást (ellentétben a CT-vel vagy a röntgennel), ami az egyik legfőbb előnye és a biztonságosságának alapja."
+            },
+            {
+                question: "Mi a 'subclavian steal' szindróma?",
+                options: ["A carotis artéria elzáródása.", "Az arteria subclavia szűkülete miatti véráramlás-megfordulás az azonos oldali arteria vertebralisban.", "Az agyi erek görcsös összehúzódása.", "Egyfajta agyi aneurizma."],
+                answer: 1,
+                explanation: "Ha az arteria subclavia a vertebralis eredése előtt beszűkül, a kar mozgatásakor a kar 'ellopja' a vért az agyi keringésből az arteria vertebralison keresztül, amelyben az áramlás megfordul. Ez szédülést, látászavart okozhat."
+            },
+            {
+                question: "Mit mér az Intima-Media Vastagság (IMT)?",
+                options: ["Az ér teljes átmérőjét.", "Az ér belső két rétegének (intima és media) együttes vastagságát.", "A plakk magasságát.", "A vér viszkozitását."],
+                answer: 1,
+                explanation: "Az IMT az érfal legbelső két rétegének vastagságát méri. Megvastagodása az atherosclerosis korai, szubklinikai jele, és a kardiovaszkuláris kockázat fontos markere."
+            },
+            {
+                question: "Melyik a legfontosabb, az eredményeket befolyásoló technikai tényező a Doppler-vizsgálat során?",
+                options: ["A használt gél mennyisége.", "A szoba hőmérséklete.", "Az ultrahang nyaláb és a véráramlás iránya közötti szög (insonation angle).", "A beteg életkora."],
+                answer: 2,
+                explanation: "A Doppler-egyenletből adódóan a mért sebesség pontossága kritikusan függ a hangnyaláb és az áramlás közötti szögtől. A pontos méréshez ennek a szögnek 60 fok alatt kell lennie, ami nagyfokú operátori tapasztalatot és precizitást igényel."
+            },
+            {
+                question: "Mikor javasolt TCD-vel mikroembólus-detekciót végezni?",
+                options: ["Minden fejfájós betegnél.", "Ismeretlen eredetű (kriptogén) stroke után, potenciális emboliaforrás (pl. pitvarfibrilláció, PFO) keresésére.", "Agyi daganatok diagnosztikájában.", "Demencia kivizsgálásakor."],
+                answer: 1,
+                explanation: "A TCD képes detektálni az agyi keringésben áthaladó apró vérrögöket (mikroembólusokat). Ennek a vizsgálatnak akkor van nagy jelentősége, ha egy stroke után a szokásos vizsgálatok nem találnak egyértelmű okot, és felmerül egy rejtett emboliaforrás gyanúja."
+            },
+            {
+                question: "Melyik állítás igaz a Willis-körre?",
+                options: ["Minden emberben teljesen ép és szimmetrikus.", "Az agy vénás elvezető rendszere.", "Csak a populáció kb. 20-25%-ában teljes, ami befolyásolja a kollaterális keringési kapacitást.", "Nincs klinikai jelentősége."],
+                answer: 2,
+                explanation: "A Willis-kör anatómiailag rendkívül variábilis. A klasszikus, tankönyvi, minden elemet tartalmazó forma viszonylag ritka. A hiányos vagy hipopláziás szakaszok csökkentik az agy azon képességét, hogy egy érelzáródást kollaterális keringéssel kompenzáljon."
+            },
+            {
+                question: "Milyen színnel ábrázolja a színes Doppler a vizsgálófej felé áramló vért?",
+                options: ["Zölddel", "Kékkel", "Pirossal", "Sárgával"],
+                answer: 2,
+                explanation: "A színkódolás konvenció szerint a 'BART' (Blue Away, Red Toward) elvet követi. A szonda felé közeledő áramlás piros, a távolodó pedig kék színnel jelenik meg a képernyőn."
+            },
+            {
+                question: "Mi a transcraniális ultrahang egyik fő korlátja?",
+                options: ["Sugárterhelés", "A vastag koponyacsont csillapító hatása", "Invazivitás", "Allergiás reakciók kockázata"],
+                answer: 1,
+                explanation: "A koponyacsont jelentősen csillapítja és szórja az ultrahanghullámokat. Ezért a TCD csak a vékonyabb 'akusztikus ablakokon' keresztül végezhető el, és a képminőség, valamint a vizsgálhatóság a beteg koponyájának vastagságától függ."
+            },
+            {
+                question: "Milyen ultrahangos jelek utalnak egy plakk instabilitására és magasabb stroke kockázatra?",
+                options: ["Sima felszín és magas echogenitás (meszesedés).", "Kisméretű, kemény plakk.", "Egyenetlen, fekélyes felszín és alacsony echogenitás (echolucens).", "Az érrel párhuzamos elhelyezkedés."],
+                answer: 2,
+                explanation: "Az instabil, ruptúrára hajlamos plakkok gyakran 'puhák', lipidben gazdagok (echolucensek), felszínük pedig szabálytalan, fekélyes. Ezek a plakkok hordozzák a legnagyobb embóliás kockázatot."
+            },
+            {
+                question: "A carotis ultrahang vizsgálat során melyik paraméter a legfontosabb az atherosclerosis korai, szubklinikai szakaszának felismerésében?",
+                options: ["A csúcsszisztolés sebesség (PSV).", "Az intima-media vastagság (IMT).", "A rezisztencia index (RI).", "Az ér átmérője."],
+                answer: 1,
+                explanation: "Még mielőtt jelentős szűkületet okozó plakk alakulna ki, az érelmeszesedés legkorábbi jele az érfal belső rétegeinek megvastagodása, amit az IMT mérésével lehet kimutatni. A megvastagodott IMT a jövőbeni kardiovaszkuláris események független kockázati tényezője."
+            },
+            {
+                question: "Melyik a leggyakrabban vizsgált intracranialis artéria TCD-vel, amelynek normál áramlási sebessége kb. 50-80 cm/s?",
+                options: ["Arteria basilaris", "Arteria cerebri anterior (ACA)", "Arteria cerebri media (MCA)", "Arteria cerebri posterior (PCA)"],
+                answer: 2,
+                explanation: "Az arteria cerebri media (MCA) a carotis interna legnagyobb ága, amely az agyféltekék nagy részét ellátja. A temporális ablakon keresztül könnyen vizsgálható, és az intracranialis keringés állapotának fontos mutatója."
+            },
+            {
+                question: "Milyen előkészületet igényel leginkább a betegtől egy nyaki ultrahang vizsgálat?",
+                options: ["Koplalás", "Nyugtató bevétele", "A nyaki régió krémektől, testápolóktól való mentessége.", "Kontrasztanyag megivása."],
+                answer: 2,
+                explanation: "Az ultrahangvizsgálat előtt a legfontosabb, hogy a vizsgálandó bőrfelület tiszta és száraz legyen. A krémek és olajok ronthatják a kontaktust a vizsgálófej és a bőr között, ami gyengébb képminőséget eredményez."
+            }
+        ]
+    }
+];
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const topicSelectionDiv = document.getElementById('topic-selection');
+    const quizContainerDiv = document.getElementById('quiz-container');
+    const scoreContainerDiv = document.getElementById('score-container');
+    const topicButtonsContainer = document.getElementById('topic-buttons');
+    const backToTopicsBtn = document.getElementById('back-to-topics');
+
+    let currentTopicIndex = -1;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedOptionButton = null;
+
+    // --- INITIALIZATION ---
+    function init() {
+        showTopicSelection();
+        createTopicButtons();
+        backToTopicsBtn.addEventListener('click', showTopicSelection);
+        document.getElementById('home-btn').addEventListener('click', showTopicSelection);
+    }
+    
+    function createTopicButtons() {
+        topicButtonsContainer.innerHTML = '';
+        quizData.forEach((topic, index) => {
+            const button = document.createElement('button');
+            button.className = 'btn-topic bg-white border-2 border-slate-200 hover:border-sky-500 hover:bg-sky-50 text-slate-700 font-semibold py-4 px-6 rounded-lg text-left shadow-sm';
+            button.innerHTML = `
+                <div class="flex items-center">
+                    <div class="bg-sky-100 text-sky-600 p-3 rounded-full mr-4">
+                        <i class="fas ${getIconForTopic(index)} fa-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">${topic.topic}</h3>
+                        <p class="text-sm text-slate-500">${topic.questions.length} kérdés</p>
+                    </div>
+                </div>`;
+            button.addEventListener('click', () => startQuiz(index));
+            topicButtonsContainer.appendChild(button);
+        });
+    }
+    
+    function getIconForTopic(index) {
+        const icons = ['fa-bolt', 'fa-x-ray', 'fa-sitemap', 'fa-brain', 'fa-wave-square'];
+        return icons[index % icons.length];
+    }
+
+    // --- SCREEN MANAGEMENT ---
+    function showTopicSelection() {
+        topicSelectionDiv.classList.remove('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showQuizContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.remove('hidden');
+        scoreContainerDiv.classList.add('hidden');
+    }
+
+    function showScoreContainer() {
+        topicSelectionDiv.classList.add('hidden');
+        quizContainerDiv.classList.add('hidden');
+        scoreContainerDiv.classList.remove('hidden');
+    }
+
+    // --- QUIZ LOGIC ---
+    function startQuiz(topicIndex) {
+        currentTopicIndex = topicIndex;
+        currentQuestionIndex = 0;
+        score = 0;
+        showQuizContainer();
+        document.getElementById('quiz-title').textContent = quizData[topicIndex].topic;
+        document.getElementById('restart-btn').onclick = () => startQuiz(currentTopicIndex);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        resetState();
+        const currentQuestion = quizData[currentTopicIndex].questions[currentQuestionIndex];
+        document.getElementById('question').textContent = currentQuestion.question;
+        const optionsContainer = document.getElementById('options');
+        
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn w-full text-left bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-4 px-5 rounded-lg';
+            button.textContent = option;
+            button.dataset.index = index;
+            button.addEventListener('click', selectOption);
+            optionsContainer.appendChild(button);
+        });
+        updateProgress();
+    }
+
+    function resetState() {
+        document.getElementById('next-btn').disabled = true;
+        document.getElementById('options').innerHTML = '';
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.classList.remove('show');
+        const feedbackContent = document.getElementById('feedback-content');
+        feedbackContent.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        selectedOptionButton = null;
+    }
+    
+    function updateProgress() {
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        progressText.textContent = `Kérdés ${currentQuestionIndex + 1} / ${totalQuestions}`;
+        progressBar.style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+    }
+
+    function selectOption(e) {
+        if (selectedOptionButton) return; // Prevent changing answer
+
+        selectedOptionButton = e.target;
+        const selectedAnswerIndex = parseInt(selectedOptionButton.dataset.index);
+        const correctAnserIndex = quizData[currentTopicIndex].questions[currentQuestionIndex].answer;
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackContent = document.getElementById('feedback-content');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationP = document.getElementById('explanation');
+        
+        // Highlight selected button
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        selectedOptionButton.classList.add('selected');
+
+        if (selectedAnswerIndex === correctAnserIndex) {
+            score++;
+            feedbackTitle.textContent = 'Helyes válasz!';
+            feedbackContent.className = 'p-5 rounded-lg bg-green-100 text-green-800 border-l-4 border-green-500';
+            
+        } else {
+            feedbackTitle.textContent = 'Helytelen válasz.';
+            feedbackContent.className = 'p-5 rounded-lg bg-red-100 text-red-800 border-l-4 border-red-500';
+            
+            // Highlight the correct answer
+            document.querySelector(`.option-btn[data-index='${correctAnserIndex}']`).classList.add('bg-green-200', 'border-green-500');
+        }
+
+        explanationP.textContent = quizData[currentTopicIndex].questions[currentQuestionIndex].explanation;
+        feedbackArea.classList.add('show');
+        
+        document.querySelectorAll('.option-btn').forEach(button => button.disabled = true);
+        document.getElementById('next-btn').disabled = false;
+        document.getElementById('next-btn').focus();
+    }
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData[currentTopicIndex].questions.length) {
+            loadQuestion();
+        } else {
+            showFinalScore();
+        }
+    });
+
+    function showFinalScore() {
+        showScoreContainer();
+        const totalQuestions = quizData[currentTopicIndex].questions.length;
+        document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
+    }
+
+    init();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Kvíz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.correct {
+            background-color: #10B981; /* Emerald-500 */
+            color: white;
+            border-color: #059669; /* Emerald-600 */
+        }
+        .quiz-option.incorrect {
+            background-color: #EF4444; /* Red-500 */
+            color: white;
+            border-color: #DC2626; /* Red-600 */
+        }
+        .quiz-option:not(.disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection -->
+        <div id="topic-selection" class="text-center">
+            <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Neurológiai Kvíz</h1>
+            <p class="text-lg mb-8 text-gray-600 dark:text-gray-400">Válassz egy témakört a kezdéshez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quiz-interface" class="hidden">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-gray-900 dark:text-white">Téma</h2>
+                    <div id="score" class="text-lg font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-1 rounded-full">Pontszám: 0 / 0</div>
+                </div>
+                <div id="progress-bar-container" class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-xl font-medium mb-6 text-gray-800 dark:text-gray-200"></p>
+                    <div id="options-container" class="space-y-4">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="hidden mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Magyarázat</h3>
+                    <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="back-to-topics" class="py-2 px-5 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Témakörök</button>
+                    <button id="next-question" class="py-2 px-5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled">Következő kérdés</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Score Screen -->
+        <div id="final-score-screen" class="hidden text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-4 text-gray-900 dark:text-white">A kvíz vége!</h2>
+            <p class="text-xl mb-6 text-gray-700 dark:text-gray-300">A pontszámod a(z) <span id="final-topic-title" class="font-semibold"></span> témakörben:</p>
+            <p id="final-score" class="text-6xl font-bold mb-8 text-blue-600 dark:text-blue-400">0 / 20</p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Újra</button>
+                <button id="change-topic" class="py-3 px-6 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">Másik téma</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            'diplopia': {
+                title: 'Diplopia',
+                questions: [
+                    {
+                        question: "Mi a monokuláris diplopia legfőbb jellemzője?",
+                        options: [
+                            "A kettőslátás csak mindkét szem nyitva tartása esetén jelentkezik.",
+                            "A kettőslátás megszűnik, ha a 'jó' szemet letakarjuk.",
+                            "A kettőslátás fennmarad az érintett szemen, még akkor is, ha a másik szemet letakarják.",
+                            "Mindig neurológiai eredetű."
+                        ],
+                        correct: 2,
+                        explanation: "A monokuláris diplopia esetében a kettőslátás csak az egyik szemen jelentkezik, és akkor is fennáll, ha a másik (jó) szemet letakarják. Ez általában szemészeti okokra vezethető vissza."
+                    },
+                    {
+                        question: "Melyik agyideg bénulása okoz jellemzően horizontális diplopiát, ami távolra nézéskor és az érintett oldal felé tekintéskor fokozódik?",
+                        options: [
+                            "N. Oculomotorius (III. agyideg)",
+                            "N. Trochlearis (IV. agyideg)",
+                            "N. Abducens (VI. agyideg)",
+                            "N. Facialis (VII. agyideg)"
+                        ],
+                        correct: 2,
+                        explanation: "A VI. agyideg (N. Abducens) bénulása horizontális diplopiát okoz, mivel a m. rectus lateralis gyengesége miatt az érintett szem nem tud teljesen kifelé mozdulni (abdukciódeficit), és befelé tér ki (esotropia)."
+                    },
+                    {
+                        question: "Mi a binokuláris diplopia patomechanizmusának alapja?",
+                        options: [
+                            "A szemlencse elhomályosodása.",
+                            "A szaruhártya szabálytalan görbülete.",
+                            "A két szem vizuális tengelyének összehangolatlansága (strabismus).",
+                            "A retina központi részének károsodása."
+                        ],
+                        correct: 2,
+                        explanation: "A binokuláris diplopia mindig a két szem vizuális tengelyének eltéréséből (diszkonjugált szemállás, strabismus) ered. Emiatt a tárgy képe a két szemben nem korrespondáló retina pontokra vetül, amit az agy nem tud egységes képpé fuzionálni."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a fluktuáló, fáradásra fokozódó, pihenésre javuló binokuláris diplopia és ptosis?",
+                        options: [
+                            "Graves-Basedow kór",
+                            "Myasthenia Gravis",
+                            "Sclerosis Multiplex",
+                            "Agyi aneurizma"
+                        ],
+                        correct: 1,
+                        explanation: "A Myasthenia Gravis egy autoimmun betegség, amely a neuromuszkuláris junkciót támadja. Jellemző a fluktuáló izomgyengeség, ami a szemizmok esetében ptosist és változó jellegű diplopiát okoz, melyek fáradásra fokozódnak."
+                    },
+                    {
+                        question: "Milyen kompenzáló fejtartás jellemző a IV. agyideg (N. Trochlearis) bénulására?",
+                        options: [
+                            "A fej fordítása az érintett oldal felé.",
+                            "A fej billentése az érintett oldal felé.",
+                            "A fej billentése az ép oldal felé, és az áll lefelé fordítása.",
+                            "Nincs jellegzetes kompenzáló fejtartás."
+                        ],
+                        correct: 2,
+                        explanation: "A IV. agyideg bénulásakor a betegek a fejüket az ép oldal felé billentik, hogy kompenzálják a paretikus m. obliquus superior gyengeségét és csökkentsék a vertikális és torziós diplopiát (Bielschowsky-fejbillentési teszt)."
+                    },
+                    {
+                        question: "Melyik vizsgálat segít elkülöníteni a fénytörési hibából eredő monokuláris diplopiát?",
+                        options: [
+                            "Cover teszt",
+                            "Red Glass teszt",
+                            "Pinhole (rés) teszt",
+                            "Hess-Lancaster teszt"
+                        ],
+                        correct: 2,
+                        explanation: "A Pinhole (rés) teszt során a résen át nézve a monokuláris diplopia javulhat vagy megszűnhet, ha az fénytörési hibából vagy a szem optikai közegeinek irregularitásából ered, mivel a rés csökkenti a fényszóródást."
+                    },
+                    {
+                        question: "Mi a 'vörös zászló' tünet a diplopia esetében, ami azonnali kivizsgálást indokol?",
+                        options: [
+                            "Fokozatosan kialakuló, intermittáló kettőslátás.",
+                            "Hirtelen kialakuló, fájdalmas diplopia pupillaérintettséggel.",
+                            "Kizárólag közelre nézéskor jelentkező diplopia.",
+                            "Rossz szemüveg okozta monokuláris diplopia."
+                        ],
+                        correct: 1,
+                        explanation: "A hirtelen kialakuló, fájdalmas binokuláris diplopia, különösen ha ptosis vagy pupillatágulat kíséri, sürgősségi állapotra, például agyi aneurizmára utalhat, ami azonnali kivizsgálást tesz szükségessé."
+                    },
+                    {
+                        question: "Melyik szemizom becsípődése okozhat diplopiát az orbita alsó falának (blowout) törése esetén?",
+                        options: [
+                            "M. rectus superior",
+                            "M. rectus lateralis",
+                            "M. rectus inferior",
+                            "M. obliquus superior"
+                        ],
+                        correct: 2,
+                        explanation: "Blowout fractura esetén leggyakrabban a m. rectus inferior csípődhet be a törésrésbe, ami mechanikus mozgáskorlátozottságot és jellemzően vertikális diplopiát okoz."
+                    },
+                    {
+                        question: "Mire utal az 'incomitans' diplopia?",
+                        options: [
+                            "A kettőslátás mértéke minden tekintési irányban azonos.",
+                            "A kettőslátás mértéke a tekintési iránytól függően változik.",
+                            "A diplopia csak az egyik szemen jelentkezik.",
+                            "A diplopia csak fáradtság esetén lép fel."
+                        ],
+                        correct: 1,
+                        explanation: "Az incomitans diplopia azt jelenti, hogy a két kép közötti szeparáció mértéke a tekintési iránytól függően változik. Ez általában szerzett problémára, például agyidegbénulásra vagy mechanikus izomrestrikcióra utal."
+                    },
+                    {
+                        question: "Mi a III. agyidegbénulás jellemző tünetegyüttese?",
+                        options: [
+                            "A szem befelé tér ki, a pupilla szűk.",
+                            "A szem felfelé tér ki, ptosis nélkül.",
+                            "A szem kifelé és lefelé tér ki, ptosissal és gyakran tág pupillával.",
+                            "Csak a szemhéj csüngése (ptosis)."
+                        ],
+
+                        correct: 2,
+                        explanation: "A III. agyideg (N. Oculomotorius) komplett bénulása esetén az érintett szem kifelé és lefelé tér ki (exotropia, hypotropia), ptosis (szemhéjcsüngés) és gyakran mydriasis (pupillatágulat) kíséri."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a monokuláris diplopiának?",
+                        options: [
+                            "Sclerosis multiplex",
+                            "Asztigmatizmus",
+                            "Agyi aneurizma",
+                            "Guillain-Barré szindróma"
+                        ],
+                        correct: 1,
+                        explanation: "Az asztigmatizmus, vagyis a szaruhártya vagy szemlencse szabálytalan görbülete a leggyakoribb ok, ami miatt a fénysugarak nem egy pontban egyesülnek a retinán, monokuláris diplopiát okozva."
+                    },
+                    {
+                        question: "Mi a neve annak a jelenségnek, amikor az agy elnyomja a deviáló szem képét a kettőslátás elkerülése érdekében?",
+                        options: [
+                            "Fúzió",
+                            "Szuppresszió",
+                            "Konvergencia",
+                            "Adaptáció"
+                        ],
+                        correct: 1,
+                        explanation: "Gyermekkorban kialakuló krónikus strabismus esetén az agy gyakran képes elnyomni (szuppresszió) a deviáló szem képét, hogy elkerülje a zavaró kettőslátást. Ez azonban amblyopiához (tompalátáshoz) vezethet."
+                    },
+                    {
+                        question: "Milyen típusú diplopiát okoz leggyakrabban a Graves-Basedow kórhoz társuló orbitopathia?",
+                        options: [
+                            "Horizontális diplopia",
+                            "Vertikális diplopia",
+                            "Torziós diplopia",
+                            "Monokuláris diplopia"
+                        ],
+                        correct: 1,
+                        explanation: "A Graves-Basedow kórban a szemizmok (leggyakrabban a m. rectus inferior és medialis) gyulladása és fibrosisa mechanikus restrikciót okoz. Ez gyakran vertikális diplopiához vezet, a szemmozgások korlátozottsága miatt."
+                    },
+                    {
+                        question: "Mi a prizmás szemüvegek szerepe a diplopia kezelésében?",
+                        options: [
+                            "Erősítik a szemizmokat.",
+                            "Csökkentik a szemnyomást.",
+                            "A fényt a retina megfelelő pontjaira terelik a fúzió elősegítésére.",
+                            "Megszüntetik a szürkehályogot."
+                        ],
+                        correct: 2,
+                        explanation: "A prizmák a fényt a retina megfelelő pontjaira (a foveákra) terelik, ezáltal optikailag korrigálják a szemtengely-eltérést és segítik a két szem képének agyi egyesítését (fúzió), megszüntetve a binokuláris diplopiát."
+                    },
+                    {
+                        question: "Melyik állapot klasszikus triászának része az ophthalmoplegia (ami diplopiához vezet), konfúzió és ataxia?",
+                        options: [
+                            "Miller Fisher szindróma",
+                            "Wernicke encephalopathia",
+                            "Ramsay-Hunt szindróma",
+                            "Guillain-Barré szindróma"
+                        ],
+                        correct: 1,
+                        explanation: "A Wernicke encephalopathia, melyet tiamin (B1-vitamin) hiány okoz, klasszikus triásza a konfúzió, ataxia és ophthalmoplegia (szemmozgászavar), ami diplopiához vezet."
+                    },
+                    {
+                        question: "Mit jelent a 'comitans' diplopia?",
+                        options: [
+                            "A kettőslátás mértéke változik a tekintési iránnyal.",
+                            "A kettőslátás mértéke minden tekintési irányban azonos.",
+                            "A kettőslátás csak időszakosan jelentkezik.",
+                            "A diplopia fájdalommal jár."
+                        ],
+                        correct: 1,
+                        explanation: "A comitans diplopia azt jelenti, hogy a két kép közötti szeparáció szöge minden tekintési irányban azonos vagy közel azonos. Tipikusan gyermekkori, nem paretikus strabismusra jellemző."
+                    },
+                    {
+                        question: "Melyik agyideg sérülékeny különösen fejsérülés esetén a hosszú, vékony lefutása miatt?",
+                        options: [
+                            "N. Oculomotorius (III)",
+                            "N. Trochlearis (IV)",
+                            "N. Abducens (VI)",
+                            "N. Opticus (II)"
+                        ],
+                        correct: 1,
+                        explanation: "A IV. agyideg (N. Trochlearis) különösen sérülékeny fejsérüléskor a koponyán belüli hosszú, vékony lefutása miatt, ami traumás vertikális diplopiához vezethet."
+                    },
+                    {
+                        question: "Mi az internukleáris ophthalmoplegia (INO) lényege?",
+                        options: [
+                            "Az egyik szem teljes mozgásképtelensége.",
+                            "A fasciculus longitudinalis medialis (FLM) károsodása, ami a konjugált horizontális tekintés zavarát okozza.",
+                            "A pupillák fényreakciójának hiánya.",
+                            "A szemizmok gyulladása."
+                        ],
+                        correct: 1,
+                        explanation: "Az INO a fasciculus longitudinalis medialis (FLM) károsodása miatt jön létre. Ez a pálya köti össze a szemmozgató agyidegmagvakat. INO esetén az érintett oldali szem addukciója (befelé mozgása) gyengül, míg a másik szemen nystagmus jelenik meg."
+                    },
+                    {
+                        question: "Milyen következménnyel jár a binokuláris diplopia a mélységérzékelésre?",
+                        options: [
+                            "Javítja a mélységérzékelést.",
+                            "Nincs hatással rá.",
+                            "Jelentősen rontja vagy megszünteti a mélységérzékelést (sztereolátás).",
+                            "Csak távolra nézéskor rontja."
+                        ],
+                        correct: 2,
+                        explanation: "A binokuláris diplopia esetén a két szem képének fúziója elmarad, ami a háromdimenziós látás (sztereopszis), vagyis a mélységérzékelés elvesztéséhez vezet."
+                    },
+                    {
+                        question: "Melyik teszt során kell a betegnek egy vörös üvegen keresztül néznie egy fénypontot?",
+                        options: [
+                            "Cover-Uncover teszt",
+                            "Pinhole teszt",
+                            "Red Glass teszt",
+                            "Schirmer-teszt"
+                        ],
+                        correct: 2,
+                        explanation: "A Red Glass teszt során egy vörös üveget helyeznek az egyik szem elé. A beteg által látott két kép (egy fehér, egy vörös) relatív helyzete segít a paretikus szem és a deviáció irányának meghatározásában."
+                    }
+                ]
+            },
+            'nystagmus': {
+                title: 'A nystagmus',
+                questions: [
+                    {
+                        question: "Melyik nystagmus forma utal szinte mindig a centrális idegrendszer (agytörzs, kisagy) károsodására?",
+                        options: [
+                            "Horizontális nystagmus",
+                            "Horizontális-rotátoros nystagmus",
+                            "Tisztán vertikális vagy tisztán torziós nystagmus",
+                            "Véghelyzeti nystagmus"
+                        ],
+                        correct: 2,
+                        explanation: "A tisztán vertikális (lefelé vagy felfelé ütő) és a tisztán torziós (forgó) nystagmus általában központi idegrendszeri eredetre utal, szemben a perifériás vesztibuláris laesiókra jellemzőbb horizontális-rotátoros nystagmussal."
+                    },
+                    {
+                        question: "Mi jellemző a perifériás vesztibuláris nystagmusra a vizuális fixáció hatására?",
+                        options: [
+                            "Felerősödik.",
+                            "Irányt vált.",
+                            "Nem változik.",
+                            "Intenzitása csökken vagy megszűnik."
+                        ],
+                        correct: 3,
+                        explanation: "A perifériás vesztibuláris nystagmus (pl. labyrinthitis esetén) intenzitása általában jelentősen csökken vagy teljesen megszűnik, ha a beteg egy pontra fixál. Ez a jelenség segít elkülöníteni a centrális eredetű nystagmustól."
+                    },
+                    {
+                        question: "Melyik nystagmus típusra jellemző a 'skandáló' beszéd?",
+                        options: [
+                            "Flaccid dysarthria",
+                            "Ataxiás dysarthria",
+                            "Spasztikus dysarthria",
+                            "Hipokinetikus dysarthria"
+                        ],
+                        correct: 1,
+                        explanation: "A 'skandáló beszéd' (túlzott és egyenletes hangsúlyozás) az ataxiás dysarthria egyik jellegzetes tünete, ami a kisagy (cerebellum) károsodására utal. A nystagmus gyakran társul ataxiás dysarthriával."
+                    },
+                    {
+                        question: "Melyik nystagmus forma köthető a cervico-medulláris junkció (pl. Arnold-Chiari malformáció) laesiójához?",
+                        options: [
+                            "Upbeat nystagmus",
+                            "Downbeat nystagmus",
+                            "See-saw nystagmus",
+                            "Periodikusan alternáló nystagmus (PAN)"
+                        ],
+                        correct: 1,
+                        explanation: "A downbeat nystagmus (lefelé ütő vertikális nystagmus) leggyakrabban a cervico-medulláris junkció vagy a vesztibulo-cerebellum károsodására utal."
+                    },
+                    {
+                        question: "Mi az oscillopsia?",
+                        options: [
+                            "Kettőslátás",
+                            "Homályos látás",
+                            "A környezet látszólagos, ritmikus mozgásának érzése",
+                            "Fényérzékenység"
+                        ],
+                        correct: 2,
+                        explanation: "Az oscillopsia a környezet tárgyainak látszólagos, akaratlan, 'rezgő' vagy 'ugráló' mozgásának érzése. Különösen zavaró tünet, ami gyakrabban fordul elő szerzett nystagmus esetén."
+                    },
+                    {
+                        question: "Melyik vizsgálat használ hideg vagy meleg vizes ingerlést a nystagmus kiváltására?",
+                        options: [
+                            "Videonystagmographia (VNG)",
+                            "Kalorikus ingerlés",
+                            "Dix-Hallpike manőver",
+                            "Fejimpulzus teszt (HIT)"
+                        ],
+                        correct: 1,
+                        explanation: "A kalorikus ingerlés során a külső hallójáratot hideg vagy meleg vízzel (vagy levegővel) ingerlik, ami a horizontális félkörös ívjáratban endolympha áramlást és ezáltal nystagmust generál. A két oldal közötti válaszkülönbség perifériás vesztibuláris laesióra utal."
+                    },
+                    {
+                        question: "Mi a spasmus nutans szindróma klasszikus triásza?",
+                        options: [
+                            "Nystagmus, vertigo, halláscsökkenés",
+                            "Nystagmus, kóros fejtartás, fejbólintás",
+                            "Nystagmus, ataxia, areflexia",
+                            "Nystagmus, ptosis, diplopia"
+                        ],
+                        correct: 1,
+                        explanation: "A spasmus nutans egy csecsemő- vagy kisgyermekkorban jelentkező, általában jóindulatú állapot, melynek klasszikus tünettriásza: 1) intermittáló, nagy frekvenciájú nystagmus, 2) kóros fejtartás (torticollis), és 3) fejbólintás vagy fejremegés."
+                    },
+                    {
+                        question: "Mi a 'nullpont' a nystagmus esetében?",
+                        options: [
+                            "A tekintési irány, ahol a nystagmus a legerősebb.",
+                            "Az a pont, ahol a beteg elveszti a látását.",
+                            "Egy specifikus tekintési irány, ahol a nystagmus intenzitása minimálisra csökken.",
+                            "A nystagmus ciklusának kezdőpontja."
+                        ],
+                        correct: 2,
+                        explanation: "A nullpont vagy nullzóna egy olyan specifikus tekintési irány, ahol a nystagmus intenzitása (amplitúdója és/vagy frekvenciája) minimálisra csökken, és ennek következtében a látásélesség a legjobb."
+                    },
+                    {
+                        question: "Melyik gyógyszer lehet hatékony a szerzett penduláris vagy downbeat nystagmus kezelésében?",
+                        options: [
+                            "Aspirin",
+                            "Paracetamol",
+                            "Gabapentin vagy Memantin",
+                            "Antibiotikumok"
+                        ],
+                        correct: 2,
+                        explanation: "Bizonyos szerzett nystagmusformák, mint a penduláris vagy downbeat nystagmus, kezelésében farmakológiai szerek, például a Gabapentin és a Memantin is hatásosak lehetnek a tünetek enyhítésében."
+                    },
+                    {
+                        question: "Mire utal a Bruns nystagmus?",
+                        options: [
+                            "Parkinson-kórra",
+                            "Cerebellopontinális szögleti tumorra (pl. acusticus neurinoma)",
+                            "Sclerosis multiplexre",
+                            "Stroke-ra a halántéklebenyben"
+                        ],
+                        correct: 1,
+                        explanation: "A Bruns nystagmus jellemzően cerebellopontinális szögleti tumoroknál fordul elő. A laesió oldala felé tekintve durva, nagy amplitúdójú, míg az ép oldalra tekintve finom, kis amplitúdójú nystagmus látható."
+                    },
+                     {
+                        question: "Mi a különbség a penduláris és a jerking nystagmus között?",
+                        options: [
+                            "A penduláris mindig veleszületett, a jerking mindig szerzett.",
+                            "A pendulárisnál a mozgás sebessége mindkét irányban azonos, míg a jerkingnek lassú és gyors fázisa van.",
+                            "A penduláris csak horizontális, a jerking csak vertikális lehet.",
+                            "A penduláris fájdalmas, a jerking nem."
+                        ],
+                        correct: 1,
+                        explanation: "A penduláris (ingaszerű) nystagmusnál a szemmozgás sebessége és amplitúdója mindkét irányban közel azonos. Ezzel szemben a jerking (rángatózó) nystagmus egy lassú (kóros) és egy gyors (korrekciós) fázisból áll."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb oka a szerzett nystagmusnak felnőttkorban?",
+                        options: [
+                            "Veleszületett szemészeti anomáliák",
+                            "Neurológiai és vesztibuláris betegségek (pl. stroke, SM), toxikus hatások",
+                            "Fénytörési hibák",
+                            "Allergiás reakciók"
+                        ],
+                        correct: 1,
+                        explanation: "Felnőttkorban a szerzett nystagmus leggyakrabban neurológiai (pl. stroke, sclerosis multiplex, tumor) és vesztibuláris betegségek, valamint gyógyszer- vagy alkohol-toxicitás következtében alakul ki."
+                    },
+                    {
+                        question: "Melyik állítás IGAZ a latens nystagmusra?",
+                        options: [
+                            "Csukott szemmel a legerősebb.",
+                            "Akkor válik manifesztté vagy fokozódik, ha az egyik szemet letakarják.",
+                            "Mindig vertikális irányú.",
+                            "Kizárólag időskorban fordul elő."
+                        ],
+                        correct: 1,
+                        explanation: "A latens nystagmus (FMNS) egy bilaterális, horizontális nystagmus, amely akkor jelenik meg vagy intenzitása jelentősen fokozódik, ha az egyik szemet letakarják (monokuláris fixáció)."
+                    },
+                    {
+                        question: "Melyik vizsgálat segít azonosítani a fovea hypoplasiát, ami gyakori oka a szenzoros nystagmusnak?",
+                        options: [
+                            "Szemnyomás mérés",
+                            "Optikai koherencia tomográfia (OCT)",
+                            "Schirmer-teszt",
+                            "Vérvétel"
+                        ],
+                        correct: 1,
+                        explanation: "Az OCT egy nagy felbontású képalkotó eljárás, amely részletes képet ad a retina rétegeiről, és különösen hasznos a fovea hypoplasia (az éleslátás helyének fejletlensége), pl. albinizmusban, kimutatására."
+                    },
+                    {
+                        question: "Mi az Alexander-törvény?",
+                        options: [
+                            "A nystagmus iránya mindig a károsodott oldal felé mutat.",
+                            "A nystagmus intenzitása fokozódik, ha a beteg a gyors fázis irányába tekint.",
+                            "Minden nystagmus idővel spontán javul.",
+                            "A nystagmus mindig szédüléssel jár."
+                        ],
+                        correct: 1,
+                        explanation: "Az Alexander-törvény szerint egy jerk nystagmus intenzitása (amplitúdója és/vagy frekvenciája) fokozódik, ha a beteg a nystagmus gyors fázisának irányába tekint. Ez főként perifériás vesztibuláris nystagmusra jellemző."
+                    },
+                    {
+                        question: "Az opsoclonus ('táncoló szemek') gyakran társul egy specifikus állapothoz. Melyik ez?",
+                        options: [
+                            "Időskori makuladegeneráció",
+                            "Paraneopláziás szindróma (pl. neuroblasztóma gyermekeknél)",
+                            "Akut glaukómás roham",
+                            "Diabeteszes retinopátia"
+                        ],
+                        correct: 1,
+                        explanation: "Az opsoclonus, amely gyors, többirányú, kaotikus szakkádok sorozata, gyakran paraneopláziás szindróma részeként (pl. neuroblasztóma gyermekeknél) vagy parainfekciós cerebellitishez (opsoclonus-myoclonus szindróma) társul."
+                    },
+                    {
+                        question: "Milyen típusú nystagmus a véghelyzeti (end-point) nystagmus?",
+                        options: [
+                            "Mindig súlyos központi idegrendszeri károsodást jelez.",
+                            "A perifériás vesztibuláris rendszer gyulladásának jele.",
+                            "Egy jóindulatú, fiziológiás jelenség, ami extrém oldalra tekintéskor jelenik meg.",
+                            "A szemizmok elfáradásának a jele."
+                        ],
+                        correct: 2,
+                        explanation: "A véghelyzeti (end-point) nystagmus egy fiziológiás, normális jelenség, amely akkor jelenik meg, amikor a szemek extrém oldalra tekintenek. Kis amplitúdójú, szimmetrikus és idővel kifárad."
+                    },
+                    {
+                        question: "Melyik gén mutációja okoz gyakran X-kromoszómához kötött infantilis nystagmust?",
+                        options: [
+                            "PAX6",
+                            "FRMD7",
+                            "RPE65",
+                            "TYR"
+                        ],
+                        correct: 1,
+                        explanation: "Az X-kromoszómához kötött infantilis nystagmust leggyakrabban az FRMD7 gén mutációi okozzák. Ez egy izolált okulomotoros zavar, ahol a látópályák strukturálisan épek."
+                    },
+                    {
+                        question: "Mi a see-saw nystagmus jellegzetessége?",
+                        options: [
+                            "A szemek horizontálisan, fűrészfogszerűen mozognak.",
+                            "A szemek fel-le mozognak, mint egy lift.",
+                            "Az egyik szem emelkedik és befelé fordul, míg a másik süllyed és kifelé fordul.",
+                            "Mindkét szem gyorsan, körkörösen mozog."
+                        ],
+                        correct: 2,
+                        explanation: "A see-saw nystagmus egy ritka, jellegzetes forma, ahol az egyik szem emelkedik és intorziót végez, míg a másik szem ezzel egy időben süllyed és extorziót végez. Gyakran paraselláris (chiasma környéki) laesiókhoz társul."
+                    },
+                    {
+                        question: "Mi a Kestenbaum-műtét célja nystagmus esetén?",
+                        options: [
+                            "A szemizmok megerősítése.",
+                            "A látóideg regenerációjának serkentése.",
+                            "A nystagmus nullpontjának áthelyezése a primer pozícióba.",
+                            "A szemnyomás csökkentése."
+                        ],
+                        correct: 2,
+                        explanation: "A Kestenbaum-műtét (és más szemizomműtétek) célja a nystagmus nullpontjának sebészi áthelyezése a primer, egyenesen előretekintő pozícióba, hogy csökkenjen a kompenzáló kényszertartás és javuljon a látás."
+                    }
+                ]
+            },
+            'facialis': {
+                title: 'N. facialis laesiok',
+                questions: [
+                    {
+                        question: "Mi a legfontosabb klinikai különbség a centrális és a perifériás facialis paresis között?",
+                        options: [
+                            "A centrális paresis mindig fájdalmas, a perifériás soha.",
+                            "Centrális paresis esetén a homlokráncolás megtartott, míg perifériásnál az egész arcfél bénult.",
+                            "Perifériás paresis esetén a homlokráncolás megtartott.",
+                            "A centrális paresis csak a száj körüli izmokat érinti."
+                        ],
+                        correct: 1,
+                        explanation: "Centrális (supranuclearis) laesiónál a homlokizmok működése megtartott, mert a motoros mag felső arcfélhez tartozó része kétoldali kortikális beidegzést kap. Ezzel szemben perifériás laesiónál az azonos oldali teljes arcfél, beleértve a homlokot is, bénul."
+                    },
+                    {
+                        question: "Melyik ága felelős a nervus facialisnak a nyelv elülső kétharmadának ízérzékeléséért?",
+                        options: [
+                            "Nervus petrosus major",
+                            "Nervus stapedius",
+                            "Chorda tympani",
+                            "Ramus marginalis mandibularis"
+                        ],
+                        correct: 2,
+                        explanation: "A chorda tympani a nervus facialis egy fontos ága, amely speciális ízérző rostokat szállít a nyelv elülső kétharmadáról, valamint paraszimpatikus rostokat a submandibularis és sublingualis nyálmirigyekhez."
+                    },
+                    {
+                        question: "Milyen tünetet okoz a nervus stapedius sérülése?",
+                        options: [
+                            "Száraz szem",
+                            "Hyperacusis (kóros hangérzékenység)",
+                            "Ízérzés elvesztése",
+                            "Homlokráncolási képtelenség"
+                        ],
+                        correct: 1,
+                        explanation: "A nervus stapedius a kengyelizmot (m. stapedius) idegzi be, amely a hangos ingerek csillapításáért felelős. Ennek bénulása hyperacusishoz, azaz a hangok kórosan hangosnak és zavarónak való észleléséhez vezet."
+                    },
+                    {
+                        question: "Ha egy facialis paresises betegnél a könnyeletválasztás csökkent (Schirmer-teszt pozitív), hol helyezkedik el a laesio legvalószínűbben?",
+                        options: [
+                            "A foramen stylomastoideum után.",
+                            "A ganglion geniculi szintjén vagy attól proximalisabban.",
+                            "Csak a perifériás, mimikai izmokat ellátó ágakon.",
+                            "A chorda tympani leágazása után."
+                        ],
+                        correct: 1,
+                        explanation: "A könnyeletválasztásért felelős paraszimpatikus rostok a nervus petrosus majorban futnak, ami a ganglion geniculinál vagy előtte ágazik le. Ezért a csökkent könnytermelés arra utal, hogy a károsodás ezen a szinten vagy annál közelebb van az agytörzshöz."
+                    },
+                    {
+                        question: "Mi a Ramsay-Hunt szindróma (Herpes Zoster Oticus) jellegzetes tünetegyüttese?",
+                        options: [
+                            "Kétoldali arcbénulás és láz.",
+                            "Lassan progrediáló arcgyengeség és halláscsökkenés.",
+                            "Fájdalmas, hólyagos kiütés a fül körül, ipsilateralis arcbénulással.",
+                            "Csak ízérzészavar és szájszárazság."
+                        ],
+                        correct: 2,
+                        explanation: "A Ramsay-Hunt szindrómát a Varicella-Zoster vírus reaktivációja okozza a ganglion geniculiban. Jellemzője a fájdalmas, vezikuláris kiütés a fülön/hallójáratban, az azonos oldali facialis paresis mellett, gyakran fülfájdalommal, hallás- és egyensúlyzavarral."
+                    },
+                    {
+                        question: "Melyik skálát használják leggyakrabban a facialis paresis súlyosságának objektív mérésére?",
+                        options: [
+                            "Glasgow Coma Skála",
+                            "House-Brackmann skála",
+                            "Rankin Skála",
+                            "NIH Stroke Skála"
+                        ],
+                        correct: 1,
+                        explanation: "A House-Brackmann skála egy 6 fokozatú rendszer (I-VI), amelyet a facialis paresis súlyosságának standardizált értékelésére használnak a nyugalmi szimmetria és az akaratlagos mozgások mértéke alapján."
+                    },
+                    {
+                        question: "Melyik tumor a leggyakoribb a cerebellopontin szögletben, ami facialis paresist okozhat?",
+                        options: [
+                            "Meningeoma",
+                            "Acusticus neurinoma (Vestibularis schwannoma)",
+                            "Glioblastoma",
+                            "Parotis tumor"
+                        ],
+                        correct: 1,
+                        explanation: "Az acusticus neurinoma, amely a VIII. agyideg (nervus vestibulocochlearis) jóindulatú daganata, a leggyakoribb tumor a cerebellopontin szögletben. Növekedése során nyomhatja a mellette futó VII. agyideget (nervus facialis), facialis gyengeséget okozva."
+                    },
+                    {
+                        question: "Mi az a synkinesis, mint a facialis paresis utáni szövődmény?",
+                        options: [
+                            "Az arcizmok teljes sorvadása.",
+                            "Az ízérzés tartós elvesztése.",
+                            "Kóros, akaratlan együttmozgások, pl. szemzáráskor a szájzug elmozdul.",
+                            "Kóros könnyezés evés közben."
+                        ],
+                        correct: 2,
+                        explanation: "A synkinesis az idegrostok hibás regenerációja miatt alakul ki. Ennek eredményeként egy akaratlagos mimikai mozgás során egy másik, nem szándékolt izommozgás is bekövetkezik, pl. a szem becsukásakor a szájzug is megrándul."
+                    },
+                    {
+                        question: "Melyik ideg károsodása okozhat facialis paresist és azonos oldali oldalra tekintési képtelenséget (abducens paresis)?",
+                        options: [
+                            "A V. és VII. agyideg együttes sérülése.",
+                            "A VII. és VIII. agyideg együttes sérülése.",
+                            "A VI. és VII. agyideg együttes sérülése a ponsban.",
+                            "Csak a VII. agyideg sérülése."
+                        ],
+                        correct: 2,
+                        explanation: "A ponsban a VI. (abducens) és VII. (facialis) agyideg magjai közel helyezkednek el egymáshoz. Egy pontin laesio (pl. stroke, tumor) károsíthatja mindkettőt, ami azonos oldali arcbénulást és oldalra tekintési képtelenséget okoz (pl. Millard-Gubler szindróma)."
+                    },
+                    {
+                        question: "Mi a 'krokodilkönny szindróma' (Bogorad-szindróma)?",
+                        options: [
+                            "Fájdalmas, görcsös szemzárás.",
+                            "A szem teljes kiszáradása.",
+                            "Kóros könnyezés evés közben.",
+                            "A könnycsatorna elzáródása."
+                        ],
+                        correct: 2,
+                        explanation: "A krokodilkönny szindróma (gustatolacrimalis reflex) egy késői szövődmény, amikor a nyálmirigyekhez tartó regenerálódó paraszimpatikus rostok tévesen a könnymirigyhez nőnek vissza. Ennek eredményeként az evés (ízinger) váltja ki az érintett oldali könnyezést."
+                    },
+                    {
+                        question: "A nervus facialis melyik szakasza a legsérülékenyebb gyulladás és kompresszió szempontjából?",
+                        options: [
+                            "A glandula parotisban lévő szakasza",
+                            "A cerebellopontin szögletben lévő szakasza",
+                            "A szűk, csontos canalis facialis (Falloppio-csatorna)",
+                            "Az agytörzsi magja"
+                        ],
+                        correct: 2,
+                        explanation: "A nervus facialis rendkívül szűk csontos csatornában (canalis facialis) fut a halántékcsontban. Az ideg duzzanata (ödéma) ebben a zárt térben könnyen kompresszióhoz, keringési zavarhoz és axonkárosodáshoz vezethet."
+                    },
+                    {
+                        question: "Mi a Moebius-szindróma legjellemzőbb tünete?",
+                        options: [
+                            "Egyoldali, átmeneti arcbénulás",
+                            "Veleszületett, jellemzően kétoldali arcbénulás és oldalra tekintési képtelenség",
+                            "Fokozatosan kialakuló arcgyengeség időskorban",
+                            "Csak a száj körüli izmok gyengesége"
+                        ],
+                        correct: 1,
+                        explanation: "A Moebius-szindróma egy ritka, veleszületett állapot, amely jellemzően a VI. (abducens) és a VII. (facialis) agyidegek fejletlenségével vagy hiányával jár, ami kétoldali arcbénulást ('maszkarc') és oldalra tekintési képtelenséget eredményez."
+                    },
+                    {
+                        question: "Melyik vizsgálat a legalkalmasabb az idegkárosodás mértékének (axonális degeneráció) felmérésére és a prognózis becslésére Bell-parézisben?",
+                        options: [
+                            "Lumbálpunkció",
+                            "Koponya CT",
+                            "Elektroneurográfia (ENoG)",
+                            "Schirmer-teszt"
+                        ],
+                        correct: 2,
+                        explanation: "Az ENoG az ideg ingerlésével kiváltott izomválasz amplitúdóját méri. Az érintett oldali amplitúdó összehasonlítása az éppel segít megbecsülni az axonális degeneráció mértékét, ami fontos prognosztikai tényező. A 90% feletti degeneráció rosszabb kimenetelt jelez."
+                    },
+                    {
+                        question: "Melyik betegség okozhat kétoldali facialis paresist (diplegia facialis)?",
+                        options: [
+                            "Csak a Bell-parézis",
+                            "Lyme-kór, Guillain-Barré szindróma, sarcoidosis",
+                            "Acusticus neurinoma",
+                            "Trigeminus neuralgia"
+                        ],
+                        correct: 1,
+                        explanation: "Míg a Bell-parézis tipikusan egyoldali, a kétoldali arcbénulás gyanút vet fel más, szisztémás kórképekre, mint a Lyme-kór, a Guillain-Barré szindróma vagy a sarcoidosis."
+                    },
+                    {
+                        question: "Ha egy perifériás arcbénulásos betegnél az ízérzés és a stapedius reflex is ép, hol van legvalószínűbben a károsodás?",
+                        options: [
+                            "A ganglion geniculi előtt",
+                            "A ponsban",
+                            "A foramen stylomastoideumnál vagy azon kívül",
+                            "A tympanicus szakaszon"
+                        ],
+                        correct: 2,
+                        explanation: "Ha az ízérzés (chorda tympani) és a stapedius reflex (n. stapedius) is megtartott, az azt jelenti, hogy a károsodás ezen ágak leágazása után, azaz a foramen stylomastoideumnál vagy a koponyán kívüli (extratemporalis) szakaszon van."
+                    },
+                    {
+                        question: "Mi a 'Bell-tünet'?",
+                        options: [
+                            "Az arcizmok akaratlan rángása.",
+                            "A szemgolyó kóros felfelé és kifelé fordulása erőltetett szemzárási kísérletkor.",
+                            "A fül mögötti fájdalom.",
+                            "A könnytermelés hiánya."
+                        ],
+                        correct: 1,
+                        explanation: "A Bell-tünet egy fizikális jel, amely során az inkompletten záródó szemhéj alatt láthatóvá válik, ahogy a szemgolyó erőltetett csukási kísérletre felfelé és kifelé fordul. Ez egy normális szinergikus mozgás, ami a gyenge szemzárás miatt válik láthatóvá."
+                    },
+                    {
+                        question: "Mi a nervus intermedius?",
+                        options: [
+                            "A nervus facialis fő motoros gyökere.",
+                            "A nervus facialis szenzoros és paraszimpatikus rostokat tartalmazó vékonyabb gyökere.",
+                            "A nervus trigeminus egyik ága.",
+                            "Egy, a fültőmirigyet beidegző ideg."
+                        ],
+                        correct: 1,
+                        explanation: "A nervus facialis két gyökérrel ered az agytörzsből: egy vastagabb motoros gyökérrel és egy vékonyabb nervus intermediusszal, ami a szenzoros (ízérző, fül körüli bőr) és paraszimpatikus (könny-, nyálmirigyek) rostokat szállítja."
+                    },
+                    {
+                        question: "Melyik motoros végága idegzi be a nervus facialisnak a homlokizmokat?",
+                        options: [
+                            "Ramus buccalis",
+                            "Ramus marginalis mandibularis",
+                            "Ramus colli",
+                            "Ramus temporalis (frontalis)"
+                        ],
+                        correct: 3,
+                        explanation: "A plexus intraparotideusból kiinduló öt fő végág közül a ramus temporalis (más néven frontalis) felelős a homlokizmok (m. frontalis, m. corrugator supercilii) és a szem körüli izom felső részének beidegzéséért."
+                    },
+                    {
+                        question: "Mi az idegsérülés legsúlyosabb formája Seddon klasszifikációja szerint, ahol az ideg folytonossága teljesen megszakad?",
+                        options: [
+                            "Neurapraxia",
+                            "Axonotmesis",
+                            "Neurotmesis",
+                            "Synkinesis"
+                        ],
+                        correct: 2,
+                        explanation: "A neurotmesis az idegsérülés legsúlyosabb foka, amely az ideg teljes folytonosságmegszakadását jelenti, beleértve a kötőszövetes hüvelyeket is. Spontán regeneráció nem várható, sebészi helyreállítás szükséges."
+                    },
+                    {
+                        question: "Melyik a legfontosabb teendő lagophthalmus (elégtelen szemrés zárás) esetén?",
+                        options: [
+                            "Arcizomtorna",
+                            "A cornea védelme a kiszáradástól",
+                            "Nagy dózisú B-vitamin adása",
+                            "Elektroterápia"
+                        ],
+                        correct: 1,
+                        explanation: "Elégtelen szemzárás esetén a legfontosabb a szaruhártya (cornea) védelme a kiszáradástól és a fekélyesedéstől. Ezt műkönny, szemkenőcs és óraüveg-kötés használatával lehet biztosítani."
+                    }
+                ]
+            },
+            'bell_paresis': {
+                title: 'Bell paresis diagnózisa és kezelése',
+                questions: [
+                    {
+                        question: "Mi a Bell-parézis leggyakrabban feltételezett kórokozója?",
+                        options: [
+                            "Influenza vírus",
+                            "Borrelia burgdorferi",
+                            "Herpes Simplex Virus 1 (HSV-1)",
+                            "Cytomegalovirus (CMV)"
+                        ],
+                        correct: 2,
+                        explanation: "A Bell-parézis hátterében a leggyakrabban a Herpes Simplex Virus (HSV-1) reaktivációját feltételezik, ami az ideg gyulladását és duzzanatát okozza a szűk Falloppio-csatornában."
+                    },
+                    {
+                        question: "Melyik a Bell-parézis első vonalbeli, bizonyítottan hatékony kezelése?",
+                        options: [
+                            "Nagy dózisú B-vitamin",
+                            "Antivirális szerek monoterápiában",
+                            "Nagy dózisú kortikoszteroidok",
+                            "Szelektív ingeráram kezelés"
+                        ],
+                        correct: 2,
+                        explanation: "A Bell-parézis kezelésében az arany standard a tünetek kezdetétől számított 72 órán belül megkezdett nagy dózisú kortikoszteroid (pl. prednisolon, methyl-prednisolon) terápia, ami csökkenti az ideg ödémáját és javítja a gyógyulási esélyeket."
+                    },
+                    {
+                        question: "Mikor indokolt képalkotó vizsgálat (MRI) Bell-parézis gyanúja esetén?",
+                        options: [
+                            "Minden esetben a diagnózis megerősítésére.",
+                            "Csak ha a betegnek fájdalma is van.",
+                            "Atípusos klinikum vagy kórlefolyás esetén (pl. lassú progresszió, nincs javulás 3 hónap után).",
+                            "Ha a beteg 60 év feletti."
+                        ],
+                        correct: 2,
+                        explanation: "Típusos klinikum esetén nem szükséges képalkotó. Azonban atípusos esetekben (pl. lassú progresszió, egyéb neurológiai tünetek, recidíva) MRI vizsgálat indokolt más okok, mint tumor vagy sclerosis multiplex, kizárására."
+                    },
+                    {
+                        question: "Milyen állapot növeli a Bell-parézis kockázatát háromszorosára?",
+                        options: [
+                            "Hypertonia",
+                            "Diabetes mellitus",
+                            "Terhesség",
+                            "Magas koleszterinszint"
+                        ],
+                        correct: 2,
+                        explanation: "A terhesség, különösen a harmadik trimeszter és a szülés utáni időszak, mintegy háromszorosára növeli a Bell-parézis kialakulásának kockázatát."
+                    },
+                    {
+                        question: "Mi a Bell-parézis prognózisa általánosságban?",
+                        options: [
+                            "Rossz, a betegek fele tartósan bénult marad.",
+                            "Jó, a betegek kb. 70-85%-a teljes vagy közel teljes funkcionális felépülést mutat.",
+                            "Mindig sebészeti beavatkozást igényel.",
+                            "A betegek többségénél kétoldalivá válik."
+                        ],
+                        correct: 1,
+                        explanation: "A Bell-parézis prognózisa általában jó. A betegek többsége, kb. 70-85%-a, spontán vagy kezeléssel teljes vagy majdnem teljes mértékben felépül néhány héten vagy hónapon belül."
+                    },
+                    {
+                        question: "Mikor javasolt antivirális szerek (pl. acyclovir) adása Bell-parézisben?",
+                        options: [
+                            "Minden esetben, monoterápiában.",
+                            "Csak enyhe esetekben.",
+                            "Súlyos esetekben (House-Brackmann IV felett), szteroiddal kombinálva.",
+                            "Csak ha a betegnek láza van."
+                        ],
+                        correct: 2,
+                        explanation: "Az antivirális szerek hatékonysága vitatott, de leginkább súlyos (House-Brackmann IV-VI) Bell-parézis esetén javasolják az alkalmazásukat, mindig kortikoszteroiddal kombinálva."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a típusos Bell-parézisre?",
+                        options: [
+                            "Retroauricularis (fül mögötti) fájdalom",
+                            "Hypogeusia (ízérzés csökkenése)",
+                            "Vezikulák (hólyagok) a külső hallójáratban",
+                            "Hyperacusis (kóros hangérzékenység)"
+                        ],
+                        correct: 2,
+                        explanation: "A fül körüli hólyagos kiütések a Ramsay-Hunt szindróma (Herpes Zoster Oticus) jellegzetes tünetei, nem a típusos, idiopathiás Bell-parézisé."
+                    },
+                    {
+                        question: "Mi a 'signe des cils'?",
+                        options: [
+                            "A szájzug akaratlan mozgása.",
+                            "Pillantáskor az érintett szemhéj mozgásának enyhe elmaradása.",
+                            "A fül mögötti bőr érzéketlensége.",
+                            "A nyelv kilógatási képtelensége."
+                        ],
+                        correct: 1,
+                        explanation: "A 'signe des cils' (szempilla jel) egy finom fizikai jel, amely során pillantáskor az érintett oldali szemhéj mozgása kissé elmarad az ép oldalhoz képest, segítve a perifériás paresis azonosítását."
+                    },
+                    {
+                        question: "Mennyi időn belül kellene javulást mutatnia a Bell-parézisnek ahhoz, hogy típusosnak tekintsük?",
+                        options: [
+                            "24 órán belül",
+                            "1 héten belül",
+                            "3 hónapon belül",
+                            "1 éven belül"
+                        ],
+                        correct: 2,
+                        explanation: "A típusos kórlefolyás része, hogy a bénulás 3 hónapon belül részlegesen vagy teljesen javulni kezd. Ha ennyi idő alatt nincs javulás, az atípusosnak számít és további vizsgálatokat tesz szükségessé."
+                    },
+                    {
+                        question: "Melyik betegségre kell gondolni, ha a facialis paresis kétoldali?",
+                        options: [
+                            "Mindig Bell-parézis.",
+                            "Lyme-kór, Guillain-Barré-szindróma, sarcoidosis.",
+                            "Csak traumás eredetű lehet.",
+                            "Acusticus neurinoma."
+                        ],
+                        correct: 1,
+                        explanation: "A kétoldali (bilaterális) facialis paresis atípusos, és gyanút vet fel szisztémás betegségekre, mint a Lyme-kór, a Guillain-Barré-szindróma, vagy a neurosarcoidosis."
+                    },
+                    {
+                        question: "Mi a patomechanizmus lényege Bell-parézis esetén?",
+                        options: [
+                            "Az ideg direkt, traumás átvágása.",
+                            "Az ideg daganatos infiltrációja.",
+                            "Az ideg ödémás duzzanata és kompressziója a csontos csatornában.",
+                            "Az agytörzsi motoros mag elhalása."
+                        ],
+                        correct: 2,
+                        explanation: "A Bell-parézis patomechanizmusa az, hogy egy (általában vírusos) gyulladás következtében a nervus facialis megduzzad (ödémássá válik), és a szűk, csontos Falloppio-csatornában kompresszió alá kerül, ami keringési zavart és működési kiesést okoz."
+                    },
+                    {
+                        question: "Mi a legfontosabb szupportív terápia a szem védelmében Bell-parézis esetén?",
+                        options: [
+                            "Erősítő szemtorna.",
+                            "Antibiotikumos szemcseppek.",
+                            "A cornea nedvesen tartása (műkönny, tapasz) a kiszáradás megelőzésére.",
+                            "Pupillatágító cseppek."
+                        ],
+                        correct: 2,
+                        explanation: "A szemhéjzárási képtelenség (lagophthalmus) miatt a legfontosabb a cornea védelme a kiszáradástól és fekélyesedéstől. Ennek eszközei a műkönny, szemgél, éjszakai óraüveg-kötés vagy a szemhéj leragasztása."
+                    },
+                    {
+                        question: "Milyen hosszú ideig javasolt a kortikoszteroid kezelés Bell-parézis esetén?",
+                        options: [
+                            "1-2 napig",
+                            "7-10 napig",
+                            "1 hónapig",
+                            "Amíg a tünetek teljesen meg nem szűnnek"
+                        ],
+                        correct: 1,
+                        explanation: "A legújabb ajánlások szerint 1 mg/kg metilprednizolon adása javasolt általában 7-10 napig. Ezt követően fokozatos leépítés általában nem szükséges."
+                    },
+                    {
+                        question: "Melyik jel utalhat korai stádiumban kisagy-hídszögleti folyamatra (pl. schwannoma) a Bell-parézissel szemben?",
+                        options: [
+                            "Hyperacusis",
+                            "A külső hallójárat hátsó részének hypaesthesiája (Hitselberger-jel)",
+                            "Retroauricularis fájdalom",
+                            "Gyors, teljes gyógyulás"
+                        ],
+                        correct: 1,
+                        explanation: "A Hitselberger-jel (a külső hallójárat hátsó falának érzéscsökkenése), mely a nervus facialis szenzoros ágának funkciózavarára utal, korai jele lehet egy növekvő kisagy-hídszögleti tumornak."
+                    },
+                    {
+                        question: "Mi a Melkersson-Rosenthal szindróma?",
+                        options: [
+                            "A Bell-parézis egy súlyos formája.",
+                            "Ritka, recidiváló granulomatosus betegség epizodikus facialis paresissel, arcduzzanattal és barázdált nyelvvel.",
+                            "A facialis ideg veleszületett hiánya.",
+                            "Egyfajta agytörzsi stroke."
+                        ],
+                        correct: 1,
+                        explanation: "A Melkersson-Rosenthal szindróma egy ritka kórkép, melynek klasszikus triásza a visszatérő (recidiváló) facialis paresis, az arc (főleg az ajkak) duzzanata és a barázdált nyelv (lingua plicata)."
+                    },
+                    {
+                        question: "Miért nem javasolt a szelektív ingeráram kezelés azonnal a paresis után?",
+                        options: [
+                            "Mert túl fájdalmas.",
+                            "Mert növelheti a kóros reinnerváció és a synkinesis kockázatát.",
+                            "Mert nem elég hatékony.",
+                            "Mert allergiás reakciót válthat ki."
+                        ],
+                        correct: 1,
+                        explanation: "A szelektív ingeráram kezelés hatékonysága vitatott, és egyes szakértők szerint növelheti a kóros együttmozgások (synkinesis) kialakulásának esélyét, ezért alkalmazása óvatosságot igényel."
+                    },
+                    {
+                        question: "Milyen arányban újul ki a Bell-parézis 10 éven belül?",
+                        options: [
+                            "Kevesebb, mint 1%",
+                            "Kb. 8%",
+                            "Kb. 25%",
+                            "Kb. 50%"
+                        ],
+                        correct: 1,
+                        explanation: "A Bell-parézis kiújulási aránya viszonylag alacsony, a betegek kb. 8%-ánál fordul elő ismételt epizód 10 éven belül. A recidíva felveti más, alternatív diagnózisok lehetőségét."
+                    },
+                    {
+                        question: "Melyik vizsgálat segít a leginkább a Bell-parézis és a stroke okozta centrális paresis elkülönítésében?",
+                        options: [
+                            "Vérvétel",
+                            "Fizikális neurológiai vizsgálat",
+                            "Lumbálpunkció",
+                            "Szemnyomás mérés"
+                        ],
+                        correct: 1,
+                        explanation: "Az alapos fizikális vizsgálat kulcsfontosságú. A homlokizmok működésének (homlokráncolás) tesztelése a legfontosabb lépés: ha ez megtartott, az centrális (pl. stroke) eredetre utal, ha kiesett, az perifériás (pl. Bell-parézis) eredetet jelez."
+                    },
+                    {
+                        question: "Igaz vagy hamis: A Bell-parézis diagnózisa kizárásos alapon történik.",
+                        options: [
+                            "Igaz",
+                            "Hamis"
+                        ],
+                        correct: 0,
+                        explanation: "Igaz. A Bell-parézis egy 'idiopathiás' állapot, ami azt jelenti, hogy a diagnózisát akkor állítják fel, miután a részletes kivizsgálás során az arcbénulás egyéb lehetséges, specifikus okait (pl. tumor, fertőzés, trauma) kizárták."
+                    },
+                    {
+                        question: "Milyen maradványtünet fordul elő leggyakrabban a Bell-parézis után (kb. 15%-ban)?",
+                        options: [
+                            "Teljes bénulás",
+                            "Synkinesis vagy contractura",
+                            "Kétoldali bénulás",
+                            "Állandó fülfájdalom"
+                        ],
+                        correct: 1,
+                        explanation: "A betegek kb. 15%-ánál marad vissza valamilyen maradványtünet. Ezek közül a leggyakoribbak a synkinesis (kóros együttmozgások) és az izom-contracturák."
+                    }
+                ]
+            },
+            'dysarthria_dysphagia': {
+                title: 'Dysarthria, dysphagia',
+                questions: [
+                    {
+                        question: "Mi a legfontosabb különbség a dysarthria és az aphasia között?",
+                        options: [
+                            "A dysarthria a nyelési, az aphasia a beszédzavar.",
+                            "A dysarthria a beszéd 'kivitelezésének' (artikuláció) zavara, míg az aphasia nyelvi (szótalálási, megértési) zavar.",
+                            "A dysarthria mindig halk, az aphasia mindig hangos beszéddel jár.",
+                            "Nincs különbség, a két fogalom szinonima."
+                        ],
+                        correct: 1,
+                        explanation: "A dysarthria egy neuromotoros beszédzavar, ahol a beteg tudja, mit akar mondani, de a beszédizmok gyengesége, lassúsága vagy inkoordinációja miatt a kiejtés nehezített. Ezzel szemben az aphasia egy nyelvi zavar, ami a beszédértést, szótalálást, mondatszerkesztést érinti."
+                    },
+                    {
+                        question: "Melyik dysarthria típus jellemző leginkább a Parkinson-kórra?",
+                        options: [
+                            "Ataxiás",
+                            "Spasztikus",
+                            "Flaccid",
+                            "Hipokinetikus"
+                        ],
+                        correct: 3,
+                        explanation: "A Parkinson-kórra a hipokinetikus dysarthria a legjellemzőbb, melynek fő tünetei a monoton hangmagasság és hangerő, csökkent hangerő (hypophonia), felgyorsult beszédrohamok és elmosódott artikuláció."
+                    },
+                    {
+                        question: "Mi a dysphagia definíciója?",
+                        options: [
+                            "Beszédzavar",
+                            "Nyelési nehézség",
+                            "Gombócérzés a torokban",
+                            "Rekedtség"
+                        ],
+                        correct: 1,
+                        explanation: "A dysphagia a nyelési nehézség orvosi kifejezése, amely az étel és/vagy folyadék szájüregből a gyomorba történő továbbításának zavarát jelenti."
+                    },
+                    {
+                        question: "Mi az aspiráció, mint a dysphagia egyik legsúlyosabb szövődménye?",
+                        options: [
+                            "Az étel orrba való visszajutása.",
+                            "Az étel vagy folyadék a hangszalagok alá, a légcsőbe kerülése.",
+                            "Az étel elakadása a nyelőcsőben.",
+                            "Gyors, akaratlan fogyás."
+                        ],
+                        correct: 1,
+                        explanation: "Az aspiráció az, amikor a lenyelt anyag (étel, folyadék, nyál) a hangszalagok alá jut és bekerül a légcsőbe, ami fulladást és/vagy aspirációs pneumóniát (tüdőgyulladást) okozhat."
+                    },
+                    {
+                        question: "Melyik dysarthria típusra jellemző a 'skandáló beszéd' és a szabálytalan artikulációs törések?",
+                        options: [
+                            "Spasztikus dysarthria",
+                            "Hipokinetikus dysarthria",
+                            "Ataxiás dysarthria",
+                            "Flaccid dysarthria"
+                        ],
+                        correct: 2,
+                        explanation: "Az ataxiás dysarthria a kisagy (cerebellum) károsodásának következménye. Jellemzője a túlzott és egyenletes hangsúlyozás ('skandáló beszéd') és a szabálytalan, kiszámíthatatlan artikulációs hibák, ami a mozgáskoordináció zavarára utal."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárást tekintik a nyelésvizsgálat 'arany standardjának'?",
+                        options: [
+                            "Mellkasröntgen",
+                            "Nyelőcső manometria",
+                            "Videofluoroszkópos nyelésvizsgálat (VFSS/MBSS)",
+                            "Koponya CT"
+                        ],
+                        correct: 2,
+                        explanation: "A VFSS (vagy MBSS) egy röntgenvizsgálat, amely báriumos kontrasztanyaggal teszi láthatóvá a nyelés teljes folyamatát, lehetővé téve a nyelési biomechanika, a penetráció és az aspiráció pontos, dinamikus értékelését."
+                    },
+                    {
+                        question: "Milyen célt szolgál a 'chin tuck' (áll lehajtása) manőver dysphagia esetén?",
+                        options: [
+                            "Erősíti a rágóizmokat.",
+                            "Javítja az ízérzékelést.",
+                            "Segítheti a légutak védelmét és csökkentheti az aspiráció kockázatát.",
+                            "Gyorsítja a nyelőcső perisztaltikáját."
+                        ],
+                        correct: 2,
+                        explanation: "Az áll mellkashoz történő billentése nyelés közben kiszélesíti a valleculát (a nyelvgyök és a gégefedő közötti teret), ami időt ad a nyelési reflex beindulására, és segít a gégefedőnek jobban zárni, így védve a légutakat."
+                    },
+                    {
+                        question: "Mely neurológiai betegségben jellemző a kevert flaccid-spasztikus dysarthria?",
+                        options: [
+                            "Parkinson-kór",
+                            "Amyotrophiás lateralis sclerosis (ALS)",
+                            "Huntington-kór",
+                            "Myasthenia gravis"
+                        ],
+                        correct: 1,
+                        explanation: "Az ALS egy motoneuron betegség, ami mind a felső (UMN), mind az alsó (LMN) motoneuronokat érinti. Ezért a dysarthria is kevert: a spasztikus komponens (UMN) feszes, préselt hangot, míg a flaccid komponens (LMN) levegős, rekedt hangot és hypernasalitást okoz."
+                    },
+                    {
+                        question: "Mi a különbség az oropharyngealis és az oesophagealis dysphagia között?",
+                        options: [
+                            "Az oropharyngealis a szilárd, az oesophagealis a folyékony ételekre vonatkozik.",
+                            "Az oropharyngealis a nyelésindítás zavara, az oesophagealis a falat továbbításának zavara a nyelőcsőben.",
+                            "Az oropharyngealis mindig fájdalommal jár, az oesophagealis soha.",
+                            "Nincs lényegi különbség."
+                        ],
+                        correct: 1,
+                        explanation: "Az oropharyngealis ('magas') dysphagia a nyelés elindításának, a falat garatba juttatásának nehézségét jelenti. Az oesophagealis ('alacsony') dysphagia pedig a falat nyelőcsövön keresztüli áthaladásának zavarát, ami elakadás érzésével jár a mellkasban."
+                    },
+                    {
+                        question: "Melyik terápia bizonyítottan hatékony a Parkinson-kóros betegek hipokinetikus dysarthriájának kezelésében?",
+                        options: [
+                            "Folyadéksűrítés",
+                            "Lee Silverman Voice Treatment (LSVT LOUD)",
+                            "Shaker gyakorlat",
+                            "Botox injekció"
+                        ],
+                        correct: 1,
+                        explanation: "Az LSVT LOUD egy intenzív, a hangerő növelésére fókuszáló hangterápiás program, amely bizonyítottan hatékonyan javítja a hangerőt, a hangminőséget és a beszédérthetőséget a Parkinson-kóros betegeknél."
+                    },
+                    {
+                        question: "Mi a hypernasalitás?",
+                        options: [
+                            "Túlzottan orrhangzós beszéd",
+                            "Csökkent orrhangzós beszéd (náthás hang)",
+                            "Rekedt hangminőség",
+                            "Suttogó beszéd"
+                        ],
+                        correct: 0,
+                        explanation: "A hypernasalitás a rezonancia zavara, amikor a lágy szájpad elégtelen zárása miatt a levegő a nem nazális hangok képzésekor is az orrüregbe szökik, túlzottan 'orrhangzóssá' téve a beszédet."
+                    },
+                    {
+                        question: "Melyik agyideg-csoportok játszanak kulcsszerepet a nyelésben?",
+                        options: [
+                            "I, II, VIII",
+                            "V, VII, IX, X, XII",
+                            "III, IV, VI",
+                            "Csak a XI. agyideg"
+                        ],
+                        correct: 1,
+                        explanation: "A nyelés egy komplex folyamat, amelyben több agyideg is részt vesz: a n. trigeminus (V - rágás), n. facialis (VII - ajakzár, bolus kontroll), n. glossopharyngeus (IX - garat érzékelés, emelés), n. vagus (X - garat- és gégeizmok, nyelőcső), és a n. hypoglossus (XII - nyelvmozgások)."
+                    },
+                    {
+                        question: "Mi az a 'csendes aspiráció'?",
+                        options: [
+                            "Amikor csak kis mennyiségű étel kerül a tüdőbe.",
+                            "Amikor az aspiráció nem vált ki köhögési reflexet vagy más látható jelet.",
+                            "Amikor az aspiráció csak alvás közben történik.",
+                            "Amikor az aspirált anyag tiszta folyadék."
+                        ],
+                        correct: 1,
+                        explanation: "A csendes aspiráció rendkívül veszélyes, mert a légutakba került anyag nem vált ki köhögést vagy fulladást, így észrevétlen maradhat, miközben ismétlődő tüdőgyulladást okozhat. Gyakori neurológiai betegeknél a csökkent gégeérzékenység miatt."
+                    },
+                    {
+                        question: "Melyik dysarthria típusra jellemző a feszes, préselt, rekedt hang és a lassú beszédtempó?",
+                        options: [
+                            "Flaccid",
+                            "Ataxiás",
+                            "Spasztikus",
+                            "Hipokinetikus"
+                        ],
+                        correct: 2,
+                        explanation: "A spasztikus dysarthriát a kétoldali felső motoneuron károsodás okozza, ami izommerevséghez (spaszticitáshoz) vezet. Ez a gégében feszes, préselt hangminőséget, az artikulációs szervekben pedig lassú, erőlködő beszédet eredményez."
+                    },
+                    {
+                        question: "Milyen célt szolgál a folyadékok sűrítése dysphagia esetén?",
+                        options: [
+                            "Finomabbá teszi az italt.",
+                            "Lassítja a folyadék áramlását, több időt adva a biztonságos nyelésre.",
+                            "Növeli a kalóriatartalmat.",
+                            "Javítja a hangminőséget."
+                        ],
+                        correct: 1,
+                        explanation: "A folyadékok sűrítése (nektár, méz állagúra) lassítja a bolus áramlását a garatban. Ez több időt ad a nyelési reflex beindulására és a légutak védelmére, így csökkentve az aspiráció kockázatát azoknál, akik a híg folyadékot félrenyelik."
+                    },
+                    {
+                        question: "Mi a diadochokinetikus ráta (DDK) mérésének célja a dysarthria vizsgálatakor?",
+                        options: [
+                            "A hallásélesség mérése.",
+                            "A gyors, váltakozó szótagismétlések sebességének és pontosságának értékelése.",
+                            "A nyelési reflex idejének mérése.",
+                            "A beteg szókincsének felmérése."
+                        ],
+                        correct: 1,
+                        explanation: "A DDK (pl. /pʌtʌkʌ/ ismétlése) a beszédmozgások sebességét, pontosságát és koordinációját méri. A különböző dysarthria típusok jellegzetes mintázatot mutathatnak (pl. lassú és reguláris spasztikusnál, gyors és elmosódott hipokinetikusnál, szabálytalan ataxiásnál)."
+                    },
+                    {
+                        question: "Melyik állítás igaz az oropharyngealis dysphagiára?",
+                        options: [
+                            "Leggyakrabban a nyelőcső daganatai okozzák.",
+                            "Fő tünete a mellkasi elakadásérzés.",
+                            "Hátterében leggyakrabban neurológiai okok állnak.",
+                            "Kizárólag időskorban fordul elő."
+                        ],
+                        correct: 2,
+                        explanation: "Az oropharyngealis dysphagia hátterében az esetek több mint 75%-ában valamilyen neuromuszkuláris betegség áll, mint például stroke, Parkinson-kór vagy ALS, mivel a nyelésindítás komplex idegrendszeri szabályozást igényel."
+                    },
+                    {
+                        question: "Mi az a 'palilalia'?",
+                        options: [
+                            "Gombócérzés a torokban.",
+                            "Szavak, frázisok akaratlan ismétlése, gyakran gyorsuló tempóban.",
+                            "Képtelenség a beszéd megindítására.",
+                            "Kórosan lassú beszéd."
+                        ],
+                        correct: 1,
+                        explanation: "A palilalia egy prozódiai zavar, amely szavak vagy frázisok akaratlan, kényszeres ismétlését jelenti, gyakran egyre gyorsuló tempóban és halkuló hangerővel. Jellemzően a hipokinetikus dysarthriánál (pl. Parkinson-kór) figyelhető meg."
+                    },
+                    {
+                        question: "Mi a pszeudobulbáris affektus, ami gyakran társul a spasztikus dysarthriához?",
+                        options: [
+                            "Az arcizmok teljes petyhüdtsége.",
+                            "Kontrollálatlan, helyzethez nem illő sírás vagy nevetés.",
+                            "Akaratlan mozgások a száj körül.",
+                            "Teljes érzelemkifejezési képtelenség."
+                        ],
+                        correct: 1,
+                        explanation: "A pszeudobulbáris affektus (vagy emocionális inkontinencia) a kétoldali felső motoneuron károsodásának egyik jele. Jellemzője a kontrollálatlan, a beteg valódi érzelmeitől független vagy aránytalan sírási vagy nevetési rohamok."
+                    },
+                    {
+                        question: "Melyik vizsgálati módszer teszi lehetővé a garat és a gége direkt, endoszkópos megtekintését nyelés közben?",
+                        options: [
+                            "Videofluoroszkópia (VFSS)",
+                            "Fiberoptikus endoszkópos nyelésvizsgálat (FEES)",
+                            "Nyelőcső manometria",
+                            "Báriumos nyeléspróba"
+                        ],
+                        correct: 1,
+                        explanation: "A FEES során egy vékony, flexibilis endoszkópot vezetnek az orron keresztül a garatba, ami lehetővé teszi a garat és a gége struktúráinak, valamint a nyelés folyamatának direkt vizualizációját. Előnye, hogy ágymellett is elvégezhető és nem jár sugárterheléssel."
+                    }
+                ]
+            }
+        };
+
+        const app = {
+            // DOM Elements
+            topicSelectionScreen: document.getElementById('topic-selection'),
+            quizInterfaceScreen: document.getElementById('quiz-interface'),
+            finalScoreScreen: document.getElementById('final-score-screen'),
+            
+            topicContainer: document.querySelector('#topic-selection .grid'),
+            quizTitle: document.getElementById('quiz-title'),
+            scoreDisplay: document.getElementById('score'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationText: document.getElementById('explanation-text'),
+            
+            backToTopicsBtn: document.getElementById('back-to-topics'),
+            nextQuestionBtn: document.getElementById('next-question'),
+            
+            finalTopicTitle: document.getElementById('final-topic-title'),
+            finalScoreDisplay: document.getElementById('final-score'),
+            restartQuizBtn: document.getElementById('restart-quiz'),
+            changeTopicBtn: document.getElementById('change-topic'),
+
+            // State
+            currentTopic: null,
+            currentQuestionIndex: 0,
+            score: 0,
+            questions: [],
+
+            init() {
+                this.renderTopicSelection();
+                this.addEventListeners();
+            },
+
+            addEventListeners() {
+                this.backToTopicsBtn.addEventListener('click', () => this.showScreen('topics'));
+                this.nextQuestionBtn.addEventListener('click', () => this.nextQuestion());
+                this.restartQuizBtn.addEventListener('click', () => this.startQuiz(this.currentTopic));
+                this.changeTopicBtn.addEventListener('click', () => this.showScreen('topics'));
+            },
+
+            renderTopicSelection() {
+                this.topicContainer.innerHTML = '';
+                Object.keys(quizData).forEach(key => {
+                    const topic = quizData[key];
+                    const button = document.createElement('button');
+                    button.className = "p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 text-left";
+                    button.innerHTML = `
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${topic.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">${topic.questions.length} kérdés</p>
+                    `;
+                    button.addEventListener('click', () => this.startQuiz(key));
+                    this.topicContainer.appendChild(button);
+                });
+            },
+
+            startQuiz(topicKey) {
+                this.currentTopic = topicKey;
+                this.questions = this.shuffleArray([...quizData[topicKey].questions]);
+                this.currentQuestionIndex = 0;
+                this.score = 0;
+                this.quizTitle.textContent = quizData[topicKey].title;
+                this.updateScore();
+                this.displayQuestion();
+                this.showScreen('quiz');
+            },
+
+            displayQuestion() {
+                this.explanationContainer.classList.add('hidden');
+                this.nextQuestionBtn.classList.add('disabled');
+                
+                if (this.currentQuestionIndex >= this.questions.length) {
+                    this.showFinalScore();
+                    return;
+                }
+
+                const question = this.questions[this.currentQuestionIndex];
+                this.questionText.textContent = question.question;
+                this.optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = "w-full text-left p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-transparent quiz-option";
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.addEventListener('click', (e) => this.selectAnswer(e));
+                    this.optionsContainer.appendChild(button);
+                });
+
+                this.updateProgressBar();
+            },
+
+            selectAnswer(e) {
+                const selectedButton = e.target;
+                const selectedIndex = parseInt(selectedButton.dataset.index);
+                const question = this.questions[this.currentQuestionIndex];
+                const isCorrect = selectedIndex === question.correct;
+
+                if (isCorrect) {
+                    this.score++;
+                    selectedButton.classList.add('correct');
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    // Highlight the correct answer
+                    const correctButton = this.optionsContainer.querySelector(`[data-index='${question.correct}']`);
+                    correctButton.classList.add('correct');
+                }
+
+                this.explanationText.textContent = question.explanation;
+                this.explanationContainer.classList.remove('hidden');
+                
+                Array.from(this.optionsContainer.children).forEach(btn => btn.classList.add('disabled'));
+                
+                this.nextQuestionBtn.classList.remove('disabled');
+                this.updateScore();
+            },
+
+            nextQuestion() {
+                this.currentQuestionIndex++;
+                this.displayQuestion();
+            },
+
+            updateScore() {
+                this.scoreDisplay.textContent = `Pontszám: ${this.score} / ${this.questions.length}`;
+            },
+
+            updateProgressBar() {
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            },
+
+            showFinalScore() {
+                this.finalTopicTitle.textContent = quizData[this.currentTopic].title;
+                this.finalScoreDisplay.textContent = `${this.score} / ${this.questions.length}`;
+                this.showScreen('final');
+            },
+
+            showScreen(screen) {
+                this.topicSelectionScreen.classList.add('hidden');
+                this.quizInterfaceScreen.classList.add('hidden');
+                this.finalScoreScreen.classList.add('hidden');
+
+                if (screen === 'topics') {
+                    this.topicSelectionScreen.classList.remove('hidden');
+                } else if (screen === 'quiz') {
+                    this.quizInterfaceScreen.classList.remove('hidden');
+                } else if (screen === 'final') {
+                    this.finalScoreScreen.classList.remove('hidden');
+                }
+            },
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+        };
+
+        app.init();
+    </script>
+
+</body>
+</html>

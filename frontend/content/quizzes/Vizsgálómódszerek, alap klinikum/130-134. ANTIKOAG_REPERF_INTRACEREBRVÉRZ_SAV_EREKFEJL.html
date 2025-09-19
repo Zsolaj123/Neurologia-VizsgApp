@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológia Teszt - 5. rész</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .quiz-option.selected {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Neurológia Tesztek - 5. rész</h1>
+            <p class="text-slate-600 mb-8">Válasszon egy témakört a tudása teszteléséhez.</p>
+            <div id="topic-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="quiz-title" class="text-2xl font-bold text-slate-900"></h2>
+                    <p id="progress-text" class="text-slate-500"></p>
+                </div>
+                <button id="back-to-topics" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2 px-4 border border-slate-300 rounded-lg shadow-sm">Vissza</button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div id="question-container">
+                    <p id="question-text" class="text-lg font-semibold mb-6"></p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+                
+                <div id="feedback-container" class="mt-6">
+                    <div id="explanation" class="explanation p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                        <h4 class="font-bold mb-2">Magyarázat</h4>
+                        <p id="explanation-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="next-button" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Eredmények</h2>
+            <p id="score-text" class="text-xl text-slate-600 mb-2"></p>
+            <p id="score-percentage" class="text-4xl font-bold text-blue-600 mb-6"></p>
+            <div class="space-x-4">
+                <button id="restart-quiz" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">Újra</button>
+                <button id="back-to-topics-from-results" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 border border-slate-300 rounded-lg shadow-sm">Vissza a témakörökhöz</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const quizData = {
+            "antikoagulansok": {
+                title: "Antikoagulálás és antiaggregáció",
+                questions: [
+                    {
+                        question: "Melyik gyógyszercsoport hatásmechanizmusa a K-vitamin-függő véralvadási faktorok szintézisének gátlása?",
+                        options: ["Heparinok", "Direkt Orális Antikoagulánsok (DOAC)", "K-vitamin antagonisták (VKA)", "Antiaggregánsok"],
+                        answer: "K-vitamin antagonisták (VKA)",
+                        explanation: "A K-vitamin antagonisták, mint a warfarin és az acenokumarol, gátolják a K-vitamin-függő II, VII, IX, és X véralvadási faktorok májban történő szintézisét."
+                    },
+                    {
+                        question: "Melyik laboratóriumi paraméterrel monitorozzák a warfarin kezelést?",
+                        options: ["APTI", "INR (International Normalized Ratio)", "Vérlemezkeszám", "D-dimer"],
+                        answer: "INR (International Normalized Ratio)",
+                        explanation: "A warfarin terápia hatékonyságát és biztonságosságát az INR érték rendszeres ellenőrzésével követik, a cél tartomány általában 2.0-3.0 között van."
+                    },
+                    {
+                        question: "Melyik a dabigatran specifikus antidotuma (reverzáló szere)?",
+                        options: ["K-vitamin", "Protamin-szulfát", "Andexanet alfa", "Idarucizumab"],
+                        answer: "Idarucizumab",
+                        explanation: "Az idarucizumab (Praxbind®) egy monoklonális antitest fragmens, amely specifikusan és gyorsan megköti a dabigatrant, semlegesítve annak antikoaguláns hatását."
+                    },
+                    {
+                        question: "Milyen típusú gyógyszerek a rivaroxaban és az apixaban?",
+                        options: ["Direkt trombin inhibitorok", "K-vitamin antagonisták", "Direkt Xa faktor gátlók", "COX-1 gátlók"],
+                        answer: "Direkt Xa faktor gátlók",
+                        explanation: "A rivaroxaban, apixaban és edoxaban a direkt orális antikoagulánsok (DOAC) csoportjába tartoznak, és specifikusan a Xa véralvadási faktort gátolják."
+                    },
+                    {
+                        question: "Mi az aszpirin antiaggregációs hatásának alapja?",
+                        options: ["A trombin direkt gátlása.", "A COX-1 enzim irreverzibilis gátlása a vérlemezkékben.", "A P2Y12 receptor blokkolása.", "A K-vitamin gátlása."],
+                        answer: "A COX-1 enzim irreverzibilis gátlása a vérlemezkékben.",
+                        explanation: "Az aszpirin alacsony dózisban gátolja a ciklooxigenáz-1 (COX-1) enzimet, megakadályozva a tromboxán A2 szintézisét, amely egy erős vérlemezke-aktivátor és aggregációt serkentő anyag."
+                    },
+                    {
+                        question: "Mikor javasolt a kettős antiaggregációs terápia (DAPT) a neurológiai gyakorlatban?",
+                        options: ["Minden stroke után élethosszig.", "Minor ischaemiás stroke vagy magas kockázatú TIA után, korlátozott ideig (pl. 21 napig).", "Csak agyvérzés után.", "Pitvarfibrillációban."],
+                        answer: "Minor ischaemiás stroke vagy magas kockázatú TIA után, korlátozott ideig (pl. 21 napig).",
+                        explanation: "A CHANCE és POINT vizsgálatok igazolták, hogy az aszpirin és clopidogrel kombinációja rövid távon (21-90 napig) hatékonyabb a kiújuló stroke megelőzésében minor stroke vagy TIA után, mint az aszpirin önmagában."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a DOAC-okra a VKA-kkal összehasonlítva?",
+                        options: ["Kiszámíthatóbb a hatásuk.", "Kevesebb gyógyszer- és ételinterakciójuk van.", "Alacsonyabb az intracranialis vérzés kockázata.", "Rendszeres INR monitorozást igényelnek."],
+                        answer: "Rendszeres INR monitorozást igényelnek.",
+                        explanation: "A DOAC-ok egyik fő előnye a warfarinnal szemben, hogy kiszámítható farmakokinetikájuk miatt nem igényelnek rutin laboratóriumi monitorozást."
+                    },
+                    {
+                        question: "Mi a Heparin-indukált thrombocytopenia (HIT) paradoxona?",
+                        options: ["A vérzékenység csökken.", "A vérlemezkeszám csökkenése ellenére fokozott trombóziskészséggel jár.", "Csak a májat károsítja.", "Növeli a vérlemezkeszámot."],
+                        answer: "A vérlemezkeszám csökkenése ellenére fokozott trombóziskészséggel jár.",
+                        explanation: "A HIT egy immunológiai reakció, ahol a heparin ellen termelődő antitestek aktiválják a vérlemezkéket, ami a számuk csökkenése mellett súlyos artériás és vénás trombózisokhoz vezet."
+                    },
+                    {
+                        question: "Melyik a standard kezelés agyi vénás trombózis (CVT) esetén?",
+                        options: ["Antiaggregáns kezelés", "Antikoaguláns kezelés", "Vérnyomáscsökkentés önmagában", "Nincs teendő"],
+                        answer: "Antikoaguláns kezelés",
+                        explanation: "A CVT kezelésének alapja az antikoagulálás (kezdetben heparin, majd orális antikoaguláns), amely megakadályozza a trombus növekedését és elősegíti a vénás sinusok rekanalizációját."
+                    },
+                    {
+                        question: "Miért nem javasolt az aszpirin pitvarfibrillációban a stroke prevenciójára?",
+                        options: ["Mert túl drága.", "Mert sokkal kevésbé hatékony, mint az antikoagulánsok.", "Mert növeli a pulzusszámot.", "Mert csak a nőknél hat."],
+                        answer: "Mert sokkal kevésbé hatékony, mint az antikoagulánsok.",
+                        explanation: "Pitvarfibrillációban a trombusképződés fő mechanizmusa a véralvadási kaszkád aktiválódása, amit az antikoagulánsok gátolnak hatékonyan. Az aszpirin (antiaggregáns) itt lényegesen gyengébb védelmet nyújt."
+                    },
+                    {
+                        question: "Melyik gyógyszer gátolja a P2Y12 ADP receptort a vérlemezkéken?",
+                        options: ["Aszpirin", "Warfarin", "Clopidogrel", "Heparin"],
+                        answer: "Clopidogrel",
+                        explanation: "A clopidogrel egy prodrug, amelynek aktív metabolitja irreverzibilisen gátolja a vérlemezkék P2Y12 receptorát, megakadályozva az ADP által közvetített aggregációt."
+                    },
+                    {
+                        question: "Milyen esetben ellenjavallt a DOAC-ok használata és a warfarin a preferált antikoaguláns?",
+                        options: ["Magas vérnyomásban", "Cukorbetegségben", "Mechanikus műbillentyűvel élő betegeknél", "Idős korban"],
+                        answer: "Mechanikus műbillentyűvel élő betegeknél",
+                        explanation: "Mechanikus műbillentyűk esetén, valamint közepesen súlyos vagy súlyos mitrális stenosisban a DOAC-ok nem bizonyultak hatékonynak vagy biztonságosnak, itt továbbra is a warfarin a standard kezelés."
+                    },
+                    {
+                        question: "Mi a teendő antikoaguláns-asszociált intracerebralis vérzés esetén?",
+                        options: ["Az antikoaguláns dózisának emelése.", "Az antikoaguláns hatásának azonnali felfüggesztése (reverzálása).", "Csak megfigyelés.", "Aspirin adása."],
+                        answer: "Az antikoaguláns hatásának azonnali felfüggesztése (reverzálása).",
+                        explanation: "Életveszélyes vérzés, különösen agyvérzés esetén az antikoaguláns hatás gyors semlegesítése szükséges specifikus antidotumokkal (pl. idarucizumab, andexanet alfa) vagy koncentrátumokkal (PCC)."
+                    },
+                    {
+                        question: "Melyik állítás igaz a kis molekulasúlyú heparinokra (LMWH) az unfrakcionált heparinnal (UFH) szemben?",
+                        options: ["Az LMWH-t intravénásan kell adni.", "Az LMWH hatása kiszámíthatatlanabb.", "Az LMWH-nak hosszabb a felezési ideje és általában nem igényel monitorozást.", "Az LMWH gyakrabban okoz HIT-et."],
+                        answer: "Az LMWH-nak hosszabb a felezési ideje és általában nem igényel monitorozást.",
+                        explanation: "Az LMWH-k (pl. enoxaparin) előnye a kiszámíthatóbb farmakokinetika, ami lehetővé teszi a testsúly alapú, fix dózisú adagolást és a rutin monitorozás elhagyását a legtöbb esetben."
+                    },
+                    {
+                        question: "Milyen kockázatot kell mérlegelni az antikoaguláns kezelés beállításakor a CHA2DS2-VASc score mellett?",
+                        options: ["A fertőzés kockázatát", "A vérzés kockázatát (pl. HAS-BLED score)", "Az allergiás reakció kockázatát", "A csonttörés kockázatát"],
+                        answer: "A vérzés kockázatát (pl. HAS-BLED score)",
+                        explanation: "A döntés mindig a trombózis megelőzésének haszna és a vérzéses szövődmények kockázatának egyensúlyán alapul. A HAS-BLED pontrendszer segít a vérzési kockázat felmérésében."
+                    },
+                    {
+                        question: "Melyik véralvadási utat méri az aktivált parciális tromboplasztin idő (APTI)?",
+                        options: ["Csak a külső utat", "Csak a közös utat", "A belső és a közös utat", "A vérlemezkék funkcióját"],
+                        answer: "A belső és a közös utat",
+                        explanation: "Az APTI a véralvadási kaszkád belső (XII, XI, IX, VIII faktorok) és közös (X, V, II, I faktorok) útjának működését tükrözi, és az UFH terápia monitorozására használják."
+                    },
+                    {
+                        question: "Milyen esetben lehet csökkentett a clopidogrel hatékonysága?",
+                        options: ["Magas vérnyomásban", "Bizonyos genetikai variánsok (CYP2C19 polimorfizmus) esetén.", "Fiatal korban", "Dohányzás esetén"],
+                        answer: "Bizonyos genetikai variánsok (CYP2C19 polimorfizmus) esetén.",
+                        explanation: "A clopidogrel egy prodrug, amelyet a CYP2C19 enzim aktivál. Azoknál az egyéneknél, akik ennek az enzimnek a csökkent működésű variánsát hordozzák ('poor metabolizer'), a clopidogrel hatása gyengébb lehet."
+                    },
+                    {
+                        question: "Mi a protamin-szulfát?",
+                        options: ["Egy véralvadásgátló.", "A heparin antidotuma.", "Egy vérlemezke-gátló.", "Egy vérnyomáscsökkentő."],
+                        answer: "A heparin antidotuma.",
+                        explanation: "A protamin-szulfát egy pozitív töltésű molekula, amely kémiailag megköti és semlegesíti a negatív töltésű heparint, így felfüggesztve annak antikoaguláns hatását."
+                    },
+                    {
+                        question: "Melyik állítás igaz a DOAC-ok és a veseelégtelenség kapcsolatára?",
+                        options: ["A vesefunkció nem befolyásolja a hatásukat.", "Minden DOAC biztonságosan adható súlyos veseelégtelenségben is.", "A DOAC-ok kiválasztódása nagymértékben függ a vesefunkciótól, ezért dózismódosítás vagy ellenjavallat szükséges lehet.", "Csak a májfunkció számít."],
+                        answer: "A DOAC-ok kiválasztódása nagymértékben függ a vesefunkciótól, ezért dózismódosítás vagy ellenjavallat szükséges lehet.",
+                        explanation: "A DOAC-ok (különösen a dabigatran) jelentős mértékben a vesén keresztül ürülnek. Beszűkült vesefunkció esetén a gyógyszer felhalmozódhat a szervezetben, növelve a vérzés kockázatát, ezért a dózist a kreatinin-clearance alapján módosítani kell."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb mellékhatása az antiaggregáns és antikoaguláns kezeléseknek?",
+                        options: ["Hajhullás", "Vérzés", "Láz", "Magas vérnyomás"],
+                        answer: "Vérzés",
+                        explanation: "Mivel ezek a gyógyszerek a véralvadást gátolják, a leggyakoribb és legjelentősebb mellékhatásuk a vérzés, amely lehet enyhe (pl. ínyvérzés) vagy súlyos, életveszélyes (pl. agyvérzés, gyomorvérzés)."
+                    }
+                ]
+            },
+            "reperfuzios_terapiak": {
+                title: "Reperfúziós terápiák az akut stroke ellátásában",
+                questions: [
+                    {
+                        question: "Mi az akut iszkémiás stroke reperfúziós terápiájának elsődleges célja?",
+                        options: ["A vérnyomás csökkentése", "A lázcsillapítás", "Az elzáródott agyi érben a véráramlás mielőbbi helyreállítása", "A vércukorszint normalizálása"],
+                        answer: "Az elzáródott agyi érben a véráramlás mielőbbi helyreállítása",
+                        explanation: "A reperfúziós terápia (trombolízis, trombektómia) célja az érelzáródás megszüntetése, hogy a veszélyeztetett, de még megmenthető agyszövet (penumbra) vérellátása helyreálljon, és a maradandó károsodás minimalizálódjon."
+                    },
+                    {
+                        question: "Mi a standard időablak az intravénás trombolízis (IVT) alkalmazására alteplase-zal?",
+                        options: ["A tünetek kezdetétől számított 1 óra", "A tünetek kezdetétől számított 4.5 óra", "A tünetek kezdetétől számított 6 óra", "A tünetek kezdetétől számított 24 óra"],
+                        answer: "A tünetek kezdetétől számított 4.5 óra",
+                        explanation: "Az intravénás alteplase adása a legtöbb beteg számára a tünetek kezdetétől számított 4.5 órán belül javasolt, amennyiben a befogadási és kizárási kritériumok teljesülnek."
+                    },
+                    {
+                        question: "Milyen dózisban alkalmazzák az alteplase-t (rt-PA) iszkémiás stroke-ban?",
+                        options: ["Fix 100 mg", "0.9 mg/testtömegkg (maximum 90 mg)", "1.5 mg/testtömegkg", "Testsúlytól független"],
+                        answer: "0.9 mg/testtömegkg (maximum 90 mg)",
+                        explanation: "A standard dózis 0.9 mg/kg, de a teljes adag nem haladhatja meg a 90 mg-ot. Ennek 10%-át adják be bólusban, a maradék 90%-ot pedig 60 perces infúzióban."
+                    },
+                    {
+                        question: "Mi a mechanikus trombektómia (EVT) lényege?",
+                        options: ["Gyógyszeres vérrögoldás.", "A vérrög katéteres úton történő mechanikus eltávolítása az agyi artériából.", "A koponya megnyitásával végzett műtét.", "A vérnyomás emelése."],
+                        answer: "A vérrög katéteres úton történő mechanikus eltávolítása az agyi artériából.",
+                        explanation: "Az EVT során egy vékony katétert vezetnek fel az artériás rendszeren keresztül az elzáródott agyi érig, és egy speciális eszközzel (stent retriever vagy aspirációs katéter) eltávolítják a vérrögöt."
+                    },
+                    {
+                        question: "Milyen esetekben jön szóba a mechanikus trombektómia?",
+                        options: ["Minden iszkémiás stroke esetén.", "Csak kisér-elzáródásokban.", "Nagy agyi artéria (LVO) elzáródása esetén.", "Csak vérzéses stroke-ban."],
+                        answer: "Nagy agyi artéria (LVO) elzáródása esetén.",
+                        explanation: "A trombektómia a nagy agyi artériák (pl. a. carotis interna, a. cerebri media M1/M2 szakasza) elzáródása esetén hatékony, ahol a nagy vérrögöt az intravénás trombolízis önmagában gyakran nem képes feloldani."
+                    },
+                    {
+                        question: "Mi az 'idő agy' (time is brain) elv lényege?",
+                        options: ["Az agy idővel regenerálódik.", "Az agyi funkciók idővel javulnak.", "Az iszkémiás stroke-ban minden perc késlekedés idegsejtek millióinak elvesztésével jár.", "Az idősebb agy lassabban károsodik."],
+                        answer: "Az iszkémiás stroke-ban minden perc késlekedés idegsejtek millióinak elvesztésével jár.",
+                        explanation: "Ez az elv hangsúlyozza, hogy az idő kritikus tényező. Minél hamarabb állítják helyre a keringést, annál több agyszövet menthető meg, ezért a tünetek észlelésekor azonnal cselekedni kell."
+                    },
+                    {
+                        question: "Mi a 'permisszív hypertonia' fogalma akut iszkémiás stroke-ban?",
+                        options: ["A vérnyomás agresszív csökkentése.", "A vérnyomás enyhén emelkedett szinten tartásának megengedése a penumbra perfúziójának javítása érdekében.", "A vérnyomás figyelmen kívül hagyása.", "A vérnyomás gyógyszeres emelése."],
+                        answer: "A vérnyomás enyhén emelkedett szinten tartásának megengedése a penumbra perfúziójának javítása érdekében.",
+                        explanation: "Ha a beteg nem kap trombolízist, az enyhén magasabb vérnyomás segíthet a kollaterális keringésen keresztül a veszélyeztetett agyterület (penumbra) vérellátásának fenntartásában. Ezért a vérnyomást csak extrém magas értékek (>220/120 Hgmm) esetén csökkentik."
+                    },
+                    {
+                        question: "Milyen vérnyomás célértéket kell tartani az intravénás trombolízis utáni első 24 órában?",
+                        options: ["<220/120 Hgmm", "<180/105 Hgmm", "<160/100 Hgmm", "<140/90 Hgmm"],
+                        answer: "<180/105 Hgmm",
+                        explanation: "A trombolízis után a vérzéses szövődmények kockázatának csökkentése érdekében a vérnyomást szigorúbban kell kontrollálni, a célérték az első 24 órában <180/105 Hgmm."
+                    },
+                    {
+                        question: "Mi a malignus MCA szindróma és mi a kezelése?",
+                        options: ["Egy ritka agydaganat.", "Agyi fertőzés.", "Az arteria cerebri media infarktusa utáni súlyos, életveszélyes agyödéma; kezelése a dekompresszív hemikraniektómia.", "Az ACM aneurizmája."],
+                        answer: "Az arteria cerebri media infarktusa utáni súlyos, életveszélyes agyödéma; kezelése a dekompresszív hemikraniektómia.",
+                        explanation: "Kiterjedt ACM infarktus esetén a duzzanat (ödéma) olyan mértékű lehet, hogy a koponyaűri nyomás kritikusan megemelkedik. A dekompresszív hemikraniektómia (a koponyacsont egy részének ideiglenes eltávolítása) életmentő lehet a nyomás csökkentésével."
+                    },
+                    {
+                        question: "Mi a TICI score?",
+                        options: ["A stroke súlyosságát mérő skála.", "A rehabilitációs potenciált becslő pontrendszer.", "A mechanikus trombektómia utáni reperfúzió mértékét osztályozó skála.", "A vérzéses kockázatot felmérő pontrendszer."],
+                        answer: "A mechanikus trombektómia utáni reperfúzió mértékét osztályozó skála.",
+                        explanation: "A TICI (Thrombolysis in Cerebral Infarction) score angiográfiásan értékeli, hogy a trombektómia után milyen mértékben sikerült helyreállítani a véráramlást az elzáródott érterületen. A TICI 2b/3 a sikeres reperfúziót jelenti."
+                    },
+                    {
+                        question: "Milyen gyógyszert kap a beteg a stroke utáni másodlagos prevencióra, ha az ok nem kardioemboliás?",
+                        options: ["Véralvadásgátlót (antikoaguláns)", "Vérlemezke-aggregáció gátlót (antiplatelet)", "Antibiotikumot", "Vízhajtót"],
+                        answer: "Vérlemezke-aggregáció gátlót (antiplatelet)",
+                        explanation: "A nem szív eredetű (pl. atheroscleroticus) iszkémiás stroke megelőzésére a thrombocyta-aggregáció gátlók (pl. aszpirin, clopidogrel) a standard kezelés."
+                    },
+                    {
+                        question: "Mi a 'wake-up stroke' és miért jelent terápiás kihívást?",
+                        options: ["Alvás közben jelentkező stroke, ahol a tünetek kezdetének időpontja ismeretlen.", "Nagyon enyhe stroke.", "Mindig vérzéses stroke.", "Csak időseket érintő stroke."],
+                        answer: "Alvás közben jelentkező stroke, ahol a tünetek kezdetének időpontja ismeretlen.",
+                        explanation: "Ébredési stroke esetén nem tudjuk, mikor kezdődtek a tünetek, így a standard időablakok nem alkalmazhatók. Ilyenkor a fejlett képalkotás (pl. DWI-FLAIR mismatch) segíthet eldönteni, hogy a beteg még profitálhat-e a reperfúziós terápiából."
+                    },
+                    {
+                        question: "Mi a tenecteplase (TNK) előnye az alteplase-zal (rt-PA) szemben?",
+                        options: ["Hatékonyabb.", "Olcsóbb.", "Egyszerűbb az adagolása (egyszeri bólus).", "Kevesebb mellékhatása van."],
+                        answer: "Egyszerűbb az adagolása (egyszeri bólus).",
+                        explanation: "A tenecteplase-t egyetlen intravénás bólusban lehet beadni, szemben az alteplase egyórás infúziójával, ami leegyszerűsíti és meggyorsítja a kezelést, különösen a betegszállítás során."
+                    },
+                    {
+                        question: "Mi az elsődleges képalkotó vizsgálat akut stroke gyanúja esetén?",
+                        options: ["MRI", "Ultrahang", "Natív koponya CT", "PET CT"],
+                        answer: "Natív koponya CT",
+                        explanation: "A sürgősségi ellátásban az első lépés egy gyors natív CT, amely megbízhatóan és gyorsan kizárja a koponyaűri vérzést, ami elengedhetetlen a trombolízis megkezdése előtt."
+                    },
+                    {
+                        question: "Milyen terápia javasolt a stroke utáni dysphagia (nyelészavar) kezelésére?",
+                        options: ["Gyógyszeres kezelés", "Logopédiai terápia (nyelésterápia)", "Fizikoterápia", "Pszichoterápia"],
+                        answer: "Logopédiai terápia (nyelésterápia)",
+                        explanation: "A dysphagia kezelése a logopédus feladata, aki felméri a nyelés biztonságosságát, és speciális diétát, kompenzációs technikákat, valamint a nyelőizmokat erősítő gyakorlatokat javasol az aspiráció megelőzésére."
+                    },
+                    {
+                        question: "Mikor indokolt a dekompresszív hemikraniektómia?",
+                        options: ["Minden stroke esetén.", "Kiterjedt, malignus agyi infarktus okozta életveszélyes agyödéma esetén.", "Kisebb, lacunaris infarktusoknál.", "Csak TIA esetén."],
+                        answer: "Kiterjedt, malignus agyi infarktus okozta életveszélyes agyödéma esetén.",
+                        explanation: "Ez egy életmentő műtét, amelyet akkor végeznek, ha a nagy kiterjedésű infarktus utáni agyduzzanat olyan mértékű koponyaűri nyomásfokozódást okoz, ami az agytörzs beékelődésével és halállal fenyeget."
+                    },
+                    {
+                        question: "Mi a szerepe a statinoknak a stroke másodlagos prevenciójában?",
+                        options: ["Csak a vérnyomást csökkentik.", "Csökkentik az LDL-koleszterin szintet és stabilizálják az atheroscleroticus plakkokat.", "Véralvadásgátló hatásúak.", "Nincs szerepük."],
+                        answer: "Csökkentik az LDL-koleszterin szintet és stabilizálják az atheroscleroticus plakkokat.",
+                        explanation: "A statinok az LDL-szint csökkentésén túl gyulladáscsökkentő és plakkstabilizáló (pleiotróp) hatásokkal is rendelkeznek, így alapvető gyógyszerek az atheroscleroticus stroke másodlagos megelőzésében."
+                    },
+                    {
+                        question: "Mi a vérzéses transzformáció?",
+                        options: ["A stroke gyógyulása.", "Az iszkémiás infarktus területének másodlagos bevérzése.", "A vérzéses stroke átalakulása iszkémiássá.", "Egyfajta rehabilitációs technika."],
+                        answer: "Az iszkémiás infarktus területének másodlagos bevérzése.",
+                        explanation: "Az iszkémia során károsodott érfal áteresztővé válhat, különösen a reperfúzió után, ami az infarktusos területen belüli kisebb-nagyobb bevérzésekhez vezethet. Ez a trombolízis egyik legrettegettebb szövődménye."
+                    },
+                    {
+                        question: "Milyen esetben preferálják a direkt orális antikoagulánsokat (DOAC) a warfarinnal szemben pitvarfibrillációban?",
+                        options: ["Soha", "Mindig", "A legtöbb nem-valvuláris pitvarfibrilláció esetén, a kedvezőbb biztonsági profil miatt.", "Csak mechanikus műbillentyű esetén."],
+                        answer: "A legtöbb nem-valvuláris pitvarfibrilláció esetén, a kedvezőbb biztonsági profil miatt.",
+                        explanation: "A DOAC-ok (pl. apixaban, rivaroxaban) előnye, hogy kevesebb agyvérzést okoznak és nem igényelnek rendszeres INR-ellenőrzést, ezért a legtöbb esetben előnyben részesítik őket a warfarinnal szemben (kivéve pl. mechanikus műbillentyű)."
+                    },
+                    {
+                        question: "Mi a stroke-ellátás legfontosabb szervezeti egysége a kórházban?",
+                        options: ["A büfé", "A Stroke Unit (Stroke Osztály)", "A sebészeti osztály", "A bőrgyógyászat"],
+                        answer: "A Stroke Unit (Stroke Osztály)",
+                        explanation: "A Stroke Unit egy specializált osztály, ahol egy multidiszciplináris team (neurológus, szakápoló, gyógytornász, logopédus stb.) végzi a stroke-os betegek akut ellátását és korai rehabilitációját. Bizonyított, hogy a Stroke Uniton történő kezelés javítja a betegek kimenetelét."
+                    }
+                ]
+            },
+            "intracerebralis_verzesek": {
+                title: "Intracerebrális vérzések",
+                questions: [
+                    {
+                        question: "Mi az intracerebralis vérzés (ICH) leggyakoribb oka?",
+                        options: ["Agyi aneurizma megrepedése", "Hipertóniás angiopátia", "Arteriovenosus malformáció (AVM)", "Véralvadási zavar"],
+                        answer: "Hipertóniás angiopátia",
+                        explanation: "A primer, spontán ICH leggyakoribb oka a krónikus magas vérnyomás által okozott kisér-betegség, amely a mély agyi struktúrákban (pl. bazális ganglionok, thalamus) vezet az erek megrepedéséhez."
+                    },
+                    {
+                        question: "Milyen lokalizációjú vérzés utal leginkább cerebrális amyloid angiopátiára (CAA) idős betegnél?",
+                        options: ["Agytörzsi (pons)", "Kisagyi (cerebellum)", "Mély (pl. putamen)", "Lobáris (corticalis/subcorticalis)"],
+                        answer: "Lobáris (corticalis/subcorticalis)",
+                        explanation: "A CAA jellemzően az agykéreghez közeli, lobáris területeken okoz vérzéseket, mivel az amyloid lerakódás a felszínesebb kis- és közepes artériákat érinti. Gyakori a multiplex és kiújuló jelleg."
+                    },
+                    {
+                        question: "Mi a 'spot sign' a CT angiográfián (CTA) és mi a jelentősége?",
+                        options: ["Egy régi, meszes plakk jele.", "Az aktív kontrasztanyag-extravazáció jele a hematómán belül, ami a hematóma növekedésének magas kockázatára utal.", "Egy agydaganat jele.", "Egy érgomolyag (AVM) jele."],
+                        answer: "Az aktív kontrasztanyag-extravazáció jele a hematómán belül, ami a hematóma növekedésének magas kockázatára utal.",
+                        explanation: "A 'spot sign' azt jelzi, hogy a vérzés a vizsgálat idején is aktív. Jelenléte a korai hematóma expanzió és a rosszabb klinikai kimenetel erős prediktora."
+                    },
+                    {
+                        question: "Mi az akut ICH kezelésének egyik legfontosabb célja az első órákban?",
+                        options: ["A vércukorszint emelése", "Agresszív folyadékbevitel", "A vérnyomás gyors és szigorú kontrollja", "A beteg azonnali mobilizálása"],
+                        answer: "A vérnyomás gyors és szigorú kontrollja",
+                        explanation: "Az akut fázisban a vérnyomás csökkentése (cél szisztolésan <140 Hgmm) kulcsfontosságú a hematóma további növekedésének megakadályozása és a másodlagos agykárosodás mérséklése érdekében."
+                    },
+                    {
+                        question: "Milyen esetben indokolt leginkább a sürgős sebészi beavatkozás (hematóma kiürítés)?",
+                        options: ["Minden ICH esetén.", "Kisméretű, mélyen fekvő vérzések esetén.", "Nagyobb (>3 cm), agytörzsi kompressziót okozó kisagyi (cerebelláris) vérzés esetén.", "Csak lobáris vérzések esetén."],
+                        answer: "Nagyobb (>3 cm), agytörzsi kompressziót okozó kisagyi (cerebelláris) vérzés esetén.",
+                        explanation: "A kisagyi vérzés gyorsan életveszélyes agytörzsi kompressziót és hydrocephalust okozhat. A hematóma sürgős sebészi eltávolítása ilyenkor életmentő lehet."
+                    },
+                    {
+                        question: "Melyik képalkotó módszer a legérzékenyebb a krónikus mikrovérzések (CMB) kimutatására?",
+                        options: ["Natív CT", "CTA", "Szuszceptibilitás-súlyozott MRI (SWI) vagy Gradiens-echo (GRE)", "PET CT"],
+                        answer: "Szuszceptibilitás-súlyozott MRI (SWI) vagy Gradiens-echo (GRE)",
+                        explanation: "Ezek az MRI szekvenciák rendkívül érzékenyek a vér bomlástermékére, a hemosziderinre, így kiválóan alkalmasak a régi mikrovérzések kimutatására, ami segít a háttérben álló kisérbetegség (pl. CAA) diagnózisában."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb lokalizációja a hipertóniás eredetű ICH-nak?",
+                        options: ["Frontális lebeny", "Occipitalis lebeny", "Putamen (bazális ganglionok)", "Corpus callosum"],
+                        answer: "Putamen (bazális ganglionok)",
+                        explanation: "A krónikus magas vérnyomás leggyakrabban az agy mély struktúráit ellátó perforáló artériákat károsítja, ezért a hipertóniás vérzések legtipikusabb helye a putamen."
+                    },
+                    {
+                        question: "Mi a perihematomális ödéma?",
+                        options: ["A hematóma belsejében lévő folyadék.", "A hematómát körülvevő agyszövet duzzanata (vizenyője).", "Az agykamrák tágulata.", "A vérzés egy ritka formája."],
+                        answer: "A hematómát körülvevő agyszövet duzzanata (vizenyője).",
+                        explanation: "A vérömleny és bomlástermékei gyulladásos reakciót és a vér-agy gát károsodását váltják ki, ami a környező agyszövetben ödéma kialakulásához vezet. Ez tovább növeli a koponyaűri nyomást."
+                    },
+                    {
+                        question: "Milyen gyógyszert adnak a warfarin-asszociált ICH hatásának gyors reverzálására?",
+                        options: ["Aszpirint", "Heparint", "Prothrombin komplex koncentrátumot (PCC) és K-vitamint", "Csak K-vitamint"],
+                        answer: "Prothrombin komplex koncentrátumot (PCC) és K-vitamint",
+                        explanation: "Életveszélyes vérzés esetén a warfarin hatását gyorsan fel kell függeszteni. A PCC azonnal pótolja a hiányzó véralvadási faktorokat, míg a K-vitamin a májban segíti az új faktorok szintézisét."
+                    },
+                    {
+                        question: "Melyik állítás igaz az ICH prognózisára?",
+                        options: ["Az ICH prognózisa általában jobb, mint az iszkémiás stroke-é.", "Az ICH mortalitása alacsony, kevesebb mint 10%.", "Az ICH súlyos kórkép, magas (akár 40%-os) egyhónapos mortalitással.", "A prognózis csak a beteg életkorától függ."],
+                        answer: "Az ICH súlyos kórkép, magas (akár 40%-os) egyhónapos mortalitással.",
+                        explanation: "Az intracerebralis vérzés a stroke súlyosabb formája, amely aránytalanul magas halálozással és rosszabb funkcionális kimenetellel jár az iszkémiás stroke-hoz képest."
+                    },
+                    {
+                        question: "Melyik a legfontosabb rizikófaktor az ICH kiújulásának megelőzésében?",
+                        options: ["A koleszterinszint csökkentése", "A dohányzás elhagyása", "A testsúly normalizálása", "A vérnyomás szigorú és tartós kontrollja"],
+                        answer: "A vérnyomás szigorú és tartós kontrollja",
+                        explanation: "Mivel a magas vérnyomás a legfőbb oka az ICH-nak, a másodlagos prevenció legfontosabb eleme a vérnyomás célértéken (<130/80 Hgmm) tartása a kiújulás kockázatának csökkentése érdekében."
+                    },
+                    {
+                        question: "Milyen típusú agydaganatok hajlamosak leginkább a bevérzésre?",
+                        options: ["Meningeoma", "Glioblastoma és agyi áttétek (pl. melanoma, veserák)", "Akusztikus neurinoma", "Agyalapi mirigy adenoma"],
+                        answer: "Glioblastoma és agyi áttétek (pl. melanoma, veserák)",
+                        explanation: "Bizonyos magas malignitású primer agydaganatok (pl. glioblastoma) és egyes áttétek (különösen a melanoma, vesesejtes cc., choriocarcinoma) kóros érképződéssel és érfal-gyengeséggel járnak, ami miatt hajlamosak a bevérzésre."
+                    },
+                    {
+                        question: "Mi a Charcot-Bouchard aneurizma?",
+                        options: ["Nagy, bogyószerű aneurizma a Willis-körön.", "Az agyi kisartériákon kialakuló mikroaneurizma, amelyet a krónikus hypertonia okoz.", "Egy vénás fejlődési rendellenesség.", "Az aorta aneurizmája."],
+                        answer: "Az agyi kisartériákon kialakuló mikroaneurizma, amelyet a krónikus hypertonia okoz.",
+                        explanation: "Ezek a kis, 300-900 mikron átmérőjű tágulatok a mély agyi területek perforáló artériáin alakulnak ki a magas vérnyomás okozta érfalkárosodás következtében, és megrepedésük mély ICH-t okoz."
+                    },
+                    {
+                        question: "Milyen neurológiai tünetek jellemzőek egy pons vérzésre?",
+                        options: ["Csak fejfájás", "Féloldali bénulás ép tudat mellett", "Mély kóma, pontszerű pupillák és quadriplegia", "Csak beszédzavar"],
+                        answer: "Mély kóma, pontszerű pupillák és quadriplegia",
+                        explanation: "A pons (híd) az agytörzs kritikus része, amely a tudatállapotért, légzésért és a motoros pályákért felelős központokat tartalmazza. A pons vérzése ezért gyakran katasztrofális, jellegzetes tünetegyüttest okoz."
+                    },
+                    {
+                        question: "Mi a másodlagos agykárosodás lényege ICH után?",
+                        options: ["A vérzés megismétlődése.", "A vérömleny és bomlástermékei által kiváltott gyulladásos és toxikus folyamatok, amelyek tovább károsítják az agyszövetet.", "A rehabilitáció sikertelensége.", "A beteg pszichés állapota."],
+                        answer: "A vérömleny és bomlástermékei által kiváltott gyulladásos és toxikus folyamatok, amelyek tovább károsítják az agyszövetet.",
+                        explanation: "A primer mechanikai károsodást követően egy komplex kaszkád indul be (ödéma, gyulladás, oxidatív stressz), ami a hematóma körüli agyszövet további, másodlagos pusztulásához vezet."
+                    },
+                    {
+                        question: "Melyik állítás igaz az antikoaguláns-asszociált ICH-ra?",
+                        options: ["Ritkábban fordul elő, mint a spontán ICH.", "Gyakran gyorsabb hematóma növekedéssel és rosszabb kimenetellel jár.", "Könnyebben kezelhető, mint a spontán ICH.", "Nem igényel speciális kezelést."],
+                        answer: "Gyakran gyorsabb hematóma növekedéssel és rosszabb kimenetellel jár.",
+                        explanation: "A véralvadásgátlókat szedő betegeknél kialakuló agyvérzés gyakran nagyobb méretű, hajlamosabb a további növekedésre, és rosszabb prognózisú, mint a nem antikoagulált betegeknél."
+                    },
+                    {
+                        question: "Milyen célt szolgál az ABC/2 módszer?",
+                        options: ["A beteg GCS pontszámának kiszámítását.", "A hematóma térfogatának gyors becslését a CT felvételek alapján.", "A vérnyomás célértékének meghatározását.", "A műtéti indikáció felállítását."],
+                        answer: "A hematóma térfogatának gyors becslését a CT felvételek alapján.",
+                        explanation: "Az ABC/2 egy egyszerű formula, amellyel a CT képeken mért legnagyobb átmérők (A, B) és a vérzést mutató szeletek számának (C) alapján gyorsan megbecsülhető a vérömleny térfogata, ami fontos prognosztikai faktor."
+                    },
+                    {
+                        question: "Milyen esetben merül fel leginkább cerebrális amyloid angiopátia (CAA) gyanúja?",
+                        options: ["Fiatal, magas vérnyomásos betegnél mély agyi vérzéssel.", "Idős, nem magas vérnyomásos betegnél ismétlődő, szigorúan lobáris vérzésekkel.", "Traumás fejsérülés után.", "Véralvadási zavarban szenvedő betegnél."],
+                        answer: "Idős, nem magas vérnyomásos betegnél ismétlődő, szigorúan lobáris vérzésekkel.",
+                        explanation: "Ez a klasszikus klinikai forgatókönyv a CAA-ra: idős kor, a hypertonia hiánya, és a vérzések jellegzetes, agykéreghez közeli (lobáris) elhelyezkedése."
+                    },
+                    {
+                        question: "Mi a fő oka a hydrocephalus kialakulásának ICH után?",
+                        options: ["Túlzott liquor termelődés.", "A vérömleny áttörése az agykamrákba (IVH), ami elzárja a liquor keringési útvonalait.", "Az agy zsugorodása.", "Agyhártyagyulladás."],
+                        answer: "A vérömleny áttörése az agykamrákba (IVH), ami elzárja a liquor keringési útvonalait.",
+                        explanation: "Ha az intracerebralis vérzés betör az agykamra-rendszerbe, a vérrögök elzárhatják a liquor normális áramlását, ami a kamrák kitágulásához, azaz obstruktív hydrocephalushoz vezet."
+                    },
+                    {
+                        question: "Milyen kezelést igényel az akut, tüneteket okozó hydrocephalus ICH után?",
+                        options: ["Vízhajtók adását.", "Lumbálpunkciót.", "Külső kamrai drainage (EVD) behelyezését.", "Csak a vérnyomás csökkentését."],
+                        answer: "Külső kamrai drainage (EVD) behelyezését.",
+                        explanation: "Az EVD egy vékony katéter, amelyet az agykamrába vezetnek a liquor elvezetése és a koponyaűri nyomás csökkentése érdekében. Ez életmentő beavatkozás lehet akut hydrocephalus esetén."
+                    }
+                ]
+            },
+            "sav_terapia": {
+                title: "A subarachnoidealis vérzés és terápiája",
+                questions: [
+                    {
+                        question: "Mi a nem-traumás subarachnoidealis vérzés (SAV) leggyakoribb oka?",
+                        options: ["Magas vérnyomás", "Agyi artériás aneurysma megrepedése", "Véralvadási zavar", "Agydaganat"],
+                        answer: "Agyi artériás aneurysma megrepedése",
+                        explanation: "A spontán SAV eseteinek döntő többségét, mintegy 80-85%-át, egy intracranialis, leggyakrabban bogyószerű (saccularis) aneurysma ruptúrája okozza."
+                    },
+                    {
+                        question: "Mi a SAV legjellegzetesebb, klasszikus tünete?",
+                        options: ["Lassan fokozódó fejfájás", "Szédülés", "Hirtelen, ütésszerű, 'életem legrosszabb' fejfájása", "Féloldali zsibbadás"],
+                        answer: "Hirtelen, ütésszerű, 'életem legrosszabb' fejfájása",
+                        explanation: "A 'thunderclap headache' (üstdobbanásszerű fejfájás) a SAV patognomonikus tünete, amelyet a vér hirtelen kiáramlása a subarachnoidealis térbe és az agyhártyák irritációja okoz."
+                    },
+                    {
+                        question: "Melyik képalkotó vizsgálat az elsődleges választás SAV gyanúja esetén?",
+                        options: ["Koponya röntgen", "Natív koponya CT", "MRI", "Ultrahang"],
+                        answer: "Natív koponya CT",
+                        explanation: "A natív CT gyors, széles körben elérhető, és az akut szakaszban (különösen az első 6-24 órában) rendkívül érzékeny a friss vér kimutatására a subarachnoidealis térben."
+                    },
+                    {
+                        question: "Mikor indokolt lumbálpunkciót végezni SAV gyanúja esetén?",
+                        options: ["Minden esetben, a CT helyett.", "Ha a natív CT negatív, de a klinikai gyanú továbbra is erős.", "Csak ha a beteg eszméletlen.", "Soha nem indokolt."],
+                        answer: "Ha a natív CT negatív, de a klinikai gyanú továbbra is erős.",
+                        explanation: "Ha a tünetek tipikusak, de a CT nem mutat vérzést (pl. mert a vérzés kis mennyiségű vagy több idő telt el), lumbálpunkcióval lehet igazolni a vér jelenlétét a liquorban (xanthochromia)."
+                    },
+                    {
+                        question: "Mi a SAV legrettegettebb korai szövődménye?",
+                        options: ["Láz", "Újravérzés", "Tüdőgyulladás", "Mélyvénás trombózis"],
+                        answer: "Újravérzés",
+                        explanation: "A megrepedt, de ellátatlan aneurysma újbóli ruptúrája rendkívül magas mortalitással jár. A kockázat az első 24 órában a legnagyobb, ezért az aneurysma mielőbbi ellátása a terápia prioritása."
+                    },
+                    {
+                        question: "Melyik gyógyszer bizonyítottan csökkenti a késői cerebrális ischaemia (DCI) kockázatát SAV után?",
+                        options: ["Aszpirin", "Statinok", "Nimodipin", "Heparin"],
+                        answer: "Nimodipin",
+                        explanation: "A nimodipin, egy kalciumcsatorna-blokkoló, standard terápia minden aneurysmatikus SAV-on átesett betegnél. Bizonyítottan javítja a neurológiai kimenetelt, valószínűleg neuroprotektív és értágító hatásai révén."
+                    },
+                    {
+                        question: "Mi a cerebrális vazospazmus?",
+                        options: ["Az agyi artériák görcsös összehúzódása, szűkülete.", "Az agyi erek tágulata.", "Vérrögképződés az agyi vénákban.", "Az agyi erek gyulladása."],
+                        answer: "Az agyi artériák görcsös összehúzódása, szűkülete.",
+                        explanation: "A vazospazmus a SAV egy gyakori és súlyos szövődménye, amely a vérzés után 3-14 nappal alakul ki. A subarachnoidealis térben lévő vér bomlástermékei okozzák, és agyi ischaemiához vezethet."
+                    },
+                    {
+                        question: "Melyik két fő módszer létezik a megrepedt aneurysma ellátására?",
+                        options: ["Gyógyszeres kezelés és sugárterápia", "Sebészi clipping és endovascularis coiling", "Csak megfigyelés", "Vérnyomáscsökkentés és lumbálpunkció"],
+                        answer: "Sebészi clipping és endovascularis coiling",
+                        explanation: "A két alapvető módszer a nyitott agyműtét során felhelyezett klip (clipping) és a katéteres úton, platinaspirálokkal történő kitöltés (coiling). A cél mindkét esetben az aneurysma keringésből való kiiktatása."
+                    },
+                    {
+                        question: "Mire szolgál a Hunt és Hess skála?",
+                        options: ["A vérzés mennyiségének becslésére.", "A beteg klinikai állapotának és a SAV súlyosságának felmérésére.", "Az aneurysma méretének mérésére.", "A vazospazmus kockázatának becslésére."],
+                        answer: "A beteg klinikai állapotának és a SAV súlyosságának felmérésére.",
+                        explanation: "A Hunt és Hess skála egy klinikai pontrendszer, amely a beteg tudatállapota és neurológiai deficitjei alapján osztályozza a SAV súlyosságát, és segít a prognózis becslésében."
+                    },
+                    {
+                        question: "Mi a hydrocephalus és miért alakul ki SAV után?",
+                        options: ["Az agy zsugorodása.", "Agykamrák tágulata a liquor keringési vagy felszívódási zavara miatt.", "Agyi fertőzés.", "Az agy duzzanata."],
+                        answer: "Agykamrák tágulata a liquor keringési vagy felszívódási zavara miatt.",
+                        explanation: "A subarachnoidealis térben lévő vér és törmelék elzárhatja a liquor normális útjait vagy károsíthatja a felszívó felületeket, ami a liquor felgyülemléséhez és az agykamrák kitágulásához (hydrocephalus) vezet."
+                    },
+                    {
+                        question: "Mi a 'sentinel headache' (őrszem fejfájás)?",
+                        options: ["A SAV utáni krónikus fejfájás.", "A nagy aneurysma ruptúrát megelőző, figyelmeztető, hirtelen és erős fejfájás.", "A migrén egy típusa.", "A lumbálpunkció utáni fejfájás."],
+                        answer: "A nagy aneurysma ruptúrát megelőző, figyelmeztető, hirtelen és erős fejfájás.",
+                        explanation: "Egyes betegek a katasztrofális vérzés előtt napokkal vagy hetekkel egy kisebb, 'figyelmeztető szivárgás' okozta hirtelen fejfájást élnek át. Ennek felismerése életmentő lehet."
+                    },
+                    {
+                        question: "Melyik agyideg bénulása jellemző a posterior communicans artéria aneurysmájának megrepedésekor?",
+                        options: ["Látóideg (II.)", "Szemmozgató ideg (III.)", "Arcideg (VII.)", "Halló-egyensúlyozó ideg (VIII.)"],
+                        answer: "Szemmozgató ideg (III.)",
+                        explanation: "A posterior communicans artéria (PComA) aneurysmája gyakran nyomja a mellette futó III. agyideget (n. oculomotorius), ami jellegzetes tüneteket okoz: szemhéjcsüngés (ptosis), tág, fénymerev pupilla és a szem kifelé-lefelé tekintése."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás az 'arany standard' az agyi aneurysmák részletes morfológiai vizsgálatára?",
+                        options: ["Natív CT", "MRA", "TCD", "Digitális Szubtrakciós Angiográfia (DSA)"],
+                        answer: "Digitális Szubtrakciós Angiográfia (DSA)",
+                        explanation: "A DSA (katéteres érfestés) adja a legrészletesebb képet az agyi erekről, az aneurysma pontos alakjáról, méretéről és a környező erekhez való viszonyáról, ami elengedhetetlen a kezelés tervezéséhez."
+                    },
+                    {
+                        question: "Mi a Fisher skála célja?",
+                        options: ["A beteg tudatállapotának felmérése.", "A vérzés mennyiségének és eloszlásának osztályozása a CT képen a vazospazmus kockázatának becslésére.", "A rehabilitációs potenciál mérése.", "Az aneurysma méretének meghatározása."],
+                        answer: "A vérzés mennyiségének és eloszlásának osztályozása a CT képen a vazospazmus kockázatának becslésére.",
+                        explanation: "A Fisher skála (és annak módosított változata) a natív CT-n látható vér mennyisége alapján segít megbecsülni a késői cerebrális ischaemia (DCI) kialakulásának valószínűségét."
+                    },
+                    {
+                        question: "Mi a kezelése a SAV utáni akut, tüneteket okozó hydrocephalusnak?",
+                        options: ["Vízhajtók adása", "Külső kamrai drainage (EVD) behelyezése", "Ismételt lumbálpunkciók", "Magas dózisú szteroidok"],
+                        answer: "Külső kamrai drainage (EVD) behelyezése",
+                        explanation: "Az EVD egy, az agykamrába vezetett katéter, amelyen keresztül a felesleges liquor elvezethető, így csökkentve a koponyaűri nyomást. Ez életmentő beavatkozás lehet."
+                    },
+                    {
+                        question: "Melyik állítás igaz az endovascularis coiling és a sebészi clipping összehasonlítására?",
+                        options: ["A clipping mindig biztonságosabb.", "A coiling mindig tartósabb megoldás.", "Az ISAT vizsgálat szerint a coilingra alkalmas aneurysmák esetén a rövid távú kimenetel kedvezőbb a coilinggal.", "A két módszer között nincs különbség."],
+                        answer: "Az ISAT vizsgálat szerint a coilingra alkalmas aneurysmák esetén a rövid távú kimenetel kedvezőbb a coilinggal.",
+                        explanation: "A mérföldkőnek számító ISAT vizsgálat kimutatta, hogy a coilinggal kezelt betegeknek jobb volt a funkcionális kimenetelük 1 év után, mint a clippinggel kezelteknek, bár a coilingnál magasabb volt a későbbi újrakezelés aránya."
+                    },
+                    {
+                        question: "Milyen vérnyomás-menedzsment javasolt az aneurysma ellátása UTÁN?",
+                        options: ["A vérnyomást a lehető legalacsonyabbra kell csökkenteni.", "A vérnyomást magasabb célértéken lehet tartani vagy akár emelni is a vazospazmus megelőzése/kezelése érdekében.", "A vérnyomást nem kell kezelni.", "A vérnyomásnak ingadoznia kell."],
+                        answer: "A vérnyomást magasabb célértéken lehet tartani vagy akár emelni is a vazospazmus megelőzése/kezelése érdekében.",
+                        explanation: "Miután az aneurysma ki van iktatva a keringésből (az újravérzés veszélye elhárult), a magasabb vérnyomás fenntartása (indukált hypertonia) segíthet az agyi perfúzió javításában és a vazospazmus okozta ischaemia kivédésében."
+                    },
+                    {
+                        question: "Mi a xanthochromia?",
+                        options: ["A liquor magas fehérjetartalma.", "A liquor sárgás elszíneződése a hemoglobin lebomlása miatt.", "Baktériumok jelenléte a liquorban.", "A liquor alacsony cukortartalma."],
+                        answer: "A liquor sárgás elszíneződése a hemoglobin lebomlása miatt.",
+                        explanation: "A subarachnoidealis térbe került vörösvértestek szétesnek, és a hemoglobinból bilirubin keletkezik, ami sárgára festi a liquort. Ez a jelenség (xanthochromia) a SAV megbízható jele lumbálpunkció során."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb hosszú távú következménye a SAV-nak a túlélőknél?",
+                        options: ["Teljes gyógyulás minden esetben", "Csak mozgásszervi problémák", "Kognitív zavarok, fáradékonyság és hangulatzavarok", "Csak fejfájás"],
+                        answer: "Kognitív zavarok, fáradékonyság és hangulatzavarok",
+                        explanation: "A SAV túlélői gyakran küzdenek 'láthatatlan' következményekkel, mint a memória- és figyelemzavarok, a krónikus fáradtság és a depresszió, amelyek jelentősen rontják az életminőséget."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a SAV-ra?",
+                        options: ["Neurológiai vészhelyzet.", "Gyakran társul ütésszerű fejfájással.", "A prognózis általában kiváló, a betegek többsége maradéktalanul felépül.", "A leggyakoribb oka egy aneurysma megrepedése."],
+                        answer: "A prognózis általában kiváló, a betegek többsége maradéktalanul felépül.",
+                        explanation: "A SAV egy súlyos állapot, magas mortalitással és morbiditással. A túlélők jelentős része tartós neurológiai vagy kognitív károsodással él tovább, a teljes, maradéktalan felépülés nem általános."
+                    }
+                ]
+            },
+            "intracranialis_erek_fejlodese": {
+                title: "Az intracranialis erek fejlődési rendellenességei",
+                questions: [
+                    {
+                        question: "Melyik a leggyakrabban diagnosztizált intracranialis vascularis malformáció?",
+                        options: ["Arteriovenosus malformáció (AVM)", "Cavernoma", "Fejlődési vénás anomália (DVA)", "Durális arteriovenosus fistula (dAVF)"],
+                        answer: "Fejlődési vénás anomália (DVA)",
+                        explanation: "A DVA a leggyakoribb agyi vascularis malformáció, amelyet gyakran véletlenül fedeznek fel képalkotó vizsgálatok során. Általában jóindulatú, a normális agyszövet vénás elvezetését szolgáló anomália."
+                    },
+                    {
+                        question: "Mi az arteriovenosus malformáció (AVM) lényege?",
+                        options: ["Lassú áramlású érgomolyag.", "Az artériák és vénák közötti direkt, kóros összeköttetés egy közbeiktatott kapillárishálózat (nidus) révén.", "Csak vénákat érintő tágulat.", "Egy meszesedett ér."],
+                        answer: "Az artériák és vénák közötti direkt, kóros összeköttetés egy közbeiktatott kapillárishálózat (nidus) révén.",
+                        explanation: "Az AVM egy gyors áramlású malformáció, ahol a magas nyomású artériás vér közvetlenül a alacsony nyomású vénás rendszerbe ömlik egy kóros érköteg, a nidus közbeiktatásával, kapilláris ágy nélkül."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb klinikai manifesztációja az AVM-nek?",
+                        options: ["Fejfájás", "Intracranialis vérzés", "Epilepsziás roham", "Fokális neurológiai deficit"],
+                        answer: "Intracranialis vérzés",
+                        explanation: "Bár okozhat görcsrohamot vagy fejfájást is, az AVM-ek leggyakoribb és legsúlyosabb megnyilvánulása a megrepedésükből származó agyvérzés, különösen fiatal betegeknél."
+                    },
+                    {
+                        question: "Mire szolgál a Spetzler-Martin skála?",
+                        options: ["A cavernomák méretének mérésére.", "Az AVM-ek komplexitásának és műtéti kockázatának felmérésére.", "A DVA-k áramlási sebességének becslésére.", "A dAVF-ek típusának meghatározására."],
+                        answer: "Az AVM-ek komplexitásának és műtéti kockázatának felmérésére.",
+                        explanation: "A Spetzler-Martin skála három tényező (az AVM mérete, az eloquens agyterülethez való közelsége, és a vénás elvezetés mintázata) alapján pontozza az AVM-et, segítve a kezelési stratégia megválasztását."
+                    },
+                    {
+                        question: "Milyen jellegzetes képalkotó jele van a cavernomának az MRI-n?",
+                        options: ["'Puff of smoke' (füstgomolyag) jel", "'String of beads' (gyöngyfüzér) jel", "'Popcorn' (pattogatott kukorica) megjelenés hemosziderin gyűrűvel", "'Empty delta' jel"],
+                        answer: "'Popcorn' (pattogatott kukorica) megjelenés hemosziderin gyűrűvel",
+                        explanation: "A cavernoma az MRI T2-súlyozott képeken jellegzetes, kevert jelintenzitású, 'pattogatott kukoricára' emlékeztető képet ad, amelyet a korábbi mikrovérzésekből származó hemosziderin lerakódás miatti sötét gyűrű vesz körül."
+                    },
+                    {
+                        question: "Miért veszélyes egy fejlődési vénás anomália (DVA) sebészi eltávolítása?",
+                        options: ["Mert mindig elrákosodik.", "Mert az eltávolítása a környező, normális agyszövet vénás infarktusát okozhatja.", "Mert nagyon könnyen vérezni kezd.", "Mert túl nagy méretű."],
+                        answer: "Mert az eltávolítása a környező, normális agyszövet vénás infarktusát okozhatja.",
+                        explanation: "A DVA nem egy kóros érgomolyag, hanem a normális agyállomány egy részének funkcionális vénás elvezetését biztosítja. Eltávolítása a terület vénás elfolyásának megszűnéséhez és súlyos vénás infarktushoz vezethet."
+                    },
+                    {
+                        question: "Mi a durális arteriovenosus fistula (dAVF) lényege?",
+                        options: ["Egy artéria és egy véna közötti direkt összeköttetés az agy állományában.", "Egy kóros összeköttetés a dura mater artériái és vénás sinusai/vénái között.", "A gerincvelő érfejlődési rendellenessége.", "Egyfajta agydaganat."],
+                        answer: "Egy kóros összeköttetés a dura mater artériái és vénás sinusai/vénái között.",
+                        explanation: "A dAVF egy szerzett elváltozás, ahol a kemény agyhártyát (dura mater) ellátó artériák kórosan, direkt módon összeköttetésbe kerülnek egy agyi vénás sinussal vagy kortikális vénával."
+                    },
+                    {
+                        question: "Melyik genetikai betegség társul gyakran multiplex agyi AVM-ekkel és ismétlődő orrvérzéssel?",
+                        options: ["CADASIL", "Fabry-kór", "Herediter haemorrhagiás teleangiectasia (HHT)", "Neurofibromatosis"],
+                        answer: "Herediter haemorrhagiás teleangiectasia (HHT)",
+                        explanation: "A HHT (Osler-Weber-Rendu szindróma) egy örökletes betegség, amelyet a bőrön és nyálkahártyákon lévő teleangiectasiák, valamint a belső szervekben (tüdő, máj, agy) kialakuló AVM-ek jellemeznek."
+                    },
+                    {
+                        question: "Melyik képalkotó eljárás az 'arany standard' az AVM-ek és dAVF-ek részletes vizsgálatára és kezelésének tervezésére?",
+                        options: ["Natív CT", "Koponya ultrahang", "Digitális szubtrakciós angiográfia (DSA)", "EEG"],
+                        answer: "Digitális szubtrakciós angiográfia (DSA)",
+                        explanation: "A DSA (katéteres érfestés) adja a legpontosabb képet a malformációk hemodinamikájáról: a tápláló artériákról, a nidus szerkezetéről és a vénás elvezetésről, ami elengedhetetlen a kezelés (embolizáció, sebészet) megtervezéséhez."
+                    },
+                    {
+                        question: "Mi a 'steal' fenomén AVM-ek esetén?",
+                        options: ["Az AVM vért lop a betegtől.", "Az AVM alacsony ellenállású söntként működik, elterelve a vért a környező egészséges agyszövettől.", "A vérrögök ellopják a vörösvértesteket.", "A liquor áramlásának ellopása."],
+                        answer: "Az AVM alacsony ellenállású söntként működik, elterelve a vért a környező egészséges agyszövettől.",
+                        explanation: "A gyors áramlású AVM 'elszívja' a vért a környező, normális agyterületektől, ami krónikus hypoperfúziót és ischaemiás tüneteket (pl. fokális deficit, kognitív hanyatlás) okozhat."
+                    },
+                    {
+                        question: "Milyen kezelési módszert alkalmaznak leggyakrabban a Galen-véna malformáció kezelésére újszülötteknél?",
+                        options: ["Gyógyszeres kezelés", "Sebészi eltávolítás", "Endovascularis embolizáció", "Sugárterápia"],
+                        answer: "Endovascularis embolizáció",
+                        explanation: "A Galen-véna malformáció egy súlyos, gyors áramlású sönt, ami újszülöttkorban szívelégtelenséget okozhat. A kezelés elsődlegesen az érrendszeren belüli, katéteres úton történő embolizáció, amellyel fokozatosan csökkentik a söntáramlást."
+                    },
+                    {
+                        question: "Melyik állítás igaz a cavernomákra?",
+                        options: ["Mindig gyors áramlásúak.", "Gyakran okoznak subarachnoidealis vérzést.", "Jellemzően epilepsziás rohamokkal vagy fokális deficittel jelentkeznek a mikrovérzések miatt.", "Soha nem öröklődnek."],
+                        answer: "Jellemzően epilepsziás rohamokkal vagy fokális deficittel jelentkeznek a mikrovérzések miatt.",
+                        explanation: "A cavernomák lassú áramlású léziók, amelyek hajlamosak a szivárgásra, ismétlődő mikrovérzésekre. A környező agyszövetben lerakódó hemosziderin irritatív hatású, ami gyakran vezet görcsrohamok kialakulásához."
+                    },
+                    {
+                        question: "Mi a 'nidus' egy AVM-ben?",
+                        options: ["A tápláló artéria.", "Az elvezető véna.", "A kóros, kapillárisokat nélkülöző érgomolyag az artériák és vénák között.", "A malformáció körüli agyödéma."],
+                        answer: "A kóros, kapillárisokat nélkülöző érgomolyag az artériák és vénák között.",
+                        explanation: "A nidus az AVM központi része, egy kusza érhálózat, ahol a magas nyomású artériás vér közvetlenül a vénás rendszerbe jut, megkerülve a normális kapilláris ágyat."
+                    },
+                    {
+                        question: "Melyik agyi régióban a leggyakoribb a kapilláris teleangiectasia?",
+                        options: ["Frontális lebeny", "Kisagy", "Híd (pons)", "Thalamus"],
+                        answer: "Híd (pons)",
+                        explanation: "A kapilláris teleangiectasiák, amelyek tágult kapillárisokból állnak, leggyakrabban az agytörzsben, különösen a hídban fordulnak elő. Általában tünetmentes, véletlen leletek."
+                    },
+                    {
+                        question: "Melyik az AVM kezelésének három fő modalitása?",
+                        options: ["Gyógyszer, diéta, testmozgás", "Mikrosebészeti eltávolítás, endovascularis embolizáció, sztereotaxiás radiosebészet", "Kemoterápia, immunterápia, hormonterápia", "Csak megfigyelés"],
+                        answer: "Mikrosebészeti eltávolítás, endovascularis embolizáció, sztereotaxiás radiosebészet",
+                        explanation: "Az AVM-ek kezelésére ez a három fő módszer vagy ezek kombinációja áll rendelkezésre, a választás a lézió méretétől, elhelyezkedésétől és a beteg állapotától függ."
+                    },
+                    {
+                        question: "Milyen típusú vérzést okoz leggyakrabban egy AVM ruptúrája?",
+                        options: ["Subdurális hematóma", "Epidurális hematóma", "Intracerebralis vérzés (ICH)", "Csak subarachnoidealis vérzés (SAH)"],
+                        answer: "Intracerebralis vérzés (ICH)",
+                        explanation: "Mivel az AVM nidusa az agy állományában (parenchyma) helyezkedik el, a megrepedése leggyakrabban intracerebralis vérzést okoz, bár gyakran áttörhet a subarachnoidealis térbe vagy a kamrarendszerbe is."
+                    },
+                    {
+                        question: "Mi a 'two-hit' hipotézis jelentősége a vascularis malformációkban?",
+                        options: ["Azt jelenti, hogy a beteget kétszer kell megütni a diagnózishoz.", "Azt feltételezi, hogy egy genetikai hajlam (első 'hit') és egy későbbi szerzett esemény (második 'hit') együttesen szükséges a malformáció kialakulásához.", "Azt jelenti, hogy a kezelésnek két lépésből kell állnia.", "Azt jelenti, hogy a malformációnak két része van."],
+                        answer: "Azt feltételezi, hogy egy genetikai hajlam (első 'hit') és egy későbbi szerzett esemény (második 'hit') együttesen szükséges a malformáció kialakulásához.",
+                        explanation: "Ez a modell magyarázatot adhat arra, hogy miért nem minden, genetikai hajlammal rendelkező egyénben alakul ki klinikailag jelentős malformáció, és miért válhatnak ezek az elváltozások az élet során később tünetessé."
+                    },
+                    {
+                        question: "Melyik állítás igaz a DVA-ra (fejlődési vénás anomália)?",
+                        options: ["Mindig sürgős műtétet igényel.", "Gyakran okoz súlyos agyvérzést.", "A normális agyszövet vénás elvezetését szolgáló, általában jóindulatú anomália.", "Egy gyors áramlású malformáció."],
+                        answer: "A normális agyszövet vénás elvezetését szolgáló, általában jóindulatú anomália.",
+                        explanation: "A DVA-t ma már nem is igazi malformációnak, hanem az agyi vénás fejlődés egy variánsának tekintik. Mivel a környező agyállomány funkcionális elvezető vénája, eltávolítása tilos."
+                    },
+                    {
+                        question: "Mi a 'caput medusae' (Medúza-fő) jel?",
+                        options: ["Egyfajta bőrkiütés.", "Az AVM-ek jellegzetes angiográfiás képe.", "A DVA-k jellegzetes angiográfiás vagy kontrasztos MRI képe.", "A cavernomák CT jele."],
+                        answer: "A DVA-k jellegzetes angiográfiás vagy kontrasztos MRI képe.",
+                        explanation: "A DVA képalkotókon egy jellegzetes mintázatot mutat: számos kisebb, radiálisan futó véna egyetlen, nagyobb, centrális gyűjtővénába ömlik, ami egy Medúza-főre emlékeztet."
+                    },
+                    {
+                        question: "Melyik malformáció társul leggyakrabban epilepsziás rohamokkal?",
+                        options: ["DVA", "Kapilláris teleangiectasia", "Cavernoma", "AVM"],
+                        answer: "Cavernoma",
+                        explanation: "A cavernomákból származó ismétlődő mikrovérzések és a hemosziderin lerakódása a környező agykéregben irritatív hatású, ami miatt a cavernomák az epilepszia egyik gyakori strukturális okát képezik."
+                    }
+                ]
+            }
+        };
+
+        const app = document.getElementById('app');
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicList = document.getElementById('topic-list');
+        const quizTitle = document.getElementById('quiz-title');
+        const progressText = document.getElementById('progress-text');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const explanationContainer = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreText = document.getElementById('score-text');
+        const scorePercentage = document.getElementById('score-percentage');
+        const restartQuizButton = document.getElementById('restart-quiz');
+        const backToTopicsButton = document.getElementById('back-to-topics');
+        const backToTopicsFromResultsButton = document.getElementById('back-to-topics-from-results');
+
+        let currentQuizId = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questions = [];
+
+        function init() {
+            // Populate topic list
+            topicList.innerHTML = '';
+            for (const topicId in quizData) {
+                const topic = quizData[topicId];
+                const topicCard = document.createElement('div');
+                topicCard.className = 'bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-slate-200 hover:border-blue-500';
+                topicCard.innerHTML = `<h3 class="text-xl font-semibold text-slate-800">${topic.title}</h3>`;
+                topicCard.addEventListener('click', () => startQuiz(topicId));
+                topicList.appendChild(topicCard);
+            }
+
+            backToTopicsButton.addEventListener('click', showTopicSelection);
+            backToTopicsFromResultsButton.addEventListener('click', showTopicSelection);
+            nextButton.addEventListener('click', nextQuestion);
+            restartQuizButton.addEventListener('click', () => startQuiz(currentQuizId));
+        }
+
+        function startQuiz(topicId) {
+            currentQuizId = topicId;
+            questions = quizData[topicId].questions;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            quizTitle.textContent = quizData[topicId].title;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            resetState();
+            const questionData = questions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            progressText.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${questions.length}`;
+
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'w-full text-left p-4 bg-slate-100 rounded-lg hover:bg-slate-200 quiz-option border border-slate-200';
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextButton.disabled = true;
+            explanationContainer.style.maxHeight = '0';
+            explanationContainer.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            explanationContainer.classList.add('border-blue-500', 'bg-blue-50');
+
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correctAnswer = questions[currentQuestionIndex].answer;
+
+            // Disable all options
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (selectedButton.textContent === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-green-500', 'bg-green-50');
+            } else {
+                selectedButton.classList.add('incorrect');
+                explanationContainer.classList.remove('border-blue-500', 'bg-blue-50');
+                explanationContainer.classList.add('border-red-500', 'bg-red-50');
+            }
+            
+            explanationText.innerHTML = questions[currentQuestionIndex].explanation;
+            explanationContainer.style.maxHeight = explanationContainer.scrollHeight + "px";
+
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            const percentage = Math.round((score / questions.length) * 100);
+            scoreText.textContent = `Helyes válaszok: ${score} / ${questions.length}`;
+            scorePercentage.textContent = `${percentage}%`;
+        }
+        
+        function showTopicSelection() {
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+        }
+
+        // Initialize the app
+        init();
+    </script>
+
+</body>
+</html>

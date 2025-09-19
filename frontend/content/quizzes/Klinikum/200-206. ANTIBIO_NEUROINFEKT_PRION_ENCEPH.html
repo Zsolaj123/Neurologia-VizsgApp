@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .topic-card, .btn-answer {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-answer.correct {
+            background-color: #22c55e; /* green-500 */
+            color: white;
+            border-color: #16a34a; /* green-600 */
+        }
+        .btn-answer.incorrect {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            border-color: #dc2626; /* red-600 */
+        }
+        .btn-answer:disabled {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="app" class="quiz-container p-4 sm:p-8">
+        
+        <!-- Topic Selection Screen -->
+        <div id="topic-selection" class="text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-2 text-gray-900">Interaktív Neurológiai Teszt</h1>
+            <p class="text-gray-600 mb-8">Válassz egy témakört a vizsga megkezdéséhez.</p>
+            <div id="topic-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Topics will be inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="quiz-topic-title" class="text-xl sm:text-2xl font-bold text-indigo-600">Téma</h2>
+                    <div class="text-lg font-semibold bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full">
+                        <span id="question-counter">1</span> / <span id="total-questions">10</span>
+                    </div>
+                </div>
+                
+                <div id="question-container" class="mb-6">
+                    <p id="question-text" class="text-lg sm:text-xl font-medium mb-6 min-h-[60px]"></p>
+                    <div id="answer-buttons" class="flex flex-col space-y-3">
+                        <!-- Answer buttons will be inserted here by JS -->
+                    </div>
+                </div>
+
+                <div id="explanation-container" class="hidden mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-lg mb-2">Magyarázat</h3>
+                    <p id="explanation-text" class="text-gray-700"></p>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-button" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">Következő</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold mb-4">Eredmények</h2>
+                <p id="score-text" class="text-2xl mb-6">X helyes válasz a Y-ból.</p>
+                <div id="results-icon" class="text-7xl mb-6"></div>
+                <p id="results-message" class="text-lg text-gray-600 mb-8"></p>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="restartQuiz()" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-200">Újrapróbálkozás</button>
+                    <button onclick="showTopics()" class="bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors duration-200">Másik téma</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const questions = {
+            "antibiotikumok": {
+                title: "Antibiotikus kezelés neuroinfekciókban",
+                data: [
+                    {
+                        question: "Melyik tényező segíti elő leginkább egy antibiotikum átjutását a vér-agy gáton (VAG)?",
+                        options: ["Magas vízoldékonyság", "Nagy molekulaméret", "Magas zsíroldékonyság (lipofilitás)", "Erős plazmafehérje-kötődés"],
+                        answer: "Magas zsíroldékonyság (lipofilitás)",
+                        explanation: "A zsíroldékony (lipofil) gyógyszerek könnyebben diffundálnak át a VAG lipidmembránjain. A nagy molekulaméret, a vízoldékonyság és az erős fehérjekötődés gátolja a penetrációt."
+                    },
+                    {
+                        question: "Mikor javasolt az adjunktív dexametazon adása bakteriális meningitis esetén?",
+                        options: ["Csak a lumbálpunkció után", "Az első antibiotikum adag előtt vagy azzal egyidőben", "A kezelés 2. napján", "Csak ha a beteg állapota romlik"],
+                        answer: "Az első antibiotikum adag előtt vagy azzal egyidőben",
+                        explanation: "A dexametazon csökkenti a gyulladásos választ, ami a baktériumok szétesésekor a legerősebb. Hatékonysága csökken, ha az antibiotikumok után adják, ezért ideális esetben 10-20 perccel előtte, vagy legalábbis egyidőben kell beadni."
+                    },
+                    {
+                        question: "Melyik empirikus terápia javasolt egy 30 éves, egyébként egészséges betegnek, akinél akut bakteriális meningitis gyanúja merül fel?",
+                        options: ["Ampicillin + Gentamicin", "Vancomycin + Ceftriaxon/Cefotaxim", "Csak Penicillin G", "Metronidazol + Doxycyclin"],
+                        answer: "Vancomycin + Ceftriaxon/Cefotaxim",
+                        explanation: "1 hónapos kortól 50 éves korig ez a standard empirikus terápia, amely lefedi a leggyakoribb kórokozókat, mint az S. pneumoniae (beleértve a penicillin-rezisztens törzseket a vancomycin miatt) és az N. meningitidis."
+                    },
+                    {
+                        question: "Melyik kórokozó gyanúja esetén kell ampicillinnel kiegészíteni az empirikus terápiát 50 év feletti vagy immunszupprimált betegeknél?",
+                        options: ["Streptococcus pneumoniae", "Neisseria meningitidis", "Haemophilus influenzae", "Listeria monocytogenes"],
+                        answer: "Listeria monocytogenes",
+                        explanation: "A Listeria monocytogenes gyakoribb kórokozó az újszülötteknél, időseknél és immunszupprimáltaknál. A standard cefalosporinok nem hatékonyak ellene, ezért ampicillin hozzáadása szükséges."
+                    },
+                    {
+                        question: "Mennyi a javasolt kezelési időtartam Neisseria meningitidis okozta meningitis esetén?",
+                        options: ["3 nap", "7 nap", "14-21 nap", "Legalább 28 nap"],
+                        answer: "7 nap",
+                        explanation: "A Neisseria meningitidis okozta meningitis kezelésére általában elegendő egy 7 napos antibiotikum kúra, feltéve, hogy a beteg állapota komplikációmentesen javul."
+                    },
+                    {
+                        question: "Melyik a preferált kezelés közösségben szerzett agytályog empirikus terápiájára immunkompetens betegnél?",
+                        options: ["Vancomycin + Meropenem", "3. generációs cefalosporin + Metronidazol", "Csak Ampicillin", "Doxycyclin"],
+                        answer: "3. generációs cefalosporin + Metronidazol",
+                        explanation: "Ez a kombináció lefedi a közösségben szerzett agytályogok leggyakoribb kórokozóit, beleértve a Streptococcus fajokat és az anaerob baktériumokat (a metronidazol miatt)."
+                    },
+                    {
+                        question: "Milyen méretű agytályog esetén mérlegelhető a tisztán gyógyszeres kezelés sebészeti beavatkozás nélkül?",
+                        options: ["< 2,5 cm", "> 5 cm", "Bármilyen méret esetén, ha a beteg stabil", "Csak ha a tályog felszínes"],
+                        answer: "< 2,5 cm",
+                        explanation: "Kisebb (<2,5 cm), mélyen elhelyezkedő tályogok esetén, ha a beteg neurológiailag stabil, megkísérelhető a konzervatív, csak antibiotikumos kezelés, amely általában 6-8 hétig tart."
+                    },
+                    {
+                        question: "Melyik antibiotikumot kell hozzáadni a terápiához, ha posztoperatív agytályog vagy MRSA fertőzés gyanúja merül fel?",
+                        options: ["Penicillin", "Metronidazol", "Vancomycin", "Gentamicin"],
+                        answer: "Vancomycin",
+                        explanation: "A Vancomycin hatékony a Methicillin-rezisztens Staphylococcus aureus (MRSA) ellen, amely gyakori kórokozó idegsebészeti beavatkozások utáni fertőzésekben."
+                    },
+                    {
+                        question: "Miért szükségesek magasabb dózisú antibiotikumok a neuroinfekciók kezelésében?",
+                        options: ["Mert a kórokozók a KIR-ben rezisztensebbek", "A vér-agy gáton (VAG) való korlátozott átjutás miatt", "A gyógyszerek gyorsabb lebomlása miatt a liquorban", "Mert a betegek általában súlyosabb állapotban vannak"],
+                        answer: "A vér-agy gáton (VAG) való korlátozott átjutás miatt",
+                        explanation: "A VAG egy szelektív gát, amely korlátozza sok gyógyszer bejutását a központi idegrendszerbe. A terápiás koncentráció eléréséhez a liquorban és az agyszövetben gyakran a maximális javasolt intravénás dózisokra van szükség."
+                    },
+                    {
+                        question: "Mennyi a javasolt kezelési időtartam agytályogok esetén?",
+                        options: ["7-10 nap", "14 nap", "21 nap", "6-8 hét"],
+                        answer: "6-8 hét",
+                        explanation: "Az agytályogok tokos, nehezen penetrálható fertőzések, amelyek teljes eradikációjához és a kiújulás megelőzéséhez szignifikánsan hosszabb, 6-8 hetes antibiotikus kezelés szükséges."
+                    },
+                    {
+                        question: "Melyik kórokozó okozta meningitis kezelése igényli a leghosszabb, legalább 21 napos terápiát?",
+                        options: ["Neisseria meningitidis", "Haemophilus influenzae", "Listeria monocytogenes", "Streptococcus pneumoniae"],
+                        answer: "Listeria monocytogenes",
+                        explanation: "A Listeria és a Gram-negatív bacilusok (pl. E. coli, Pseudomonas) okozta meningitisek kezelése a legnehezebb, ezért legalább 21 napos, vagy akár hosszabb antibiotikum kúrát igényelnek."
+                    },
+                    {
+                        question: "Melyik gyógyszer plazmafehérje-kötődése magasabb, ami csökkenti a KIR-be való bejutását?",
+                        options: ["Cefotaxim", "Ceftriaxon", "Ampicillin", "Meropenem"],
+                        answer: "Ceftriaxon",
+                        explanation: "A ceftriaxon plazmafehérje-kötődése 90-95%, ami szignifikánsan csökkenti a szabad, aktív gyógyszer mennyiségét, amely átjuthat a vér-agy gáton, szemben a cefotaximmal (<40% kötődés)."
+                    },
+                    {
+                        question: "Mi az empirikus terápia fő célja akut bakteriális neuroinfekció gyanúja esetén?",
+                        options: ["A gyógyszerköltségek minimalizálása", "A kórokozó pontos azonosítása a kezelés előtt", "Az azonnali, életmentő kezelés megkezdése a kórokozó azonosítása előtt", "A mellékhatások elkerülése"],
+                        answer: "Az azonnali, életmentő kezelés megkezdése a kórokozó azonosítása előtt",
+                        explanation: "A bakteriális neuroinfekciók neurológiai vészhelyzetek, ahol a kezelés késlekedése drámaian rontja a prognózist. Az empirikus terápia célja a legvalószínűbb kórokozók lefedése, amíg a tenyésztési eredmények megérkeznek."
+                    },
+                    {
+                        question: "Milyen hatással van a meningitis a vér-agy gát áteresztőképességére?",
+                        options: ["Csökkenti az áteresztőképességet", "Nincs hatással rá", "Fokozza az áteresztőképességet", "Csak a vízoldékony anyagok számára fokozza"],
+                        answer: "Fokozza az áteresztőképességet",
+                        explanation: "Agyhártyagyulladás esetén a VAG gyulladása miatt az áteresztőképessége megnő, ami paradox módon segíti egyes antibiotikumok (pl. béta-laktámok) bejutását a központi idegrendszerbe."
+                    },
+                    {
+                        question: "Melyik antibiotikumot használják kifejezetten az anaerob kórokozók ellen agytályog kezelésében?",
+                        options: ["Ceftriaxon", "Vancomycin", "Metronidazol", "Ampicillin"],
+                        answer: "Metronidazol",
+                        explanation: "A metronidazol kiválóan hat az anaerob baktériumokra, amelyek gyakran szerepet játszanak az agytályogok kialakulásában, különösen, ha a fertőzés forrása a szájüreg vagy a fül."
+                    },
+                    {
+                        question: "Melyik a javasolt empirikus terápia egy újszülött (0-4 hetes) bakteriális meningitise esetén?",
+                        options: ["Vancomycin + Ceftriaxon", "Csak Penicillin G", "Ampicillin + Cefotaxim vagy Aminoglikozid", "Meropenem"],
+                        answer: "Ampicillin + Cefotaxim vagy Aminoglikozid",
+                        explanation: "Ebben az életkorban a leggyakoribb kórokozók a GBS (B csoportú Streptococcus), E. coli és Listeria. Az ampicillin a Listeriát és a GBS-t, míg a cefotaxim/aminoglikozid a Gram-negatív kórokozókat fedi le."
+                    },
+                    {
+                        question: "Melyik gyógyszerkombináció javasolt idegsebészeti beavatkozás utáni agytályog empirikus kezelésére?",
+                        options: ["Ceftriaxon + Metronidazol", "Ampicillin + Gentamicin", "Vancomycin + Ceftazidim/Cefepim/Meropenem", "Csak Doxycyclin"],
+                        answer: "Vancomycin + Ceftazidim/Cefepim/Meropenem",
+                        explanation: "Ez a széles spektrumú kombináció lefedi a nozokomiális fertőzések gyakori kórokozóit, beleértve az MRSA-t (vancomycin) és a Pseudomonas aeruginosát (ceftazidim/cefepim/meropenem)."
+                    },
+                    {
+                        question: "Milyen esetben NEM javasolt az adjunktív dexametazon adása?",
+                        options: ["Igazolt pneumococcus meningitis", "Gyermekek Haemophilus influenzae meningitise", "Feltételezett bakteriális meningitis felnőttnél", "Listeria monocytogenes meningitis"],
+                        answer: "Listeria monocytogenes meningitis",
+                        explanation: "Bár a dexametazon előnyös a pneumococcus és H. influenzae okozta meningitisben, a Listeria esetében a bizonyítékok nem egyértelműek, és egyes adatok szerint akár ronthatja is a kimenetelt, ezért általában nem ajánlott."
+                    },
+                    {
+                        question: "Mi a 'de-eszkalációs' terápia lényege a neuroinfekciók kezelésében?",
+                        options: ["A gyógyszerdózisok fokozatos csökkentése", "A széles spektrumú empirikus terápia szűkítése a kórokozó azonosítása után", "A kezelés időtartamának lerövidítése", "Azonnali áttérés orális terápiára"],
+                        answer: "A széles spektrumú empirikus terápia szűkítése a kórokozó azonosítása után",
+                        explanation: "A de-eszkaláció azt jelenti, hogy amint a kórokozót és annak antibiotikum-érzékenységét azonosították, a kezdeti, széles spektrumú kezelést egy célzott, szűkebb spektrumú antibiotikumra cserélik a felesleges antibiotikum-használat és a rezisztencia kialakulásának csökkentése érdekében."
+                    },
+                    {
+                        question: "Melyik állítás igaz a bakteriális encephalitis kezelésére?",
+                        options: ["Mindig csak antivirális szereket igényel", "A kezelés gyakran átfed a bakteriális meningitis protokolljaival", "Soha nem igényel antibiotikumot", "A diagnózis mindig egyértelmű a kezdetektől"],
+                        answer: "A kezelés gyakran átfed a bakteriális meningitis protokolljaival",
+                        explanation: "A feltételezett encephalitis kezdeti empirikus kezelése gyakran magában foglalja a bakteriális meningitisre is ható antibiotikumokat (pl. ceftriaxon), mivel a korai szakaszban nehéz elkülöníteni a vírusos és bakteriális okokat."
+                    }
+                ]
+            },
+            "aids": {
+                title: "Az AIDS neurológiai vonatkozásai",
+                data: [
+                    {
+                        question: "Mi a HIV-asszociált neurokognitív zavarok (HAND) legsúlyosabb formája?",
+                        options: ["Aszimptomatikus neurokognitív károsodás (ANI)", "Enyhe neurokognitív zavar (MND)", "HIV-asszociált demencia (HAD)", "Perifériás neuropátia"],
+                        answer: "HIV-asszociált demencia (HAD)",
+                        explanation: "A HAND egy spektrum, amelynek legsúlyosabb, a mindennapi funkciókat jelentősen károsító formája a HIV-asszociált demencia (korábban AIDS demencia komplex)."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb központi idegrendszeri (KIR) tömeges elváltozást okozó opportunista fertőzés AIDS-ben?",
+                        options: ["Cryptococcus meningitis", "Progresszív multifokális leukoencephalopathia (PML)", "Cerebrális toxoplazmózis", "Primer KIR limfóma"],
+                        answer: "Cerebrális toxoplazmózis",
+                        explanation: "A cerebrális toxoplazmózis a leggyakoribb KIR-térfoglaló folyamat AIDS-es betegeknél, különösen, ha a CD4+ sejtszám < 100 sejt/mm³."
+                    },
+                    {
+                        question: "Milyen jellegzetes képalkotó (MRI) lelet utal cerebrális toxoplazmózisra?",
+                        options: ["Egyetlen, homogénen kontrasztot halmozó lézió", "Fehérállományi léziók kontraszthalmozás nélkül", "Többszörös, gyűrűszerűen kontrasztot halmozó léziók", "Bazális meningealis kontraszthalmozás"],
+                        answer: "Többszörös, gyűrűszerűen kontrasztot halmozó léziók",
+                        explanation: "A toxoplazmózisra jellemző az MRI-n látható többszörös, gyűrűszerűen kontrasztanyagot halmozó lézió, amelyek gyakran a bazális ganglionokban és a szürke-fehérállomány határán helyezkednek el."
+                    },
+                    {
+                        question: "Melyik kórokozó okozza a progresszív multifokális leukoencephalopathiát (PML)?",
+                        options: ["Epstein-Barr vírus (EBV)", "Cytomegalovírus (CMV)", "JC-vírus", "Herpes simplex vírus"],
+                        answer: "JC-vírus",
+                        explanation: "A PML-t a John Cunningham (JC) vírus reaktivációja okozza immunszupprimált egyénekben, ami az agy fehérállományának (myelin) pusztulásához vezet."
+                    },
+                    {
+                        question: "Milyen hatással volt a kombinált antiretrovirális terápia (cART) bevezetése az AIDS neurológiai szövődményeire?",
+                        options: ["Növelte a súlyos opportunista fertőzések számát", "Drámaian csökkentette a súlyos opportunista fertőzések és a HAD előfordulását", "Nem volt hatással a neurológiai szövődményekre", "Csak a perifériás neuropátiát javította"],
+                        answer: "Drámaian csökkentette a súlyos opportunista fertőzések és a HAD előfordulását",
+                        explanation: "A cART az immunrendszer helyreállításával jelentősen csökkentette a súlyos opportunista fertőzések (pl. toxoplazmózis, cryptococcus meningitis) és a HIV-asszociált demencia (HAD) incidenciáját és súlyosságát."
+                    },
+                    {
+                        question: "Mi az immunrekonstitúciós gyulladásos szindróma (IRIS)?",
+                        options: ["A HIV-vírus direkt citotoxikus hatása", "Egy új opportunista fertőzés megjelenése", "A cART megkezdése után a tünetek paradox rosszabbodása a helyreálló immunválasz miatt", "Az antiretrovirális gyógyszerek mellékhatása"],
+                        answer: "A cART megkezdése után a tünetek paradox rosszabbodása a helyreálló immunválasz miatt",
+                        explanation: "Az IRIS akkor alakul ki, amikor a cART hatására helyreálló immunrendszer heves gyulladásos választ ad egy már meglévő (akár szubklinikai) fertőzésre, ami a beteg klinikai állapotának átmeneti romlásához vezet."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb meningitis forma AIDS-ben, és mi a diagnózis kulcsa?",
+                        options: ["Bakteriális meningitis; Gram-festés", "Toxoplazmózis; MRI", "Kriptokokkális meningitis; Kriptokokkusz antigén kimutatása", "PML; JC-vírus PCR"],
+                        answer: "Kriptokokkális meningitis; Kriptokokkusz antigén kimutatása",
+                        explanation: "A Cryptococcus neoformans által okozott meningitis a leggyakoribb agyhártyagyulladás AIDS-ben. A diagnózis legérzékenyebb és legspecifikusabb módja a kriptokokkusz antigén (CrAg) kimutatása a vérből vagy a liquorból."
+                    },
+                    {
+                        question: "Melyik vírus játszik szerepet a primer KIR limfóma kialakulásában AIDS-es betegeknél?",
+                        options: ["HIV", "JC-vírus", "Epstein-Barr vírus (EBV)", "Cytomegalovírus (CMV)"],
+                        answer: "Epstein-Barr vírus (EBV)",
+                        explanation: "A primer KIR limfóma, amely egy AIDS-definiáló daganat, szinte minden esetben az Epstein-Barr vírushoz (EBV) köthető az immunszuppresszió talaján."
+                    },
+                    {
+                        question: "Milyen CD4+ sejtszám alatt a leggyakoribbak a súlyos KIR opportunista fertőzések, mint a toxoplazmózis vagy a CMV encephalitis?",
+                        options: ["< 500 sejt/mm³", "< 350 sejt/mm³", "< 200 sejt/mm³", "< 100 sejt/mm³"],
+                        answer: "< 100 sejt/mm³",
+                        explanation: "A legtöbb súlyos, életveszélyes opportunista fertőzés, mint a toxoplazmózis, a kriptokokkusz meningitis és a CMV encephalitis, jellemzően súlyos immunszuppresszió esetén, 100 sejt/mm³ alatti, sőt gyakran 50 alatti CD4+ sejtszám mellett jelentkezik."
+                    },
+                    {
+                        question: "Mi a cerebrális toxoplazmózis első vonalbeli kezelése?",
+                        options: ["Ganciclovir + Foscarnet", "Amphotericin B + Flucytosine", "Ceftriaxon + Vancomycin", "Pirimetamin + Szulfadiazin + Leukovorin"],
+                        answer: "Pirimetamin + Szulfadiazin + Leukovorin",
+                        explanation: "A cerebrális toxoplazmózis standard akut terápiája a pirimetamin és szulfadiazin kombinációja, amelyet leukovorinnal (folinsav) egészítenek ki a pirimetamin okozta csontvelő-szuppresszió megelőzésére."
+                    },
+                    {
+                        question: "Milyen jellegzetes képalkotó (MRI) lelet utal a PML-re?",
+                        options: ["Gyűrűszerűen halmozó léziók", "Aszimmetrikus, fehérállományi léziók kontraszthalmozás nélkül", "Egyetlen, periventrikuláris, homogén halmozó lézió", "Diffúz agyi atrófia"],
+                        answer: "Aszimmetrikus, fehérállományi léziók kontraszthalmozás nélkül",
+                        explanation: "A PML-re jellemzőek az MRI-n látható multifokális, aszimmetrikus, a fehérállományt érintő léziók, amelyek általában nem halmozzák a kontrasztanyagot és nincs tömeghatásuk."
+                    },
+                    {
+                        question: "Mi a leggyakoribb neurológiai szövődmény HIV-fertőzésben?",
+                        options: ["HIV-asszociált demencia (HAD)", "Distalis szimmetrikus polyneuropathia (DSPN)", "Kriptokokkális meningitis", "Primer KIR limfóma"],
+                        answer: "Distalis szimmetrikus polyneuropathia (DSPN)",
+                        explanation: "A DSPN a leggyakoribb neurológiai komplikáció, amely fájdalmas, égő érzéssel és zsibbadással jár a végtagokon. Okozhatja maga a HIV-vírus vagy a korábbi, toxikusabb antiretrovirális gyógyszerek."
+                    },
+                    {
+                        question: "Mikor kell elkezdeni az antiretrovirális terápiát (cART) tuberkulotikus meningitis (TBM) esetén HIV-pozitív betegnél?",
+                        options: ["Azonnal a TBM diagnózisával egyidőben", "Késleltetve, akár 8 héttel az anti-TB terápia megkezdése után", "Soha nem szabad elkezdeni", "Csak ha a CD4 szám 50 alá esik"],
+                        answer: "Késleltetve, akár 8 héttel az anti-TB terápia megkezdése után",
+                        explanation: "TBM esetén a cART korai megkezdése növeli a súlyos, akár halálos kimenetelű immunrekonstitúciós gyulladásos szindróma (IRIS) kockázatát. Ezért a cART bevezetését javasolt késleltetni, amíg a TBM kezelése stabilizálja a beteget."
+                    },
+                    {
+                        question: "Milyen szemészeti tünetet okozhat a Cytomegalovírus (CMV) AIDS-ben?",
+                        options: ["Kettőslátás", "Retinitis (látásromlás, úszkáló homályok)", "Szemfájdalom", "Fényérzékenység"],
+                        answer: "Retinitis (látásromlás, úszkáló homályok)",
+                        explanation: "A CMV súlyos immunszuppresszió esetén retinitist (a retina gyulladását) okozhatja, ami kezeletlenül gyors látásvesztéshez, vaksághoz vezet. A szemfenéki kép jellegzetes ('pizzaszerű' bevérzések)."
+                    },
+                    {
+                        question: "Mi a PML kezelésének alapja?",
+                        options: ["Nagy dózisú kortikoszteroidok", "Specifikus antivirális szer a JC-vírus ellen", "A cART megkezdése vagy optimalizálása az immunrendszer helyreállítására", "Plazmaferezis"],
+                        answer: "A cART megkezdése vagy optimalizálása az immunrendszer helyreállítására",
+                        explanation: "Nincs specifikus, hatékony gyógyszer a JC-vírus ellen. A PML kezelésének egyetlen bizonyítottan hatásos módja az immunrendszer helyreállítása a cART segítségével, ami lehetővé teszi a szervezet számára, hogy kontrollálja a vírus replikációját."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz a HIV-asszociált neurokognitív zavarokra (HAND)?",
+                        options: ["A cART bevezetése óta a súlyos demencia ritkábbá vált.", "A HAND mindig progresszív és elkerülhetetlenül demenciához vezet.", "A kognitív tünetek mellett motoros és hangulati problémák is jelentkezhetnek.", "Az alacsony CD4 sejtszám rizikófaktor a kialakulására."],
+                        answer: "A HAND mindig progresszív és elkerülhetetlenül demenciához vezet.",
+                        explanation: "A HAND lefolyása változatos. Hatékony cART mellett a legtöbb esetben a tünetek enyhék maradnak vagy stabilizálódnak, és nem feltétlenül progrediálnak súlyos demenciává."
+                    },
+                    {
+                        question: "Milyen diagnosztikai eljárás szükséges a primer KIR limfóma definitív diagnózisához?",
+                        options: ["Liquorvizsgálat", "MRI kontrasztanyaggal", "Szerológiai teszt EBV-re", "Agybiopszia"],
+                        answer: "Agybiopszia",
+                        explanation: "Bár az MRI, a liquorvizsgálat (EBV PCR) és a klinikai kép erősen utalhat a diagnózisra, a primer KIR limfóma definitív, szövettani megerősítéséhez agybiopszia szükséges."
+                    },
+                    {
+                        question: "Melyik korábbi antiretrovirális gyógyszer volt ismert a perifériás neuropátia okozásáról?",
+                        options: ["Efavirenz", "Tenofovir", "Stavudin", "Ritonavir"],
+                        answer: "Stavudin",
+                        explanation: "A régebbi nukleozid analógok, mint a stavudin (d4T) és a didanosin (ddI), ismert neurotoxikus mellékhatással rendelkeztek, és gyakran okoztak fájdalmas perifériás neuropátiát. Ma már ritkán használják őket."
+                    },
+                    {
+        
+                question: "Milyen beavatkozás szükséges gyakran a kriptokokkális meningitis egyik súlyos szövődménye, a koponyaűri nyomásfokozódás kezelésére?",
+                        options: ["Nagy dózisú kortikoszteroidok", "Ventrikuláris sönt beültetése", "Sorozatos terápiás lumbálpunkciók", "Hipertóniás sóoldat infúziója"],
+                        answer: "Sorozatos terápiás lumbálpunkciók",
+                        explanation: "A kriptokokkális meningitis gyakran okoz súlyos koponyaűri nyomásfokozódást, ami fejfájáshoz, látásvesztéshez és halálhoz vezethet. Ennek kezelésére a liquor ismételt lecsapolása (terápiás lumbálpunkciók) szükséges a nyomás csökkentése érdekében."
+                    },
+                    {
+                        question: "Melyik állapotot kell elsősorban elkülöníteni a cerebrális toxoplazmózistól egy AIDS-es beteg agyi térfoglaló folyamata esetén?",
+                        options: ["Stroke", "Agytályog", "Primer KIR limfóma", "PML"],
+                        answer: "Primer KIR limfóma",
+                        explanation: "A cerebrális toxoplazmózis és a primer KIR limfóma a két leggyakoribb agyi térfoglaló folyamat AIDS-ben, és a képalkotó leleteik nagyon hasonlóak lehetnek (gyűrűs halmozás). Az elkülönítés kulcsfontosságú, mert a kezelésük teljesen eltérő."
+                    }
+                ]
+            },
+            "borreliosis_syphilis": {
+                title: "Neuroborreliosis és Neurosyphilis",
+                data: [
+                    {
+                        question: "Mi a Neuroborreliosis (LNB) leggyakoribb klinikai manifesztációja Európában felnőtteknél?",
+                        options: ["Krónikus encephalitis", "Izolált arcidegbénulás", "Meningoradiculitis (Bannwarth-szindróma)", "Akut myelitis"],
+                        answer: "Meningoradiculitis (Bannwarth-szindróma)",
+                        explanation: "Európában a felnőttkori LNB legjellemzőbb megjelenési formája a Bannwarth-szindróma, amelyet a fájdalmas, vándorló ideggyöki fájdalom (radiculitis), agyhártyagyulladás és gyakran agyidegbénulás (jellemzően facialis paresis) triásza jellemez."
+                    },
+                    {
+                        question: "Mi a Neurosyphilis késői, parenchymás formája, amelyet progresszív demencia és személyiségváltozás jellemez?",
+                        options: ["Tabes dorsalis", "Meningovascularis syphilis", "Paralysis generalisans", "Szifiliszes meningitis"],
+                        answer: "Paralysis generalisans",
+                        explanation: "A paralysis generalisans (vagy dementia paralytica) a késői neurosyphilis egyik formája, amely az agykéreg krónikus gyulladása és atrófiája miatt súlyos, progresszív kognitív hanyatlást, demenciát, pszichiátriai tüneteket és motoros zavarokat okoz."
+                    },
+                    {
+                        question: "Mi a diagnosztikai aranystandard a Neuroborreliosis (LNB) igazolására?",
+                        options: ["Borrelia-specifikus antitestek kimutatása a szérumból", "Pozitív CXCL13 szint a liquorban", "Intrathecalis Borrelia-specifikus antitest-termelés kimutatása a liquorból", "Borrelia DNS kimutatása PCR-rel a liquorból"],
+                        answer: "Intrathecalis Borrelia-specifikus antitest-termelés kimutatása a liquorból",
+                        explanation: "Az LNB definitív diagnózisához igazolni kell, hogy a központi idegrendszeren belül termelődnek Borrelia-ellenes antitestek. Ezt a liquor és a szérum antitest-szintjeinek összehasonlításával (antitest index számítás) lehet kimutatni, a liquorbeli gyulladás (pleocytosis) mellett."
+                    },
+                    {
+                        question: "Melyik laboratóriumi teszt a legspecifikusabb a Neurosyphilis diagnózisára a liquorból?",
+                        options: ["Emelkedett fehérjeszint", "Lymphocytás pleocytosis", "Reaktív CSF-VDRL teszt", "Reaktív CSF-FTA-ABS teszt"],
+                        answer: "Reaktív CSF-VDRL teszt",
+                        explanation: "Bár a CSF-VDRL teszt érzékenysége alacsony (sok esetben álnegatív lehet), a pozitivitása rendkívül specifikus a neurosyphilisre, és megerősíti az aktív KIR-fertőzést."
+                    },
+                    {
+                        question: "Mi az elsődlegesen választandó kezelés korai Neuroborreliosis (pl. izolált arcidegbénulás) esetén?",
+                        options: ["Intravénás Penicillin G", "Intravénás Ceftriaxon", "Szájon át szedhető Doxycyclin", "Szájon át szedhető Metronidazol"],
+                        answer: "Szájon át szedhető Doxycyclin",
+                        explanation: "Komplikációmentes, korai LNB esetén (pl. meningitis nélküli arcidegbénulás) a 14 napos orális doxycyclin kúra ugyanolyan hatékony, mint az intravénás ceftriaxon, de egyszerűbb és kevesebb mellékhatással jár."
+                    },
+                    {
+                        question: "Mi a Neurosyphilis elsődlegesen választandó kezelése?",
+                        options: ["Nagy dózisú intravénás Penicillin G", "Hosszú hatású intramuszkuláris Penicillin (Benzathin-penicillin)", "Szájon át szedhető Doxycyclin", "Intravénás Ceftriaxon"],
+                        answer: "Nagy dózisú intravénás Penicillin G",
+                        explanation: "A neurosyphilis kezelésének alapja a 10-14 napig tartó, nagy dózisú intravénás Penicillin G terápia, mivel ez biztosítja a megfelelő gyógyszerszintet a központi idegrendszerben a kórokozó elpusztításához."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a Tabes dorsalisra?",
+                        options: ["Villámcsapásszerű, lövellő fájdalmak", "Szenzoros ataxia (csapkodó járás)", "Argyll Robertson pupilla", "Myoclonusos rángások"],
+                        answer: "Myoclonusos rángások",
+                        explanation: "A Tabes dorsalis a gerincvelő hátsó kötegeinek károsodása miatt szenzoros tüneteket okoz: fájdalmat, ataxiát, reflexkiesést és a jellegzetes pupillareflex-zavart. A myoclonus nem jellemző rá, inkább a CJD-re utal."
+                    },
+                    {
+                        question: "Mi a Jarisch-Herxheimer reakció?",
+                        options: ["Súlyos allergiás reakció a penicillinre", "A szifilisz kezelésének megkezdése utáni akut, lázas reakció", "A neurosyphilis kiújulása a kezelés után", "A liquorleletek paradox romlása"],
+                        answer: "A szifilisz kezelésének megkezdése utáni akut, lázas reakció",
+                        explanation: "A Jarisch-Herxheimer reakció a szifilisz (és más spirocheta fertőzések) antibiotikus kezelésének megkezdése utáni első 24 órában jelentkező, magától múló, lázzal, fejfájással, izomfájdalommal járó állapot, amelyet a széteső baktériumokból felszabaduló toxinok okoznak."
+                    },
+                    {
+                        question: "Melyik állítás igaz a Neuroborreliosis kezelésére?",
+                        options: ["A tünetek fennmaradása esetén hónapokig tartó antibiotikum kúrára van szükség.", "Egy 2-3 hetes antibiotikum kúra általában elegendő és megbízhatóan megállítja a betegséget.", "A kortikoszteroidok a kezelés alapját képezik.", "Csak intravénás kezelés hatásos."],
+                        answer: "Egy 2-3 hetes antibiotikum kúra általában elegendő és megbízhatóan megállítja a betegséget.",
+                        explanation: "A bizonyítékok azt mutatják, hogy egy 14-21 napos, megfelelően megválasztott antibiotikum kúra elegendő az LNB kezelésére. A hosszabb távú kezelés nem nyújt további előnyt, és a mellékhatások kockázatával jár."
+                    },
+                    {
+                        question: "Melyik állapot vezethet stroke-hoz fiatal betegeknél a korai neurosyphilis részeként?",
+                        options: ["Szifiliszes meningitis", "Tabes dorsalis", "Meningovascularis syphilis", "Paralysis generalisans"],
+                        answer: "Meningovascularis syphilis",
+                        explanation: "A meningovascularis syphilis az agyi erek gyulladását (endarteritis obliterans) okozza, ami az erek szűkületéhez, elzáródásához és következményes agyi infarktushoz (stroke) vezethet, jellemzően a fertőzést követő első néhány évben."
+                    },
+                    {
+                        question: "Melyik kórokozót terjeszti kullancscsípés?",
+                        options: ["Treponema pallidum", "Borrelia burgdorferi", "Mycobacterium tuberculosis", "Toxoplasma gondii"],
+                        answer: "Borrelia burgdorferi",
+                        explanation: "A Borrelia burgdorferi baktériumot, a Lyme-kór (és így a neuroborreliosis) okozóját, az Ixodes ricinus kullancsok terjesztik csípésükkel."
+                    },
+                    {
+                        question: "Milyen típusú sejtes válasz jellemző a liquorban mind a neuroborreliosis, mind a neurosyphilis esetén?",
+                        options: ["Neutrophil pleocytosis", "Eosinophil pleocytosis", "Lymphocytás/monocytás pleocytosis", "Nincs sejtes válasz"],
+                        answer: "Lymphocytás/monocytás pleocytosis",
+                        explanation: "Mindkét spirocheta-fertőzésre jellemző a krónikus gyulladás, ami a liquorban lymphocyták és monocyták felszaporodását (pleocytosis) okozza, ellentétben az akut bakteriális meningitisekkel, ahol a neutrofilek dominálnak."
+                    },
+                    {
+                        question: "Mi a teendő, ha egy neurosyphilis gyanús beteg penicillin allergiás?",
+                        options: ["Másik antibiotikumot, pl. doxycyclint kell adni.", "A beteget deszenzitizálni kell, és penicillinnel kell kezelni.", "A kezelést el kell halasztani.", "Csak tüneti kezelést kaphat."],
+                        answer: "A beteget deszenzitizálni kell, és penicillinnel kell kezelni.",
+                        explanation: "A penicillin annyira hatékony és a neurosyphilis annyira súlyos, hogy az alternatívák nem tekinthetők megfelelőnek. Ezért penicillin allergia esetén a deszenzitizálás (a szervezet hozzászoktatása a gyógyszerhez) és az azt követő penicillin terápia az ajánlott eljárás."
+                    },
+                    {
+                        question: "Melyik tünetegyüttes a Bannwarth-szindróma?",
+                        options: ["Demencia, myoclonus, ataxia", "Láz, fejfájás, tarkókötöttség", "Fájdalmas radiculoneuritis, meningitis, agyidegbénulás", "Ataxia, areflexia, ophthalmoplegia"],
+                        answer: "Fájdalmas radiculoneuritis, meningitis, agyidegbénulás",
+                        explanation: "A Bannwarth-szindróma a neuroborreliosis klasszikus európai megjelenési formája, amely e három tünetcsoport kombinációjából áll."
+                    },
+                    {
+                        question: "Melyik állítás igaz a neurosyphilis és a HIV-fertőzés kapcsolatára?",
+                        options: ["A HIV-fertőzés véd a neurosyphilis ellen.", "A HIV-fertőzés jelentősen fokozza a neurosyphilis kialakulásának kockázatát és gyorsítja a progresszióját.", "A két betegségnek nincs köze egymáshoz.", "Neurosyphilis csak HIV-pozitív egyéneknél fordul elő."],
+                        answer: "A HIV-fertőzés jelentősen fokozza a neurosyphilis kialakulásának kockázatát és gyorsítja a progresszióját.",
+                        explanation: "A HIV okozta immunszuppresszió megkönnyíti a Treponema pallidum bejutását a KIR-be és annak szaporodását, ami gyakoribbá, súlyosabbá és gyorsabb lefolyásúvá teszi a neurosyphilist."
+                    },
+                    {
+                        question: "Milyen pupillareakció jellemző a Tabes dorsalisra?",
+                        options: ["Tág, fénymerev pupillák", "Szűk, fénymerev pupillák", "Argyll Robertson pupilla", "Normális pupillareakciók"],
+                        answer: "Argyll Robertson pupilla",
+                        explanation: "Az Argyll Robertson pupilla egy klasszikus neurológiai jel, amelyre jellemző, hogy a pupilla fényre nem vagy csak renyhén szűkül, de a közeli fókuszálásra (akkomodáció) igen. Ez a jel erősen utal a neurosyphilisre, különösen a Tabes dorsalisra."
+                    },
+                    {
+                        question: "Gyermekkorban mi a neuroborreliosis leggyakoribb megnyilvánulása?",
+                        options: ["Fájdalmas radiculitis", "Izolált arcidegbénulás és/vagy szubakut agyhártyagyulladás", "Encephalopathia", "Görcsrohamok"],
+                        answer: "Izolált arcidegbénulás és/vagy szubakut agyhártyagyulladás",
+                        explanation: "Míg felnőtteknél a fájdalmas Bannwarth-szindróma a leggyakoribb, gyermekeknél az LNB gyakran enyhébb formában, izolált (akár kétoldali) arcidegbénulásként vagy enyhe meningitis tüneteivel jelentkezik."
+                    },
+                    {
+                        question: "Hogyan kell követni a neurosyphilis kezelésének hatékonyságát?",
+                        options: ["A klinikai tünetek javulásával", "Ismételt agyi MRI vizsgálatokkal", "Sorozatos liquorvizsgálatokkal (sejtszám, VDRL titer) 6 havonta", "Évente egyszeri szerológiai vizsgálattal"],
+                        answer: "Sorozatos liquorvizsgálatokkal (sejtszám, VDRL titer) 6 havonta",
+                        explanation: "A kezelési válasz megerősítéséhez és a kudarc vagy újrafertőződés kizárásához elengedhetetlen a liquorleletek normalizálódásának követése. A sejtszámnak és a VDRL titernek csökkennie kell, ideális esetben 2 éven belül normalizálódnia."
+                    },
+                    {
+                        question: "Melyik betegségre utal a 'nagy imitátor' kifejezés a neurológiában?",
+                        options: ["Sclerosis multiplex", "Csak a neurosyphilisre", "Csak a neuroborreliosisra", "Mind a neuroborreliosisra, mind a neurosyphilisre"],
+                        answer: "Mind a neuroborreliosisra, mind a neurosyphilisre",
+                        explanation: "Mindkét betegség rendkívül változatos klinikai képpel jelentkezhet, számos más neurológiai és pszichiátriai kórképet utánozva, ezért mindkettőt gyakran nevezik 'nagy imitátornak'."
+                    },
+                    {
+                        question: "Melyik állítás igaz a liquor CXCL13 markerre LNB-ben?",
+                        options: ["Specifikus az LNB-re, és megerősíti a diagnózist.", "Szintje emelkedett LNB-ben, de más neurogyulladásos állapotokban is, ezért nem specifikus.", "A kezelés után is magas marad.", "Alacsony érzékenységű, ezért nem hasznos."],
+                        answer: "Szintje emelkedett LNB-ben, de más neurogyulladásos állapotokban is, ezért nem specifikus.",
+                        explanation: "A CXCL13 egy kemokin, amelynek szintje aktív LNB-ben magas és a kezelésre csökken, ami segíthet az aktivitás megítélésében. Azonban nem specifikus, mert más fertőzésekben (pl. neurosyphilis) és gyulladásos kórképekben is emelkedett lehet."
+                    }
+                ]
+            },
+            "tuberkulozis": {
+                title: "Tuberkulózis és egyéb mycobakteriális fertőzések",
+                data: [
+                    {
+                        question: "Mi a központi idegrendszeri tuberkulózis (KIR-TB) legsúlyosabb és leggyakoribb formája?",
+                        options: ["Intrakraniális tuberculoma", "Spinális tuberkulózis (Pott-betegség)", "Tuberkulotikus meningitis (TBM)", "Tuberkulotikus agytályog"],
+                        answer: "Tuberkulotikus meningitis (TBM)",
+                        explanation: "A TBM a KIR-TB leggyakoribb és legsúlyosabb megnyilvánulása, amely az agyhártyák gyulladásával jár, és magas mortalitással, valamint súlyos neurológiai maradványtünetekkel jár."
+                    },
+                    {
+                        question: "Milyen jellegzetes liquorlelet utal tuberkulotikus meningitisre (TBM)?",
+                        options: ["Magas sejtszám (neutrofil dominancia), normál fehérje, normál glükóz", "Alacsony sejtszám, alacsony fehérje, magas glükóz", "Lymphocytás pleocytosis, magas fehérjeszint, alacsony glükózszint", "Nincs eltérés a normálistól"],
+                        answer: "Lymphocytás pleocytosis, magas fehérjeszint, alacsony glükózszint",
+                        explanation: "A TBM klasszikus liquor triásza a lymphocytás sejtszaporulat, a kifejezetten magas fehérje koncentráció (gyakran >1 g/L) és az alacsony glükózszint."
+                    },
+                    {
+                        question: "Mi a standard, első vonalbeli kezelési séma a gyógyszerérzékeny tuberkulózisra?",
+                        options: ["2 hónapig RIPE, majd 4 hónapig RI", "6 hónapig csak Rifampicin és Isoniazid", "9 hónapig csak Isoniazid", "4 hónapig Moxifloxacin alapú séma"],
+                        answer: "2 hónapig RIPE, majd 4 hónapig RI",
+                        explanation: "A standard 6 hónapos kezelés egy intenzív fázisból áll (2 hónap Rifampicin, Isoniazid, Pirazinamid, Etambutol), amelyet egy folytatólagos fázis követ (4 hónap Rifampicin, Isoniazid)."
+                    },
+                    {
+                        question: "Milyen adjuváns terápia javasolt a tuberkulotikus meningitis (TBM) kezelésében a kimenetel javítására?",
+                        options: ["Nagy dózisú C-vitamin", "Plazmaferezis", "Kortikoszteroidok (pl. dexametazon)", "Antiepileptikumok profilaktikusan"],
+                        answer: "Kortikoszteroidok (pl. dexametazon)",
+                        explanation: "Erős bizonyítékok támasztják alá, hogy a TBM kezelésében az antibiotikumok mellé adott kortikoszteroidok csökkentik a gyulladásos választ, az ödémát és a mortalitást."
+                    },
+                    {
+                        question: "Melyik képalkotó (MRI) jel utal leginkább a tuberkulotikus meningitisre?",
+                        options: ["Gyűrűszerűen halmozó léziók a fehérállományban", "Diffúz agyi atrófia", "Bazális meningealis kontraszthalmozás", "A corpus callosum elvékonyodása"],
+                        answer: "Bazális meningealis kontraszthalmozás",
+                        explanation: "A TBM-re jellemző a kontrasztanyagos MRI vizsgálaton látható vastag, gyulladásos izzadmány (exsudatum) halmozódása az agyalapi (bazális) agyhártyákon."
+                    },
+                    {
+                        question: "Mi a multidrog-rezisztens TB (MDR-TB) definíciója?",
+                        options: ["Rezisztencia csak az Isoniazidra", "Rezisztencia legalább az Isoniazidra és a Rifampicinre", "Rezisztencia az összes első vonalbeli szerre", "Rezisztencia a Rifampicinre és egy fluorokinolonra"],
+                        answer: "Rezisztencia legalább az Isoniazidra és a Rifampicinre",
+                        explanation: "Az MDR-TB olyan tuberkulózis, amelyet olyan baktériumtörzs okoz, amely rezisztens a két leghatékonyabb első vonalbeli gyógyszerre, az isoniazidra és a rifampicinre."
+                    },
+                    {
+                        question: "Melyik NEM tuberkulotikus mycobaktérium (NTM) fertőzés kezelése jelenti a legnagyobb kihívást a kiterjedt gyógyszerrezisztencia miatt?",
+                        options: ["Mycobacterium kansasii", "Mycobacterium avium complex (MAC)", "Mycobacterium abscessus", "Mycobacterium marinum"],
+                        answer: "Mycobacterium abscessus",
+                        explanation: "Az M. abscessus komplex tagjai 'antibiotikumos rémálomnak' számítanak, mivel kiterjedt intrinszik és szerzett rezisztenciával rendelkeznek, beleértve az indukálható makrolid rezisztenciát, ami a kezelést rendkívül nehézzé teszi."
+                    },
+                    {
+                        question: "Mi a diagnosztikai alapja a nem-tuberkulotikus mycobaktérium (NTM) okozta tüdőbetegségnek?",
+                        options: ["Egyetlen pozitív köpettenyésztés", "Csak a radiológiai kép", "Klinikai, radiológiai és ismételt mikrobiológiai kritériumok együttes teljesülése", "Pozitív tuberkulin bőrteszt"],
+                        answer: "Klinikai, radiológiai és ismételt mikrobiológiai kritériumok együttes teljesülése",
+                        explanation: "Mivel az NTM-ek a környezetben is jelen vannak, a diagnózishoz nem elég egyetlen pozitív tenyésztés. Szükségesek a jellegzetes klinikai tünetek, a megfelelő radiológiai kép (pl. bronchiectasia, nodulusok) és a kórokozó ismételt izolálása légúti mintából."
+                    },
+                    {
+                        question: "Mi a Mycobacterium avium complex (MAC) okozta tüdőbetegség standard kezelésének alapja?",
+                        options: ["Isoniazid alapú terápia", "Makrolid alapú, három gyógyszerből álló kombináció", "Csak sebészi kezelés", "Monoterápia etambutollal"],
+                        answer: "Makrolid alapú, három gyógyszerből álló kombináció",
+                        explanation: "A MAC tüdőbetegség kezelésének sarokköve egy makrolid antibiotikum (klaritromicin vagy azitromicin), amelyet általában rifampicinnel és etambutollal kombinálnak, és hosszú ideig (legalább 12 hónapig a tenyésztés negativizálódása után) adnak."
+                    },
+                    {
+                        question: "Mi a tuberculoma?",
+                        options: ["Gennyes agytályog", "Az agyhártyák gyulladása", "Tokkal körülvett, sajtos nekrózist tartalmazó granulóma az agyállományban", "A gerinccsigolyák tuberkulotikus fertőzése"],
+                        answer: "Tokkal körülvett, sajtos nekrózist tartalmazó granulóma az agyállományban",
+                        explanation: "A tuberculoma a KIR-TB egyik formája, egy térfoglaló folyamatként viselkedő, tokos granulóma, amely fokális neurológiai tüneteket és görcsrohamokat okozhat."
+                    },
+                    {
+                        question: "Melyik diagnosztikai módszer a leggyorsabb és legérzékenyebb a tuberkulózis kimutatására a liquorból?",
+                        options: ["Ziehl-Neelsen festés", "Tenyésztés Löwenstein-Jensen táptalajon", "GeneXpert MTB/RIF (PCR) teszt", "Tuberkulin bőrteszt (TST)"],
+                        answer: "GeneXpert MTB/RIF (PCR) teszt",
+                        explanation: "A GeneXpert egy nukleinsav-amplifikációs teszt (NAAT/PCR), amely néhány órán belül képes kimutatni a Mycobacterium tuberculosis DNS-ét a mintából, és egyúttal a rifampicin rezisztenciát is. Érzékenysége lényegesen jobb, mint a festésé, és sokkal gyorsabb, mint a hetekig tartó tenyésztés."
+                    },
+                    {
+                        question: "Mi az 'intrinszik rezisztencia' a mycobaktériumoknál?",
+                        options: ["A kezelés során kialakuló rezisztencia", "A baktérium természetes, veleszületett tulajdonsága, ami ellenállóvá teszi bizonyos gyógyszerekkel szemben", "Csak a biofilmekben megfigyelhető rezisztencia", "A beteg rossz együttműködése miatti rezisztencia"],
+                        answer: "A baktérium természetes, veleszületett tulajdonsága, ami ellenállóvá teszi bizonyos gyógyszerekkel szemben",
+                        explanation: "Az intrinszik rezisztencia a mycobaktériumok veleszületett jellemzőiből fakad, mint például a vastag, viaszos, áthatolhatatlan sejtfal, amely megakadályozza a gyógyszerek bejutását."
+                    },
+                    {
+                        question: "Melyik gyógyszer a Mycobacterium kansasii fertőzés kezelésének sarokköve?",
+                        options: ["Isoniazid", "Pirazinamid", "Rifampicin", "Makrolidok"],
+                        answer: "Rifampicin",
+                        explanation: "A M. kansasii általában érzékeny a rifampicinre, ezért ez a gyógyszer a kezelési séma alapja, általában isoniaziddal és etambutollal kombinálva."
+                    },
+                    {
+                        question: "Milyen hosszú távú neurológiai következményei lehetnek a KIR-TB-nek a gyógyulás után is?",
+                        options: ["Nincsenek hosszú távú következmények", "Csak enyhe fejfájás", "Kognitív károsodás, depresszió, szorongás", "Fokozott kreativitás"],
+                        answer: "Kognitív károsodás, depresszió, szorongás",
+                        explanation: "A KIR-TB által kiváltott intenzív és tartós gyulladásos válasz még a kórokozó elpusztítása után is maradandó neuronális károsodást okozhat, ami krónikus neurokognitív és neuropszichiátriai problémákhoz vezet."
+                    },
+                    {
+                        question: "Mi az oka annak, hogy a TB kezelése ilyen hosszú ideig tart?",
+                        options: ["A gyógyszerek nagyon toxikusak", "A baktériumok nagyon gyorsan szaporodnak", "A baktériumok lassú anyagcseréje és nyugalmi állapotba vonulásának képessége", "A gyógyszerek drágák"],
+                        answer: "A baktériumok lassú anyagcseréje és nyugalmi állapotba vonulásának képessége",
+                        explanation: "A mycobaktériumok lassan osztódnak, és a granulómákon belül 'alvó' vagy perzisztáló állapotba kerülhetnek, ahol az antibiotikumok kevésbé hatékonyak. A hosszú kezelés szükséges ezen perzisztáló baktériumok elpusztításához és a visszaesés megelőzéséhez."
+                    },
+                    {
+                        question: "Melyik állítás igaz a nem-tuberkulotikus mycobaktériumokra (NTM)?",
+                        options: ["Mindig súlyos betegséget okoznak egészséges emberekben is.", "Emberről emberre könnyen terjednek.", "A környezetben (talaj, víz) mindenütt jelenlévő opportunista kórokozók.", "Kezelésük mindig rövid és egyszerű."],
+                        answer: "A környezetben (talaj, víz) mindenütt jelenlévő opportunista kórokozók.",
+                        explanation: "Az NTM-ek a környezetünk természetes részei, és általában csak akkor okoznak betegséget, ha a szervezet védekezőképessége valamilyen okból (pl. krónikus tüdőbetegség, immunszuppresszió) meggyengül."
+                    },
+                    {
+                        question: "Mi a 'szerzett rezisztencia' oka a TB kezelésében?",
+                        options: ["Spontán mutációk a baktériumban", "A beteg genetikai hajlama", "A nem megfelelő vagy rendszertelen gyógyszerszedés", "A gyógyszerek rossz minősége"],
+                        answer: "A nem megfelelő vagy rendszertelen gyógyszerszedés",
+                        explanation: "A szerzett rezisztencia leggyakrabban akkor alakul ki, ha a kezelés nem megfelelő (pl. rossz gyógyszerkombináció, alacsony dózis) vagy a beteg nem szedi rendszeresen a gyógyszereit. Ilyenkor a rezisztens mutánsok szelektív előnyhöz jutnak és elszaporodnak."
+                    },
+                    {
+                        question: "Melyik NTM faj okozhat bőrfertőzést szennyezett orvosi beavatkozások (pl. tetoválás) után?",
+                        options: ["Mycobacterium tuberculosis", "Mycobacterium kansasii", "Mycobacterium abscessus", "Mycobacterium leprae"],
+                        answer: "Mycobacterium abscessus",
+                        explanation: "A gyorsan növő mycobaktériumok, mint az M. abscessus, ismertek arról, hogy bőr- és lágyrészfertőzéseket okoznak, ha a bőr védelmi vonala sérül, például nem steril eszközökkel végzett beavatkozások során."
+                    },
+                    {
+                        question: "Milyen képalkotó módszer a legalkalmasabb a tüdő-TB és az NTM okozta tüdőbetegség részletes morfológiai vizsgálatára?",
+                        options: ["Mellkasröntgen", "Ultrahang", "Nagy felbontású komputertomográfia (HRCT)", "PET-CT"],
+                        answer: "Nagy felbontású komputertomográfia (HRCT)",
+                        explanation: "A HRCT sokkal részletesebb képet ad a tüdő szerkezetéről, mint a hagyományos röntgen, és elengedhetetlen az NTM-re jellemző elváltozások, mint a multifokális bronchiectasia és a kis nodulusok kimutatásához."
+                    },
+                    {
+                        question: "Mi a Pott-betegség?",
+                        options: ["A tüdőcsúcs tuberkulózisa", "A vesék tuberkulózisa", "A gerinccsigolyák tuberkulotikus gyulladása", "A bőr tuberkulózisa"],
+                        answer: "A gerinccsigolyák tuberkulotikus gyulladása",
+                        explanation: "A Pott-betegség a spinális tuberkulózis egyik formája, ahol a fertőzés a csigolyatesteket támadja meg, ami azok pusztulásához, deformitáshoz (gibbus) és akár a gerincvelő kompressziójához is vezethet."
+                    }
+                ]
+            },
+            "parazitak": {
+                title: "Idegrendszeri parazitózisok, protozoonózisok",
+                data: [
+                    {
+                        question: "Mi a neurociszticerkózis leggyakoribb klinikai tünete?",
+                        options: ["Fejfájás", "Láz", "Görcsrohamok", "Demencia"],
+                        answer: "Görcsrohamok",
+                        explanation: "A neurociszticerkózis a szerzett epilepszia leggyakoribb megelőzhető oka világszerte. A görcsrohamok a betegek 70-90%-ában jelentkeznek, gyakran akkor, amikor az agyi ciszták elpusztulnak és gyulladást váltanak ki."
+                    },
+                    {
+                        question: "Melyik kórokozó okozza a cerebrális maláriát, a malária legsúlyosabb neurológiai szövődményét?",
+                        options: ["Plasmodium vivax", "Plasmodium falciparum", "Plasmodium malariae", "Plasmodium ovale"],
+                        answer: "Plasmodium falciparum",
+                        explanation: "Bár más Plasmodium fajok is okozhatnak maláriát, a súlyos, életveszélyes formát, beleértve a cerebrális maláriát (kóma), szinte kizárólag a Plasmodium falciparum okozza."
+                    },
+                    {
+                        question: "Milyen betegcsoportban a leggyakoribb a KIR toxoplazmózis?",
+                        options: ["Terhes nők", "Gyermekek", "Idősek", "Súlyosan immunszupprimált betegek (pl. AIDS)"],
+                        answer: "Súlyosan immunszupprimált betegek (pl. AIDS)",
+                        explanation: "A KIR toxoplazmózis szinte mindig a látens fertőzés reaktivációjából ered olyan egyénekben, akiknek az immunrendszere súlyosan károsodott, leggyakrabban előrehaladott HIV-fertőzés (AIDS) esetén."
+                    },
+                    {
+                        question: "Milyen jellegzetes képalkotó (MRI) lelet utal a neurociszticerkózis életképes (vesicularis) stádiumára?",
+                        options: ["Gyűrűszerű kontraszthalmozás", "Diffúz agyi ödéma", "Meszes gócok", "Folyadékkal telt ciszta egy excentrikus ponttal (scolex)"],
+                        answer: "Folyadékkal telt ciszta egy excentrikus ponttal (scolex)",
+                        explanation: "Az életképes cisztára jellemző a vékony falú, liquor denzitású képlet, amelyben gyakran látható a parazita feji része, a scolex, mint egy kis 'pont a cisztában'. Ebben a stádiumban általában nincs gyulladás vagy kontraszthalmozás."
+                    },
+                    {
+                        question: "Mi a cerebrális malária elsődlegesen választandó kezelése?",
+                        options: ["Kinin", "Klorokin", "Intravénás Artesunate", "Doxycyclin"],
+                        answer: "Intravénás Artesunate",
+                        explanation: "Súlyos malária, beleértve a cerebrális maláriát is, esetén az intravénás artesunate a leghatékonyabb és a WHO által ajánlott első vonalbeli szer, mivel gyorsabban tisztítja a parazitákat a vérből, mint a kinin."
+                    },
+                    {
+                        question: "Milyen gyógyszerkombinációt alkalmaznak a KIR toxoplazmózis kezelésére?",
+                        options: ["Albendazol + Prazikantel", "Amphotericin B + Flucytosine", "Pyrimethamin + Sulfadiazin + Folinsav", "Rifampicin + Isoniazid"],
+                        answer: "Pyrimethamin + Sulfadiazin + Folinsav",
+                        explanation: "A standard terápia a pyrimethamin és a szulfadiazin kombinációja. A folinsavat (leukovorin) a pyrimethamin okozta csontvelő-szuppresszió kivédésére adják."
+                    },
+                    {
+                        question: "Melyik amőba okoz gyors lefolyású, szinte mindig halálos primer amőbás meningoencephalitist (PAM) meleg édesvízben való úszás után?",
+                        options: ["Acanthamoeba spp.", "Balamuthia mandrillaris", "Entamoeba histolytica", "Naegleria fowleri"],
+                        answer: "Naegleria fowleri",
+                        explanation: "A Naegleria fowleri, a 'agyevő amőba', meleg tavakban, folyókban él, és az orron keresztül bejutva gyors, fulmináns, gennyes meningoencephalitist okoz, amelynek halálozási aránya meghaladja a 97%-ot."
+                    },
+                    {
+                        question: "Milyen adjuváns terápiát kell adni az anthelminthikus szerek (pl. albendazol) mellé neurociszticerkózis kezelésekor?",
+                        options: ["Antibiotikumokat", "Antivirális szereket", "Kortikoszteroidokat", "Véralvadásgátlókat"],
+                        answer: "Kortikoszteroidokat",
+                        explanation: "Az anthelminthikus szerek a paraziták pusztulását okozzák, ami heves gyulladásos választ válthat ki az agyban, súlyosbítva a tüneteket (pl. ödéma, görcsök). Ennek megelőzésére vagy enyhítésére kortikoszteroidokat (pl. dexametazon) adnak."
+                    },
+                    {
+                        question: "Melyik parazitafertőzés okoz leggyakrabban gerincvelő-gyulladást (myelopathiát)?",
+                        options: ["Toxoplasma gondii", "Taenia solium", "Schistosoma fajok", "Plasmodium falciparum"],
+                        answer: "Schistosoma fajok",
+                        explanation: "A schistosomiasis (vérmételyfertőzés) neurológiai szövődménye leggyakrabban a gerincvelőt érinti, ahol a parazita petéi granulomatosus gyulladást okoznak, ami akut vagy szubakut myelopathiához vezet."
+                    },
+                    {
+                        question: "Mi a granulomatosus amőbás encephalitis (GAE) legfőbb rizikófaktora?",
+                        options: ["Fiatal életkor", "Utazás trópusi országokba", "Legyengült immunrendszer", "Kontaktlencse viselése"],
+                        answer: "Legyengült immunrendszer",
+                        explanation: "A GAE-t okozó amőbák (Acanthamoeba, Balamuthia) opportunista kórokozók, amelyek jellemzően csak immunszupprimált vagy krónikus betegségben szenvedő egyéneknél okoznak súlyos, lassan progrediáló, halálos agyi fertőzést."
+                    },
+                    {
+                        question: "Melyik képalkotó lelet NEM jellemző a KIR toxoplazmózisra?",
+                        options: ["Többszörös léziók", "Gyűrűszerű kontraszthalmozás", "Predilekció a bazális ganglionokra", "Fehérállományi léziók kontraszthalmozás nélkül"],
+                        answer: "Fehérállományi léziók kontraszthalmozás nélkül",
+                        explanation: "A fehérállományi léziók kontraszthalmozás nélkül a PML (progresszív multifokális leukoencephalopathia) jellegzetes képalkotó jelei, míg a toxoplazmózisra a gyűrűszerűen halmozó gócok a jellemzőek."
+                    },
+                    {
+                        question: "Mi a cerebrális echinococcosis (hydatidosis) kezelésének alapja?",
+                        options: ["Csak gyógyszeres kezelés albendazollal", "Sugárterápia", "Sebészi eltávolítás és albendazol terápia", "Hosszú távú kortikoszteroid kezelés"],
+                        answer: "Sebészi eltávolítás és albendazol terápia",
+                        explanation: "A nagy, térfoglaló agyi hidatid cisztákat sebészileg kell eltávolítani, ügyelve arra, hogy a ciszta ne repedjen meg a műtét során. A beavatkozást albendazol kezelés előzi meg és követi a kiújulás megelőzése érdekében."
+                    },
+                    {
+                        question: "Hogyan történik a neurociszticerkózis fertőzés?",
+                        options: ["Szúnyogcsípéssel", "Kullancscsípéssel", "A Taenia solium petéivel szennyezett étel vagy víz fogyasztásával", "Nyers hal fogyasztásával"],
+                        answer: "A Taenia solium petéivel szennyezett étel vagy víz fogyasztásával",
+                        explanation: "A neurociszticerkózist nem a galandféreg lárváját (borsókát) tartalmazó sertéshús, hanem a féregpetéket tartalmazó emberi széklettel szennyezett étel/víz elfogyasztása okozza. A lenyelt petékből a bélben kikelnek a lárvák, amelyek a vérárammal az agyba jutnak."
+                    },
+                    {
+                        question: "Milyen sejttípus felszaporodása jellemző a liquorban parazitás (helmint) fertőzések esetén?",
+                        options: ["Neutrofilek", "Limfociták", "Eozinofilek", "Bazofilek"],
+                        answer: "Eozinofilek",
+                        explanation: "Bár nem minden esetben, de a liquor eozinofília (az eozinofil granulociták arányának megemelkedése) erősen felveti a parazitás, különösen a féreg (helmint) eredetű KIR-fertőzés gyanúját."
+                    },
+                    {
+                        question: "Miért veszélyes az anthelminthikus terápia megkezdése neurociszticerkózisban?",
+                        options: ["Mert a gyógyszerek súlyosan károsítják a májat.", "Mert a gyógyszerek allergiás reakciót válthatnak ki.", "Mert a pusztuló paraziták heves gyulladásos reakciót és agyi ödémát okozhatnak.", "Mert a paraziták rezisztenssé válnak."],
+                        answer: "Mert a pusztuló paraziták heves gyulladásos reakciót és agyi ödémát okozhatnak.",
+                        explanation: "A gyógyszer hatására elpusztuló cisztákból antigének szabadulnak fel, ami az agyban gyulladást és ödémát provokál, ezáltal súlyosbíthatja a neurológiai tüneteket. Ezért adják a kezelést kortikoszteroid védelemben."
+                    },
+                    {
+                        question: "Melyik állítás igaz a cerebrális maláriára?",
+                        options: ["Lassan, hetek alatt fejlődik ki.", "Kezelés nélkül is jó a prognózisa.", "Orvosi vészhelyzet, amely kezeletlenül 24 órán belül halálos lehet.", "Csak gyermekeket érint."],
+                        answer: "Orvosi vészhelyzet, amely kezeletlenül 24 órán belül halálos lehet.",
+                        explanation: "A cerebrális malária egy hiperakut állapot, amely gyorsan progrediál kómához és halálhoz. Azonnali, hatékony antimaláriás kezelést igényel."
+                    },
+                    {
+                        question: "Melyik diagnosztikai módszer a legfontosabb a neurociszticerkózis cisztáinak stádiumbeosztásában?",
+                        options: ["Liquorvizsgálat", "EEG", "Szerológia", "Agyi képalkotás (CT/MRI)"],
+                        answer: "Agyi képalkotás (CT/MRI)",
+                        explanation: "A CT és különösen az MRI képes megkülönböztetni a ciszták különböző fejlődési/degenerációs stádiumait (vesicularis, kolloid, granuláris, meszesedett), ami alapvető a kezelési stratégia (pl. anthelminthikus terápia indikációja) meghatározásában."
+                    },
+                    {
+                        question: "Milyen tünetekkel járhat a Balamuthia mandrillaris okozta GAE, ami megkülönböztetheti más agyi fertőzésektől?",
+                        options: ["Magas láz", "A bőrön lévő, nem gyógyuló seb, amely megelőzi a neurológiai tüneteket", "Akut, gennyes meningitis", "Gyors javulás antibiotikumokra"],
+                        answer: "A bőrön lévő, nem gyógyuló seb, amely megelőzi a neurológiai tüneteket",
+                        explanation: "A Balamuthia fertőzés gyakran a bőrön keresztül történik, és egy krónikus, nem gyógyuló bőrlézió vagy fekély hetekkel-hónapokkal megelőzheti a neurológiai tünetek (GAE) kialakulását. Ez fontos diagnosztikai nyom lehet."
+                    },
+                    {
+                        question: "Mi a diagnosztikai alapja a feltételezett KIR toxoplazmózisnak AIDS-ben?",
+                        options: ["Csak a pozitív szerológia", "Kompatibilis klinikai és radiológiai kép, valamint pozitív anti-Toxoplasma IgG", "Agybiopszia minden esetben", "A liquor PCR pozitivitása"],
+                        answer: "Kompatibilis klinikai és radiológiai kép, valamint pozitív anti-Toxoplasma IgG",
+                        explanation: "Mivel a biopszia invazív, a diagnózist gyakran empirikusan állítják fel. Ha egy AIDS-es betegnek jellegzetes neurológiai tünetei és MRI leletei vannak, és a vérében kimutatható a korábbi fertőzést jelző IgG antitest, nagy a valószínűsége a toxoplazmózis reaktivációjának, és elindítják a terápiás próbát."
+                    },
+                    {
+                        question: "Melyik parazita cisztája képezhet ellenálló, nyugalmi állapotot az agyban, ami a kezelés utáni relapszushoz vezethet?",
+                        options: ["Plasmodium falciparum", "Taenia solium", "Acanthamoeba spp.", "Toxoplasma gondii"],
+                        answer: "Acanthamoeba spp.",
+                        explanation: "Az Acanthamoeba (és a Balamuthia) képes rendkívül ellenálló cisztákat képezni, amelyek túlélik a gyógyszeres kezelést. Ezek a ciszták később reaktiválódhatnak, ami a betegség kiújulásához vezet, ez az egyik fő oka a GAE rendkívül rossz prognózisának."
+                    }
+                ]
+            },
+            "lassu_virusok_prionok": {
+                title: "Lassú vírusfertőzések és Prion betegségek",
+                data: [
+                    {
+                        question: "Melyik betegség a kanyaróvírus ritka, évekkel a fertőzés után jelentkező, halálos kimenetelű központi idegrendszeri szövődménye?",
+                        options: ["Progresszív multifokális leukoencephalopathia (PML)", "Guillain-Barré-szindróma (GBS)", "Szubakut szklerotizáló panencephalitis (SSPE)", "Creutzfeldt-Jakob betegség (CJD)"],
+                        answer: "Szubakut szklerotizáló panencephalitis (SSPE)",
+                        explanation: "Az SSPE egy lassan progrediáló, halálos agyvelőgyulladás, amelyet a perzisztáló, módosult kanyaróvírus okoz, jellemzően olyanoknál, akik gyermekkorukban estek át a betegségen és nem kaptak védőoltást."
+                    },
+                    {
+                        question: "Mi a prion betegségek kórokozója?",
+                        options: ["Egy speciális, lassan osztódó vírus", "Egy baktérium spóra", "Egy hibásan feltekeredett, fertőző fehérje (PrPSc)", "Egy gombatoxin"],
+                        answer: "Egy hibásan feltekeredett, fertőző fehérje (PrPSc)",
+                        explanation: "A prion betegségeket nem mikroorganizmusok, hanem a normális prion fehérje (PrPC) kóros, fertőzőképes konformációja (PrPSc) okozza, amely láncreakciószerűen átalakítja a többi normális fehérjét, ami azok agyban való felhalmozódásához és neuronpusztuláshoz vezet."
+                    },
+                    {
+                        question: "Melyik a Creutzfeldt-Jakob betegség (CJD) leggyakoribb formája?",
+                        options: ["Variáns CJD (vCJD)", "Iatrogén CJD", "Familiáris CJD", "Sporadikus CJD (sCJD)"],
+                        answer: "Sporadikus CJD (sCJD)",
+                        explanation: "A sporadikus CJD teszi ki az összes eset körülbelül 85%-át. Ennek a formának az oka ismeretlen, spontán alakul ki, jellemzően idősebb korban."
+                    },
+                    {
+                        question: "Milyen klinikai tünet a legjellemzőbb a sporadikus CJD-re?",
+                        options: ["Lassan progrediáló memória zavar", "Gyorsan progrediáló demencia és myoclonus", "Krónikus fejfájás", "Korai pszichiátriai tünetek és fájdalom"],
+                        answer: "Gyorsan progrediáló demencia és myoclonus",
+                        explanation: "Az sCJD-t a rendkívül gyors, hetek-hónapok alatti intellektuális leépülés (demencia) és az akaratlan, hirtelen izomrángások (myoclonus) jellemzik."
+                    },
+                    {
+                        question: "Melyik kórokozó reaktivációja okozza a progresszív multifokális leukoencephalopathiát (PML) immunszupprimált betegekben?",
+                        options: ["Kanyaróvírus", "HIV", "JC-vírus", "Epstein-Barr vírus"],
+                        answer: "JC-vírus",
+                        explanation: "A PML-t a lakosság nagy részében tünetmentesen jelenlévő JC-vírus reaktivációja okozza, amikor az immunrendszer (pl. AIDS, immunszuppresszív terápia miatt) meggyengül."
+                    },
+                    {
+                        question: "Melyik agyi képalkotó (MRI) jel rendkívül specifikus a variáns CJD-re (vCJD)?",
+                        options: ["Kortikális szalagszerű diffúziógátlás (ribboning)", "A bazális ganglionok hyperintenzitása", "A pulvinar thalami hyperintenzitása ('pulvinar jel' vagy 'hokibot-jel')", "Fehérállományi léziók kontraszthalmozás nélkül"],
+                        answer: "A pulvinar thalami hyperintenzitása ('pulvinar jel' vagy 'hokibot-jel')",
+                        explanation: "A 'pulvinar jel' a thalamus hátsó részének szimmetrikus, magas jelintenzitása az MRI-n, ami a megfelelő klinikai kép mellett nagyon erős bizonyíték a vCJD mellett."
+                    },
+                    {
+                        question: "Mivel hozható összefüggésbe a variáns CJD (vCJD) kialakulása?",
+                        options: ["Kanyaró elleni védőoltással", "Szarvasmarha-spongiform encephalopathiával (BSE, 'kergemarhakór') fertőzött marhahús fogyasztásával", "Genetikai mutációval", "Orvosi beavatkozással"],
+                        answer: "Szarvasmarha-spongiform encephalopathiával (BSE, 'kergemarhakór') fertőzött marhahús fogyasztásával",
+                        explanation: "Erős tudományos bizonyítékok támasztják alá, hogy a vCJD-t ugyanaz a priontörzs okozza, mint a szarvasmarhák BSE betegségét, és a fertőzés fertőzött hústermékek fogyasztásával történt."
+                    },
+                    {
+                        question: "Melyik laboratóriumi vizsgálat a legérzékenyebb és legspecifikusabb a CJD antemortem (életben történő) diagnózisára?",
+                        options: ["Liquor 14-3-3 protein teszt", "EEG", "Agyi MRI", "Liquor RT-QuIC teszt"],
+                        answer: "Liquor RT-QuIC teszt",
+                        explanation: "A Real-time Quaking-Induced Conversion (RT-QuIC) egy új, rendkívül érzékeny és specifikus teszt, amely képes kimutatni a kóros prion fehérje (PrPSc) aggregációját a liquorból, lehetővé téve a CJD pontos diagnózisát még a beteg életében."
+                    },
+                    {
+                        question: "Melyik állítás igaz a 'lassú vírusfertőzés' kifejezésre?",
+                        options: ["Azt jelenti, hogy a vírus replikációja lassú.", "Azt jelenti, hogy a betegség klinikai lefolyása lassú és progresszív, hosszú lappangási idő után.", "Csak a prion betegségekre vonatkozik.", "Mindig gyógyítható, ha időben felismerik."],
+                        answer: "Azt jelenti, hogy a betegség klinikai lefolyása lassú és progresszív, hosszú lappangási idő után.",
+                        explanation: "A 'lassú' jelző a betegség hónapokig-évekig tartó, fokozatosan rosszabbodó klinikai lefolyására utal, nem a kórokozó szaporodási sebességére."
+                    },
+                    {
+                        question: "Miben különbözik leginkább a variáns CJD (vCJD) a sporadikus CJD-től (sCJD) a kezdeti tünetek tekintetében?",
+                        options: ["A vCJD demenciával kezdődik, míg az sCJD mozgászavarral.", "A vCJD jellegzetesen pszichiátriai és szenzoros tünetekkel kezdődik, míg az sCJD demenciával.", "Nincs különbség a kezdeti tünetekben.", "A vCJD lázzal kezdődik, az sCJD nem."],
+                        answer: "A vCJD jellegzetesen pszichiátriai és szenzoros tünetekkel kezdődik, míg az sCJD demenciával.",
+                        explanation: "Ellentétben az sCJD-vel, ahol a gyors demencia a vezető tünet, a vCJD-s betegeknél a betegség elején gyakran pszichiátriai zavarok (depresszió, szorongás) és fájdalmas érzészavarok (dysesthesia) jelentkeznek, és a kognitív hanyatlás csak később alakul ki."
+                    },
+                    {
+                        question: "Melyik betegségre jellemző az EEG-n látható periodikus éles hullám komplexus?",
+                        options: ["SSPE", "PML", "Variáns CJD (vCJD)", "Sporadikus CJD (sCJD)"],
+                        answer: "Sporadikus CJD (sCJD)",
+                        explanation: "Az sCJD egyik klasszikus diagnosztikai jele az EEG-n látható jellegzetes, periodikusan ismétlődő, nagy amplitúdójú éles-lassú hullám mintázat. Ez az SSPE-ben is látható, de a vCJD-ben és a PML-ben nem jellemző."
+                    },
+                    {
+                        question: "Mi a PML kezelésének alapja?",
+                        options: ["Nagy dózisú kortikoszteroidok", "Specifikus antivirális szer a JC-vírus ellen", "Az immunszuppresszió visszafordítása (pl. cART megkezdése)", "Plazmaferezis"],
+                        answer: "Az immunszuppresszió visszafordítása (pl. cART megkezdése)",
+                        explanation: "Nincs specifikus gyógyszer a JC-vírus ellen. A PML egyetlen hatásos kezelése az immunrendszer működésének helyreállítása, ami lehetővé teszi a szervezet számára, hogy kordában tartsa a vírust. HIV-betegeknél ez a hatékony antiretrovirális terápia (cART) megkezdését vagy optimalizálását jelenti."
+                    },
+                    {
+                        question: "Melyik prion betegség örökletes és fő tünete a gyógyíthatatlan álmatlanság?",
+                        options: ["Gerstmann-Sträussler-Scheinker-szindróma (GSS)", "Fatális Familiáris Insomnia (FFI)", "Kuru", "Sporadikus CJD"],
+                        answer: "Fatális Familiáris Insomnia (FFI)",
+                        explanation: "Az FFI egy ritka, genetikailag öröklődő prion betegség, amelynek vezető tünete a súlyos, kezelhetetlen álmatlanság, amelyhez autonóm idegrendszeri zavarok, motoros jelek és végül demencia társul."
+                    },
+                    {
+                        question: "Miért jelentenek különleges fertőzéskontroll-kihívást a prionok?",
+                        options: ["Mert rendkívül gyorsan terjednek cseppfertőzéssel.", "Mert rendkívül ellenállóak a hagyományos sterilizálási eljárásokkal (hő, fertőtlenítők) szemben.", "Mert nincsenek rájuk diagnosztikai tesztek.", "Mert csak állatokban fordulnak elő."],
+                        answer: "Mert rendkívül ellenállóak a hagyományos sterilizálási eljárásokkal (hő, fertőtlenítők) szemben.",
+                        explanation: "A kóros prion fehérjék rendkívüli stabilitásuk miatt ellenállnak a legtöbb rutin sterilizálási és fertőtlenítési módszernek. Ezért a velük kontaminálódott orvosi eszközök (pl. sebészeti műszerek) speciális, agresszív eljárásokat igényelnek az iatrogén átvitel megelőzésére."
+                    },
+                    {
+                        question: "Melyik állapot utánozhatja a CJD-t, de potenciálisan kezelhető?",
+                        options: ["Alzheimer-kór", "Autoimmun encephalitis", "PML", "SSPE"],
+                        answer: "Autoimmun encephalitis",
+                        explanation: "Az autoimmun encephalitisek (pl. anti-NMDAR, VGKC) gyorsan progrediáló demenciával és neurológiai tünetekkel járhatnak, ami klinikailag utánozhatja a CJD-t. Az elkülönítés létfontosságú, mert az autoimmun encephalitis immunszuppresszív terápiára (szteroidok, plazmaferezis) javulhat, míg a CJD halálos."
+                    },
+                    {
+                        question: "Melyik idegrendszeri területet támadja meg elsődlegesen a Guillain-Barré-szindróma (GBS)?",
+                        options: ["Az agy fehérállományát", "A bazális ganglionokat", "A perifériás idegeket", "A gerincvelőt"],
+                        answer: "A perifériás idegeket",
+                        explanation: "A GBS egy autoimmun betegség, amely a központi idegrendszer helyett a perifériás idegrendszert támadja, károsítva az idegrostokat körülvevő myelinhüvelyt, ami felszálló gyengeséghez és bénuláshoz vezet."
+                    },
+                    {
+                        question: "Melyik állítás igaz a HIV-asszociált neurokognitív zavarra (HAND)?",
+                        options: ["Csak a HIV-fertőzés végső stádiumában jelentkezik.", "A cART bevezetése teljesen megszüntette.", "A kognitív, motoros és hangulati problémák spektrumát jelöli.", "Mindig súlyos demenciát okoz."],
+                        answer: "A kognitív, motoros és hangulati problémák spektrumát jelöli.",
+                        explanation: "A HAND egy gyűjtőfogalom, amely a HIV-fertőzéshez társuló különböző súlyosságú neurokognitív problémákat foglalja magában, az enyhe, tünetmentes károsodástól (ANI) a mindennapi életet zavaró enyhe zavaron (MND) át a súlyos demenciáig (HAD)."
+                    },
+                    {
+                        question: "Mi a neuropatológiai jele a prion betegségeknek az agyszövetben?",
+                        options: ["Gennyes gyulladás", "Demyelinizáció", "Szivacsos (spongiform) elváltozás, neuronvesztés és gliózis", "Vaszkuláris elzáródások"],
+                        answer: "Szivacsos (spongiform) elváltozás, neuronvesztés és gliózis",
+                        explanation: "A prionok felhalmozódása az idegsejtek pusztulásához vezet, ami mikroszkopikus lyukakat hoz létre az agyszövetben, szivacsos megjelenést kölcsönözve neki. Ezt a folyamatot asztrocita-szaporulat (gliózis) kíséri."
+                    },
+                    {
+                        question: "Melyik a legfontosabb megelőzési módszer az SSPE ellen?",
+                        options: ["Jó higiénia", "Kullancsriasztók használata", "Kanyaró elleni védőoltás", "Biztonságos szex"],
+                        answer: "Kanyaró elleni védőoltás",
+                        explanation: "Az SSPE a kanyarófertőzés szövődménye. A hatékony és széles körben alkalmazott kanyaró elleni védőoltás (MMR) a leghatékonyabb módja a betegség megelőzésének, és bevezetése óta az SSPE esetszáma drámaian lecsökkent."
+                    },
+                    {
+                        question: "Melyik betegségre jellemzőek a 'florid plakkok' az agyban?",
+                        options: ["Alzheimer-kór", "Sporadikus CJD", "Variáns CJD", "PML"],
+                        answer: "Variáns CJD",
+                        explanation: "A vCJD egyik jellegzetes neuropatológiai jellemzője a nagyszámú 'florid plakk' jelenléte. Ezek sűrű, kuru-típusú amiloid plakkok, amelyeket szivacsos elváltozások (vakuólumok) koszorúja vesz körül."
+                    }
+                ]
+            }
+        };
+
+        const app = document.getElementById('app');
+        const topicSelectionScreen = document.getElementById('topic-selection');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const topicGrid = document.getElementById('topic-grid');
+        const quizTopicTitle = document.getElementById('quiz-topic-title');
+        const questionCounter = document.getElementById('question-counter');
+        const totalQuestions = document.getElementById('total-questions');
+        const questionText = document.getElementById('question-text');
+        const answerButtons = document.getElementById('answer-buttons');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextButton = document.getElementById('next-button');
+        const scoreText = document.getElementById('score-text');
+        const resultsIcon = document.getElementById('results-icon');
+        const resultsMessage = document.getElementById('results-message');
+
+        let currentTopic = '';
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const quizLength = 10;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function showTopics() {
+            topicSelectionScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+        }
+
+        function startQuiz(topicKey) {
+            currentTopic = topicKey;
+            currentQuestions = shuffleArray([...questions[topicKey].data]).slice(0, quizLength);
+            currentQuestionIndex = 0;
+            score = 0;
+
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            quizTopicTitle.textContent = questions[topicKey].title;
+            totalQuestions.textContent = currentQuestions.length;
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            resetState();
+            const question = currentQuestions[currentQuestionIndex];
+            questionCounter.textContent = currentQuestionIndex + 1;
+            questionText.textContent = question.question;
+
+            shuffleArray(question.options).forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('btn-answer', 'w-full', 'text-left', 'p-4', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'hover:bg-gray-100', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-400');
+                button.addEventListener('click', () => selectAnswer(button, option));
+                answerButtons.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextButton.classList.add('hidden');
+            nextButton.disabled = true;
+            explanationContainer.classList.add('hidden');
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+        }
+        
+        function selectAnswer(selectedButton, selectedAnswer) {
+            const question = currentQuestions[currentQuestionIndex];
+            const correctAnswer = question.answer;
+
+            Array.from(answerButtons.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                } else {
+                    button.classList.add('opacity-60');
+                }
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+            } else {
+                selectedButton.classList.remove('opacity-60');
+                selectedButton.classList.add('incorrect');
+            }
+
+            explanationText.textContent = question.explanation;
+            explanationContainer.classList.remove('hidden');
+            nextButton.disabled = false;
+            
+            if (currentQuestions.length > currentQuestionIndex + 1) {
+                 nextButton.textContent = 'Következő kérdés';
+                 nextButton.onclick = showNextQuestion;
+            } else {
+                nextButton.textContent = 'Eredmények megtekintése';
+                nextButton.onclick = showResults;
+            }
+            nextButton.classList.remove('hidden');
+        }
+
+        function showNextQuestion() {
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreText.textContent = `${score} helyes válasz a ${currentQuestions.length}-ból.`;
+            
+            const percentage = (score / currentQuestions.length) * 100;
+            if (percentage >= 80) {
+                resultsIcon.textContent = '🎉';
+                resultsMessage.textContent = 'Kiváló munka! Jól felkészültél.';
+            } else if (percentage >= 50) {
+                resultsIcon.textContent = '👍';
+                resultsMessage.textContent = 'Szép eredmény! Még egy kis gyakorlással tökéletes lesz.';
+            } else {
+                resultsIcon.textContent = '📚';
+                resultsMessage.textContent = 'Gyakorolj még egy kicsit, és próbáld újra!';
+            }
+        }
+        
+        function restartQuiz() {
+            startQuiz(currentTopic);
+        }
+
+        // Initialize topic selection
+        function init() {
+            Object.keys(questions).forEach(key => {
+                const topic = questions[key];
+                const card = document.createElement('div');
+                card.classList.add('topic-card', 'p-6', 'bg-white', 'rounded-xl', 'shadow-md', 'cursor-pointer', 'text-center');
+                card.innerHTML = `<h3 class="text-xl font-semibold text-gray-800">${topic.title}</h3>`;
+                card.addEventListener('click', () => startQuiz(key));
+                topicGrid.appendChild(card);
+            });
+        }
+
+        init();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Új Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/80</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Neurológiai rehabilitáció és afázia",
+                questions: [
+                    { question: "Mi a neurológiai rehabilitáció alapvető célja?", options: ["Kizárólag a fizikai tünetek kezelése.", "A beteg lehető legmagasabb szintű funkcionális képességének és függetlenségének visszaállítása.", "A gyógyszeres terápia teljes helyettesítése.", "Csak az akut sérülések utáni ellátás."], answer: "A beteg lehető legmagasabb szintű funkcionális képességének és függetlenségének visszaállítása.", explanation: "A neurológiai rehabilitáció célja a beteg funkciójának növelése, tüneteinek enyhítése és általános jólétének javítása fizikai, érzelmi és szociális szempontból, a lehető legnagyobb függetlenség elérése mellett." },
+                    { question: "Melyik jelenségre épül a neurológiai rehabilitáció?", options: ["Neurodegeneráció", "Neuroplaszticitás", "Apoptózis", "Excitotoxicitás"], answer: "Neuroplaszticitás", explanation: "A neuroplaszticitás az agy azon képessége, hogy a sérülésre reagálva átszervezze magát és új kapcsolatokat hozzon létre. A rehabilitáció célja ezen folyamatok maximalizálása." },
+                    { question: "Mi a 'tanult nem-használat' (learned non-use) jelensége?", options: ["A beteg szándékosan nem használja a sérült végtagját.", "A paretikus végtag használatának elkerülése, még akkor is, ha van némi funkcionális potenciál.", "A rehabilitáció egy hatékony formája.", "A beteg elfelejti, hogyan kell mozgatni a végtagját."], answer: "A paretikus végtag használatának elkerülése, még akkor is, ha van némi funkcionális potenciál.", explanation: "A 'tanult nem-használat' egy maladaptív folyamat, ahol a beteg a kezdeti nehézségek miatt hozzászokik a sérült végtag mellőzéséhez, ami további funkcióvesztéshez vezet. A Kényszerített Mozgásterápia (CIMT) ezt célozza." },
+                    { question: "Melyik technika NEM számít neuromodulációs priming technikának a rehabilitációban?", options: ["Tükörterápia", "Motoros képalkotás (Motor Imagery)", "Kényszerített Mozgásterápia (CIMT)", "Transzkraniális Egyenáramú Stimuláció (tDCS)"], answer: "Kényszerített Mozgásterápia (CIMT)", explanation: "Míg a tükörterápia, a motoros képalkotás és a tDCS priming technikák, amelyek felkészítik az agyat a mozgásra, a CIMT egy intenzív, feladatspecifikus gyakorlati módszer, nem pedig priming." },
+                    { question: "Mi az afázia leggyakoribb oka?", options: ["Agydaganat", "Fejsérülés", "Stroke (agyi érkatasztrófa)", "Demencia"], answer: "Stroke (agyi érkatasztrófa)", explanation: "Az afázia leggyakoribb oka a stroke, amely az agy nyelvért felelős területeinek vérellátási zavara miatt okoz károsodást." },
+                    { question: "Melyik afázia típusra jellemző a rövid, de értelmes mondatokban való beszéd, a funkciószavak (pl. 'és', 'a') elhagyásával?", options: ["Wernicke-afázia", "Globális afázia", "Broca-afázia", "Anómiás afázia"], answer: "Broca-afázia", explanation: "A Broca-afázia (expresszív afázia) a beszédprodukció zavara. A betegek megértik a beszédet, de nehezen, erőltetetten, agrammatikusan beszélnek, gyakran csak a legfontosabb szavakat használva." },
+                    { question: "Melyik afázia típusra jellemző a folyékony, de értelmetlen, zavaros beszéd és a súlyos beszédmegértési zavar?", options: ["Broca-afázia", "Wernicke-afázia", "Kondukciós afázia", "Transzkortikális motoros afázia"], answer: "Wernicke-afázia", explanation: "A Wernicke-afázia (receptív afázia) a beszédértés súlyos zavara. A betegek folyékonyan beszélnek, de beszédük gyakran értelmetlen (szósaláta), és nem értik meg, amit mások mondanak nekik." },
+                    { question: "Milyen terápiás módszer alapul azon a megfigyelésen, hogy egyes afáziás betegek képesek elénekelni szavakat, amiket kimondani nem tudnak?", options: ["Szemantikus Jellemző Analízis (SFA)", "Forgatókönyv Tréning", "Melodikus Intonációs Terápia (MIT)", "Vizuális Akcióterápia (VAT)"], answer: "Melodikus Intonációs Terápia (MIT)", explanation: "Az MIT a jobb agyfélteke zenei és prozódiai képességeit használja ki, hogy segítse a bal féltekei károsodás miatti beszédprodukciós zavarral küzdő betegeket." },
+                    { question: "Mi a rehabilitációs terápia 'dózisának' jelentősége?", options: ["Nincs jelentősége, a terápia típusa a fontos.", "A magasabb dózis (intenzitás, gyakoriság, időtartam) hatékonyabb a funkcionális javulás elérésében.", "Csak a terápia időtartama számít.", "A túl magas dózis mindig káros."], answer: "A magasabb dózis (intenzitás, gyakoriság, időtartam) hatékonyabb a funkcionális javulás elérésében.", explanation: "A kutatások, köztük a Cochrane áttekintések is, azt mutatják, hogy a neuroplaszticitás és a funkcionális javulás eléréséhez megfelelő mennyiségű és intenzitású terápiára van szükség. A heti néhány óra terápia gyakran nem elegendő." },
+                    { question: "Mi a 'SMART' célkitűzés a rehabilitációban?", options: ["Egyszerű, Mérhető, Ambiciózus, Releváns, Tág", "Specifikus, Mérhető, Elérhető, Releváns, Időhöz kötött", "Gyors (Speedy), Motiváló, Aktív, Ismétlődő, Célzott (Targeted)", "Szociális, Motoros, Adaptív, Reális, Terápiás"], answer: "Specifikus, Mérhető, Elérhető, Releváns, Időhöz kötött", explanation: "A SMART mozaikszó egy célkitűzési módszertant jelöl, amely segít konkrét, jól definiált és követhető célokat megfogalmazni a terápiás tervben, növelve annak hatékonyságát." },
+                    { question: "Melyik szakember felelős elsődlegesen az afázia diagnosztizálásáért és terápiájáért?", options: ["Gyógytornász", "Neuropszichológus", "Logopédus", "Foglalkozásterapeuta"], answer: "Logopédus", explanation: "A logopédus (beszéd- és nyelvterapeuta) az a szakember, aki a kommunikációs zavarok, köztük az afázia felmérésére, diagnosztizálására és rehabilitációjára specializálódott." },
+                    { question: "Mi a legerősebb előrejelzője a nyelvi funkciók javulásának az afázia rehabilitációban?", options: ["A beteg életkora", "A stroke óta eltelt idő", "Az afázia kezdeti súlyossága", "A beteg iskolai végzettsége"], answer: "Az afázia kezdeti súlyossága", explanation: "A POLAR vizsgálat szerint az afázia kezdeti súlyossága a legerősebb prognosztikai faktor. Az enyhébb vagy közepes afáziával rendelkező betegek általában jobb terápiás választ mutatnak, mint a nagyon súlyos afáziával élők." },
+                    { question: "Mit jelent a Beteg Által Jelentett Kimeneti Mérés (PRO)?", options: ["A terapeuta által mért objektív adat.", "A beteg egészségi állapotáról szóló jelentés, amely közvetlenül a betegtől származik.", "A laboratóriumi vizsgálatok eredménye.", "A képalkotó vizsgálatok lelete."], answer: "A beteg egészségi állapotáról szóló jelentés, amely közvetlenül a betegtől származik.", explanation: "A PRO-k a beteg szubjektív tapasztalatait és perspektíváját helyezik a középpontba, biztosítva a betegközpontú ellátást. Ilyen például a fájdalom vagy az életminőség értékelése a beteg által." },
+                    { question: "Melyik állítás igaz a rehabilitációs csapatmunkára?", options: ["A multidiszciplináris csapatmunka nem hatékonyabb, mint az egyéni terápia.", "A csapatmunka lényege, hogy minden szakember külön-külön dolgozik.", "A multidiszciplináris csapat hatékonyan csökkenti a fogyatékosságot, és a szinergikus hatás felülmúlja az egyes szakmák munkájának összegét.", "A csapatmunkához nincs szükség orvosra."], answer: "A multidiszciplináris csapat hatékonyan csökkenti a fogyatékosságot, és a szinergikus hatás felülmúlja az egyes szakmák munkájának összegét.", explanation: "A különböző szakterületek (orvos, gyógytornász, logopédus stb.) összehangolt munkája biztosítja a beteg komplex problémáinak holisztikus kezelését, ami hatékonyabb, mint az izolált beavatkozások." },
+                    { question: "Mi a Constraint-Induced Aphasia Therapy (CIAT) lényege?", options: ["A betegnek csendben kell maradnia a terápia alatt.", "Intenzív nyelvgyakorlás a nem-verbális kommunikációs formák (pl. gesztusok) korlátozásával.", "A betegnek csak írásban szabad kommunikálnia.", "Csoportos beszélgetés korlátok nélkül."], answer: "Intenzív nyelvgyakorlás a nem-verbális kommunikációs formák (pl. gesztusok) korlátozásával.", explanation: "A CIAT a 'tanult nem-használat' elvét fordítja meg: a beteget arra kényszeríti, hogy a verbális kommunikációt használja, korlátozva a kompenzáló stratégiákat, ami intenzív gyakorlást és a nyelvi funkciók javulását eredményezi." },
+                    { question: "Milyen szerepe van a foglalkozásterapeutának a rehabilitációban?", options: ["A beszéd javítása.", "A járás és egyensúly fejlesztése.", "A mindennapi életvitelhez (ADL) szükséges készségek fejlesztése és a környezet adaptálása.", "Gyógyszerek felírása."], answer: "A mindennapi életvitelhez (ADL) szükséges készségek fejlesztése és a környezet adaptálása.", explanation: "A foglalkozásterapeuta abban segít a betegnek, hogy a megváltozott képességei mellett is a lehető legönállóbban tudja végezni a mindennapi tevékenységeket, mint az öltözködés, étkezés vagy a házimunka." },
+                    { question: "Mi a VNeST (Verb Network Strengthening Treatment) terápia célja?", options: ["A főnevek megnevezésének javítása.", "Az igék és a hozzájuk kapcsolódó mondatszerkezetek előhívásának javítása.", "Az olvasási képesség fejlesztése.", "A nyelési funkció javítása."], answer: "Az igék és a hozzájuk kapcsolódó mondatszerkezetek előhívásának javítása.", explanation: "A VNeST egy szemantikai alapú terápia, amely az igékre, mint a mondatok központi elemeire fókuszál, és a hozzájuk kapcsolódó ágensek (ki?) és páciensek (mit?) aktiválásával erősíti a szemantikai hálózatot, javítva a szó- és mondatalkotást." },
+                    { question: "Milyen etikai elv ismeri el a beteg jogát arra, hogy tájékozott döntéseket hozzon a saját ellátásáról?", options: ["Jótékonyság (Beneficence)", "Ártalmatlanság (Non-maleficence)", "Igazságosság (Justice)", "Autonómia (Autonomy)"], answer: "Autonómia (Autonomy)", explanation: "Az autonómia elve kimondja, hogy a cselekvőképes betegeknek joguk van a saját testük és egészségügyi ellátásuk feletti rendelkezéshez, beleértve a kezelések elfogadását vagy elutasítását, megfelelő tájékoztatás alapján." },
+                    { question: "Melyik állítás igaz az afázia prognózisára?", options: ["A felépülés mindig teljes és gyors.", "A javulás csak az első hónapban lehetséges.", "A felépülés mértéke változó, és a javulás évekig is tarthat, bár a leggyorsabb az első 3-6 hónapban.", "Az afázia soha nem javul."], answer: "A felépülés mértéke változó, és a javulás évekig is tarthat, bár a leggyorsabb az első 3-6 hónapban.", explanation: "A neuroplaszticitásnak köszönhetően a nyelvi funkciók javulása a stroke után hosszú ideig lehetséges, bár a legjelentősebb spontán és terápiás javulás az első hónapokban várható. A krónikus fázisban is elérhető fejlődés intenzív terápiával." },
+                    { question: "Miért fontos a rehabilitációs csapatban a pszichológus/neuropszichológus jelenléte?", options: ["Mert ő végzi a fizikoterápiát.", "Mert felméri és kezeli a sérülés okozta kognitív, érzelmi és viselkedési zavarokat.", "Mert segédeszközöket ír fel.", "Mert a gyógyszeres kezelést irányítja."], answer: "Mert felméri és kezeli a sérülés okozta kognitív, érzelmi és viselkedési zavarokat.", explanation: "Az agysérülés gyakran jár kognitív deficitekkel (memória, figyelem) és érzelmi változásokkal (depresszió, szorongás). A neuropszichológus feladata ezek objektív felmérése és a megfelelő kognitív és pszichoterápiás beavatkozások elvégzése." }
+                ]
+            },
+            {
+                topic: "Koponyasérülés és intracraniális vérzések",
+                questions: [
+                    { question: "Mi a primer agysérülés a traumás agysérülés (TBI) kontextusában?", options: ["A trauma után órákkal kialakuló agyödéma.", "Az a közvetlen, irreverzibilis károsodás, amely a trauma pillanatában következik be.", "A koponyaűri nyomásfokozódás.", "A sérülés utáni fertőzés."], answer: "Az a közvetlen, irreverzibilis károsodás, amely a trauma pillanatában következik be.", explanation: "A primer agysérülés a mechanikai erőhatás által közvetlenül okozott szöveti károsodás (pl. zúzódás, szakadás), amely a baleset pillanatában megtörténik és nem visszafordítható." },
+                    { question: "Melyik skálát használják leggyakrabban a TBI súlyosságának felmérésére a tudatzavar mértéke alapján?", options: ["ASIA Skála", "Glasgow Coma Scale (GCS)", "Rancho Los Amigos Skála", "MMSE"], answer: "Glasgow Coma Scale (GCS)", explanation: "A GCS egy 15 pontos skála, amely a szemnyitást, a verbális és a motoros választ értékeli, és széles körben használják a tudatállapot objektív mérésére és a TBI súlyosságának osztályozására." },
+                    { question: "Mi a sürgősségi ellátás elsődleges célja TBI esetén?", options: ["Azonnali MRI vizsgálat végzése.", "A primer sérülés visszafordítása.", "A szekunder agysérülés megelőzése és minimalizálása.", "A fájdalom teljes megszüntetése."], answer: "A szekunder agysérülés megelőzése és minimalizálása.", explanation: "Mivel a primer sérülés irreverzibilis, a terápia a szekunder károsodási folyamatok (pl. hypoxia, hypotensio, agyödéma) megelőzésére fókuszál, amelyek tovább rontják a kimenetelt." },
+                    { question: "Milyen típusú koponyaűri vérzésre jellemző a lencse alakú (bikonvex) megjelenés a CT felvételen?", options: ["Subduralis haematoma (SDH)", "Subarachnoidealis vérzés (SAH)", "Intracerebralis haematoma (ICH)", "Epiduralis haematoma (EDH)"], answer: "Epiduralis haematoma (EDH)", explanation: "Az EDH a dura mater és a koponyacsont között alakul ki. Mivel a dura szorosan tapad a varratvonalakhoz, a vérzés ezeket nem lépi át, így jellegzetes, mindkét oldalán domború, lencse alakú formát vesz fel." },
+                    { question: "Melyik ér sérülése okozza leggyakrabban az epiduralis haematomát?", options: ["Arteria carotis interna", "Arteria cerebri media", "Arteria meningea media", "Sinus sigmoideus"], answer: "Arteria meningea media", explanation: "Az epiduralis vérzések klasszikusan a halántékcsont töréséhez társulnak, amely elszakítja az alatta futó arteria meningea media-t, gyors artériás vérzést okozva." },
+                    { question: "Mi a 'lucid interval' (tiszta periódus)?", options: ["A beteg tartós kómája.", "A sérülést követő azonnali eszméletlenség.", "A kezdeti eszméletvesztést követő átmeneti, tünetmentes vagy enyhe tünetekkel járó időszak, amit gyors állapotromlás követ.", "A rehabilitáció utolsó szakasza."], answer: "A kezdeti eszméletvesztést követő átmeneti, tünetmentes vagy enyhe tünetekkel járó időszak, amit gyors állapotromlás követ.", explanation: "A 'lucid interval' klasszikusan az epiduralis haematomára jellemző, ahol a növekvő vérömleny kezdetben nem okoz tüneteket, de ahogy eléri a kritikus méretet, hirtelen koponyaűri nyomásfokozódáshoz és beékelődéshez vezet." },
+                    { question: "Milyen képalkotó eljárás az 'aranystandard' az akut TBI diagnosztikájában?", options: ["Koponya röntgen", "Koponya CT", "Koponya MRI", "SPECT"], answer: "Koponya CT", explanation: "A koponya CT gyors, széles körben elérhető, és rendkívül érzékeny a sürgős beavatkozást igénylő elváltozások, mint a koponyaűri vérzések és a koponyatörések kimutatására, ezért ez az elsődleges vizsgálat akut TBI esetén." },
+                    { question: "Milyen alakú a subduralis haematoma (SDH) a CT felvételen?", options: ["Lencse alakú (bikonvex)", "Sarló alakú (konkáv)", "Kerek", "Szabálytalan"], answer: "Sarló alakú (konkáv)", explanation: "Az SDH a dura és az arachnoidea között helyezkedik el. Mivel a vér szétterülhet ebben a potenciális térben, követi az agy felszínének görbületét, így jellegzetes, sarló alakú, konkáv belső határú vérgyülemet képez." },
+                    { question: "Melyik populációban gyakoribb a krónikus subduralis haematoma akár enyhe trauma után is?", options: ["Gyermekek", "Fiatal sportolók", "Idősek és alkoholisták", "Terhes nők"], answer: "Idősek és alkoholisták", explanation: "Az agyi atrófia (ami időskorban és alkoholizmusban gyakori) miatt a hídvénák megnyúlnak és sérülékenyebbé válnak. Emiatt már enyhe fejsérülés is a vénák szakadásához és lassan kialakuló, krónikus SDH-hoz vezethet." },
+                    { question: "Mi a szekunder agysérülés egyik legfontosabb megelőzhető szisztémás oka?", options: ["Hyperoxia (túl magas oxigénszint)", "Hypotensio (alacsony vérnyomás)", "Hyperglykaemia (magas vércukor)", "Láz"], answer: "Hypotensio (alacsony vérnyomás)", explanation: "A hypotensio (szisztolés vérnyomás < 90 Hgmm) drámaian rontja a sérült agy vérellátását (cerebrális perfúziót), súlyosbítva az iszkémiás károsodást. Ennek elkerülése és a vérnyomás stabilizálása az akut ellátás egyik legfontosabb célja." },
+                    { question: "Milyen célt szolgál a dekompressziós kraniektómia?", options: ["A koponyatörés esztétikai helyreállítását.", "A koponyaűri nyomás csökkentését a koponyacsont egy részének ideiglenes eltávolításával.", "A vérömleny leszívását egy kis furaton keresztül.", "Az agy elektromos stimulálását."], answer: "A koponyaűri nyomás csökkentését a koponyacsont egy részének ideiglenes eltávolításával.", explanation: "Súlyos agyödéma és kontrollálhatatlan koponyaűri nyomásfokozódás esetén a koponyacsont egy darabjának eltávolítása 'helyet csinál' a duzzadt agynak, megelőzve a beékelődést. Ez egy életmentő beavatkozás lehet." },
+                    { question: "Melyik állítás igaz a koponya röntgen vizsgálatra akut TBI esetén?", options: ["Ez az elsődlegesen választandó vizsgálat.", "Részletes képet ad a lágyrészekről.", "Alkalmas a diffúz axonális sérülés kimutatására.", "Alkalmazása ellenjavallt, mert a CT sokkal pontosabb."], answer: "Alkalmazása ellenjavallt, mert a CT sokkal pontosabb.", explanation: "A koponya röntgen nem képes kimutatni a koponyaűri vérzéseket vagy az agyödémát, amelyek a legfontosabb, életveszélyes elváltozások. A CT széleskörű elérhetősége miatt a röntgen rutinszerű használata elavult és ellenjavallt." },
+                    { question: "Mi a diffúz axonális sérülés (DAI)?", options: ["Az agykéreg fokális zúzódása.", "A fehérállományban lévő idegrostok (axonok) széleskörű, nyíróerők által okozott károsodása.", "Egy specifikus típusú agyvérzés.", "A koponyacsont egyfajta törése."], answer: "A fehérállományban lévő idegrostok (axonok) széleskörű, nyíróerők által okozott károsodása.", explanation: "A DAI súlyos, gyakran rotációs gyorsulási-lassulási sérülések következménye. Az axonok diffúz szakadása az idegsejtek közötti kommunikáció megszakadásához és súlyos, tartós neurológiai károsodáshoz vezet. CT-n gyakran nem látható, kimutatására az MRI érzékenyebb." },
+                    { question: "Melyik tünetegyüttes a Cushing-triász, ami súlyos koponyaűri nyomásfokozódásra utal?", options: ["Láz, kiütés, ízületi fájdalom", "Magas vérnyomás, lassú pulzus (bradycardia), szabálytalan légzés", "Alacsony vérnyomás, gyors pulzus, szapora légzés", "Fejfájás, szédülés, hányinger"], answer: "Magas vérnyomás, lassú pulzus (bradycardia), szabálytalan légzés", explanation: "A Cushing-triász egy késői, vészjósló jele a súlyos, agytörzsi kompressziót okozó koponyaűri nyomásfokozódásnak. Azonnali beavatkozást igényel." },
+                    { question: "Melyik képalkotó eljárás érzékenyebb a kis mennyiségű subarachnoidealis vérzés (SAH) kimutatására?", options: ["CT", "Röntgen", "Ultrahang", "MRI (különösen a FLAIR szekvencia)"], answer: "MRI (különösen a FLAIR szekvencia)", explanation: "Bár a CT az elsődleges vizsgálat akut vérzés gyanúja esetén, az MRI (főleg a FLAIR és a szuszceptibilitás-súlyozott szekvenciák) érzékenyebb lehet a kis mennyiségű SAH vagy a krónikus vérzés maradványainak kimutatására." },
+                    { question: "Mi a 'Battle-jel'?", options: ["A szem körüli bevérzés.", "A fül mögötti processus mastoideus feletti bevérzés.", "A nyelv harapásos sérülése.", "A pupillák tágulata."], answer: "A fül mögötti processus mastoideus feletti bevérzés.", explanation: "A Battle-jel (a mastoid ecchymosis) a közép- vagy hátsó koponyagödör alapi törésének egyik klinikai jele." },
+                    { question: "Miért fontos a hypotensio és a hypoxia elkerülése a TBI akut ellátásában?", options: ["Mert kényelmetlen a betegnek.", "Mert ezek súlyosbítják a szekunder agysérülést.", "Mert megnehezítik a CT vizsgálatot.", "Mert allergiás reakciót válthatnak ki."], answer: "Mert ezek súlyosbítják a szekunder agysérülést.", explanation: "A hypotensio (alacsony vérnyomás) és a hypoxia (oxigénhiány) a két legfontosabb, elkerülhető szisztémás inzultus, amelyek drámaian rontják a sérült agy állapotát és a beteg kimenetelét. Ezek megelőzése az ellátás alapköve." },
+                    { question: "Mikor indokolt a profilaktikus antiepileptikumok adása TBI után?", options: ["Minden enyhe fejsérülés esetén.", "A korai (első 7 napban jelentkező) poszt-traumás rohamok megelőzésére súlyos TBI-ben.", "Csak ha a betegnek már volt epilepsziája.", "Soha nem indokolt."], answer: "A korai (első 7 napban jelentkező) poszt-traumás rohamok megelőzésére súlyos TBI-ben.", explanation: "Súlyos TBI után magas a korai rohamok kockázata. A profilaktikus antiepileptikumok (pl. levetiracetam) adása az első 7 napban bizonyítottan csökkenti ezt a kockázatot, bár a késői epilepszia kialakulását nem befolyásolja." },
+                    { question: "Melyik állítás igaz a krónikus SDH-ra?", options: ["Mindig súlyos trauma okozza.", "A tünetek gyorsan, órák alatt alakulnak ki.", "Gyakran lassan, hetek alatt fejlődik ki, és a tünetek (pl. zavartság, járászavar) demenciát utánozhatnak.", "Csak fiatalokat érint."], answer: "Gyakran lassan, hetek alatt fejlődik ki, és a tünetek (pl. zavartság, járászavar) demenciát utánozhatnak.", explanation: "A krónikus SDH alattomosan alakul ki, különösen időseknél. A lassan növekvő vérömleny fokozatosan okoz kognitív hanyatlást és neurológiai tüneteket, ami könnyen összetéveszthető a demenciával. Ez egy fontos, kezelhető oka a demencia-szerű állapotoknak." },
+                    { question: "Mi a 'swirl sign' (örvénylő jel) a CT-n egy hematómán belül?", options: ["A hematóma gyógyulásának jele.", "Aktív, folyamatban lévő vérzésre utal.", "Egy gyakori műtermék.", "A hematóma krónikus voltára utal."], answer: "Aktív, folyamatban lévő vérzésre utal.", explanation: "A 'swirl sign' egy hipodenz (sötétebb) terület a hiperdenz (világos) akut hematómán belül, ami a frissen kiáramló, még nem alvadt vért jelzi. Az aktív vérzés jele, ami a hematóma növekedésére és rosszabb prognózisra utal." }
+                ]
+            },
+            {
+                topic: "Poszt-traumás neurológiai kórképek",
+                questions: [
+                    { question: "Mi a poszt-konkussziós szindróma (PKSZ)?", options: ["Az agyrázkódás akut fázisa.", "Olyan állapot, ahol az agyrázkódás tünetei hetekig, hónapokig vagy tovább is fennmaradnak.", "Egy súlyos, életveszélyes agysérülés.", "A poszt-traumás epilepszia egy másik neve."], answer: "Olyan állapot, ahol az agyrázkódás tünetei hetekig, hónapokig vagy tovább is fennmaradnak.", explanation: "A PKSZ akkor diagnosztizálható, ha az enyhe traumás agysérülés (agyrázkódás) után a tünetek, mint a fejfájás, szédülés, kognitív nehézségek, a vártnál hosszabb ideig, hetekig vagy hónapokig perzisztálnak." },
+                    { question: "Melyik a leggyakoribb tünet a poszt-konkussziós szindrómában?", options: ["Görcsrohamok", "Bénulás", "Fejfájás", "Hallucinációk"], answer: "Fejfájás", explanation: "A fejfájás a PKSZ leggyakoribb és leginkább zavaró tünete, amely lehet tenziós típusú vagy migrénszerű." },
+                    { question: "Mi a poszt-traumás epilepszia (PTE) definíciója?", options: ["A sérülés utáni első 24 órában jelentkező görcsroham.", "Visszatérő, provokálatlan görcsrohamok, amelyek a TBI után több mint egy héttel jelentkeznek.", "A fejsérülés által kiváltott ájulás.", "Az agyrázkódás egy súlyos formája."], answer: "Visszatérő, provokálatlan görcsrohamok, amelyek a TBI után több mint egy héttel jelentkeznek.", explanation: "A PTE egy krónikus állapot, amelyet a fejsérülés által okozott agyi hegesedés és a neuronális hálózatok kóros átépülése vált ki, ami spontán, visszatérő görcsrohamokhoz vezet." },
+                    { question: "Mi a krónikus traumás encephalopathia (CTE)?", options: ["Egyetlen súlyos TBI utáni állapot.", "Ismétlődő fejsérülések által okozott progresszív neurodegeneratív betegség.", "Az agy akut gyulladása trauma után.", "A koponya veleszületett fejlődési rendellenessége."], answer: "Ismétlődő fejsérülések által okozott progresszív neurodegeneratív betegség.", explanation: "A CTE egy demenciával járó neurodegeneratív kórkép, amely jellemzően évekkel vagy évtizedekkel az ismétlődő, gyakran enyhe fejsérülések (pl. kontakt sportolóknál) után alakul ki." },
+                    { question: "Melyik kóros fehérje felhalmozódása jellemző a CTE-re?", options: ["Amiloid-béta", "Alfa-szinuklein", "Prion fehérje", "Tau fehérje"], answer: "Tau fehérje", explanation: "A CTE patológiai fémjele a hiperfoszforilált tau fehérje kóros felhalmozódása neurofibrilláris kötegek formájában, jellegzetes eloszlásban az agyban, különösen a sulcusok mélyén." },
+                    { question: "Melyik állítás igaz a CTE diagnózisára?", options: ["Könnyen diagnosztizálható vérvizsgálattal.", "A diagnózis a jellegzetes tünetek alapján életben is felállítható.", "A definitív diagnózis csak halál után, az agyszövet boncolásával lehetséges.", "Az MRI vizsgálat egyértelműen kimutatja."], answer: "A definitív diagnózis csak halál után, az agyszövet boncolásával lehetséges.", explanation: "Jelenleg a CTE-t biztosan csak post-mortem szövettani vizsgálattal lehet diagnosztizálni. Életben, a klinikai tünetek alapján a 'traumás encephalopathia szindróma' diagnózisát használják." },
+                    { question: "Milyen kognitív zavarok gyakoriak TBI után?", options: ["Csak a hosszú távú memória zavara.", "A figyelem, a koncentráció, a memória és a végrehajtó funkciók zavara.", "A nyelvi képességek javulása.", "A kreativitás fokozódása."], answer: "A figyelem, a koncentráció, a memória és a végrehajtó funkciók zavara.", explanation: "A TBI gyakran okoz diffúz agykárosodást, ami a kognitív funkciók széles körét érintheti, beleértve a figyelem fenntartását, az új információk megjegyzését és a komplex feladatok tervezését, szervezését." },
+                    { question: "Melyik pszichiátriai kórkép kockázata nő meg jelentősen TBI után?", options: ["Skizofrénia", "Bipoláris zavar", "Depresszió és szorongásos zavarok", "Obszesszív-kompulzív zavar"], answer: "Depresszió és szorongásos zavarok", explanation: "A depresszió és a szorongás a leggyakoribb pszichiátriai következményei a TBI-nek, amelyeket mind a sérülés okozta neurobiológiai változások, mind a sérüléssel járó pszichoszociális stressz kiválthat." },
+                    { question: "Melyik terápia bizonyult hatékonynak a TBI utáni depresszió és szorongás kezelésében?", options: ["Expozíciós terápia", "Kognitív viselkedésterápia (CBT)", "Pszichoanalízis", "Humanisztikus terápia"], answer: "Kognitív viselkedésterápia (CBT)", explanation: "A CBT egy strukturált pszichoterápiás módszer, amely segít a betegeknek azonosítani és megváltoztatni a negatív gondolati mintákat és viselkedéseket. Számos vizsgálat igazolta hatékonyságát a TBI-t követő hangulati zavarok kezelésében." },
+                    { question: "Mi a paroxizmális szimpatikus hiperaktivitás (PSH)?", options: ["A szimpatikus idegrendszer leállása.", "A szimpatikus idegrendszer túlzott, rohamokban jelentkező aktivitása, ami szapora pulzust, magas vérnyomást és lázat okoz.", "Egyfajta epilepsziás roham.", "A paraszimpatikus idegrendszer túlműködése."], answer: "A szimpatikus idegrendszer túlzott, rohamokban jelentkező aktivitása, ami szapora pulzust, magas vérnyomást és lázat okoz.", explanation: "A PSH, vagy 'vihar a TBI után', a súlyos agysérülést követő hetekben kialakuló állapot, amelyet az autonóm idegrendszer diszregulációja és a szimpatikus idegrendszer kontrollálatlan túlműködése jellemez." },
+                    { question: "Melyik állítás igaz a TBI és a neurodegeneratív betegségek kapcsolatára?", options: ["A TBI csökkenti a demencia kockázatát.", "Egyetlen súlyos TBI vagy ismétlődő enyhe TBI növeli a későbbi demencia, pl. Alzheimer-kór kockázatát.", "Nincs bizonyított összefüggés.", "A TBI csak a Parkinson-kór kockázatát növeli."], answer: "Egyetlen súlyos TBI vagy ismétlődő enyhe TBI növeli a későbbi demencia, pl. Alzheimer-kór kockázatát.", explanation: "Epidemiológiai és patológiai bizonyítékok is alátámasztják, hogy a TBI egy fontos kockázati tényező a későbbi neurodegeneratív betegségek, köztük az Alzheimer-kór és a CTE kialakulásában." },
+                    { question: "Milyen alvászavar a leggyakoribb TBI után?", options: ["Narkolepszia", "Alvajárás", "Insomnia (álmatlanság)", "REM alvási viselkedészavar"], answer: "Insomnia (álmatlanság)", explanation: "Az insomnia, amely magában foglalja az elalvási nehézséget, a gyakori éjszakai ébredéseket és a korai ébredést, a leggyakrabban jelentett alvászavar a TBI-t követően." },
+                    { question: "Milyen szerepe van a rehabilitációnak a TBI utáni felépülésben?", options: ["Nincs szerepe, a felépülés spontán.", "Csak a fizikai funkciók javítására szolgál.", "Kulcsfontosságú a funkcionális képességek maximalizálásában és az életminőség javításában egy multidiszciplináris csapat segítségével.", "Csak a súlyos sérülteknek van rá szükségük."], answer: "Kulcsfontosságú a funkcionális képességek maximalizálásában és az életminőség javításában egy multidiszciplináris csapat segítségével.", explanation: "A rehabilitáció (gyógytorna, foglalkozásterápia, logopédia, neuropszichológia) elengedhetetlen a TBI utáni felépüléshez. Segít a betegeknek újra megtanulni az elvesztett készségeket és kompenzálni a maradandó károsodásokat." },
+                    { question: "Mi a diffúz axonális sérülés (DAI) kimutatásának legérzékenyebb képalkotó módszere?", options: ["CT", "Röntgen", "Diffúziós tenzor képalkotás (DTI)", "SPECT"], answer: "Diffúziós tenzor képalkotás (DTI)", explanation: "A DTI egy fejlett MRI technika, amely a fehérállományi pályák integritását vizsgálja a vízmolekulák diffúziója alapján. Érzékenyen ki tudja mutatni a DAI-ra jellemző mikroszkopikus axonsérüléseket, amelyek a hagyományos CT-n vagy MRI-n rejtve maradhatnak." },
+                    { question: "Melyik állítás igaz a poszt-traumás fejfájásra (PTH)?", options: ["Mindig a sérülés pillanatában kezdődik és egy héten belül elmúlik.", "Ritka szövődmény.", "Gyakori, tartós fejfájás, amely a TBI után hetekkel vagy hónapokkal is fennállhat.", "Kizárólag súlyos TBI után fordul elő."], answer: "Gyakori, tartós fejfájás, amely a TBI után hetekkel vagy hónapokkal is fennállhat.", explanation: "A PTH a TBI egyik leggyakoribb következménye, amely az enyhe sérülések (agyrázkódás) után is kialakulhat, és jelentősen ronthatja az életminőséget." },
+                    { question: "Milyen hormonális zavar alakulhat ki TBI után az agyalapi mirigy sérülése miatt?", options: ["Hyperthyreosis", "Cushing-szindróma", "Poszt-traumás hipopituitarizmus", "Diabetes insipidus"], answer: "Poszt-traumás hipopituitarizmus", explanation: "Az agyalapi mirigy (hypophysis) sérülékeny a traumával szemben. Károsodása egy vagy több hormon termelésének hiányához (hipopituitarizmus) vezethet, ami széles körű tüneteket okozhat (pl. fáradtság, növekedési zavarok, anyagcsere-problémák)." },
+                    { question: "Melyik állítás NEM igaz a TBI megelőzésére?", options: ["A biztonsági öv és a sisak használata csökkenti a kockázatot.", "Az esések megelőzése időseknél fontos prevenciós stratégia.", "A TBI teljesen elkerülhetetlen.", "Az ittas vezetés kerülése csökkenti a balesetek és a TBI kockázatát."], answer: "A TBI teljesen elkerülhetetlen.", explanation: "Bár a baleseteket nem lehet teljesen kiküszöbölni, a TBI-k jelentős része megelőzhető lenne a megfelelő biztonsági óvintézkedések betartásával, mint a védőfelszerelések használata és a kockázatos viselkedés kerülése." },
+                    { question: "Mi a 'második becsapódás szindróma' (second impact syndrome)?", options: ["Két különböző tárggyal történő sérülés.", "Egy ritka, de potenciálisan halálos állapot, amikor egy második agyrázkódás éri a beteget, mielőtt az elsőből teljesen felépült volna.", "A TBI utáni második epilepsziás roham.", "A rehabilitáció második fázisa."], answer: "Egy ritka, de potenciálisan halálos állapot, amikor egy második agyrázkódás éri a beteget, mielőtt az elsőből teljesen felépült volna.", explanation: "A 'second impact syndrome' során a második, gyakran enyhébb trauma is súlyos, diffúz agyödémát és agyi herniációt válthat ki, mert az agy még sérülékeny az előző sérülés miatt. Ezért kritikus a sportba való visszatérés szabályainak betartása agyrázkódás után." },
+                    { question: "Milyen szerepe van a biomarkereknek (pl. GFAP, UCH-L1) a TBI diagnózisában?", options: ["Helyettesítik a GCS skálát.", "Segítenek a sérülés súlyosságának felmérésében és a CT-vizsgálat szükségességének eldöntésében.", "Kizárólag a CTE diagnózisára használhatók.", "A kezelés hatékonyságát mérik."], answer: "Segítenek a sérülés súlyosságának felmérésében és a CT-vizsgálat szükségességének eldöntésében.", explanation: "A vérből kimutatható biomarkerek objektív információt adnak az agykárosodás mértékéről. Magas szintjük intrakraniális sérülésre utal, míg alacsony szintjük segíthet a felesleges CT-vizsgálatok elkerülésében enyhe TBI esetén." },
+                    { question: "Melyik a leggyakoribb halálok súlyos TBI-t követően az első 48 órában?", options: ["Fertőzés", "Vérrögképződés", "Kontrollálhatatlan koponyaűri nyomásfokozódás és agyi herniáció", "Szívelégtelenség"], answer: "Kontrollálatlan koponyaűri nyomásfokozódás és agyi herniáció", explanation: "Az akut fázisban a legfőbb veszélyt a sérülés okozta agyödéma és vérzés miatti koponyaűri nyomásfokozódás jelenti, ami az agytörzs beékelődéséhez és halálhoz vezethet." }
+                ]
+            },
+            {
+                topic: "Gerincvelő-károsodás és harántlézió",
+                questions: [
+                    { question: "Mi a gerincvelő-károsodás (GVK) leggyakoribb oka?", options: ["Daganatok", "Fertőzések", "Akut trauma", "Érrendszeri betegségek"], answer: "Akut trauma", explanation: "A GVK leggyakoribb oka az akut trauma, amely leggyakrabban közlekedési balesetek, esések, erőszakos cselekmények vagy sportbalesetek következtében alakul ki." },
+                    { question: "Mi a gerincvelői sokk (spinal shock)?", options: ["A gerincvelő vérellátásának hirtelen leállása.", "A sérülés szintje alatti idegi aktivitás átmeneti elvesztése, petyhüdt bénulással és areflexiával.", "A szimpatikus idegrendszer túlműködése.", "Egyfajta pszichés reakció a sérülésre."], answer: "A sérülés szintje alatti idegi aktivitás átmeneti elvesztése, petyhüdt bénulással és areflexiával.", explanation: "A gerincvelői sokk egy fiziológiai állapot a GVK akut fázisában, ahol a gerincvelői reflexek a sérülés szintje alatt átmenetileg gátlás alá kerülnek. Ez a fázis napokig-hetekig tarthat." },
+                    { question: "Melyik skála a standard a GVK neurológiai szintjének és teljességének felmérésére?", options: ["Glasgow Coma Scale (GCS)", "ASIA Impairment Scale (AIS)", "Rancho Los Amigos Scale", "Modified Ashworth Scale"], answer: "ASIA Impairment Scale (AIS)", explanation: "Az AIS egy nemzetközileg standardizált vizsgálati protokoll, amely a motoros és szenzoros funkciók részletes vizsgálatával meghatározza a neurológiai sérülés szintjét és azt, hogy a sérülés komplett (teljes) vagy inkomplett (részleges)." },
+                    { question: "Mi a legfontosabb prognosztikai jel a járásképesség visszanyerésére GVK után?", options: ["A beteg életkora", "A motoros funkciók megőrzése a karokban", "A sacralis (S4-S5) szegmentumok érzésének megőrzése", "A gerinctörés típusa"], answer: "A sacralis (S4-S5) szegmentumok érzésének megőrzése", explanation: "A sacralis érzésmegtartottság (különösen a tűszúrás érzékelése) az inkomplett sérülés legfontosabb jele. Azoknál a betegeknél, akiknél ez megmarad, sokkal nagyobb az esély a motoros funkciók, beleértve a járásképesség, visszanyerésére." },
+                    { question: "Melyik képalkotó eljárás a 'gold standard' a gerincvelő és a lágyrészek sérüléseinek kimutatására?", options: ["Röntgen", "CT", "MRI", "Ultrahang"], answer: "MRI", explanation: "Míg a CT kiváló a csontsérülések kimutatására, az MRI részletes képet ad magáról a gerincvelőről, a porckorongokról és a szalagokról, kimutatva a zúzódást, ödémát, vérzést vagy kompressziót, ami elengedhetetlen a pontos diagnózishoz és prognózishoz." },
+                    { question: "Mi a harántlézió (transverse myelitis)?", options: ["A gerincvelő féloldali károsodása.", "A gerincvelő egy szakaszának mindkét oldalát érintő gyulladásos állapot.", "A gerincvelő veleszületett fejlődési rendellenessége.", "A gerincvelő daganata."], answer: "A gerincvelő egy szakaszának mindkét oldalát érintő gyulladásos állapot.", explanation: "A transzverzális myelitis a gerincvelő fokális gyulladása, amely a mielinhüvely károsodásához és az idegi funkciók kieséséhez vezet a gyulladás szintje alatt." },
+                    { question: "Melyik autoimmun betegség lehet a transzverzális myelitis hátterében?", options: ["Rheumatoid arthritis", "Sclerosis multiplex (SM)", "Psoriasis", "Crohn-betegség"], answer: "Sclerosis multiplex (SM)", explanation: "A transzverzális myelitis gyakran a sclerosis multiplex első megnyilvánulása. Az SM egy krónikus, demyelinizációs autoimmun betegség, amely a központi idegrendszer több területét is érintheti." },
+                    { question: "Mi a neurogén sokk?", options: ["A gerincvelői reflexek átmeneti kiesése.", "A szimpatikus idegrendszeri tónus elvesztése miatti hypotensio és bradycardia.", "Pszichogén sokk a trauma hírére.", "A gerincvelő vérellátásának akut zavara."], answer: "A szimpatikus idegrendszeri tónus elvesztése miatti hypotensio és bradycardia.", explanation: "A neurogén sokk egy disztributív sokk forma, amelyet a T6 szint feletti gerincvelő-sérülés okoz. A szimpatikus pályák megszakadása miatt az erek kitágulnak (hypotensio) és a szívverés lelassul (bradycardia)." },
+                    { question: "Melyik állítás igaz a gerinc mozgáskorlátozására (SMR) a prehospitális ellátásban?", options: ["Minden sérültnél kötelező a hosszú gerincágy használata a kórházig.", "A 'gerinc mozgáskorlátozása' kifejezés előnyösebb, mint az 'immobilizáció', és a hosszú gerincágy használatát korlátozni kell.", "A nyakmerevítő használata felesleges.", "Csak eszméletlen betegeknél van rá szükség."], answer: "A 'gerinc mozgáskorlátozása' kifejezés előnyösebb, mint az 'immobilizáció', és a hosszú gerincágy használatát korlátozni kell.", explanation: "A modern irányelvek a szelektív SMR-t javasolják, és a hosszú gerincdeszka rutinszerű, hosszan tartó használatát kerülni kell a szövődmények (fájdalom, felfekvés) miatt. A cél a gerinc mozgásának minimalizálása a mentés és szállítás során." },
+                    { question: "Mi az ASIA 'A' besorolás jelentése?", options: ["Normális motoros és szenzoros funkció.", "Inkomplett sérülés, a motoros funkció megőrzött.", "Inkomplett sérülés, csak a szenzoros funkció megőrzött.", "Komplett (teljes) sérülés, nincs motoros vagy szenzoros funkció az S4-S5 szegmentumokban."], answer: "Komplett (teljes) sérülés, nincs motoros vagy szenzoros funkció az S4-S5 szegmentumokban.", explanation: "Az ASIA A a legsúlyosabb sérülési kategória, amely a gerincvelő teljes harántsérülését jelenti, a legalsó szakrális szegmentumok funkcióinak teljes hiányával." },
+                    { question: "Milyen vérnyomás célérték fenntartása javasolt akut GVK esetén a gerincvelő perfúziójának biztosítására?", options: ["MAP < 60 Hgmm", "MAP 60-70 Hgmm", "MAP > 85-90 Hgmm", "A vérnyomás nem fontos."], answer: "MAP > 85-90 Hgmm", explanation: "Az akut fázisban a megengedő hipertónia (magasabb vérnyomás fenntartása) kulcsfontosságú a sérült, ödémás gerincvelő megfelelő vérellátásának biztosításához és a szekunder iszkémiás károsodás megelőzéséhez." },
+                    { question: "Melyik a legmegfelelőbb képalkotó eljárás egy akut traumás csigolyatörés gyanúja esetén a sürgősségi osztályon?", options: ["Gerinc MRI", "Gerinc röntgen", "Gerinc CT", "PET-CT"], answer: "Gerinc CT", explanation: "A CT gyors és rendkívül pontos a csontsérülések, törések és ficamok kimutatásában, ezért ez az elsődlegesen választandó módszer akut gerinctrauma esetén." },
+                    { question: "Milyen kezelést alkalmaznak első vonalban akut transzverzális myelitis esetén?", options: ["Antibiotikumok", "Nagy dózisú intravénás kortikoszteroidok", "Sebészeti dekompresszió", "Fizikoterápia"], answer: "Nagy dózisú intravénás kortikoszteroidok", explanation: "Mivel a TM egy gyulladásos állapot, a kezelés alapja a gyulladás csökkentése. A nagy dózisú intravénás szteroidok (pl. metilprednizolon) az első vonalbeli terápiát jelentik." },
+                    { question: "Mi a spinális sokk és a neurogén sokk közötti fő különbség?", options: ["Nincs különbség, a két kifejezés szinonima.", "A spinális sokk neurológiai, a neurogén sokk hemodinamikai jelenség.", "A spinális sokk csak a nyaki, a neurogén sokk csak a háti sérüléseknél fordul elő.", "A spinális sokk tartós, a neurogén sokk átmeneti."], answer: "A spinális sokk neurológiai, a neurogén sokk hemodinamikai jelenség.", explanation: "A spinális sokk a gerincvelői reflexek átmeneti kiesését jelenti a sérülés szintje alatt. A neurogén sokk ezzel szemben egy szisztémás keringési zavar (hypotensio, bradycardia) a szimpatikus tónus kiesése miatt." },
+                    { question: "Mi az autonóm diszreflexia?", options: ["A vizelet és széklet akaratlan ürítése.", "Egy életveszélyes állapot, ahol a sérülés szintje alatti inger hirtelen, extrém magas vérnyomást vált ki.", "A testhőmérséklet szabályozásának teljes hiánya.", "A szívverés tartós lelassulása."], answer: "Egy életveszélyes állapot, ahol a sérülés szintje alatti inger hirtelen, extrém magas vérnyomást vált ki.", explanation: "Az autonóm diszreflexia a T6 szint feletti sérülteknél fordulhat elő. Egy, a sérülés alatt keletkező ártalmas inger (pl. telt hólyag) a szimpatikus idegrendszer kontrollálatlan túlműködését váltja ki, ami súlyos hipertóniához vezet." },
+                    { question: "Melyik állítás igaz a GVK utáni rehabilitációra?", options: ["A rehabilitáció csak a kórházi tartózkodás alatt tart.", "A rehabilitáció egy hosszú távú, multidiszciplináris folyamat.", "A rehabilitáció célja csak az izomerő növelése.", "A rehabilitáció felesleges, mert a károsodás maradandó."], answer: "A rehabilitáció egy hosszú távú, multidiszciplináris folyamat.", explanation: "A GVK utáni felépülés komplex, és egy életen át tartó folyamat lehet. A multidiszciplináris rehabilitációs csapat célja a funkciók maximalizálása, a szövődmények megelőzése és a beteg közösségi reintegrációjának segítése." },
+                    { question: "Melyik izomcsoportot teszteli a C5 myotoma vizsgálata?", options: ["Könyökfeszítők (triceps)", "Csuklófeszítők", "Könyökhajlítók (biceps)", "Ujjhajlítók"], answer: "Könyökhajlítók (biceps)", explanation: "Az ASIA standard szerint a C5 neurológiai szint motoros funkcióját a könyökhajlító izmok (biceps brachii, brachialis) erejének vizsgálatával mérik." },
+                    { question: "Mi a plazmaferézis (PLEX) szerepe a transzverzális myelitis kezelésében?", options: ["A liquor nyomásának csökkentése.", "A kóros autoantitestek eltávolítása a vérplazmából.", "A gerincvelő vérellátásának javítása.", "A gyulladáscsökkentő gyógyszerek hatásának fokozása."], answer: "A kóros autoantitestek eltávolítása a vérplazmából.", explanation: "A plazmaferézis egy olyan eljárás, ahol a beteg vérplazmáját eltávolítják és pótolják. Autoimmun betegségekben, mint a súlyos, szteroid-rezisztens TM, ez segít eltávolítani a keringésből a károsodást okozó autoantitesteket és gyulladásos mediátorokat." },
+                    { question: "Milyen hosszú távú szövődmény kockázatát növeli a GVK miatti mozgáskorlátozottság?", options: ["Cukorbetegség", "Magas vérnyomás", "Nyomási fekélyek és mélyvénás trombózis", "Látásromlás"], answer: "Nyomási fekélyek és mélyvénás trombózis", explanation: "Az immobilitás miatt a bőr folyamatos nyomásnak van kitéve, ami felfekvésekhez vezethet. A végtagok mozgásának hiánya pedig lelassítja a vénás keringést, ami növeli a vérrögképződés (mélyvénás trombózis) kockázatát." },
+                    { question: "Melyik állítás igaz a GVK prognózisára?", options: ["Minden GVK teljes bénuláshoz vezet.", "A komplett (ASIA A) sérülések prognózisa a legjobb.", "Az inkomplett sérülések prognózisa jobb, és a felépülés évekig is tarthat.", "A prognózis csak a beteg életkorától függ."], answer: "Az inkomplett sérülések prognózisa jobb, és a felépülés évekig is tarthat.", explanation: "Az inkomplett sérülés azt jelenti, hogy a gerincvelő nem sérült teljesen, és maradtak működő idegpályák. Ezeknek a betegeknek sokkal jobb esélyük van a funkciók részleges vagy jelentős visszanyerésére, és a javulás a sérülés után akár 2 évig vagy tovább is folytatódhat." }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

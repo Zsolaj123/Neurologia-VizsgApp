@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Új Interaktív Neurológiai Teszt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-option {
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .topic-option {
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+        .topic-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .topic-option.selected {
+            background-color: #4F46E5; /* indigo-600 */
+            color: white;
+            border-color: #4338CA; /* indigo-700 */
+        }
+        .correct {
+            background-color: #10B981 !important;
+            color: white !important;
+            border-color: #059669 !important;
+        }
+        .incorrect {
+            background-color: #EF4444 !important;
+            color: white !important;
+            border-color: #DC2626 !important;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #start-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="quiz-container" class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transform transition-all duration-500">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Új Interaktív Neurológiai Teszt</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Válasszon egy témakört a kezdéshez, vagy indítsa a tesztet az összes kérdéssel!</p>
+            
+            <div id="topic-selection-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <!-- Topic options will be inserted here by JS -->
+            </div>
+
+            <button id="start-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" disabled>
+                Teszt indítása
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 id="topic-title" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Téma</h2>
+                    <p id="progress-text" class="text-sm font-medium text-gray-600 dark:text-gray-400">Kérdés 1/100</p>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+            </div>
+            
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-6 leading-relaxed"></p>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here by JS -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-5 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 id="feedback-title" class="text-lg font-bold mb-2"></h3>
+                <p id="explanation-text" class="text-gray-700 dark:text-gray-300"></p>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 hidden">
+                    Következő
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">A teszt véget ért!</h1>
+            <p class="text-2xl text-gray-600 dark:text-gray-300 mb-2">Az Ön eredménye:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8"></p>
+            <p id="result-message" class="text-lg text-gray-600 dark:text-gray-300 mb-8"></p>
+            <button id="restart-btn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+                Újrapróbálkozás
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                topic: "Szerzett és herediter polyneuropathiák",
+                questions: [
+                    {
+                        question: "Mi a polyneuropathia leggyakoribb oka?",
+                        options: ["Alkoholizmus", "Diabetes mellitus", "B12-vitamin hiány", "Guillain-Barré-szindróma"],
+                        answer: "Diabetes mellitus",
+                        explanation: "A diabéteszes polyneuropathia (DPN) a polyneuropathia leggyakoribb oka, az esetek 32-53%-áért felelős. A krónikus hiperglikémia és más metabolikus tényezők okozzák."
+                    },
+                    {
+                        question: "Milyen tünetegyüttes jellemző a Guillain-Barré-szindrómára (GBS)?",
+                        options: ["Lassan progrediáló disztális gyengeség", "Akut, felszálló, szimmetrikus petyhüdt bénulás areflexiával", "Csak szenzoros tünetek a kezeken", "Krónikus, aszimmetrikus fájdalom"],
+                        answer: "Akut, felszálló, szimmetrikus petyhüdt bénulás areflexiával",
+                        explanation: "A GBS egy akut, posztinfekciós, immunmediált rendellenesség, melyet gyorsan (napoktól hetekig) kialakuló, a lábakban kezdődő és felfelé terjedő szimmetrikus gyengeség/bénulás és reflexkiesés jellemez."
+                    },
+                    {
+                        question: "Mi a Charcot-Marie-Tooth (CMT) betegség legjellemzőbb klinikai jele?",
+                        options: ["Pes cavus (magas lábboltozat) és 'fordított pezsgősüveg' lábszár", "Akut légzési elégtelenség", "Súlyos kognitív hanyatlás", "Hirtelen látásvesztés"],
+                        answer: "Pes cavus (magas lábboltozat) és 'fordított pezsgősüveg' lábszár",
+                        explanation: "A CMT-re jellemző a lassan progrediáló disztális izomgyengeség és -sorvadás, ami jellegzetes lábdeformitásokhoz, mint a pes cavus (magas lábboltozat) és a 'fordított pezsgősüveg' alakú lábszár kialakulásához vezet."
+                    },
+                    {
+                        question: "Melyik gén deléciója okozza a Herediter Neuropathiát Nyomásra Való Hajlammal (HNPP)?",
+                        options: ["DMPK", "SOD1", "PMP22", "TTR"],
+                        answer: "PMP22",
+                        explanation: "A HNPP egy autoszomális domináns rendellenesség, amelyet leggyakrabban a PMP22 gén deléciója okoz. Ez a gén a perifériás mielin egy fontos fehérjéjét kódolja."
+                    },
+                    {
+                        question: "Milyen kezelés NEM javasolt első vonalban a diabéteszes polyneuropathia okozta fájdalomra?",
+                        options: ["Gabapentinoidok", "SNRI-k (pl. duloxetin)", "Opioidok", "Triciklikus antidepresszánsok"],
+                        answer: "Opioidok",
+                        explanation: "Az AAN irányelvei szerint az opioidok alkalmazása általában nem javasolt a fájdalmas diabéteszes polyneuropathia (PDN) kezelésére a függőség és a jelentős mellékhatások kockázata miatt."
+                    },
+                    {
+                        question: "Mi a krónikus gyulladásos demyelinizáló polyneuropathia (CIDP) és a GBS közötti fő különbség?",
+                        options: ["A GBS mindig axonális, a CIDP mindig demyelinizáló.", "A CIDP csak a férfiakat érinti.", "A CIDP egy krónikus (>8 hét), progresszív vagy relapszáló állapot, míg a GBS akut.", "A CIDP kezelésére a szteroidok hatástalanok."],
+                        answer: "A CIDP egy krónikus (>8 hét), progresszív vagy relapszáló állapot, míg a GBS akut.",
+                        explanation: "A legfontosabb különbség az időbeli lefolyás. A GBS egy akut, monofázisos betegség, míg a CIDP krónikus, és a tüneteknek legalább 8 hétig fenn kell állniuk a diagnózishoz."
+                    },
+                    {
+                        question: "Milyen patofiziológiai mechanizmus áll az alkoholos polyneuropathia hátterében?",
+                        options: ["Kizárólag autoimmun folyamat.", "Direkt toxikus hatás és táplálkozási hiány (főleg tiamin).", "Genetikai mutáció.", "Vírusfertőzés."],
+                        answer: "Direkt toxikus hatás és táplálkozási hiány (főleg tiamin).",
+                        explanation: "Az alkoholos polyneuropathia kialakulásában az alkohol közvetlen idegkárosító (toxikus) hatása és a gyakran társuló táplálkozási hiányállapotok, különösen a B1-vitamin (tiamin) hiánya játszanak szerepet."
+                    },
+                    {
+                        question: "Milyen tünetek jellemzőek a Herediter Szenzoros és Autonóm Neuropathiákra (HSAN)?",
+                        options: ["Főként proximális izomgyengeség.", "Progresszív érzéskiesés (fájdalom, hő), ami öncsonkításhoz vezethet.", "Csak a látóideget érintő gyulladás.", "Akut, súlyos fejfájás."],
+                        answer: "Progresszív érzéskiesés (fájdalom, hő), ami öncsonkításhoz vezethet.",
+                        explanation: "A HSAN-ok fő jellemzője a szenzoros és autonóm idegek károsodása. A fájdalomérzet elvesztése miatt a betegek észrevétlenül szenvedhetnek súlyos sérüléseket, ami fekélyekhez, törésekhez és öncsonkításhoz vezethet."
+                    },
+                    {
+                        question: "Mi az albuminocytológiai disszociáció a liquorban?",
+                        options: ["Alacsony fehérje- és magas sejtszám.", "Magas fehérjeszint normális sejtszám mellett.", "Vörösvértestek jelenléte.", "Alacsony glükózszint."],
+                        answer: "Magas fehérjeszint normális sejtszám mellett.",
+                        explanation: "Ez a lelet, ahol a liquor fehérjetartalma jelentősen megemelkedik a sejtszám emelkedése nélkül, klasszikusan a gyulladásos demyelinizáló polyneuropathiákra, mint a GBS és a CIDP, jellemző."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb ENG/NCS lelet axonális polyneuropathia esetén?",
+                        options: ["Jelentősen lassult vezetési sebesség.", "Vezetési blokk.", "Csökkent szenzoros és motoros válaszamplitúdók.", "Megnyúlt F-hullám latencia."],
+                        answer: "Csökkent szenzoros és motoros válaszamplitúdók.",
+                        explanation: "Axonális károsodás esetén az idegrostok száma csökken, ami az általuk generált elektromos válasz (akciós potenciál) méretének, azaz amplitúdójának csökkenéséhez vezet, míg a vezetési sebesség viszonylag megtartott."
+                    },
+                    {
+                        question: "Melyik betegségre jellemző a 'kesztyű-zokni' eloszlású tünettan?",
+                        options: ["Mononeuropathia multiplex", "Radiculopathia", "Hosszúságfüggő polyneuropathia", "Myopathia"],
+                        answer: "Hosszúságfüggő polyneuropathia",
+                        explanation: "A 'kesztyű-zokni' eloszlás a hosszúságfüggő idegkárosodásra utal, ahol a leghosszabb idegrostok (a végtagok disztális részén) érintettek először. Ez a legtöbb szerzett (pl. diabéteszes) és herediter polyneuropathia jellemzője."
+                    },
+                    {
+                        question: "Milyen kezelési módok az elsődlegesek GBS esetén?",
+                        options: ["Kortikoszteroidok és antibiotikumok", "Intravénás immunglobulin (IVIG) és plazmaferézis", "Hosszú távú fizikoterápia", "Riluzol"],
+                        answer: "Intravénás immunglobulin (IVIG) és plazmaferézis",
+                        explanation: "A GBS egy neurológiai vészhelyzet, amelynek kezelése az immunválasz módosításán alapul. Az IVIG és a plazmacsere bizonyítottan hatékonyak a betegség lefolyásának lerövidítésében és a kimenetel javításában. A szteroidok GBS-ben hatástalanok."
+                    },
+                    {
+                        question: "Mi a herediter transthyretin (hATTR) amyloidosis patofiziológiájának lényege?",
+                        options: ["A myelin hüvely autoimmun pusztulása.", "A TTR gén mutációja miatti hibás fehérje-feltekeredés és amyloid lerakódás.", "A kloridcsatornák diszfunkciója.", "A perifériás idegek vérellátásának zavara."],
+                        answer: "A TTR gén mutációja miatti hibás fehérje-feltekeredés és amyloid lerakódás.",
+                        explanation: "A hATTR amyloidosisban a transthyretin (TTR) fehérje genetikai hiba miatt instabillá válik, hibásan tekeredik fel, és oldhatatlan amyloid fibrillumok formájában lerakódik a szövetekben, köztük az idegekben, szívben és vesében, károsítva azok működését."
+                    },
+                    {
+                        question: "Melyik vitamin hiánya okozhat subacute combined degeneration of the spinal cord-ot polyneuropathia mellett?",
+                        options: ["B1-vitamin", "B6-vitamin", "B12-vitamin", "E-vitamin"],
+                        answer: "B12-vitamin",
+                        explanation: "A B12-vitamin hiánya nemcsak perifériás polyneuropathiát, hanem a gerincvelő hátsó és oldalsó kötegeinek degenerációját is okozhatja, ami a járásataxia és a propriocepciós zavarok súlyosbodásához vezet."
+                    },
+                    {
+                        question: "Milyen elektrofiziológiai lelet jellemző a demyelinizációs neuropathiákra?",
+                        options: ["Normális vezetési sebesség, csökkent amplitúdó.", "Jelentősen lassult vezetési sebesség és megnyúlt latenciák.", "Csak a motoros rostok érintettsége.", "Normális EMG és NCS."],
+                        answer: "Jelentősen lassult vezetési sebesség és megnyúlt latenciák.",
+                        explanation: "A myelin hüvely károsodása (demyelinizáció) lelassítja az ingerület terjedését az idegroston, ami az idegvezetési sebesség (NCV) csökkenésében és a disztális latenciák megnyúlásában mérhető."
+                    },
+                    {
+                        question: "Mi a HNPP jellegzetes klinikai megnyilvánulása?",
+                        options: ["Krónikus, szimmetrikus fájdalom.", "Visszatérő, fájdalmatlan, fokális bénulások mechanikai nyomásra.", "Gyorsan felszálló bénulás.", "Csak a szemizmok gyengesége."],
+                        answer: "Visszatérő, fájdalmatlan, fokális bénulások mechanikai nyomásra.",
+                        explanation: "A HNPP-ben szenvedő betegek perifériás idegei rendkívül érzékenyek a mechanikai nyomásra. Jellemző, hogy enyhe kompresszió (pl. könyöklés, lábkeresztezés) is átmeneti, de visszatérő zsibbadást és gyengeséget (bénulást) okoz egy-egy ideg ellátási területén."
+                    },
+                    {
+                        question: "Melyik géncsendesítő terápia hatékony hATTR amyloidosis kezelésében?",
+                        options: ["Tofersen", "Riluzol", "Patisiran", "Edaravone"],
+                        answer: "Patisiran",
+                        explanation: "A Patisiran (és a Vutrisiran, Inotersen) egy RNS-interferencia (RNAi) alapú gyógyszer, amely specifikusan gátolja a kóros TTR fehérje termelődését a májban, így csökkentve az amyloid lerakódást és lassítva a betegség progresszióját."
+                    },
+                    {
+                        question: "Milyen diagnosztikai módszer a legalkalmasabb a kisrost neuropathia kimutatására?",
+                        options: ["Standard ENG/EMG vizsgálat.", "Koponya MRI.", "Bőrbioopszia az intraepidermális idegrost sűrűség mérésére.", "Vérvétel CK szintre."],
+                        answer: "Bőrbioopszia az intraepidermális idegrost sűrűség mérésére.",
+                        explanation: "A kisrost neuropathia a vékony, nem vagy csak enyhén mielinizált idegrostokat érinti, amelyeket a standard ENG/EMG nem vizsgál. A bőrbioopszia lehetővé teszi ezen vékony rostok sűrűségének számszerűsítését a hámrétegben, így megerősítve a diagnózist."
+                    },
+                    {
+                        question: "Melyik állítás igaz a CMT1A-ra?",
+                        options: ["A TTR gén mutációja okozza.", "Egy szerzett, gyulladásos neuropathia.", "A PMP22 gén duplikációja okozza és demyelinizációs jellegű.", "Mindig csak felnőttkorban kezdődik."],
+                        answer: "A PMP22 gén duplikációja okozza és demyelinizációs jellegű.",
+                        explanation: "A CMT1A a Charcot-Marie-Tooth betegség leggyakoribb altípusa. Ezt a PMP22 gén duplikációja okozza, ami a myelin hüvely kóros szerkezetéhez és működéséhez vezet, ezért a kórkép demyelinizációs jellegű."
+                    },
+                    {
+                        question: "Mi a kezelés elsődleges célja CIDP esetén?",
+                        options: ["A fájdalom tüneti enyhítése.", "Az immunrendszer módosítása (immunmoduláció).", "A B-vitaminok pótlása.", "A kiváltó vírus elpusztítása."],
+                        answer: "Az immunrendszer módosítása (immunmoduláció).",
+                        explanation: "A CIDP egy autoimmun betegség, ezért a kezelés sarokköve az immunrendszer működésének befolyásolása kortikoszteroidokkal, IVIG-gel vagy plazmaferézissel, hogy megállítsák a myelin elleni támadást."
+                    }
+                ]
+            },
+            {
+                topic: "Alagút szindrómák",
+                questions: [
+                    {
+                        question: "Mi a leggyakoribb alagút szindróma?",
+                        options: ["Tarsalis alagút szindróma", "Ulnaris alagút szindróma", "Karpális alagút szindróma (CTS)", "Radialis alagút szindróma"],
+                        answer: "Karpális alagút szindróma (CTS)",
+                        explanation: "A karpális (kéztő) alagút szindróma a leggyakrabban előforduló alagút szindróma, amely a nervus medianus kompressziójából adódik a csuklóban."
+                    },
+                    {
+                        question: "Melyik ideg kompressziója okozza az ulnaris (cubitalis) alagút szindrómát?",
+                        options: ["Nervus medianus", "Nervus radialis", "Nervus ulnaris", "Nervus axillaris"],
+                        answer: "Nervus ulnaris",
+                        explanation: "Az ulnaris alagút szindróma a nervus ulnaris (singcsonti ideg) becsípődését jelenti, leggyakrabban a könyök belső oldalán található cubitalis alagútban."
+                    },
+                    {
+                        question: "Melyik tünet NEM jellemző a karpális alagút szindrómára?",
+                        options: ["Éjszaka fokozódó zsibbadás az első három ujjban", "A thenar (hüvelykpárna) izmainak sorvadása", "Fájdalom és zsibbadás a kisujjban", "Pozitív Phalen-teszt"],
+                        answer: "Fájdalom és zsibbadás a kisujjban",
+                        explanation: "A nervus medianus az első három és a gyűrűsujj radiális felét idegzi be. A kisujj zsibbadása a nervus ulnaris érintettségére utal, ami jellemzően ulnaris alagút szindrómában fordul elő."
+                    },
+                    {
+                        question: "Mi a 'Gowers-jel'?",
+                        options: ["A csukló lecsüngése", "A beteg a saját combjain 'mászik fel' a földről", "A szemhéj csüngése", "Égő fájdalom a talpon"],
+                        answer: "A beteg a saját combjain 'mászik fel' a földről",
+                        explanation: "A Gowers-jel nem alagút szindrómára, hanem izomdystrophiára (pl. Duchenne) jellemző, ahol a proximális izomgyengeség miatt a beteg a kezeit használja segítségül a felálláshoz. Ez a kérdés a differenciáldiagnosztikai tudást teszteli."
+                    },
+                    {
+                        question: "Melyik provokációs teszt használatos a karpális alagút szindróma diagnózisában?",
+                        options: ["Lasègue-jel", "Phalen-teszt", "Froment-jel", "Babinski-jel"],
+                        answer: "Phalen-teszt",
+                        explanation: "A Phalen-teszt során a csuklók maximális hajlításban tartása 60 másodpercig provokálja a nervus medianus kompresszióját, kiváltva a jellegzetes zsibbadást és bizsergést."
+                    },
+                    {
+                        question: "Milyen kezelési módszer a leghatékonyabb első vonalban enyhe CTS esetén?",
+                        options: ["Azonnali sebészi felszabadítás", "Erős opioid fájdalomcsillapítók", "Éjszakai csuklósín viselése", "Rendszeres forró vizes borogatás"],
+                        answer: "Éjszakai csuklósín viselése",
+                        explanation: "A konzervatív kezelés első lépése gyakran az éjszakai csuklósín, amely a csuklót semleges helyzetben tartva csökkenti az idegre nehezedő nyomást alvás közben, így enyhítve az éjszakai tüneteket."
+                    },
+                    {
+                        question: "Melyik alagút szindróma okozhat 'ulnaris karomkéz' deformitást súlyos esetben?",
+                        options: ["Karpális alagút szindróma", "Ulnaris alagút szindróma", "Tarsalis alagút szindróma", "Meralgia paresthetica"],
+                        answer: "Ulnaris alagút szindróma",
+                        explanation: "A nervus ulnaris beidegzi a kéz belső (intrinsic) izmainak nagy részét. Ezen izmok krónikus bénulása és sorvadása felborítja az ujjak hajlító és feszítő izmai közötti egyensúlyt, ami a 4. és 5. ujj jellegzetes, karmos tartásához vezet."
+                    },
+                    {
+                        question: "Mi a meralgia paresthetica?",
+                        options: ["A nervus tibialis kompressziója a bokánál", "A nervus cutaneus femoris lateralis kompressziója a lágyéknál", "A nervus ischiadicus gyulladása", "A nervus radialis sérülése"],
+                        answer: "A nervus cutaneus femoris lateralis kompressziója a lágyéknál",
+                        explanation: "A meralgia paresthetica egy tisztán szenzoros alagút szindróma, melyet a comb külső-elülső részének bőrét beidegző ideg kompressziója okoz, jellemzően a lágyékszalag alatt."
+                    },
+                    {
+                        question: "Mikor indokolt alagút szindróma esetén a sebészi kezelés?",
+                        options: ["Minden esetben az első választás", "Csak ha a beteg elmúlt 60 éves", "Ha a konzervatív kezelés hatástalan, vagy súlyos, progrediáló idegkárosodás (pl. izomsorvadás) jelei mutatkoznak", "Soha, mert túl kockázatos"],
+                        answer: "Ha a konzervatív kezelés hatástalan, vagy súlyos, progrediáló idegkárosodás (pl. izomsorvadás) jelei mutatkoznak",
+                        explanation: "A műtéti dekompresszió akkor jön szóba, ha a konzervatív módszerek nem hoznak enyhülést, vagy ha már a motoros funkciók is károsodtak (izomgyengeség, atrófia), ami a maradandó idegkárosodás megelőzése érdekében beavatkozást tesz szükségessé."
+                    },
+                    {
+                        question: "Melyik vizsgálat a legfontosabb az alagút szindrómák objektív megerősítésére és a súlyosság felmérésére?",
+                        options: ["Röntgen", "Vérvizsgálat", "Elektrodiagnosztikai vizsgálatok (ENG/NCS)", "Ultrahang"],
+                        answer: "Elektrodiagnosztikai vizsgálatok (ENG/NCS)",
+                        explanation: "Az idegvezetési vizsgálat (NCS) és az elektromiográfia (EMG) objektíven mérik az ideg funkcióját. Kimutatják a vezetési sebesség lassulását vagy a válasz amplitúdójának csökkenését a kompresszió helyén, megerősítve a diagnózist és felmérve a károsodás mértékét."
+                    },
+                    {
+                        question: "Milyen tüneteket okoz a tarsalis alagút szindróma?",
+                        options: ["Fájdalom a derékban", "Lábfejcsüngés", "Égő fájdalom és zsibbadás a talpon és a lábujjakban", "Térdfájdalom"],
+                        answer: "Égő fájdalom és zsibbadás a talpon és a lábujjakban",
+                        explanation: "A tarsalis alagút szindróma a nervus tibialis posterior kompressziója a boka belső oldalán, ami a talp és a lábujjak érző beidegzésének zavarát okozza, égő fájdalom és zsibbadás formájában."
+                    },
+                    {
+                        question: "Melyik szisztémás betegség növeli jelentősen az alagút szindrómák kockázatát?",
+                        options: ["Magas vérnyomás", "Asztma", "Diabetes mellitus", "Allergia"],
+                        answer: "Diabetes mellitus",
+                        explanation: "A cukorbetegség általános polyneuropathiát okoz, ami az idegeket sérülékenyebbé teszi a mechanikai kompresszióval szemben, így a diabéteszes betegeknél gyakrabban alakulnak ki alagút szindrómák."
+                    },
+                    {
+                        question: "Mi a Tinel-jel?",
+                        options: ["Fájdalom az ízület passzív mozgatásakor", "Az érintett ideg feletti bőrterület kopogtatására kiváltott, a beidegzési területre sugárzó áramütésszerű érzés", "Az izomgörcs tapintása", "A reflexek kiesése"],
+                        answer: "Az érintett ideg feletti bőrterület kopogtatására kiváltott, a beidegzési területre sugárzó áramütésszerű érzés",
+                        explanation: "A Tinel-jel egy provokációs teszt, ahol az irritált ideg mechanikai ingerlése (kopogtatás) a disztális ellátási területen paresztéziát (zsibbadást, bizsergést) vált ki."
+                    },
+                    {
+                        question: "Melyik állítás igaz a meralgia paresthetica tüneteire?",
+                        options: ["Mindig jár izomgyengeséggel a combban", "A tünetek a lábszár belső oldalán jelentkeznek", "Tisztán szenzoros tünetekkel (fájdalom, zsibbadás) jár a comb külső oldalán", "Gyakran okoz lázduzzanatot"],
+                        answer: "Tisztán szenzoros tünetekkel (fájdalom, zsibbadás) jár a comb külső oldalán",
+                        explanation: "A nervus cutaneus femoris lateralis egy tisztán érző ideg, így a kompressziója nem okoz motoros kiesést (izomgyengeséget), csak szenzoros tüneteket a comb anterolaterális részén."
+                    },
+                    {
+                        question: "Mi a 'split hand' minta?",
+                        options: ["A kéz kisizmainak együttes sorvadása", "A kéz laterális szélének preferenciális sorvadása, ami motoneuron betegségre (ALS) utal", "A kéz ujjainak karmos tartása", "A kéz duzzanata sérülés után"],
+                        answer: "A kéz laterális szélének preferenciális sorvadása, ami motoneuron betegségre (ALS) utal",
+                        explanation: "A 'split hand' (hasadt kéz) az ALS egyik jellegzetes tünete, ahol az első dorsalis interosseus és az abductor pollicis brevis izmok sorvadása kifejezettebb, mint a hypothenar izmoké. Ez nem alagút szindróma, hanem annak fontos differenciáldiagnosztikai párja."
+                    },
+                    {
+                        question: "Milyen foglalkozások jelentenek fokozott kockázatot a CTS kialakulására?",
+                        options: ["Irodai adminisztrátorok", "Építőipari munkások, pénztárosok, gépírók", "Tanárok", "Orvosok"],
+                        answer: "Építőipari munkások, pénztárosok, gépírók",
+                        explanation: "Az ismétlődő, monoton kéz- és csuklómozgásokat igénylő munkakörök, mint a szalagmunka, gépelés vagy vibrációs eszközök használata, jelentősen növelik a karpális alagút szindróma kockázatát."
+                    },
+                    {
+                        question: "Milyen eredményt ad az endoszkópos karpális alagút felszabadítás a nyílt műtéthez képest?",
+                        options: ["Rosszabb hosszú távú eredményeket", "Ugyanolyan hosszú távú eredményeket, de potenciálisan gyorsabb felépüléssel", "Mindig több szövődménnyel jár", "Csak enyhe esetekben végezhető"],
+                        answer: "Ugyanolyan hosszú távú eredményeket, de potenciálisan gyorsabb felépüléssel",
+                        explanation: "Az endoszkópos technika kisebb metszést igényel, ami kevesebb posztoperatív fájdalommal és gyorsabb funkcionális felépüléssel járhat. A hosszú távú eredmények (tünetmentesség, erő) tekintetében azonban nincs szignifikáns különbség a két módszer között."
+                    },
+                    {
+                        question: "Melyik alagút szindróma differenciáldiagnózisában kell gondolni a nyaki radiculopathiára?",
+                        options: ["Tarsalis alagút szindróma", "Meralgia paresthetica", "Karpális és ulnaris alagút szindróma", "Csak a radialis alagút szindrómában"],
+                        answer: "Karpális és ulnaris alagút szindróma",
+                        explanation: "A nyaki gerincből (pl. porckorongsérv miatt) kilépő ideggyökök nyomása a karba és kézbe sugárzó zsibbadást, fájdalmat okozhat, ami utánozhatja a nervus medianus (CTS) vagy ulnaris (cubitalis alagút) kompressziójának tüneteit. Ezt 'double crush' szindrómának is nevezik."
+                    },
+                    {
+                        question: "Mi a Froment-jel?",
+                        options: ["A hüvelykujj és mutatóujj közötti papírlap megtartásának képtelensége a hüvelykujj behajlítása nélkül", "A csukló passzív hajlítására jelentkező fájdalom", "A szemhéj csüngése", "A vádli fájdalma a lábfej dorsalflexiójakor"],
+                        answer: "A hüvelykujj és mutatóujj közötti papírlap megtartásának képtelensége a hüvelykujj behajlítása nélkül",
+                        explanation: "A Froment-jel a nervus ulnaris által beidegzett adductor pollicis izom gyengeségét vizsgálja. Ha ez az izom gyenge, a beteg kompenzálásként a nervus medianus által beidegzett flexor pollicis longus-szal hajlítja be a hüvelykujját a papírlap megtartásához."
+                    },
+                    {
+                        question: "Melyik nem-sebészi kezelés bizonyítottan hatékony CTS-ben a tünetek enyhítésére?",
+                        options: ["Mágneses karkötők", "Kortikoszteroid injekciók", "Réz karkötők", "Homeopátiás szerek"],
+                        answer: "Kortikoszteroid injekciók",
+                        explanation: "A kéztőalagútba adott kortikoszteroid injekciók hatékonyan csökkentik a gyulladást és a duzzanatot az alagútban, így enyhítve az idegre nehezedő nyomást és a tüneteket, különösen enyhe és közepes esetekben."
+                    }
+                ]
+            },
+            {
+                topic: "Motoneuron betegségek",
+                questions: [
+                    {
+                        question: "Mi a motoneuron betegségek (MND) közös jellemzője?",
+                        options: ["A perifériás érző idegek károsodása", "A mozgató idegsejtek (motoneuronok) progresszív degenerációja", "Az izom-ideg átmenet autoimmun gyulladása", "A központi idegrendszer demyelinizációja"],
+                        answer: "A mozgató idegsejtek (motoneuronok) progresszív degenerációja",
+                        explanation: "Az MND-k egy olyan neurodegeneratív betegségcsoport, amelyet a központi és/vagy perifériás mozgató idegsejtek pusztulása jellemez, ami progresszív izomgyengeséghez és -sorvadáshoz vezet."
+                    },
+                    {
+                        question: "Melyik a leggyakoribb motoneuron betegség?",
+                        options: ["Primer lateralsclerosis (PLS)", "Progresszív izomatrófia (PMA)", "Amyotrophiás lateralsclerosis (ALS)", "Progresszív bulbaris paresis (PBP)"],
+                        answer: "Amyotrophiás lateralsclerosis (ALS)",
+                        explanation: "Az ALS az MND-k prototípusa és leggyakoribb formája, amely mind a felső (központi), mind az alsó (perifériás) motoneuronokat érinti."
+                    },
+                    {
+                        question: "Melyik tünet utal felső motoneuron (UMN) károsodásra?",
+                        options: ["Izomatrófia", "Fasciculatio (izomrángás)", "Spaszticitás és hyperreflexia", "Petyhüdt bénulás"],
+                        answer: "Spaszticitás és hyperreflexia",
+                        explanation: "A felső motoneuronok az agykéregből indulnak és gátló hatást fejtenek ki az alsó motoneuronokra. Károsodásuk a gátlás megszűnéséhez vezet, ami fokozott izomtónust (spaszticitás) és élénk reflexeket (hyperreflexia) eredményez."
+                    },
+                    {
+                        question: "Melyik tünet utal alsó motoneuron (LMN) károsodásra?",
+                        options: ["Pozitív Babinski-jel", "Izomgyengeség, atrófia és fasciculatiók", "Emocionális labilitás", "Fokozott állkapocs-reflex"],
+                        answer: "Izomgyengeség, atrófia és fasciculatiók",
+                        explanation: "Az alsó motoneuronok közvetlenül az izmokat idegzik be. Pusztulásuk az izom denervációjához vezet, ami petyhüdt gyengeséget, izomsorvadást (atrófia) és spontán izomrángásokat (fasciculatiók) okoz."
+                    },
+                    {
+                        question: "Mi a 'bulbaris érintettség' az ALS-ben?",
+                        options: ["A lábak gyengesége", "A karok gyengesége", "A beszédért (dysarthria) és nyelésért (dysphagia) felelős agytörzsi izmok gyengesége", "Légzési nehézség"],
+                        answer: "A beszédért (dysarthria) és nyelésért (dysphagia) felelős agytörzsi izmok gyengesége",
+                        explanation: "A bulbaris kezdetű ALS az agytörzsben (medulla oblongata, vagy 'bulbus') található motoneuronok károsodásával indul, ami a nyelv, a garat és a gége izmainak gyengeségét, így beszéd- és nyelészavart okoz."
+                    },
+                    {
+                        question: "Melyik gyógyszer bizonyítottan lassítja az ALS progresszióját és növeli a túlélést?",
+                        options: ["Prednizon", "Riluzole", "Aspirin", "Baclofen"],
+                        answer: "Riluzole",
+                        explanation: "A Riluzole egy glutamát-antagonista, amely az egyetlen szájon át szedhető gyógyszer, ami bizonyítottan, bár mérsékelten (átlagosan 3-4 hónappal), meghosszabbítja a túlélést ALS-ben."
+                    },
+                    {
+                        question: "Milyen szerepe van az EMG/NCS vizsgálatnak az ALS diagnózisában?",
+                        options: ["Kimutatja a felső motoneuron károsodást", "Kizárja az összes egyéb neurológiai betegséget", "Megerősíti a kiterjedt, aktív alsó motoneuron károsodást (denervációt) és segít kizárni a neuropathiákat", "Nincs szerepe, a diagnózis tisztán klinikai"],
+                        answer: "Megerősíti a kiterjedt, aktív alsó motoneuron károsodást (denervációt) és segít kizárni a neuropathiákat",
+                        explanation: "Az EMG kulcsfontosságú az ALS diagnózisában. Kimutatja a kiterjedt alsó motoneuron pusztulás jeleit (pl. fibrilláció, fasciculatio) több testtájékon, míg a normális idegvezetési sebesség (NCS) segít elkülöníteni a perifériás neuropathiáktól."
+                    },
+                    {
+                        question: "Melyik génmutációhoz kapcsolódó ALS-re létezik már célzott, FDA által jóváhagyott terápia?",
+                        options: ["C9orf72", "TARDBP", "FUS", "SOD1"],
+                        answer: "SOD1",
+                        explanation: "A Tofersen egy antiszensz oligonukleotid terápia, amelyet specifikusan a SOD1 gén mutációja által okozott familiáris ALS kezelésére fejlesztettek ki és hagytak jóvá. A kóros SOD1 fehérje termelését gátolja."
+                    },
+                    {
+                        question: "Mi a leggyakoribb halálok ALS-ben?",
+                        options: ["Szívelégtelenség", "Veseelégtelenség", "Légzési elégtelenség", "Sepsis"],
+                        answer: "Légzési elégtelenség",
+                        explanation: "A betegség progressziója során a légzőizmok (rekeszizom, bordaközi izmok) is elgyengülnek, ami végül légzési elégtelenséghez és gyakran aspirációs tüdőgyulladáshoz vezet, ez a leggyakoribb halálok."
+                    },
+                    {
+                        question: "Milyen nem-invazív beavatkozás javítja bizonyítottan a túlélést és az életminőséget ALS-ben?",
+                        options: ["Rendszeres masszázs", "Nem-invazív lélegeztetés (NIV/BiPAP)", "Akupunktúra", "Vitamin-infúziók"],
+                        answer: "Nem-invazív lélegeztetés (NIV/BiPAP)",
+                        explanation: "A nem-invazív lélegeztetés (pl. BiPAP maszk) használata, különösen éjszaka, tehermentesíti a fáradó légzőizmokat, javítja a gázcserét, enyhíti a tüneteket (pl. reggeli fejfájás), és bizonyítottan meghosszabbítja a túlélést."
+                    },
+                    {
+                        question: "Melyik MND forma érinti kizárólag a felső motoneuronokat?",
+                        options: ["ALS", "PMA", "PLS", "PBP"],
+                        answer: "PLS",
+                        explanation: "A primer lateralsclerosis (PLS) egy ritka MND variáns, amelyet a felső motoneuronok izolált, lassú degenerációja jellemez, ami spaszticitáshoz és gyengeséghez vezet, de alsó motoneuron jelek (atrófia, fasciculatio) nincsenek jelen."
+                    },
+                    {
+                        question: "Mi a pseudobulbaris affektus?",
+                        options: ["Súlyos nyelési zavar", "A nyelv izmainak sorvadása", "Kontrollálhatatlan, helyzethez nem illő nevetési vagy sírási epizódok", "A beszéd teljes elvesztése"],
+                        answer: "Kontrollálhatatlan, helyzethez nem illő nevetési vagy sírási epizódok",
+                        explanation: "A pseudobulbaris affektus (emocionális labilitás) a felső motoneuronok károsodásának egyik jele, amely az érzelmi kifejezések agyi kontrolljának zavarából ered. Gyakori az ALS bulbaris formájában."
+                    },
+                    {
+                        question: "Milyen szerepe van az agyi és gerincvelői MRI-nek az MND kivizsgálásában?",
+                        options: ["Pozitívan megerősíti az MND diagnózisát", "Felesleges vizsgálat", "Más, hasonló tüneteket okozó betegségek (pl. gerincvelői kompresszió, stroke, daganat) kizárására szolgál", "Kimutatja a genetikai mutációt"],
+                        answer: "Más, hasonló tüneteket okozó betegségek (pl. gerincvelői kompresszió, stroke, daganat) kizárására szolgál",
+                        explanation: "Az MND diagnózisa kizárásos. Az MRI elengedhetetlen annak a bizonyítására, hogy a tüneteket nem valamilyen más, kezelhető strukturális elváltozás okozza, ami utánozhatja az MND klinikai képét."
+                    },
+                    {
+                        question: "Melyik állítás igaz a kognitív funkciókra ALS-ben?",
+                        options: ["A kognitív funkciók soha nem érintettek.", "A betegek kb. 10%-ánál frontotemporális demencia is kialakul.", "Minden betegnél súlyos memóriazavar lép fel.", "A kognitív hanyatlás mindig megelőzi a motoros tüneteket."],
+                        answer: "A betegek kb. 10%-ánál frontotemporális demencia is kialakul.",
+                        explanation: "Bár korábban tisztán motoros betegségnek tartották, ma már tudjuk, hogy az ALS-es betegek jelentős részénél (akár 50%) fellép valamilyen kognitív vagy viselkedési zavar, és kb. 10-15%-uknál a frontotemporális demencia kritériumai is teljesülnek."
+                    },
+                    {
+                        question: "Mi a PEG?",
+                        options: ["Egyfajta lélegeztetőgép", "Egy kommunikációs segédeszköz", "Perkután endoszkópos gasztrosztóma: a hasfalon keresztül a gyomorba vezetett táplálócső", "Egy gyógyszer a nyálfolyás csökkentésére"],
+                        answer: "Perkután endoszkópos gasztrosztóma: a hasfalon keresztül a gyomorba vezetett táplálócső",
+                        explanation: "Súlyos nyelészavar (dysphagia) esetén, amikor a beteg már nem képes biztonságosan és elegendő mennyiségű táplálékot lenyelni, a PEG beültetése biztosítja a megfelelő tápanyag- és folyadékbevitelt, megelőzve az alultápláltságot és az aspirációt."
+                    },
+                    {
+                        question: "Melyik biomarkert használják egyre gyakrabban a liquorban az ALS diagnózisának támogatására?",
+                        options: ["Kreatin-kináz (CK)", "Neurofilament light peptide (NfL)", "Glükóz", "Anti-AChR antitest"],
+                        answer: "Neurofilament light peptide (NfL)",
+                        explanation: "A neurofilamentumok az idegsejtek belső vázának fehérjéi. Idegsejt-pusztulás során a liquorba és a vérbe kerülnek. Az emelkedett NfL szint az idegsejt-károsodás érzékeny, bár nem specifikus markere, ami segít az ALS differenciáldiagnózisában és a progresszió követésében."
+                    },
+                    {
+                        question: "Melyik MND fenotípusnak a legjobb a prognózisa?",
+                        options: ["Progresszív bulbaris paresis (PBP)", "Tipikus ALS", "Primer lateralsclerosis (PLS)", "Légzőizom-gyengeséggel induló ALS"],
+                        answer: "Primer lateralsclerosis (PLS)",
+                        explanation: "A PLS, amely csak a felső motoneuronokat érinti, sokkal lassabb lefolyású, mint a többi MND forma. A betegek évtizedekig is élhetnek a diagnózissal, és a progresszió sokkal lassabb."
+                    },
+                    {
+                        question: "Mi a 'flail arm' szindróma?",
+                        options: ["Az ALS egy variánsa, ahol a gyengeség a proximális karizmokban kezdődik", "A lábak spasztikus bénulása", "A beszéd teljes elvesztése", "A kezek ügyetlensége"],
+                        answer: "Az ALS egy variánsa, ahol a gyengeség a proximális karizmokban kezdődik",
+                        explanation: "A 'flail arm' (lógó kar) vagy Vulpian-Bernhardt szindróma a PMA/ALS egy atípusos, lassabban progrediáló formája, ahol a gyengeség és atrófia a vállöv és a felkar izmaiban kezdődik, aszimmetrikusan."
+                    },
+                    {
+                        question: "Milyen terápiás megközelítés elengedhetetlen az MND-s betegek ellátásában?",
+                        options: ["Kizárólag gyógyszeres kezelés", "Csak sebészeti beavatkozások", "Multidiszciplináris team által végzett ellátás", "Alternatív gyógymódok"],
+                        answer: "Multidiszciplináris team által végzett ellátás",
+                        explanation: "Az MND komplex betegség, amely a beteg életének számos területét érinti. Az optimális ellátáshoz elengedhetetlen egy multidiszciplináris csapat (neurológus, tüdőgyógyász, dietetikus, gyógytornász, logopédus, pszichológus stb.) összehangolt munkája."
+                    },
+                    {
+                        question: "Miért fontos a genetikai tanácsadás a familiáris ALS-ben?",
+                        options: ["Mert segít a gyógyszerek kiválasztásában", "Mert a betegség örökletes, és a családtagok kockázatának felmérése, valamint a családtervezési döntések meghozatala fontos", "Mert a genetikai teszt olcsóbb, mint az MRI", "Mert megjósolja a halál pontos időpontját"],
+                        answer: "Mert a betegség örökletes, és a családtagok kockázatának felmérésére, valamint a családtervezési döntések meghozatalára van szükség",
+                        explanation: "Mivel a familiáris ALS (az esetek 5-10%-a) öröklődő betegség, a genetikai tanácsadás segít a családtagoknak megérteni a saját kockázatukat, a tesztelés lehetőségeit és következményeit, valamint tájékozott döntéseket hozni a családtervezéssel kapcsolatban."
+                    }
+                ]
+            },
+            {
+                topic: "Az izombetegségek kivizsgálásának menete",
+                questions: [
+                    {
+                        question: "Mi a legjellemzőbb klinikai tünete a myopathiáknak (izombetegségeknek)?",
+                        options: ["Disztális, aszimmetrikus gyengeség", "Proximális, szimmetrikus izomgyengeség", "Érzészavarok a végtagokban", "Fokozott ínreflexek"],
+                        answer: "Proximális, szimmetrikus izomgyengeség",
+                        explanation: "A legtöbb myopathia jellemzően a törzshöz közelebbi (proximális) izmokat (pl. vállöv, medenceöv) érinti szimmetrikusan, ami nehézséget okoz a karok emelésében, lépcsőn járásban vagy székből való felállásban."
+                    },
+                    {
+                        question: "Melyik laboratóriumi paraméter a legfontosabb szűrővizsgálat izombetegség gyanúja esetén?",
+                        options: ["Vércukorszint", "Kreatin-kináz (CK) szint", "Koleszterinszint", "Nátriumszint"],
+                        answer: "Kreatin-kináz (CK) szint",
+                        explanation: "A kreatin-kináz (CK) egy enzim, amely nagy koncentrációban található az izomsejtekben. Izomkárosodás (pl. gyulladás, nekrózis) esetén a vérbe kerül, így a megemelkedett szérum CK szint az izombetegség érzékeny, bár nem specifikus markere."
+                    },
+                    {
+                        question: "Milyen leletet mutat az EMG (elektromiográfia) tipikus myopathia esetén?",
+                        options: ["Nagy amplitúdójú, hosszú ideig tartó motoros egység potenciálok (MUP-ok)", "Csökkent idegvezetési sebesség", "Rövid időtartamú, alacsony amplitúdójú, polifázisos MUP-ok", "Normális lelet"],
+                        answer: "Rövid időtartamú, alacsony amplitúdójú, polifázisos MUP-ok",
+                        explanation: "Myopathiában az izomrostok pusztulása miatt egy motoros egységen belül kevesebb rost aktiválódik, ami kisebb és rövidebb MUP-okat eredményez. A szervezet kompenzálásként több motoros egységet aktivál (korai, teljes rekrutáció)."
+                    },
+                    {
+                        question: "Melyik állítás igaz az idegvezetési vizsgálatra (NCS) myopathia esetén?",
+                        options: ["Mindig jelentősen lassult vezetést mutat", "Az NCS általában normális, mivel az idegek épek", "Csak a szenzoros rostok érintettek", "A válasz amplitúdója mindig extrém magas"],
+                        answer: "Az NCS általában normális, mivel az idegek épek",
+                        explanation: "A myopathia primer izombetegség, a perifériás idegek működése általában nem érintett. Ezért az idegvezetési vizsgálat (NCS) eredménye jellemzően normális, ami segít elkülöníteni a myopathiát a neuropathiától."
+                    },
+                    {
+                        question: "Mikor indokolt izombiopsziát végezni?",
+                        options: ["Minden izomgyengeséggel járó esetben", "Csak ha a beteg kéri", "Ha a diagnózis bizonytalan, és gyulladásos vagy örökletes myopathia gyanúja merül fel", "Ha a CK szint normális"],
+                        answer: "Ha a diagnózis bizonytalan, és gyulladásos vagy örökletes myopathia gyanúja merül fel",
+                        explanation: "Az izombiopszia egy invazív, de gyakran definitív diagnosztikai eszköz. Akkor van rá szükség, ha a kevésbé invazív vizsgálatok (labor, EMG) nem adnak egyértelmű választ, és a szövettani kép (pl. gyulladás, dystrophiás jelek) segíthet a pontos diagnózis felállításában és a terápia meghatározásában."
+                    },
+                    {
+                        question: "Mi a dermatomyositis jellegzetes bőrtünete?",
+                        options: ["Pikkelysömör", "Csalánkiütés", "Gottron-papulák és heliotrop kiütés", "Akne"],
+                        answer: "Gottron-papulák és heliotrop kiütés",
+                        explanation: "A dermatomyositis egy gyulladásos myopathia, amely jellegzetes bőrtünetekkel jár. A Gottron-papulák lilásvörös kiemelkedő elváltozások az ízületek feszítő felszínén (pl. kézfej), a heliotrop kiütés pedig a szemhéjak lilás elszíneződése, gyakran ödémával."
+                    },
+                    {
+                        question: "Milyen gyengeség mintázat utal leginkább neuropathiára a myopathiával szemben?",
+                        options: ["Proximális, szimmetrikus gyengeség", "Disztális, aszimmetrikus gyengeség érzészavarral", "Fluktuáló gyengeség", "Csak a nyakizmok gyengesége"],
+                        answer: "Disztális, aszimmetrikus gyengeség érzészavarral",
+                        explanation: "Míg a myopathiák jellemzően proximális és szimmetrikus gyengeséget okoznak, a neuropathiák gyakrabban indulnak disztálisan (a végtagok végén), lehetnek aszimmetrikusak, és szinte mindig társulnak hozzájuk érzészavarok (zsibbadás, fájdalom)."
+                    },
+                    {
+                        question: "Hogyan segít az izom MRI a kivizsgálásban?",
+                        options: ["Helyettesíti az izombiopsziát", "Kimutatja a gyulladást, ödémát vagy zsíros átépülést, és segít a biopszia helyének kiválasztásában", "Méri az izomerőt", "Azonosítja a genetikai hibát"],
+                        answer: "Kimutatja a gyulladást, ödémát vagy zsíros átépülést, és segít a biopszia helyének kiválasztásában",
+                        explanation: "Az izom MRI érzékenyen jelzi az izomszövet kóros elváltozásait, mint a gyulladásos ödéma vagy a krónikus folyamatokra jellemző zsíros infiltráció. Ez segít azonosítani az aktívan érintett izmokat, így a biopszia célzottan, a legnagyobb diagnosztikai hozamot ígérő helyről végezhető el."
+                    },
+                    {
+                        question: "Melyik állapotra jellemző a fluktuáló, ismétlésre romló gyengeség, ptosis és diplopia?",
+                        options: ["Myopathia", "Neuropathia", "Neuromuszkuláris junkció zavara (pl. Myasthenia Gravis)", "Motoneuron betegség"],
+                        answer: "Neuromuszkuláris junkció zavara (pl. Myasthenia Gravis)",
+                        explanation: "A fáradékonyság, azaz az izomerő ismételt használatra történő csökkenése, a neuromuszkuláris átmenet betegségeinek, különösen a Myasthenia Gravisnak a kardinális tünete. A szemizmok gyakori érintettsége ptosist (szemhéjcsüngés) és diplopiát (kettőslátás) okoz."
+                    },
+                    {
+                        question: "Melyik állítás igaz a reflexek vizsgálatára myopathia esetén?",
+                        options: ["A reflexek mindig fokozottak.", "A reflexek mindig hiányoznak.", "A reflexek általában a gyengeség mértékéhez képest megtartottak.", "A reflexvizsgálatnak nincs jelentősége."],
+                        answer: "A reflexek általában a gyengeség mértékéhez képest megtartottak.",
+                        explanation: "Myopathiában a reflexpálya idegi része (érző és mozgató ideg) ép. A reflexek csak későn, a súlyos izomsorvadás miatt gyengülnek vagy tűnnek el. Ezzel szemben a neuropathiákban a reflexek korán kiesnek. Ez egy fontos differenciáldiagnosztikai jel."
+                    },
+                    {
+                        question: "Melyik autoantitest társul leggyakrabban a gyulladásos myopathiákhoz és a malignitáshoz?",
+                        options: ["Anti-Jo-1", "Anti-Mi2", "Anti-TIF1-gamma", "Anti-HMGCR"],
+                        answer: "Anti-TIF1-gamma",
+                        explanation: "Az Anti-TIF1-gamma antitest jelenléte dermatomyositisben erős összefüggést mutat a háttérben álló daganatos megbetegedéssel, különösen idősebb betegeknél. Ennek az antitestnek a kimutatása alapos onkológiai kivizsgálást tesz szükségessé."
+                    },
+                    {
+                        question: "Mi a 'rosttípus-csoportosulás' (fiber type grouping) az izombiopsziában?",
+                        options: ["Myopathiás jel, ami az izomrostok véletlenszerű pusztulását mutatja.", "Neurogén elváltozás jele, ami a denervációt követő reinnervációra utal.", "Normális lelet egészséges izomban.", "Gyulladásos sejtek beszűrődése."],
+                        answer: "Neurogén elváltozás jele, ami a denervációt követő reinnervációra utal.",
+                        explanation: "Normálisan a különböző típusú izomrostok (pl. I-es, II-es) mozaikszerűen helyezkednek el. Neurogén károsodásnál a denervált rostokat a szomszédos, ép motoros egységek újra beidegzik. Ennek eredményeként az egy motoros egységhez tartozó, azonos típusú rostok csoportokba rendeződnek."
+                    },
+                    {
+                        question: "Milyen gyógyszercsoport okozhat toxikus myopathiát?",
+                        options: ["Antibiotikumok", "Vitaminkészítmények", "Statinok (koleszterincsökkentők)", "Vérnyomáscsökkentők"],
+                        answer: "Statinok (koleszterincsökkentők)",
+                        explanation: "A statinok a leggyakrabban myopathiát okozó gyógyszerek. Izomfájdalmat (myalgia), gyengeséget, és ritkán súlyos, necrotizáló autoimmun myopathiát is kiválthatnak."
+                    },
+                    {
+                        question: "Milyen eloszlású gyengeség jellemző az inclusion body myositis (IBM) korai szakaszára?",
+                        options: ["Csak a vállizmok gyengesége", "Proximális láb- és disztális karizmok (ujj- és csuklóhajlítók) aszimmetrikus gyengesége", "Csak a szemizmok gyengesége", "Teljesen szimmetrikus, disztális gyengeség"],
+                        answer: "Proximális láb- és disztális karizmok (ujj- és csuklóhajlítók) aszimmetrikus gyengesége",
+                        explanation: "Az IBM egy atípusos gyulladásos myopathia, amelyre a quadriceps (proximális láb) és az ujjhajlítók (disztális kar) jellegzetes, gyakran aszimmetrikus gyengesége jellemző. Ez a mintázat eltér a legtöbb más myopathiától."
+                    },
+                    {
+                        question: "Mi a perifascicularis atrófia?",
+                        options: ["Az izomrostok közepének sorvadása.", "Az izomkötegek (fasciculusok) szélén lévő rostok sorvadása, ami a dermatomyositis patognomonikus jele.", "Az idegrostok sorvadása.", "Az egész izom egyenletes sorvadása."],
+                        answer: "Az izomkötegek (fasciculusok) szélén lévő rostok sorvadása, ami a dermatomyositis patognomonikus jele.",
+                        explanation: "A perifascicularis atrófia a dermatomyositis jellegzetes szövettani lelete. Úgy gondolják, hogy az izomkötegek szélén lévő kapillárisok károsodása miatti lokális ischaemia (vérellátási zavar) okozza."
+                    },
+                    {
+                        question: "Melyik állítás NEM igaz az izombetegségek kivizsgálására?",
+                        options: ["Az anamnézis és a fizikális vizsgálat az első és legfontosabb lépés.", "A magas CK szint mindig súlyos izomdystrophiát jelent.", "Az EMG segít elkülöníteni a myopathiát a neuropathiától.", "A genetikai tesztelés megerősítheti az örökletes myopathiák diagnózisát."],
+                        answer: "A magas CK szint mindig súlyos izomdystrophiát jelent.",
+                        explanation: "Bár a magas CK szint izomkárosodásra utal, nem specifikus. Okozhatja megerőltető edzés, sérülés, gyógyszerek vagy más állapotok is, és a szint magassága nem mindig korrelál a betegség súlyosságával."
+                    },
+                    {
+                        question: "Mi a 'rimmed vacuole' (szegélyezett vakuólum)?",
+                        options: ["Egy laboratóriumi műtermék.", "A dermatomyositisre jellemző szövettani lelet.", "Az inclusion body myositis (IBM) jellegzetes szövettani elváltozása.", "Egyfajta izomsejt."],
+                        answer: "Az inclusion body myositis (IBM) jellegzetes szövettani elváltozása.",
+                        explanation: "A szegélyezett vakuólumok az izomrostokon belüli üregek, amelyek szélén bazofil granulumok halmozódnak fel. Ez az elváltozás, bár nem teljesen specifikus, az IBM egyik legfontosabb szövettani ismérve."
+                    },
+                    {
+                        question: "Melyik myositis-specifikus antitest társul a necrotizáló autoimmun myopathiához (NAM), gyakran statin expozíció után?",
+                        options: ["Anti-Jo-1", "Anti-SRP", "Anti-Mi2", "Anti-MDA5"],
+                        answer: "Anti-SRP",
+                        explanation: "Az anti-signal recognition particle (SRP) antitestek a necrotizáló autoimmun myopathia (IMNM/NAM) egyik fő szerológiai markere. Ez az állapot súlyos, gyorsan progrediáló izomgyengeséggel és extrém magas CK szintekkel jár, és gyakran statinok szedése váltja ki."
+                    },
+                    {
+                        question: "Milyen gyengeség mintázatot kell keresni, ha a betegnek nehézsége van a fésülködéssel és a polcról való leemeléssel?",
+                        options: ["Disztális gyengeség", "Proximális gyengeség (vállöv)", "Bulbaris gyengeség", "Szemizom gyengeség"],
+                        answer: "Proximális gyengeség (vállöv)",
+                        explanation: "Ezek a tevékenységek a karok fej fölé emelését igénylik, amihez a vállöv proximális izmainak (pl. deltoid) ereje szükséges. Ezen mozdulatok nehezítettsége a proximális izomgyengeség klasszikus jele, ami myopathiára utal."
+                    },
+                    {
+                        question: "Miért fontos a gyengeség valódi okának megkülönböztetése a szubjektív fáradtságtól?",
+                        options: ["Mert a kezelésük ugyanaz.", "Mert a valódi gyengeség objektíven mérhető (pl. MRC skálán), és specifikus neurológiai vagy izombetegségre utal, míg a fáradtság lehet nem specifikus tünet.", "Mert a fáradtság mindig pszichés eredetű.", "Nincs különbség a kettő között."],
+                        answer: "Mert a valódi gyengeség objektíven mérhető (pl. MRC skálán), és specifikus neurológiai vagy izombetegségre utal, míg a fáradtság lehet nem specifikus tünet.",
+                        explanation: "A valódi izomgyengeség az izomerő objektív csökkenését jelenti, ami szervi betegség jele. A fáradtság vagy asthenia egy szubjektív érzés, ami számos betegség (pl. anémia, depresszió, krónikus fertőzések) kísérője lehet, de nem feltétlenül jár együtt az izomerő csökkenésével."
+                    }
+                ]
+            },
+            {
+                topic: "Izomdystrophiák, myotonia és a neuromuscularis ingerületátvitel zavarai",
+                questions: [
+                    {
+                        question: "Melyik fehérje hiánya vagy hibás működése okozza a Duchenne és Becker izomdystrophiát?",
+                        options: ["Aktin", "Miozin", "Disztrofin", "Kollagén"],
+                        answer: "Disztrofin",
+                        explanation: "A Duchenne (DMD) és Becker (BMD) izomdystrophia a disztrofinopátiák csoportjába tartozik, melyeket az izomsejtek stabilitásáért felelős disztrofin fehérjét kódoló gén mutációi okoznak."
+                    },
+                    {
+                        question: "Mi a fő különbség a Duchenne és a Becker izomdystrophia között?",
+                        options: ["A Duchenne autoszomális domináns, a Becker recesszív öröklődésű.", "DMD-ben a disztrofin teljesen hiányzik, míg BMD-ben csökkent mennyiségű vagy méretű, de funkcióképes fehérje termelődik.", "A Becker-típus csak a lábakat, a Duchenne csak a karokat érinti.", "A Becker sokkal gyorsabb lefolyású, mint a Duchenne."],
+                        answer: "DMD-ben a disztrofin teljesen hiányzik, míg BMD-ben csökkent mennyiségű vagy méretű, de funkcióképes fehérje termelődik.",
+                        explanation: "A klinikai kép súlyossága közvetlenül összefügg a disztrofin fehérje mennyiségével és funkciójával. A DMD-ben a fehérje gyakorlatilag hiányzik, ami súlyos, gyors lefolyáshoz vezet. A BMD enyhébb, mert valamennyi, részlegesen működő disztrofin termelődik."
+                    },
+                    {
+                        question: "Mi a myotonia klinikai jelensége?",
+                        options: ["Az izmok hirtelen, akaratlan görcse.", "Az izmok teljes petyhüdtsége.", "Az izom akaratlagos összehúzódás utáni elernyedésének kóros késlekedése.", "Az izmok folyamatos rángatózása."],
+                        answer: "Az izom akaratlagos összehúzódás utáni elernyedésének kóros késlekedése.",
+                        explanation: "A myotonia az izommembrán kóros ingerlékenységének következménye, ami miatt az izom az akaratlagos kontrakció után nem tud azonnal elernyedni. A beteg ezt merevségként éli meg (pl. nehezen nyitja ki a markolt öklét)."
+                    },
+                    {
+                        question: "Melyik betegségcsoportra jellemző a myotonia?",
+                        options: ["Motoneuron betegségek", "Myotoniás dystrophiák és nem-dystrophiás myotoniák (csatornopátiák)", "Alagút szindrómák", "Guillain-Barré-szindróma"],
+                        answer: "Myotoniás dystrophiák és nem-dystrophiás myotoniák (csatornopátiák)",
+                        explanation: "A myotonia a myotoniás dystrophiák (DM1, DM2) és a nem-dystrophiás myotoniák (pl. Myotonia Congenita, Paramyotonia Congenita), azaz az ioncsatorna-betegségek (channelopathiák) kardinális tünete."
+                    },
+                    {
+                        question: "Mi a Myasthenia Gravis (MG) patofiziológiájának alapja?",
+                        options: ["A preszinaptikus acetilkolin felszabadulás gátlása.", "Autoimmun támadás a posztszinaptikus acetilkolin receptorok (AChR) ellen.", "A perifériás idegek myelin hüvelyének pusztulása.", "A motoneuronok degenerációja."],
+                        answer: "Autoimmun támadás a posztszinaptikus acetilkolin receptorok (AChR) ellen.",
+                        explanation: "Az MG egy autoimmun betegség, ahol a szervezet antitesteket termel a neuromuszkuláris junkció posztszinaptikus membránján lévő acetilkolin receptorok ellen, gátolva az ingerületátvitelt és fáradékonyságot okozva."
+                    },
+                    {
+                        question: "Melyik a Myasthenia Gravis leggyakoribb kezdeti tünete?",
+                        options: ["Lábgyengeség", "Légzési nehézség", "Okuláris tünetek (ptosis és/vagy diplopia)", "Nyelési zavar"],
+                        answer: "Okuláris tünetek (ptosis és/vagy diplopia)",
+                        explanation: "Az MG-s betegek több mint felénél a betegség a szemizmok gyengeségével kezdődik, ami szemhéjcsüngést (ptosis) és/vagy kettőslátást (diplopia) okoz."
+                    },
+                    {
+                        question: "Melyik betegség társul gyakran a Lambert-Eaton Myastheniás Szindrómához (LEMS)?",
+                        options: ["Cukorbetegség", "Rheumatoid arthritis", "Kissejtes tüdőrák (SCLC)", "Pajzsmirigy-alulműködés"],
+                        answer: "Kissejtes tüdőrák (SCLC)",
+                        explanation: "A LEMS az esetek 50-70%-ában paraneopláziás szindrómaként, leggyakrabban kissejtes tüdőrákhoz társulva jelentkezik. A diagnózis felállítása ezért sürgős daganatkutatást tesz szükségessé."
+                    },
+                    {
+                        question: "Mi a botulizmus által okozott bénulás jellegzetes mintázata?",
+                        options: ["Felszálló, szimmetrikus bénulás", "Leszálló, szimmetrikus petyhüdt bénulás", "Aszimmetrikus, foltos gyengeség", "Csak a lábakat érintő bénulás"],
+                        answer: "Leszálló, szimmetrikus petyhüdt bénulás",
+                        explanation: "A botulinum toxin által okozott bénulás klasszikusan fentről lefelé terjed: a szemizmokkal és a bulbaris izmokkal kezdődik (kettőslátás, nyelészavar), majd a nyak, a vállak, és végül a törzs és a végtagok izmaira terjed, beleértve a légzőizmokat is."
+                    },
+                    {
+                        question: "Milyen elektrofiziológiai jelenség jellemző a LEMS-re repetitív idegingerlés (RNS) során?",
+                        options: ["Nincs változás az amplitúdóban", "Jelentős dekrement (csökkenés) magas frekvencián", "Jelentős inkrement (növekedés, facilitáció) magas frekvenciájú stimulációra", "Vezetési blokk"],
+                        answer: "Jelentős inkrement (növekedés, facilitáció) magas frekvenciájú stimulációra",
+                        explanation: "LEMS-ben a preszinaptikus acetilkolin felszabadulás gátolt. Magas frekvenciájú ingerlésre vagy rövid, maximális erőkifejtés után a preszinaptikus idegvégződésben felhalmozódik a kalcium, ami átmenetileg fokozza az acetilkolin felszabadulását. Ez az izomválasz amplitúdójának jelentős (>100%) növekedésében (inkrement) nyilvánul meg, ami patognomonikus a LEMS-re."
+                    },
+                    {
+                        question: "Melyik gyógyszer hatékony a LEMS tüneti kezelésében az acetilkolin felszabadulásának fokozásával?",
+                        options: ["Pyridostigmine", "Prednizon", "3,4-Diaminopyridine (3,4-DAP)", "Rituximab"],
+                        answer: "3,4-Diaminopyridine (3,4-DAP)",
+                        explanation: "A 3,4-DAP a preszinaptikus idegvégződés feszültségfüggő káliumcsatornáit blokkolja. Ez meghosszabbítja az akciós potenciált, ami több kalcium beáramlását és következésképpen több acetilkolin felszabadulását teszi lehetővé, így javítva az izomerőt."
+                    },
+                    {
+                        question: "Milyen öröklődésmenetű a Myotoniás Dystrophia (DM1/DM2)?",
+                        options: ["Autoszomális recesszív", "X-kromoszómához kötött", "Autoszomális domináns", "Mitokondriális"],
+                        answer: "Autoszomális domináns",
+                        explanation: "Mindkét fő típusú myotoniás dystrophia autoszomális dominánsan öröklődik, ami azt jelenti, hogy egy beteg szülő 50% eséllyel adja tovább a betegséget okozó génhibát minden gyermekének."
+                    },
+                    {
+                        question: "Mi a Gowers-jel?",
+                        options: ["A szemizmok gyengesége", "A beteg a saját végtagjain 'kapaszkodik fel' a földről", "A vádli izmainak sorvadása", "A kéz izmainak görcse"],
+                        answer: "A beteg a saját végtagjain 'kapaszkodik fel' a földről",
+                        explanation: "A Gowers-jel a proximális (csípő- és comb-) izmok gyengeségének klasszikus jele, leggyakrabban Duchenne izomdystrophiában látható. A gyermek a gyenge törzs- és lábizmai miatt a kezeit használja támaszként a saját combján, hogy fel tudjon állni a földről."
+                    },
+                    {
+                        question: "Melyik szerv eltávolítása (thymectomia) jöhet szóba a Myasthenia Gravis kezelésében?",
+                        options: ["Lép", "Mellékvese", "Csecsemőmirigy (thymus)", "Pajzsmirigy"],
+                        answer: "Csecsemőmirigy (thymus)",
+                        explanation: "Az MG-s betegek jelentős részénél a csecsemőmirigy kóros (thymoma vagy hyperplasia). A thymus fontos szerepet játszik az immunrendszer működésében és az autoantitest-termelésben, ezért az eltávolítása, különösen fiatal, AChR-pozitív betegeknél, javíthatja a betegség lefolyását és növelheti a gyógyszermentes remisszió esélyét."
+                    },
+                    {
+                        question: "Milyen típusú izomgyengeség jellemző a DM1-re (Steinert-kór)?",
+                        options: ["Proximális gyengeség", "Disztális gyengeség (arc, nyak, alkar, lábszár)", "Csak a szemizmok gyengesége", "Aszimmetrikus gyengeség"],
+                        answer: "Disztális gyengeség (arc, nyak, alkar, lábszár)",
+                        explanation: "A DM1 klasszikus formájában a gyengeség és sorvadás jellegzetesen a disztális izmokat érinti, ami a 'bárdolt arc' (facies myopathica), a nyakizmok gyengesége (hattyúnyak), valamint a csukló- és bokalógás képét eredményezi."
+                    },
+                    {
+                        question: "Melyik betegségre jellemző a 'bemelegedési jelenség' (warm-up phenomenon)?",
+                        options: ["Myasthenia Gravis", "Myotonia Congenita", "Duchenne izomdystrophia", "Lambert-Eaton szindróma"],
+                        answer: "Myotonia Congenita",
+                        explanation: "A 'warm-up' jelenség azt takarja, hogy a myotoniás merevség ismételt mozgásra, bemelegítésre enyhül. Ez különösen a klorid-csatorna betegségekre, mint a Myotonia Congenita, jellemző."
+                    },
+                    {
+                        question: "Mi a botulinum toxin hatásmechanizmusa?",
+                        options: ["Blokkolja a posztszinaptikus acetilkolin receptorokat", "Gátolja a preszinaptikus acetilkolin felszabadulását", "Elpusztítja az izomrostokat", "Fokozza az idegvezetési sebességet"],
+                        answer: "Gátolja a preszinaptikus acetilkolin felszabadulását",
+                        explanation: "A botulinum toxin a preszinaptikus idegvégződésben a SNARE fehérjék hasításával megakadályozza az acetilkolint tartalmazó vezikulák fúzióját a sejtmembránnal, így gátolva a neurotranszmitter felszabadulását és petyhüdt bénulást okozva."
+                    },
+                    {
+                        question: "Milyen genetikai mechanizmus okozza a myotoniás dystrophiát?",
+                        options: ["Pontmutáció", "Deléció", "Trinukleotid (vagy tetranukleotid) ismétlődés expanziója", "Kromoszóma transzlokáció"],
+                        answer: "Trinukleotid (vagy tetranukleotid) ismétlődés expanziója",
+                        explanation: "A myotoniás dystrophiákat (DM1: CTG, DM2: CCTG) a gén nem-kódoló régiójában található ismétlődő szekvenciák kóros felszaporodása (expanziója) okozza. Ez a 'toxikus' RNS szintjén fejti ki hatását."
+                    },
+                    {
+                        question: "Melyik gyógyszer súlyosbíthatja a Myasthenia Gravis tüneteit?",
+                        options: ["Paracetamol", "Aminoglikozid antibiotikumok", "C-vitamin", "Vas-készítmények"],
+                        answer: "Aminoglikozid antibiotikumok",
+                        explanation: "Számos gyógyszer, köztük bizonyos antibiotikumok (pl. aminoglikozidok, makrolidok), béta-blokkolók, és kalciumcsatorna-blokkolók gátolhatják a neuromuszkuláris ingerületátvitelt, ezért súlyosbíthatják az MG-s betegek állapotát és myastheniás krízist provokálhatnak."
+                    },
+                    {
+                        question: "Milyen szisztémás tünet NEM jellemző a myotoniás dystrophiára?",
+                        options: ["Cataracta (szürkehályog)", "Szívritmuszavarok", "Veseeégtelenség", "Inzulinrezisztencia (diabetes)"],
+                        answer: "Veseeégtelenség",
+                        explanation: "A myotoniás dystrophia egy multisztémás betegség, amely a vázizomzaton kívül érinti a szemet (cataracta), a szívet (vezetési zavarok), az endokrin rendszert (inzulinrezisztencia, hereatrófia) és a központi idegrendszert is. A vese érintettsége nem jellemző."
+                    },
+                    {
+                        question: "Mi a 'paradox myotonia'?",
+                        options: ["A myotonia hiánya myotoniás betegségben", "A myotonia javulása hideg hatására", "A myotonia súlyosbodása ismételt mozgásra", "A myotonia csak egyetlen izomban jelentkezik"],
+                        answer: "A myotonia súlyosbodása ismételt mozgásra",
+                        explanation: "A paradox myotonia a 'warm-up' jelenség ellentéte. Itt az izomaktivitás nem javítja, hanem rontja a merevséget. Ez a jelenség a nátrium-csatorna betegségekre, különösen a Paramyotonia Congenitára jellemző."
+                    }
+                ]
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const topicSelectionContainer = document.getElementById('topic-selection-container');
+
+        const topicTitle = document.getElementById('topic-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let allQuestions = [];
+        let selectedTopicIndex = null;
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedTopicIndex = null;
+            allQuestions = [];
+            totalQuestions = 0;
+
+            displayTopics();
+            startBtn.disabled = true;
+
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function displayTopics() {
+            topicSelectionContainer.innerHTML = '';
+            
+            // Add "All Topics" option
+            const allTopicsButton = document.createElement('button');
+            allTopicsButton.innerText = 'Minden téma';
+            allTopicsButton.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+            allTopicsButton.dataset.topicIndex = -1;
+            allTopicsButton.addEventListener('click', handleTopicSelection);
+            topicSelectionContainer.appendChild(allTopicsButton);
+
+            quizData.forEach((topic, index) => {
+                const button = document.createElement('button');
+                button.innerText = topic.topic;
+                button.classList.add('topic-option', 'w-full', 'p-4', 'text-center', 'font-semibold', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg');
+                button.dataset.topicIndex = index;
+                button.addEventListener('click', handleTopicSelection);
+                topicSelectionContainer.appendChild(button);
+            });
+        }
+
+        function handleTopicSelection(event) {
+            selectedTopicIndex = parseInt(event.target.dataset.topicIndex);
+            
+            // Update styles
+            document.querySelectorAll('.topic-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (selectedTopicIndex === -1) {
+                // All topics
+                allQuestions = quizData.flatMap(topic => 
+                    topic.questions.map(q => ({...q, topic: topic.topic}))
+                );
+            } else {
+                // Specific topic
+                allQuestions = quizData[selectedTopicIndex].questions.map(q => ({...q, topic: quizData[selectedTopicIndex].topic}));
+            }
+            totalQuestions = allQuestions.length;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initializeQuiz);
+
+        function loadQuestion() {
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = allQuestions[currentQuestionIndex];
+            
+            topicTitle.innerText = currentQuestion.topic;
+            questionText.innerText = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('quiz-option', 'w-full', 'p-4', 'text-left', 'bg-white', 'dark:bg-gray-700', 'border-2', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'hover:bg-indigo-100', 'dark:hover:bg-gray-600', 'hover:border-indigo-400', 'dark:hover:border-indigo-500');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            progressText.innerText = `Kérdés ${currentQuestionIndex + 1}/${totalQuestions}`;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            
+            allOptions.forEach(optBtn => {
+                optBtn.classList.add('disabled-option');
+                if (optBtn.innerText === correctAnswer) {
+                    optBtn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                feedbackTitle.innerText = "Helyes válasz!";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-green-600 dark:text-green-400';
+            } else {
+                button.classList.add('incorrect');
+                feedbackTitle.innerText = "Helytelen válasz.";
+                feedbackTitle.className = 'text-lg font-bold mb-2 text-red-600 dark:text-red-400';
+            }
+            
+            explanationText.innerText = allQuestions[currentQuestionIndex].explanation;
+            feedbackArea.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            finalScore.innerText = `${score}/${totalQuestions} (${percentage}%)`;
+
+            let message = '';
+            if (percentage >= 90) {
+                message = "Kiváló munka! Ön a téma szakértője.";
+            } else if (percentage >= 70) {
+                message = "Szép eredmény! Magabiztos tudással rendelkezik.";
+            } else if (percentage >= 50) {
+                message = "Jó kezdés! Érdemes lehet átismételni a bizonytalanabb témaköröket.";
+            } else {
+                message = "Gyakorlás teszi a mestert! Ne adja fel, próbálja újra a tudása elmélyítéséért.";
+            }
+            resultMessage.innerText = message;
+        }
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

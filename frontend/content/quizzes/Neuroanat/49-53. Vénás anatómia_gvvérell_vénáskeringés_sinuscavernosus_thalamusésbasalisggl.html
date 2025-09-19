@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Kvíz: Vénás és Gerincvelői Keringés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .option-btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #22c55e !important;
+            color: white;
+            border-color: #16a34a;
+        }
+        .incorrect {
+            background-color: #ef4444 !important;
+            color: white;
+            border-color: #dc2626;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            position: relative;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-app" class="w-full max-w-4xl mx-auto">
+        
+        <div id="start-screen" class="text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">Neuroanatómia Kvíz</h1>
+            <p class="text-slate-600 mb-8 text-lg">Válassz egy témakört a tudásod elmélyítéséhez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button onclick="startQuiz('venas_anatomia')" class="bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">1. Vénás anatómia</button>
+                <button onclick="startQuiz('gerincvelo_verellatas')" class="bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-md">2. Gerincvelő vérellátása</button>
+                <button onclick="startQuiz('venas_zavarok')" class="bg-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-700 transition duration-300 shadow-md">3. Vénás keringészavarok</button>
+                <button onclick="startQuiz('sinus_cavernosus')" class="bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition duration-300 shadow-md">4. Sinus Cavernosus</button>
+                <button onclick="startQuiz('thalamus_bg_verellatas')" class="bg-violet-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-violet-700 transition duration-300 shadow-md">5. Thalamus & Basalis G.</button>
+            </div>
+        </div>
+
+        <div id="quiz-container" class="hidden bg-white p-6 md:p-10 rounded-2xl shadow-xl">
+            <div id="header" class="flex justify-between items-center mb-6">
+                <p id="question-counter" class="text-slate-500 font-medium"></p>
+                <p id="score" class="text-slate-500 font-medium">Pontszám: 0</p>
+            </div>
+            <div id="question" class="text-xl md:text-2xl font-semibold mb-8 min-h-[6rem] flex items-center"></div>
+            <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <button id="next-btn" class="w-full mt-8 bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition duration-300 shadow-md hidden">Következő</button>
+        </div>
+
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h2 class="text-3xl font-bold mb-4">Eredmény</h2>
+            <p id="final-score" class="text-5xl font-bold text-slate-700 mb-6"></p>
+            <p id="result-message" class="text-slate-600 mb-8 text-lg"></p>
+            <button onclick="restartQuiz()" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300 shadow-md">Vissza a főmenübe</button>
+        </div>
+    </div>
+
+    <div id="explanation-modal" class="modal">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl">
+            <h3 id="explanation-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="explanation-text" class="text-slate-700 leading-relaxed"></p>
+        </div>
+    </div>
+
+<script>
+    const quizData = [
+        // Tétel 1: Az agyi vénás keringési rendszer anatómiája
+        {
+            topic: 'venas_anatomia',
+            question: "Melyik állítás NEM igaz a durális vénás sinusokra?",
+            options: ["A dura mater két lemeze között helyezkednek el.", "Vastag izomréteggel és billentyűkkel rendelkeznek.", "Merev faluk miatt nem kollabálnak.", "Részt vesznek a liquor cerebrospinalis felszívásában."],
+            answer: "Vastag izomréteggel és billentyűkkel rendelkeznek.",
+            explanation: "A durális vénás sinusok falában nincsenek izomsejtek, és általában billentyűket sem tartalmaznak, ami megkülönbözteti őket a test legtöbb vénájától."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Melyik a legnagyobb felszínes anasztomotikus véna, amely a sinus sagittalis superiort köti össze a v. cerebri media superficialisszal?",
+            options: ["Vena magna cerebri (Galeni)", "Vena basalis (Rosenthal)", "Vena anastomotica superior (Trolard)", "Vena anastomotica inferior (Labbé)"],
+            answer: "Vena anastomotica superior (Trolard)",
+            explanation: "A Trolard-véna (vena anastomotica superior) egy nagy, de variábilis véna, amely a felszínes vénás rendszer fontos kollaterális útvonalát képezi a sinus sagittalis superior és a Sylvius-árok vénája között."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Hova ömlik a vena magna cerebri (Galeni-véna)?",
+            options: ["A sinus cavernosusba", "A sinus sagittalis superiorba", "A confluens sinuumba", "A sinus rectusba"],
+            answer: "A sinus rectusba",
+            explanation: "A vena magna cerebri, amely a mély agyi vénák vérét gyűjti össze, a sinus rectus elülső végébe ömlik, a falx cerebri és a tentorium cerebelli találkozásánál."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Mi a 'hídvénák' (bridging veins) klinikai jelentősége?",
+            options: ["Kollaterális keringést biztosítanak.", "Trauma során könnyen szakadhatnak, subduralis haematomát okozva.", "A liquor cerebrospinalist szállítják.", "Az agytörzset látják el vérrel."],
+            answer: "Trauma során könnyen szakadhatnak, subduralis haematomát okozva.",
+            explanation: "A 'hídvénák' a subarachnoidealis térből a dura sinusok felé haladva átszelik a potenciális subduralis teret. Fejsérülések során az agy elmozdulása megfeszítheti és elszakíthatja őket, ami subduralis vérzéshez vezet."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Mely struktúrák egyesüléséből jön létre a vena cerebri interna?",
+            options: ["V. ophthalmica és v. facialis", "V. thalamostriata, v. choroidea és v. septi pellucidi", "Sinus sagittalis superior és inferior", "A két v. basalis (Rosenthal)"],
+            answer: "V. thalamostriata, v. choroidea és v. septi pellucidi",
+            explanation: "A páros v. cerebri interna a foramen interventriculare (Monro-nyílás) közelében jön létre a v. thalamostriata superior, a v. choroidea superior és a v. septi pellucidi anterior egyesüléséből."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Mi a confluens sinuum (torcular Herophili)?",
+            options: ["A mély agyi vénák találkozása", "A sinus cavernosus egy része", "A felső duralis sinusok (SSS, sinus rectus, sinus transversusok) összefolyása", "A vena jugularis interna kezdete"],
+            answer: "A felső duralis sinusok (SSS, sinus rectus, sinus transversusok) összefolyása",
+            explanation: "A confluens sinuum a protuberantia occipitalis interna belső felszínénél található vénás összefolyás, ahová a sinus sagittalis superior és a sinus rectus ömlik, és ahonnan a sinus transversusok kiindulnak."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Melyik két sinusba vezeti el a vért a sinus cavernosus?",
+            options: ["Sinus sagittalis superior és inferior", "Sinus transversus és rectus", "Sinus petrosus superior és inferior", "Sinus sigmoideus és occipitalis"],
+            answer: "Sinus petrosus superior és inferior",
+            explanation: "A sinus cavernosus fő elvezetési útjai a sinus petrosus superior (amely a sinus transversus/sigmoideus átmenetbe vezet) és a sinus petrosus inferior (amely közvetlenül a v. jugularis internába ömlik)."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Mi a venae emissariae szerepe?",
+            options: ["Az agykéreg vérellátása", "A koponyán belüli és kívüli vénás rendszerek összekötése", "A liquor termelése", "Az agyidegek beidegzése"],
+            answer: "A koponyán belüli és kívüli vénás rendszerek összekötése",
+            explanation: "A venae emissariae a koponyacsontokon áthaladó vénák, amelyek összeköttetést teremtenek a duralis sinusok és a koponyán kívüli (pl. fejbőr) vénák között, segítve a nyomáskiegyenlítést és potenciális fertőzési útvonalat képezve."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Hova ömlenek a felszínes agyi vénák?",
+            options: ["Közvetlenül a v. jugularis internába", "A legközelebbi durális vénás sinusba", "A mély agyi vénákba", "A gerincvelői vénás plexusba"],
+            answer: "A legközelebbi durális vénás sinusba",
+            explanation: "A felszínes vénák az agykéreg felszínéről gyűjtik a vért, és áttörve a pókhálóhártyát, a legközelebbi nagy durális sinusba (pl. sinus sagittalis superior, sinus transversus) ömlenek."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Melyik véna fut a Sylvius-árokban?",
+            options: ["Vena anastomotica superior (Trolard)", "Vena cerebri interna", "Vena cerebri media superficialis", "Vena basalis (Rosenthal)"],
+            answer: "Vena cerebri media superficialis",
+            explanation: "A vena cerebri media superficialis, más néven Sylvius-véna, a sulcus lateralis (Sylvius-árok) mentén halad, és a környező kérgi területek vérét gyűjti."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "A liquor cerebrospinalis (CSF) felszívódása főként melyik struktúrán keresztül történik a sinus sagittalis superiorba?",
+            options: ["Plexus choroideus", "Arachnoidealis granulációk (Pacchioni-granulációk)", "Venae emissariae", "Dura mater"],
+            answer: "Arachnoidealis granulációk (Pacchioni-granulációk)",
+            explanation: "Az arachnoidealis granulációk a pókhálóhártya kiboltosulásai, amelyek benyomulnak a duralis sinusok, főleg a sinus sagittalis superior lumenébe, és itt történik a CSF nagy részének visszaszívódása a vénás keringésbe."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Melyik állítás igaz a mély agyi vénákra?",
+            options: ["Az agykéreg felszínéről gyűjtenek vért.", "A törzsdúcok, thalamus és más központi struktúrák vérét drenálják.", "Közvetlenül a v. jugularis internába ömlenek.", "Vastag falúak és billentyűket tartalmaznak."],
+            answer: "A törzsdúcok, thalamus és más központi struktúrák vérét drenálják.",
+            explanation: "A mély agyi vénák az agy belső, központi struktúráinak (törzsdúcok, thalamus, stb.) vénás elvezetéséért felelősek, és végül a v. magna cerebri (Galeni) révén a sinus rectusba ömlenek."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "A sinus sigmoideus minek a közvetlen folytatása, és mibe torkollik?",
+            options: ["A sinus rectus folytatása, a confluens sinuumba torkollik.", "A sinus transversus folytatása, a v. jugularis internába torkollik.", "A sinus cavernosus folytatása, a sinus petrosus superiorba torkollik.", "A sinus sagittalis superior folytatása, a v. jugularis externába torkollik."],
+            answer: "A sinus transversus folytatása, a v. jugularis internába torkollik.",
+            explanation: "A sinus sigmoideus a sinus transversus S-alakú folytatása, amely a foramen jugularénál a v. jugularis interna bulbus superiorjába megy át."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Mi a plexus basilaris?",
+            options: ["A gerincvelő artériás hálózata.", "A clivus belső felszínén elhelyezkedő vénás fonat.", "Az arc mély vénás hálózata.", "A kisagy fő vénás elvezetője."],
+            answer: "A clivus belső felszínén elhelyezkedő vénás fonat.",
+            explanation: "A plexus basilaris a clivuson (a koponyaalap lejtőjén) található vénás fonat, amely összeköti a két sinus cavernosust és petrosus inferiort, valamint lefelé a gerincvelői vénás plexussal áll kapcsolatban."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Az 'arc veszélyes háromszöge' fertőzései melyik vénás összeköttetésen keresztül juthatnak el legkönnyebben a sinus cavernosusba?",
+            options: ["A v. jugularis externán keresztül", "A v. facialis és v. ophthalmica superior/inferior révén", "A v. retromandibularison keresztül", "A v. temporalis superficialison keresztül"],
+            answer: "A v. facialis és v. ophthalmica superior/inferior révén",
+            explanation: "Az arc vénái (v. facialis, v. angularis) billentyű nélküli összeköttetésben állnak a v. ophthalmica-val, amely közvetlenül a sinus cavernosusba ömlik, így a fertőzések ezen az útvonalon könnyen eljuthatnak a koponyaüregbe."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "A vena basalis (Rosenthal-véna) mely struktúrák körül kanyarog?",
+            options: ["A corpus callosum körül", "A nyúltvelő körül", "A pedunculus cerebri körül", "A kisagy körül"],
+            answer: "A pedunculus cerebri körül",
+            explanation: "A vena basalis (Rosenthal-véna) az agyalapon, a cisterna ambiensben haladva megkerüli a középagyat, azaz a pedunculus cerebrit, mielőtt a v. magna cerebribe ömlene."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "A venae diploicae hol helyezkednek el?",
+            options: ["Az agykéreg felszínén", "A dura mater lemezei között", "A koponyacsontok szivacsos állományában", "A gerinccsatornában"],
+            answer: "A koponyacsontok szivacsos állományában",
+            explanation: "A venae diploicae a koponyacsontok szivacsos, diploë nevű rétegében futó vénás hálózatot alkotják, és a csontok vérét drenálják a sinusokba vagy a külső vénákba."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Melyik sinusba ömlik a legtöbb felszínes agyi véna?",
+            options: ["Sinus cavernosus", "Sinus transversus", "Sinus rectus", "Sinus sagittalis superior"],
+            answer: "Sinus sagittalis superior",
+            explanation: "A sinus sagittalis superior a legnagyobb sinus, amely a falx cerebri felső szélén fut, és a hemisphaeriumok felső-lateralis és medialis felszínéről származó legtöbb felszínes véna vérét gyűjti össze."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "A Labbé-véna melyik két struktúrát köti össze?",
+            options: ["Sinus sagittalis superior és sinus transversus", "V. cerebri media superficialis és sinus transversus", "V. cerebri media superficialis és sinus sagittalis superior", "Sinus cavernosus és v. jugularis interna"],
+            answer: "V. cerebri media superficialis és sinus transversus",
+            explanation: "A vena anastomotica inferior (Labbé-véna) a Sylvius-árok vénáját (v. cerebri media superficialis) köti össze a sinus transversusszal, fontos kollaterális útvonalat képezve a temporális lebeny felett."
+        },
+        {
+            topic: 'venas_anatomia',
+            question: "Melyik a fő elvezetési út a sinus cavernosusból?",
+            options: ["A v. ophthalmica superioron keresztül az arc felé", "A sinus petrosus inferioron keresztül a v. jugularis internába", "A sinus sagittalis superiorba", "A plexus pterygoideuson keresztül"],
+            answer: "A sinus petrosus inferioron keresztül a v. jugularis internába",
+            explanation: "Bár több elvezetési útja is van, a sinus cavernosus vénás vérének fő elfolyási iránya a sinus petrosus inferioron keresztül közvetlenül a v. jugularis interna bulbusába történik."
+        },
+        // Tétel 2: A gerincvelő vérellátása
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Melyik artéria látja el a gerincvelő elülső kétharmadát?",
+            options: ["Arteriae spinales posteriores", "Arteria radicularis magna", "Arteria spinalis anterior", "Arteria vasocorona"],
+            answer: "Arteria spinalis anterior",
+            explanation: "Az egyetlen, páratlan arteria spinalis anterior (ASA) felelős a gerincvelő elülső kétharmadának vérellátásáért, beleértve az elülső szarvakat (motoros neuronok) és a fő leszálló pályákat."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Mi az Adamkiewicz-artéria (AKA)?",
+            options: ["A gerincvelő hátsó részének fő ellátó ere", "A legnagyobb elülső medulláris (radiculomedullaris) artéria", "A nyaki gerincvelő egy kis ága", "A gerincvelő vénás fonata"],
+            answer: "A legnagyobb elülső medulláris (radiculomedullaris) artéria",
+            explanation: "Az Adamkiewicz-artéria az ASA legnagyobb megerősítő ága, amely az alsó thoracalis és lumbalis gerincvelő vérellátásáért felelős. Sérülése súlyos paraplegiát okozhat."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Melyik gerincvelői szakasz tekinthető 'vízválasztó zónának', ami különösen sérülékeny az ischaemiára?",
+            options: ["Nyaki szakasz (C1-C4)", "Felső thoracalis szakasz (T2-T10)", "Lumbális szakasz (L1-L5)", "Sacralis szakasz (S1-S5)"],
+            answer: "Felső thoracalis szakasz (T2-T10)",
+            explanation: "A középső-felső mellkasi szakasz egy 'vízválasztó zóna', mivel itt az ASA átmérője a legszűkebb és a szegmentális megerősítő artériák ritkásabbak, így ez a terület a legérzékenyebb a hypoperfúzióra."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Anterior spinalis artéria szindróma esetén mely funkciók maradnak jellemzően megőrzöttek?",
+            options: ["Motoros funkciók", "Fájdalom- és hőérzés", "Propriocepció és vibrációérzés", "Hólyag- és bélműködés"],
+            answer: "Propriocepció és vibrációérzés",
+            explanation: "Mivel az ASA a gerincvelő elülső 2/3-át látja el, a hátsó kötegek (amelyek a propriocepciót és vibrációt közvetítik) vérellátása a posterior spinalis artériákból megmarad, így ezek a funkciók megőrzöttek."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Miből erednek az arteriae spinales posteriores (PSA)?",
+            options: ["Az aorta descendensből", "Az a. subclaviából", "Az a. vertebralisokból vagy a PICA-ból", "Az a. spinalis anteriorból"],
+            answer: "Az a. vertebralisokból vagy a PICA-ból",
+            explanation: "A két, páros posterior spinalis artéria tipikusan az a. vertebralisokból vagy azok legnagyobb ágából, az a. cerebelli inferior posteriorból (PICA) ered a koponyaüregen belül."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Mi a Batson-féle plexus?",
+            options: ["A gerincvelő artériás hálózata", "A gerincvelő billentyű nélküli epiduralis vénás fonata", "A nyaki idegfonat", "A hasüreg artériás rendszere"],
+            answer: "A gerincvelő billentyű nélküli epiduralis vénás fonata",
+            explanation: "A Batson-féle plexus (plexus venosus vertebralis internus) egy kiterjedt, billentyűk nélküli vénás hálózat a gerinccsatornában, amely lehetővé teszi a vér kétirányú áramlását, és fontos szerepet játszik a metasztázisok és fertőzések terjedésében."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Az Adamkiewicz-artéria leggyakrabban melyik oldalról és milyen magasságban ered?",
+            options: ["Jobb oldal, T4-T7", "Bal oldal, T9-T12", "Jobb oldal, L2-L4", "Bal oldal, C5-C7"],
+            answer: "Bal oldal, T9-T12",
+            explanation: "Bár variábilis, az AKA az esetek kb. 75-85%-ában a bal oldali aortából eredő intercostalis vagy lumbalis artériából származik, a T9-T12 csigolyák magasságában."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Mi az arteria vasocorona?",
+            options: ["Az Adamkiewicz-artéria másik neve", "A gerincvelő felszínén lévő, az ASA-t és PSA-kat összekötő artériás hálózat", "A dura matert ellátó artéria", "A gerincvelő vénás elvezető rendszere"],
+            answer: "A gerincvelő felszínén lévő, az ASA-t és PSA-kat összekötő artériás hálózat",
+            explanation: "Az arteria vasocorona, vagy pialis artériás plexus, egy finom hálózat a gerincvelő felszínén, amely összeköti a longitudinális artériás rendszereket és a perifériás fehérállományt látja el. Kollaterális kapacitása korlátozott."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Mi a klinikai következménye a Batson-féle plexus billentyű nélküli természetének?",
+            options: ["Gyorsabb véráramlás", "A vérnyomás jobb szabályozása", "Metasztázisok és fertőzések könnyebb terjedése a csigolyákra", "Csökkent vérzési kockázat"],
+            answer: "Metasztázisok és fertőzések könnyebb terjedése a csigolyákra",
+            explanation: "A billentyűk hiánya miatt a hasüri nyomásfokozódás a vért retrográd módon a plexusba préselheti, így a medencei vagy hasi tumorokból származó sejtek könnyen eljuthatnak a csigolyákhoz, megkerülve a tüdőt."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Posterior spinalis artéria szindróma esetén melyik neurológiai funkció károsodik?",
+            options: ["Motoros erő", "Fájdalomérzés", "Propriocepció (helyzetérzékelés)", "Hőérzés"],
+            answer: "Propriocepció (helyzetérzékelés)",
+            explanation: "A PSA szindróma a gerincvelő hátsó egyharmadát érinti, ahol a hátsó kötegek futnak. Ezért a propriocepció, vibrációérzés és diszkriminatív tapintás károsodik, míg a motoros és spinothalamicus funkciók megmaradnak."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Melyik képalkotó jel utalhat az ASA infarktusára axiális MRI felvételen?",
+            options: ["Delta jel", "Cord jel", "Bagolyszem jel", "Hajtűkanyar jel"],
+            answer: "Bagolyszem jel",
+            explanation: "Az ún. 'bagolyszem' (Owl's eyes) jel, amely kétoldali, szimmetrikus hyperintenzitást jelent az elülső szarvakban, szinte patognomonikus (kóroki) az ASA területén bekövetkezett infarktusra."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Melyik ér látja el a gerincvelő hátsó egyharmadát?",
+            options: ["Egy páratlan arteria spinalis posterior", "Két páros arteria spinalis posterior", "Az arteria spinalis anterior ágai", "Az arteria vasocorona"],
+            answer: "Két páros arteria spinalis posterior",
+            explanation: "A gerincvelő hátsó egyharmadát a két, páros arteria spinalis posterior (PSA) látja el, amelyek gyakran nem folytonos eret, hanem egy plexiform hálózatot képeznek."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Melyik állítás igaz a medulláris artériákra?",
+            options: ["Minden gerincvelői szegmentumban megtalálhatók.", "Csak az ideggyökereket látják el.", "Nem minden szegmentumban vannak jelen, és az ASA/PSA-kat erősítik.", "Csak a nyaki szakaszon fontosak."],
+            answer: "Nem minden szegmentumban vannak jelen, és az ASA/PSA-kat erősítik.",
+            explanation: "A medulláris artériák (arteriae radiculomedullares) nem minden szinten lépnek be, de ezek a nagyobb kaliberű ágak érik el és táplálják a longitudinális spinalis artériákat."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "A gerincvelő vénás vére hova drenálódik az intervertebralis vénákon keresztül a mellkasi szakaszon?",
+            options: ["A v. cava inferiorba", "A v. portae-ba", "A v. azygos és hemiazygos rendszerbe", "A v. jugularis internába"],
+            answer: "A v. azygos és hemiazygos rendszerbe",
+            explanation: "A mellkasi szakaszon a gerincvelői vénás plexusokból a vér az intervertebralis vénákon keresztül a jobb oldalon a v. azygosba, bal oldalon pedig a v. hemiazygos rendszerbe ömlik."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Milyen típusú embolia okozhat gerincvelő infarktust?",
+            options: ["Csak zsírembólia", "Csak légembólia", "Fibrocartilagineas embolia vagy a szívből/aortából származó vérrög", "Csak daganatos embolia"],
+            answer: "Fibrocartilagineas embolia vagy a szívből/aortából származó vérrög",
+            explanation: "A gerincvelő artériáit elzárhatja a szívből (pl. pitvarfibrilláció) vagy az aorta plakkjaiból származó embolus, valamint egy ritkább forma, a porckorongból származó fibrocartilagineas embolia is."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Milyen összefüggés van az aorta műtétek és a gerincvelő infarktus között?",
+            options: ["Nincs összefüggés", "Az aorta műtétek csökkentik a kockázatot", "Az aorta műtétek során sérülhetnek a gerincvelőt ellátó szegmentális artériák (pl. AKA)", "Az aorta műtétek csak vénás infarktust okoznak"],
+            answer: "Az aorta műtétek során sérülhetnek a gerincvelőt ellátó szegmentális artériák (pl. AKA)",
+            explanation: "Különösen a thoracoabdominalis aorta műtétek során magas a kockázata a gerincvelőt ellátó szegmentális artériák, főleg az Adamkiewicz-artéria iatrogén sérülésének, ami paraplegiához vezethet."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Mi jellemzi a gerincvelő vénás infarktusát az artériáshoz képest?",
+            options: ["Mindig hirtelenebb kezdetű és kevésbé fájdalmas", "Gyakran lassabb progressziójú és vérzéses lehet", "Soha nem jár ödémával", "Mindig jobb a prognózisa"],
+            answer: "Gyakran lassabb progressziójú és vérzéses lehet",
+            explanation: "A vénás infarktusok lefolyása változatosabb, gyakran lassabb progressziót mutatnak és a vénás pangás miatt hajlamosabbak a vérzéses átalakulásra, mint az artériás infarktusok."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "A gerincvelő melyik részének vérellátása függ leginkább az Adamkiewicz-artériától?",
+            options: ["Nyaki kiszélesedés (intumescentia cervicalis)", "Teljes mellkasi szakasz", "Alsó thoracalis, lumbalis és sacralis szakasz (intumescentia lumbosacralis)", "Csak a conus medullaris"],
+            answer: "Alsó thoracalis, lumbalis és sacralis szakasz (intumescentia lumbosacralis)",
+            explanation: "Az AKA az alsó gerincvelői szakasz, beleértve a lumbosacralis kiszélesedést és a conus medullarist, szinte egyedüli fő artériás ellátója, ezért sérülése ezen a területen okoz súlyos károsodást."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Az ASA és PSA rendszerek között hol találhatók a legjelentősebb anasztomózisok?",
+            options: ["A gerincvelő központi szürkeállományában", "A gerincvelő felszínén, a pialis plexusban (vasocorona)", "A foramen magnum szintjén", "Nincsenek közöttük anasztomózisok"],
+            answer: "A gerincvelő felszínén, a pialis plexusban (vasocorona)",
+            explanation: "A legjelentősebb összeköttetések az elülső és hátsó artériás rendszerek között a gerincvelő felszínén, a pia materben futó arteria vasocoronában találhatók, de ezek kollaterális kapacitása a mélyebb struktúrák felé korlátozott."
+        },
+        {
+            topic: 'gerincvelo_verellatas',
+            question: "Mi a 'hajtűkanyar' (hairpin turn) jelentősége?",
+            options: ["A v. jugularis interna jellegzetes kanyarulata", "Az Adamkiewicz-artéria jellegzetes csatlakozási formája az ASA-hoz", "A Willis-kör egy része", "A sinus cavernosus egy sövénye"],
+            answer: "Az Adamkiewicz-artéria jellegzetes csatlakozási formája az ASA-hoz",
+            explanation: "Az Adamkiewicz-artéria azonosításának egyik kulcsfontosságú radiológiai jele az a jellegzetes 'hajtűkanyar', amellyel az ASA-hoz csatlakozik, miután belépett a gerinccsatornába."
+        },
+
+        // Tétel 3: Agyi vénás keringészavarok
+        {
+            topic: 'venas_zavarok',
+            question: "Mi a cerebrális vénás sinus thrombosis (CVST) leggyakoribb tünete?",
+            options: ["Görcsroham", "Féloldali bénulás", "Fejfájás", "Látásvesztés"],
+            answer: "Fejfájás",
+            explanation: "A fejfájás a CVST leggyakoribb (az esetek kb. 90%-ában jelen lévő) tünete. Jellege változó lehet, de gyakran súlyos, progresszív és a szokásos fájdalomcsillapítókra rosszul reagál."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik sinus thrombosisa a leggyakoribb?",
+            options: ["Sinus cavernosus", "Sinus transversus", "Sinus sagittalis superior", "Sinus rectus"],
+            answer: "Sinus sagittalis superior",
+            explanation: "A sinus sagittalis superior a leggyakrabban érintett sinus CVST esetén, ami a méretéből és a felszínes vénák fő gyűjtőhelyeként betöltött szerepéből adódik."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik a legfontosabb képalkotó módszer a CVST diagnosztikájában?",
+            options: ["Natív CT", "Koponya röntgen", "MRI agyi MRV-vel", "Lumbálpunkció"],
+            answer: "MRI agyi MRV-vel",
+            explanation: "Az MRI agyi MR venográfiával (MRV) a választandó, 'gold standard' módszer a CVST kimutatására, mivel nagy érzékenységgel ábrázolja a vénás áramlás hiányát és a thrombust magát."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Mi a CVST kezelésének alapköve?",
+            options: ["Antibiotikumok", "Antikoaguláció (vérhígítás)", "Kortikoszteroidok", "Sebészi beavatkozás"],
+            answer: "Antikoaguláció (vérhígítás)",
+            explanation: "Az antikoaguláns terápia (heparin, majd orális antikoaguláns) a CVST kezelésének alapja, még agyi vérzés jelenlétében is. Célja a thrombus továbbnövekedésének megakadályozása és a rekanalizáció elősegítése."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik állítás NEM számít a CVST fő rizikófaktorának?",
+            options: ["Terhesség és gyermekágy", "Orális fogamzásgátlók szedése", "Örökletes thrombophiliák", "Magas koleszterinszint"],
+            answer: "Magas koleszterinszint",
+            explanation: "Míg a magas koleszterinszint az artériás stroke-ok fontos rizikófaktora, a CVST esetében a prothrombotikus állapotok, hormonális tényezők és fertőzések játszanak dominánsabb szerepet."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Mi a 'dense delta sign' és a 'empty delta sign'?",
+            options: ["Az agykamrák tágulatának jelei", "A sinus sagittalis superior thrombosisának jelei CT-n", "A sinus cavernosus thrombosis jelei MRI-n", "Agyvérzés jelei"],
+            answer: "A sinus sagittalis superior thrombosisának jelei CT-n",
+            explanation: "A 'dense delta sign' a friss thrombus hyperdenz képe natív CT-n, míg az 'empty delta sign' a kontrasztanyagos CT-n látható, ahol a sinus falának halmozása körülveszi a nem halmozó thrombust."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik állítás igaz a sinus cavernosus thrombosisra (SCT)?",
+            options: ["Általában jóindulatú és lassan progrediál.", "Leggyakrabban az arc vagy az orrmelléküregek fertőzései okozzák.", "A fő tünete az alsó végtagi gyengeség.", "Kezelése általában nem igényel antibiotikumot."],
+            answer: "Leggyakrabban az arc vagy az orrmelléküregek fertőzései okozzák.",
+            explanation: "Az SCT egy életveszélyes állapot, amelyet leggyakrabban az arc, a sinusok vagy a fogak bakteriális fertőzésének továbbterjedése okoz a sinus cavernosusba a vénás összeköttetéseken keresztül."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Milyen tünet NEM jellemző a sinus cavernosus thrombosisra?",
+            options: ["Proptosis (szemkidülledés)", "Ophthalmoplegia (szemmozgászavar)", "Periorbitalis fájdalom", "Halláscsökkenés"],
+            answer: "Halláscsökkenés",
+            explanation: "Az SCT tünetei a sinusban futó képletek (III, IV, V1, V2, VI. agyidegek, ACI) károsodásából adódnak, ami szemtüneteket és arcfájdalmat okoz. A halláscsökkenés nem jellemző tünete."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Milyen szerepe van a D-dimer szint mérésének CVST gyanúja esetén?",
+            options: ["A magas szint egyértelműen bizonyítja a CVST-t.", "A normális szint mindig kizárja a CVST-t.", "Alacsony klinikai gyanú esetén a normális szint segíthet a kizárásban, de nem specifikus.", "Csak a kezelés hatékonyságának monitorozására használják."],
+            answer: "Alacsony klinikai gyanú esetén a normális szint segíthet a kizárásban, de nem specifikus.",
+            explanation: "A D-dimer egy nem specifikus marker. Normális szintje alacsony gyanú esetén valószínűtlenné teszi a CVST-t, de emelkedett szintje számos más állapotban is előfordulhat, és a normális érték sem zárja ki 100%-osan a betegséget."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Miért gyakoribb a CVST a fiatal nők körében?",
+            options: ["Mert gyakrabban szenvednek fejsérülést.", "A hormonális kockázati tényezők (terhesség, orális fogamzásgátlók) miatt.", "Mert az anatómiájuk hajlamosít rá.", "Mert gyakrabban dohányoznak."],
+            answer: "A hormonális kockázati tényezők (terhesség, orális fogamzásgátlók) miatt.",
+            explanation: "A terhesség, a gyermekágyi időszak és az orális fogamzásgátlók használata ismert prothrombotikus állapotok, amelyek jelentősen növelik a CVST kockázatát, és ez magyarázza a nők körében való gyakoribb előfordulást."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "A CVST patofiziológiájában mi okozza a vénás infarktust?",
+            options: ["Egy artéria elzáródása", "A vénás pangás és a csökkent kapilláris perfúzió", "A liquor túltermelődése", "Az agyidegek gyulladása"],
+            answer: "A vénás pangás és a csökkent kapilláris perfúzió",
+            explanation: "A vénás elzáródás miatt a vér nem tud elfolyni, ami pangáshoz, a kapillárisokban a nyomás növekedéséhez, agyödémához és a szöveti perfúzió csökkenéséhez vezet, ami végül szövetelhaláshoz (infarktus) vezethet."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik agyideg bénulása a leggyakoribb a sinus cavernosus thrombosis korai szakaszában?",
+            options: ["N. oculomotorius (III.)", "N. trochlearis (IV.)", "N. trigeminus (V.)", "N. abducens (VI.)"],
+            answer: "N. abducens (VI.)",
+            explanation: "A VI. agyideg (n. abducens) a leginkább mediálisan, a sinuson belül szabadon fut, ezért a legérzékenyebb a nyomásfokozódásra, és bénulása (kifelé tekintés zavara) gyakran az első tünet."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Mi a Virchow-triász, amely a thrombosis kialakulását magyarázza?",
+            options: ["Fejfájás, láz, tudatzavar", "Artériás, vénás és kapilláris károsodás", "Endothelsérülés, sztázis (véráramlás lelassulása), hyperkoagulabilitás", "Trauma, fertőzés, daganat"],
+            answer: "Endothelsérülés, sztázis (véráramlás lelassulása), hyperkoagulabilitás",
+            explanation: "A Virchow-triász a thrombosis kialakulásának három fő tényezőjét foglalja össze: az érfal (endothel) sérülése, a véráramlás lelassulása (sztázis), és a vér fokozott alvadékonysága (hyperkoagulabilitás)."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Miért javasolt az antikoaguláns terápia CVST esetén még agyi vérzés jelenlétében is?",
+            options: ["Mert a vérzés sosem súlyos", "Mert a vérzést nem a terápia okozza, hanem a vénás pangás", "Mert a vérzést a terápia megszünteti", "Mert nincs más kezelési lehetőség"],
+            answer: "Mert a vérzést nem a terápia okozza, hanem a vénás pangás",
+            explanation: "A CVST-hez társuló agyi vérzés gyakran a vénás pangás és a megnövekedett vénás nyomás következménye. Az antikoaguláció a kiváltó okot (a thrombosist) célozza, segítve a vénás elfolyás helyreállítását, ami hosszú távon csökkentheti a további vérzés kockázatát."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik állítás igaz a CVST prognózisára?",
+            options: ["Mindig halálos kimenetelű.", "A betegek többsége maradandó, súlyos károsodással él tovább.", "A prognózis jelentősen javult, a betegek többsége jól felépül.", "A kiújulás kockázata nagyon magas."],
+            answer: "A prognózis jelentősen javult, a betegek többsége jól felépül.",
+            explanation: "A modern diagnosztikának és az antikoaguláns terápiának köszönhetően a CVST mortalitása jelentősen csökkent (5-15%), és a betegek kb. 80%-a jól vagy teljesen felépül."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik nem-invazív képalkotó módszer a legkevésbé érzékeny a CVST kimutatására?",
+            options: ["MRI", "MRV", "CTV", "Natív CT"],
+            answer: "Natív CT",
+            explanation: "A natív (kontrasztanyag nélküli) CT gyakran normális leletet ad, különösen a korai fázisban. Csak az esetek kisebb részében mutat direkt (pl. dense delta sign) vagy indirekt jeleket, ezért érzékenysége alacsony."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik nem egy tipikus klinikai megjelenési formája a CVST-nek?",
+            options: ["Izolált intracranialis nyomásfokozódás szindróma", "Fokális szindróma (fokális deficittel és/vagy görcsrohamokkal)", "Sinus cavernosus szindróma", "Akut gerincvelői harántlézió"],
+            answer: "Akut gerincvelői harántlézió",
+            explanation: "A CVST az agyi vénás rendszert érinti, ezért koponyaűri tüneteket okoz. A gerincvelői harántlézió a gerincvelő károsodásának tünete, amit nem okoz agyi vénás thrombosis."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "A VITT/TTS szindróma mely eseményhez köthető ritka szövődményként?",
+            options: ["Lumbálpunkció", "Bizonyos COVID-19 vakcinák beadása", "Terhesség", "Fejsérülés"],
+            answer: "Bizonyos COVID-19 vakcinák beadása",
+            explanation: "A VITT/TTS (Vakcina Indukálta Immun Thromboticus Thrombocytopenia) egy ritka, de súlyos szindróma, amely CVST-t is okozhat, és amelyet főleg adenovírus-vektor alapú COVID-19 vakcinák után írtak le."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Milyen típusú ödéma dominál a CVST korai fázisában a vénás pangás miatt?",
+            options: ["Citotoxikus ödéma", "Vasogén ödéma", "Interstitialis ödéma", "Ozmotikus ödéma"],
+            answer: "Vasogén ödéma",
+            explanation: "A vénás pangás növeli a hidrosztatikai nyomást a kapillárisokban, ami a vér-agy gát károsodásához és a plazma folyadékrészének a sejtek közötti (interstitialis) térbe való kijutásához vezet. Ez a vasogén ödéma."
+        },
+        {
+            topic: 'venas_zavarok',
+            question: "Melyik állítás NEM igaz a CVST-hez társuló fejfájásra?",
+            options: ["Ez a leggyakoribb tünet.", "Lehet hirtelen, donderszerű is.", "Gyakran napokig, hetekig fokozódik.", "Mindig féloldali és lüktető."],
+            answer: "Mindig féloldali és lüktető.",
+            explanation: "A CVST okozta fejfájás jellege rendkívül változatos. Lehet diffúz vagy lokalizált, tompa, nyomó, lüktető, és nem feltétlenül féloldali."
+        },
+        // Tétel 4: A sinus cavernosus anatómiája
+        {
+            topic: 'sinus_cavernosus',
+            question: "Hol helyezkedik el a sinus cavernosus?",
+            options: ["A hátsó koponyagödörben", "A sella turcica két oldalán", "A falx cerebri mentén", "A tentorium cerebelli alatt"],
+            answer: "A sella turcica két oldalán",
+            explanation: "A páros sinus cavernosus a középső koponyagödörben, a töröknyereg (sella turcica) két oldalán, az ékcsont (os sphenoidale) testén helyezkedik el."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik artéria halad át a sinus cavernosuson belül?",
+            options: ["A. cerebri media", "A. basilaris", "A. carotis interna", "A. vertebralis"],
+            answer: "A. carotis interna",
+            explanation: "Az a. carotis interna cavernosus szakasza (C4) az egyetlen artéria a testben, amely egy vénás struktúrán (a sinus cavernosuson) belül halad keresztül, jellegzetes S-alakú kanyarulatot (siphont) képezve."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik agyideg fut a sinus cavernosuson BELÜL, az ACI mellett?",
+            options: ["N. oculomotorius (III.)", "N. trochlearis (IV.)", "N. ophthalmicus (V1)", "N. abducens (VI.)"],
+            answer: "N. abducens (VI.)",
+            explanation: "Míg a III., IV., és V1/V2 agyidegek a sinus lateralis falában futnak, a VI. agyideg (n. abducens) az egyetlen, amely a sinus belsejében, az ACI mellett, attól lateralisan helyezkedik el, ezért a leginkább sérülékeny."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik tünet NEM része a klasszikus sinus cavernosus szindrómának?",
+            options: ["Ophthalmoplegia (szemmozgászavar)", "Proptosis (szemkidülledés)", "Arcérzészavar (V1/V2 területén)", "Halláscsökkenés"],
+            answer: "Halláscsökkenés",
+            explanation: "A sinus cavernosus szindróma tünetei a benne futó III, IV, VI, V1, V2 agyidegek és a vénás elfolyás zavarából adódnak. A hallásért felelős VIII. agyideg nem itt fut, így a halláscsökkenés nem jellemző tünet."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Mi a carotis-cavernosus fistula (CCF)?",
+            options: ["A sinus cavernosus gyulladása", "Az ACI aneurizmája a sinuson belül", "Kóros összeköttetés az ACI (vagy ágai) és a sinus cavernosus között", "A sinus cavernosus veleszületett hiánya"],
+            answer: "Kóros összeköttetés az ACI (vagy ágai) és a sinus cavernosus között",
+            explanation: "CCF esetén a magas nyomású artériás vér közvetlenül az alacsony nyomású sinus cavernosusba jut, ami a vénás nyomás drámai emelkedését és jellegzetes tüneteket (pl. pulzáló exophthalmus) okoz."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik a sinus cavernosus thrombosis (SCT) leggyakoribb oka?",
+            options: ["Fejtrauma", "Agydaganat", "Az arc vagy az orrmelléküregek bakteriális fertőzése", "Autoimmun betegség"],
+            answer: "Az arc vagy az orrmelléküregek bakteriális fertőzése",
+            explanation: "Az SCT leggyakrabban egy közeli fertőzés (pl. sinusitis, facialis cellulitis) továbbterjedése a vénás összeköttetéseken (pl. v. ophthalmica) keresztül a sinus cavernosusba. A leggyakoribb kórokozó a Staphylococcus aureus."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Mi a Tolosa-Hunt szindróma?",
+            options: ["A sinus cavernosus fertőzése", "Egy carotis-cavernosus fistula típusa", "A sinus cavernosus idiopathiás (ismeretlen eredetű) granulomatosus gyulladása", "A hypophysis daganata"],
+            answer: "A sinus cavernosus idiopathiás (ismeretlen eredetű) granulomatosus gyulladása",
+            explanation: "A Tolosa-Hunt szindróma egy ritka betegség, amelyet a sinus cavernosus, a fissura orbitalis superior vagy az orbita csúcsának ismeretlen eredetű gyulladása okoz, ami fájdalmas ophthalmoplegiát eredményez és jól reagál a szteroid kezelésre."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik agyideg NEM fut a sinus cavernosus lateralis falában?",
+            options: ["N. oculomotorius (III.)", "N. trochlearis (IV.)", "N. abducens (VI.)", "N. ophthalmicus (V1)"],
+            answer: "N. abducens (VI.)",
+            explanation: "A III., IV. és V1 (valamint a V2) agyidegek a sinus lateralis falában, a dura lemezei között futnak. A VI. agyideg a sinus belsejében, az ACI mellett található."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik vénás struktúra biztosítja a fő összeköttetést a sinus cavernosus és az orbita között?",
+            options: ["Vena jugularis interna", "Sinus petrosus superior", "Vena ophthalmica superior et inferior", "Plexus pterygoideus"],
+            answer: "Vena ophthalmica superior et inferior",
+            explanation: "A v. ophthalmica superior és inferior az orbita vénás vérét gyűjtik, és a fissura orbitalis superioron keresztül közvetlenül a sinus cavernosusba ömlenek. Ez a fő beömlési és fertőzésterjedési útvonal."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Mi a 'pulsáló exophthalmus'?",
+            options: ["A szemgolyó fájdalmas lüktetése", "A szemgolyó előredülledése, amely szinkronban pulzál a szívveréssel", "A szemhéjak ritmikus rángása", "A pupilla ritmikus tágulása és szűkülése"],
+            answer: "A szemgolyó előredülledése, amely szinkronban pulzál a szívveréssel",
+            explanation: "A pulzáló exophthalmus a direkt, magas áramlású carotis-cavernosus fistula klasszikus tünete, ahol az artériás pulzushullám áttevődik a sinusra és az orbitális vénákra, megmozgatva a szemgolyót."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "A sinus cavernosus kétoldali összeköttetését mely struktúrák biztosítják?",
+            options: ["A sinus petrosus superiorok", "A sinus intercavernosi anterior et posterior", "A plexus basilaris", "A venae emissariae"],
+            answer: "A sinus intercavernosi anterior et posterior",
+            explanation: "A kétoldali sinus cavernosust a sella turcica előtt és mögött futó sinus intercavernosusok kötik össze, egy vénás gyűrűt (circulus venosus) alkotva a hypophysis körül, és lehetővé téve a fertőzések, thrombosisok átterjedését az ellenoldalra."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik agyideg bénulása okoz ptosist (szemhéjcsüngést) és mydriasist (pupillatágulatot)?",
+            options: ["N. abducens (VI.)", "N. trochlearis (IV.)", "N. oculomotorius (III.)", "N. ophthalmicus (V1)"],
+            answer: "N. oculomotorius (III.)",
+            explanation: "A III. agyideg motorosan beidegzi a szemhéjemelő izmot (m. levator palpebrae superioris) és paraszimpatikusan a pupillaszűkítő izmot (m. sphincter pupillae). Károsodása ezért ptosist és tág, fénymerev pupillát okoz."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik állítás igaz a carotis-cavernosus fistulák kezelésére?",
+            options: ["Mindig sebészi beavatkozást igényelnek.", "A választandó módszer az endovascularis embolizáció.", "Általában gyógyszeresen kezelik őket.", "Spontán gyógyulás soha nem fordul elő."],
+            answer: "A választandó módszer az endovascularis embolizáció.",
+            explanation: "A CCF-ek kezelésének gold standard módszere az endovascularis terápia, amely során katéteren keresztül zárják le a kóros összeköttetést (pl. fémspirálokkal, folyékony embolizáló szerekkel)."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik tünetegyüttesre jellemző a fájdalmas ophthalmoplegia, ami drámaian javul szteroidokra?",
+            options: ["Sinus cavernosus thrombosis", "Carotis-cavernosus fistula", "Tolosa-Hunt szindróma", "Hypophysis apoplexia"],
+            answer: "Tolosa-Hunt szindróma",
+            explanation: "A Tolosa-Hunt szindróma diagnosztikus kritériumai közé tartozik a fájdalmas ophthalmoplegia és a tünetek gyors, drámai javulása kortikoszteroid kezelésre, miután más okokat kizártak."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Mi köti össze a sinus cavernosust a fossa infratemporalisban lévő plexus pterygoideusszal?",
+            options: ["A v. ophthalmica superior", "A sinus petrosus inferior", "Emissarium vénák a foramen ovalén és lacerumon keresztül", "A v. facialis"],
+            answer: "Emissarium vénák a foramen ovalén és lacerumon keresztül",
+            explanation: "A sinus cavernosus a koponyaalapi nyílásokon (főleg foramen ovale) áthaladó emissarium vénákon keresztül áll összeköttetésben a plexus pterygoideusszal, ami egy alternatív elvezetési és fertőzésterjedési útvonal."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "A sinus cavernosus lateralis falában melyik ideg helyezkedik el legfelül?",
+            options: ["N. abducens (VI.)", "N. trochlearis (IV.)", "N. oculomotorius (III.)", "N. ophthalmicus (V1)"],
+            answer: "N. oculomotorius (III.)",
+            explanation: "A sinus lateralis falában futó agyidegek sorrendje fentről lefelé: III. (oculomotorius), IV. (trochlearis), V1 (ophthalmicus) és V2 (maxillaris)."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Miért veszélyes az arc középső részének ('veszélyes háromszög') fertőzése?",
+            options: ["Mert közel van az agyhoz.", "Mert a vénás összeköttetések miatt a fertőzés könnyen a sinus cavernosusba terjedhet.", "Mert itt nincsenek nyirokcsomók.", "Mert a bőr itt nagyon vékony."],
+            answer: "Mert a vénás összeköttetések miatt a fertőzés könnyen a sinus cavernosusba terjedhet.",
+            explanation: "Az arc ezen területének vénái (v. angularis, v. facialis) billentyűk nélkül anasztomizálnak a v. ophthalmica-val, amely a sinus cavernosusba ömlik. Ez direkt utat biztosít a fertőzések koponyaűri terjedésének."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik agyideg bénulása okozza a szem abdukciójának (kifelé tekintés) képtelenségét?",
+            options: ["N. oculomotorius (III.)", "N. trochlearis (IV.)", "N. opticus (II.)", "N. abducens (VI.)"],
+            answer: "N. abducens (VI.)",
+            explanation: "A VI. agyideg (n. abducens) a m. rectus lateralist idegzi be, amely a szemgolyót kifelé (abdukció) mozgatja. Bénulása esetén a szem befelé kancsalít, és a beteg nem tud kifelé nézni."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "Melyik állítás NEM igaz a sinus cavernosusra?",
+            options: ["Páros képlet.", "Trabekulált, szivacsszerű belső szerkezete van.", "Csak vénás vért tartalmaz.", "A hypophysis mellett helyezkedik el."],
+            answer: "Csak vénás vért tartalmaz.",
+            explanation: "A sinus cavernosus egyedülálló abban a tekintetben, hogy a vénás véren kívül egy fő artériát (a. carotis interna) és több agyideget is tartalmaz a belsejében vagy a falában."
+        },
+        {
+            topic: 'sinus_cavernosus',
+            question: "A Horner-szindróma mely komponensei társulhatnak a sinus cavernosus szindrómához?",
+            options: ["Ptosis és miosis", "Mydriasis és exophthalmus", "Anhidrosis és arcpír", "Könnyezés és orrfolyás"],
+            answer: "Ptosis és miosis",
+            explanation: "Az ACI körüli szimpatikus plexus károsodása részleges Horner-szindrómát okozhat, amelynek tünetei a ptosis (enyhe szemhéjcsüngés) és a miosis (pupillaszűkület)."
+        },
+        
+        // Tétel 5: A thalamus és a basalis ganglionok vérellátása
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik artéria a thalamus vérellátásának elsődleges forrása?",
+            options: ["A. cerebri anterior (ACA)", "A. cerebri media (ACM)", "A. cerebri posterior (PCA)", "A. choroidea anterior (AChA)"],
+            answer: "A. cerebri posterior (PCA)",
+            explanation: "A thalamus artériás ellátását túlnyomórészt az a. cerebri posterior (PCA) perforáló ágai (thalamoperforáló, thalamogeniculatus) biztosítják."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Mi az Arteria Percheron (AOP)?",
+            options: ["A thalamus fő vénás elvezetője.", "Egy ritka anatómiai variáns, ahol egyetlen törzs látja el mindkét thalamus paramedian régióját.", "Az a. cerebri media egy ága.", "A basalis ganglionokat ellátó fő ér."],
+            answer: "Egy ritka anatómiai variáns, ahol egyetlen törzs látja el mindkét thalamus paramedian régióját.",
+            explanation: "Az AOP egy ritka variáció, ahol egyetlen artéria ered a PCA P1 szakaszából, és mindkét oldali paramedian thalamust ellátja. Elzáródása jellegzetes kétoldali thalamus infarktust okoz."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A basalis ganglionok (különösen a putamen és a globus pallidus lateralis) vérellátásáért melyik artériacsoport felelős elsősorban?",
+            options: ["Aa. thalamoperforantes", "Aa. lenticulostriatae", "Aa. choroideae posteriores", "A. recurrens Heubneri"],
+            answer: "Aa. lenticulostriatae",
+            explanation: "Az a. cerebri media (ACM) M1 szakaszából eredő lateralis lenticulostriata artériák látják el a putamen és a globus pallidus lateralis, valamint a capsula interna nagy részét."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Mi a Heubner-féle rekurrens artéria?",
+            options: ["Az ACM egy perforáló ága.", "Az ACA legnagyobb medialis lenticulostriata artériája.", "A PCA egy kérgi ága.", "A PComA fő ága."],
+            answer: "Az ACA legnagyobb medialis lenticulostriata artériája.",
+            explanation: "A Heubner-féle rekurrens artéria (RAH) általában az ACA A2 szakaszából ered, és a nucleus caudatus fejének anteromedialis részét, a putamen elülső részét és a capsula interna elülső szárát látja el."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A thalamus melyik magcsoportjának károsodása okoz leginkább szenzoros kiesést (Dejerine-Roussy szindróma)?",
+            options: ["Anterior magok (AN)", "Mediodorsalis mag (MD)", "Ventralis posterior magok (VPL/VPM)", "Intralaminaris magok"],
+            answer: "Ventralis posterior magok (VPL/VPM)",
+            explanation: "A VPL/VPM magok a thalamus fő szomatoszenzoros átkapcsoló állomásai. Az őket ellátó thalamogeniculatus artériák (PCA ágak) elzáródása okozza a jellegzetes ellenoldali érzéskiesést, ami később kínzó fájdalommá (thalamikus fájdalom) alakulhat."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik állítás igaz a lacunaris infarktusokra?",
+            options: ["Mindig a nagyagyi kérget érintik.", "Egyetlen, kis, mélyen futó perforáló artéria elzáródása okozza őket.", "Ritkán okoznak tüneteket.", "Fő oka a szívből származó embólia."],
+            answer: "Egyetlen, kis, mélyen futó perforáló artéria elzáródása okozza őket.",
+            explanation: "A lacunaris infarktusok kis méretű stroke-ok, amelyeket a mély agyi struktúrákat (thalamus, basalis ganglionok, capsula interna, híd) ellátó perforáló artériák elzáródása okoz, leggyakrabban magas vérnyomás talaján."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A 'tiszta motoros hemiparesis' mely struktúra károsodására utal leggyakrabban lacunaris stroke esetén?",
+            options: ["Thalamus", "Capsula interna hátsó szára", "Occipitalis lebeny", "Kisagy"],
+            answer: "Capsula interna hátsó szára",
+            explanation: "A tiszta motoros hemiparesis a leggyakoribb lacunaris szindróma, amelyet a corticospinalis pálya rostjainak sűrű kötegét tartalmazó capsula interna hátsó szárának, vagy a basis pontisnak a kis infarktusa okoz."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik artéria ága az arteria choroidea anterior (AChA)?",
+            options: ["A. cerebri media (ACM)", "A. cerebri posterior (PCA)", "A. basilaris", "A. carotis interna (ACI)"],
+            answer: "A. carotis interna (ACI)",
+            explanation: "Az AChA közvetlenül az ACI-ből ered, a PComA után, és fontos szerepet játszik a capsula interna hátsó szárának, a globus pallidus medialis részének és a hippocampusnak az ellátásában."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Az Arteria Percheron elzáródása milyen jellegzetes klinikai képet okoz?",
+            options: ["Féloldali bénulás", "Kétoldali paramedian thalamikus infarktus tudatzavarral", "Izolált látótérkiesés", "Csak beszédzavar"],
+            answer: "Kétoldali paramedian thalamikus infarktus tudatzavarral",
+            explanation: "Mivel az AOP egyetlen törzsből látja el mindkét thalamus mediális részét, elzáródása szimmetrikus, kétoldali infarktust okoz, ami jellegzetesen a tudatállapot zavarával (somnolentia, coma), memóriazavarral és vertikális tekintészavarral jár."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A tuberothalamicus (poláris) artéria melyik fő érből ered leggyakrabban?",
+            options: ["A. cerebri posterior (PCA)", "A. cerebri media (ACM)", "A. communicans posterior (PComA)", "A. cerebri anterior (ACA)"],
+            answer: "A. communicans posterior (PComA)",
+            explanation: "A tuberothalamicus (vagy poláris) artéria, amely az anterior thalamust látja el, leggyakrabban az a. communicans posteriorból ered."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik basalis ganglion komponenst látja el elsődlegesen az a. choroidea anterior?",
+            options: ["Nucleus caudatus feje", "Putamen", "Globus pallidus internus (GPi)", "Nucleus subthalamicus"],
+            answer: "Globus pallidus internus (GPi)",
+            explanation: "Az AChA egyik fő ellátási területe a basalis ganglionok kimeneti struktúrája, a globus pallidus internus."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik állítás igaz a Heubner-artéria szindrómára?",
+            options: ["Főleg alsó végtagi gyengeséggel jár.", "Jellemzően kontralaterális faciobrachialis gyengeséget és abuliát okoz.", "Mindig tiszta szenzoros stroke-ot eredményez.", "A látótér kiesése a fő tünet."],
+            answer: "Jellemzően kontralaterális faciobrachialis gyengeséget és abuliát okoz.",
+            explanation: "A RAH a capsula interna elülső szárát és a caudatus fejét látja el, ezért elzáródása jellegzetesen az arcot és a kart érintő gyengeséget, valamint a frontális lebeny károsodására utaló viselkedési tüneteket (pl. abulia, motivációhiány) okoz."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik struktúra vérellátásában játszik szerepet az ACA, az ACM és az AChA is?",
+            options: ["Nyúltvelő", "Híd", "Kisagy", "Basalis ganglionok"],
+            answer: "Basalis ganglionok",
+            explanation: "A basalis ganglionok vérellátása komplex, több forrásból származik: az ACM (lateralis LSAs), az ACA (medialis LSAs, RAH) és az AChA is ad hozzájuk ágakat."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A 'dysarthria-ügyetlen kéz' lacunaris szindróma melyik struktúra károsodására utalhat?",
+            options: ["Csak a thalamus", "A basis pontis vagy a capsula interna genuja", "Az occipitalis lebeny", "A gerincvelő"],
+            answer: "A basis pontis vagy a capsula interna genuja",
+            explanation: "Ez a szindróma a corticobulbaris (beszédmozgások) és a corticospinalis (kézmozgások) pályák szoros közelségben történő károsodásakor lép fel, ami tipikusan a hídban vagy a capsula interna genu (térd) régiójában fordul elő."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A post-stroke mozgászavarok (pl. dystonia, tremor) megjelenése a basalis ganglionok infarktusa után mit jelez?",
+            options: ["A stroke mindig azonnali mozgászavart okoz.", "A jelenség késleltetett megjelenése másodlagos, maladaptív plaszticitásra utal.", "A mozgászavarok a gyógyszerek mellékhatásai.", "Azt jelzi, hogy a stroke nem volt súlyos."],
+            answer: "A jelenség késleltetett megjelenése másodlagos, maladaptív plaszticitásra utal.",
+            explanation: "A hetekkel vagy hónapokkal a stroke után megjelenő mozgászavarok arra utalnak, hogy az akut sejthalálon túl az érintett neurális hálózatokban másodlagos, átszerveződési (plaszticitási) folyamatok zajlanak, amelyek kóros működést eredményeznek."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik struktúrát NEM látja el a carotis rendszer (ACI és ágai)?",
+            options: ["Thalamus egy része", "Basalis ganglionok egy része", "Kisagy", "Frontális lebeny mediális felszíne"],
+            answer: "Kisagy",
+            explanation: "A kisagy vérellátását teljes egészében a hátsó, vertebro-basilaris rendszer (PICA, AICA, SCA artériák) biztosítja. A carotis rendszer az előagy nagy részéért felelős."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A thalamus melyik magcsoportja kapja vérellátását a PComA-ból (poláris artéria)?",
+            options: ["Posterior magok", "Ventralis posterior magok (VPL/VPM)", "Anterior magok (AN)", "Medialis magok"],
+            answer: "Anterior magok (AN)",
+            explanation: "Az anterior thalamikus magcsoportot, amely a Papez-féle limbikus kör fontos része, a PComA-ból eredő poláris (tuberothalamicus) artéria látja el."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Miért nevezik a lenticulostriata artériákat 'stroke artériáknak'?",
+            options: ["Mert a legnagyobb agyi artériák.", "Mert vékonyak, végartériák, és magas vérnyomás esetén gyakran elzáródnak vagy megrepednek.", "Mert csak stroke esetén láthatók.", "Mert a stroke kezelésére használják őket."],
+            answer: "Mert vékonyak, végartériák, és magas vérnyomás esetén gyakran elzáródnak vagy megrepednek.",
+            explanation: "Ezek a kis, mélyre hatoló artériák különösen sérülékenyek a magas vérnyomás okozta érfalkárosodásra (lipohyalinosis), ami lacunaris infarktusokhoz vagy mély agyi vérzésekhez vezet, ezért régen 'az agyvérzés artériáinak' is nevezték őket."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "A nucleus subthalamicus (STN) vérellátása melyik rendszerből származik főként?",
+            options: ["Csak az ACA-ból", "Csak az ACM-ből", "Főként a PCA és PComA perforáló ágaiból", "Csak az AChA-ból"],
+            answer: "Főként a PCA és PComA perforáló ágaiból",
+            explanation: "Bár több ér is hozzájárulhat, a nucleus subthalamicus vérellátásának nagy részét a hátsó keringés, a PCA P1 szakaszából és a PComA-ból eredő posteromedialis perforáló ágak biztosítják."
+        },
+        {
+            topic: 'thalamus_bg_verellatas',
+            question: "Melyik lacunaris szindrómára utal, ha a betegnek nincsenek kérgi tünetei (pl. afázia, neglect)?",
+            options: ["Ez kizárja a stroke-ot.", "Ez jellemző a lacunaris szindrómákra.", "Ez kiterjedt kérgi stroke-ra utal.", "Ez agytörzsi stroke jele."],
+            answer: "Ez jellemző a lacunaris szindrómákra.",
+            explanation: "A lacunaris infarktusok a mély, subcorticalis struktúrákat érintik, az agykérget megkímélik. Ezért a klasszikus kérgi funkciók (beszéd, téri orientáció stb.) zavara nem jellemző rájuk, ami fontos diagnosztikai támpont."
+        }
+    ];
+
+    const startScreen = document.getElementById('start-screen');
+    const quizContainer = document.getElementById('quiz-container');
+    const resultsScreen = document.getElementById('results-screen');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const questionCounterEl = document.getElementById('question-counter');
+    const scoreEl = document.getElementById('score');
+    const finalScoreEl = document.getElementById('final-score');
+    const resultMessageEl = document.getElementById('result-message');
+    const explanationModal = document.getElementById('explanation-modal');
+    const explanationTitleEl = document.getElementById('explanation-title');
+    const explanationTextEl = document.getElementById('explanation-text');
+
+    let currentTopicQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let questionsAnswered = false;
+
+    function startQuiz(topic) {
+        let filteredQuestions = quizData.filter(q => q.topic === topic);
+        currentTopicQuestions = shuffleArray(filteredQuestions);
+        
+        if (currentTopicQuestions.length > 20) {
+            currentTopicQuestions = currentTopicQuestions.slice(0, 20);
+        }
+        
+        currentQuestionIndex = 0;
+        score = 0;
+        
+        startScreen.classList.add('hidden');
+        resultsScreen.classList.add('hidden');
+        quizContainer.classList.remove('hidden');
+        quizContainer.style.opacity = '0';
+        setTimeout(() => { quizContainer.style.opacity = '1'; }, 10);
+        
+        scoreEl.textContent = `Pontszám: 0`;
+        displayQuestion();
+    }
+
+    function displayQuestion() {
+        questionsAnswered = false;
+        nextBtn.classList.add('hidden');
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        
+        questionCounterEl.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${currentTopicQuestions.length}`;
+        questionEl.textContent = currentQuestion.question;
+        
+        optionsEl.innerHTML = '';
+        const shuffledOptions = shuffleArray([...currentQuestion.options]);
+        shuffledOptions.forEach(option => {
+            const button = document.createElement('button');
+            button.innerHTML = option;
+            button.classList.add('option-btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-slate-300', 'bg-slate-50', 'hover:bg-slate-200');
+            button.onclick = () => selectAnswer(button, option);
+            optionsEl.appendChild(button);
+        });
+    }
+
+    function selectAnswer(button, selectedOption) {
+        if (questionsAnswered) return;
+        questionsAnswered = true;
+
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        const isCorrect = selectedOption === currentQuestion.answer;
+        
+        Array.from(optionsEl.children).forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent === currentQuestion.answer) {
+                 btn.classList.add('correct');
+            }
+        });
+
+        if (isCorrect) {
+            score++;
+            button.classList.add('correct');
+            explanationTitleEl.textContent = "✅ Helyes válasz!";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-green-600";
+        } else {
+            button.classList.add('incorrect');
+            explanationTitleEl.textContent = "❌ Helytelen válasz";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-red-600";
+        }
+
+        scoreEl.textContent = `Pontszám: ${score}`;
+        explanationTextEl.innerHTML = `<b>Magyarázat:</b> ${currentQuestion.explanation}`;
+        showExplanationModal();
+        nextBtn.classList.remove('hidden');
+    }
+    
+    function showExplanationModal() {
+        explanationModal.style.display = "flex";
+        explanationModal.onclick = (e) => {
+             if (e.target === explanationModal) {
+                 explanationModal.style.display = "none";
+             }
+        };
+    }
+
+    nextBtn.addEventListener('click', () => {
+        explanationModal.style.display = "none";
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentTopicQuestions.length) {
+            displayQuestion();
+        } else {
+            showResults();
+        }
+    });
+
+    function showResults() {
+        quizContainer.classList.add('hidden');
+        resultsScreen.classList.remove('hidden');
+        
+        const percentage = Math.round((score / currentTopicQuestions.length) * 100);
+        finalScoreEl.textContent = `${percentage}%`;
+        
+        let message = "";
+        if (percentage === 100) {
+            message = "Tökéletes! Készen állsz a vizsgára. 🏆";
+        } else if (percentage >= 80) {
+            message = "Kiváló eredmény! Már csak egy kis ismétlés kell. 👍";
+        } else if (percentage >= 50) {
+            message = "Szép munka! Gyakorolj még egy kicsit. 😊";
+        } else {
+            message = "Ne add fel, ismételd át az anyagot és próbáld újra! 📚";
+        }
+        resultMessageEl.textContent = message;
+    }
+
+    function restartQuiz() {
+        resultsScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+</script>
+
+</body>
+</html>

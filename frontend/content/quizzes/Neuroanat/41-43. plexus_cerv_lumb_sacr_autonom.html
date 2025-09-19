@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatómia Kvíz: Idegrendszer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .quiz-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .option-btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #22c55e !important;
+            color: white;
+            border-color: #16a34a;
+        }
+        .incorrect {
+            background-color: #ef4444 !important;
+            color: white;
+            border-color: #dc2626;
+        }
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            position: relative;
+            margin: 10% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-app" class="w-full max-w-3xl mx-auto">
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">Anatómia Kvíz</h1>
+            <p class="text-slate-600 mb-8 text-lg">Válassz témakört a tudásod teszteléséhez!</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="startQuiz('plexus_brachialis')" class="bg-blue-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">Plexus Brachialis</button>
+                <button onclick="startQuiz('plexus_lumbosacralis')" class="bg-green-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-green-700 transition duration-300 shadow-md">Plexus Lumbalis & Sacralis</button>
+                <button onclick="startQuiz('autonom_idegrendszer')" class="bg-purple-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-purple-700 transition duration-300 shadow-md">Autonóm Idegrendszer</button>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="hidden bg-white p-6 md:p-10 rounded-2xl shadow-xl">
+            <div id="header" class="flex justify-between items-center mb-6">
+                <p id="question-counter" class="text-slate-500 font-medium"></p>
+                <p id="score" class="text-slate-500 font-medium">Pontszám: 0</p>
+            </div>
+            <div id="question" class="text-xl md:text-2xl font-semibold mb-8 min-h-[6rem]"></div>
+            <div id="options" class="grid grid-cols-1 gap-4"></div>
+            <button id="next-btn" class="w-full mt-8 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md hidden">Következő</button>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center bg-white p-8 rounded-2xl shadow-xl">
+            <h2 class="text-3xl font-bold mb-4">Eredmény</h2>
+            <p id="final-score" class="text-5xl font-bold text-indigo-600 mb-6"></p>
+            <p id="result-message" class="text-slate-600 mb-8 text-lg"></p>
+            <button onclick="restartQuiz()" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300 shadow-md">Vissza a főmenübe</button>
+        </div>
+    </div>
+
+    <!-- Explanation Modal -->
+    <div id="explanation-modal" class="modal">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl">
+            <h3 id="explanation-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="explanation-text" class="text-slate-700 leading-relaxed"></p>
+        </div>
+    </div>
+
+<script>
+    // --- Kérdés Bank ---
+    const quizData = [
+        // === Plexus Brachialis ===
+        {
+            topic: 'plexus_brachialis',
+            question: "Mely gerincvelői idegek elülső ágaiból ered a plexus brachialis?",
+            options: ["C1-C5", "C5-Th1", "C3-C7", "Th1-Th5"],
+            answer: "C5-Th1",
+            explanation: "A plexus brachialis, vagy karfonat, a C5, C6, C7, C8 nyaki és a Th1 (első háti) gerincvelői ideg elülső (ventrális) ágaiból származik."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik két izom között lépnek ki a plexus brachialis gyökerei a nyakon?",
+            options: ["M. sternocleidomastoideus és m. trapezius", "M. omohyoideus és m. sternohyoideus", "M. scalenus anterior és medius", "M. scalenus posterior és medius"],
+            answer: "M. scalenus anterior és medius",
+            explanation: "A plexus brachialis gyökerei a nyakon, a musculus scalenus anterior és medius között lépnek ki."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Mi alkotja a truncus superiort?",
+            options: ["C7 gyökér", "C5 és C6 gyökerek", "C8 és Th1 gyökerek", "C6 és C7 gyökerek"],
+            answer: "C5 és C6 gyökerek",
+            explanation: "A truncus superior (felső törzs) a C5 és C6 gyökerek egyesüléséből jön létre a kulcscsont feletti régióban."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "A plexus brachialis melyik hierarchikus része található a hónaljárokban az a. axillaris körül?",
+            options: ["Gyökerek (Radices)", "Törzsek (Trunci)", "Ágak (Divisiones)", "Kötegek (Fasciculi)"],
+            answer: "Kötegek (Fasciculi)",
+            explanation: "A kötegek (fasciculi) a hónaljárokban, az arteria axillaris körül helyezkednek el, és az artériához viszonyított helyzetük alapján kapják nevüket (lateralis, medialis, posterior)."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik köteg (fasciculus) jön létre mindhárom törzs (superior, medius, inferior) hátulsó ágából?",
+            options: ["Fasciculus lateralis", "Fasciculus medialis", "Fasciculus posterior", "Fasciculus anterior"],
+            answer: "Fasciculus posterior",
+            explanation: "A fasciculus posterior (hátsó köteg) mindhárom törzs hátulsó ágának egyesüléséből alakul ki, így mind az öt gyökérből (C5-Th1) kap rostokat."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik ideg fúrja át a m. coracobrachialist?",
+            options: ["N. ulnaris", "N. radialis", "N. medianus", "N. musculocutaneus"],
+            answer: "N. musculocutaneus",
+            explanation: "A n. musculocutaneus, amely a fasciculus lateralisból ered, jellegzetesen átfúrja a m. coracobrachialist, melyet be is idegez."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik ideg felelős a m. deltoideus (váll fő emelő izma) beidegzéséért?",
+            options: ["N. suprascapularis", "N. axillaris", "N. radialis", "N. thoracicus longus"],
+            answer: "N. axillaris",
+            explanation: "A n. axillaris, a fasciculus posterior egyik végága, idegzi be a m. deltoideust, amely a kar abdukciójáért (emeléséért) felelős."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik a plexus brachialis legnagyobb idege, amely a kar és alkar összes feszítő izmát ellátja?",
+            options: ["N. medianus", "N. ulnaris", "N. radialis", "N. musculocutaneus"],
+            answer: "N. radialis",
+            explanation: "A n. radialis, a fasciculus posterior folytatása, a plexus legnagyobb idege. Motorosan beidegzi a felkar és alkar összes extenzor (feszítő) izmát."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Mi a jellegzetes tünete a n. thoracicus longus sérülésének?",
+            options: ["Karomkéz (claw hand)", "Pincérborravalót váró kéz (waiter's tip)", "Eső kéz (wrist drop)", "Angyalszárny lapocka (scapula alata)"],
+            answer: "Angyalszárny lapocka (scapula alata)",
+            explanation: "A n. thoracicus longus a m. serratus anteriort idegzi be. Sérülése esetén az izom megbénul, ami a lapocka elállásához, ún. angyalszárny lapockához vezet."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik ideg halad át a kéztőalagúton (canalis carpi)?",
+            options: ["N. radialis", "N. ulnaris", "N. medianus", "N. musculocutaneus"],
+            answer: "N. medianus",
+            explanation: "A n. medianus a csuklónál a canalis carpin (kéztőalagúton) keresztül lép a tenyérbe. Ennek kompressziója okozza a kéztőalagút-szindrómát."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Erb-Duchenne bénulás esetén melyik ideggyökerek sérülnek elsősorban?",
+            options: ["C5, C6", "C7", "C8, Th1", "C5-Th1"],
+            answer: "C5, C6",
+            explanation: "Az Erb-Duchenne bénulás (felső plexus sérülés) a gyakoribb típus, amely a plexus brachialis felső részét, elsősorban a C5 és C6 ideggyökereket érinti."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Mi a Dejerine-Klumpke bénulás jellegzetes tünete?",
+            options: ["Eső kéz", "Pincérborravalót váró kéz", "Karomkéz", "Majomkéz"],
+            answer: "Karomkéz",
+            explanation: "A Dejerine-Klumpke bénulás (alsó plexus sérülés, C8-Th1) a kéz kisizmainak bénulását okozza, ami jellegzetes „karomkéz” (claw hand) tartáshoz vezet."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik ideg sérülése okozza az ún. 'eső kéz' (wrist drop) tünetet?",
+            options: ["N. ulnaris", "N. medianus", "N. axillaris", "N. radialis"],
+            answer: "N. radialis",
+            explanation: "A n. radialis sérülése az alkar feszítő izmainak bénulását okozza, ami miatt a beteg nem tudja a csuklóját és ujjait kinyújtani, ez az 'eső kéz' vagy 'csuklóesés'."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik ideg felelős a tenyér radiális három és fél ujjának érző beidegzéséért?",
+            options: ["N. radialis", "N. ulnaris", "N. medianus", "N. musculocutaneus"],
+            answer: "N. medianus",
+            explanation: "A n. medianus szenzorosan beidegzi a tenyér radiális kétharmadát, valamint a radiális három és fél ujj tenyéri felszínét és a distalis ujjpercek hátoldalát."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "A 'viccescsont' (funny bone) területén melyik ideg fut felszínesen és sérülékenyen?",
+            options: ["N. radialis", "N. ulnaris", "N. medianus", "N. axillaris"],
+            answer: "N. ulnaris",
+            explanation: "A n. ulnaris a könyöktájékon a sulcus nervi ulnarisban, a humerus medialis epicondylusa mögött halad. Itt felszínes és sérülékeny, ütésre zsibbadó érzést okoz."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik izomcsoportot idegzi be motorosan a n. musculocutaneus?",
+            options: ["Felkar feszítőit", "Alkar hajlítóit", "Felkar hajlítóit", "Alkar feszítőit"],
+            answer: "Felkar hajlítóit",
+            explanation: "A n. musculocutaneus motorosan a felkar elülső, hajlító rekeszének izmait látja el: m. coracobrachialis, m. biceps brachii, m. brachialis."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik kollaterális ág idegzi be a m. supraspinatust és m. infraspinatust?",
+            options: ["N. thoracicus longus", "N. dorsalis scapulae", "N. suprascapularis", "N. subclavius"],
+            answer: "N. suprascapularis",
+            explanation: "A n. suprascapularis, amely a truncus superiorból ered, idegzi be a rotátorköpeny fontos izmait, a m. supraspinatust és m. infraspinatust."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik két köteg (fasciculus) egyesüléséből jön létre a n. medianus?",
+            options: ["Lateralis és posterior", "Medialis és posterior", "Lateralis és medialis", "Mindhárom kötegből"],
+            answer: "Lateralis és medialis",
+            explanation: "A n. medianus a fasciculus lateralisból származó radix lateralis és a fasciculus medialisból származó radix medialis egyesülésével jön létre, jellegzetes 'M' alakot formálva."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "A Dejerine-Klumpke bénuláshoz melyik szindróma társulhat a Th1 gyökér sérülése esetén?",
+            options: ["Carpal tunnel szindróma", "Thoracic outlet szindróma", "Horner-szindróma", "Guyon-csatorna szindróma"],
+            answer: "Horner-szindróma",
+            explanation: "Ha az alsó plexus sérülés a Th1 gyökeret is érinti a kilépésénél, károsodhatnak a szimpatikus rostok, ami az azonos oldali arcfélen Horner-szindrómát (ptosis, miosis, anhidrosis) okozhat."
+        },
+        {
+            topic: 'plexus_brachialis',
+            question: "Melyik ideg látja el a kéz legtöbb saját (intrinsic) kisizmát, beleértve az összes m. interosseust?",
+            options: ["N. medianus", "N. radialis", "N. ulnaris", "N. musculocutaneus"],
+            answer: "N. ulnaris",
+            explanation: "A n. ulnaris mély, motoros ága felelős a kéz legtöbb kisizmának beidegzéséért, ami a finom kézmozgásokhoz elengedhetetlen."
+        },
+        
+        // === Plexus Lumbalis & Sacralis ===
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Mely gerincvelői idegek elülső ágaiból alakul ki a plexus lumbalis?",
+            options: ["L4-S4", "T10-L2", "L1-L4 (gyakran T12)", "S1-S4"],
+            answer: "L1-L4 (gyakran T12)",
+            explanation: "A plexus lumbalis (ágyéki fonat) elsősorban az L1, L2, L3 és L4 gyökök elülső ágaiból formálódik, és gyakran kap rostokat a T12-es idegtől is."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik izom állományában, annak mélyén helyezkedik el a plexus lumbalis?",
+            options: ["M. quadratus lumborum", "M. iliacus", "M. psoas major", "M. latissimus dorsi"],
+            answer: "M. psoas major",
+            explanation: "A plexus lumbalis mélyen, a hátsó hasfalon, a musculus psoas major állományában, annak hátsó részében fekszik."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik a plexus lumbalis legnagyobb ága?",
+            options: ["N. obturatorius", "N. genitofemoralis", "N. femoralis", "N. ilioinguinalis"],
+            answer: "N. femoralis",
+            explanation: "A n. femoralis a plexus lumbalis legnagyobb és legvastagabb ága, amely a comb elülső (extensor) izomcsoportját idegzi be."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik ideg idegzi be a comb közelítő (adductor) izmait?",
+            options: ["N. femoralis", "N. ischiadicus", "N. obturatorius", "N. cutaneus femoris lateralis"],
+            answer: "N. obturatorius",
+            explanation: "A n. obturatorius a comb medialis rekeszében halad, és motorosan a comb adductor (közelítő) izomcsoportját látja el."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Mi a meralgia paraesthetica?",
+            options: ["A n. femoralis kompressziója", "A n. cutaneus femoris lateralis kompressziója", "A n. obturatorius sérülése", "A n. genitofemoralis neuralgiája"],
+            answer: "A n. cutaneus femoris lateralis kompressziója",
+            explanation: "A meralgia paraesthetica egy tisztán érző ideg, a n. cutaneus femoris lateralis kompressziós szindrómája, amely égő fájdalmat és zsibbadást okoz a comb külső oldalán."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "A plexus sacralis melyik izom elülső felszínén fekszik?",
+            options: ["M. gluteus maximus", "M. piriformis", "M. obturator internus", "M. psoas major"],
+            answer: "M. piriformis",
+            explanation: "A plexus sacralis a kismedence hátsó falán, közvetlenül a musculus piriformis elülső (medencei) felszínén helyezkedik el."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik a test leghosszabb és legvastagabb idege?",
+            options: ["N. femoralis", "N. vagus", "N. ischiadicus", "N. tibialis"],
+            answer: "N. ischiadicus",
+            explanation: "A nervus ischiadicus (ülőideg) az emberi test leghosszabb és legvastagabb idege, amely a plexus sacralisból ered."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "A n. ischiadicus melyik két fő ágra oszlik a térdhajlatban?",
+            options: ["N. femoralis és n. obturatorius", "N. tibialis és n. peroneus communis", "N. suralis és n. saphenus", "N. gluteus superior és inferior"],
+            answer: "N. tibialis és n. peroneus communis",
+            explanation: "A n. ischiadicus a fossa poplitea (térdhajlati árok) felső részén oszlik két fő végágára: a mediálisan futó n. tibialisra és a laterálisan futó n. peroneus (fibularis) communisra."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik ideg sérülése okozza az 'eső láb' (foot drop) tünetet?",
+            options: ["N. tibialis", "N. femoralis", "N. obturatorius", "N. peroneus communis"],
+            answer: "N. peroneus communis",
+            explanation: "A n. peroneus communis sérülése a lábfej és lábujjak emeléséért (dorsalflexio) felelős izmok bénulását okozza, ami 'eső láb' tünethez és szteppelő járáshoz vezet."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Mi a Trendelenburg-tünet oka?",
+            options: ["A n. gluteus inferior sérülése", "A n. gluteus superior sérülése", "A m. piriformis gyengesége", "A n. femoralis bénulása"],
+            answer: "A n. gluteus superior sérülése",
+            explanation: "A n. gluteus superior sérülése a csípőtávolító izmok (m. gluteus medius et minimus) gyengeségét okozza. Terheléskor a medence az ellenoldalra lebillen, ez a Trendelenburg-tünet."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik ideg a gát (perineum) és a külső záróizmok fő beidegzője?",
+            options: ["N. genitofemoralis", "Nn. splanchnici pelvini", "N. obturatorius", "N. pudendus"],
+            answer: "N. pudendus",
+            explanation: "A n. pudendus a gát fő szomatikus idege, amely motorosan beidegzi a külső záróizmokat (sphincter ani/urethrae externus) és a gátizmokat, valamint szenzorosan a gát bőrét."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Mely idegek képviselik a paraszimpatikus idegrendszer sacralis kiáramlását?",
+            options: ["N. pudendus", "Nn. splanchnici pelvini", "Truncus lumbosacralis", "N. genitofemoralis"],
+            answer: "Nn. splanchnici pelvini",
+            explanation: "A nervi splanchnici pelvini (S2-S4) a paraszimpatikus rendszer sacralis részét alkotják, és a kismedencei szervek (hólyag, belek, nemi szervek) autonóm működését szabályozzák, mint pl. a vizelés, székletürítés és erekció."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Piriformis szindróma esetén melyik ideg kerül nyomás alá?",
+            options: ["N. femoralis", "N. obturatorius", "N. ischiadicus", "N. gluteus superior"],
+            answer: "N. ischiadicus",
+            explanation: "Piriformis szindróma esetén a megfeszült vagy hipertrofizált m. piriformis nyomást gyakorol a leggyakrabban alatta elhaladó n. ischiadicusra, ischias-szerű tüneteket okozva."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "A n. femoralis sérülése esetén melyik reflex esik ki tipikusan?",
+            options: ["Achilles-ínreflex", "Cremaster-reflex", "Patella-ínreflex", "Babinski-reflex"],
+            answer: "Patella-ínreflex",
+            explanation: "A n. femoralis idegzi be a m. quadriceps femorist, amely a térd nyújtásáért felelős. Sérülésekor a térdreflex (patella-ínreflex) renyhe vagy kiesett."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Mi a truncus lumbosacralis?",
+            options: ["A plexus sacralis fő végága", "A plexus lumbalis és sacralis közötti összekötő idegköteg", "A n. ischiadicus másik neve", "A gát fő idegfonata"],
+            answer: "A plexus lumbalis és sacralis közötti összekötő idegköteg",
+            explanation: "A truncus lumbosacralis egy vastag idegköteg, amelyet az L4 és L5 gyökerek alkotnak, és amely összeköti a plexus lumbalist a plexus sacralissal."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik ideg idegzi be a lábszár hajlító izmait és a talpizmokat?",
+            options: ["N. peroneus communis", "N. suralis", "N. saphenus", "N. tibialis"],
+            answer: "N. tibialis",
+            explanation: "A n. tibialis, a n. ischiadicus mediális ága, a lábszár hátsó (flexor) rekeszének izmait, valamint a talp összes izmát idegzi be."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "A lágyéksérv műtét során melyik két ideg van különösen kitéve a sérülés veszélyének?",
+            options: ["N. femoralis és n. obturatorius", "N. ilioinguinalis és n. iliohypogastricus", "N. ischiadicus és n. pudendus", "N. cutaneus femoris lateralis és n. genitofemoralis"],
+            answer: "N. ilioinguinalis és n. iliohypogastricus",
+            explanation: "A n. ilioinguinalis és n. iliohypogastricus a hasfal rétegei között és a lágyékcsatornában futnak, ezért a lágyéksérv műtétek során gyakran sérülhetnek."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Melyik ideg felelős a m. gluteus maximus (a legerősebb csípőfeszítő) beidegzéséért?",
+            options: ["N. gluteus superior", "N. gluteus inferior", "N. ischiadicus", "N. pudendus"],
+            answer: "N. gluteus inferior",
+            explanation: "A n. gluteus inferior egy tisztán motoros ideg, amely kizárólag a m. gluteus maximust idegzi be."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "A lábszár és a láb mediális (belső) szélének bőrét melyik ideg látja el?",
+            options: ["N. tibialis", "N. peroneus superficialis", "N. suralis", "N. saphenus"],
+            answer: "N. saphenus",
+            explanation: "A n. saphenus a n. femoralis leghosszabb tisztán érző ága, amely a lábszár és a láb mediális szélének bőrét idegzi be."
+        },
+        {
+            topic: 'plexus_lumbosacralis',
+            question: "Pudendus neuralgia esetén melyik anatómiai képletben történik az ideg becsípődése leggyakrabban?",
+            options: ["Canalis inguinalis", "Canalis obturatorius", "Foramen infrapiriforme", "Alcock-csatorna (canalis pudendalis)"],
+            answer: "Alcock-csatorna (canalis pudendalis)",
+            explanation: "Pudendus neuralgia, vagy Alcock-csatorna szindróma esetén a n. pudendus a fossa ischiorectalis lateralis falában található szűk Alcock-csatornában kerül nyomás alá."
+        },
+
+        // === Autonóm Idegrendszer ===
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Mi az autonóm idegrendszer elsődleges funkciója?",
+            options: ["Akaratlagos mozgások koordinálása", "A homeosztázis fenntartása", "Érzékszervek információinak feldolgozása", "Beszéd és gondolkodás"],
+            answer: "A homeosztázis fenntartása",
+            explanation: "Az autonóm (vegetatív) idegrendszer fő funkciója a szervezet belső környezetének dinamikus állandóságának, a homeosztázisnak a fenntartása."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik a szimpatikus idegrendszer központi eredetének helye?",
+            options: ["Agytörzs és sacralis gerincvelő (craniosacralis)", "Gerincvelő thoracolumbalis szakasza (T1-L2)", "Csak az agytörzs", "Csak a lumbalis gerincvelő"],
+            answer: "Gerincvelő thoracolumbalis szakasza (T1-L2)",
+            explanation: "A szimpatikus preganglionaris neuronok a gerincvelő oldalsó szarvában, a T1-L2 szegmentumok között helyezkednek el, ezért thoracolumbalis kiáramlásnak nevezik."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik jellemző a paraszimpatikus idegrendszerre?",
+            options: ["Rövid preganglionaris, hosszú postganglionaris rostok", "A ganglionok a gerincoszlop mellett vannak", "Hosszú preganglionaris, rövid postganglionaris rostok", "Diffúz, kiterjedt hatás"],
+            answer: "Hosszú preganglionaris, rövid postganglionaris rostok",
+            explanation: "A paraszimpatikus rendszerre jellemzőek a hosszú preganglionaris rostok, amelyek a célszerv közelében vagy falában lévő ganglionokig futnak, és az innen induló postganglionaris rostok nagyon rövidek."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik neurotranszmitter szabadul fel a legtöbb szimpatikus postganglionaris végződésben?",
+            options: ["Acetilkolin (ACh)", "Szerotonin", "Noradrenalin (NA)", "Dopamin"],
+            answer: "Noradrenalin (NA)",
+            explanation: "A legtöbb szimpatikus postganglionaris neuron noradrenalint szabadít fel a célszerveken. Kivételt képeznek pl. a verejtékmirigyek, ahol acetilkolin a transzmitter."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik neurotranszmitter a paraszimpatikus rendszer postganglionaris transzmittere?",
+            options: ["Noradrenalin (NA)", "Adrenalin", "Acetilkolin (ACh)", "GABA"],
+            answer: "Acetilkolin (ACh)",
+            explanation: "A paraszimpatikus rendszerben mind a pre-, mind a postganglionaris végződésben az acetilkolin az ingerületátvivő anyag."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik receptor felelős a szívfrekvencia és a kontrakciós erő szimpatikus fokozásáért?",
+            options: ["α1", "α2", "β1", "β2"],
+            answer: "β1",
+            explanation: "A β1-adrenerg receptorok főként a szíven találhatók, és aktiválásuk noradrenalin vagy adrenalin által növeli a szívfrekvenciát és a kontrakciós erőt."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "A pupilla tágulását (mydriasis) melyik rendszer okozza?",
+            options: ["Szimpatikus", "Paraszimpatikus", "Szomatikus", "Enterális"],
+            answer: "Szimpatikus",
+            explanation: "A szimpatikus idegrendszer a m. dilatator pupillae összehúzásával pupillatágulást (mydriasis) okoz, ami 'harcolj vagy menekülj' válasz része."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik agyterület tekinthető az autonóm idegrendszer legfőbb szabályozó központjának?",
+            options: ["Kisagy (cerebellum)", "Agykéreg (cortex)", "Hipotalamusz", "Talamusz"],
+            answer: "Hipotalamusz",
+            explanation: "A hipotalamusz az autonóm idegrendszer legfőbb szubkortikális szabályozó központja, amely integrálja a vegetatív, endokrin és magatartási válaszokat."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Mi a 'Fight or Flight' (Harcolj vagy Menekülj) válaszért felelős rendszer?",
+            options: ["Paraszimpatikus idegrendszer", "Enterális idegrendszer", "Szimpatikus idegrendszer", "Limbikus rendszer"],
+            answer: "Szimpatikus idegrendszer",
+            explanation: "A szimpatikus idegrendszer aktiválódása készíti fel a szervezetet a vészhelyzetekre, a fokozott fizikai vagy mentális teljesítményre, ez a 'Fight or Flight' válasz."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik agyideg NEM tartalmaz paraszimpatikus rostokat?",
+            options: ["N. oculomotorius (III.)", "N. vagus (X.)", "N. facialis (VII.)", "N. trigeminus (V.)"],
+            answer: "N. trigeminus (V.)",
+            explanation: "A paraszimpatikus craniosacralis kiáramlás agytörzsi komponense a III., VII., IX. és X. agyidegekhez kötődik. A N. trigeminus (V.) elsősorban szomatoszenzoros és motoros rostokat tartalmaz."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Az enterális idegrendszer (ENS) melyik plexusa felelős elsősorban a bélmotilitás szabályozásáért?",
+            options: ["Plexus submucosus (Meissner)", "Plexus myentericus (Auerbach)", "Plexus coeliacus", "Plexus hypogastricus"],
+            answer: "Plexus myentericus (Auerbach)",
+            explanation: "A plexus myentericus (Auerbach-féle plexus), amely a bélfal hosszanti és körkörös izomrétege között helyezkedik el, fő funkciója a GI traktus motilitásának (perisztaltika) szabályozása."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Milyen hatással van a paraszimpatikus rendszer a hörgők simaizomzatára?",
+            options: ["Tágulást (bronchodilatatio) okoz", "Szűkületet (bronchoconstrictio) okoz", "Nincs hatással rá", "Fokozza a váladéktermelést, de nem hat az izomzatra"],
+            answer: "Szűkületet (bronchoconstrictio) okoz",
+            explanation: "A paraszimpatikus rendszer acetilkolin felszabadításával (M3 receptorokon hatva) a hörgők simaizomzatának összehúzódását, azaz bronchoconstrictiót vált ki."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik receptor altípus közvetíti a hörgőtágulatot a szimpatikus rendszerben?",
+            options: ["α1", "β1", "β2", "α2"],
+            answer: "β2",
+            explanation: "A β2-adrenerg receptorok aktiválása a hörgők simaizomzatának relaxációját, azaz hörgőtágulatot (bronchodilatatio) okoz, ami megkönnyíti a légzést."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Az autonóm ganglionokban, a pre- és postganglionaris neuronok közötti szinapszisban melyik receptor található?",
+            options: ["Muszkarinos acetilkolin receptor", "Alfa-adrenerg receptor", "Béta-adrenerg receptor", "Nikotinos acetilkolin receptor"],
+            answer: "Nikotinos acetilkolin receptor",
+            explanation: "Mind a szimpatikus, mind a paraszimpatikus ganglionokban az acetilkolin a preganglionaris transzmitter, és a postganglionaris neuronon nikotinos (nAChR) receptorokhoz kötődik."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "A 'Rest and Digest' (Pihenj és Eméssz) állapot melyik rendszer dominanciájára utal?",
+            options: ["Szimpatikus", "Paraszimpatikus", "Szomatikus", "Enterális"],
+            answer: "Paraszimpatikus",
+            explanation: "A paraszimpatikus rendszer a nyugalmi állapotért, az energia raktározásáért és az emésztési folyamatok serkentéséért felelős, ezt írja le a 'Rest and Digest' kifejezés."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Mi a mellékvesevelő szerepe a szimpatikus válaszban?",
+            options: ["Paraszimpatikus hormonokat termel", "Kortizolt bocsát a vérbe", "Módosult szimpatikus ganglionként adrenalint és noradrenalint bocsát a vérbe", "Gátolja a szimpatikus aktivitást"],
+            answer: "Módosult szimpatikus ganglionként adrenalint és noradrenalint bocsát a vérbe",
+            explanation: "A mellékvesevelő egy módosult szimpatikus ganglion, amely preganglionaris szimpatikus beidegzésre válaszul hormonokat (főként adrenalint) bocsát a véráramba, ami elnyújtja és felerősíti a szimpatikus választ."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik folyamatért felelős a paraszimpatikus rendszer a szexuális funkciókban?",
+            options: ["Ejakuláció", "Orgazmus", "Erekció", "Libidó csökkenése"],
+            answer: "Erekció",
+            explanation: "A paraszimpatikus rendszer (a nn. splanchnici pelvini révén) felelős a nemi szervek ereinek tágulatáért (vasodilatatio), ami az erekciót eredményezi."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "A szimpatikus dúclánc (truncus sympathicus) melyik anatómiai képlet?",
+            options: ["Ganglionok láncolata a gerincoszlop mellett", "Ganglionok a célszervek falában", "Nagy ganglionok a hasi aorta mentén", "Idegekből álló fonat a bélfalban"],
+            answer: "Ganglionok láncolata a gerincoszlop mellett",
+            explanation: "A truncus sympathicus (paravertebralis dúclánc) a gerincoszlop két oldalán végigfutó, szegmentálisan rendeződött szimpatikus ganglionokból és az őket összekötő rostokból áll."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Milyen hatással van a szimpatikus rendszer az emésztőrendszer motilitására és szekréciójára?",
+            options: ["Fokozza mindkettőt", "Csökkenti mindkettőt", "Fokozza a motilitást, de csökkenti a szekréciót", "Nincs hatással rá"],
+            answer: "Csökkenti mindkettőt",
+            explanation: "A 'Fight or Flight' válasz során a szervezet az energiát a létfontosságú szervek felé irányítja, ezért a szimpatikus hatás gátolja az emésztőrendszer mozgását (perisztaltikát) és a mirigyek váladéktermelését."
+        },
+        {
+            topic: 'autonom_idegrendszer',
+            question: "Melyik az enterális idegrendszer két fő plexusa?",
+            options: ["Plexus celiacus és plexus mesentericus", "Plexus myentericus (Auerbach) és plexus submucosus (Meissner)", "Plexus hypogastricus és plexus pelvicus", "Plexus brachialis és plexus lumbalis"],
+            answer: "Plexus myentericus (Auerbach) és plexus submucosus (Meissner)",
+            explanation: "Az ENS két fő, a bélfalban elhelyezkedő fonata a plexus myentericus, amely a motilitásért felelős, és a plexus submucosus, amely a szekréciót és felszívódást szabályozza."
+        },
+    ];
+
+    // --- JavaScript Logika ---
+    const startScreen = document.getElementById('start-screen');
+    const quizContainer = document.getElementById('quiz-container');
+    const resultsScreen = document.getElementById('results-screen');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const questionCounterEl = document.getElementById('question-counter');
+    const scoreEl = document.getElementById('score');
+    const finalScoreEl = document.getElementById('final-score');
+    const resultMessageEl = document.getElementById('result-message');
+    const explanationModal = document.getElementById('explanation-modal');
+    const explanationTitleEl = document.getElementById('explanation-title');
+    const explanationTextEl = document.getElementById('explanation-text');
+
+    let currentTopicQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let questionsAnswered = false;
+
+    function startQuiz(topic) {
+        currentTopicQuestions = shuffleArray(quizData.filter(q => q.topic === topic));
+        // Limit to 20 questions if more are available
+        if (currentTopicQuestions.length > 20) {
+            currentTopicQuestions = currentTopicQuestions.slice(0, 20);
+        }
+        currentQuestionIndex = 0;
+        score = 0;
+        
+        startScreen.classList.add('hidden');
+        resultsScreen.classList.add('hidden');
+        quizContainer.classList.remove('hidden');
+        quizContainer.style.opacity = '0';
+        setTimeout(() => { quizContainer.style.opacity = '1'; }, 10);
+        
+        scoreEl.textContent = `Pontszám: 0`;
+        displayQuestion();
+    }
+
+    function displayQuestion() {
+        questionsAnswered = false;
+        nextBtn.classList.add('hidden');
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        
+        questionCounterEl.textContent = `Kérdés: ${currentQuestionIndex + 1} / ${currentTopicQuestions.length}`;
+        questionEl.textContent = currentQuestion.question;
+        
+        optionsEl.innerHTML = '';
+        const shuffledOptions = shuffleArray([...currentQuestion.options]);
+        shuffledOptions.forEach(option => {
+            const button = document.createElement('button');
+            button.textContent = option;
+            button.classList.add('option-btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-slate-300', 'bg-slate-50', 'hover:bg-slate-200');
+            button.onclick = () => selectAnswer(button, option);
+            optionsEl.appendChild(button);
+        });
+    }
+
+    function selectAnswer(button, selectedOption) {
+        if (questionsAnswered) return;
+        questionsAnswered = true;
+
+        const currentQuestion = currentTopicQuestions[currentQuestionIndex];
+        const isCorrect = selectedOption === currentQuestion.answer;
+        
+        if (isCorrect) {
+            score++;
+            button.classList.add('correct');
+            explanationTitleEl.textContent = "✅ Helyes válasz!";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-green-600";
+        } else {
+            button.classList.add('incorrect');
+            const correctOptionEl = Array.from(optionsEl.children).find(btn => btn.textContent === currentQuestion.answer);
+            if(correctOptionEl) correctOptionEl.classList.add('correct');
+            explanationTitleEl.textContent = "❌ Helytelen válasz";
+            explanationTitleEl.className = "text-2xl font-bold mb-4 text-red-600";
+        }
+
+        scoreEl.textContent = `Pontszám: ${score}`;
+        
+        explanationTextEl.innerHTML = `<b>Magyarázat:</b> ${currentQuestion.explanation}`;
+        showExplanationModal();
+
+        nextBtn.classList.remove('hidden');
+    }
+
+    function showExplanationModal() {
+        explanationModal.style.display = "flex";
+        explanationModal.onclick = (e) => {
+             if (e.target === explanationModal) {
+                 explanationModal.style.display = "none";
+             }
+        };
+    }
+
+    nextBtn.addEventListener('click', () => {
+        explanationModal.style.display = "none";
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentTopicQuestions.length) {
+            displayQuestion();
+        } else {
+            showResults();
+        }
+    });
+
+    function showResults() {
+        quizContainer.classList.add('hidden');
+        resultsScreen.classList.remove('hidden');
+        
+        const percentage = Math.round((score / currentTopicQuestions.length) * 100);
+        finalScoreEl.textContent = `${percentage}%`;
+        
+        let message = "";
+        if (percentage === 100) {
+            message = "Tökéletes! Készen állsz a vizsgára. 🏆";
+        } else if (percentage >= 80) {
+            message = "Kiváló eredmény! Már csak egy kis ismétlés kell. 👍";
+        } else if (percentage >= 50) {
+            message = "Szép munka! Gyakorolj még egy kicsit.  ";
+        } else {
+            message = "Ne add fel, ismételd át az anyagot és próbáld újra! 📚";
+        }
+        resultMessageEl.textContent = message;
+    }
+
+    function restartQuiz() {
+        resultsScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+</script>
+
+</body>
+</html>
+ 
