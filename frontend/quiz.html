@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológia VizsgApp - Quiz Engine</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/app-optimized.css">
+    <link rel="stylesheet" href="css/quiz-engine.css">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">
+                Neurológia Quiz Engine
+                <span class="author-credit">by Zsolaj</span>
+            </h1>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">←</span>
+                    Vissza a főoldalra
+                </a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main id="quiz-main" class="quiz-container">
+        <!-- Category Selection Screen -->
+        <section id="category-screen" class="screen active">
+            <div class="screen-header">
+                <h2 class="screen-title">Válassz kategóriát</h2>
+                <p class="screen-subtitle">Teszteld tudásodat a neurológia különböző területein</p>
+            </div>
+            
+            <div class="category-grid">
+                <!-- Neuroanatómia Category -->
+                <div class="category-card" data-category="neuroanat">
+                    <div class="category-glow"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Neuroanatómia</h3>
+                        <p class="category-description">
+                            Koponya, gerinc, agyidegek, látópálya és idegrendszeri struktúrák
+                        </p>
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Témák:</span>
+                                <span class="stat-value">1-59</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Kvízek:</span>
+                                <span class="stat-value">15</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" data-progress="0"></div>
+                            <span class="progress-text">0% teljesítve</span>
+                        </div>
+                        <button class="category-button">
+                            <span class="button-text">Kezdés</span>
+                            <span class="button-arrow">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vizsgálómódszerek Category -->
+                <div class="category-card" data-category="vizsmod">
+                    <div class="category-glow"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Vizsgálómódszerek, alap klinikum</h3>
+                        <p class="category-description">
+                            EEG, EMG, képalkotó eljárások, klinikai vizsgálatok és diagnózis
+                        </p>
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Témák:</span>
+                                <span class="stat-value">60-179</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Kvízek:</span>
+                                <span class="stat-value">20</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" data-progress="0"></div>
+                            <span class="progress-text">0% teljesítve</span>
+                        </div>
+                        <button class="category-button">
+                            <span class="button-text">Kezdés</span>
+                            <span class="button-arrow">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Klinikum Category -->
+                <div class="category-card" data-category="klinikum">
+                    <div class="category-glow"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Klinikum</h3>
+                        <p class="category-description">
+                            Neurológiai betegségek, kezelések, rehabilitáció és speciális esetek
+                        </p>
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Témák:</span>
+                                <span class="stat-value">180-259</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Kvízek:</span>
+                                <span class="stat-value">12</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" data-progress="0"></div>
+                            <span class="progress-text">0% teljesítve</span>
+                        </div>
+                        <button class="category-button">
+                            <span class="button-text">Kezdés</span>
+                            <span class="button-arrow">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz List Screen -->
+        <section id="quiz-list-screen" class="screen">
+            <div class="screen-header">
+                <button class="back-button" data-target="category-screen">
+                    <span class="back-arrow">←</span>
+                    Vissza
+                </button>
+                <h2 class="screen-title" id="quiz-list-title">Neuroanatómia kvízek</h2>
+            </div>
+            
+            <div id="quiz-list-container" class="quiz-list">
+                <!-- Quiz items will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <!-- Active Quiz Screen -->
+        <section id="quiz-active-screen" class="screen">
+            <div class="quiz-header">
+                <button class="back-button" data-target="quiz-list-screen">
+                    <span class="back-arrow">←</span>
+                    Vissza
+                </button>
+                <div class="quiz-info">
+                    <h2 id="active-quiz-title" class="quiz-title"></h2>
+                    <div class="quiz-progress">
+                        <span id="question-counter">Kérdés 1 / 5</span>
+                        <div class="timer" id="quiz-timer">
+                            <span class="timer-icon">⏱</span>
+                            <span class="timer-text">00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quiz-content" class="quiz-content">
+                <!-- Quiz questions will be displayed here -->
+            </div>
+
+            <div class="quiz-controls">
+                <button id="submit-answer" class="control-button primary" disabled>
+                    Válasz beküldése
+                </button>
+                <button id="next-question" class="control-button secondary hidden">
+                    Következő kérdés
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Screen -->
+        <section id="results-screen" class="screen">
+            <div class="results-header">
+                <h2 class="results-title">Kvíz eredmények</h2>
+                <div class="results-score">
+                    <span class="score-label">Eredményed:</span>
+                    <span id="score-display" class="score-value">0/0</span>
+                    <span id="score-percentage" class="score-percentage">(0%)</span>
+                </div>
+            </div>
+
+            <div id="results-breakdown" class="results-breakdown">
+                <!-- Detailed results will be shown here -->
+            </div>
+
+            <div class="results-actions">
+                <button class="action-button" data-action="retry">
+                    <span class="button-icon">↻</span>
+                    Újrapróbálkozás
+                </button>
+                <button class="action-button" data-action="new-quiz">
+                    <span class="button-icon">→</span>
+                    Új kvíz választása
+                </button>
+                <button class="action-button primary" data-action="home">
+                    <span class="button-icon">⌂</span>
+                    Főmenü
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Matrix Rain Background Effect -->
+    <canvas id="matrix-rain" class="matrix-rain"></canvas>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Betöltés...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/quiz-app.js"></script>
+</body>
+</html>

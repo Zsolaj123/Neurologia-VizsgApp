@@ -8,11 +8,16 @@ A comprehensive web application for neurology exam preparation, featuring 259 to
   - Neuroanatomy (1-59)
   - Clinical Examination Methods (60-179)
   - Detailed Clinical Topics (180-259)
+- **Interactive Quiz Engine**: Test your knowledge with dynamic quizzes
+  - Multiple categories with progress tracking
+  - Randomized questions with detailed explanations
+  - Performance statistics and visual feedback
+  - Matrix rain background effect
 - **Collapsible Navigation**: Hierarchical topic organization with expand/collapse functionality
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Cyberpunk Theme**: Distinctive neon green aesthetic
+- **Cyberpunk Theme**: Distinctive neon green aesthetic with smooth animations
 - **Markdown Support**: Full Obsidian-style markdown rendering
-- **Table of Contents**: Auto-generated navigation for each topic
+- **Table of Contents**: Auto-generated navigation for each topic with scroll tracking
 - **Offline Support**: All content stored locally
 
 ## Project Structure
@@ -20,19 +25,31 @@ A comprehensive web application for neurology exam preparation, featuring 259 to
 ```
 frontend/
 ├── css/
-│   ├── main.css          # Core styles, variables, layout
-│   ├── topic-menu.css    # Topic navigation styles
-│   └── content.css       # Content and markdown styles
+│   ├── app-optimized.css # Core styles, variables, layout
+│   └── quiz-engine.css   # Quiz engine specific styles
 ├── js/
 │   ├── app.js            # Main application entry
+│   ├── quiz-app.js       # Quiz engine entry point
 │   ├── data/             # Topic metadata
 │   ├── models/           # Data models (Topic, AppState, Errors)
-│   └── modules/          # Core modules (UI, Markdown, TOC, Loader)
+│   ├── modules/          # Core modules (UI, Markdown, TOC, Loader)
+│   └── quiz-engine/      # Quiz engine modules
+│       ├── quiz-loader.js    # Quiz data loader
+│       ├── quiz-manager.js   # Quiz state management
+│       ├── quiz-ui.js        # Quiz UI components
+│       ├── quiz-results.js   # Results display
+│       └── matrix-rain.js    # Matrix effect
 ├── content/
-│   ├── neuroanat/        # Neuroanatomy topics (1-59)
-│   ├── clinical/         # Clinical topics (60-179)
-│   └── detailed-clinical/# Detailed clinical topics (180-259)
-└── index.html            # Main application file
+│   ├── topics/           # Study materials (259 topics)
+│   │   ├── neuroanat/    # Neuroanatomy topics (1-59)
+│   │   ├── clinical/     # Clinical topics (60-179)
+│   │   └── detailed/     # Detailed clinical (180-259)
+│   └── quizzes/          # Interactive quizzes
+│       ├── Neuroanat/    # Neuroanatomy quizzes
+│       ├── Klinikum/     # Clinical quizzes
+│       └── Vizsgálómódszerek/ # Examination method quizzes
+├── index.html            # Main application
+└── quiz.html             # Quiz engine interface
 ```
 
 ## Technical Stack
