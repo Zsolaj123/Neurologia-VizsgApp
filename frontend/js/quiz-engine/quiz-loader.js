@@ -95,42 +95,60 @@ export class QuizLoader {
     parseQuestions(scriptContent) {
         const questions = [];
         
-        // Try to find quiz data array
-        const fullQuizMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*\[([\s\S]*?)\];/);
-        const questionsMatch = scriptContent.match(/const\s+questions\s*=\s*\[([\s\S]*?)\];/);
-        
-        const dataMatch = fullQuizMatch || questionsMatch;
-        if (!dataMatch) {
-            console.warn('No quiz data found in script');
-            return questions;
-        }
-
-        // Extract the array content
-        const arrayContent = dataMatch[1];
-        
-        // Parse individual questions
-        const questionRegex = /\{\s*question:\s*"([^"]+)"[^}]*answers:\s*\{([^}]+)\}[^}]*correctAnswer:\s*"([^"]+)"[^}]*explanation:\s*"([^"]+)"/g;
-        
-        let match;
-        while ((match = questionRegex.exec(arrayContent)) !== null) {
-            const [_, question, answersStr, correctAnswer, explanation] = match;
+        try {
+            // Create a function to safely evaluate the quiz data
+            const evalFunction = new Function('return ' + scriptContent.replace(/const\s+fullQuizData\s*=\s*/, '').replace(/;\s*$/, ''));
+            const fullQuizData = evalFunction();
             
-            // Parse answers
-            const answers = {};
-            const answerRegex = /([a-z]):\s*"([^"]+)"/g;
-            let answerMatch;
-            while ((answerMatch = answerRegex.exec(answersStr)) !== null) {
-                answers[answerMatch[1]] = this.decodeHTML(answerMatch[2]);
+            if (Array.isArray(fullQuizData)) {
+                fullQuizData.forEach(item => {
+                    // Fix the typo: check for both 'question' and 'anulus' keys
+                    const questionText = item.question || item.anulus;
+                    
+                    if (questionText && item.answers && item.correctAnswer && item.explanation) {
+                        questions.push({
+                            question: questionText,
+                            answers: item.answers,
+                            correctAnswer: item.correctAnswer,
+                            explanation: item.explanation
+                        });
+                    }
+                });
             }
+        } catch (error) {
+            // Fallback to regex parsing if evaluation fails
+            console.warn('Failed to evaluate quiz data, falling back to regex parsing:', error);
             
-            questions.push({
-                question: this.decodeHTML(question),
-                answers,
-                correctAnswer,
-                explanation: this.decodeHTML(explanation)
-            });
+            // Try to find quiz data array
+            const fullQuizMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*\[([\s\S]*?)\];/);
+            
+            if (fullQuizMatch) {
+                // More flexible regex that handles the actual data format
+                const questionRegex = /\{\s*(?:question|anulus):\s*"([^"]+)"[^}]*answers:\s*\{([^}]+)\}[^}]*correctAnswer:\s*"([^"]+)"[^}]*explanation:\s*"([^"]+)"/g;
+                
+                let match;
+                while ((match = questionRegex.exec(fullQuizMatch[0])) !== null) {
+                    const [_, questionText, answersStr, correctAnswer, explanation] = match;
+                    
+                    // Parse answers
+                    const answers = {};
+                    const answerRegex = /([a-z]):\s*"([^"]+)"/g;
+                    let answerMatch;
+                    while ((answerMatch = answerRegex.exec(answersStr)) !== null) {
+                        answers[answerMatch[1]] = this.decodeHTML(answerMatch[2]);
+                    }
+                    
+                    questions.push({
+                        question: this.decodeHTML(questionText),
+                        answers,
+                        correctAnswer,
+                        explanation: this.decodeHTML(explanation)
+                    });
+                }
+            }
         }
         
+        console.log(`Parsed ${questions.length} questions from quiz data`);
         return questions;
     }
 

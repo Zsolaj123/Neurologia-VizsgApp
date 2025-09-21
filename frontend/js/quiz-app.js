@@ -208,7 +208,10 @@ class QuizApp {
         if (!selectedAnswer) return;
         
         const answerIndex = parseInt(selectedAnswer.dataset.answerIndex);
-        const result = this.manager.submitAnswer(answerIndex);
+        
+        // Get the current question with answer mapping
+        const currentQuestion = this.manager.getCurrentQuestion();
+        const result = this.manager.submitAnswer(answerIndex, currentQuestion.answerMapping);
         
         // Update UI
         this.ui.showAnswerResult(result);

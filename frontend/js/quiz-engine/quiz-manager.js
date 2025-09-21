@@ -63,11 +63,12 @@ export class QuizManager {
         const question = this.state.questions[this.state.currentQuestionIndex];
         
         // Shuffle answers while preserving correct answer reference
-        const shuffledAnswers = this.shuffleAnswers(question.answers);
+        const shuffledAnswers = this.shuffleAnswers(question.answers, question.correctAnswer);
         
         return {
             ...question,
             answers: shuffledAnswers.answers,
+            answerMapping: shuffledAnswers.answerMapping,
             correctIndex: shuffledAnswers.correctIndex
         };
     }
@@ -75,26 +76,30 @@ export class QuizManager {
     /**
      * Shuffle answers while tracking correct answer
      * @param {Object} answers - Original answers object
-     * @returns {Object} Shuffled answers with correct index
+     * @param {string} correctAnswer - Correct answer letter
+     * @returns {Object} Shuffled answers with correct index and mapping
      */
-    shuffleAnswers(answers) {
+    shuffleAnswers(answers, correctAnswer) {
         const entries = Object.entries(answers);
         const shuffled = this.shuffleArray(entries);
         
         const newAnswers = {};
+        const answerMapping = {}; // Maps display index to original letter
         let correctIndex = -1;
         
         shuffled.forEach((entry, index) => {
             const [letter, text] = entry;
             newAnswers[index] = text;
+            answerMapping[index] = letter;
             
-            if (letter === this.state.questions[this.state.currentQuestionIndex].correctAnswer) {
+            if (letter === correctAnswer) {
                 correctIndex = index;
             }
         });
         
         return {
             answers: newAnswers,
+            answerMapping,
             correctIndex
         };
     }
@@ -102,12 +107,14 @@ export class QuizManager {
     /**
      * Submit answer for current question
      * @param {number} answerIndex - Selected answer index
+     * @param {Object} answerMapping - Mapping of display indices to original letters
      * @returns {Object} Answer result
      */
-    submitAnswer(answerIndex) {
+    submitAnswer(answerIndex, answerMapping) {
         const question = this.state.questions[this.state.currentQuestionIndex];
-        const originalAnswers = Object.entries(question.answers);
-        const selectedLetter = originalAnswers[answerIndex] ? originalAnswers[answerIndex][0] : null;
+        
+        // Get the original letter from the mapping
+        const selectedLetter = answerMapping ? answerMapping[answerIndex] : null;
         
         const isCorrect = selectedLetter === question.correctAnswer;
         
@@ -125,6 +132,7 @@ export class QuizManager {
         return {
             isCorrect,
             correctAnswer: question.correctAnswer,
+            selectedLetter,
             explanation: question.explanation
         };
     }
