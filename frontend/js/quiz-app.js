@@ -154,24 +154,44 @@ class QuizApp {
     }
 
     async handleQuizSelect(quizPath) {
+        console.log('[QuizApp] Handling quiz selection:', quizPath);
+        
         try {
             this.ui.showLoading(true);
             
             // Load quiz data
+            console.log('[QuizApp] Loading quiz data...');
             const quizData = await this.loader.loadQuiz(quizPath);
+            
+            if (!quizData) {
+                throw new Error('No quiz data returned');
+            }
+            
+            if (!quizData.questions || quizData.questions.length === 0) {
+                throw new Error('No questions found in quiz data');
+            }
+            
+            console.log('[QuizApp] Quiz data loaded successfully:', {
+                title: quizData.title,
+                questionsCount: quizData.questions.length
+            });
+            
             this.state.quizData = quizData;
             this.state.currentQuizPath = quizPath;
             
             // Initialize quiz manager with data
+            console.log('[QuizApp] Initializing quiz manager...');
             this.manager.initQuiz(quizData);
             
             // Start quiz
+            console.log('[QuizApp] Starting quiz...');
             this.startQuiz();
             
             this.ui.showLoading(false);
         } catch (error) {
-            console.error('Error loading quiz:', error);
-            this.ui.showError('Hiba történt a kvíz betöltése közben.');
+            console.error('[QuizApp] Error loading quiz:', error);
+            console.error('[QuizApp] Error stack:', error.stack);
+            this.ui.showError(`Hiba történt a kvíz betöltése közben: ${error.message}`);
             this.ui.showLoading(false);
         }
     }
@@ -182,6 +202,14 @@ class QuizApp {
         
         // Display first question
         const question = this.manager.getCurrentQuestion();
+        console.log('[QuizApp] Current question:', question);
+        
+        if (!question) {
+            console.error('[QuizApp] No question returned from manager');
+            this.ui.showError('Nem található kérdés a kvízben.');
+            return;
+        }
+        
         this.ui.displayQuestion(question, this.manager.state.currentQuestionIndex + 1, this.manager.state.totalQuestions);
         
         // Switch to quiz screen

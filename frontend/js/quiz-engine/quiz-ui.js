@@ -27,17 +27,25 @@ export class QuizUI {
      * @param {string} screenId - ID of the screen to show
      */
     switchScreen(screenId) {
+        console.log('[QuizUI] Switching to screen:', screenId);
+        
         // Hide all screens
         Object.values(this.elements.screens).forEach(screen => {
-            if (screen) screen.classList.remove('active');
+            if (screen) {
+                screen.classList.remove('active');
+                console.log('[QuizUI] Hiding screen:', screen.id);
+            }
         });
         
         // Show target screen
         const targetScreen = document.getElementById(screenId);
         if (targetScreen) {
             targetScreen.classList.add('active');
+            console.log('[QuizUI] Showing screen:', screenId);
             // Scroll to top
             window.scrollTo(0, 0);
+        } else {
+            console.error('[QuizUI] Screen not found:', screenId);
         }
     }
 
@@ -46,12 +54,16 @@ export class QuizUI {
      * @param {boolean} show - Whether to show loading
      */
     showLoading(show) {
+        console.log('[QuizUI] Show loading:', show);
         if (this.elements.loading) {
             if (show) {
                 this.elements.loading.classList.remove('hidden');
             } else {
                 this.elements.loading.classList.add('hidden');
             }
+            console.log('[QuizUI] Loading element classes:', this.elements.loading.className);
+        } else {
+            console.warn('[QuizUI] No loading element found');
         }
     }
 
@@ -140,7 +152,17 @@ export class QuizUI {
      * @param {number} total - Total questions
      */
     displayQuestion(question, current, total) {
-        if (!question || !this.elements.quizContent) return;
+        console.log('[QuizUI] Displaying question:', {
+            hasQuestion: !!question,
+            hasQuizContent: !!this.elements.quizContent,
+            current,
+            total
+        });
+        
+        if (!question || !this.elements.quizContent) {
+            console.error('[QuizUI] Missing question or quiz content element');
+            return;
+        }
         
         // Update counter
         if (this.elements.questionCounter) {
@@ -148,6 +170,7 @@ export class QuizUI {
         }
         
         // Build question HTML
+        console.log('[QuizUI] Building answers HTML, answers:', question.answers);
         const answersHTML = Object.entries(question.answers).map(([index, text]) => `
             <div class="answer-option" data-answer-index="${index}">
                 <div class="answer-label">
@@ -161,6 +184,9 @@ export class QuizUI {
             <div class="question">${question.question}</div>
             <div class="answers">${answersHTML}</div>
         `;
+        
+        console.log('[QuizUI] Quiz content updated, innerHTML length:', this.elements.quizContent.innerHTML.length);
+        console.log('[QuizUI] Quiz content element visible:', this.elements.quizContent.offsetHeight > 0);
         
         // Reset submit button
         if (this.elements.submitButton) {

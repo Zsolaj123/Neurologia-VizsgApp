@@ -14,27 +14,40 @@ export class QuizLoader {
      * @returns {Promise<Object>} Parsed quiz data
      */
     async loadQuiz(quizPath) {
+        console.log('[QuizLoader] Loading quiz from:', quizPath);
+        
         // Check cache first
         if (this.cache.has(quizPath)) {
+            console.log('[QuizLoader] Returning cached quiz');
             return this.cache.get(quizPath);
         }
 
         try {
             // Fetch the HTML file
+            console.log('[QuizLoader] Fetching quiz file...');
             const response = await fetch(quizPath);
+            console.log('[QuizLoader] Response status:', response.status);
+            
             if (!response.ok) {
                 throw new Error(`Failed to load quiz: ${response.status}`);
             }
 
             const html = await response.text();
+            console.log('[QuizLoader] HTML loaded, length:', html.length);
+            
             const quizData = this.parseQuizHTML(html, quizPath);
+            console.log('[QuizLoader] Quiz data parsed:', {
+                title: quizData.title,
+                totalQuestions: quizData.totalQuestions,
+                questionsLength: quizData.questions.length
+            });
             
             // Cache the result
             this.cache.set(quizPath, quizData);
             
             return quizData;
         } catch (error) {
-            console.error('Error loading quiz:', error);
+            console.error('[QuizLoader] Error loading quiz:', error);
             throw error;
         }
     }
@@ -78,12 +91,17 @@ export class QuizLoader {
      */
     extractScriptContent(doc) {
         const scripts = doc.querySelectorAll('script');
+        console.log('[QuizLoader] Found', scripts.length, 'script tags');
+        
         for (const script of scripts) {
             const content = script.textContent;
             if (content.includes('fullQuizData') || content.includes('const questions')) {
+                console.log('[QuizLoader] Found quiz data in script tag');
                 return content;
             }
         }
+        
+        console.warn('[QuizLoader] No quiz data found in script tags');
         return '';
     }
 
@@ -95,29 +113,53 @@ export class QuizLoader {
     parseQuestions(scriptContent) {
         const questions = [];
         
+        if (!scriptContent) {
+            console.error('[QuizLoader] No script content to parse');
+            return questions;
+        }
+        
         try {
-            // Create a function to safely evaluate the quiz data
-            const evalFunction = new Function('return ' + scriptContent.replace(/const\s+fullQuizData\s*=\s*/, '').replace(/;\s*$/, ''));
-            const fullQuizData = evalFunction();
+            console.log('[QuizLoader] Attempting to parse quiz data...');
             
-            if (Array.isArray(fullQuizData)) {
-                fullQuizData.forEach(item => {
-                    // Fix the typo: check for both 'question' and 'anulus' keys
-                    const questionText = item.question || item.anulus;
+            // Extract the array part from the script content
+            const arrayMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*(\[[\s\S]*?\]);/);
+            if (arrayMatch) {
+                console.log('[QuizLoader] Found fullQuizData array');
+                
+                // Create a safer evaluation function
+                const evalFunction = new Function('return ' + arrayMatch[1]);
+                const fullQuizData = evalFunction();
+                
+                if (Array.isArray(fullQuizData)) {
+                    console.log('[QuizLoader] Successfully parsed array with', fullQuizData.length, 'items');
                     
-                    if (questionText && item.answers && item.correctAnswer && item.explanation) {
-                        questions.push({
-                            question: questionText,
-                            answers: item.answers,
-                            correctAnswer: item.correctAnswer,
-                            explanation: item.explanation
-                        });
-                    }
-                });
+                    fullQuizData.forEach((item, index) => {
+                        // Fix the typo: check for both 'question' and 'anulus' keys
+                        const questionText = item.question || item.anulus;
+                        
+                        if (questionText && item.answers && item.correctAnswer && item.explanation) {
+                            questions.push({
+                                question: questionText,
+                                answers: item.answers,
+                                correctAnswer: item.correctAnswer,
+                                explanation: item.explanation
+                            });
+                        } else {
+                            console.warn(`[QuizLoader] Item ${index} missing required fields:`, {
+                                hasQuestion: !!questionText,
+                                hasAnswers: !!item.answers,
+                                hasCorrectAnswer: !!item.correctAnswer,
+                                hasExplanation: !!item.explanation
+                            });
+                        }
+                    });
+                }
+            } else {
+                console.warn('[QuizLoader] Could not find fullQuizData array in script content');
             }
         } catch (error) {
             // Fallback to regex parsing if evaluation fails
-            console.warn('Failed to evaluate quiz data, falling back to regex parsing:', error);
+            console.warn('[QuizLoader] Failed to evaluate quiz data, falling back to regex parsing:', error);
             
             // Try to find quiz data array
             const fullQuizMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*\[([\s\S]*?)\];/);
