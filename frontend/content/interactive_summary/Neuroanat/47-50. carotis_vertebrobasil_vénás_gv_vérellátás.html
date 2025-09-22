@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Részletes Vizsgafelkészítő: Agy és Gerincvelő Keringése</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --carotid-blue: #3b82f6;
+            --vb-green: #16a34a;
+            --venous-purple: #8b5cf6;
+            --spinal-teal: #14b8a6;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        .section-title {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        .title-carotid { background-image: linear-gradient(to right, var(--carotid-blue), #1d4ed8); }
+        .title-vb { background-image: linear-gradient(to right, var(--vb-green), #15803d); }
+        .title-venous { background-image: linear-gradient(to right, var(--venous-purple), #6d28d9); }
+        .title-spinal { background-image: linear-gradient(to right, var(--spinal-teal), #0f766e); }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid transparent;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .card-carotid { border-left-color: var(--carotid-blue); }
+        .card-vb { border-left-color: var(--vb-green); }
+        .card-venous { border-left-color: var(--venous-purple); }
+        .card-spinal { border-left-color: var(--spinal-teal); }
+
+        .nav-item {
+            position: relative;
+            transition: color 0.2s;
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s;
+        }
+        .nav-item:hover::after {
+            width: 100%;
+        }
+        .nav-anatomy::after { background-color: var(--carotid-blue); }
+        .nav-vb::after { background-color: var(--vb-green); }
+        .nav-venous::after { background-color: var(--venous-purple); }
+        .nav-spinal::after { background-color: var(--spinal-teal); }
+
+
+        .interactive-svg .highlightable {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .interactive-svg .highlightable:hover {
+            stroke-width: 6px;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+        .tooltip {
+            position: absolute;
+            display: none;
+            background-color: rgba(30, 41, 59, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .accordion-button.active + .accordion-content {
+             max-height: 1500px; /* Adjust as needed */
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px dashed #9ca3af;
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -11px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid #f1f5f9;
+        }
+        .timeline-vb .timeline-item:before { background-color: var(--vb-green); }
+        
+        /* Spinal cord diagram specific styles */
+        #spinal-cord-svg .asa-area, #spinal-cord-svg .psa-area {
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        #spinal-cord-svg .asa-area:hover, #spinal-cord-svg .psa-area:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="M12 2a10 10 0 0 0-4.37 18.02c.3.06.42-.12.42-.28v-1.03c-2.31.5-2.8-1.12-2.8-1.12-.28-.7-.68-.88-.68-.88-.55-.37.04-.36.04-.36.6.04.93.62.93.62.54.92 1.42.66 1.77.5.06-.39.21-.66.38-.81-1.35-.15-2.77-0.67-2.77-3.01 0-.66.24-1.2.62-1.62-.06-.15-.27-.77.06-1.59 0 0 .5-.16 1.65.62.48-.13.99-.2 1.5-.2s1.02.07 1.5.2c1.14-.78 1.65-.62 1.65-.62.33.82.12 1.44.06 1.59.39.42.62 1 .62 1.62 0 2.34-1.42 2.85-2.77 3.01.22.19.42.55.42 1.11v1.65c0 .16.12.33.42.28A10 10 0 0 0 12 2Z"/></svg>
+                Keringési Anatómia
+            </h1>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#carotid-system" class="nav-item nav-anatomy text-gray-600 font-semibold">Carotis Rendszer</a>
+                <a href="#vb-system" class="nav-item nav-vb text-gray-600 font-semibold">Vertebro-Basilaris</a>
+                <a href="#venous-system" class="nav-item nav-venous text-gray-600 font-semibold">Vénás Rendszer</a>
+                <a href="#spinal-cord" class="nav-item nav-spinal text-gray-600 font-semibold">Gerincvelő</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-10">
+
+        <!-- Carotid System Section -->
+        <section id="carotid-system" class="mb-20">
+            <h2 class="text-4xl font-extrabold text-center mb-10 section-title title-carotid">Carotis Rendszer Ellátási Területei</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- ACI Card -->
+                <div class="card card-carotid p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">Arteria Carotis Interna (ACI)</h3>
+                    <p class="mb-4">Az agy elülső keringésének fő artériája. Lefutása 7 szegmensre (C1-C7) osztható a nyaki szakasztól a koponyaüregig.</p>
+                    <h4 class="font-semibold text-lg mb-2">Főbb intracranialis ágai:</h4>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><span class="font-semibold">A. ophthalmica:</span> Szem, retina, orbita.</li>
+                        <li><span class="font-semibold">A. communicans posterior (PComA):</span> Willis-kör része, thalamus, hypothalamus.</li>
+                        <li><span class="font-semibold">A. choroidea anterior (AChA):</span> Capsula interna, hippocampus, globus pallidus.</li>
+                    </ul>
+                </div>
+                <!-- ACA Card -->
+                <div class="card card-carotid p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">Arteria Cerebri Anterior (ACA)</h3>
+                    <p class="mb-4">Az ACI mediális végága. Ellátja a frontális és parietális lebenyek mediális felszínét.</p>
+                     <h4 class="font-semibold text-lg mb-2">Klinikai tünetek (ACA szindróma):</h4>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><span class="font-semibold">Ellenoldali alsó végtagi túlsúlyú</span> bénulás és érzészavar.</li>
+                        <li><span class="font-semibold">Vizeletinkontinencia.</span></li>
+                        <li><span class="font-semibold">Abulia, apátia,</span> motivációhiány (frontális lebeny tünetek).</li>
+                        <li>Motoros transzkortikális afázia (domináns oldalon).</li>
+                    </ul>
+                </div>
+                <!-- MCA Card -->
+                <div class="card card-carotid p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">Arteria Cerebri Media (MCA)</h3>
+                    <p class="mb-4">Az ACI laterális, nagyobbik végága. A leggyakrabban érintett ér stroke esetén. Ellátja a hemiszfériumok laterális felszínét.</p>
+                    <h4 class="font-semibold text-lg mb-2">Klinikai tünetek (MCA szindróma):</h4>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><span class="font-semibold">Ellenoldali faciobrachialis (arc-kar) túlsúlyú</span> bénulás és érzészavar.</li>
+                        <li><span class="font-semibold">Homonym hemianopia</span> (látótérkiesés).</li>
+                        <li><span class="font-semibold">Domináns (bal) oldal:</span> Afázia (Broca, Wernicke, globális).</li>
+                        <li><span class="font-semibold">Nem-domináns (jobb) oldal:</span> Neglect szindróma, anosognosia.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vertebro-Basilaris System Section -->
+        <section id="vb-system" class="mb-20">
+            <h2 class="text-4xl font-extrabold text-center mb-10 section-title title-vb">Vertebro-Basilaris Rendszer</h2>
+             <div class="text-center mb-10 max-w-3xl mx-auto">
+                <p class="text-lg text-gray-600">A hátsó keringési rendszer, mely az agytörzset, kisagyat és a nagyagy hátsó részeit látja el. Elzáródásai komplex, gyakran "keresztezett" tüneteket okoznak.</p>
+            </div>
+             <div class="card card-vb p-6 md:p-8">
+                <h3 class="text-2xl font-bold mb-6 text-center text-green-700">Főbb Artériák és Klinikai Szindrómák</h3>
+                <div class="space-y-4" id="vb-accordion">
+                    <!-- A. Vertebralis -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <button class="accordion-button w-full text-left p-4 bg-gray-50 hover:bg-gray-100 font-semibold flex justify-between items-center">
+                            <span>Arteria Vertebralis (AV) és PICA</span>
+                            <span class="text-green-600 text-xl">+</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white">
+                            <p class="mb-3"><span class="font-semibold">Fő ág:</span> A. cerebelli posterior inferior (PICA). Az AV elzáródása okozza a leggyakrabban a Wallenberg-szindrómát.</p>
+                            <h4 class="font-semibold text-lg mb-2">Wallenberg-szindróma (Laterális Medulláris)</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <h5 class="font-medium">Ipsilateralis (azonos oldali) tünetek:</h5>
+                                    <ul class="list-disc list-inside text-sm">
+                                        <li>Vertigo, nystagmus, hányás</li>
+                                        <li>Dysphagia, rekedtség (IX., X. agyideg)</li>
+                                        <li>Horner-szindróma</li>
+                                        <li>Ataxia</li>
+                                        <li>Arcfél fájdalom- és hőérzéskiesés (V. agyideg)</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 class="font-medium">Kontralateralis (ellenoldali) tünetek:</h5>
+                                    <ul class="list-disc list-inside text-sm">
+                                         <li>Testfél fájdalom- és hőérzéskiesés</li>
+                                         <li class="text-gray-500">(Motoros pályák általában megkíméltek)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- A. Basilaris -->
+                     <div class="border rounded-lg overflow-hidden">
+                        <button class="accordion-button w-full text-left p-4 bg-gray-50 hover:bg-gray-100 font-semibold flex justify-between items-center">
+                            <span>Arteria Basilaris (AB)</span>
+                             <span class="text-green-600 text-xl">+</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white">
+                           <p class="mb-3">A két AV egyesüléséből jön létre. Teljes elzáródása katasztrofális.</p>
+                            <h4 class="font-semibold text-lg mb-2">Locked-in Szindróma</h4>
+                            <p class="text-sm mb-3">A híd ventrális részének kétoldali károsodása miatt a beteg tudata tiszta, de teljesen béna (quadriplegia) és néma (anarthria), kommunikálni csak vertikális szemmozgásokkal képes.</p>
+                            <h4 class="font-semibold text-lg mb-2">Top-of-the-Basilar Szindróma</h4>
+                             <p class="text-sm">Az AB csúcsának embóliája. Tünetei: tudatzavar, komplex szemmozgászavarok, vizuális hallucinációk, memóriazavarok, kérgi vakság.</p>
+                        </div>
+                    </div>
+                    <!-- PCA -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <button class="accordion-button w-full text-left p-4 bg-gray-50 hover:bg-gray-100 font-semibold flex justify-between items-center">
+                            <span>Arteria Cerebri Posterior (PCA) és Perforáló Ágai</span>
+                             <span class="text-green-600 text-xl">+</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white">
+                             <p class="mb-4">Ellátja az occipitalis lebenyt, a temporalis lebeny mediális részét, a thalamust és a középagyat.</p>
+                             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div>
+                                    <h5 class="font-semibold mb-1">Kérgi ágak elzáródása:</h5>
+                                     <ul class="list-disc list-inside text-sm space-y-1">
+                                         <li>Kontralaterális homonym hemianopia.</li>
+                                         <li>Alexia agraphia nélkül (olvasási zavar írászavar nélkül).</li>
+                                         <li>Memóriazavarok.</li>
+                                     </ul>
+                                </div>
+                                <div>
+                                     <h5 class="font-semibold mb-1">Weber-szindróma:</h5>
+                                     <p class="text-sm">Ipsilateralis III. agyideg bénulás + kontralateralis hemiparesis.</p>
+                                </div>
+                                 <div>
+                                     <h5 class="font-semibold mb-1">Benedikt-szindróma:</h5>
+                                     <p class="text-sm">Ipsilateralis III. agyideg bénulás + kontralateralis tremor és ataxia.</p>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Venous System Section -->
+        <section id="venous-system" class="mb-20">
+            <h2 class="text-4xl font-extrabold text-center mb-10 section-title title-venous">Agyi Vénás Keringés</h2>
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Superficial & Deep Veins -->
+                <div class="card card-venous p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-purple-700">Felszínes és Mély Vénák</h3>
+                    <p class="font-semibold">Felszínes vénák (vv. superiores/inferiores cerebri):</p>
+                    <p class="mb-3 text-sm">A kéreg felszínéről gyűjtik a vért a duralis sinusokba. Fontos anasztomotikus vénák: Trolard- és Labbé-véna.</p>
+                     <p class="font-semibold">Mély vénák (vv. internae cerebri, v. basalis Rosenthal):</p>
+                    <p class="text-sm">A törzsdúcok, thalamus, capsula interna vérét gyűjtik a <span class="font-semibold">v. magna cerebri (Galeni)</span> felé, ami a sinus rectusba ömlik.</p>
+                </div>
+                <!-- Dural Sinuses -->
+                <div class="card card-venous p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-purple-700">Duralis Vénás Sinusok</h3>
+                     <p class="mb-4">A dura mater kettőzeteiben lévő, merev falú vénás csatornák, melyek a vért a v. jugularis interna felé vezetik. Billentyűket nem tartalmaznak.</p>
+                    <div id="venous-info-box" class="p-3 bg-blue-50 border border-blue-200 rounded-md min-h-[50px]">Válasszon egy sinust az ábrán!</div>
+                </div>
+            </div>
+
+            <div class="card card-venous p-6 md:p-8">
+                <h3 class="text-2xl font-bold mb-4 text-center">Interaktív Sinus Térkép</h3>
+                <div class="w-full flex justify-center interactive-svg">
+                    <svg id="dural-sinus-svg" viewBox="0 0 500 400" width="100%" height="auto" style="max-width: 600px;">
+                        <!-- Simplified Dural Sinus Diagram -->
+                        <title>Duralis Sinusok</title>
+                        <!-- SSS -->
+                        <path class="highlightable" id="sss" data-info="Sinus Sagittalis Superior: A falx cerebri felső szélén fut, a felszínes vénák és a liquor fő gyűjtőhelye. Leggyakoribb thrombosis helyszín." stroke="#1e40af" fill="#60a5fa" d="M 100 50 C 250 20, 400 50, 450 60 L 440 80 C 390 70, 250 40, 110 70 Z" />
+                        <text x="250" y="55" text-anchor="middle" font-size="12" fill="white">S. Sagittalis Superior</text>
+                        <!-- Confluens -->
+                        <ellipse class="highlightable" id="confluens" data-info="Confluens Sinuum (Torcular Herophili): A sinusok összefolyása a tarkónál." stroke="#1e40af" fill="#3b82f6" cx="445" cy="70" rx="40" ry="15"/>
+                        <text x="445" y="75" text-anchor="middle" font-size="12" fill="white">Confluens</text>
+                        <!-- Transversus -->
+                        <path class="highlightable" id="trans" data-info="Sinus Transversus: A tentorium cerebelli mentén fut oldalra." stroke="#1d4ed8" fill="#93c5fd" d="M 445 85 C 400 100, 200 120, 150 200 L 160 215 C 210 135, 400 115, 445 100 Z"/>
+                        <text x="320" y="125" font-size="12" transform="rotate(-15 320,125)">S. Transversus</text>
+                        <!-- Sigmoideus -->
+                        <path class="highlightable" id="sig" data-info="Sinus Sigmoideus: A sinus transversus S-alakú folytatása a v. jugularis internába." stroke="#1e3a8a" fill="#dbeafe" d="M 150 200 C 100 250, 150 300, 180 350 L 200 345 C 170 295, 120 255, 160 215 Z"/>
+                        <text x="160" y="280" font-size="12" transform="rotate(60 160,280)">S. Sigmoideus</text>
+                        <!-- VJI -->
+                        <path class="highlightable" id="vji" data-info="Vena Jugularis Interna: Az agy fő vénás elvezetője." stroke="#1e40af" fill="#60a5fa" d="M 180 350 H 200 V 380 H 180 Z"/>
+                        <text x="190" y="395" text-anchor="middle" font-size="12">V. Jugularis Int.</text>
+                        <!-- Cavernosus -->
+                        <ellipse class="highlightable" id="cavernosus" data-info="Sinus Cavernosus: A sella turcica mellett. Fontos idegképletek és az ACI halad át rajta. Fertőzések veszélyes terjedési útja!" stroke="#7c3aed" fill="#c4b5fd" cx="200" cy="150" rx="30" ry="40"/>
+                        <text x="200" y="155" text-anchor="middle" font-size="12">S. Cavernosus</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Spinal Cord Section -->
+        <section id="spinal-cord">
+            <h2 class="text-4xl font-extrabold text-center mb-10 section-title title-spinal">A Gerincvelő Vérellátása</h2>
+             <div class="grid md:grid-cols-2 gap-8">
+                <!-- Arterial Supply -->
+                <div class="card card-spinal p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-teal-700">Artériás Ellátás</h3>
+                    <p class="font-semibold">Longitudinális artériák:</p>
+                     <ul class="list-disc list-inside text-sm mb-3">
+                        <li><span class="font-semibold">A. Spinalis Anterior (ASA):</span> Páratlan, a gerincvelő elülső 2/3-át látja el (motoros pályák, tractus spinothalamicus).</li>
+                        <li><span class="font-semibold">Aa. Spinales Posteriores (PSA):</span> Páros, a hátsó 1/3-ot látja el (hátsó kötegi pályák).</li>
+                     </ul>
+                     <p class="font-semibold">Szegmentális megerősítés:</p>
+                    <p class="text-sm mb-3">A longitudinális ereket szegmentális medulláris artériák táplálják. Ezek egyenlőtlen eloszlása miatt <span class="font-semibold">"vízválasztó zónák"</span> alakulnak ki (pl. középső thoracalis szakasz), melyek sérülékenyek.</p>
+                     <p class="font-semibold text-red-600">Arteria Radicularis Magna (Adamkiewicz):</p>
+                     <p class="text-sm">Az alsó thoracalis és lumbalis szakasz fő ellátó ere. Sérülése (pl. aortaműtét során) paraplegiát okozhat.</p>
+                </div>
+
+                <!-- Venous Drainage -->
+                <div class="card card-spinal p-6">
+                     <h3 class="text-2xl font-bold mb-3 text-teal-700">Vénás Elvezetés</h3>
+                    <p class="mb-3">Komplex, billentyű nélküli vénás plexusok rendszere.</p>
+                     <p class="font-semibold">Plexus Venosus Vertebralis (Batson-féle plexus):</p>
+                    <p class="text-sm">A gerinccsatornán belül (internus) és kívül (externus) helyezkedik el. Billentyűk hiánya miatt lehetővé teszi a vér kétirányú áramlását.</p>
+                    <p class="mt-3 text-red-600 font-semibold">Klinikai jelentőség:</p>
+                    <p class="text-sm">Fertőzések és daganatos áttétek (pl. prosztata, emlő) terjedési útvonala lehet a kismedencéből/törzsből a csigolyákba és a koponyába, megkerülve a tüdőt.</p>
+                </div>
+            </div>
+            
+            <!-- Spinal Cord Cross-section -->
+            <div class="card card-spinal p-6 md:p-8 mt-8">
+                 <h3 class="text-2xl font-bold mb-4 text-center">Interaktív Gerincvelő Keresztmetszet</h3>
+                 <p class="text-center text-gray-600 mb-6">Mozgassa az egeret a területek fölé, hogy lássa az ellátó artériát és a főbb funkciókat.</p>
+                 <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <svg id="spinal-cord-svg" class="interactive-svg" viewBox="0 0 300 250" width="300px">
+                        <title>Gerincvelő keresztmetszet</title>
+                        <!-- PSA Area -->
+                        <path class="psa-area highlightable" fill="#14b8a6" stroke="#0f766e" data-info="A. Spinalis Posterior (PSA) területe: Hátsó kötegi pályák (propriocepció, vibrációérzés, diszkriminatív tapintás)." d="M 150 50 C 180 50, 220 80, 220 125 C 220 170, 180 200, 150 200 L 150 50 Z" />
+                        <!-- ASA Area -->
+                        <path class="asa-area highlightable" fill="#a7f3d0" stroke="#047857" data-info="A. Spinalis Anterior (ASA) területe: Elülső/oldalsó szarvak (motoros neuronok) és az elülső/oldalsó kötegek (motoros és spinothalamicus pályák - fájdalom- és hőérzés)." d="M 150 50 C 120 50, 80 80, 80 125 C 80 170, 120 200, 150 200 L 150 50 Z" />
+                         <!-- Grey Matter H-shape -->
+                        <path fill="#64748b" stroke="#475569" stroke-width="1.5" d="M150,80 l-40,20 l15,25 l-15,25 l40,20 l40,-20 l-15,-25 l15,-25 Z"/>
+                    </svg>
+                    <div id="spinal-info-box" class="p-4 bg-gray-100 border border-gray-200 rounded-lg w-full md:w-1/2">
+                        <h4 class="font-bold text-lg mb-2">Ellátási Területek</h4>
+                        <p class="text-sm">Az ábra a gerincvelő artériás vérellátását mutatja. A két fő rendszer az elülső (ASA) és a hátsó (PSA) artériák.</p>
+                        <div class="mt-4">
+                            <div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-[#a7f3d0] border border-[#047857]"></div><span>ASA Terület</span></div>
+                            <div class="flex items-center gap-2 mt-1"><div class="w-4 h-4 rounded-full bg-[#14b8a6] border border-[#0f766e]"></div><span>PSA Terület</span></div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white text-center p-4 mt-12">
+        <p>&copy; 2024 Részletes Vizsgafelkészítő. Sok sikert a vizsgához!</p>
+    </footer>
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const setupTooltip = (containerSelector, targetSelector, tooltipElement) => {
+                const container = document.querySelector(containerSelector);
+                if (!container) return;
+
+                const targets = container.querySelectorAll(targetSelector);
+                targets.forEach(target => {
+                    target.addEventListener('mouseover', (event) => {
+                        const info = target.getAttribute('data-info');
+                        tooltipElement.innerHTML = info;
+                        tooltipElement.style.display = 'block';
+                    });
+                    
+                    target.addEventListener('mousemove', (event) => {
+                        tooltipElement.style.left = `${event.clientX + 15}px`;
+                        tooltipElement.style.top = `${event.clientY + 15}px`;
+                    });
+
+                    target.addEventListener('mouseout', () => {
+                        tooltipElement.style.display = 'none';
+                    });
+                });
+            };
+            
+            const setupInfoBox = (containerSelector, targetSelector, infoBoxElement, defaultHTML) => {
+                 const container = document.querySelector(containerSelector);
+                 if (!container || !infoBoxElement) return;
+
+                 const targets = container.querySelectorAll(targetSelector);
+                 targets.forEach(target => {
+                     target.addEventListener('mouseover', () => {
+                         const info = target.getAttribute('data-info');
+                         infoBoxElement.innerHTML = `<p>${info}</p>`;
+                     });
+                     target.addEventListener('mouseout', () => {
+                         infoBoxElement.innerHTML = defaultHTML;
+                     });
+                 });
+            };
+
+            const setupAccordion = (containerId) => {
+                 const accordionContainer = document.getElementById(containerId);
+                 if(!accordionContainer) return;
+
+                 accordionContainer.addEventListener('click', function(e) {
+                    const button = e.target.closest('.accordion-button');
+                    if (!button) return;
+
+                    const isActive = button.classList.contains('active');
+                    
+                    // Close all buttons
+                    const allButtons = accordionContainer.querySelectorAll('.accordion-button');
+                    allButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.querySelector('span:last-child').textContent = '+';
+                    });
+                    
+                    // Toggle current button if it wasn't active
+                    if (!isActive) {
+                        button.classList.add('active');
+                        button.querySelector('span:last-child').textContent = '-';
+                    }
+                });
+            };
+            
+            const mainTooltip = document.getElementById('tooltip');
+
+            // Dural Sinus Info Box
+            const sinusInfoBox = document.getElementById('venous-info-box');
+            const defaultSinusHTML = sinusInfoBox ? sinusInfoBox.innerHTML : '';
+            const sinusSVG = document.getElementById('dural-sinus-svg');
+            if (sinusSVG) {
+                 sinusSVG.addEventListener('click', (e) => {
+                     const target = e.target.closest('.highlightable');
+                     if(target) {
+                        const info = target.getAttribute('data-info');
+                        sinusInfoBox.innerHTML = `<p class='font-semibold'>${target.id.toUpperCase()}:</p><p>${info}</p>`;
+                     }
+                 });
+            }
+
+            // Spinal Cord Info Box
+            const spinalInfoBox = document.getElementById('spinal-info-box');
+            const defaultSpinalHTML = spinalInfoBox ? spinalInfoBox.innerHTML : '';
+            setupInfoBox('#spinal-cord-svg', '.highlightable', spinalInfoBox, defaultSpinalHTML);
+
+            // Accordions
+            setupAccordion('vb-accordion');
+
+        });
+    </script>
+
+</body>
+</html>

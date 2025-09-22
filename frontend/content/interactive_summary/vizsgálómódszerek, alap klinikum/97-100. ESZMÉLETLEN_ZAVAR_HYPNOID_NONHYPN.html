@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Tételek: Interaktív Tanulási Segédlet (Tudatzavarok)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px -2px rgba(0,0,0,0.2);
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background-color: currentColor;
+            border-radius: 2px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-content {
+            flex-grow: 1;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px -5px rgb(0 0 0 / 0.1);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            font-weight: 700;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        h3 {
+            font-size: 1.875rem; /* 30px */
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+        }
+        h4 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .icon {
+            width: 1.5rem; /* 24px */
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        .header-icon {
+             width: 2.25rem; /* 36px */
+            height: 2.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Color Themes */
+        .unconscious-theme { --theme-color: #3b82f6; --theme-bg: #eff6ff; }
+        .confused-theme { --theme-color: #f97316; --theme-bg: #fff7ed; }
+        .hypnoid-theme { --theme-color: #8b5cf6; --theme-bg: #f5f3ff; }
+        .non-hypnoid-theme { --theme-color: #10b981; --theme-bg: #f0fdf4; }
+        
+        h3, h4 { color: var(--theme-color); }
+        th { background-color: var(--theme-bg); color: var(--theme-color); }
+        
+        .red-flag-card {
+            background-color: #fff1f2;
+            border-color: #f43f5e;
+            color: #be123c;
+        }
+        .red-flag-card h4, .red-flag-card .icon {
+            color: #f43f5e;
+        }
+        .exam-tip-card {
+            background-color: #fefce8;
+            border-color: #eab308;
+            color: #a16207;
+        }
+        .exam-tip-card h4, .exam-tip-card .icon {
+            color: #ca8a04;
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Neurológiai Tételek: Tudatzavarok</h1>
+            <p class="text-xl text-gray-500 mt-3">Interaktív tanulási segédlet vizsgához</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12 p-2 bg-gray-100 rounded-full shadow-inner">
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="unconscious">Eszméletlen beteg</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="confused">Zavart beteg & Delírium</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="hypnoid">Hypnoid Tudatzavarok</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="non-hypnoid">Nem-hypnoid Tudatzavarok</button>
+        </div>
+
+        <!-- Content Sections -->
+        <main>
+            <!-- Eszméletlen beteg Section -->
+            <section id="unconscious-content" class="tab-content unconscious-theme">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                           Az Eszméletlen Beteg
+                        </h3>
+                        <p class="text-lg">Az eszméletlenség az éber állapot elvesztése, ahol a beteg nem ébreszthető és nem reagál a külső ingerekre, de az alapvető életfunkciói (légzés, keringés) megvannak. A védekező reflexek (pl. nyelés, köhögés) hiánya miatt azonnali beavatkozást igénylő, életveszélyes állapot.</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
+                            Kórokok (Etiológia)
+                        </h4>
+                         <div class="card-content">
+                             <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Vaszkuláris:</strong> Stroke, agyvérzés.</li>
+                                 <li><strong>Traumás:</strong> Fejsérülés, agyrázkódás, hematómák.</li>
+                                 <li><strong>Metabolikus:</strong> Hipo-/hiperglikémia, máj-/veseelégtelenség.</li>
+                                 <li><strong>Toxikus:</strong> Alkohol, gyógyszer, drog, CO-mérgezés.</li>
+                                 <li><strong>Infekciók:</strong> Meningitis, encephalitis, szepszis.</li>
+                                 <li><strong>Epilepszia:</strong> Postictalis állapot, status epilepticus.</li>
+                             </ul>
+                         </div>
+                    </div>
+                    
+                    <div class="card red-flag-card">
+                         <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                            Sürgősségi Ellátás (ABCDE)
+                        </h4>
+                        <p class="card-content">Az eszméletlen beteg ellátásának alapja a légútbiztosítás és az életfunkciók stabilizálása. <strong>A (Airway):</strong> Légút szabaddá tétele (fej hátrahajtása). <strong>B (Breathing):</strong> Légzés ellenőrzése (10 mp). <strong>C (Circulation):</strong> Keringés jeleinek vizsgálata. Ha van légzés és nincs sérülés gyanúja: <strong>stabil oldalfektetés!</strong> Ha nincs légzés: azonnali újraélesztés.</p>
+                    </div>
+                    
+                    <div class="card md:col-span-3 lg:col-span-3 table-container">
+                        <h4>Glasgow Kóma Skála (GCS)</h4>
+                        <table>
+                            <thead>
+                                <tr><th>Komponens</th><th>Válasz</th><th>Pontszám</th></tr>
+                            </thead>
+                            <tbody>
+                                 <tr><td rowspan="4"><strong>Szemnyitás (E)</strong></td><td>Spontán</td><td>4</td></tr>
+                                 <tr><td>Hangingerre</td><td>3</td></tr>
+                                 <tr><td>Fájdalomingerre</td><td>2</td></tr>
+                                 <tr><td>Nincs</td><td>1</td></tr>
+                                 <tr><td rowspan="5"><strong>Verbális Válasz (V)</strong></td><td>Orientált</td><td>5</td></tr>
+                                 <tr><td>Zavart</td><td>4</td></tr>
+                                 <tr><td>Nem megfelelő szavak</td><td>3</td></tr>
+                                 <tr><td>Érthetetlen hangok</td><td>2</td></tr>
+                                 <tr><td>Nincs</td><td>1</td></tr>
+                                 <tr><td rowspan="6"><strong>Motoros Válasz (M)</strong></td><td>Utasításra végzi</td><td>6</td></tr>
+                                 <tr><td>Fájdalomra lokalizál</td><td>5</td></tr>
+                                 <tr><td>Fájdalomra elhárít</td><td>4</td></tr>
+                                 <tr><td>Kóros flexió (dekortikáció)</td><td>3</td></tr>
+                                 <tr><td>Kóros extenzió (decerebráció)</td><td>2</td></tr>
+                                 <tr><td>Nincs</td><td>1</td></tr>
+                                 <tr><td colspan="2"><strong>Értékelés</strong></td><td><strong>Súlyos: ≤ 8, Közepes: 9-12, Enyhe: ≥ 13</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Zavart beteg & Delírium Section -->
+            <section id="confused-content" class="tab-content confused-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
+                            A Zavart Beteg & Delírium
+                        </h3>
+                        <p class="text-lg">A zavartság a tiszta gondolkodás és tájékozódás képességének zavara. Akut formája a <strong>delírium</strong>, melynek főbb jellemzői a hirtelen kezdet, a tünetek ingadozása (fluktuáció), a figyelemzavar és a tudatállapot változása. A delírium mindig sürgős orvosi kivizsgálást igénylő, potenciálisan reverzibilis állapot.</p>
+                    </div>
+                    
+                    <div class="card exam-tip-card md:col-span-3">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                            Vizsga Tipp: Delírium vs. Demencia
+                        </h4>
+                        <div class="card-content">
+                            <p>A legfontosabb elkülönítő jegyek:</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Kezdet:</strong> A delírium <strong>akut</strong> (órák, napok), a demencia <strong>krónikus</strong> (hónapok, évek).</li>
+                                <li><strong>Lefolyás:</strong> A delírium <strong>fluktuáló</strong>, a demencia stabilan progresszív.</li>
+                                <li><strong>Figyelem:</strong> A delíriumban a figyelem <strong>súlyosan károsodott</strong>, míg a demencia korai szakaszában általában ép.</li>
+                                <li><strong>Reverzibilitás:</strong> A delírium az alapok kezelésével <strong>potenciálisan reverzibilis</strong>, a demencia általában nem.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                           Diagnózis: CAM Módszer
+                        </h4>
+                         <div class="card-content">
+                            <p>A <strong>Confusion Assessment Method (CAM)</strong> a delírium szűrésének gold standardja. A diagnózishoz szükséges:</p>
+                            <ol class="list-decimal list-inside space-y-1 mt-2">
+                                <li>Akut kezdet ÉS fluktuáló lefolyás</li>
+                                <li>Figyelemzavar</li>
+                                <li>Dezorganizált gondolkodás <strong>VAGY</strong></li>
+                                <li>Tudati szint változása</li>
+                            </ol>
+                            <p class="mt-2 font-semibold">Feltétel: (1 ÉS 2) + (3 VAGY 4)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Hypnoid Tudatzavarok Section -->
+            <section id="hypnoid-content" class="tab-content hypnoid-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                           Hypnoid (Kvantitatív) Tudatzavarok
+                        </h3>
+                        <p class="text-lg">Ezek az állapotok az éberség (vigilitás) szintjének csökkenését jelentik, egy kontinuumot képezve a könnyű álmosságtól a teljes ébreszthetetlenségig. Az alváshoz hasonló (innen a "hypnoid" név) állapotokról van szó, melyek súlyossága a beteg ingerekre adott reakciókészségén mérhető le.</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                           Fokozatok
+                        </h4>
+                        <div class="card-content">
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Somnolentia (Aluszékonyság):</strong> Erős ingerrel ébreszthető, de magára hagyva visszaalszik. A válaszok lassúak, de adekvátak lehetnek.</li>
+                                <li><strong>Sopor:</strong> Csak erős, gyakran fájdalmas ingerre reagál (pl. szemnyitás, elhárító mozgás), de adekvát kontaktus nem létesíthető.</li>
+                                <li><strong>Kóma:</strong> Teljes ébreszthetetlenség, még fájdalmas ingerekre sem reagál, vagy csak primitív, reflexszerű motoros válaszok (pl. dekortikáció) figyelhetők meg.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>
+                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v16.5h16.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
+                           Alvászavarok
+                        </h4>
+                        <div class="card-content">
+                            <p>Az alvás-ébrenlét ciklus zavarai gyakran előjelei vagy kísérői a hypnoid tudatzavaroknak.</p>
+                             <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Narkolepszia:</strong> Kóros nappali aluszékonyság, a REM fázis rohamszerű betörése.</li>
+                                <li><strong>Paraszomniák:</strong> Alvás közbeni kóros viselkedések (pl. alvajárás, RBD - REM alvási viselkedészavar).</li>
+                                <li><strong>Súlyos inszomnia/alvásmegvonás:</strong> Hozzájárulhat a nappali tudatfunkciók romlásához.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Nem-Hypnoid Tudatzavarok Section -->
+            <section id="non-hypnoid-content" class="tab-content non-hypnoid-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.311a7.5 7.5 0 01-7.5 0c-1.42 0-2.798-.31-4.04-1.011m15.58 0c-1.242.702-2.62.998-4.04 1.01M6 15a6 6 0 1112 0 6 6 0 01-12 0z" /></svg>
+                           Nem-Hypnoid (Kvalitatív) Tudatzavarok
+                        </h3>
+                        <p class="text-lg">Ezekben az állapotokban a beteg ébernek tűnik, de a tudat tartalma, integrációja, tisztasága súlyosan zavart. Nem az éberség szintje, hanem a tudatosság minősége sérül. Gyakran a valóság és képzelet összemosódása jellemzi őket.</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-5.25 3h9" /></svg>
+                           Főbb Típusok
+                        </h4>
+                        <div class="card-content">
+                             <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Delírium:</strong> Akut, fluktuáló zavartság figyelemzavarral és kognitív diszfunkcióval (lásd előző fül).</li>
+                                <li><strong>Amencia:</strong> Klasszikus pszichiátriai fogalom a súlyos, kaotikus zavartságra, inkoherens gondolkodással és viselkedéssel. Ma leginkább a delírium súlyos formáival vagy akut pszichotikus zavarokkal írható le.</li>
+                                <li><strong>Oneiroid (álomszerű) állapot:</strong> Élénk, fantasztikus, álomszerű hallucinációk és delúziók uralják a tudatot, gyakran katatón tünetekkel.</li>
+                                <li><strong>Homályállapot (Tudatszűkült állapot):</strong> A tudat egy adott élményre vagy cselekvésre szűkül le, a környezet többi része kiesik. Utólagos amnézia jellemzi. Gyakran epilepsziához vagy pszichogén állapotokhoz társul.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card md:col-span-2 table-container">
+                        <h4>"Éber" Tudatzavarok Elkülönítése</h4>
+                        <table>
+                            <thead>
+                                <tr><th>Állapot</th><th>Éberség</th><th>Tudatosság</th><th>Kommunikáció</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Akinetikus Mutizmus</strong></td><td>Ébernek tűnik</td><td>Kérdéses/Hiányzik</td><td>Nincs (motiváció hiánya)</td></tr>
+                                <tr><td><strong>Vegetatív Állapot (PVS/UWS)</strong></td><td>Van alvás-ébrenlét ciklus</td><td>Hiányzik</td><td>Nincs</td></tr>
+                                <tr><td><strong>Minimálisan Tudatos Állapot (MCS)</strong></td><td>Van alvás-ébrenlét ciklus</td><td>Minimális, de egyértelmű</td><td>Inkonzisztens, de lehetséges</td></tr>
+                                <tr><td><strong>Locked-in Szindróma</strong></td><td><strong>Ép</strong></td><td><strong>Ép</strong></td><td>Súlyosan korlátozott (szemmozgás)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        const colorMap = {
+            unconscious: '#3b82f6',
+            confused: '#f97316',
+            hypnoid: '#8b5cf6',
+            'non-hypnoid': '#10b981'
+        };
+
+        const setActiveTab = (tab) => {
+             // Update button styles
+            tabButtons.forEach(btn => {
+                const btnTab = btn.dataset.tab;
+                if (btnTab === tab) {
+                    btn.classList.add('active');
+                    btn.style.backgroundColor = colorMap[btnTab];
+                    btn.style.color = 'white';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.backgroundColor = '#e5e7eb';
+                    btn.style.color = '#4b5563';
+                }
+            });
+
+            // Update content visibility
+            tabContents.forEach(content => {
+                if (content.id === tab + '-content') {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        };
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                setActiveTab(button.dataset.tab);
+            });
+        });
+
+        // Set initial active tab
+        setActiveTab('unconscious');
+    </script>
+
+</body>
+</html>

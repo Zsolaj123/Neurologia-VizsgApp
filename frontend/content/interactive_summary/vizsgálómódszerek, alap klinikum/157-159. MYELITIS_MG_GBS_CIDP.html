@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Tudásbázis: Gyulladásos Neuropathiák és Myasthenia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --c-sky: #0ea5e9;    /* sky-500 */
+            --c-lime: #84cc16;   /* lime-500 */
+            --c-rose: #f43f5e;   /* rose-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-link.active.nav-sky { border-color: var(--c-sky); color: var(--c-sky); }
+        .nav-link.active.nav-lime { border-color: var(--c-lime); color: var(--c-lime); }
+        .nav-link.active.nav-rose { border-color: var(--c-rose); color: var(--c-rose); }
+        
+        .accordion-toggle {
+            transition: background-color 0.2s ease;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out, padding 0.5s ease;
+            padding: 0 1.25rem;
+        }
+        .accordion-content.open {
+            max-height: 9999px; /* Adjust as needed */
+            padding: 0 1.25rem 1.25rem 1.25rem;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb; /* gray-200 */
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9fafb; /* gray-50 */
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .hero-gradient-sky { background: linear-gradient(45deg, #e0f2fe, #e0f2fe); }
+        .hero-gradient-lime { background: linear-gradient(45deg, #f7fee7, #ecfccb); }
+        .hero-gradient-rose { background: linear-gradient(45deg, #fff1f2, #ffe4e6); }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 flex items-center">
+                    <svg class="icon mr-3 text-sky-600" data-lucide="activity"></svg>
+                    <span>Gyulladásos Neuropathiák <span class="font-light text-slate-500">& MG</span></span>
+                </h1>
+                <nav id="main-nav" class="mt-4 md:mt-0 flex flex-wrap justify-center items-center gap-2 md:gap-6">
+                    <a href="#myelitis" class="nav-link nav-sky text-base font-semibold text-gray-600 hover:text-sky-600">Myelitisek</a>
+                    <a href="#gbs-cidp" class="nav-link nav-lime text-base font-semibold text-gray-600 hover:text-lime-600">GBS & CIDP</a>
+                    <a href="#mg" class="nav-link nav-rose text-base font-semibold text-gray-600 hover:text-rose-600">Myasthenia Gravis</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Myelitisek Section -->
+        <section id="myelitis-content" class="content-section">
+            <div class="p-8 rounded-2xl hero-gradient-sky mb-8">
+                <h2 class="text-4xl font-bold text-sky-800">A Gerincvelő Gyulladásos Betegségei (Myelitisek)</h2>
+                <p class="mt-2 text-sky-700 max-w-3xl">A myelitis a gerincvelő gyulladását jelenti, ami motoros, szenzoros és autonóm funkciózavarhoz vezethet. A pontos etiológia felderítése kulcsfontosságú a terápia szempontjából.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-sky-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-sky-800 hover:bg-sky-50">
+                        <span class="flex items-center"><i data-lucide="sitemap" class="mr-3 text-sky-500"></i>Osztályozás és Etiológia</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-sky-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A myelitisek osztályozása az etiológia (fertőzéses, autoimmun, paraneoplasztikus, idiopátiás) és az MRI léziómintázat (fokális, LETM, szürkeállomány-domináns) alapján történik.</p>
+                        <div class="table-container">
+                            <table class="text-sm">
+                                <thead class="bg-sky-50">
+                                    <tr><th>Etiológia</th><th>Jellemző MRI Mintázat</th><th>Tipikus Kórokok/Kórképek</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><b>Fertőzéses</b></td><td>LETM, fokális, szürkeállomány-domináns (pl. elülső szarv), tályog</td><td>Vírusok (Enterovírus, VZV), Baktériumok (Lyme, TB), Paraziták (Schistosoma)</td></tr>
+                                    <tr><td><b>Autoimmun</b></td><td>Rövid, parciális (SM); LETM (NMOSD); "H-jel" (MOGAD)</td><td>Sclerosis Multiplex, NMOSD, MOGAD, Sarcoidosis, SLE</td></tr>
+                                    <tr><td><b>Paraneoplasztikus</b></td><td>LETM, traktus-specifikus, lehet negatív</td><td>Anti-Hu, CRMP5; Kissejtes tüdőrák, emlőrák</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-sky-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-sky-800 hover:bg-sky-50">
+                        <span class="flex items-center"><i data-lucide="stethoscope" class="mr-3 text-sky-500"></i>Specifikus Myelitisek</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-sky-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                         <p class="text-slate-600 mt-4 mb-4">A különböző myelitisek klinikai és radiológiai képe jellegzetes lehet, ami segíti az elkülönítést.</p>
+                         <ul class="list-none space-y-3">
+                            <li class="flex items-start"><i data-lucide="activity" class="h-5 w-5 mr-3 mt-1 text-sky-500 flex-shrink-0"></i><div><b>Transzverzális Myelitis (TM):</b> Egy szindróma, melynek hátterében számos ok állhat. A diagnózis a gyulladás igazolásán és a kompresszió kizárásán alapul. Kezelése nagy dózisú szteroid, súlyos esetben PLEX/IVIG.</div></li>
+                            <li class="flex items-start"><i data-lucide="shield-check" class="h-5 w-5 mr-3 mt-1 text-sky-500 flex-shrink-0"></i><div><b>Autoimmun Myelitisek:</b> Az SM-re a rövid, aszimmetrikus léziók, az NMOSD-re a LETM és AQP4-IgG pozitivitás, a MOGAD-re a LETM és/vagy a conus érintettség és MOG-IgG pozitivitás jellemző. A Sarcoidosisra a "trident sign" lehet specifikus.</div></li>
+                            <li class="flex items-start"><i data-lucide="bug" class="h-5 w-5 mr-3 mt-1 text-sky-500 flex-shrink-0"></i><div><b>Fertőzéses Myelitisek:</b> Az akut flaccid myelitis (AFM) enterovírusokra, a tabes dorsalis szifiliszre, a Pott-betegség tuberkulózisra utal. A diagnózis a kórokozó kimutatásán alapul.</div></li>
+                         </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GBS & CIDP Section -->
+        <section id="gbs-cidp-content" class="content-section">
+            <h2 class="text-3xl font-bold mb-2 text-slate-800">Guillain-Barré & CIDP</h2>
+            <div class="w-24 h-1.5 bg-lime-500 rounded-full mb-6"></div>
+            <p class="mb-8 text-slate-600 max-w-3xl">A GBS és a CIDP a perifériás idegrendszer két legfontosabb immunmediált, demielinizációs betegsége. Alapvető különbségük az időbeli lefolyásukban rejlik.</p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-lime-400">
+                    <h3 class="text-2xl font-bold mb-4 text-lime-800 flex items-center"><i data-lucide="siren" class="mr-3"></i>Guillain-Barré-Szindróma (GBS)</h3>
+                    <p class="text-sm text-slate-600 mb-4">Akut, gyorsan progrediáló, monofázisos polyneuropathia, melyet az esetek 70%-ában fertőzés előz meg.</p>
+                    <ul class="list-none space-y-3 text-sm">
+                        <li class="flex items-start"><i data-lucide="trending-up" class="h-5 w-5 mr-2 mt-0.5 text-lime-600 flex-shrink-0"></i><div><b>Klinikum:</b> Szimmetrikus, <b>felszálló petyhüdt bénulás</b> és <b>areflexia</b>. Gyakori a kétoldali arcidegbénulás és az autonóm diszfunkció. A légzési elégtelenség életveszélyes lehet.</div></li>
+                        <li class="flex items-start"><i data-lucide="test-tube-2" class="h-5 w-5 mr-2 mt-0.5 text-lime-600 flex-shrink-0"></i><div><b>Diagnózis:</b> Liquorban <b>albuminocytológiai disszociáció</b> (fehérje↑, sejt↓). ENG/EMG demielinizációt igazol.</div></li>
+                        <li class="flex items-start"><i data-lucide="life-buoy" class="h-5 w-5 mr-2 mt-0.5 text-lime-600 flex-shrink-0"></i><div><b>Kezelés:</b> Szupportív ellátás, <b>IVIG</b> vagy <b>plazmaferezis</b>. A szteroidok hatástalanok!</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-lime-400">
+                    <h3 class="text-2xl font-bold mb-4 text-lime-800 flex items-center"><i data-lucide="hourglass" class="mr-3"></i>Krónikus Inflammatoros Demyelinizációs Polyneuropathia (CIDP)</h3>
+                    <p class="text-sm text-slate-600 mb-4">Krónikus (>8 hét), progrediáló vagy relabáló polyneuropathia, a GBS krónikus megfelelője.</p>
+                     <ul class="list-none space-y-3 text-sm">
+                        <li class="flex items-start"><i data-lucide="move-3d" class="h-5 w-5 mr-2 mt-0.5 text-lime-600 flex-shrink-0"></i><div><b>Klinikum:</b> Szimmetrikus, <b>proximális és disztális</b> izomgyengeség, érzészavarok. Léteznek atipikus (pl. multifokális, disztális, tisztán motoros/szenzoros) formái.</div></li>
+                        <li class="flex items-start"><i data-lucide="clipboard-check" class="h-5 w-5 mr-2 mt-0.5 text-lime-600 flex-shrink-0"></i><div><b>Diagnózis:</b> Az EFNS/PNS kritériumok alapján, melyek a klinikai képen, a liquorleleten és az ENG/EMG-n igazolt demielinizáción alapulnak.</div></li>
+                        <li class="flex items-start"><i data-lucide="shield" class="h-5 w-5 mr-2 mt-0.5 text-lime-600 flex-shrink-0"></i><div><b>Kezelés:</b> Hosszú távú immunterápia. Első vonalban <b>kortikoszteroidok</b>, <b>IVIG</b>, vagy <b>plazmaferezis</b>. Fenntartó kezelésre immunszuppresszánsok (pl. azathioprin, MMF).</div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Myasthenia Gravis Section -->
+        <section id="mg-content" class="content-section">
+             <div class="p-8 rounded-2xl hero-gradient-rose mb-8">
+                <h2 class="text-4xl font-bold text-rose-800">Myasthenia Gravis (MG)</h2>
+                <p class="mt-2 text-rose-700 max-w-3xl">Krónikus, autoimmun neuromuszkuláris betegség, melyet a vázizmok változó mértékű, terhelésre fokozódó gyengesége és kóros fáradékonysága jellemez.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-rose-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-rose-800 hover:bg-rose-50">
+                        <span class="flex items-center"><i data-lucide="atom" class="mr-3 text-rose-500"></i>Patofiziológia és Osztályozás</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-rose-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A betegség lényege, hogy az immunrendszer autoantitesteket termel a neuromuszkuláris junkció (NMJ) posztszinaptikus membránján lévő fehérjék (leggyakrabban az acetilkolin receptor - AChR) ellen.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><b>Fő autoantitestek:</b> Anti-AChR (85-90%), Anti-MuSK (1-10%), Anti-LRP4.</li>
+                            <li><b>Thymus szerepe:</b> A csecsemőmirigy központi szerepet játszik az AChR-pozitív MG-ben. Gyakori a thymus hyperplasia (~70%) vagy thymoma (~10-15%).</li>
+                            <li><b>Osztályozás:</b> Az MGFA klasszifikáció a betegség súlyosságát I. (okuláris) - V. (myastheniás krízis) osztályba sorolja.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-rose-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-rose-800 hover:bg-rose-50">
+                        <span class="flex items-center"><i data-lucide="eye" class="mr-3 text-rose-500"></i>Klinikai Kép és Diagnózis</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-rose-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A legfőbb jellemző az ingadozó, fáradásra fokozódó izomgyengeség.</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-semibold text-rose-900 mb-2">Gyakori tünetek:</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li><b>Okuláris:</b> Ptosis (szemhéjcsüngés), diplopia (kettőslátás).</li>
+                                    <li><b>Bulbáris:</b> Dysarthria (beszédzavar), dysphagia (nyelészavar).</li>
+                                    <li><b>Generalizált:</b> Proximális végtaggyengeség, légzőizom-gyengeség.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-rose-900 mb-2">Diagnosztika:</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li><b>Szerológia:</b> Anti-AChR, anti-MuSK antitestek kimutatása.</li>
+                                    <li><b>Elektrofiziológia:</b> Repetitív idegingerlés (RNS) decrementumot, az egyrost EMG (SFEMG) megnyúlt jittert mutat.</li>
+                                    <li><b>Képalkotás:</b> Mellkas CT/MRI a thymus vizsgálatára.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-rose-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-rose-800 hover:bg-rose-50">
+                        <span class="flex items-center"><i data-lucide="syringe" class="mr-3 text-rose-500"></i>Kezelési Stratégiák</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-rose-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A kezelés mindig individualizált, célja a tünetek enyhítése és az immunválasz módosítása.</p>
+                        <div class="table-container">
+                            <table class="text-sm">
+                                <thead class="bg-rose-50">
+                                    <tr><th>Terápiás Csoport</th><th>Példa</th><th>Fő Indikáció</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><b>Tüneti kezelés (AChE-gátlók)</b></td><td>Piridosztigmin (Mestinon)</td><td>Enyhe MG, alap tüneti kontroll.</td></tr>
+                                    <tr><td><b>Hosszú távú immunterápia</b></td><td>Kortikoszteroidok, Azathioprin, MMF</td><td>Közepesen súlyos/súlyos MG, szteroid-megtakarítás.</td></tr>
+                                    <tr><td><b>Gyorsan ható immunterápiák</b></td><td>Plazmaferezis (PLEX), IVIG</td><td>Myastheniás krízis, súlyos állapotromlás.</td></tr>
+                                    <tr><td><b>Sebészeti kezelés</b></td><td>Timektómia</td><td>Thymoma esetén kötelező; AChR+ nem-thymomás MG-ben ajánlott.</td></tr>
+                                    <tr><td><b>Célzott terápiák</b></td><td>Rituximab, Eculizumab, Efgartigimod</td><td>Refrakter MG.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 mt-8 bg-slate-800 text-slate-400">
+        <p>&copy; 2025 Neurológiai Tudásbázis. Kizárólag oktatási és tájékoztatási célokat szolgál.</p>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Navigation Logic
+        const navLinks = document.querySelectorAll('#main-nav a');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        function switchTab(hash) {
+            const targetLink = document.querySelector(`a[href="${hash}"]`);
+            if (!targetLink) return;
+
+            navLinks.forEach(l => l.classList.remove('active'));
+            targetLink.classList.add('active');
+
+            const targetId = hash.substring(1) + '-content';
+            contentSections.forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hash = link.getAttribute('href');
+                history.replaceState(null, null, hash);
+                switchTab(hash);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Set the active tab on page load based on the hash
+        if (window.location.hash) {
+            switchTab(window.location.hash);
+        } else {
+            // Default to the first tab if no hash is present
+            switchTab('#myelitis');
+        }
+
+        // Accordion Logic
+        const accordionToggles = document.querySelectorAll('.accordion-toggle');
+
+        accordionToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('.accordion-icon');
+                
+                if (content && icon) {
+                    content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

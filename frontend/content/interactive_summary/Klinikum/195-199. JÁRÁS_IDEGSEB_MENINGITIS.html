@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Részletes Neurológiai Vizsgaanyag II.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark .bg-gray-50 { background-color: #171923; }
+        .dark .text-gray-800 { color: #e2e8f0; }
+        .dark .text-gray-700 { color: #cbd5e0; }
+        .dark .text-gray-600 { color: #a0aec0; }
+        .dark .text-gray-500 { color: #cbd5e0; }
+        .dark .border-gray-200 { border-color: #4a5568; }
+        .dark .bg-gray-100 { background-color: #2d3748; }
+        .dark .hover\:bg-gray-200:hover { background-color: #4a5568; }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25); }
+        .dark h1, .dark h2, .dark h3, .dark h4 { color: #f7fafc; }
+        .dark th { background-color: #4a5568; }
+        .dark td { border-color: #4a5568; }
+        .dark tr:nth-child(even) { background-color: #2d3748; }
+        .dark tr:nth-child(odd) { background-color: #4a5568; }
+        
+        .content-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid;
+        }
+        .content-section h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .content-section h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .content-section p, .content-section li {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+        .content-section ul {
+            list-style-type: none;
+            padding-left: 1rem;
+        }
+        .content-section ul li::before {
+            content: '🔹';
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        .content-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .content-section th, .content-section td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        .content-section th {
+            background-color: #f7fafc;
+            font-weight: 600;
+        }
+        .content-section tr:nth-child(even) {
+            background-color: #edf2f7;
+        }
+        
+        .nav-item.active {
+            background-color: #4c51bf;
+            color: white;
+            font-weight: 600;
+        }
+        .dark .nav-item.active {
+            background-color: #9f7aea;
+        }
+        .nav-item.active i {
+            color: white !important;
+        }
+
+        .highlight {
+            background: linear-gradient(to top, rgba(255, 235, 59, 0.6) 50%, transparent 50%);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .dark .highlight {
+             background: linear-gradient(to top, rgba(251, 211, 141, 0.5) 50%, transparent 50%);
+        }
+        .key-term {
+            font-weight: 600;
+            color: #c53030;
+        }
+        .dark .key-term {
+            color: #fc8181;
+        }
+        .alert {
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-left-width: 5px;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+        }
+        .alert-icon {
+            margin-right: 1rem;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+        .alert-danger { background-color: #fff5f5; border-color: #e53e3e; color: #c53030; }
+        .dark .alert-danger { background-color: #4c1d1d; border-color: #fc8181; color: #fed7d7; }
+        .alert-warning { background-color: #fffaf0; border-color: #dd6b20; color: #b7791f; }
+        .dark .alert-warning { background-color: #4a2a0c; border-color: #f6ad55; color: #fbd38d; }
+        .alert-info { background-color: #ebf8ff; border-color: #4299e1; color: #2c5282; }
+        .dark .alert-info { background-color: #2a4365; border-color: #63b3ed; color: #bee3f8; }
+
+        #menu-toggle { display: none; }
+        @media (max-width: 768px) {
+            #menu-toggle { display: block; }
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                position: fixed;
+                z-index: 40;
+                height: 100%;
+            }
+            #sidebar.open { transform: translateX(0); }
+            #main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex h-screen">
+        <aside id="sidebar" class="w-72 bg-white shadow-lg p-4 space-y-2 overflow-y-auto">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-blue-500">Neurológia</h1>
+                <p class="text-sm text-gray-500">Vizsgaanyag II.</p>
+            </div>
+            <nav id="nav-menu">
+                <!-- Navigation items will be inserted here by JavaScript -->
+            </nav>
+            <div class="absolute bottom-4 left-4">
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun hidden"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main id="main-content" class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div id="content-display" class="bg-white p-6 md:p-10 rounded-lg shadow-lg">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-gray-700">Részletes Neurológiai Vizsgaanyag II.</h1>
+                    <p class="mt-4 text-lg text-gray-600">Válassz egy témakört a bal oldali menüből a felkészüléshez.</p>
+                    <i class="fas fa-book-medical text-9xl text-cyan-300 mt-12 animate-pulse"></i>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const contentData = {
+            "t196": {
+                title: "Járászavarok",
+                icon: "fa-solid fa-person-walking",
+                color: "text-blue-500",
+                content: {
+                    "t196_bevezetes": {
+                        title: "Bevezetés és Alapok",
+                        html: `
+                            <h2 style="border-color: #3b82f6;">Járászavarok Differenciáldiagnózisa</h2>
+                            <p>A járás egy összetett motoros cselekedet, amely számos idegrendszeri struktúra (agykéreg, bazális ganglionok, kisagy, agytörzs, gerincvelő, perifériás idegek) összehangolt működését igényli. A kóros járásmintázatok felismerése és elemzése kulcsfontosságú diagnosztikai információt nyújt a háttérben álló neurológiai kórképekről.</p>
+                             <div class="alert alert-info">
+                                <i class="fas fa-shoe-prints alert-icon"></i>
+                                <div><h5 class="font-bold">A Járásvizsgálat Jelentősége</h5><p class="text-sm">A járás egyfajta „ablakként” szolgálhat az idegrendszer működésére. A specifikus járásminta megfigyelése lehetővé teszi a klinikus számára, hogy következtessen az idegrendszeri diszfunkció valószínű anatómiai régiójára, irányítva a további célzott vizsgálatokat.</p></div>
+                            </div>
+                        `
+                    },
+                    "t196_jarasmintak": {
+                        title: "Neurológiai Járásminták",
+                        html: `
+                            <h3 style="color: #2563eb;">Specifikus Neurológiai Járásminták</h3>
+                            <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700">
+                                    <tr><th class="px-6 py-3">Járászavar Típusa</th><th class="px-6 py-3">Jellegzetes Mintázat</th><th class="px-6 py-3">Fő Neurológiai Korrelátum</th><th class="px-6 py-3">Gyakori Okok</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Spasztikus Járás</td><td class="px-6 py-4">Merev, "ollózó" (scissoring) lépték, a láb circumductiója (körző mozgás).</td><td class="px-6 py-4"><span class="key-term">Felső motoneuron károsodás</span></td><td class="px-6 py-4">Stroke, sclerosis multiplex, agyi bénulás</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Ataxiás Járás</td><td class="px-6 py-4">Széles alapú, bizonytalan, tántorgó, "részeges" járás.</td><td class="px-6 py-4"><span class="key-term">Kisagyi (cerebelláris) diszfunkció</span></td><td class="px-6 py-4">Stroke, daganat, alkoholos cerebelláris degeneráció</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Parkinsonos Járás</td><td class="px-6 py-4">Csoszogó, apró léptű ("marche à petits pas"), a törzs előredőlt, <span class="highlight">járásindítási nehézség (hezitáció)</span> és <span class="highlight">"lefagyás" (freezing)</span>.</td><td class="px-6 py-4">A <span class="key-term">bazális ganglionok</span> károsodása</td><td class="px-6 py-4">Parkinson-kór, atípusos parkinsonizmusok</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Szenzoros Ataxia</td><td class="px-6 py-4">Széles alapú, bizonytalan, a beteg a lábát "dobálja", a talajt erősen megüti. <span class="highlight">Sötétben vagy csukott szemmel jelentősen rosszabbodik</span> (pozitív Romberg-tünet).</td><td class="px-6 py-4">A <span class="key-term">proprioceptív (mélyérző) pályák</span> károsodása</td><td class="px-6 py-4">B12-vitamin hiány, perifériás neuropathiák</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Neuropátiás (Lépcsőző)</td><td class="px-6 py-4">Lábcsüngés (foot drop) miatt a beteg a lábát magasra emeli, hogy ne akadjon el a lábfeje.</td><td class="px-6 py-4"><span class="key-term">Perifériás idegkárosodás</span> (n. peroneus)</td><td class="px-6 py-4">Peroneus paresis, L5 radiculopathia, Charcot-Marie-Tooth</td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        `
+                    }
+                }
+            },
+            "t197": {
+                title: "Idegsebészet Mozgászavarokban",
+                icon: "fa-solid fa-brain",
+                color: "text-pink-500",
+                content: {
+                    "t197_bevezetes": {
+                        title: "Bevezetés",
+                        html: `
+                            <h2 style="border-color: #ec4899;">Idegsebészeti Beavatkozások Mozgászavarokban</h2>
+                            <p>Amikor a gyógyszeres kezelés már nem elegendő a mozgászavarok (pl. Parkinson-kór, esszenciális tremor, dystonia) tüneteinek kontrollálására, vagy súlyos mellékhatásokkal jár, funkcionális idegsebészeti beavatkozások jöhetnek szóba. Ezek a módszerek az agyi motoros körök kóros aktivitásának modulálásával vagy megszakításával enyhítik a tüneteket.</p>
+                        `
+                    },
+                    "t197_dbs": {
+                        title: "Mélyagyi Stimuláció (DBS)",
+                        html: `
+                            <h3 style="color: #db2777;">Mélyagyi Stimuláció (DBS - Deep Brain Stimulation)</h3>
+                            <p>A DBS a leggyakrabban alkalmazott idegsebészeti eljárás mozgászavarokban. Lényege, hogy egy vagy több, precízen beültetett elektródán keresztül nagyfrekvenciájú elektromos ingerlést alkalmaznak az agy specifikus mély magjaiban (pl. STN, GPi, VIM). Az elektródákat egy beültetett, programozható neurostimulátor (pacemaker) vezérli.</p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-toggle-on alert-icon"></i>
+                                <div><h5 class="font-bold">A DBS Előnye</h5><p class="text-sm">A DBS legnagyobb előnye, hogy <span class="highlight">reverzibilis és állítható</span>, lehetővé téve a kezelés finomhangolását a betegség változásaihoz és a mellékhatások minimalizálásához.</p></div>
+                            </div>
+                            <h4>Főbb Indikációk és Várható Eredmények</h4>
+                            <ul>
+                                <li><strong>Parkinson-kór:</strong> Előrehaladott betegség, súlyos motoros fluktuációkkal és diszkinéziákkal. A DBS javítja a tremort, rigiditást, bradykinesiát, csökkenti a fluktuációkat és a gyógyszerigényt.</li>
+                                <li><strong>Esszenciális Tremor:</strong> Súlyos, gyógyszerrezisztens tremor. A DBS a tremor jelentős, gyakran drámai csökkenését eredményezi.</li>
+                                <li><strong>Dystonia:</strong> Súlyos, gyógyszerrezisztens generalizált vagy cervicalis dystonia. A DBS enyhíti a dystoniás mozgásokat és a fájdalmat.</li>
+                            </ul>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-triangle-exclamation alert-icon"></i>
+                                <div><h5 class="font-bold">Kockázatok</h5><p class="text-sm">A műtéti kockázatok (vérzés, fertőzés) mellett előfordulhatnak hardverrel kapcsolatos problémák és stimulációval összefüggő, általában korrigálható mellékhatások (pl. beszédzavar, zsibbadás).</p></div>
+                            </div>
+                        `
+                    },
+                    "t197_ablativ": {
+                        title: "Ablatív Eljárások",
+                        html: `
+                            <h3 style="color: #db2777;">Ablatív Sebészeti Eljárások</h3>
+                            <p>Ezek a beavatkozások egy kis, célzott agyterület <span class="key-term">irreverzibilis roncsolásával</span> (lézióképzés) szüntetik meg a kóros agyi aktivitást. Régebben nyitott műtéttel végezték, ma már a minimálisan invazív technikák kerülnek előtérbe.</p>
+                            <h4>Mágneses Rezonancia Vezérelt Fókuszált Ultrahang (MRgFUS)</h4>
+                            <p>Teljesen <span class="highlight">non-invazív</span> eljárás, amely nem igényel koponyamegnyitást. Nagy energiájú, fókuszált ultrahanghullámokkal, MRI vezérlés mellett, precízen felmelegítik és elpusztítják a célterületet (leggyakrabban a thalamus VIM magját).</p>
+                            <ul>
+                                <li><strong>Indikációk:</strong> Főként esszenciális tremor és tremor-domináns Parkinson-kór kezelésére alkalmazzák, általában egyoldali beavatkozásként.</li>
+                                <li><strong>Előnyök:</strong> Azonnali hatás, nincs implantátummal kapcsolatos kockázat.</li>
+                                <li><strong>Hátrányok:</strong> Irreverzibilis, a beállítások utólag nem módosíthatók.</li>
+                            </ul>
+                        `
+                    }
+                }
+            },
+            "t198": {
+                title: "Autonóm Idegrendszer",
+                icon: "fa-solid fa-network-wired",
+                color: "text-teal-500",
+                content: {
+                    "t198_bevezetes": {
+                        title: "Anatómia és Fiziológia",
+                        html: `
+                            <h2 style="border-color: #14b8a6;">Az Autonóm Idegrendszer Zavarainak Vizsgálata</h2>
+                            <p>Az autonóm (vegetatív) idegrendszer (ANI) az akaratunktól független élettani folyamatokat szabályozza, mint a szívműködés, vérnyomás, emésztés. Célja a <span class="key-term">homeosztázis</span> fenntartása. Két fő alrendszere van, amelyek dinamikus egyensúlyban működnek:</p>
+                            <ul>
+                                <li><strong>Szimpatikus Idegrendszer:</strong> A "harcolj vagy menekülj" (fight or flight) válaszért felelős, felkészítve a szervezetet az erőkifejtésre.</li>
+                                <li><strong>Paraszimpatikus Idegrendszer:</strong> A "pihenj és eméssz" (rest and digest) funkciókat látja el, az energia megőrzésére és újratermelésére fókuszál.</li>
+                            </ul>
+                        `
+                    },
+                    "t198_klinikum": {
+                        title: "Klinikai Manifesztációk",
+                        html: `
+                            <h3 style="color: #0d9488;">Gyakori Klinikai Manifesztációk</h3>
+                            <p>Az autonóm diszfunkciók (diszautonómiák) rendkívül szerteágazó tüneteket okozhatnak, érintve szinte minden szervrendszert.</p>
+                            <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700">
+                                    <tr><th class="px-6 py-3">Szervrendszer</th><th class="px-6 py-3">Gyakori Tünetek/Jelek</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Kardiovaszkuláris</td><td class="px-6 py-4"><span class="key-term">Ortosztatikus hipotenzió (OH)</span>, nyugalmi tachycardia, vérnyomás labilitás (fekvő hipertónia).</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Szudomotoros</td><td class="px-6 py-4">Csökkent (anhidrosis) vagy fokozott (hyperhidrosis) verejtékezés, hőintolerancia.</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Gasztrointesztinális</td><td class="px-6 py-4">Gastroparesis (lassult gyomorürülés), krónikus székrekedés, hasmenés.</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Urogenitális</td><td class="px-6 py-4">Neurogén hólyag (inkontinencia, retenció), <span class="highlight">erektilis diszfunkció</span>.</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Pupillomotoros</td><td class="px-6 py-4">Pupillaszűkület/tágulat, renyhe fényreakció.</td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        `
+                    },
+                    "t198_diagnosztika": {
+                        title: "Diagnosztikai Tesztek",
+                        html: `
+                            <h3 style="color: #0d9488;">Autonóm Funkciós Tesztek</h3>
+                            <p>Céljuk a diszautonómia jelenlétének, súlyosságának és eloszlásának objektív kimutatása.</p>
+                            <ul>
+                                <li><strong>Kardiovaszkuláris Reflex Tesztek:</strong>
+                                    <ul>
+                                        <li><strong>Billenőasztal-vizsgálat (HUTT):</strong> Az ortosztatikus tolerancia, nOH, POTS és vazovagális syncope diagnosztizálására szolgáló provokációs teszt.</li>
+                                        <li><strong>Valsalva-manőver:</strong> A baroreflex funkciót vizsgálja standardizált préselési manőverrel.</li>
+                                        <li><strong>Mély légzési teszt (HRDB):</strong> A kardiovagális (paraszimpatikus) funkciót méri.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Szudomotoros Tesztek:</strong>
+                                    <ul>
+                                        <li><strong>QSART (Quantitative Sudomotor Axon Reflex Test):</strong> A posztganglionáris szimpatikus szudomotoros axonok integritását vizsgálja.</li>
+                                        <li><strong>TST (Thermoregulatory Sweat Test):</strong> A teljes test verejtékezési mintázatát térképezi fel.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Képalkotó/Biokémiai Tesztek:</strong>
+                                    <ul>
+                                        <li><strong>MIBG Szívszcintigráfia:</strong> A szív posztganglionáris szimpatikus beidegzésének épségét vizsgálja. Fontos a Parkinson-kór és az MSA elkülönítésében.</li>
+                                        <li><strong>Plazma Noradrenalin mérés:</strong> A szimpatikus idegrendszer aktivitásának indirekt mutatója.</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        `
+                    }
+                }
+            },
+            "t199": {
+                title: "KIR Fertőzések",
+                icon: "fa-solid fa-head-side-virus",
+                color: "text-rose-500",
+                content: {
+                    "t199_meningitis": {
+                        title: "Bakteriális Meningitis",
+                        html: `
+                            <h2 style="border-color: #f43f5e;">Bakteriális Meningitis</h2>
+                            <p>Az agyhártyák (meninges) gennyes gyulladása. Orvosi vészhelyzet, amely azonnali beavatkozást igényel.</p>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-triangle-exclamation alert-icon"></i>
+                                <div><h5 class="font-bold">Klasszikus Tünettriász</h5><p class="text-sm"><span class="key-term">Láz, fejfájás és tarkókötöttség (meningizmus)</span>. Gyakori a tudatzavar és a fotofóbia is.</p></div>
+                            </div>
+                            <h4>Diagnózis és Kezelés</h4>
+                            <ul>
+                                <li><strong>Diagnózis:</strong> A diagnózis sarokköve a <span class="highlight">liquor (CSF) vizsgálata</span> lumbálpunkcióval. Jellemző a zavaros liquor, magas sejtszám (neutrofil dominancia), magas fehérje és alacsony glükózszint.</li>
+                                <li><strong>Kezelés:</strong> Azonnali, empirikus, intravénás <span class="key-term">antibiotikum terápia</span> (pl. 3. generációs cephalosporin + vancomycin) és adjuváns <span class="key-term">dexametazon</span> adása a szövődmények csökkentésére.</li>
+                            </ul>
+                        `
+                    },
+                    "t199_agytalyog": {
+                        title: "Agytályog",
+                        html: `
+                            <h3 style="color: #e11d48;">Agytályog (Cerebrális Abscesszus)</h3>
+                            <p>Egy körülírt, tokkal körülvett gennygyülem az agyállományon belül, amely térfoglaló folyamatként viselkedik.</p>
+                             <div class="alert alert-danger">
+                                <i class="fas fa-ban alert-icon"></i>
+                                <div><h5 class="font-bold">Kontraindikáció!</h5><p class="text-sm">Agytályog gyanúja esetén a tömeghatás és a beékelődés veszélye miatt a <span class="key-term">lumbálpunkció általában kontraindikált!</span></p></div>
+                            </div>
+                            <h4>Klinikai Kép és Diagnózis</h4>
+                            <ul>
+                                <li><strong>Klinikum:</strong> A tünetek lassabban alakulnak ki. Jellemző a fejfájás, <span class="highlight">fokális neurológiai deficit</span> (a tályog helyétől függően, pl. hemiparesis), és gyakoriak a <span class="highlight">görcsrohamok</span>. A láz hiányozhat.</li>
+                                <li><strong>Diagnózis:</strong> Az <span class="key-term">agyi képalkotó vizsgálatok</span> (kontrasztanyagos CT/MRI) kulcsfontosságúak. Jellemző a gyűrűszerűen kontrasztot halmozó elváltozás.</li>
+                            </ul>
+                            <h4>Kezelés</h4>
+                            <p>Hosszú távú (4-8 hét) intravénás antibiotikum terápia. Nagyobb, felszínes vagy a kezelésre nem reagáló tályogok esetén <span class="key-term">sebészeti beavatkozás</span> (sztereotaxiás aspiráció vagy drenázs) szükséges.</p>
+                        `
+                    }
+                }
+            }
+        };
+
+        const navMenu = document.getElementById('nav-menu');
+        const contentDisplay = document.getElementById('content-display');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // Generate navigation menu
+        Object.keys(contentData).forEach(mainKey => {
+            const mainTopic = contentData[mainKey];
+            const mainNavItem = document.createElement('div');
+            mainNavItem.innerHTML = `
+                <button class="w-full text-left p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between nav-item" data-id="${mainKey}">
+                    <span class="font-semibold"><i class="${mainTopic.icon} ${mainTopic.color} mr-3"></i>${mainTopic.title}</span>
+                    <i class="fas fa-chevron-down transform transition-transform"></i>
+                </button>
+            `;
+            const subMenu = document.createElement('div');
+            subMenu.className = 'pl-6 mt-2 space-y-1 hidden';
+            
+            Object.keys(mainTopic.content).forEach(subKey => {
+                const subTopic = mainTopic.content[subKey];
+                const subNavItem = document.createElement('a');
+                subNavItem.href = '#';
+                subNavItem.className = 'block p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 nav-item';
+                subNavItem.textContent = subTopic.title;
+                subNavItem.dataset.id = subKey;
+                subMenu.appendChild(subNavItem);
+            });
+
+            mainNavItem.querySelector('button').addEventListener('click', (e) => {
+                subMenu.classList.toggle('hidden');
+                e.currentTarget.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
+            });
+
+            navMenu.appendChild(mainNavItem);
+            navMenu.appendChild(subMenu);
+        });
+
+        // Handle content display
+        navMenu.addEventListener('click', (e) => {
+            e.preventDefault();
+            let target = e.target;
+            while(target && !target.classList.contains('nav-item')) {
+                target = target.parentElement;
+            }
+
+            if (target && target.matches('.nav-item')) {
+                const id = target.dataset.id;
+                
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                target.classList.add('active');
+
+                let contentHtml = '';
+                for (const mainKey in contentData) {
+                    if (contentData[mainKey].content[id]) {
+                        contentHtml = contentData[mainKey].content[id].html;
+                        break;
+                    }
+                }
+                
+                if (contentHtml) {
+                    contentDisplay.innerHTML = contentHtml;
+                    contentDisplay.scrollTop = 0;
+                    if(window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            }
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = themeToggle.querySelector('.fa-sun');
+        const moonIcon = themeToggle.querySelector('.fa-moon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+
+        // Mobile menu toggle
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+    </script>
+</body>
+</html>

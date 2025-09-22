@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Részletes Neurológiai Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark .bg-gray-50 { background-color: #171923; }
+        .dark .text-gray-800 { color: #e2e8f0; }
+        .dark .text-gray-700 { color: #cbd5e0; }
+        .dark .text-gray-600 { color: #a0aec0; }
+        .dark .text-gray-500 { color: #cbd5e0; }
+        .dark .border-gray-200 { border-color: #4a5568; }
+        .dark .bg-gray-100 { background-color: #2d3748; }
+        .dark .hover\:bg-gray-200:hover { background-color: #4a5568; }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25); }
+        .dark h1, .dark h2, .dark h3, .dark h4 { color: #f7fafc; }
+        .dark th { background-color: #4a5568; }
+        .dark td { border-color: #4a5568; }
+        .dark tr:nth-child(even) { background-color: #2d3748; }
+        .dark tr:nth-child(odd) { background-color: #4a5568; }
+        
+        .content-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid;
+        }
+        .content-section h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .content-section h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .content-section p, .content-section li {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+        .content-section ul {
+            list-style-type: none;
+            padding-left: 1rem;
+        }
+        .content-section ul li::before {
+            content: '🔹';
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        .content-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .content-section th, .content-section td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        .content-section th {
+            background-color: #f7fafc;
+            font-weight: 600;
+        }
+        .content-section tr:nth-child(even) {
+            background-color: #edf2f7;
+        }
+        
+        .nav-item.active {
+            background-color: #4c51bf;
+            color: white;
+            font-weight: 600;
+        }
+        .dark .nav-item.active {
+            background-color: #9f7aea;
+        }
+        .nav-item.active i {
+            color: white !important;
+        }
+
+        .highlight {
+            background: linear-gradient(to top, rgba(255, 235, 59, 0.6) 50%, transparent 50%);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .dark .highlight {
+             background: linear-gradient(to top, rgba(251, 211, 141, 0.5) 50%, transparent 50%);
+        }
+        .key-term {
+            font-weight: 600;
+            color: #c53030;
+        }
+        .dark .key-term {
+            color: #fc8181;
+        }
+        .alert {
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-left-width: 5px;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+        }
+        .alert-icon {
+            margin-right: 1rem;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+        .alert-danger { background-color: #fff5f5; border-color: #e53e3e; color: #c53030; }
+        .dark .alert-danger { background-color: #4c1d1d; border-color: #fc8181; color: #fed7d7; }
+        .alert-warning { background-color: #fffaf0; border-color: #dd6b20; color: #b7791f; }
+        .dark .alert-warning { background-color: #4a2a0c; border-color: #f6ad55; color: #fbd38d; }
+        .alert-info { background-color: #ebf8ff; border-color: #4299e1; color: #2c5282; }
+        .dark .alert-info { background-color: #2a4365; border-color: #63b3ed; color: #bee3f8; }
+
+        #menu-toggle { display: none; }
+        @media (max-width: 768px) {
+            #menu-toggle { display: block; }
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                position: fixed;
+                z-index: 40;
+                height: 100%;
+            }
+            #sidebar.open { transform: translateX(0); }
+            #main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex h-screen">
+        <aside id="sidebar" class="w-72 bg-white shadow-lg p-4 space-y-2 overflow-y-auto">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">Neurológia</h1>
+                <p class="text-sm text-gray-500">Részletes Vizsgaanyag</p>
+            </div>
+            <nav id="nav-menu">
+                <!-- Navigation items will be inserted here by JavaScript -->
+            </nav>
+            <div class="absolute bottom-4 left-4">
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun hidden"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main id="main-content" class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div id="content-display" class="bg-white p-6 md:p-10 rounded-lg shadow-lg">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-gray-700">Részletes Neurológiai Vizsgaanyag</h1>
+                    <p class="mt-4 text-lg text-gray-600">Válassz egy témakört a bal oldali menüből a vizsgára való felkészüléshez.</p>
+                    <i class="fas fa-book-medical text-9xl text-purple-300 mt-12 animate-pulse"></i>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const contentData = {
+            "t180": {
+                title: "Szervtranszplantációk",
+                icon: "fa-solid fa-heart-pulse",
+                color: "text-red-500",
+                content: {
+                    "t180_bevezetes": {
+                        title: "Bevezetés",
+                        html: `
+                            <h2 style="border-color: #ef4444;">Szervtranszplantációk Idegrendszeri Vonatkozásai</h2>
+                            <p>A szolid szervtranszplantációt (SOT) követő neurológiai szövődmények jelentős és elterjedt kihívást jelentenek, amelyek a recipiensek jelentős részét érintik. A jelentett incidenciák széles skálán mozognak a különböző vizsgálatok és szervtípusok között, általában 10% és 59% között, egyes májtranszplantációs sorozatokban pedig akár 75%-ot is elérhetnek. Bár egyes szakirodalmi források körülbelül 10%-os előfordulást sugallnak, más adatok szerint a transzplantált betegek mintegy egyharmada tapasztalhat neuropszichiátriai komplikációkat.</p>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-triangle-exclamation alert-icon"></i>
+                                <div><h5 class="font-bold">Klinikai Jelentőség</h5><p class="text-sm">Ezek a szövődmények jelentős morbiditási és mortalitási tényezők, még akkor is, ha az elsődleges transzplantáció sikeresnek minősül. Előfordulásuk meghosszabbíthatja a kórházi tartózkodást, növelheti a másodlagos fertőzések kockázatát, szükségessé teheti az újbóli transzplantációt, és emelheti a halálozási arányt.</p></div>
+                            </div>
+                            <p>A klinikai gyakorlatban különösen nagy kihívást jelent ezen szövődmények felismerése, főként az intenzív osztályokon, ahol a betegek szedálása elfedheti a létfontosságú fizikális vizsgálati leleteket. A széles körben változó incidenciaszámok, valamint a kritikus állapotú betegeknél a felismerés nehézsége arra utal, hogy a transzplantált recipiensek neurológiai szövődményeinek valós terhe valószínűleg alulbecsült. Ezért elengedhetetlen a fokozott klinikai gyanú, a szisztematikus neurológiai szűrési protokollok, és potenciálisan a fejlett monitorozási technikák bevezetése.</p>
+                        `
+                    },
+                    "t180_szovodmenyek": {
+                        title: "Gyakori Szövődmények",
+                        html: `
+                            <h3 style="color: #dc2626;">Közös Neurológiai Szövődmények</h3>
+                            <p>A szolid szervtranszplantációt követően számos neurológiai szövődmény léphet fel, amelyek jelentős mértékben befolyásolhatják a beteg kimenetelét. Az alábbiakban a leggyakoribbakat részletezzük.</p>
+                            
+                            <h4>Encephalopathia</h4>
+                            <p>Az encephalopathia, vagyis a megváltozott mentális állapot, a transzplantált betegeknél a leggyakoribb neurológiai zavar, amely delíriumot, letargiát és kómát is magában foglalhat. A kiváltó okok sokrétűek: szisztémás toxikus-metabolikus tényezők, mint például a szervelégtelenség (hepatikus, urémiás), elektrolit-egyensúlyzavarok, szepszis, fertőzések, vagy hipoxiás-ischaemiás agyi károsodás. A tünetek a <span class="highlight">zavartságtól és agitációtól a stuporig és kómáig</span> terjedhetnek, gyakran társulva tremorral és bradyphreniával.</p>
+
+                            <h4>Neurotoxicitás</h4>
+                            <p>Az immunszuppresszív gyógyszerek neurotoxicitása a transzplantációt követő egyik leggyakoribb neurológiai szövődmény. A <span class="key-term">kalcineurin gátlók (CNI)</span>, mint a ciklosporin és a takrolimus, a legfőbb neurotoxicitást okozó szerek. A tünetek enyhéktől (tremor, fejfájás) a súlyosakig (pszichózis, görcsrohamok, kortikális vakság, <span class="highlight">Posterior Reversible Encephalopathy Syndrome - PRES</span>) terjedhetnek. A kortikoszteroidok szintén okozhatnak neuropszichiátriai tüneteket (álmatlanság, mánia, pszichózis).</p>
+                            
+                            <h4>Görcsrohamok</h4>
+                            <p>A görcsrohamok a transzplantált recipiensek 4-27%-ánál fordulnak elő. Etiológiájuk sokrétű: immunszuppresszív gyógyszerek (CNI-k), metabolikus zavarok, hipoxiás-ischaemiás léziók, cerebrovaszkuláris események, KIR fertőzések és agydaganatok.</p>
+
+                            <h4>Cerebrovaszkuláris Események (Stroke/TIA)</h4>
+                            <p>Jelentős morbiditási és mortalitási okot jelentenek. A kockázati tényezők közé tartozik a hemodinamikai instabilitás, szív eredetű embólia, koagulációs zavarok. A <span class="key-term">PRES</span> egy klinikai-radiológiai entitás, amelyet akut tünetek (fejfájás, látászavarok, zavartság, görcsrohamok) és agyi vazogén ödéma jellemeznek.</p>
+                            
+                            <h4>Központi Idegrendszeri (KIR) Fertőzések</h4>
+                            <p>Ritkák, de súlyosak, magas mortalitással és maradandó neurológiai következményekkel járnak. A kórokozók lehetnek bakteriálisak, virálisak (EBV, CMV) vagy gombásak. A diagnózis kihívást jelenthet az immunszuppresszió miatt elfedett tünetek miatt.</p>
+                            
+                            <h4>Posztranszplantációs Limfoproliferatív Betegség (PTLD)</h4>
+                            <p>Egy limfóma-csoport, amely az immunszuppresszió miatt reaktiválódó <span class="key-term">Epstein-Barr vírussal (EBV)</span> hozható összefüggésbe. A KIR érintettség a PTLD-s betegek 7-25%-ánál fordul elő, kognitív zavarokat, fókális neurológiai deficitet és görcsrohamokat okozva.</p>
+                        `
+                    },
+                    "t180_szervspecifikus": {
+                        title: "Szervspecifikus Megfontolások",
+                        html: `
+                            <h3 style="color: #b91c1c;">Szervspecifikus Neurológiai Megfontolások</h3>
+                            <div class="space-y-6">
+                                <div class="p-4 border-l-4 border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500">
+                                    <h4 class="font-bold text-lg text-blue-800 dark:text-blue-300">Májtranszplantáció</h4>
+                                    <p>Az <span class="highlight">encephalopathia</span> a leggyakoribb szövődmény. A görcsrohamok szintén gyakoriak. A <span class="key-term">centrális pontin myelinolysis (CPM)</span> viszonylag specifikus a májtranszplantáltakra, és az intraoperatív elektrolit/ozmolaritás változásokkal hozható összefüggésbe.</p>
+                                </div>
+                                <div class="p-4 border-l-4 border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-500">
+                                    <h4 class="font-bold text-lg text-green-800 dark:text-green-300">Vesetranszplantáció</h4>
+                                    <p>A <span class="highlight">stroke</span> a leggyakoribb neurológiai szövődmény. A <span class="key-term">hipertenzív encephalopathia</span> a közvetlen poszttranszplantációs időszakban alakulhat ki, gyakran PRES-szel társulva.</p>
+                                </div>
+                                <div class="p-4 border-l-4 border-pink-400 bg-pink-50 dark:bg-pink-900/20 dark:border-pink-500">
+                                    <h4 class="font-bold text-lg text-pink-800 dark:text-pink-300">Szívtranszplantáció</h4>
+                                    <p>Gyakoriak a cerebrovaszkuláris események (stroke, TIA), görcsrohamok és encephalopathia. A perioperatív időszakban a leggyakoribb a delírium/encephalopathia és a stroke.</p>
+                                </div>
+                                <div class="p-4 border-l-4 border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-500">
+                                    <h4 class="font-bold text-lg text-indigo-800 dark:text-indigo-300">Tüdőtranszplantáció</h4>
+                                    <p>A neurológiai szövődmények gyakoriak (45%) és kedvezőtlen kimenetelűek. A leggyakoribb a <span class="highlight">posztoperatív delírium</span>, a PRES és a stroke/TIA. A görcsrohamok különösen gyakoriaknak tűnnek.</p>
+                                </div>
+                            </div>
+                        `
+                    }
+                }
+            },
+            "t181": {
+                title: "Alkohol & Kábítószerek",
+                icon: "fa-solid fa-pills",
+                color: "text-purple-500",
+                content: {
+                    "t181_alkohol": {
+                        title: "Alkoholizmus Kórképei",
+                        html: `
+                            <h2 style="border-color: #8b5cf6;">Alkoholizmussal Kapcsolatos Neurológiai Kórképek</h2>
+                            <div class="alert alert-info">
+                                <i class="fas fa-hand-holding-medical alert-icon"></i>
+                                <div><h5 class="font-bold">Kezelési Alapelv</h5><p class="text-sm">Minden esetben a legfontosabb beavatkozás az <span class="highlight">alkoholabsztinencia</span>, amely megállíthatja a progressziót.</p></div>
+                            </div>
+                            
+                            <h4>Wernicke-Korsakoff Szindróma (WKS)</h4>
+                            <p>A WKS egy neurodegeneratív állapot, amely elsősorban <span class="key-term">B1-vitamin (tiamin) hiányból</span> ered. Két fázisa van:
+                                <ul>
+                                    <li><strong>Wernicke-encephalopathia (WE - akut):</strong> Potenciálisan reverzibilis. Klasszikus triász: <span class="highlight">zavartság, ataxia, szemmozgászavarok</span> (nystagmus, ophtalmoplegia).</li>
+                                    <li><strong>Korsakoff-szindróma (KS - krónikus):</strong> Gyakran irreverzibilis. Jellemzői: súlyos <span class="key-term">anterográd amnézia</span> (új emlékek képzésének képtelensége) és konfabuláció (memóriahézagok kitöltése kitalált történetekkel).</li>
+                                </ul>
+                                <strong>Kezelés:</strong> Azonnali, nagy dózisú parenterális tiaminpótlás (fontos, hogy glükóz adása előtt történjen!), majd alkoholabsztinencia.
+                            </p>
+
+                            <h4>Alkoholos Neuropátia</h4>
+                            <p>A perifériás idegek károsodása az alkohol direkt toxicitása és a tápanyaghiány (főleg B-vitaminok) miatt. Jellemzője a fájdalmas, disztális, szimmetrikus, főként szenzoros tünetegyüttes: zsibbadás, bizsergés, égő fájdalom <span class="highlight">"kesztyű-harisnya" eloszlásban</span>. Később izomgyengeség és autonóm diszfunkció is kialakulhat.</p>
+
+                            <h4>Alkoholos Cerebelláris Degeneráció</h4>
+                            <p>A kisagy, főleg az anterior superior vermis Purkinje-sejtjeinek pusztulása. Fő tünetei a <span class="key-term">járási ataxia</span> (támolygó, széles alapú járás), egyensúlyzavar, dysarthria (elkent beszéd) és nystagmus.</p>
+
+                            <h4>Alkoholos Demencia / ARBD</h4>
+                            <p>Súlyos agykárosodás, melyet a kognitív funkciók hanyatlása jellemez: memóriazavar, végrehajtó funkciók (tervezés, problémamegoldás) zavara, személyiségváltozás. Az absztinencia megállíthatja a további romlást.</p>
+                        `
+                    },
+                    "t181_kabitoszer": {
+                        title: "Kábítószer Következményei",
+                        html: `
+                            <h2 style="border-color: #7c3aed;">Kábítószer-fogyasztás Neurológiai Következményei</h2>
+                            <p>A szerhasználati zavarok diagnózisa a DSM-5 kritériumain alapul. A neurológiai következmények szer-specifikusak.</p>
+                             <div class="space-y-6">
+                                <div class="p-4 border-l-4 border-gray-400 bg-gray-100 dark:bg-gray-800 dark:border-gray-500">
+                                    <h4 class="font-bold text-lg text-gray-800 dark:text-gray-200">Opioidok</h4>
+                                    <p>A mu-opioid receptorok aktiválása a jutalmazó rendszerben eufóriához és erős függőséghez vezet. Jellemző a sóvárgás (craving), tolerancia és elvonási tünetek. A túladagolás <span class="key-term">légzésdepresszióhoz</span> és halálhoz vezethet. Kezelés: gyógyszer-asszisztált terápia (MAT - metadon, buprenorfin), akut esetben naloxon.</p>
+                                </div>
+                                <div class="p-4 border-l-4 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-500">
+                                    <h4 class="font-bold text-lg text-yellow-800 dark:text-yellow-300">Stimulánsok (Kokain, Amfetamin)</h4>
+                                    <p>A katekolaminok (dopamin, noradrenalin) szintjét növelik. A fő neurológiai kockázat a <span class="key-term">cerebrovaszkuláris esemény (stroke)</span>, melyet a hirtelen vérnyomás-emelkedés és érszűkület okoz. Görcsrohamok, pszichózis és mozgászavarok is előfordulhatnak.</p>
+                                </div>
+                                <div class="p-4 border-l-4 border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-500">
+                                    <h4 class="font-bold text-lg text-green-800 dark:text-green-300">Kannabisz</h4>
+                                    <p>Befolyásolja a mozgáskoordinációt, memóriát és a végrehajtó funkciókat. A szintetikus kannabinoidok ("spice") <span class="highlight">súlyos, kiszámíthatatlan mellékhatásokat</span> (pszichózis, görcsök, stroke) okozhatnak. Fiatal korban a használata növeli a pszichotikus zavarok kialakulásának kockázatát.</p>
+                                </div>
+                                <div class="p-4 border-l-4 border-pink-400 bg-pink-50 dark:bg-pink-900/20 dark:border-pink-500">
+                                    <h4 class="font-bold text-lg text-pink-800 dark:text-pink-300">Hallucinogének (LSD, PCP)</h4>
+                                    <p>A szerotonin és glutamát rendszereket zavarják meg. Fő kockázat a tartós pszichózis és a <span class="key-term">Hallucinogen Persisting Perception Disorder (HPPD)</span> - a vizuális élmények (pl. "visual snow", halók) tartós fennmaradása a szerhasználat után.</p>
+                                </div>
+                             </div>
+                        `
+                    }
+                }
+            },
+            "t183": {
+                title: "Alvászavarok",
+                icon: "fa-solid fa-moon",
+                color: "text-blue-500",
+                content: {
+                    "t183_attekintes": {
+                        title: "Áttekintés és Kivizsgálás",
+                        html: `
+                            <h2 style="border-color: #3b82f6;">Az Alvászavarok Kivizsgálása és Kezelése</h2>
+                            <p>Az alvászavarok rendkívül gyakoriak és súlyos egészségügyi következményekkel járhatnak. A kivizsgálás sarokköve az alapos <span class="highlight">alvási anamnézis</span> (beteg és hálótárs bevonásával), szűrő kérdőívek (pl. Epworth, STOP-BANG) és objektív műszeres vizsgálatok.</p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-microscope alert-icon"></i>
+                                <div><h5 class="font-bold">Diagnosztikai Eszközök</h5><p class="text-sm">A diagnózis "arany standardja" a laboratóriumi <span class="key-term">Poliszomnográfia (PSG)</span>. Egyszerűbb esetekben az otthoni <span class="key-term">HSAT</span> is használható. Az alvás-ébrenlét mintázatainak hosszú távú követésére az <span class="key-term">aktigráfia</span> alkalmas.</p></div>
+                            </div>
+                        `
+                    },
+                    "t183_gyakori_zavarok": {
+                        title: "Gyakori Alvászavarok",
+                        html: `
+                            <h3 style="color: #2563eb;">Főbb Alvászavarok</h3>
+                             <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700">
+                                    <tr><th class="px-6 py-3">Alvászavar</th><th class="px-6 py-3">Fő Jellemző</th><th class="px-6 py-3">Patofiziológia</th><th class="px-6 py-3">Első Vonalbeli Kezelés</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Insomnia</td><td class="px-6 py-4">Elalvási/átalvási nehézség, nappali diszfunkció</td><td class="px-6 py-4">Pszichofiziológiai tényezők, kondicionálás</td><td class="px-6 py-4"><span class="key-term">CBT-I</span></td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Obstruktív Alvási Apnoe (OSA)</td><td class="px-6 py-4">Horkolás, légzéskimaradás, nappali álmosság</td><td class="px-6 py-4">Felső légutak összeomlása</td><td class="px-6 py-4"><span class="key-term">PAP terápia</span></td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Nyugtalan Láb Szindróma (RLS)</td><td class="px-6 py-4">Kényszer a lábak mozgatására, este rosszabbodik</td><td class="px-6 py-4">Dopaminerg diszfunkció, vashiány</td><td class="px-6 py-4">Gabapentinoidok, vaspótlás</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Narkolepszia</td><td class="px-6 py-4">Nappali álmosság, <span class="key-term">kataplexia</span></td><td class="px-6 py-4"><span class="key-term">Hipokretin (orexin) hiány</span></td><td class="px-6 py-4">Stimulánsok, nátrium-oxibát</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">REM Alvás Viselkedészavar (RBD)</td><td class="px-6 py-4">Álom-eljátszó viselkedés</td><td class="px-6 py-4">REM alatti izomatónia hiánya</td><td class="px-6 py-4">Clonazepam, melatonin</td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                            <div class="alert alert-warning mt-4">
+                                <i class="fas fa-brain alert-icon"></i>
+                                <div><h5 class="font-bold">RBD és Neurodegeneráció</h5><p class="text-sm">Az RBD gyakran a neurodegeneratív betegségek (pl. <span class="key-term">Parkinson-kór</span>, Lewy-testes demencia) korai, prodromális jele lehet, évekkel megelőzve a motoros tüneteket.</p></div>
+                            </div>
+                        `
+                    },
+                    "t184_osas_reszletesen": {
+                        title: "Obstruktív Alvási Apnoe (OSA)",
+                        html: `
+                            <h2 style="border-color: #2563eb;">Obstruktív Alvási Apnoe Szindróma (OSAS) Részletesen</h2>
+                            <p>Az OSAS a felső légutak alvás közbeni ismétlődő, teljes (apnoe) vagy részleges (hypopnoe) elzáródása. Súlyosságát az <span class="key-term">Apnoe-Hypopnoe Index (AHI)</span> alapján határozzák meg: enyhe (5-15), közepes (15-30), súlyos (≥30).</p>
+                            
+                            <h4 class="text-blue-700 dark:text-blue-400">Patofiziológia és Kockázati Tényezők</h4>
+                            <p>Az elzáródást az anatómiai szűkület (pl. nagy nyelv, retrognathia) és az alvás alatti izomtónus-csökkenés kombinációja okozza. A legerősebb kockázati tényező az <span class="highlight">elhízás</span> és a nagy nyakkörfogat.</p>
+
+                            <h4 class="text-blue-700 dark:text-blue-400">Szövődmények</h4>
+                             <div class="alert alert-danger">
+                                <i class="fas fa-heart-crack alert-icon"></i>
+                                <div><h5 class="font-bold">Súlyos Szisztémás Következmények</h5><p class="text-sm">A kezeletlen OSAS független kockázati tényezője a <span class="key-term">hipertóniának, pitvarfibrillációnak, stroke-nak, szívelégtelenségnek</span> és a 2-es típusú diabetes mellitusnak.</p></div>
+                            </div>
+
+                            <h4 class="text-blue-700 dark:text-blue-400">Kezelési Stratégiák</h4>
+                            <ul>
+                                <li><strong>Pozitív Légúti Nyomás (PAP) Terápia:</strong> Az "arany standard". A CPAP, APAP, vagy BiPAP készülékek egy maszk segítségével nyitva tartják a légutakat. A siker kulcsa a megfelelő <span class="highlight">adherencia</span> (használat).</li>
+                                <li><strong>Életmódbeli Intervenciók:</strong> A <span class="key-term">testsúlycsökkentés</span> a leghatékonyabb. Emellett fontos az alkohol kerülése és a pozicionális terápia.</li>
+                                <li><strong>Orális Készülékek (MAD):</strong> Mandibuláris előretoló sínek, melyek enyhe-közepes esetekben vagy CPAP-intolerancia esetén javasoltak.</li>
+                                <li><strong>Sebészet és HNS:</strong> Ritkábban, specifikus anatómiai eltérések esetén jön szóba. A Hypoglossus Ideg Stimuláció (HNS) egy új, implantálható eszköz CPAP-intoleráns betegek egy csoportjának.</li>
+                            </ul>
+                        `
+                    }
+                }
+            }
+        };
+
+        const navMenu = document.getElementById('nav-menu');
+        const contentDisplay = document.getElementById('content-display');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // Generate navigation menu
+        Object.keys(contentData).forEach(mainKey => {
+            const mainTopic = contentData[mainKey];
+            const mainNavItem = document.createElement('div');
+            mainNavItem.innerHTML = `
+                <button class="w-full text-left p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between nav-item" data-id="${mainKey}">
+                    <span class="font-semibold"><i class="${mainTopic.icon} ${mainTopic.color} mr-3"></i>${mainTopic.title}</span>
+                    <i class="fas fa-chevron-down transform transition-transform"></i>
+                </button>
+            `;
+            const subMenu = document.createElement('div');
+            subMenu.className = 'pl-6 mt-2 space-y-1 hidden';
+            
+            Object.keys(mainTopic.content).forEach(subKey => {
+                const subTopic = mainTopic.content[subKey];
+                const subNavItem = document.createElement('a');
+                subNavItem.href = '#';
+                subNavItem.className = 'block p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 nav-item';
+                subNavItem.textContent = subTopic.title;
+                subNavItem.dataset.id = subKey;
+                subMenu.appendChild(subNavItem);
+            });
+
+            mainNavItem.querySelector('button').addEventListener('click', (e) => {
+                subMenu.classList.toggle('hidden');
+                e.currentTarget.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
+            });
+
+            navMenu.appendChild(mainNavItem);
+            navMenu.appendChild(subMenu);
+        });
+
+        // Handle content display
+        navMenu.addEventListener('click', (e) => {
+            e.preventDefault();
+            let target = e.target;
+            while(target && !target.classList.contains('nav-item')) {
+                target = target.parentElement;
+            }
+
+            if (target && target.matches('.nav-item')) {
+                const id = target.dataset.id;
+                
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                target.classList.add('active');
+
+                let contentHtml = '';
+                for (const mainKey in contentData) {
+                    if (contentData[mainKey].content[id]) {
+                        contentHtml = contentData[mainKey].content[id].html;
+                        break;
+                    }
+                }
+                
+                if (contentHtml) {
+                    contentDisplay.innerHTML = contentHtml;
+                    contentDisplay.scrollTop = 0;
+                    if(window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            }
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = themeToggle.querySelector('.fa-sun');
+        const moonIcon = themeToggle.querySelector('.fa-moon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+
+        // Mobile menu toggle
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+    </script>
+</body>
+</html>

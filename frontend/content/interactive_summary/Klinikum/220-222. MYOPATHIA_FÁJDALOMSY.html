@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szerzett Myopathiák és Fájdalomkezelés Tudástár</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Roboto Slab', serif;
+        }
+        .nav-link.active {
+            color: #7c3aed; /* violet-600 */
+            font-weight: 600;
+            border-bottom: 2px solid #7c3aed;
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 2rem;
+            border-bottom: 4px solid;
+            padding-bottom: 1rem;
+        }
+        .section-title svg {
+            width: 3rem;
+            height: 3rem;
+            margin-right: 1.5rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Roboto Slab', serif;
+            font-size: 1.1rem;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        tbody tr:hover {
+            background-color: #f3e8ff; /* violet-100 */
+        }
+        .key-term {
+            font-weight: 600;
+            color: #6d28d9; /* violet-700 */
+        }
+        .pill {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-violet-700">Klinikai Neurológia</h1>
+            <nav class="hidden md:flex space-x-8 text-lg">
+                <a href="#myopathia" class="nav-link hover:text-violet-600 transition pb-1">Myopathiák</a>
+                <a href="#fajdalom" class="nav-link hover:text-violet-600 transition pb-1">Fájdalomkezelés</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#myopathia" class="block py-2 text-lg nav-link">Myopathiák</a>
+            <a href="#fajdalom" class="block py-2 text-lg nav-link">Fájdalomkezelés</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Myopathies Section -->
+        <section id="myopathia" class="mb-20 scroll-mt-24">
+            <div class="section-title border-violet-500 text-violet-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
+                <h2>Szerzett Myopathiák</h2>
+            </div>
+            <div class="space-y-12">
+                <!-- Inflammatory Myopathies -->
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-6 text-violet-800">Gyulladásos Myopathiák (IIM)</h3>
+                    <p class="text-lg mb-6">Autoimmun betegségek, amelyeket az izmok gyulladása és progresszív, jellemzően <span class="key-term">proximális izomgyengeség</span> jellemez. A diagnózis és a kezelés a specifikus altípuson alapul.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Myopathia Típus</th>
+                                    <th>Főbb Klinikai Jellemzők</th>
+                                    <th>Bőrtünetek</th>
+                                    <th>Szövettan / Diagnosztikai Kulcsok</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Dermatomyositis (DM)</td>
+                                    <td>Szimmetrikus, proximális izomgyengeség, dysphagia. Magas a <strong class="text-red-600">daganatasszociáció</strong> kockázata.</td>
+                                    <td><span class="pill bg-red-100 text-red-800">Jellegzetesek</span><br><strong>Gottron-papulák</strong> (kézízületek felett), <strong>heliotrop kiütés</strong> (lilás szemhéjduzzanat), "V-jel", "kendő-jel".</td>
+                                    <td><span class="key-term">Perifascicularis atrófia</span>, perivaszkuláris gyulladás. Specifikus autoantitestek (pl. anti-Mi-2, anti-TIF1-γ).</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Polymyositis (PM)</td>
+                                    <td>Szimmetrikus, proximális izomgyengeség. Hasonló a DM-hez, de bőrtünetek nélkül. Ritka, tiszta formája megkérdőjelezett.</td>
+                                    <td><span class="pill bg-gray-100 text-gray-800">Nincsenek</span></td>
+                                    <td>Endomysialis gyulladásos infiltrátum (CD8+ T-sejtek), amely a nem-nekrotikus izomrostokat veszi körül.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Inklúziós Testes Myositis (IBM)</td>
+                                    <td>Idősebb korban (>50 év). <strong class="text-red-600">Aszimmetrikus gyengeség</strong>, a <span class="key-term">quadriceps</span> és az <span class="key-term">ujjak mély hajlítóinak</span> érintettsége.</td>
+                                    <td><span class="pill bg-gray-100 text-gray-800">Nincsenek</span></td>
+                                    <td>Izomrostokban <span class="key-term">"rimmed vacuoles"</span>. Jellemzően <strong class="text-red-600">rezisztens az immunszuppresszív terápiára</strong>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6 bg-violet-50 p-4 rounded-lg border-l-4 border-violet-400">
+                        <h4 class="font-bold text-violet-900">Kezelési alapelv</h4>
+                        <p>Az elsődleges választás a <span class="key-term">kortikoszteroidok</span>, melyekre a betegek többsége jól reagál (kivéve az IBM-et). Szteroidrezisztencia esetén egyéb <span class="key-term">immunszuppresszánsok</span> (pl. azathioprin, metotrexát, rituximab) jönnek szóba.</p>
+                    </div>
+                </div>
+
+                <!-- Endocrine, Metabolic, Toxic Myopathies -->
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-6 text-violet-800">Endokrin, Metabolikus és Toxikus Myopathiák</h3>
+                    <p class="text-lg mb-6">Ezek a myopathiák egy szisztémás állapot vagy külső ágens (gyógyszer, toxin) következményei. A kezelés kulcsa a kiváltó ok megszüntetése.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Kategória</th>
+                                    <th>Példák és Jellemzők</th>
+                                    <th>Kezelés</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Endokrin</td>
+                                    <td>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li><strong>Pajzsmirigy-diszfunkció:</strong> Mind a hyper-, mind a hypothyreosis okozhat proximális gyengeséget.</li>
+                                            <li><strong>Cushing-szindróma:</strong> A túlzott kortizol <span class="key-term">szteroid myopathiát</span> okoz (proximális gyengeség, atrófia, normális CK).</li>
+                                        </ul>
+                                    </td>
+                                    <td>Az alap endokrin betegség kezelése, a hormonális egyensúly helyreállítása.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Metabolikus</td>
+                                    <td>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li><strong>Glikogén tárolási betegségek</strong> (pl. Pompe, McArdle): Terhelésre jelentkező izomfájdalom, görcsök.</li>
+                                            <li><strong>Lipid tárolási betegségek:</strong> Hasonló tünetek, mint a glikogenózisokban.</li>
+                                            <li><strong>Mitokondriális myopathiák:</strong> Gyakran multisystemás érintettséggel (pl. PEO, süketség).</li>
+                                        </ul>
+                                    </td>
+                                    <td>Diétás módosítások, enzimpótló terápia (Pompe), vitaminok/kofaktorok.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Toxikus</td>
+                                    <td>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li><strong>Gyógyszer-indukált:</strong> A <strong class="text-red-600">sztatinok</strong> a leggyakoribbak (myalgia, emelkedett CK). Egyéb okok: szteroidok, klorokin, kolchicin.</li>
+                                            <li><strong>Alkoholos myopathia:</strong> Lehet akut (rhabdomyolysis) vagy krónikus (proximális gyengeség).</li>
+                                        </ul>
+                                    </td>
+                                    <td>A kiváltó szer <strong class="key-term">elhagyása</strong>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pain Syndromes Section -->
+        <section id="fajdalom" class="mb-16 scroll-mt-24">
+            <div class="section-title border-rose-500 text-rose-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                <h2>Fájdalomszindrómák Kezelése</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-6 text-rose-800">A Neuropátiás Fájdalom</h3>
+                    <p class="text-lg mb-4">A szomatoszenzoros idegrendszer sérülése vagy betegsége által okozott specifikus fájdalomtípus. Minőségileg eltér a nociceptív (szöveti) fájdalomtól.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-2">Klinikai Jellemzők</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Spontán fájdalom:</strong> Égő, szúró, lüktető, "áramütésszerű".</li>
+                                <li><strong>Allodynia:</strong> Nem fájdalmas inger (pl. érintés) fájdalmat vált ki.</li>
+                                <li><strong>Hyperalgesia:</strong> Fájdalmas ingerre adott túlzott fájdalomválasz.</li>
+                                <li><strong>Egyéb érzészavarok:</strong> Zsibbadás (paresztézia).</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-2">Patofiziológia</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Perifériás szenzitizáció:</strong> A sérült idegrostok spontán, kóros elektromos aktivitást generálnak.</li>
+                                <li><strong>Centrális szenzitizáció:</strong> A gerincvelői és agyi neuronok tartósan fokozott ingerlékenységi állapotba kerülnek.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-6 text-rose-800">Gyógyszeres Kezelési Stratégiák</h3>
+                    <p class="text-lg mb-4">A neuropátiás fájdalom kezelése multimodális. A WHO fájdalomlétrája itt kevésbé alkalmazható, helyette specifikus gyógyszercsoportok jönnek szóba.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Gyógyszercsoport</th>
+                                    <th>Példák</th>
+                                    <th>Fő Hatásmechanizmus</th>
+                                    <th>Főbb Indikációk</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Antikonvulzívumok (Gabapentinoidok)</td>
+                                    <td><span class="pill bg-blue-100 text-blue-800">Pregabalin</span> <span class="pill bg-blue-100 text-blue-800">Gabapentin</span></td>
+                                    <td>A feszültségfüggő Ca<sup>2+</sup>-csatornák α2-δ alegységéhez kötődve csökkentik a neurotranszmitterek felszabadulását.</td>
+                                    <td><strong class="key-term">Első vonalbeli szerek</strong>. Diabéteszes neuropathia, posztherpeszes neuralgia.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Antidepresszánsok</td>
+                                    <td><span class="pill bg-yellow-100 text-yellow-800">Duloxetin (SNRI)</span> <span class="pill bg-yellow-100 text-yellow-800">Amitriptilin (TCA)</span></td>
+                                    <td>A leszálló fájdalomcsillapító pályákban a szerotonin és a noradrenalin visszavételének gátlása.</td>
+                                    <td><strong class="key-term">Első vonalbeli szerek</strong>. Diabéteszes neuropathia, fibromyalgia.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Helyi Kezelések</td>
+                                    <td><span class="pill bg-green-100 text-green-800">Lidokain 5% tapasz</span> <span class="pill bg-green-100 text-green-800">Kapszaicin 8% tapasz</span></td>
+                                    <td>Lokális Na<sup>+</sup>-csatorna-blokád (lidokain), TRPV1 receptor deszenzitizáció (kapszaicin).</td>
+                                    <td>Jól lokalizált neuropátiás fájdalom (pl. posztherpeszes neuralgia).</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Opioidok</td>
+                                    <td><span class="pill bg-red-100 text-red-800">Tramadol</span> <span class="pill bg-red-100 text-red-800">Tapentadol</span></td>
+                                    <td>Központi opioid receptorok aktiválása.</td>
+                                    <td><strong class="key-term">Másod- vagy harmadvonalbeli szerek</strong>, a függőség kockázata miatt csak körültekintően.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="mt-6 grid md:grid-cols-2 gap-6">
+                        <div class="bg-rose-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-rose-900">Nem-gyógyszeres kezelések</h4>
+                            <p>Fizikoterápia, transzkután elektromos idegstimuláció (TENS), pszichoterápia (KVT), relaxációs technikák.</p>
+                        </div>
+                        <div class="bg-rose-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-rose-900">Intervenciós eljárások</h4>
+                            <p>Idegblokádok, rádiófrekvenciás abláció, gerincvelő-stimuláció (SCS), intratekális pumpák.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>&copy; 2025 Klinikai Neurológia Tudástár. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

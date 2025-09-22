@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Részletes Vizuális Neurológiai Képalkotó Összefoglaló</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-ctmr-100: #e0e7ff; --c-ctmr-600: #4f46e5; --c-ctmr-800: #3730a3;
+            --c-angio-100: #fce7f3; --c-angio-600: #db2777; --c-angio-800: #9d174d;
+            --c-func-100: #dcfce7; --c-func-600: #16a34a; --c-func-800: #14532d;
+            --c-uh-100: #fef9c3; --c-uh-600: #ca8a04; --c-uh-800: #854d0e;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+        .icon {
+            width: 28px;
+            height: 28px;
+            stroke-width: 2;
+            flex-shrink: 0;
+        }
+        strong, .strong {
+            font-weight: 600;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #1e293b;
+        }
+        .section-title-gradient {
+            background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-to));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .list-disc-colored li::marker {
+            color: var(--marker-color, #4f46e5);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .table-auto {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        .table-auto th, .table-auto td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        .table-auto thead th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        .table-auto tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            color: white;
+        }
+        #liquor-tabs .tab-button.active { background-color: #0d9488; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        @media (min-width: 768px) {
+            .section-title {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-800">
+                Neurológiai <span class="text-indigo-500">Képalkotás</span>
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-slate-600 font-medium">
+                <a href="#ct_mr" class="hover:text-indigo-500 transition">CT & MR</a>
+                <a href="#angio" class="hover:text-indigo-500 transition">Angiográfia</a>
+                <a href="#func" class="hover:text-indigo-500 transition">Funkcionális Képalkotás</a>
+                <a href="#uh" class="hover:text-indigo-500 transition">Ultrahang</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 py-16">
+
+        <!-- ===== CT & MR Section ===== -->
+        <section id="ct_mr" class="mb-24">
+            <h2 class="section-title">💻 CT & MR <span class="section-title-gradient from-indigo-500 to-blue-500">Vizsgálatok</span></h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+                <div class="card">
+                    <div class="card-header bg-indigo-50">
+                        <svg class="icon text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082a.75.75 0 0 0-.75.75v5.714c0 .414.336.75.75.75H4.5m5.25 0h7.5A2.25 2.25 0 0 0 19.5 9V5.25a2.25 2.25 0 0 0-2.25-2.25h-7.5" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Komputertomográfia (CT)</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600 mb-4"><strong>Elv:</strong> Röntgensugarak szöveti elnyelődésén alapul. Gyors, széles körben elérhető.</p>
+                        <strong class="block text-slate-700 mb-2">Fő indikációk (Sürgősségi ellátás alapköve):</strong>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 list-disc-colored" style="--marker-color: var(--c-ctmr-600);">
+                           <li><span class="font-medium">Akut stroke:</span> A vérzés gyors és megbízható kizárása.</li>
+                           <li><span class="font-medium">Koponyasérülés:</span> Törések és akut vérzések (epiduralis, subduralis) kimutatása.</li>
+                           <li><span class="font-medium">SAV gyanúja:</span> Az elsődlegesen választandó módszer "ütésszerű" fejfájás esetén.</li>
+                        </ul>
+                         <strong class="block text-slate-700 mt-4 mb-2">Speciális technikák:</strong>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 list-disc-colored" style="--marker-color: var(--c-ctmr-600);">
+                           <li><span class="font-medium">CTA (CT Angiográfia):</span> Érrendszeri elváltozások (aneurizma, szűkület, okklúzió) gyors, non-invazív vizsgálata.</li>
+                           <li><span class="font-medium">CTP (CT Perfúzió):</span> Stroke esetén az infarktusmag és a megmenthető penumbra elkülönítése.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header bg-blue-50">
+                        <svg class="icon text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25 1.313M12 12.75V15m0 6.75v-2.25M12 21.75l-2.25-1.313M12 21.75l2.25-1.313M3.75 6.75h16.5M3.75 17.25h16.5" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Mágneses Rezonancia (MR)</h3>
+                    </div>
+                    <div class="card-body">
+                         <p class="text-slate-600 mb-4"><strong>Elv:</strong> Erős mágneses tér és rádióhullámok segítségével képez jelet. Nincs ionizáló sugárzás, kiváló lágyrész-kontraszt.</p>
+                        <strong class="block text-slate-700 mb-2">Fő indikációk (Krónikus és komplex kórképek):</strong>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 list-disc-colored" style="--marker-color: var(--c-ep-600);">
+                           <li><span class="font-medium">Sclerosis Multiplex:</span> Demyelinizációs plakkok kimutatása, aktivitásának megítélése.</li>
+                           <li><span class="font-medium">Agydaganatok:</span> Pontos lokalizáció, karakterizálás, műtéti tervezés.</li>
+                           <li><span class="font-medium">Epilepszia:</span> Strukturális okok (hippocampus sclerosis, dysplasiák) keresése.</li>
+                           <li><span class="font-medium">Gerincvelői patológiák:</span> Elsődleges módszer a gerincvelő vizsgálatára.</li>
+                        </ul>
+                        <strong class="block text-slate-700 mt-4 mb-2">Fontosabb szekvenciák:</strong>
+                         <ul class="list-disc list-inside text-slate-600 space-y-2 list-disc-colored" style="--marker-color: var(--c-ep-600);">
+                           <li><span class="font-medium">DWI:</span> Akut stroke legérzékenyebb kimutatása.</li>
+                            <li><span class="font-medium">FLAIR:</span> Liquor-közeli laesiók (pl. SM plakkok) kiemelése.</li>
+                            <li><span class="font-medium">SWI/T2*:</span> Vérzések, meszesedés, vaslerakódás detektálása.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Angio Section ===== -->
+        <section id="angio" class="mb-24">
+            <h2 class="section-title">🩸 Angiográfiás <span class="section-title-gradient from-pink-500 to-rose-500">Vizsgálatok</span></h2>
+             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card">
+                     <div class="card-header bg-pink-50">
+                        <svg class="icon text-pink-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 3.75 3.75 0 0 0-7.993-2.25A3.75 3.75 0 0 0 12 18Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">DSA - "Gold Standard"</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600">A <strong>Digitális Szubtrakciós Angiográfia (DSA)</strong> egy invazív, katéteres eljárás, amely a legpontosabb képet adja az érrendszerről.</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: var(--c-angio-600);">
+                           <li><strong>Elv:</strong> Kontrasztanyag befecskendezése után a háttér (csont, lágyrész) digitális kivonása.</li>
+                           <li><strong>Előny:</strong> Kiváló térbeli és időbeli felbontás, hemodinamikai információ, terápiás beavatkozás lehetősége.</li>
+                           <li><strong>Fő indikáció:</strong> Aneurizmák, AVM-ek részletes elemzése, kezelés tervezése, ha a non-invazív módszerek nem egyértelműek.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                     <div class="card-header bg-pink-50">
+                        <svg class="icon text-pink-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.375a6.375 6.375 0 0 0 6.375-6.375a6.375 6.375 0 0 0-6.375-6.375a6.375 6.375 0 0 0-6.375 6.375a6.375 6.375 0 0 0 6.375 6.375Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.375a6.375 6.375 0 0 0 6.375-6.375a6.375 6.375 0 0 0-6.375-6.375a6.375 6.375 0 0 0-6.375 6.375a6.375 6.375 0 0 0 6.375 6.375Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">MRA - Non-invazív MR</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600">A <strong>Mágneses Rezonancia Angiográfia (MRA)</strong> non-invazív, sugárzásmentes módszer.</p>
+                         <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: var(--c-angio-600);">
+                            <li><strong>Elv:</strong> Az áramló vér jelét használja a képalkotásra (pl. TOF-MRA), kontrasztanyag nélkül is elvégezhető.</li>
+                            <li><strong>Előny:</strong> Biztonságos, jó a nagy- és közepes erek vizsgálatára, ideális szűrésre és követésre.</li>
+                            <li><strong>Korlátok:</strong> Érzékeny a mozgásra, hajlamos a szűkület mértékének túlbecslésére, a kis ereket kevésbé ábrázolja.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="card">
+                     <div class="card-header bg-pink-50">
+                        <svg class="icon text-pink-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082a.75.75 0 0 0-.75.75v5.714c0 .414.336.75.75.75H4.5m5.25 0h7.5A2.25 2.25 0 0 0 19.5 9V5.25a2.25 2.25 0 0 0-2.25-2.25h-7.5" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">CTA - Gyors CT</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600">A <strong>CT Angiográfia (CTA)</strong> egy gyors, non-invazív, kontrasztanyagos CT vizsgálat.</p>
+                         <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: var(--c-angio-600);">
+                            <li><strong>Elv:</strong> Intravénás kontrasztanyag beadása utáni gyors, vékony szeletes CT felvétel.</li>
+                            <li><strong>Előny:</strong> Rendkívül gyors, kiváló a csont és az erek együttes ábrázolására, magas diagnosztikai pontosság.</li>
+                             <li><strong>Fő indikáció:</strong> Akut stroke, SAV, trauma esetén az érállapot gyors felmérése.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Functional Imaging Section ===== -->
+        <section id="func" class="mb-24">
+            <h2 class="section-title">✨ Funkcionális <span class="section-title-gradient from-emerald-500 to-lime-500">Képalkotás</span></h2>
+             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <div class="card">
+                     <div class="card-header bg-emerald-50">
+                        <svg class="icon text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3 3 5.015 3 7.5c0 1.12.376 2.134 1.002 2.937a21.743 21.743 0 0 0 1.498 1.817 22.035 22.035 0 0 0 5.65 3.655l.004.002.003.002.002.002.002.001.002.001.001.001c.09.043.18.084.27.124a2.99 2.99 0 0 0 2.136 0c.09-.04.18-.08.27-.123l.001-.001.002-.001.002-.001.002-.002.003-.002.004-.002a22.036 22.036 0 0 0 5.65-3.655 21.743 21.743 0 0 0 1.498-1.817A4.47 4.47 0 0 0 21 7.5Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">fMRI - Funkcionális MR</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600">A neuronális aktivitás által kiváltott vér-oxigenizáció változását (<strong>BOLD</strong> effektus) méri. Kiváló térbeli, de gyengébb időbeli felbontású.</p>
+                        <strong class="block text-slate-700 mt-4 mb-2">Alkalmazás:</strong>
+                        <ul class="list-disc list-inside text-slate-600 list-disc-colored" style="--marker-color: var(--c-func-600);">
+                           <li class="ml-4">Műtét előtti agyi térképezés (beszéd-, mozgatóközpontok).</li>
+                           <li class="ml-4">Agyi hálózatok (pl. nyugalmi állapotú hálózat) vizsgálata.</li>
+                           <li class="ml-4">Pszichiátriai és neurodegeneratív betegségek kutatása.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="card">
+                     <div class="card-header bg-lime-50">
+                        <svg class="icon text-lime-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">PET & SPECT</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600">Nukleáris medicinai eljárások, radioaktív nyomjelzőket használnak az agyi anyagcsere és véráramlás mérésére.</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: var(--c-func-600);">
+                           <li><strong>PET:</strong> Magasabb felbontás. Specifikus molekuláris folyamatokat (pl. glükóz metabolizmus, amiloid/tau lerakódás) vizsgál.</li>
+                           <li><strong>SPECT:</strong> Szélesebb körben elérhető. Főként a regionális agyi véráramlást méri. Iktális epilepszia vizsgálatában egyedülálló.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="card">
+                     <div class="card-header bg-green-50">
+                        <svg class="icon text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.311a7.5 7.5 0 0 1-7.5 0c-1.255 0-2.443.29-3.5.832m14.5.002c1.057-.542 2.245-.832 3.5-.832a7.5 7.5 0 0 1 0 15c-1.255 0-2.443-.29-3.5-.832m0 0a7.5 7.5 0 0 1-7.5 0" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">EEG & MEG</h3>
+                    </div>
+                    <div class="card-body">
+                         <p class="text-slate-600">A neuronális aktivitást direkt módon mérik, kiváló időbeli felbontással.</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: var(--c-func-600);">
+                           <li><strong>EEG (Elektroenkefalográfia):</strong> Elektromos potenciálokat mér a fejbőrön. Olcsó, hordozható.</li>
+                           <li><strong>MEG (Magnetoenkefalográfia):</strong> Az elektromos aktivitás által generált mágneses mezőket méri. Jobb térbeli felbontású, de drága.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== UH Section ===== -->
+        <section id="uh" class="mb-16">
+            <h2 class="section-title">🌊 Érrendszeri <span class="section-title-gradient from-yellow-500 to-amber-500">Ultrahang</span></h2>
+             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card">
+                     <div class="card-header bg-yellow-50">
+                        <svg class="icon text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">UH Fizikai Alapjai</h3>
+                    </div>
+                    <div class="card-body">
+                         <p class="text-slate-600">Magas frekvenciájú hanghullámok visszaverődésén alapuló, valós idejű, sugárzásmentes képalkotás.</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: var(--c-uh-600);">
+                           <li><strong>B-mód:</strong> Szürkeskálás anatómiai kép az érfalról, plakkokról.</li>
+                           <li><strong>Doppler-effektus:</strong> A véráramlás sebességének és irányának mérése a hanghullámok frekvenciaeltolódása alapján.</li>
+                           <li><strong>Duplex UH:</strong> A B-mód és a Doppler kombinációja, átfogó strukturális és hemodinamikai értékelés.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="card">
+                     <div class="card-header bg-yellow-50">
+                        <svg class="icon text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Vizsgált Területek</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-disc list-inside text-slate-600 space-y-3 list-disc-colored" style="--marker-color: var(--c-uh-600);">
+                           <li><strong class="text-slate-700">Extracranialis (nyaki) erek:</strong> A. carotis communis, interna (ACI), externa (ACE), A. vertebralis. Fókuszban az ACI eredésénél lévő plakkok.</li>
+                           <li><strong class="text-slate-700">Intracranialis erek (TCD):</strong> A koponya "akusztikus ablakain" keresztül a Willis-kör ereinek vizsgálata (MCA, ACA, PCA).</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="card">
+                     <div class="card-header bg-yellow-50">
+                        <svg class="icon text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Klinikai Jelentőség</h3>
+                    </div>
+                    <div class="card-body">
+                         <p class="text-slate-600">Kiemelt szerepe van a stroke prevencióban és a cerebrovaszkuláris betegségek kivizsgálásában.</p>
+                         <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: var(--c-uh-600);">
+                            <li><strong class="text-slate-700">Érszűkület (Stenosis):</strong> Súlyosságának felmérése sebességi kritériumok alapján (pl. ACI PSV >230 cm/s ≈ 70% szűkület).</li>
+                            <li><strong class="text-slate-700">Plakk analízis:</strong> Instabil, echolucens plakkok azonosítása, melyek magasabb embolizációs kockázatot jelentenek.</li>
+                             <li><strong class="text-slate-700">TCD alkalmazása:</strong> Vazospazmus monitorozása SAV után, mikroembólus-detekció, kollaterális keringés értékelése.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Comparison Table Section -->
+        <section id="osszehasonlitas" class="mb-16">
+            <h2 class="section-title">� Képalkotó Módszerek <span class="section-title-gradient from-slate-500 to-gray-500">Összehasonlítása</span></h2>
+            <div class="card">
+                <div class="card-body table-container">
+                    <table class="table-auto">
+                        <thead>
+                            <tr>
+                                <th>Módszer</th>
+                                <th>Elv</th>
+                                <th>Felbontás</th>
+                                <th>Fő Előny</th>
+                                <th>Fő Hátrány</th>
+                                <th>Elsődlegesen választandó...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="strong text-indigo-700">CT</td>
+                                <td>Röntgensugár elnyelődés</td>
+                                <td>Térbeli: Jó (0.5mm)</td>
+                                <td><span class="tag bg-green-100 text-green-800">Gyors, széleskörűen elérhető</span></td>
+                                <td><span class="tag bg-red-100 text-red-800">Sugárterhelés, gyenge lágyrész-kontraszt</span></td>
+                                <td>Akut stroke, koponyatrauma, SAV gyanú</td>
+                            </tr>
+                             <tr>
+                                <td class="strong text-blue-700">MR</td>
+                                <td>Magmágneses rezonancia</td>
+                                <td>Térbeli: Kiváló (sub-mm)</td>
+                                <td><span class="tag bg-green-100 text-green-800">Kiváló lágyrész-kontraszt, nincs sugárzás</span></td>
+                                <td><span class="tag bg-red-100 text-red-800">Lassú, drága, kontraindikációk</span></td>
+                                <td>SM, agydaganat, epilepszia, gerinc</td>
+                            </tr>
+                            <tr>
+                                <td class="strong text-pink-700">DSA</td>
+                                <td>Katéteres, röntgen + szubtrakció</td>
+                                <td>Térbeli: Legjobb (<0.2mm)</td>
+                                <td><span class="tag bg-green-100 text-green-800">"Gold standard", hemodinamika, terápia</span></td>
+                                <td><span class="tag bg-red-100 text-red-800">Invazív, stroke kockázat</span></td>
+                                <td>Komplex aneurizmák, AVM-ek, intervenció</td>
+                            </tr>
+                            <tr>
+                                <td class="strong text-green-700">fMRI</td>
+                                <td>BOLD hatás (vér-oxigenizáció)</td>
+                                <td>Térbeli: Jó (2-3mm), Időbeli: Gyenge (s)</td>
+                                <td><span class="tag bg-green-100 text-green-800">Non-invazív agyi funkció térképezés</span></td>
+                                <td><span class="tag bg-red-100 text-red-800">Közvetett mérés, lassú</span></td>
+                                <td>Műtéti tervezés, kutatás</td>
+                            </tr>
+                            <tr>
+                                <td class="strong text-yellow-700">Ultrahang</td>
+                                <td>Hanghullám-visszaverődés</td>
+                                <td>Térbeli: Jó (sub-mm)</td>
+                                <td><span class="tag bg-green-100 text-green-800">Non-invazív, valós idejű, olcsó</span></td>
+                                <td><span class="tag bg-red-100 text-red-800">Operátorfüggő, akusztikus ablak limitált</span></td>
+                                <td>Carotis stenosis szűrés, TCD monitorozás</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-white mt-8 border-t">
+        <div class="container mx-auto px-6 py-4 text-center text-slate-500">
+            <p>&copy; 2024 Neurológiai Képalkotó Összefoglaló. Sok sikert a vizsgához!</p>
+        </div>
+    </footer>
+
+    <script>
+        function switchLiquorTab(tabId) {
+            const container = document.getElementById('liquor-tab-content-container');
+            const liquorTabs = document.getElementById('liquor-tabs');
+
+            if (!container || !liquorTabs) {
+                console.error("Tab container or buttons not found!");
+                return;
+            }
+
+            const contents = container.querySelectorAll('.tab-content');
+            const buttons = liquorTabs.querySelectorAll('.tab-button');
+            
+            contents.forEach(content => content.classList.remove('active'));
+            buttons.forEach(button => button.classList.remove('active', 'bg-slate-200', 'text-slate-700'));
+            buttons.forEach(button => button.classList.add('bg-slate-200', 'text-slate-700'));
+
+            const activeContent = document.getElementById(tabId + '-content');
+            const activeButton = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabId));
+
+            if (activeContent) activeContent.classList.add('active');
+            if (activeButton) {
+                activeButton.classList.remove('bg-slate-200', 'text-slate-700');
+                activeButton.classList.add('active');
+            }
+        }
+
+        // Initialize the first tab as active.
+        // The script is at the end of the body, so the DOM is loaded.
+        switchLiquorTab('bakterialis');
+    </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sürgősségi Neurológia és Intenzív Ellátás Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-primary: #dc2626; /* red-600 */
+            --c-primary-dark: #991b1b; /* red-800 */
+            --c-secondary: #2563eb; /* blue-600 */
+            --c-tertiary: #475569; /* slate-600 */
+            --c-text-dark: #1f2937;
+            --c-text-light: #4b5563;
+            --c-bg-light: #f8fafc;
+            --c-border: #e5e7eb;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--c-bg-light);
+            color: var(--c-text-dark);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-link.active {
+            color: var(--c-primary);
+            font-weight: 700;
+            border-bottom: 3px solid var(--c-primary);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--c-text-dark);
+            margin-bottom: 3rem;
+            border-bottom: 4px solid;
+            padding-bottom: 1.5rem;
+        }
+        .section-title svg {
+            width: 4rem;
+            height: 4rem;
+            margin-right: 1.5rem;
+            stroke-width: 1.5;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border: 1px solid var(--c-border);
+            border-radius: 0.75rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--c-border);
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #374151;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background-color: #fee2e2; /* red-50 */
+        }
+        .key-term {
+            font-weight: 700;
+            color: var(--c-primary-dark);
+            background-color: #fecaca;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        details {
+            background: #fafafa;
+            border-radius: 0.5rem;
+            border: 1px solid var(--c-border);
+            margin-top: 1.5rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+            color: #7f1d1d; /* red-900 */
+            font-size: 1.1rem;
+        }
+        summary::after {
+            content: '＋';
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .details-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--c-border);
+            line-height: 1.75;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-red-700">Sürgősségi Neurológia és Intenzív Ellátás</h1>
+            <nav class="hidden md:flex space-x-8 text-lg">
+                <a href="#surgossegi-ellatas" class="nav-link hover:text-red-600 transition pb-2">Sürgősségi Ellátás</a>
+                <a href="#neuro-monitor" class="nav-link hover:text-red-600 transition pb-2">Neuro-ITO Monitorozás</a>
+                <a href="#agyhalal" class="nav-link hover:text-red-600 transition pb-2">Agyhalál</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#surgossegi-ellatas" class="block py-2 text-lg nav-link">Sürgősségi Ellátás</a>
+            <a href="#neuro-monitor" class="block py-2 text-lg nav-link">Neuro-ITO Monitorozás</a>
+            <a href="#agyhalal" class="block py-2 text-lg nav-link">Agyhalál</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Neurological Emergencies Section -->
+        <section id="surgossegi-ellatas" class="mb-20 scroll-mt-24">
+            <div class="section-title border-red-500 text-red-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                <h2>Sürgősségi Ellátás a Neurológiában</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-red-800">Alapelvek és Gyakori Kórképek</h3>
+                    <p class="text-lg mb-4">A neurológiai sürgősségi állapotok azonnali beavatkozást igényelnek. Az <strong class="key-term">"Idő agy" (Time is Brain)</strong> elv alapján a késlekedés irreverzibilis idegsejt-pusztuláshoz vezet. A kórházi sürgősségi esetek 10-15%-a neurológiai eredetű.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Sürgősségi Állapot</th><th>Kulcsfontosságú Klinikai Jelek</th><th>Azonnali Diagnosztika</th><th>Elsődleges Terápiás Beavatkozás</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Akut Iszkémiás Stroke</td>
+                                    <td>Hirtelen fokális neurológiai deficit (pl. <strong class="key-term">F.A.S.T.</strong> jelek).</td>
+                                    <td>Natív Koponya CT, CT-Angiográfia.</td>
+                                    <td><strong class="key-term">Rekanalizációs terápia</strong>: IV trombolízis (rtPA) &lt;4.5 órán belül, és/vagy mechanikus trombektómia (MT).</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Status Epilepticus (SE)</td>
+                                    <td>&gt;5 percig tartó, vagy ismétlődő görcsrohamok tudatvisszanyerés nélkül.</td>
+                                    <td>Vércukormérés, labor. EEG a non-konvulzív SE-hez.</td>
+                                    <td><strong class="key-term">Első vonal:</strong> Benzodiazepinek (IV). <strong class="key-term">Második vonal:</strong> Antiepileptikumok telítő dózisban.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Bakteriális Meningitis</td>
+                                    <td>Láz, fejfájás, tarkókötöttség, tudatzavar.</td>
+                                    <td>Lumbálpunkció (LP) képalkotó után.</td>
+                                    <td><strong class="text-red-600">Azonnali empirikus antibiotikum</strong> és dexametazon, a diagnózisra nem várva!</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Akut Gerincvelői Kompresszió / CES</td>
+                                    <td>Hátfájás, gyorsan progrediáló paraparesis, érzészavar, <strong class="key-term">vizelet-/székletürítési zavar</strong>.</td>
+                                    <td>Sürgős Gerinc MRI.</td>
+                                    <td><strong class="text-red-600">Azonnali sebészi dekompresszió</strong> (ált. &lt;24-48 órán belül).</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Myastheniás Krízis / GBS</td>
+                                    <td>Gyorsan progrediáló, súlyos izomgyengeség, mely a <strong class="key-term">légzőizmokat</strong> is érinti.</td>
+                                    <td>Légzésfunkciós vizsgálatok (vitálkapacitás).</td>
+                                    <td>Intenzív osztályos ellátás, légzéstámogatás, <strong class="key-term">IVIG</strong> vagy <strong class="key-term">plazmaferézis</strong>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Neuro-ICU Monitoring Section -->
+        <section id="neuro-monitor" class="mb-20 scroll-mt-24">
+            <div class="section-title border-secondary text-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
+                <h2>Neuro-ITO Monitorozás</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-blue-800">Multimodális Neuromonitorozás (MMM)</h3>
+                    <p class="text-lg mb-4">Az MMM célja az agyi funkciók optimalizálása és a másodlagos agykárosodás korai felismerése. Több, egymást kiegészítő technika együttes alkalmazását jelenti a beteg állapotának komplex felmérésére.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h4 class="font-semibold text-xl mb-2">ICP Monitorozás</h4>
+                            <p>A koponyaűri nyomás (ICP) mérése, melynek célértéke &lt;22 Hgmm. Az <strong class="key-term">EVD</strong> (külső kamrai drain) a "gold standard", mert terápiás liquorlecsapolást is lehetővé tesz.</p>
+                        </div>
+                         <div class="bg-blue-50 p-6 rounded-lg">
+                            <h4 class="font-semibold text-xl mb-2">CPP Monitorozás</h4>
+                            <p>A cerebrális perfúziós nyomás (CPP = MAP - ICP) az agyi véráramlás mutatója. Célértéke <strong class="key-term">60-70 Hgmm</strong>.</p>
+                        </div>
+                         <div class="bg-blue-50 p-6 rounded-lg">
+                            <h4 class="font-semibold text-xl mb-2">Agyi Szöveti O₂ (PbtO₂)</h4>
+                            <p>Az agyszövet oxigénellátottságának direkt mérése. A PbtO₂ &lt; 20 Hgmm agyi hipoxiát jelez.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-blue-800">Speciális Monitorozási Technikák</h3>
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Folyamatos EEG (cEEG)</h4>
+                            <p>Az agy elektromos aktivitásának folyamatos rögzítése. Elengedhetetlen a <strong class="key-term">non-konvulzív status epilepticus</strong> és a szubklinikai ischaemia kimutatására.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Agyi Mikrodialízis (CMD)</h4>
+                            <p>Az agyi anyagcsere monitorozása az extracelluláris térben. A <strong class="key-term">laktát/piruvát arány (LPR)</strong> az agyi ischaemia vagy mitokondriális diszfunkció érzékeny markere.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Brain Death Section -->
+        <section id="agyhalal" class="scroll-mt-24">
+            <div class="section-title border-tertiary text-tertiary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21.75l5.375-5.375M12 21.75l-5.375-5.375M12 21.75v-9.75M12 6.375v-1.875a1.125 1.125 0 112.25 0v1.875M12 6.375a1.125 1.125 0 00-1.125 1.125v1.875m1.125-3a1.125 1.125 0 011.125 1.125v1.875m-3.75 0a1.125 1.125 0 01-1.125-1.125v-1.875a1.125 1.125 0 012.25 0v1.875" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 21.75c-4.142 0-7.5-3.358-7.5-7.5s3.358-7.5 7.5-7.5 7.5 3.358 7.5 7.5-3.358 7.5-7.5 7.5z" /></svg>
+                <h2>Agyhalál Megállapítása</h2>
+            </div>
+            <div class="content-card">
+                 <h3 class="text-3xl font-bold mb-6 text-violet-800">Definíció és Klinikai Kritériumok</h3>
+                 <p class="text-lg mb-6">Az agyhalál az agy – beleértve az agytörzset is – összes funkciójának teljes és <strong class="text-red-600">visszafordíthatatlan</strong> megszűnése. Jogi értelemben ez egyenlő a halállal, és a szervdonáció előfeltétele. Megállapítása szigorú, jogszabályban rögzített protokoll szerint történik.</p>
+                <details>
+                    <summary>Az Agyhalál Megállapításának Előfeltételei és Klinikai Vizsgálata</summary>
+                    <div class="details-content">
+                        <h4 class="font-semibold text-lg mt-4 mb-2">Előfeltételek:</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Ismert, súlyos, irreverzibilis agykárosodást okozó kórfolyamat.</li>
+                            <li>Kizáró tényezők eliminálása: hipotermia (&lt;36°C), súlyos metabolikus/endokrin zavarok, intoxikáció, KIR-depresszáns gyógyszerek hatása.</li>
+                            <li>Az agytörzsi funkciók teljes hiányának gyanúja.</li>
+                        </ul>
+                        <h4 class="font-semibold text-lg mt-4 mb-2">Klinikai Vizsgálat (Bizottság végzi):</h4>
+                         <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Kóma:</strong> Mély, areaktív kóma (GCS 3).</li>
+                            <li><strong>Agytörzsi reflexek hiánya:</strong> Fényreakció, corneareflex, okulovesztibuláris (kalorikus), okulokefalikus (babaszem), köhögési és garatreflex hiánya.</li>
+                            <li><strong>Apnoe teszt:</strong> A spontán légzés hiányának igazolása. A beteget 100% oxigénnel preoxigenálják, majd lekapcsolják a lélegeztetőgépről. Az agyhalál fennáll, ha a PaCO₂ szintje eléri a 60 Hgmm-t anélkül, hogy légzési mozgás jelentkezne.</li>
+                        </ul>
+                    </div>
+                </details>
+                 <details>
+                    <summary>Megerősítő (Kiegészítő) Vizsgálatok</summary>
+                    <div class="details-content">
+                        <p>Akkor szükségesek, ha a klinikai vizsgálat (különösen az apnoe teszt) nem végezhető el biztonságosan, vagy a kizáró tényezők nem eliminálhatók.</p>
+                        <ul class="list-disc list-inside space-y-1 mt-2">
+                            <li><strong>Agyi keringést vizsgáló eljárások:</strong> A "gold standard". Céljuk az agyi keringésleállás igazolása.
+                                <ul class="list-circle list-inside ml-6">
+                                    <li>CT-angiográfia (CTA)</li>
+                                    <li>Transcranialis Doppler (TCD)</li>
+                                    <li>Agyi perfúziós szcintigráfia</li>
+                                </ul>
+                            </li>
+                            <li><strong>EEG:</strong> Elektrocerebrális csend (izoelektromos EEG) kimutatása. Szerepe a modern protokollokban csökken a zavaró tényezők miatt.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>&copy; 2025 Sürgősségi Neurológia és Intenzív Ellátás Tudástára. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

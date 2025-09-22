@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neuroanatómia Vizsgafelkészítő</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .dark .prose-invert h2, .dark .prose-invert h3 { color: #93c5fd; }
+        .dark .prose-invert h4 { color: #a5b4fc; }
+        .dark .prose-invert strong { color: #c7d2fe; }
+        .interactive-diagram-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .interactive-diagram-node:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 10px rgba(79, 70, 229, 0.7));
+        }
+        .quiz-option.selected {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4338ca;
+        }
+        .quiz-option.correct {
+            background-color: #16a34a;
+            color: white;
+        }
+        .quiz-option.incorrect {
+            background-color: #dc2626;
+            color: white;
+        }
+        .prose table { width: 100%; }
+        .prose th, .prose td { border: 1px solid; padding: 8px; }
+        .dark .prose th, .dark .prose td { border-color: #4b5563; }
+        .light .prose th, .light .prose td { border-color: #d1d5db; }
+        .prose .table-container { overflow-x: auto; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-500">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white dark:bg-slate-800 shadow-md sticky top-0 z-50">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <span class="font-bold text-xl text-indigo-600 dark:text-indigo-400">Neuroanatómia Felkészítő</span>
+                    </div>
+                    <div class="hidden md:block">
+                        <div id="nav-menu" class="ml-10 flex items-baseline space-x-4">
+                            <!-- Nav links will be injected here -->
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                         <button id="theme-toggle" class="p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-900 focus:ring-indigo-500">
+                            <svg id="theme-icon-light" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <svg id="theme-icon-dark" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="-mr-2 flex md:hidden">
+                        <button id="mobile-menu-button" type="button" class="bg-slate-100 dark:bg-slate-800 inline-flex items-center justify-center p-2 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-900 focus:ring-indigo-500" aria-controls="mobile-menu" aria-expanded="false">
+                            <span class="sr-only">Menü megnyitása</span>
+                            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <!-- Mobile menu, show/hide based on menu state. -->
+            <div class="md:hidden" id="mobile-menu" style="display: none;">
+                <div id="mobile-nav-menu" class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                   <!-- Mobile nav links will be injected here -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+            <div id="content-area" class="prose dark:prose-invert max-w-none lg:prose-xl">
+                <!-- Content will be injected here -->
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-slate-800 shadow-inner">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-slate-500 dark:text-slate-400">
+                <p>&copy; 2024 Interaktív Neuroanatómia Vizsgafelkészítő. Sok sikert a vizsgához!</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Info Modal for Diagrams -->
+    <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl max-w-md w-full m-4">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-indigo-600 dark:text-indigo-400"></h3>
+            <p id="modal-content" class="text-slate-700 dark:text-slate-300"></p>
+            <button id="modal-close" class="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Bezárás</button>
+        </div>
+    </div>
+
+
+<script>
+// Main Application Logic
+document.addEventListener('DOMContentLoaded', () => {
+
+    const appData = {
+        'limbikus-rendszer': {
+            title: 'A Limbikus Rendszer',
+            content: `
+                <h2>A Limbikus Rendszer</h2>
+                <p>A limbikus rendszer az agy összetett struktúráinak egy csoportja, amely elsődlegesen az érzelmek, a motiváció, a tanulás és az emlékezet szabályozásában vesz részt. Nem egyetlen, diszkrét anatómiai egység, hanem inkább egy funkcionálisan integrált rendszer, amelynek megértése kulcsfontosságú az emberi és állati viselkedés hátterében álló neurális mechanizmusok feltárásához.</p>
+                
+                <h3>A. A Limbikus Rendszer Központi Anatómiai Komponensei</h3>
+                <p>A limbikus rendszer, vagy más néven paleomammalián agy, az agykéreg alatti (szubkortikális) és az agykéreg peremén (prekortex) elhelyezkedő struktúrákat foglal magában. Támogatja az érzelmeket, a viselkedést, a motivációt, a hosszú távú memóriát és a szaglást.</p>
+                
+                <h4>1. Hippokampális Formáció (Hippocampus, Gyrus Dentatus, Subiculum)</h4>
+                <p>A mediális temporális lebenyben helyezkedik el. Részt vesz a rövid távú memória hosszú távúvá alakításában, a téri memóriában és az emlékek felidézésében. Az entorhinális kéregből kap bemenetet, és a Papez-körön keresztül játszik szerepet a memóriában.</p>
+                
+                <h4>2. Amygdala (Mandelamag)</h4>
+                <p>Mandula alakú struktúra a mediális temporális lebenyben, a hippocampus előtt. Feldolgozza az érzelmeket (félelem, düh, szorongás, öröm, jutalom), érzelmi jelentőséget tulajdonít az emlékeknek, és részt vesz a félelem kondicionálásában.</p>
+                
+                <h4>3. Gyrus Cinguli (Övtekervény)</h4>
+                <p>Ív alakú kérgi régió a corpus callosum felett. Az anterior rész (ACC) részt vesz az érzelmi szabályozásban és a kognitív kontrollban, míg a posterior rész (PCC) az epizodikus memória előhívásában és az önreferenciális gondolkodásban.</p>
+
+                <h4>4. A Papez-kör és Modern Értelmezése</h4>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p>James Papez eredetileg az érzelmek neurális köreként javasolta. A klasszikus pálya: <strong>Hippocampus → Fornix → Emlőtestek → Tractus mammillothalamicus → Anterior talamikus magok → Gyrus cinguli → Hippocampus</strong>. Bár történelmileg fontos, ma már inkább az <strong>epizodikus memória konszolidációjában</strong> tekintik kritikusabbnak. Az amygdalát ma már központibbnak tartják az elsődleges érzelmi feldolgozásban.</p>
+                    </div>
+                    <div class="bg-slate-200 dark:bg-slate-800 p-4 rounded-lg">
+                        <h4 class="text-center font-bold mb-4">A Papez-kör (Interaktív Ábra)</h4>
+                        <div class="relative w-full h-80" id="papez-circuit">
+                            <!-- Nodes will be positioned with JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <h4>További kulcsfontosságú struktúrák</h4>
+                <ul>
+                    <li><strong>Gyrus Parahippocampalis és Entorhinális Kéreg:</strong> Fő be- és kimeneti kapu a neokortex és a hippocampus között.</li>
+                    <li><strong>Fornix:</strong> Fehérállományi köteg, a hippocampus fő kimeneti pályája az emlőtestekhez.</li>
+                    <li><strong>Szeptális Magok:</strong> A jutalmazásban, megerősítésben és örömérzetben vesznek részt.</li>
+                    <li><strong>Mammilláris Testek (Emlőtestek):</strong> A posterior hipotalamusz részei, fontosak az emlékek felidézésében.</li>
+                    <li><strong>Hipotalamusz:</strong> Az autonóm idegrendszert és az endokrin rendszert irányítja, részt vesz a homeosztázisban és az érzelmek testi kifejezésében.</li>
+                </ul>
+
+                <h3>B. A Limbikus Rendszer Elsődleges Funkciói</h3>
+                <ul>
+                    <li><strong>Érzelmi Feldolgozás:</strong> Az amygdala és a gyrus cinguli központi szerepet játszik a félelem, düh, öröm és szorongás feldolgozásában. A hipotalamusz közvetíti az érzelmek testi (autonóm, endokrin) válaszait.</li>
+                    <li><strong>Motiváció és Jutalmazás:</strong> A nucleus accumbens, amygdala, szeptális magok és hipotalamusz kulcsfontosságú a motiváció, jutalomfeldolgozás és örömérzet szempontjából, olyan viselkedéseket vezérelve, mint az evés, ivás és szaporodás.</li>
+                    <li><strong>Tanulás és Memória:</strong> A hippocampus elengedhetetlen az új deklaratív emlékek kialakításához és konszolidációjához. Az amygdala erősíti az érzelmi emlékeket.</li>
+                    <li><strong>Szaglás:</strong> A szaglórendszer közvetlen kapcsolata a limbikus rendszerrel magyarázza a szagok és emlékek/érzelmek közötti erős kapcsolatot.</li>
+                </ul>
+
+                <h3>C. Diszfunkció és Klinikai Kórképek</h3>
+                <p>A limbikus rendszer diszfunkciója számos neurológiai és pszichiátriai kórképhez kapcsolódik. A különböző zavarok (szorongás, depresszió, epilepszia, Alzheimer-kór, skizofrénia) közös jellemzője az amygdalát, hippocampust és cinguláris kérget magukban foglaló pályák diszfunkciója, ami rávilágít e struktúrák központi szerepére.</p>
+                <ul>
+                    <li><strong>Szorongásos Zavarok:</strong> Az amygdala hiperaktivitása, a félelmi körök diszregulációja jellemzi.</li>
+                    <li><strong>Hangulatzavarok (pl. Depresszió):</strong> A negatív ingerekre adott fokozott amygdala aktivitás, valamint a hippocampus és az anterior cinguláris kéreg (ACC) térfogatcsökkenése figyelhető meg. A HPA-tengely diszregulációja (magas kortizolszint) szintén hozzájárul.</li>
+                    <li><strong>Temporális lebeny epilepszia:</strong> Gyakran a hippocampusból vagy az amygdalából indul ki, hippokampális szklerózist okozva.</li>
+                    <li><strong>Memóriazavarok (pl. Alzheimer-kór):</strong> A betegség korai szakaszában a hippocampus és az entorhinális kéreg degenerálódik, ami súlyos memóriavesztést okoz.</li>
+                </ul>
+            `,
+            diagrams: {
+                'papez-circuit': {
+                    type: 'interactive',
+                    nodes: [
+                        { id: 'hippocampus', name: 'Hippocampus', x: '50%', y: '10%', info: 'Elindítja a körfolyamatot; kulcsfontosságú a memóriakonszolidációban.' },
+                        { id: 'fornix', name: 'Fornix', x: '85%', y: '30%', info: 'Fehérállományi köteg, a hippocampus fő kimenete az emlőtestek felé.' },
+                        { id: 'mammillary_bodies', name: 'Emlőtestek', x: '80%', y: '70%', info: 'A hipotalamusz részei, reléállomás a thalamus felé.' },
+                        { id: 'ant_thalamic_nuclei', name: 'Anterior Thalamus', x: '20%', y: '70%', info: 'Információt kap az emlőtestektől és a cingulumhoz vetít.' },
+                        { id: 'cingulate_gyrus', name: 'Gyrus Cinguli', x: '15%', y: '30%', info: 'Érzelmi élmények és memóriafeldolgozás. Visszavetít a hippocampushoz.' },
+                    ],
+                    connections: [
+                        ['hippocampus', 'fornix'],
+                        ['fornix', 'mammillary_bodies'],
+                        ['mammillary_bodies', 'ant_thalamic_nuclei'],
+                        ['ant_thalamic_nuclei', 'cingulate_gyrus'],
+                        ['cingulate_gyrus', 'hippocampus'],
+                    ]
+                }
+            },
+            quiz: [
+                {
+                    question: "Melyik struktúra játszik központi szerepet a félelem feldolgozásában?",
+                    options: ["Hippocampus", "Amygdala", "Fornix", "Gyrus Cinguli"],
+                    answer: "Amygdala"
+                },
+                {
+                    question: "Melyik neurális kört társítják ma elsősorban az epizodikus memória konszolidációjához?",
+                    options: ["Triszinaptikus kör", "Papez-kör", "Mezolimbikus pálya", "Nigrostriatális pálya"],
+                    answer: "Papez-kör"
+                }
+            ]
+        },
+        'magatartas-szabalyozas': {
+            title: 'A Magatartás Szabályozása',
+            content: `
+                <h2>A Magatartás Szabályozása</h2>
+                <p>A viselkedésszabályozás összetett idegi és neurokémiai rendszerek összehangolt aktivitását igényli. A hatékony viselkedés a "hideg" kognitív (PFC-vezérelt) és a "forró" érzelmi/motivációs (limbikus) rendszerek közötti dinamikus kölcsönhatásból ered.</p>
+
+                <h3>A. Kulcsfontosságú Neurális Hálózatok</h3>
+                <ul>
+                    <li><strong>Prefrontális Kéreg (PFC):</strong> A "karmester". Felelős a magas szintű kognitív kontrollért: tervezés, döntéshozatal, impulzuskontroll, munkamemória, és a szociális viselkedés mérséklése (top-down kontroll).</li>
+                    <li><strong>Limbikus Rendszer:</strong> A "miért". Biztosítja a viselkedés érzelmi (amygdala) és motivációs (hipotalamusz, nucleus accumbens) hátterét.</li>
+                    <li><strong>Bazális Ganglionok:</strong> A "hogyan". Részt vesznek a mozgásindításban, szokástanulásban, procedurális készségekben és az akcióválasztásban. Automatizálják a rutin viselkedéseket.</li>
+                    <li><strong>Hipotalamusz és Agytörzs:</strong> Az "alapok". Szabályozzák a homeosztatikus hajtóerőket (éhség, szomjúság, alvás) és az alapvető arousal állapotokat.</li>
+                </ul>
+                
+                <h3>B. A Viselkedés Neurokémiai Modulációja</h3>
+                <h4>Főbb Neurotranszmitter Rendszerek:</h4>
+                <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Neurotranszmitter</th><th>Kulcsfontosságú Szerepek</th><th>Asszociált Zavarok</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Dopamin (DA)</strong></td><td>Jutalmazás, motiváció, öröm, tanulás, fókusz, motoros kontroll, végrehajtó funkciók</td><td>Parkinson-kór, skizofrénia, ADHD, függőség</td></tr>
+                        <tr><td><strong>Szerotonin (5-HT)</strong></td><td>Hangulat, alvás, étvágy, szorongás, impulzuskontroll</td><td>Depresszió, szorongásos zavarok, OCD</td></tr>
+                        <tr><td><strong>Noradrenalin (NE)</strong></td><td>Éberség, arousal, figyelem, küzdj-vagy-menekülj válasz</td><td>ADHD, depresszió, szorongás</td></tr>
+                        <tr><td><strong>Acetilkolin (ACh)</strong></td><td>Memória, tanulás, figyelem, izomösszehúzódás, REM alvás</td><td>Alzheimer-kór</td></tr>
+                        <tr><td><strong>GABA</strong></td><td>Fő gátló neurotranszmitter, szorongáscsökkentés, agyi aktivitás szabályozása</td><td>Szorongásos zavarok, epilepszia</td></tr>
+                        <tr><td><strong>Glutamát</strong></td><td>Fő serkentő neurotranszmitter, tanulás, memória (LTP)</td><td>Epilepszia, neurodegeneratív betegségek</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h4>Hormonális Hatások:</h4>
+                <p>A <strong>stresszhormonok (kortizol, HPA-tengely)</strong> és a <strong>nemi hormonok (ösztrogén, tesztoszteron)</strong> mélyreható, hosszan tartó moduláló hatást gyakorolnak az agy szerkezetére (pl. krónikus stressz -> hippocampus károsodás), működésére és a viselkedésre, gyakran kölcsönhatásba lépve a neurotranszmitter rendszerekkel.</p>
+                
+                <h3>C. A Viselkedésszabályozás Aspektusai</h3>
+                <ul>
+                    <li><strong>Célorientált viselkedés:</strong> A PFC (tervezés) és a bazális ganglionok (akcióválasztás) közötti, dopamin által modulált kölcsönhatáson alapul.</li>
+                    <li><strong>Érzelemszabályozás:</strong> A PFC (különösen a laterális és mediális részek) felülről lefelé irányuló kontrollt gyakorol a limbikus régiók (pl. amygdala) felett. Stratégiák: kognitív átértékelés, elfojtás, elfogadás.</li>
+                    <li><strong>Szociális viselkedés:</strong> A "Tudatelmélet" (Theory of Mind - ToM) és az empátia képességein alapul. Kulcsfontosságú területek: mPFC, temporoparietális junkció (TPJ), superior temporális sulcus (STS), amygdala.</li>
+                </ul>
+
+                <h3>D. Viselkedési Diszreguláció Klinikai Állapotokban</h3>
+                <ul>
+                    <li><strong>ADHD:</strong> A PFC körök gyengébb működése és a noradrenalin/dopamin jelátvitel zavara jellemzi.</li>
+                    <li><strong>Magatartászavar (CD/ODD):</strong> Az amygdala (csökkent félelem- és büntetésfeldolgozás), a PFC (elégtelen kognitív kontroll) és a jutalmazó rendszerek diszfunkciója áll a háttérben.</li>
+                    <li><strong>Függőség:</strong> A drogok "eltérítik" az agy jutalmazó rendszerét (mezolimbikus dopamin pálya), ami a célorientált (PFC) viselkedésről a kényszeres, szokásalapú (bazális ganglionok) droghasználatra való áttéréshez vezet.</li>
+                </ul>
+            `,
+            quiz: [
+                {
+                    question: "Melyik neurotranszmitter kulcsfontosságú az agy jutalmazó rendszerében?",
+                    options: ["Szerotonin", "GABA", "Dopamin", "Acetilkolin"],
+                    answer: "Dopamin"
+                },
+                {
+                    question: "Melyik agyterület felelős elsődlegesen a végrehajtó funkciókért, mint a tervezés és impulzuskontroll?",
+                    options: ["Amygdala", "Prefrontális kéreg (PFC)", "Bazális ganglionok", "Kisagy"],
+                    answer: "Prefrontális kéreg (PFC)"
+                }
+            ]
+        },
+        'memoria-strukturak': {
+            title: 'A Memória Idegrendszeri Szerkezetei',
+            content: `
+                <h2>A Memóriával Kapcsolatos Idegrendszeri Szerkezetek</h2>
+                <p>A memória az információk kódolásának, tárolásának és előhívásának képessége, amely nem egyetlen agyterülethez kötött, hanem számos, egymással összeköttetésben álló agyi struktúra összehangolt működésének eredménye.</p>
+
+                <h3>A. A Memória Funkcióinak Áttekintése</h3>
+                <p>A memóriát többféleképpen osztályozhatjuk:</p>
+                <ul>
+                    <li><strong>Időtartam szerint:</strong> Rövid távú memória (és munkamemória) vs. Hosszú távú memória.</li>
+                    <li><strong>Tartalom szerint (Hosszú távú):</strong>
+                        <ul>
+                            <li><strong>Deklaratív (explicit):</strong> Tudatosan felidézhető emlékek.
+                                <ul>
+                                    <li><em>Epizodikus memória:</em> Személyes események (mi, hol, mikor történt).</li>
+                                    <li><em>Szemantikus memória:</em> Tények, általános tudás.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Nem-deklaratív (implicit):</strong> Nem tudatos, készségekben, szokásokban megnyilvánuló emlékek. (pl. motoros készségek).</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>B. Kulcsfontosságú Agyterületek és Szerepük a Memóriában</h3>
+                <div class="space-y-4">
+                    <p><strong>Hippokampusz:</strong> A deklaratív memória "kapuőre". Nélkülözhetetlen az új epizodikus és szemantikus emlékek kialakításához (kódolás) és rögzítéséhez (konszolidáció). Emellett kulcsfontosságú a téri memóriában és navigációban is.</p>
+                    <p><strong>Amigdala:</strong> Az "érzelmi színező". Befolyásolja az emlékek tárolását az érzelmi töltet alapján (stresszhormonokon keresztül). Erősíti az érzelmileg jelentős események emléknyomát, összekapcsolódva a hippokampusszal.</p>
+                    <p><strong>Prefrontális kéreg (PFC):</strong> A "stratégiai menedzser". Központi szerepet játszik a munkamemóriában (információk aktív manipulálása) és a végrehajtó funkciókban, amelyek a memória stratégiai szervezését és előhívását irányítják (pl. mire figyeljünk, hogyan keressünk).</p>
+                    <p><strong>Kisagy (Cerebellum):</strong> A "motoros tanító". Feldolgozza a procedurális emlékeket (motoros készségek, pl. zongorázás), a motoros tanulást és a klasszikus kondicionálást (pl. időzített reflexek).</p>
+                    <p><strong>Bazális ganglionok:</strong> A "szokásformáló". Részt vesznek a procedurális tanulásban, a szokások kialakításában és a jutalomalapú tanulásban, automatizálva a gyakran ismételt cselekvéssorokat.</p>
+                </div>
+                
+                <h3>C. Munkamemória és Végrehajtó Funkciók</h3>
+                <p>A munkamemória egy aktív mentális munkaterület, amelyet a végrehajtó funkciók (frissítés, váltás, gátlás) irányítanak. Ennek neuroanatómiai hátterében a <strong>prefrontális kéreg</strong> (különösen a dorsolaterális PFC) áll, de egy kiterjedt, elosztott hálózat részeként, amely magában foglal parietális, occipitális és szubkortikális (bazális ganglionok) területeket is. A PFC e hálózat karmestereként működik.</p>
+                
+                <div class="table-container my-6">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Agyi Struktúra</th>
+                      <th>Elsődleges Memória Funkciók</th>
+                      <th>Kulcsfontosságú Memóriatípusok</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Hippokampusz</strong></td>
+                      <td>Új deklaratív emlékek kialakítása, memóriakonszolidáció, téri memória</td>
+                      <td>Deklaratív (epizodikus, szemantikus), téri</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Amigdala</strong></td>
+                      <td>Emocionális emlékek feldolgozása, memóriakonszolidáció modulálása</td>
+                      <td>Emocionális (explicit és implicit)</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Prefrontális kéreg</strong></td>
+                      <td>Munkamemória, végrehajtó funkciók, stratégiai előhívás</td>
+                      <td>Munkamemória, szemantikus</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Kisagy</strong></td>
+                      <td>Motoros készségek tanulása, klasszikus kondicionálás</td>
+                      <td>Procedurális, implicit, motoros</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Bazális ganglionok</strong></td>
+                      <td>Szokásképzés, procedurális tanulás, jutalomalapú tanulás</td>
+                      <td>Procedurális, implicit, szokások</td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+            `,
+             quiz: [
+                {
+                    question: "Melyik struktúra nélkülözhetetlen az új deklaratív (epizodikus) emlékek kialakításához?",
+                    options: ["Kisagy", "Bazális ganglionok", "Amigdala", "Hippokampusz"],
+                    answer: "Hippokampusz"
+                },
+                {
+                    question: "A motoros készségek, mint a zongorázás megtanulása, melyik memóriatípushoz tartoznak és melyik struktúra játszik benne fő szerepet?",
+                    options: ["Deklaratív memória, Hippokampusz", "Procedurális memória, Kisagy", "Munkamemória, Prefrontális kéreg", "Emocionális memória, Amigdala"],
+                    answer: "Procedurális memória, Kisagy"
+                }
+            ]
+        },
+        'hippokampusz-szerkezete': {
+            title: 'A Hippokampusz Szerkezete és Kapcsolatai',
+            content: `
+                <h2>A Hippokampusz Szerkezete és Kapcsolatai</h2>
+                <p>A hippokampusz, a mediális temporális lebenyben elhelyezkedő, a limbikus rendszer részét képező agyi struktúra, központi szerepet játszik a tanulásban és a memóriában. A hippokampusz formáció magában foglalja a tulajdonképpeni hippokampuszt (Cornu Ammonis vagy Ammon-szarv), a gyrus dentatust (fogazott tekervény) és a subiculumot.</p>
+                
+                <h3>A. Anatómia és Sejtes Felépítés</h3>
+                <p>A hippokampusz archikortikális, jellegzetesen háromrétegű szerkezettel rendelkezik. A Cornu Ammonis (CA) további alrégiókra osztható: <strong>CA1, CA2, CA3 és CA4</strong>. Ezen alrégiók eltérő be- és kimenetekkel, valamint a neurodegeneratív betegségekre való fogékonysággal rendelkeznek, ami funkcionális specializációra utal.</p>
+                
+                <h3>B. Intrinsic Hippokampális Pályák: A Triszinaptikus Kör</h3>
+                <p>A triszinaptikus kör a hippokampuszon belüli fő, nagyrészt egyirányú információáramlási útvonal. Ez a szekvenciális feldolgozás teszi lehetővé az új információk elkülönült kódolását és a tárolt információk asszociációját/előhívását.</p>
+                
+                <div class="bg-slate-200 dark:bg-slate-800 p-4 rounded-lg my-6">
+                    <h4 class="text-center font-bold mb-4">A Triszinaptikus Kör (Interaktív Ábra)</h4>
+                    <div class="relative w-full h-48" id="trisynaptic-circuit">
+                        <!-- Nodes will be positioned with JS -->
+                    </div>
+                </div>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li><strong>Perforáns pálya:</strong> Az <strong>Entorhinális kéregből (EC)</strong> a <strong>Gyrus Dentatus (GD)</strong> granulasejtjeihez fut. A GD itt <strong>mintázat-szétválasztást</strong> végez, azaz hasonló bemeneti mintázatokat megkülönböztethetőbbé tesz.</li>
+                    <li><strong>Moharostok:</strong> A GD granulasejtjeinek axonjai a <strong>CA3</strong> régió piramissejtjeihez vetülnek.</li>
+                    <li><strong>Schaffer-kollaterálisok:</strong> A CA3 piramissejtek axonjai a <strong>CA1</strong> régió piramissejtjeihez futnak. A CA3 kiterjedt belső kapcsolatai révén <strong>mintázat-kiegészítésre</strong> képes (részleges ingerekből teljes emlék előhívása). A CA1 a hippokampusz fő kimeneti feldolgozója.</li>
+                </ol>
+
+                <h3>C. Afferens és Efferens Kapcsolatok</h3>
+                <ul>
+                    <li><strong>Entorhinális kéreg (EC):</strong> A fő be- és kimeneti kapu a hippokampusz és a neokortex között. Nélkülözhetetlen a memóriakonszolidációhoz.</li>
+                    <li><strong>Fornix:</strong> A hippokampusz fő kimeneti útvonala, amely az emlőtestekhez és a szeptális magokhoz kapcsolja, így a <strong>Papez-gyűrű</strong> kritikus láncszeme.</li>
+                    <li><strong>Papez-gyűrű:</strong> Egy reverberációs hurok (Hippocampus → Fornix → Emlőtestek → Thalamus → Gyrus Cinguli → Hippocampus), amely fontos az epizodikus memória konszolidációjában és érzelmi színezésében.</li>
+                    <li><strong>Egyéb kapcsolatok:</strong> Kiterjedt kapcsolatok az amigdalával (emocionális memória), a prefrontális kéreggel (munkamemória) és a cinguláris kéreggel (limbikus és kognitív funkciók integrációja).</li>
+                </ul>
+
+                <h3>D. Funkcionális Jelentőség</h3>
+                <p>A hippokampusz nélkülözhetetlen a <strong>memóriakonszolidációhoz</strong>, a <strong>téri memóriához ("kognitív térkép")</strong>, és a <strong>deklaratív memória</strong> kialakításához. A "kognitív térkép" elmélet (tájékozódási pontok összekapcsolása a térben) és az epizodikus memória (egy esemény elemeinek összekapcsolása az időben) valószínűleg ugyanazon alapvető hippokampális funkciónak, a <strong>relációs kötésnek</strong> a két megnyilvánulása.</p>
+                
+                <div class="table-container my-6">
+                 <table>
+                  <thead>
+                    <tr>
+                      <th>Alrégió</th>
+                      <th>Fő Bemenet(ek)</th>
+                      <th>Fő Kimenet(ek)</th>
+                      <th>Feltételezett Fő Szerep</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Gyrus Dentatus (DG)</strong></td>
+                      <td>Entorhinális kéreg (perforáns pálya)</td>
+                      <td>CA3 (moharostok)</td>
+                      <td>Mintázat-szétválasztás, új emlékek kódolása</td>
+                    </tr>
+                    <tr>
+                      <td><strong>CA3</strong></td>
+                      <td>Gyrus Dentatus (moharostok)</td>
+                      <td>CA1 (Schaffer-kollaterálisok)</td>
+                      <td>Mintázat-kiegészítés, auto-asszociáció</td>
+                    </tr>
+                    <tr>
+                      <td><strong>CA1</strong></td>
+                      <td>CA3 (Schaffer-kollaterálisok), EC</td>
+                      <td>Subiculum, EC, PFC</td>
+                      <td>Kimeneti feldolgozás, összehasonlítás</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Subiculum</strong></td>
+                      <td>CA1, EC</td>
+                      <td>EC, PFC, amigdala, hipotalamusz</td>
+                      <td>Fő kimeneti struktúra, integráció</td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+
+            `,
+            diagrams: {
+                'trisynaptic-circuit': {
+                    type: 'interactive',
+                    nodes: [
+                        { id: 'ec', name: 'EC', x: '10%', y: '50%', info: 'Entorhinális Kéreg: A fő bemenet a hippokampuszba a neokortexből.' },
+                        { id: 'dg', name: 'GD', x: '35%', y: '50%', info: '1. szinapszis (Perforáns pálya): A Gyrus Dentatus mintázat-szétválasztást végez.' },
+                        { id: 'ca3', name: 'CA3', x: '65%', y: '50%', info: '2. szinapszis (Moharostok): A CA3 mintázat-kiegészítésre képes.' },
+                        { id: 'ca1', name: 'CA1', x: '90%', y: '50%', info: '3. szinapszis (Schaffer-koll.): A CA1 a hippokampusz fő kimeneti feldolgozója.' },
+                    ],
+                    connections: [
+                        ['ec', 'dg'],
+                        ['dg', 'ca3'],
+                        ['ca3', 'ca1'],
+                    ]
+                }
+            },
+            quiz: [
+                {
+                    question: "Mi a Gyrus Dentatus feltételezett fő funkciója a triszinaptikus körben?",
+                    options: ["Mintázat-kiegészítés", "Mintázat-szétválasztás", "Kimeneti feldolgozás", "Érzelmi színezés"],
+                    answer: "Mintázat-szétválasztás"
+                },
+                {
+                    question: "Melyik pálya köti össze a CA3 és CA1 régiókat?",
+                    options: ["Perforáns pálya", "Moharostok", "Schaffer-kollaterálisok", "Fornix"],
+                    answer: "Schaffer-kollaterálisok"
+                }
+            ]
+        },
+    };
+
+    const contentArea = document.getElementById('content-area');
+    const navMenu = document.getElementById('nav-menu');
+    const mobileNavMenu = document.getElementById('mobile-nav-menu');
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIconLight = document.getElementById('theme-icon-light');
+    const themeIconDark = document.getElementById('theme-icon-dark');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    // Theme toggler
+    const toggleTheme = () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateThemeIcons(isDark);
+    };
+
+    const updateThemeIcons = (isDark) => {
+        if (isDark) {
+            themeIconLight.classList.remove('hidden');
+            themeIconDark.classList.add('hidden');
+            document.documentElement.classList.add('dark');
+        } else {
+            themeIconLight.classList.add('hidden');
+            themeIconDark.classList.remove('hidden');
+            document.documentElement.classList.remove('dark');
+        }
+    };
+    
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Mobile menu toggler
+    mobileMenuButton.addEventListener('click', () => {
+        const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+        mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+        mobileMenu.style.display = isExpanded ? 'none' : 'block';
+        mobileMenuButton.querySelectorAll('svg').forEach(svg => svg.classList.toggle('hidden'));
+    });
+    
+    // Function to render content
+    function renderContent(topicKey) {
+        const topic = appData[topicKey];
+        if (!topic) {
+            contentArea.innerHTML = '<h2>Üdvözlünk!</h2><p>Válassz egy témát a fenti menüből a kezdéshez.</p>';
+            return;
+        }
+
+        contentArea.innerHTML = topic.content;
+        
+        // Render diagrams
+        if (topic.diagrams) {
+            Object.keys(topic.diagrams).forEach(diagramId => {
+                const diagramContainer = document.getElementById(diagramId);
+                if (diagramContainer) {
+                    renderInteractiveDiagram(diagramContainer, topic.diagrams[diagramId]);
+                }
+            });
+        }
+        
+        // Render quiz
+        if (topic.quiz) {
+            renderQuiz(contentArea, topic.quiz);
+        }
+
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('bg-indigo-100', 'dark:bg-indigo-900', 'text-indigo-700', 'dark:text-indigo-300');
+            link.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-200', 'dark:hover:bg-slate-700');
+            if (link.dataset.topic === topicKey) {
+                link.classList.add('bg-indigo-100', 'dark:bg-indigo-900', 'text-indigo-700', 'dark:text-indigo-300');
+                link.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-200', 'dark:hover:bg-slate-700');
+            }
+        });
+
+        // Close mobile menu after selection
+        if(mobileMenu.style.display === 'block') {
+            mobileMenuButton.click();
+        }
+    }
+
+    // Function to render interactive diagrams
+    function renderInteractiveDiagram(container, diagramData) {
+        diagramData.nodes.forEach(node => {
+            const nodeEl = document.createElement('div');
+            nodeEl.id = node.id;
+            nodeEl.className = 'interactive-diagram-node absolute bg-indigo-500 dark:bg-indigo-400 text-white dark:text-slate-900 rounded-lg py-2 px-3 text-center text-sm font-semibold shadow-lg';
+            nodeEl.style.left = node.x;
+            nodeEl.style.top = node.y;
+            nodeEl.style.transform = 'translate(-50%, -50%)';
+            nodeEl.textContent = node.name;
+            nodeEl.dataset.info = node.info;
+            nodeEl.dataset.title = node.name;
+            container.appendChild(nodeEl);
+            
+            nodeEl.addEventListener('click', () => showInfoModal(node.name, node.info));
+        });
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('class', 'absolute top-0 left-0 w-full h-full');
+        svg.setAttribute('style', 'z-index: -1;');
+
+        setTimeout(() => { // Wait for nodes to be in DOM to get positions
+            diagramData.connections.forEach(conn => {
+                const startNode = document.getElementById(conn[0]);
+                const endNode = document.getElementById(conn[1]);
+                if (startNode && endNode) {
+                    const line = document.createElementNS(svgNS, 'line');
+                    const x1 = startNode.offsetLeft + startNode.offsetWidth / 2;
+                    const y1 = startNode.offsetTop + startNode.offsetHeight / 2;
+                    const x2 = endNode.offsetLeft + endNode.offsetWidth / 2;
+                    const y2 = endNode.offsetTop + endNode.offsetHeight / 2;
+                    
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                    line.setAttribute('stroke', 'rgb(129 140 248)');
+                    line.setAttribute('stroke-width', '2');
+                    line.setAttribute('marker-end', 'url(#arrow)');
+                    svg.appendChild(line);
+                }
+            });
+            container.insertBefore(svg, container.firstChild);
+        }, 50); // small delay to ensure rendering
+        
+        // Add marker definition
+        const defs = document.createElementNS(svgNS, 'defs');
+        const marker = document.createElementNS(svgNS, 'marker');
+        marker.setAttribute('id', 'arrow');
+        marker.setAttribute('viewBox', '0 0 10 10');
+        marker.setAttribute('refX', '8');
+        marker.setAttribute('refY', '5');
+        marker.setAttribute('markerWidth', '6');
+        marker.setAttribute('markerHeight', '6');
+        marker.setAttribute('orient', 'auto-start-reverse');
+        const path = document.createElementNS(svgNS, 'path');
+        path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+        path.setAttribute('fill', 'rgb(129 140 248)');
+        marker.appendChild(path);
+        defs.appendChild(marker);
+        svg.appendChild(defs);
+    }
+
+    // Modal logic
+    const modal = document.getElementById('info-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    const modalClose = document.getElementById('modal-close');
+    
+    function showInfoModal(title, content) {
+        modalTitle.textContent = title;
+        modalContent.textContent = content;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    modalClose.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    });
+
+    // Quiz logic
+    function renderQuiz(container, questions) {
+        const quizContainer = document.createElement('div');
+        quizContainer.className = 'mt-12 p-6 bg-slate-200 dark:bg-slate-800 rounded-lg';
+        quizContainer.innerHTML = `<h3 class="text-2xl font-bold mb-6 text-center">Teszteld a tudásod!</h3>`;
+        
+        questions.forEach((q, index) => {
+            const questionEl = document.createElement('div');
+            questionEl.className = 'mb-6';
+            questionEl.innerHTML = `<p class="font-semibold mb-3">${index + 1}. ${q.question}</p>`;
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'space-y-2';
+            
+            q.options.forEach(option => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'quiz-option block w-full text-left p-3 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-300 dark:hover:bg-slate-700 transition';
+                optionBtn.textContent = option;
+                optionBtn.dataset.questionIndex = index;
+                optionBtn.addEventListener('click', (e) => {
+                    // Deselect others
+                    document.querySelectorAll(`.quiz-option[data-question-index="${index}"]`).forEach(btn => btn.classList.remove('selected'));
+                    // Select this one
+                    e.target.classList.add('selected');
+                });
+                optionsContainer.appendChild(optionBtn);
+            });
+            questionEl.appendChild(optionsContainer);
+            quizContainer.appendChild(questionEl);
+        });
+
+        const submitBtn = document.createElement('button');
+        submitBtn.className = 'w-full mt-6 bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-bold text-lg';
+        submitBtn.textContent = 'Válaszok ellenőrzése';
+        
+        const resultsEl = document.createElement('div');
+        resultsEl.id = 'quiz-results';
+        resultsEl.className = 'mt-6 text-center font-bold text-xl';
+        
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            questions.forEach((q, index) => {
+                const selectedOption = document.querySelector(`.quiz-option[data-question-index="${index}"].selected`);
+                document.querySelectorAll(`.quiz-option[data-question-index="${index}"]`).forEach(btn => {
+                    btn.disabled = true;
+                    if (btn.textContent === q.answer) {
+                        btn.classList.add('correct');
+                    }
+                });
+
+                if (selectedOption) {
+                    if (selectedOption.textContent === q.answer) {
+                        score++;
+                        selectedOption.classList.add('correct');
+                    } else {
+                        selectedOption.classList.add('incorrect');
+                    }
+                }
+            });
+            resultsEl.textContent = `Eredményed: ${score} / ${questions.length}`;
+            submitBtn.style.display = 'none';
+        });
+
+        quizContainer.appendChild(submitBtn);
+        quizContainer.appendChild(resultsEl);
+        container.appendChild(quizContainer);
+    }
+
+
+    // Initialize navigation and first content
+    function init() {
+        // Apply saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            updateThemeIcons(true);
+        } else {
+            updateThemeIcons(false);
+        }
+
+        const navLinksHTML = Object.keys(appData).map(key => `
+            <a href="#" data-topic="${key}" class="nav-link text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium">${appData[key].title}</a>
+        `).join('');
+
+        const mobileNavLinksHTML = Object.keys(appData).map(key => `
+            <a href="#" data-topic="${key}" class="nav-link text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium">${appData[key].title}</a>
+        `).join('');
+
+        navMenu.innerHTML = navLinksHTML;
+        mobileNavMenu.innerHTML = mobileNavLinksHTML;
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                renderContent(e.target.dataset.topic);
+                window.scrollTo(0, 0);
+            });
+        });
+
+        renderContent(Object.keys(appData)[0]); // Load first topic initially
+    }
+    
+    init();
+
+});
+</script>
+
+</body>
+</html>

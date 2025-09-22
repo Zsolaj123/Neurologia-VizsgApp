@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Kórképek Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb; /* gray-50 */
+        }
+        .nav-link.active {
+            color: #4f46e5; /* indigo-600 */
+            font-weight: 600;
+        }
+        .tab-button.active {
+            background-color: #1e40af; /* blue-800 */
+            color: white;
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700; /* font-bold */
+            color: #111827; /* text-gray-900 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            border-bottom: 3px solid;
+            padding-bottom: 0.5rem;
+        }
+        .section-title svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-right: 1rem;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+        th {
+            background-color: #f3f4f6; /* gray-100 */
+            font-weight: 600;
+        }
+        tbody tr:hover {
+            background-color: #f9fafb; /* gray-50 */
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-700">Neurológiai Tudástár</h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600">
+                <a href="#polyneuropathia" class="nav-link hover:text-indigo-600 transition">Polyneuropathiák</a>
+                <a href="#alagut-szindromak" class="nav-link hover:text-indigo-600 transition">Alagút Szindrómák</a>
+                <a href="#mnd" class="nav-link hover:text-indigo-600 transition">Motoneuron Betegségek</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#polyneuropathia" class="block py-2 nav-link">Polyneuropathiák</a>
+            <a href="#alagut-szindromak" class="block py-2 nav-link">Alagút Szindrómák</a>
+            <a href="#mnd" class="block py-2 nav-link">Motoneuron Betegségek</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Polyneuropathies Section -->
+        <section id="polyneuropathia" class="mb-16 scroll-mt-20">
+            <div class="section-title border-purple-500 text-purple-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.472-2.472a3.75 3.75 0 00-5.304-5.304L5.172 15.17l5.304 5.304a3.75 3.75 0 005.304-5.304l-2.472-2.472" /></svg>
+                <h2>Szerzett és Herediter Polyneuropathiák</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-purple-700">Definíció és Osztályozás</h3>
+                    <p class="mb-4">A polyneuropathia (PNP) a perifériás idegek generalizált, jellemzően szimmetrikus károsodása. A tünetek a végtagok disztális részén kezdődnek ("kesztyű-zokni" eloszlás). A kivizsgálás alapja a szerzett és örökletes okok elkülönítése.</p>
+                    <h4 class="font-semibold mb-2">Fő károsodási típusok (ENG/EMG alapján):</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Axonális:</strong> Az idegrost (axon) károsodik. Csökkent válaszamplitúdó. Jellemző okok: diabetes, alkohol, toxinok.</li>
+                        <li><strong>Demyelinisatiós:</strong> A myelinhüvely károsodik. Lelassult idegvezetési sebesség. Jellemző okok: GBS, CIDP, CMT1.</li>
+                    </ul>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-purple-700">Diagnosztikus Alapelvek</h3>
+                    <p class="mb-4">A diagnózis egy lépcsőzetes folyamat, amely a klinikai képen alapul és célzott vizsgálatokkal egészül ki.</p>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                        <li><strong>Anamnézis és vizsgálat:</strong> Időbeli lefolyás, családi kórtörténet tisztázása.</li>
+                        <li><strong>ENG/NCS vizsgálat:</strong> A PNP megerősítése és típusának (axonális/demyelinisatiós) meghatározása.</li>
+                        <li><strong>Laboratóriumi vizsgálatok:</strong> Célzottan, a gyanú alapján (pl. vércukor, B12-vitamin, immunszerológia).</li>
+                        <li><strong>Genetikai tesztelés:</strong> Herediter neuropathia gyanúja esetén.</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="content-card mb-8">
+                <h3 class="text-2xl font-semibold mb-4 text-purple-700">Gyakori Szerzett Polyneuropathiák</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Típus</th><th>Főbb Okok</th><th>Jellemző Klinikai és ENG/NCS Kép</th><th>Kezelés</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-semibold">Diabéteszes Neuropathia</td>
+                                <td>Diabetes mellitus</td>
+                                <td>Leggyakoribb PNP. Disztális, szimmetrikus, szenzoros-domináns, <strong>axonális</strong> károsodás. Fájdalmas lehet.</td>
+                                <td>Optimális glikémiás kontroll. Tüneti fájdalomcsillapítás (gabapentinoidok, duloxetin).</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Alkoholos Neuropathia</td>
+                                <td>Krónikus alkoholfogyasztás</td>
+                                <td>Disztális, szimmetrikus, fájdalmas szenzoros tünetek. <strong>Axonális</strong> károsodás, gyakran B1-vitamin hiánnyal.</td>
+                                <td>Alkohol absztinencia, B-vitamin pótlás.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Guillain-Barré (GBS)</td>
+                                <td>Post-infekciós autoimmun</td>
+                                <td><strong>Akut, gyorsan felszálló petyhüdt bénulás</strong>, areflexia. <strong>Demyelinisatiós</strong> (AIDP).</td>
+                                <td>Intravénás immunglobulin (IVIG) vagy plazmaferézis (PLEX).</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">CIDP</td>
+                                <td>Idült autoimmun folyamat</td>
+                                <td><strong>Krónikus (>2 hónap)</strong> progrediáló/relapszáló gyengeség. <strong>Demyelinisatiós</strong>.</td>
+                                <td>Kortikoszteroidok, IVIG, PLEX.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-2xl font-semibold mb-4 text-purple-700">Gyakori Herediter (Örökletes) Polyneuropathiák</h3>
+                <p class="mb-4">Általában lassan progrediáló kórképek, melyek diagnózisához elengedhetetlen a genetikai vizsgálat. A kezelés többnyire szupportív.</p>
+                 <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-lg mb-2">Charcot-Marie-Tooth (CMT)</h4>
+                        <p>Lassan progrediáló, disztális izomgyengeség és -atrófia, jellegzetes lábdeformitásokkal (<strong>pes cavus</strong>, "gólyaláb"). Lehet <strong>demyelinisatiós (CMT1)</strong> vagy <strong>axonális (CMT2)</strong>. A CMT1A-t a PMP22 gén duplikációja okozza.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg mb-2">HNPP</h4>
+                        <p>Herediter Neuropathia Nyomásos Bénulásokra Való Hajlammal. A PMP22 gén deléciója okozza. Visszatérő, nyomásnak kitett helyeken kialakuló, átmeneti, fájdalmatlan zsibbadás és gyengeség jellemzi.</p>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- Tunnel Syndromes Section -->
+        <section id="alagut-szindromak" class="mb-16 scroll-mt-20">
+            <div class="section-title border-blue-700 text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 110-18 9 9 0 010 18z" /></svg>
+                <h2>Alagút Szindrómák</h2>
+            </div>
+             <div class="flex flex-wrap gap-2 mb-6">
+                <button class="tab-button active" data-tab="felso">Felső Végtag</button>
+                <button class="tab-button" data-tab="also">Alsó Végtag</button>
+            </div>
+
+            <div id="felso" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="content-card lg:col-span-1">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-700">Kéztőalagút-szindróma (CTS)</h3>
+                        <p>A <strong>n. medianus</strong> kompressziója a csuklóban. Éjszakai zsibbadás (1-4. ujj), thenar atrophia. <br><strong>Tesztek:</strong> Phalen, Tinel. <br><strong>Kezelés:</strong> sín, szteroid inj., műtét.</p>
+                    </div>
+                    <div class="content-card lg:col-span-1">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-700">Könyökízületi Alagút-szindróma</h3>
+                        <p>A <strong>n. ulnaris</strong> kompressziója a könyökben. Zsibbadás (4-5. ujj), kéz kisizmainak gyengesége, "karmos kéz". <br><strong>Tesztek:</strong> Froment. <br><strong>Kezelés:</strong> könyökvédő, műtét.</p>
+                    </div>
+                    <div class="content-card lg:col-span-1">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-700">Radiális Ideg Bénulás</h3>
+                        <p>A <strong>n. radialis</strong> kompressziója a felkaron. Jellemző a <strong>"csuklócsüngés"</strong>. <br><strong>Prognózis:</strong> általában jó, spontán gyógyul. <br><strong>Kezelés:</strong> sín, fizioterápia.</p>
+                    </div>
+                </div>
+            </div>
+             <div id="also" class="tab-content hidden">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="content-card">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-700">Peroneus Paresis</h3>
+                        <p>A <strong>n. peroneus</strong> kompressziója a fibulafejecsnél. Jellemző a <strong>"lábfejcsüngés"</strong>, szteppázó járás. <br><strong>Kezelés:</strong> peroneus-emelő sín.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-700">Meralgia Paresthetica</h3>
+                        <p>A <strong>n. cut. fem. lat.</strong> kompressziója a lágyéknál. Égő fájdalom a comb elülső-külső felszínén. Tisztán szenzoros. <br><strong>Kezelés:</strong> oki terápia, injekciók.</p>
+                    </div>
+                    <div class="content-card">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-700">Tarsalis Alagút-szindróma</h3>
+                        <p>A <strong>n. tibialis</strong> kompressziója a boka belső oldalán. Égő, szúró fájdalom a talpon. <br><strong>Kezelés:</strong> betétek, injekciók, műtét.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Motor Neuron Diseases Section -->
+        <section id="mnd" class="mb-16 scroll-mt-20">
+            <div class="section-title border-red-500 text-red-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 15.75l-1.42-1.42A11.25 11.25 0 0112 4.5v5.25l-1.5-1.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 15.75l7.5-7.5 7.5 7.5" /></svg>
+                <h2>Motoneuron Betegségek (MND)</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="content-card lg:col-span-2">
+                    <h3 class="text-2xl font-semibold mb-3 text-red-700">Definíció és Főbb Típusok</h3>
+                    <p class="mb-4">Progresszív neurodegeneratív rendellenességek, amelyek szelektíven a mozgató idegsejteket (motoneuronokat) érintik. A leggyakoribb forma az <strong>Amyotrophiás Lateralsclerosis (ALS)</strong>, amely mind a felső (UMN), mind az alsó (LMN) motoneuronokat károsítja.</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>ALS:</strong> UMN + LMN jelek. Végtagi vagy bulbáris (beszéd/nyelés) kezdet.</li>
+                        <li><strong>PLS (Primer Lateralsclerosis):</strong> Csak UMN jelek.</li>
+                        <li><strong>PMA (Progresszív Izomatrófia):</strong> Csak LMN jelek.</li>
+                    </ul>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-red-700">Diagnosztika</h3>
+                     <p class="mb-4">A diagnózis klinikai, más kórképek kizárásán alapul. Az <strong>ENG/EMG</strong> kulcsfontosságú az LMN károsodás igazolására.</p>
+                     <p>Az agy és gerincvelő <strong>MRI</strong> vizsgálata elengedhetetlen a strukturális okok (pl. gerincvelői kompresszió) kizárására.</p>
+                </div>
+                <div class="content-card lg:col-span-3">
+                    <h3 class="text-2xl font-semibold mb-4 text-red-700">Felső (UMN) vs. Alsó (LMN) Motoneuron Károsodás Jelei</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Jel</th><th>Felső Motoneuron (UMN) Károsodás</th><th>Alsó Motoneuron (LMN) Károsodás</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Izomtónus</strong></td><td><strong>Spaszticitás</strong> (fokozott tónus)</td><td><strong>Flacciditás</strong> (petyhüdtség, csökkent tónus)</td></tr>
+                                <tr><td><strong>Reflexek</strong></td><td><strong>Hyperreflexia</strong> (fokozott reflexek)</td><td><strong>Hyporeflexia / Areflexia</strong> (csökkent/hiányzó)</td></tr>
+                                <tr><td><strong>Kóros reflex</strong></td><td><strong>Babinski-jel pozitív</strong></td><td>Nincs</td></tr>
+                                <tr><td><strong>Izomatrófia</strong></td><td>Enyhe, inaktivitás miatt</td><td><strong>Kifejezett</strong>, korai</td></tr>
+                                <tr><td><strong>Fasciculatio</strong></td><td>Nincs</td><td><strong>Jellemző</strong> (akaratlan izomrángások)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-card lg:col-span-3">
+                    <h3 class="text-2xl font-semibold mb-3 text-red-700">Kezelés és Menedzsment</h3>
+                    <p class="mb-4">Az ALS jelenleg gyógyíthatatlan, a kezelés célja a progresszió lassítása és az életminőség javítása multidiszciplináris megközelítéssel.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Betegségmódosító Terápia</h4>
+                            <ul class="list-disc list-inside">
+                                <li><strong>Riluzol:</strong> A túlélést bizonyítottan meghosszabbító gyógyszer.</li>
+                                <li><strong>Edaravone:</strong> Lassíthatja a funkcionális hanyatlást.</li>
+                                <li><strong>Tofersen:</strong> Specifikus terápia SOD1 mutáció esetén.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Tüneti és Szupportív Kezelés</h4>
+                            <ul class="list-disc list-inside">
+                                <li><strong>Légzési elégtelenség:</strong> Nem-invazív lélegeztetés (NIV) javítja a túlélést.</li>
+                                <li><strong>Nyelési zavar:</strong> PEG beültetése a táplálás biztosítására.</li>
+                                <li><strong>Kommunikáció:</strong> Augmentatív kommunikációs eszközök.</li>
+                                <li><strong>Fizikoterápia, spaszticitás kezelése.</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-6 text-center">
+            <p>&copy; 2025 Neurológiai Kórképek Tudástára. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // --- Tabbed Interface ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+
+                // Only handle tabs within the same section
+                const parentSection = button.closest('section');
+                const sectionTabButtons = parentSection.querySelectorAll('.tab-button');
+                const sectionTabContents = parentSection.querySelectorAll('.tab-content');
+
+                sectionTabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                sectionTabContents.forEach(content => {
+                    if (content.id === tabId) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

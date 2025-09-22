@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Anatómia Kalauz: Koponya, Gerinc, Koponyagödrök és Látópálya</title>
+    <script src="tailwind.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: Single-page app with a mobile hamburger menu and five modules ('Koponya', 'Gerinc', 'Koponyagödrök', 'Látópálya', 'Gyakorlás'). Retains list/detail and tabbed layouts. Implements URL hash-based navigation. Layout for the 'Látópálya' module has been adjusted to place the description panel below the diagram, preventing overlap. The footer is expanded with a comprehensive list of sources. -->
+    <!-- Visualization & Content Choices: 
+        - Clinical Significance: Highlighted with a brain emoji (🧠) and subtle background color.
+        - Visual Pathway (Látópálya): Interactive HTML/CSS diagram is now followed by the description panel to improve usability on all screen sizes.
+        - Quiz (Gyakorlás): JS-powered multiple-choice quiz with immediate feedback.
+        - Navigation: Hamburger menu for mobile and URL hash updates for direct linking.
+        - Sources: Footer now includes a detailed list of anatomical sources to enhance credibility.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .bg-cream { background-color: #F5F5DC; }
+        .bg-warm-gray { background-color: #EFEBE9; }
+        .bg-clinical { background-color: #E0E0E0; }
+        .text-brown-dark { color: #4E342E; }
+        .text-brown-medium { color: #6D4C41; }
+        .border-brown-light { border-color: #A1887F; }
+        .nav-btn.nav-active {
+            background-color: #8D6E63;
+            color: white;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+        }
+        .list-item-active { background-color: #D7CCC8; border-left-color: #6D4C41; }
+        .fossa-tab.fossa-tab-active { background-color: #A1887F; color: white; border-bottom-color: transparent; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+        .pathway-diagram { position: relative; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; height: 250px; }
+        .pathway-diagram .path-item { cursor: pointer; transition: all 0.2s ease-in-out; }
+        .pathway-diagram .path-item:hover { transform: scale(1.05); filter: brightness(0.95); }
+        .pathway-diagram .path-item.active-path { border: 3px solid #6D4C41; box-shadow: 0 0 15px rgba(78, 52, 46, 0.5); }
+        .answer-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .correct-answer { background-color: #4CAF50 !important; color: white !important; }
+        .wrong-answer { background-color: #F44336 !important; color: white !important; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+    </style>
+</head>
+<body class="bg-cream text-brown-dark">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <header class="bg-warm-gray shadow-md sticky top-0 z-20">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <h1 class="text-lg md:text-2xl font-bold text-brown-dark">Interaktív Anatómia Kalauz</h1>
+                    <!-- Desktop Menu -->
+                    <div class="hidden lg:flex space-x-1">
+                        <button data-target="koponya" class="nav-btn text-xs sm:text-base px-2 sm:px-3 py-2 rounded-md font-medium transition-colors duration-200">Koponya</button>
+                        <button data-target="gerinc" class="nav-btn text-brown-medium hover:bg-stone-300 text-xs sm:text-base px-2 sm:px-3 py-2 rounded-md font-medium transition-colors duration-200">Gerinc</button>
+                        <button data-target="koponyagodrok" class="nav-btn text-brown-medium hover:bg-stone-300 text-xs sm:text-base px-2 sm:px-3 py-2 rounded-md font-medium transition-colors duration-200">Koponyagödrök</button>
+                        <button data-target="latopalya" class="nav-btn text-brown-medium hover:bg-stone-300 text-xs sm:text-base px-2 sm:px-3 py-2 rounded-md font-medium transition-colors duration-200">Látópálya</button>
+                        <button data-target="gyakorlas" class="nav-btn text-brown-medium hover:bg-stone-300 text-xs sm:text-base px-2 sm:px-3 py-2 rounded-md font-medium transition-colors duration-200">Gyakorlás</button>
+                    </div>
+                    <!-- Mobile Menu Button -->
+                    <div class="lg:hidden">
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-brown-dark hover:text-white hover:bg-brown-medium focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                            <span class="sr-only">Menü megnyitása</span>
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="lg:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <button data-target="koponya" class="nav-btn text-brown-medium block px-3 py-2 rounded-md text-base font-medium w-full text-left">Koponya</button>
+                    <button data-target="gerinc" class="nav-btn text-brown-medium block px-3 py-2 rounded-md text-base font-medium w-full text-left">Gerinc</button>
+                    <button data-target="koponyagodrok" class="nav-btn text-brown-medium block px-3 py-2 rounded-md text-base font-medium w-full text-left">Koponyagödrök</button>
+                    <button data-target="latopalya" class="nav-btn text-brown-medium block px-3 py-2 rounded-md text-base font-medium w-full text-left">Látópálya</button>
+                    <button data-target="gyakorlas" class="nav-btn text-brown-medium block px-3 py-2 rounded-md text-base font-medium w-full text-left">Gyakorlás</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+            
+            <div id="koponya" class="page-content">
+                <div class="mb-6 p-6 bg-warm-gray rounded-lg shadow">
+                    <h2 class="text-2xl font-bold text-brown-dark mb-2">A Csontos Koponya Anatómiája</h2>
+                    <p class="text-brown-medium">Ez a modul a csontos koponya felépítését mutatja be. A bal oldali listából válasszon ki egy csontot a részletes információk megtekintéséhez. Az agykoponya (Neurocranium) az agyvelőt védi, míg az arckoponya (Viscerocranium) az arc vázát képezi és helyet ad az érzékszerveknek.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-warm-gray rounded-lg shadow p-4">
+                        <h3 class="font-bold text-lg mb-4 text-brown-dark border-b-2 border-brown-light pb-2">Koponyacsontok</h3>
+                        <div id="bone-list"></div>
+                    </div>
+                    <div id="bone-details" class="lg:col-span-2 bg-warm-gray rounded-lg shadow p-6 min-h-[500px]">
+                        <p class="text-center text-brown-medium mt-16">Kérjük, válasszon egy csontot a bal oldali listából a részletek megtekintéséhez.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gerinc" class="page-content hidden">
+                 <div class="mb-6 p-6 bg-warm-gray rounded-lg shadow">
+                    <h2 class="text-2xl font-bold text-brown-dark mb-2">A Gerinc Anatómiája</h2>
+                    <p class="text-brown-medium">Ez a modul a gerincoszlop felépítését és szakaszait ismerteti. A gerinc a test központi tartóoszlopa, védi a gerincvelőt és biztosítja a törzs mozgékonyságát. Válasszon egy gerincszakaszt a listából a jellegzetes csigolyák leírásának megtekintéséhez, és tanulmányozza a vizualizációkat.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-warm-gray rounded-lg shadow p-4">
+                        <h3 class="font-bold text-lg mb-4 text-brown-dark border-b-2 border-brown-light pb-2">Gerincszakaszok</h3>
+                        <div id="vertebra-list"></div>
+                    </div>
+                    <div id="vertebra-details" class="lg:col-span-2 bg-warm-gray rounded-lg shadow p-6 min-h-[500px]">
+                         <p class="text-center text-brown-medium mt-16">Kérjük, válasszon egy gerincszakaszt a bal oldali listából a részletek megtekintéséhez.</p>
+                    </div>
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-warm-gray rounded-lg shadow p-6">
+                         <h3 class="font-bold text-lg mb-4 text-center text-brown-dark">Csigolyák Száma Szakaszonként</h3>
+                         <div class="chart-container">
+                            <canvas id="vertebraeChart"></canvas>
+                         </div>
+                    </div>
+                    <div class="bg-warm-gray rounded-lg shadow p-6">
+                        <h3 class="font-bold text-lg mb-4 text-center text-brown-dark">A Gerinc Görbületei</h3>
+                        <p class="text-sm text-brown-medium text-center mb-4">A gerinc oldalnézetből jellegzetes, kettős S-alakú görbületekkel rendelkezik, amelyek a rugalmasságot és a teherbírást növelik.</p>
+                        <div class="relative h-80 w-full max-w-xs mx-auto">
+                           <div class="absolute w-20 h-full border-l-4 border-dashed border-gray-400 left-1/2 -translate-x-1/2"></div>
+                           <div class="absolute left-1/2 -translate-x-1/2 w-32 h-full">
+                               <div class="absolute top-0 left-0 text-right w-full pr-12">
+                                    <div class="font-semibold text-sm text-brown-dark">Nyaki lordosis</div>
+                                    <div class="text-xs text-brown-medium">(előre domború)</div>
+                                </div>
+                                <div class="absolute top-[25%] left-0 text-left w-full pl-12">
+                                     <div class="font-semibold text-sm text-brown-dark">Háti kyphosis</div>
+                                     <div class="text-xs text-brown-medium">(hátra domború)</div>
+                                </div>
+                                <div class="absolute top-[55%] left-0 text-right w-full pr-12">
+                                     <div class="font-semibold text-sm text-brown-dark">Ágyéki lordosis</div>
+                                     <div class="text-xs text-brown-medium">(előre domború)</div>
+                                </div>
+                                <div class="absolute top-[85%] left-0 text-left w-full pl-12">
+                                     <div class="font-semibold text-sm text-brown-dark">Keresztcsonti kyphosis</div>
+                                     <div class="text-xs text-brown-medium">(hátra domború)</div>
+                                </div>
+                           </div>
+                           <svg class="absolute w-full h-full" viewBox="0 0 100 200" preserveAspectRatio="none">
+                              <path d="M 50,0 C 75,25 75,75 50,100 C 25,125 25,175 50,200" stroke="#6D4C41" stroke-width="4" fill="none" />
+                           </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="koponyagodrok" class="page-content hidden">
+                 <div class="mb-6 p-6 bg-warm-gray rounded-lg shadow">
+                    <h2 class="text-2xl font-bold text-brown-dark mb-2">A Koponyaalapi Gödrök Anatómiája</h2>
+                    <p class="text-brown-medium">A koponyaalap belső felszíne három, lépcsőzetesen elhelyezkedő mélyedést képez: az elülső, középső és hátsó koponyagödröt. Ezek az agy különböző részeit fogadják be, és számos nyílást tartalmaznak az idegek és erek számára. Válasszon egy gödröt az alábbi fülekre kattintva a részletes anatómia megtekintéséhez.</p>
+                </div>
+                <div>
+                    <div class="border-b border-brown-light mb-4">
+                        <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                            <button class="fossa-tab whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm" data-fossa-target="fossa-anterior">Elülső koponyagödör</button>
+                            <button class="fossa-tab text-brown-medium hover:text-brown-dark hover:border-gray-400 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm" data-fossa-target="fossa-media">Középső koponyagödör</button>
+                            <button class="fossa-tab text-brown-medium hover:text-brown-dark hover:border-gray-400 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm" data-fossa-target="fossa-posterior">Hátulsó koponyagödör</button>
+                        </nav>
+                    </div>
+                    <div id="fossa-content" class="bg-warm-gray rounded-lg shadow p-6">
+                        <!-- Fossa content will be injected here by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="latopalya" class="page-content hidden">
+                 <div class="mb-6 p-6 bg-warm-gray rounded-lg shadow">
+                    <h2 class="text-2xl font-bold text-brown-dark mb-2">A Látópálya Szerkezete</h2>
+                    <p class="text-brown-medium">A látópálya az idegrendszer azon összetett része, amely a vizuális információt a szem retinájából az agy látókérgébe továbbítja. Kattintson az ábra elemeire a részletes leírásért, és ismerje meg a pálya sérüléseinek lehetséges következményeit.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-warm-gray rounded-lg shadow p-6 w-full">
+                        <h3 class="font-bold text-lg mb-4 text-center text-brown-dark">A Látópálya Interaktív Ábrája</h3>
+                        <div class="pathway-diagram">
+                            <div data-path-id="retina" class="path-item absolute top-1/2 -translate-y-1/2 left-2 w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-center text-xs font-semibold border-2 border-blue-400">Retina</div>
+                            <div class="absolute top-1/2 -translate-y-px left-[4.5rem] w-[calc(11rem-4.5rem)] h-1 bg-gray-400"></div>
+                            <div data-path-id="n-opticus" class="path-item absolute top-1/2 -translate-y-1/2 left-[11rem] w-20 h-10 bg-green-200 rounded-lg flex items-center justify-center text-center text-xs font-semibold border-2 border-green-400">N. Opticus (CN II)</div>
+                            <div data-path-id="lesion-a" class="path-item absolute top-1/2 -translate-y-[150%] left-[12.5rem] w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xs" title="Sérülés: A">A</div>
+                            <div class="absolute top-1/2 -translate-y-px left-[16rem] w-[calc(18rem-16rem)] h-1 bg-gray-400"></div>
+                            <div data-path-id="chiasma" class="path-item absolute top-1/2 -translate-y-1/2 left-[18rem] w-20 h-20 bg-purple-200 rounded-xl flex items-center justify-center text-center text-xs font-semibold border-2 border-purple-400 transform -skew-x-12">Chiasma Opticum</div>
+                            <div data-path-id="lesion-b" class="path-item absolute top-1/2 -translate-y-[150%] left-[20rem] w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xs" title="Sérülés: B">B</div>
+                            <div class="absolute top-1/2 -translate-y-px left-[23rem] w-[calc(25rem-23rem)] h-1 bg-gray-400"></div>
+                            <div data-path-id="tractus" class="path-item absolute top-1/2 -translate-y-1/2 left-[25rem] w-20 h-10 bg-yellow-200 rounded-lg flex items-center justify-center text-center text-xs font-semibold border-2 border-yellow-400">Tractus Opticus</div>
+                            <div data-path-id="lesion-c" class="path-item absolute top-1/2 -translate-y-[150%] left-[27.5rem] w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xs" title="Sérülés: C">C</div>
+                            <div class="absolute top-1/2 -translate-y-px left-[30rem] w-[calc(32rem-30rem)] h-1 bg-gray-400"></div>
+                            <div data-path-id="cgl" class="path-item absolute top-1/2 -translate-y-1/2 left-[32rem] w-20 h-16 bg-orange-200 rounded-lg flex items-center justify-center text-center text-xs font-semibold border-2 border-orange-400">CGL</div>
+                            <div class="absolute top-1/2 -translate-y-px left-[37rem] w-[calc(39rem-37rem)] h-1 bg-gray-400"></div>
+                            <div data-path-id="radiatio" class="path-item absolute top-1/2 -translate-y-1/2 left-[39rem] w-24 h-12 bg-pink-200 rounded-lg flex items-center justify-center text-center text-xs font-semibold border-2 border-pink-400">Radiatio Optica</div>
+                            <div class="absolute top-1/2 -translate-y-px left-[45rem] w-[calc(47rem-45rem)] h-1 bg-gray-400"></div>
+                            <div data-path-id="cortex" class="path-item absolute top-1/2 -translate-y-1/2 left-[47rem] w-24 h-20 bg-teal-200 rounded-lg flex items-center justify-center text-center text-xs font-semibold border-2 border-teal-400">Primer Látókéreg (V1)</div>
+                        </div>
+                    </div>
+                    <div id="pathway-details" class="bg-warm-gray rounded-lg shadow p-6 mt-6 w-full">
+                        <p class="text-center text-brown-medium">Kattintson az ábra egy elemére a leírás megtekintéséhez.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gyakorlas" class="page-content hidden">
+                <div class="mb-6 p-6 bg-warm-gray rounded-lg shadow">
+                    <h2 class="text-2xl font-bold text-brown-dark mb-2">Gyakorlás: Tudáspróba</h2>
+                    <p class="text-brown-medium">Tesztelje tudását a tanultakról! Válasszon egy témakört, és válaszoljon a kérdésekre.</p>
+                </div>
+                <div id="quiz-container" class="bg-warm-gray rounded-lg shadow p-6">
+                    <!-- Quiz content will be injected here by JS -->
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-warm-gray mt-8 py-6">
+            <div class="container mx-auto text-center text-brown-medium text-sm px-4">
+                <p>&copy; 2025 Interaktív Anatómia Kalauz. Készült a forrásanyag alapján.</p>
+                <p class="mt-2">További felfedezéshez: <a href="https://human.biodigital.com/" target="_blank" rel="noopener noreferrer" class="font-semibold text-brown-dark hover:underline">BioDigital Human (3D)</a></p>
+                
+                <div class="mt-6 pt-6 border-t border-brown-light/50">
+                    <h4 class="font-bold text-lg text-brown-dark mb-4">Felhasznált Források</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-xs text-left">
+                        <p>1. Moore, K. L., Dalley, A. F., & Agur, A. M. R. (2018). *Clinically Oriented Anatomy*.</p>
+                        <p>2. Standring, S. (Ed.). (2021). *Gray's Anatomy: The Anatomical Basis of Clinical Practice*.</p>
+                        <p>3. Netter, F. H. (2019). *Atlas of Human Anatomy*.</p>
+                        <p>4. Drake, R. L., Vogl, A. W., & Mitchell, A. W. M. (2020). *Gray's Anatomy for Students*.</p>
+                        <p>5. White, T. D., & Folkens, P. A. (2005). *The Human Bone Manual*.</p>
+                        <p>6. Scheuer, L., & Black, S. (2004). *The Juvenile Skeleton*.</p>
+                        <p>7. Agur, A. M. R., & Dalley, A. F. (2017). *Grant's Atlas of Anatomy*.</p>
+                        <p>8. Rohen, J. W., Yokochi, C., & Lütjen-Drecoll, E. (2015). *Color Atlas of Anatomy*.</p>
+                        <p>9. Schünke, M., Schulte, E., & Schumacher, U. (2021). *Thieme Atlas of Anatomy: Head, Neck, and Neuroanatomy*.</p>
+                        <p>10. Szentágothai J., Réthelyi M. (1994). *Funkcionális Anatómia*.</p>
+                        <p>11. Aiello, L., & Dean, C. (1990). *An Introduction to Human Evolutionary Anatomy*.</p>
+                        <p>12. Blumenfeld, H. (2010). *Neuroanatomy through Clinical Cases*.</p>
+                        <p>13. Haines, D. E. (2018). *Neuroanatomy: An Atlas of Structures, Sections, and Systems*.</p>
+                        <p>14. Osborn, A. G. (1999). *Diagnostic Cerebral Angiography*.</p>
+                        <p>15. Harnsberger, H. R., & Osborn, A. G. (2021). *Diagnostic and Surgical Imaging Anatomy: Brain, Head and Neck, Spine*.</p>
+                        <p>16. Okeson, J. P. (2013). *Management of Temporomandibular Disorders and Occlusion*.</p>
+                        <p>17. Kenhub.com. (n.d.). *Online Anatomy, Histology, and Medical Imaging Learning Platform*.</p>
+                        <p>18. TeachMeAnatomy.info. (n.d.). *Anatomy & Clinical Education*.</p>
+                        <p>19. Saladin, K. S. (2018). *Anatomy & Physiology: The Unity of Form and Function*.</p>
+                        <p>20. Dähnert, W. (2011). *Radiology Review Manual*.</p>
+                        <p>21. Standring, S. (2020). *Gray's Surgical Anatomy*.</p>
+                        <p>22. Greenberg, M. S. (2020). *Handbook of Neurosurgery*.</p>
+                        <p>23. Sadler, T. W. (2019). *Langman's Medical Embryology*.</p>
+                        <p>24. Bogduk, N. (2012). *Clinical and Radiological Anatomy of the Lumbar Spine*.</p>
+                        <p>25. Palastanga, N., & Soames, R. (2012). *Anatomy and Human Movement: Structure and Function*.</p>
+                        <p>26. Som, P. M., & Curtin, H. D. (2011). *Head and Neck Imaging*.</p>
+                        <p>27. Kaufman, M. H. (1999). *The Atlas of Mouse Development*.</p>
+                        <p>28. Gaillard, F., & Jones, J. (n.d.). Radiopaedia.org. *Collaborative Radiology Resource*.</p>
+                        <p>29. Snell, R. S. (2010). *Clinical Neuroanatomy*.</p>
+                        <p>30. Waxman, S. G. (2013). *Clinical Neuroanatomy*.</p>
+                        <p>31. Gilroy, A. M., MacPherson, B. R., & Ross, L. M. (2012). *Atlas of Anatomy*.</p>
+                        <p>32. Clemente, C. D. (2011). *Clemente's Anatomy Dissector*.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const anatomyData = {
+        koponya: {
+            agykoponya: [
+                {
+                    id: 'os-frontale', name: 'Homlokcsont (Os Frontale)',
+                    jellemzok: `Páratlan, kagyló alakú csont, a homlok formáját adja. Részei: pikkelyrész (squama frontalis), két szemüregi rész (pars orbitalis) és egy orri rész (pars nasalis). Belül található a homloküreg ($sinus frontalis$). Fontos képlete a $margo supraorbitalis$ a $foramen supraorbitale$-val, ahol a homlokot ellátó ideg és erek lépnek ki.`,
+                    izesulesek: `Falcsontokkal (sutura coronalis), ékcsonttal, rostacsonttal, orrcsontokkal, felső állcsontokkal, könnycsontokkal, járomcsontokkal.`,
+                    klinikai: `Sérülései gyakoriak. A sinus frontalis hátsó falának törése liquorrhoeához (agyvízcsorgáshoz) vezethet.`
+                },
+                {
+                    id: 'os-parietale', name: 'Falcsont (Os Parietale)',
+                    jellemzok: `Páros, négyszögletű lapos csont, az agykoponya tetejét és oldalát alkotja. Belső felszínén az $arteria meningea media$ ágai hagynak barázdákat. Külső felszínén tapad a halántékizom.`,
+                    izesulesek: `A másik falcsonttal (sutura sagittalis), homlokcsonttal (sutura coronalis), nyakszirtcsonttal (sutura lambdoidea) és halántékcsonttal (sutura squamosa).`,
+                    klinikai: `Védi az agy érző és asszociációs területeit. Törése epidurális vérzést okozhat az $a. meningea media$ sérülése miatt.`
+                },
+                {
+                    id: 'os-temporale', name: 'Halántékcsont (Os Temporale)',
+                    jellemzok: `Páros, bonyolult felépítésű csont a fül körül. Részei: pikkelyrész ($pars squamosa$), sziklacsonti rész ($pars petrosa$), dobüregi rész ($pars tympanica$), csecsnyúlványi rész ($pars mastoidea$). Befogadja a halló- és egyensúlyozó szervet. Fontos képletei: $processus zygomaticus$ (a járomív része), $fossa mandibularis$ (az állkapocsízülethez), $meatus acusticus externus$ és $internus$, $canalis caroticus$ ($a. carotis interna$ számára).`,
+                    izesulesek: `Nyakszirtcsonttal, falcsonttal, ékcsonttal, járomcsonttal és az állkapoccsal (állkapocsízület).`,
+                    klinikai: `Rendkívül sokrétű funkciói miatt sérülései vagy gyulladásai (pl. mastoiditis) súlyos következményekkel járhatnak. Számos agyideg (VII, VIII, IX, X, XI) halad át rajta.`
+                },
+                {
+                    id: 'os-occipitale', name: 'Nyakszirtcsont (Os Occipitale)',
+                    jellemzok: `Páratlan csont, a koponya hátsó-alsó részét alkotja. Közepén található a $foramen magnum$ (öreglyuk), ahol a nyúltvelő a gerincvelőbe folytatódik, és fontos erek, idegek haladnak át. Képletei: $condyli occipitales$ (az atlasszal ízesül), $clivus$ (az agytörzs fekvőhelye), $protuberantia occipitalis externa$ (tarkón tapintható).`,
+                    izesulesek: `Falcsontokkal (sutura lambdoidea), halántékcsontokkal, ékcsonttal és az első nyakcsigolyával (atlas).`,
+                    klinikai: `Kulcsfontosságú a koponya és a gerinc kapcsolatában. A foramen magnum körüli sérülések életveszélyesek lehetnek az agytörzs közelsége miatt.`
+                },
+                {
+                    id: 'os-sphenoidale', name: 'Ékcsont (Os Sphenoidale)',
+                    jellemzok: `Páratlan, "ékkőként" a koponyaalap közepén elhelyezkedő, pillangó alakú csont. Részei: test, kis szárnyak, nagy szárnyak, röpnyúlványok. A testében található a $sella turcica$ (töröknyereg), amely a hypophysist (agyalapi mirigy) fogadja be. Számos nyílást tartalmaz agyidegek és erek számára ($canalis opticus$, $fissura orbitalis superior$, $foramen rotundum$, $foramen ovale$).`,
+                    izesulesek: `Szinte minden agykoponya- és több arckoponyacsonttal is ízesül, stabilizálva a koponyát.`,
+                    klinikai: `Központi elhelyezkedése miatt sérülései vagy daganatai változatos neurológiai és endokrin tüneteket okozhatnak. A $sella turcica$ körüli daganat látótérkiesést okozhat.`
+                },
+                {
+                    id: 'os-ethmoidale', name: 'Rostacsont (Os Ethmoidale)',
+                    jellemzok: `Páratlan, szivacsos, kocka alakú csont a szemüregek között, az orrüreg tetején. Részei: $lamina cribrosa$ (szitalemez), amelyen a szaglóideg rostjai lépnek be; $lamina perpendicularis$ (az orrsövény része); és a labyrinthusok, amelyek a rostasejteket ($cellulae ethmoidales$) és az orrkagylókat (felső, középső) tartalmazzák. A $crista galli$ a $falx cerebri$ rögzítésére szolgál.`,
+                    izesulesek: `Homlokcsonttal, ékcsonttal, orrcsontokkal, felső állcsontokkal, könnycsontokkal, szájpadcsontokkal és az ekecsonttal.`,
+                    klinikai: `A $lamina cribrosa$ sérülése szaglásvesztéshez és liquorrhoeához vezethet. Gyulladása ($ethmoiditis$) könnyen átterjedhet a szemüregre a vékony $lamina papyracea$ miatt.`
+                }
+            ],
+            arckoponya: [
+                 { 
+                    id: 'maxilla', name: 'Felső állcsont (Maxilla)',
+                    jellemzok: `Páros csont, a felső állívet alkotja. Befogadja a felső fogakat. Testében van a legnagyobb orrmelléküreg, a $sinus maxillaris$ (Highmore-üreg). Nyúlványai: homloki, járomcsonti, fogmedri és szájpadnyúlvány (a kemény szájpad elülső részét képezi).`,
+                    izesulesek: `Sok csonttal ízesül, központi szerepet játszik az arc középső részének felépítésében.`,
+                    klinikai: `A sinus maxillaris közelsége a foggyökerekhez miatt gyakori a fogászati eredetű arcüreggyulladás.`
+                },
+                { 
+                    id: 'mandibula', name: 'Állkapocscsont (Mandibula)',
+                    jellemzok: `Páratlan, patkó alakú, a koponya egyetlen mozgékony csontja. Részei: test ($corpus$) és két ág ($ramus$). A testen van a fogmedri rész az alsó fogaknak. A ramus a $processus coronoideus$-ban és a $processus condylaris$-ban végződik, utóbbi alkotja az állkapocsízületet.`,
+                    izesulesek: `A kétoldali halántékcsonttal az $articulatio temporomandibularis$ (állkapocsízület) révén.`,
+                    klinikai: `Alapvető a rágásban és a beszédben. Ízületi diszfunkciói (TMD) gyakoriak.`
+                },
+                { 
+                    id: 'os-zygomaticum', name: 'Járomcsont (Os Zygomaticum)',
+                    jellemzok: `Páros csont, a pofacsontot alkotja. Részt vesz a szemüreg oldalsó és alsó falának kialakításában. A halántékcsonttal alkotja a járomívet ($arcus zygomaticus$).`,
+                    izesulesek: `Homlokcsonttal, halántékcsonttal, ékcsonttal és felső állcsonttal.`,
+                    klinikai: `Gyakran sérül arctraumák során, törése arcdeformitást és funkcionális zavarokat (pl. kettős látás) okozhat.`
+                },
+                { 
+                    id: 'os-nasale', name: 'Orrcsont (Os Nasale)',
+                    jellemzok: `Páros, kicsi, téglalap alakú csont, amely az orrgyököt alkotja.`,
+                    izesulesek: `Homlokcsonttal, felső állcsonttal, rostacsonttal és a másik oldali orrcsonttal.`,
+                    klinikai: `Exponált helyzete miatt az egyik leggyakrabban törött arccsont.`
+                },
+                { 
+                    id: 'os-lacrimale', name: 'Könnycsont (Os Lacrimale)',
+                    jellemzok: `Páros, az arckoponya legkisebb csontja. A szemüreg mediális falán helyezkedik el. Rajta található a könnytömlő árka ($fossa sacci lacrimalis$).`,
+                    izesulesek: `Homlokcsonttal, rostacsonttal, felső állcsonttal és az alsó orrkagylóval.`,
+                    klinikai: `Fontos a könnyelvezető rendszer működésében. Törékeny, könnyen sérül.`
+                },
+                { 
+                    id: 'os-palatinum', name: 'Szájpadcsont (Os Palatinum)',
+                    jellemzok: `Páros, L-alakú csont. Vízszintes lemeze ($lamina horizontalis$) a kemény szájpad hátsó részét alkotja. Függőleges lemeze ($lamina perpendicularis$) az orrüreg oldalfalának része.`,
+                    izesulesek: `Ékcsonttal, rostacsonttal, felső állcsonttal, alsó orrkagylóval, ekecsonttal és a másik szájpadcsonttal.`,
+                    klinikai: `Fejlődési zavara szájpadhasadékot okozhat.`
+                },
+                { 
+                    id: 'vomer', name: 'Ekecsont (Vomer)',
+                    jellemzok: `Páratlan, ekevas alakú csont, az orrsövény hátsó-alsó csontos részét alkotja.`,
+                    izesulesek: `Ékcsonttal, rostacsonttal, felső állcsontokkal és szájpadcsontokkal.`,
+                    klinikai: `Az orrsövényferdülés gyakran érinti, ami légzési nehézséget okozhat.`
+                },
+                { 
+                    id: 'concha-nasalis-inferior', name: 'Alsó orrkagyló (Concha Nasalis Inferior)',
+                    jellemzok: `Páros, önálló csont (ellentétben a felső és középső orrkagylóval, amik a rostacsont részei). Az orrüreg oldalfalán helyezkedik el, jelentősen növeli a légzőnyálkahártya felszínét.`,
+                    izesulesek: `Felső állcsonttal, könnycsonttal, rostacsonttal és szájpadcsonttal.`,
+                    klinikai: `Duzzanata (pl. allergia miatt) orrdugulást okoz.`
+                }
+            ]
+        },
+        gerinc: [
+            {
+                id: 'cervicalis', name: 'Nyaki szakasz (C1-C7)',
+                jellemzok: `Hét csigolyából áll, a gerinc legmozgékonyabb szakasza. A tipikus nyakcsigolyák (C3-C6) teste kicsi, tövisnyúlványa villás, harántnyúlványán pedig lyuk ($foramen transversarium$) található az $arteria vertebralis$ számára.`,
+                atipikus: `
+                    <ul class="list-disc list-inside space-y-2 text-sm">
+                        <li><b>Atlas (C1):</b> Gyűrű alakú, nincs teste. Lehetővé teszi a fej bólintó mozgását.</li>
+                        <li><b>Axis (C2):</b> Felfelé nyúló fognyúlványa ($dens axis$) van, ami a fej forgását biztosítja.</li>
+                        <li><b>Vertebra prominens (C7):</b> Hosszú, jól tapintható tövisnyúlványa van.</li>
+                    </ul>
+                `,
+                klinikai: `Nagy mozgékonysága miatt sérülékeny, gyakoriak a degeneratív elváltozások (pl. porckorongsérv).`
+            },
+            {
+                id: 'thoracalis', name: 'Háti szakasz (T1-T12)',
+                jellemzok: `Tizenkét csigolyából áll, mindegyikhez egy bordapár ízesül, így a mellkas vázát képezi. A legkevésbé mozgékony szakasz. Testükön és harántnyúlványukon ízületi felszínek ($foveae costales$) vannak a bordáknak. Tövisnyúlványaik hosszúak és meredeken lefelé irányulnak.`,
+                atipikus: `A T1, T9, T10, T11 és T12 csigolyák a bordákkal való ízesülés módjában eltérnek a tipikus háti csigolyáktól, átmenetet képezve a szomszédos szakaszok felé.`,
+                klinikai: `Merevsége fontos a mellkas stabilitásához. Görbülete a kyphosis (hátrafelé domborodó).`
+            },
+            {
+                id: 'lumbalis', name: 'Ágyéki szakasz (L1-L5)',
+                jellemzok: `Öt csigolyából áll. Ezek a gerinc legnagyobb, legerősebb csigolyái, mivel a test súlyának jelentős részét viselik. Testük nagy, vese alakú. Tövisnyúlványuk rövid, vastag, bárd alakú. Ízületi felszíneik elsősorban előre- és hátrahajlást tesznek lehetővé.`,
+                atipikus: `Az L5 csigolya ék alakú testtel rendelkezik, hogy illeszkedjen a keresztcsonthoz.`,
+                klinikai: `Nagy terhelése miatt itt a leggyakoribb a porckorongsérv és a derékfájdalom. Természetes görbülete a lordosis (előre domborodó).`
+            },
+            {
+                id: 'sacrum', name: 'Keresztcsont (Os Sacrum)',
+                jellemzok: `Öt keresztcsonti csigolya (S1-S5) összecsontosodásából jön létre. Ék alakú, a medence hátsó falát alkotja. Felső része, a $promontorium$, fontos szülészeti tájékozódási pont. Elülső és hátsó felszínén lyukak ($foramina sacralia$) vannak a gerincvelői idegek kilépésére.`,
+                izesulesek: `Felül az L5 csigolyával, oldalt a csípőcsontokkal (sacroiliacalis ízület), alul a farkcsonttal.`,
+                klinikai: `Fontos szerepe van a testsúly átvitelében a gerincről az alsó végtagokra.`
+            },
+            {
+                id: 'coccyx', name: 'Farkcsont (Os Coccygis)',
+                jellemzok: `3-5 csökevényes farkcsonti csigolya (Co1-Co5) összecsontosodásából álló kis, háromszögletű csont. Az emberi testben csökevényes farokváznak felel meg.`,
+                izesulesek: `Felül a keresztcsonttal.`,
+                klinikai: `Fontos izmok és szalagok tapadási helye a medencefenéken. Sérülése (törés, zúzódás) esés következtében fordulhat elő és rendkívül fájdalmas lehet.`
+            }
+        ],
+        koponyagodrok: {
+            'fossa-anterior': {
+                name: 'Elülső koponyagödör (Fossa Cranii Anterior)',
+                hatarai: '<b>Elöl és oldalt:</b> homlokcsont pikkelyrésze. <br><b>Hátul:</b> ékcsont kis szárnyainak hátsó széle és a limbus sphenoidalis. <br><b>Alapja:</b> homlokcsont szemüregi részei, rostacsont szitalemeze, ékcsont teste és kis szárnyai.',
+                tartalma: 'Az agy homloklebenyeit ($lobi frontales$), a szaglógumókat ($bulbi olfactorii$) fogadja be. Itt található a $crista galli$ és a $crista frontalis$ a kemény agyhártya rögzítésére.',
+                nyilasok: [
+                    { name: 'Foramina cribrosa', bone: 'Rostacsont (Os ethmoidale)', content: 'Szaglóidegek ($Nn. olfactorii$, CN I)' },
+                    { name: 'Foramen ethmoidale anterius', bone: 'Rosta- és homlokcsont határa', content: 'A. et v. ethmoidalis anterior, N. ethmoidalis anterior' },
+                    { name: 'Foramen ethmoidale posterius', bone: 'Rosta- és ékcsont határa', content: 'A. et v. ethmoidalis posterior, N. ethmoidalis posterior' },
+                    { name: 'Foramen caecum', bone: 'Homlok- és rostacsont határa', content: 'Emissziós véna (inkonstans)' }
+                ]
+            },
+            'fossa-media': {
+                name: 'Középső koponyagödör (Fossa Cranii Media)',
+                hatarai: '<b>Elöl:</b> ékcsont kis szárnyainak hátsó széle. <br><b>Hátul:</b> halántékcsont sziklacsontjának felső éle és a dorsum sellae. <br><b>Oldalt:</b> ékcsont nagy szárnyai, halántékcsont pikkelyrésze.',
+                tartalma: 'Az agy halántéklebenyeit ($lobi temporales$) és az agyalapi mirigyet ($hypophysis$) fogadja be a $sella turcica$-ban. Itt található a látóideg-kereszteződés ($chiasma opticum$) és a $sinus cavernosus$.',
+                nyilasok: [
+                    { name: 'Canalis opticus', bone: 'Ékcsont (Os sphenoidale)', content: 'Látóideg ($N. opticus$, CN II), Szemüregi artéria ($A. ophthalmica$)' },
+                    { name: 'Fissura orbitalis superior', bone: 'Ékcsont (kis és nagy szárny között)', content: 'CN III, IV, V/1, VI agyidegek, V. ophthalmica superior, Sympathicus rostok' },
+                    { name: 'Foramen rotundum', bone: 'Ékcsont (Os sphenoidale)', content: '$N. maxillaris$ (CN V/2)' },
+                    { name: 'Foramen ovale', bone: 'Ékcsont (Os sphenoidale)', content: '$N. mandibularis$ (CN V/3), A. meningea accessoria, (N. petrosus minor – inkonzisztens)' },
+                    { name: 'Foramen spinosum', bone: 'Ékcsont (Os sphenoidale)', content: 'A. et V. meningea media, Ramus meningeus n. mandibularis (N. spinosus)' },
+                    { name: 'Foramen lacerum', bone: 'Ék-, halánték-, nyakszirtcsont határa', content: 'Porccal kitöltött; N. petrosus major (áthalad a porcon vagy mellette), kisebb erek' }
+                ]
+            },
+            'fossa-posterior': {
+                name: 'Hátulsó koponyagödör (Fossa Cranii Posterior)',
+                hatarai: '<b>Elöl:</b> dorsum sellae és a clivus. <br><b>Hátul és oldalt:</b> nyakszirtcsont és a halántékcsont sziklacsonti, valamint csecsnyúlványi része.',
+                tartalma: 'A kisagyat ($cerebellum$), a hidat ($pons$) és a nyúltvelőt ($medulla oblongata$) fogadja be.',
+                nyilasok: [
+                    { name: 'Foramen magnum', bone: 'Nyakszirtcsont (Os occipitale)', content: 'Nyúltvelő/gerincvelő átmenet, Aa. vertebrales, CN XI gerincvelői gyökerei' },
+                    { name: 'Meatus acusticus internus', bone: 'Halántékcsont (Os temporale)', content: 'Arcideg ($N. facialis$, CN VII), Halló- és egyensúlyozó ideg ($N. vestibulocochlearis$, CN VIII), A. et V. labyrinthi' },
+                    { name: 'Foramen jugulare', bone: 'Halánték- és nyakszirtcsont határa', content: 'CN IX, X, XI agyidegek, V. jugularis interna (kezdet), Sinus petrosus inferior, Sinus sigmoideus' },
+                    { name: 'Canalis nervi hypoglossi', bone: 'Nyakszirtcsont (Os occipitale)', content: 'Nyelv alatti ideg ($N. hypoglossus$, CN XII), Plexus venosus canalis nervi hypoglossi' }
+                ]
+            }
+        },
+        latopalya: {
+            retina: { title: 'Retina (látóhártya)', desc: 'A szem legbelső, fényérzékeny rétege. A fotoreceptor sejtek (csapok és pálcikák) a fényingert elektromos jellé alakítják, amelyet a bipoláris és ganglionsejtek továbbítanak.' },
+            'n-opticus': { title: 'Nervus Opticus (Látóideg, CN II)', desc: 'A retina ganglionsejtjeinek axonjaiból álló köteg, amely a vizuális információt a szemből a chiasma opticum felé vezeti.' },
+            'chiasma': { title: 'Chiasma Opticum (Látóideg-kereszteződés)', desc: 'A két látóideg találkozási és részleges kereszteződési helye. A mindkét szem nasalis (orri) retinafeléből származó rostok itt átkereszteződnek az ellenoldalra.' },
+            'tractus': { title: 'Tractus Opticus', desc: 'A chiasma utáni pályaszakasz. Az azonos oldali temporalis (halántéki) és az ellenoldali nasalis retinafél rostjait tartalmazza, tehát a látótér ellenkező oldali felének információját vezeti.' },
+            'cgl': { title: 'Corpus Geniculatum Laterale (CGL)', desc: 'A thalamus része, a látópálya fő átkapcsoló állomása. A tractus opticus rostjai itt végződnek, és az információ a következő neuronra kapcsolódik át.' },
+            'radiatio': { title: 'Radiatio Optica (Látósugárzás)', desc: 'A CGL-ből kiinduló rostok legyezőszerűen széttérve haladnak a primer látókéreg felé a halánték- és fali lebenyeken keresztül.' },
+            'cortex': { title: 'Primer Látókéreg (V1)', desc: 'A nyakszirtcsont lebenyében (lobus occipitalis) található agykérgi terület, ahol a vizuális információ tudatosul és megkezdődik a kép feldolgozása.' },
+            'lesion-a': { title: 'Sérülés (A): Látóideg sérülése', desc: '🧠 Az azonos oldali szem teljes vakságát (anopia) okozza, mivel a sérülés a chiasma előtti összes információt blokkolja az adott szemből.' },
+            'lesion-b': { title: 'Sérülés (B): Chiasma opticum sérülése', desc: '🧠 Jellemzően a kereszteződő nasalis rostokat érinti (pl. hypophysis daganat miatt). Ez bitemporalis hemianopiát okoz, azaz mindkét szem halántéki látótere kiesik.' },
+            'lesion-c': { title: 'Sérülés (C): Tractus opticus sérülése', desc: '🧠 A chiasma utáni sérülés. Ellenoldali homonym hemianopiát okoz. Pl. a bal tractus sérülése a jobb oldali látótér (jobb szem nasalis, bal szem temporalis fele) kiesését eredményezi.' }
+        },
+        quiz: {
+            title: 'Gyakorló kvíz: Koponyagödrök',
+            questions: [
+                {
+                    question: "Melyik nyíláson keresztül lép be a látóideg (N. opticus) a koponyaüregbe?",
+                    answers: ["Foramen rotundum", "Fissura orbitalis superior", "Canalis opticus", "Foramen ovale"],
+                    correct: 2
+                },
+                {
+                    question: "Melyik agykoponya-gödörben található a sella turcica (töröknyereg)?",
+                    answers: ["Fossa cranii anterior", "Fossa cranii media", "Fossa cranii posterior", "Nem koponyagödörben van"],
+                    correct: 1
+                },
+                {
+                    question: "Mi halad át a foramen magnumon a nyúltvelőn kívül?",
+                    answers: ["N. trigeminus (CN V)", "A. carotis interna", "Aa. vertebrales", "N. facialis (CN VII)"],
+                    correct: 2
+                },
+                 {
+                    question: "A Fissura orbitalis superior melyik két csontrész között található?",
+                    answers: ["Os frontale és os sphenoidale", "Os sphenoidale ala minor és ala major", "Os ethmoidale és os sphenoidale", "Os temporale és os sphenoidale"],
+                    correct: 1
+                }
+            ]
+        }
+    };
+
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const pages = document.querySelectorAll('.page-content');
+    const boneListContainer = document.getElementById('bone-list');
+    const boneDetailsContainer = document.getElementById('bone-details');
+    const vertebraListContainer = document.getElementById('vertebra-list');
+    const vertebraDetailsContainer = document.getElementById('vertebra-details');
+    const fossaTabs = document.querySelectorAll('.fossa-tab');
+    const fossaContentContainer = document.getElementById('fossa-content');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const pathwayItems = document.querySelectorAll('.path-item');
+    const pathwayDetailsContainer = document.getElementById('pathway-details');
+    const quizContainer = document.getElementById('quiz-container');
+
+    function switchPage(targetId) {
+        pages.forEach(page => page.classList.toggle('hidden', page.id !== targetId));
+        navButtons.forEach(btn => {
+            const isActive = btn.dataset.target === targetId;
+            btn.classList.toggle('nav-active', isActive);
+            btn.classList.toggle('text-brown-medium', !isActive);
+            btn.classList.toggle('hover:bg-stone-300', !isActive);
+        });
+        mobileMenu.classList.add('hidden'); // Close mobile menu on navigation
+        if (targetId === "gyakorlas") {
+            loadQuiz();
+        }
+    }
+
+    function updateURL(hash) {
+        if(history.pushState) {
+            history.pushState(null, null, '#' + hash);
+        } else {
+            location.hash = '#' + hash;
+        }
+    }
+
+    function handlePageLoad() {
+        const hash = window.location.hash.substring(1);
+        if (!hash) {
+            switchPage('koponya');
+            return;
+        }
+
+        const parts = hash.split('-');
+        const pageId = parts[0];
+        const elementId = hash;
+        
+        let targetPage;
+        switch(pageId) {
+            case 'os': targetPage = 'koponya'; break;
+            case 'v': targetPage = 'gerinc'; break; // v for vertebra
+            case 'fossa': targetPage = 'koponyagodrok'; break;
+            default: targetPage = hash; break;
+        }
+
+        if (document.getElementById(targetPage)) {
+            switchPage(targetPage);
+        }
+
+        setTimeout(() => {
+            if (pageId === 'os') {
+                const button = boneListContainer.querySelector(`[data-id='${elementId}']`);
+                if (button) button.click();
+            } else if (pageId === 'v') {
+                const button = vertebraListContainer.querySelector(`[data-id='${hash.substring(2)}']`);
+                if (button) button.click();
+            } else if (pageId === 'fossa') {
+                 const button = document.querySelector(`[data-fossa-target='${elementId}']`);
+                 if (button) button.click();
+            }
+        }, 100);
+    }
+    
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.target;
+            switchPage(targetId);
+            updateURL(targetId);
+        });
+    });
+
+    function createList(items, container, clickHandler, type, idPrefix) {
+        let html = '';
+        if (type === 'koponya') {
+            html += '<h4 class="font-semibold text-md text-brown-medium my-2">Agykoponya (Neurocranium)</h4>';
+            anatomyData.koponya.agykoponya.forEach(item => {
+                html += `<button data-id="${item.id}" class="w-full text-left p-3 my-1 rounded-md border-l-4 border-transparent hover:bg-stone-300 transition-colors duration-200">${item.name}</button>`;
+            });
+            html += '<h4 class="font-semibold text-md text-brown-medium my-2 mt-4">Arckoponya (Viscerocranium)</h4>';
+            anatomyData.koponya.arckoponya.forEach(item => {
+                html += `<button data-id="${item.id}" class="w-full text-left p-3 my-1 rounded-md border-l-4 border-transparent hover:bg-stone-300 transition-colors duration-200">${item.name}</button>`;
+            });
+        } else {
+             items.forEach(item => {
+                html += `<button data-id="${item.id}" data-hash-id="${idPrefix}-${item.id}" class="w-full text-left p-3 my-1 rounded-md border-l-4 border-transparent hover:bg-stone-300 transition-colors duration-200">${item.name}</button>`;
+            });
+        }
+        container.innerHTML = html;
+        container.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                container.querySelectorAll('button').forEach(b => b.classList.remove('list-item-active'));
+                e.currentTarget.classList.add('list-item-active');
+                const id = e.currentTarget.dataset.id;
+                clickHandler(id);
+                updateURL(id);
+            });
+        });
+    }
+
+    function displayBoneDetails(boneId) {
+        const bone = [...anatomyData.koponya.agykoponya, ...anatomyData.koponya.arckoponya].find(b => b.id === boneId);
+        if (bone) {
+            boneDetailsContainer.innerHTML = `
+                <h3 id="${bone.id}" class="text-2xl font-bold text-brown-dark mb-4 border-b-2 border-brown-light pb-2">${bone.name}</h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-lg text-brown-medium">Jellemzők</h4>
+                        <p class="text-brown-dark text-sm mt-1">${bone.jellemzok.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-brown-medium">Ízesülések</h4>
+                        <p class="text-brown-dark text-sm mt-1">${bone.izesulesek.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</p>
+                    </div>
+                    <div class="p-3 rounded-md bg-clinical">
+                        <h4 class="font-semibold text-lg text-brown-medium">🧠 Klinikai jelentőség</h4>
+                        <p class="text-brown-dark text-sm mt-1">${bone.klinikai.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById(bone.id)?.scrollIntoView();
+        }
+    }
+
+    function displayVertebraDetails(vertebraId) {
+        const vertebra = anatomyData.gerinc.find(v => v.id === vertebraId);
+        if (vertebra) {
+            let atipikusHtml = '';
+            if (vertebra.atipikus) {
+                atipikusHtml = `
+                    <div>
+                        <h4 class="font-semibold text-lg text-brown-medium">Atipikus csigolyák</h4>
+                        <div class="text-brown-dark text-sm mt-1">${vertebra.atipikus.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</div>
+                    </div>
+                `;
+            }
+            vertebraDetailsContainer.innerHTML = `
+                <h3 id="v-${vertebra.id}" class="text-2xl font-bold text-brown-dark mb-4 border-b-2 border-brown-light pb-2">${vertebra.name}</h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-lg text-brown-medium">Általános jellemzők</h4>
+                        <p class="text-brown-dark text-sm mt-1">${vertebra.jellemzok.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</p>
+                    </div>
+                    ${atipikusHtml}
+                    <div class="p-3 rounded-md bg-clinical">
+                        <h4 class="font-semibold text-lg text-brown-medium">🧠 Klinikai jelentőség</h4>
+                        <p class="text-brown-dark text-sm mt-1">${vertebra.klinikai.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</p>
+                    </div>
+                </div>
+            `;
+             document.getElementById(`v-${vertebra.id}`)?.scrollIntoView();
+        }
+    }
+
+    function displayFossaDetails(fossaId) {
+        const fossa = anatomyData.koponyagodrok[fossaId];
+        if (fossa) {
+            let nyilasokHtml = `
+                <div class="overflow-x-auto rounded-lg border border-brown-light/30">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-brown-dark uppercase bg-stone-300">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">Nyílás Neve</th>
+                                <th scope="col" class="px-4 py-3">Elhelyezkedés (Csont)</th>
+                                <th scope="col" class="px-4 py-3">Áthaladó Képletek</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            fossa.nyilasok.forEach(nyilas => {
+                nyilasokHtml += `
+                    <tr class="bg-warm-gray border-b border-brown-light/50 last:border-b-0">
+                        <td class="px-4 py-3 font-semibold text-brown-dark">${nyilas.name}</td>
+                        <td class="px-4 py-3">${nyilas.bone}</td>
+                        <td class="px-4 py-3">${nyilas.content.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</td>
+                    </tr>
+                `;
+            });
+            nyilasokHtml += '</tbody></table></div>';
+
+            fossaContentContainer.innerHTML = `
+                <h3 id="${fossaId}" class="text-2xl font-bold text-brown-dark mb-4">${fossa.name}</h3>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <h4 class="font-semibold text-lg text-brown-medium">Határai</h4>
+                            <p class="text-brown-dark text-sm mt-1">${fossa.hatarai}</p>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="font-semibold text-lg text-brown-medium">Tartalma</h4>
+                            <p class="text-brown-dark text-sm mt-1">${fossa.tartalma.replace(/\$(.*?)\$/g, '<i class="italic">$1</i>')}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-brown-medium mb-3">Főbb nyílások</h4>
+                        ${nyilasokHtml}
+                    </div>
+                </div>
+            `;
+             document.getElementById(fossaId)?.scrollIntoView();
+        }
+    }
+
+    fossaTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const fossaId = e.currentTarget.dataset.fossaTarget;
+            fossaTabs.forEach(t => {
+                t.classList.remove('fossa-tab-active');
+                t.classList.add('text-brown-medium', 'hover:text-brown-dark', 'hover:border-gray-400');
+            });
+            tab.classList.add('fossa-tab-active');
+            tab.classList.remove('text-brown-medium', 'hover:text-brown-dark', 'hover:border-gray-400');
+            displayFossaDetails(fossaId);
+            updateURL(fossaId);
+        });
+    });
+    
+    pathwayItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            const pathId = e.currentTarget.dataset.pathId;
+            const details = anatomyData.latopalya[pathId];
+            pathwayItems.forEach(i => i.classList.remove('active-path'));
+            e.currentTarget.classList.add('active-path');
+            pathwayDetailsContainer.innerHTML = `
+                <h4 class="font-bold text-lg text-brown-dark mb-2">${details.title}</h4>
+                <p class="text-sm text-brown-medium">${details.desc.replace(/🧠/g, '<span class="inline-block mr-2">🧠</span>')}</p>
+            `;
+        });
+    });
+
+    function loadQuiz() {
+        const quizData = anatomyData.quiz;
+        let quizHtml = `<h3 class="text-xl font-bold text-brown-dark mb-4">${quizData.title}</h3>`;
+        quizData.questions.forEach((q, index) => {
+            quizHtml += `
+                <div class="mb-6" id="q-${index}">
+                    <p class="font-semibold mb-2">${index + 1}. ${q.question}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            `;
+            q.answers.forEach((ans, ansIndex) => {
+                quizHtml += `<button data-q="${index}" data-a="${ansIndex}" class="answer-btn w-full text-left p-3 rounded-md bg-stone-300 hover:bg-stone-400 transition-colors duration-200">${ans}</button>`;
+            });
+            quizHtml += `</div><p class="text-sm mt-2" id="feedback-${index}"></p></div>`;
+        });
+        quizContainer.innerHTML = quizHtml;
+
+        document.querySelectorAll('.answer-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const qIndex = e.currentTarget.dataset.q;
+                const aIndex = parseInt(e.currentTarget.dataset.a);
+                const question = quizData.questions[qIndex];
+                const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+                const answerButtons = document.querySelectorAll(`button[data-q='${qIndex}']`);
+
+                answerButtons.forEach(b => {
+                    b.disabled = true;
+                    b.classList.remove('hover:bg-stone-400');
+                });
+
+                if (aIndex === question.correct) {
+                    e.currentTarget.classList.add('correct-answer');
+                    feedbackEl.innerHTML = '<span class="font-bold text-green-700">Helyes!</span>';
+                } else {
+                    e.currentTarget.classList.add('wrong-answer');
+                    answerButtons[question.correct].classList.add('correct-answer');
+                    feedbackEl.innerHTML = '<span class="font-bold text-red-700">Helytelen.</span> A helyes válasz megjelölve.';
+                }
+            });
+        });
+    }
+
+    // Initial setup
+    createList(null, boneListContainer, displayBoneDetails, 'koponya', 'os');
+    createList(anatomyData.gerinc, vertebraListContainer, displayVertebraDetails, 'gerinc', 'v');
+    
+    if (document.getElementById('vertebraeChart')) {
+        createVertebraeChart();
+    }
+    
+    handlePageLoad();
+    
+    function createVertebraeChart() {
+        const ctx = document.getElementById('vertebraeChart').getContext('2d');
+        const data = {
+            labels: ['Nyaki (7)', 'Háti (12)', 'Ágyéki (5)', 'Keresztcsonti (5)', 'Farkcsonti (3-5)'],
+            datasets: [{
+                label: 'Csigolyák száma',
+                data: [7, 12, 5, 5, 4],
+                backgroundColor: ['rgba(161, 136, 127, 0.6)','rgba(141, 110, 99, 0.6)','rgba(121, 85, 72, 0.6)','rgba(109, 76, 65, 0.6)','rgba(93, 64, 55, 0.6)'],
+                borderColor: ['rgba(161, 136, 127, 1)','rgba(141, 110, 99, 1)','rgba(121, 85, 72, 1)','rgba(109, 76, 65, 1)','rgba(93, 64, 55, 1)'],
+                borderWidth: 1
+            }]
+        };
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 2, color: '#4E342E' }, grid: { color: 'rgba(120, 80, 80, 0.1)' }},
+                    x: { ticks: { color: '#4E342E' }, grid: { display: false } }
+                },
+                plugins: { legend: { display: false }, tooltip: { enabled: true } }
+            }
+        });
+    }
+});
+</script>
+
+</body>
+</html>

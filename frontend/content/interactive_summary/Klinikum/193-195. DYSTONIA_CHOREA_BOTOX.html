@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dystonia, Chorea és Botulinum Toxin Terápia - Részletes Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-container .tab-button.tab-active {
+            color: var(--active-color, #0d9488);
+            border-color: var(--active-color, #0d9488);
+            background-color: var(--active-bg-color, #f0fdfa);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header és Navigáció -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-teal-700 flex items-center">
+                <i data-lucide="move-3d" class="mr-2"></i>
+                Hyperkinetikus Mozgászavarok
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#dystonia" class="hover:text-teal-600 transition">Dystonia</a>
+                <a href="#chorea" class="hover:text-teal-600 transition">Chorea</a>
+                <a href="#botox" class="hover:text-teal-600 transition">Botulinum Toxin</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobil menü -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+            <a href="#dystonia" class="block py-2 hover:text-teal-600 transition">Dystonia</a>
+            <a href="#chorea" class="block py-2 hover:text-teal-600 transition">Chorea</a>
+            <a href="#botox" class="block py-2 hover:text-teal-600 transition">Botulinum Toxin</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Dystonia -->
+        <section id="dystonia" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-teal-500 pl-4">Dystonia</h2>
+            <div id="dystonia-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #0d9488; --active-bg-color: #f0fdfa;">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="dystonia-def" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-teal-500 transition text-center">
+                        <i data-lucide="list-tree" class="inline-block mr-2"></i>Definíció és Klinikum
+                    </button>
+                    <button data-tab="dystonia-diag" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-teal-500 transition text-center">
+                        <i data-lucide="stethoscope" class="inline-block mr-2"></i>Diagnózis
+                    </button>
+                    <button data-tab="dystonia-kezeles" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-teal-500 transition text-center">
+                        <i data-lucide="pilcrow" class="inline-block mr-2"></i>Kezelés
+                    </button>
+                </div>
+
+                <div class="tab-content-wrapper">
+                    <div id="dystonia-def" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-teal-700">Definíció és Klinikai Jellemzők</h3>
+                        <p class="mb-4">A dystonia egy mozgászavar, amelyet akaratlan, tartós vagy időszakos izomösszehúzódások jellemeznek. Ezek csavaró és ismétlődő mozgásokat, kóros testtartásokat vagy mindkettőt okozhatják.</p>
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-teal-50 hover:bg-teal-100 font-semibold flex justify-between items-center"><span>Osztályozás és Klinikai Kép</span><i data-lucide="chevron-down" class="transition-transform"></i></button>
+                                <div class="accordion-content p-4 border-t">
+                                    <h4 class="font-semibold text-lg mb-2">Osztályozás (érintett testrészek szerint):</h4>
+                                    <ul class="list-disc list-inside space-y-1 mb-4">
+                                        <li><strong>Fokális:</strong> Egy testrész (pl. blepharospasmus - szemhéj; cervicalis dystonia/torticollis - nyak).</li>
+                                        <li><strong>Szegmentális:</strong> Két vagy több szomszédos testrész.</li>
+                                        <li><strong>Generalizált:</strong> A törzs és legalább két másik testrész érintett.</li>
+                                    </ul>
+                                     <h4 class="font-semibold text-lg mb-2">Klinikai Jellemzők:</h4>
+                                     <ul class="list-disc list-inside space-y-1">
+                                        <li><strong>Geste Antagoniste (Szenzoros trükk):</strong> A dystonia szinte patognomonikus jele. Egy specifikus, enyhe érintés az érintett vagy egy közeli testrészen, amely átmenetileg enyhítheti a görcsöt.</li>
+                                        <li><strong>Feladatspecifikus dystoniák:</strong> Csak bizonyos, jól begyakorolt feladatok során jelentkeznek (pl. írógörcs, zenészi dystonia).</li>
+                                        <li><strong>Non-motoros tünetek:</strong> Gyakori a fájdalom (főleg cervicalis dystoniában), depresszió, szorongás, alvászavar.</li>
+                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="dystonia-diag" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-teal-700">Diagnosztikai Megközelítés</h3>
+                        <p class="mb-4">A dystonia diagnózisa elsősorban klinikai megfigyelésen alapul. A kivizsgálás célja a háttérben álló ok azonosítása.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Klinikai értékelés:</strong> A mozgás fenomenológiájának részletes elemzése, a testrészek szerinti eloszlás, a kezdeti életkor és a társuló tünetek felmérése.</li>
+                            <li><strong>Etiológia keresése:</strong>
+                                <ul>
+                                    <li><strong>Fiatal korban kezdődő / Generalizált:</strong> Genetikai tesztelés (pl. <i>TOR1A</i> - DYT1, <i>GCH1</i> - dopa-reszponzív dystonia) és képalkotás (MRI) javasolt.</li>
+                                    <li><strong>Felnőttkorban kezdődő fokális:</strong> Általában idiopátiás, kiterjedt kivizsgálás nem mindig szükséges.</li>
+                                    <li><strong>Szekunder okok:</strong> Agyi képalkotás (MRI) strukturális okok (pl. stroke, daganat) kizárására. Laborvizsgálatok (pl. rézanyagcsere - Wilson-kór).</li>
+                                </ul>
+                            </li>
+                             <li><strong>Elektrofiziológia (EMG):</strong> Segíthet a diagnózis megerősítésében, kimutatva a jellegzetes izomaktivációs mintázatokat (pl. kokontrakció, overflow).</li>
+                        </ul>
+                    </div>
+                    <div id="dystonia-kezeles" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-teal-700">Kezelési Stratégiák</h3>
+                        <p class="mb-4">A kezelés célja a tünetek enyhítése, a funkció javítása és a fájdalom csökkentése.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[800px] text-sm text-left">
+                                <thead class="bg-teal-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Kezelési Modalitás</th>
+                                        <th class="p-3 font-semibold">Leírás és Indikáció</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Botulinum Toxin (BoNT) Injekciók</td>
+                                        <td class="p-3">A <strong>fokális dystoniák elsődleges választandó kezelése</strong>. Az érintett izmokba fecskendezve kémiai denervációt okoz, csökkentve a kóros összehúzódásokat. Hatása 3-4 hónapig tart.</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Gyógyszeres Kezelés</td>
+                                        <td class="p-3">Főként generalizált vagy multifokális formákban. <strong>Antikolinerg szerek</strong> (trihexyphenidyl), <strong>Benzodiazepinek</strong> (clonazepam), <strong>Baclofen</strong>.</td>
+                                    </tr>
+                                     <tr class="border-b">
+                                        <td class="p-3 font-medium">Levodopa próba</td>
+                                        <td class="p-3">Minden gyermekkorban kezdődő dystonia esetén kötelező a <strong>dopa-reszponzív dystonia (DRD)</strong> kizárására, amely drámaian reagál a levodopára.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Mélyagyi Stimuláció (DBS)</td>
+                                        <td class="p-3">Súlyos, gyógyszerrezisztens generalizált vagy cervicalis dystonia esetén. A <strong>globus pallidus internus (GPi)</strong> a leggyakoribb célpont.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chorea -->
+        <section id="chorea" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-orange-500 pl-4">Chorea</h2>
+             <div id="chorea-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #f97316; --active-bg-color: #fff7ed;">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="chorea-def" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-orange-500 transition text-center">
+                        <i data-lucide="move" class="inline-block mr-2"></i>Definíció és Etiológia
+                    </button>
+                    <button data-tab="chorea-klinikum" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-orange-500 transition text-center">
+                        <i data-lucide="activity" class="inline-block mr-2"></i>Klinikum és Kezelés
+                    </button>
+                </div>
+                <div class="tab-content-wrapper">
+                    <div id="chorea-def" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-orange-700">Definíció és Etiológia</h3>
+                        <p class="mb-4">A chorea egy folyamatos, véletlenszerű, rövid, "táncszerű", akaratlan mozgások sorozata. Jellemzően szabálytalan, kiszámíthatatlan és áramló jellegű. Patofiziológiai hátterében a bazális ganglionok, különösen a dopaminerg rendszer túlműködése áll.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Örökletes Chorea:</strong>
+                                <ul>
+                                    <li class="ml-4"><strong>Huntington-kór (HK):</strong> A leggyakoribb örökletes ok felnőttkorban. Autosomális domináns, a huntingtin gén CAG-repeat expanziója okozza.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Szerzett Chorea:</strong>
+                                <ul>
+                                    <li class="ml-4"><strong>Fertőzéses/Immunmediált:</strong> <strong>Sydenham-chorea</strong> (Streptococcus fertőzés utáni rheumás láz szövődménye gyermekkorban).</li>
+                                    <li class="ml-4"><strong>Gyógyszer-indukált:</strong> Levodopa (Parkinson-kór kezelése során), antipszichotikumok.</li>
+                                    <li class="ml-4"><strong>Metabolikus/Endokrin:</strong> Hyperthyreosis, terhesség (chorea gravidarum).</li>
+                                    <li class="ml-4"><strong>Vaszkuláris:</strong> A bazális ganglionokat érintő stroke.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="chorea-klinikum" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-orange-700">Klinikai Jellemzők és Kezelés</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-2">Klinikai Kép</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Folyamatos, akaratlan, szabálytalan, "táncoló" mozgások.</li>
+                                    <li>Motoros nyugtalanság, a mozgások gyakran beépülnek az akaratlagos cselekvésekbe.</li>
+                                    <li>Járászavar, dysarthria (elkent beszéd), dysphagia (nyelési nehézség).</li>
+                                    <li><strong>Huntington-kórban:</strong> progresszív kognitív hanyatlás (demencia) és pszichiátriai zavarok.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-2">Kezelési Stratégiák</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Az alapbetegség kezelése (pl. antibiotikum Sydenham-choreában).</li>
+                                    <li><strong>Tüneti kezelés:</strong> A dopaminerg rendszer gátlása.</li>
+                                    <li class="ml-4"><strong>VMAT2-gátlók</strong> (pl. tetrabenazin): Első vonalbeli szerek a Huntington-kór choreájára.</li>
+                                    <li class="ml-4"><strong>Dopamin receptor blokkolók</strong> (antipszichotikumok).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Botulinum Toxin -->
+        <section id="botox" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-cyan-500 pl-4">Botulinum Toxin a Neurológiai Terápiában</h2>
+            <div id="botox-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #0891b2; --active-bg-color: #ecfeff;">
+                 <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="botox-hatas" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-cyan-500 transition text-center">
+                        <i data-lucide="atom" class="inline-block mr-2"></i>Hatásmechanizmus
+                    </button>
+                    <button data-tab="botox-indikaciok" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-cyan-500 transition text-center">
+                        <i data-lucide="syringe" class="inline-block mr-2"></i>Főbb Indikációk
+                    </button>
+                </div>
+                <div class="tab-content-wrapper">
+                    <div id="botox-hatas" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-cyan-700">A Botulinum Toxin Hatásmechanizmusa</h3>
+                        <p class="mb-4">A BoNT-A egy rendkívül hatékony neurotoxin, amely a preszinaptikus idegvégződésben hat.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Elsődleges hatás:</strong> A toxin a kolinerg idegvégződésekben a <strong>SNAP-25</strong> fehérje hasításával gátolja az <strong>acetilkolin (ACh) felszabadulását</strong>.</li>
+                            <li><strong>Következmény:</strong> Az ACh felszabadulásának gátlása megakadályozza az izomösszehúzódást, ami egy reverzibilis, dózisfüggő <strong>kémiai denervációt</strong> és az injektált izom ellazulását eredményezi. A hatás 3-4 hónapig tart.</li>
+                            <li><strong>Egyéb hatások:</strong> A fájdalomérzetért felelős neurotranszmitterek (pl. glutamát, P-anyag) felszabadulását is gátolja, ami magyarázza fájdalomcsillapító hatását (pl. krónikus migrénben).</li>
+                        </ul>
+                    </div>
+                    <div id="botox-indikaciok" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-cyan-700">Főbb Neurológiai Indikációk</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[800px] text-sm text-left">
+                                <thead class="bg-cyan-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Indikáció</th>
+                                        <th class="p-3 font-semibold">Klinikai Cél</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Fokális Dystoniák (Cervicalis dystonia, Blepharospasmus)</td>
+                                        <td class="p-3">Az akaratlan izomösszehúzódások és kóros testtartás csökkentése. <strong>Első vonalbeli kezelés.</strong></td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Spaszticitás (Stroke, SM, CP után)</td>
+                                        <td class="p-3">A fokozott izomtónus csökkentése, a mozgástartomány és a funkció javítása.</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Krónikus Migrén</td>
+                                        <td class="p-3">A fejfájásos napok számának és a fájdalom intenzitásának csökkentése (profilaktikus kezelés).</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Sialorrhea (Nyálfolyás)</td>
+                                        <td class="p-3">A nyálmirigyekbe injektálva csökkenti a túlzott nyáltermelést.</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="p-3 font-medium">Egyéb (pl. Hemifacialis spasmus, Tremor)</td>
+                                        <td class="p-3">A kóros izomaktivitás csökkentése.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 - Interaktív Tanulási Segédlet. Készült a feltöltött dokumentumok alapján.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobil menü
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Általános Tab váltó funkció
+        function setupTabs(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const tabButtons = container.querySelectorAll('.tab-button');
+            const tabPanes = container.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                    });
+                    button.classList.add('tab-active');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Tabok inicializálása
+        setupTabs('dystonia-container');
+        setupTabs('chorea-container');
+        setupTabs('botox-container');
+
+
+        // Accordion
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('svg');
+                
+                header.parentElement.classList.toggle('open');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

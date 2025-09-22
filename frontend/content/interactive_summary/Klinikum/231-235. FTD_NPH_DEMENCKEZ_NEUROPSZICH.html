@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demenciák és Kezelésük Részletes Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-primary: #0d9488; /* teal-600 */
+            --c-primary-dark: #0f766e; /* teal-700 */
+            --c-secondary: #f59e0b; /* amber-500 */
+            --c-tertiary: #6366f1; /* indigo-500 */
+            --c-text-dark: #1f2937;
+            --c-text-light: #4b5563;
+            --c-bg-light: #f8fafc;
+            --c-border: #e5e7eb;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--c-bg-light);
+            color: var(--c-text-dark);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-link.active {
+            color: var(--c-primary);
+            font-weight: 700;
+            border-bottom: 3px solid var(--c-primary);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--c-text-dark);
+            margin-bottom: 3rem;
+            border-bottom: 4px solid;
+            padding-bottom: 1.5rem;
+        }
+        .section-title svg {
+            width: 4rem;
+            height: 4rem;
+            margin-right: 1.5rem;
+            stroke-width: 1.5;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border: 1px solid var(--c-border);
+            border-radius: 0.75rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--c-border);
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #374151;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background-color: #f0fdfa; /* teal-50 */
+        }
+        .key-term {
+            font-weight: 700;
+            color: var(--c-primary-dark);
+            background-color: #ccfbf1;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        details {
+            background: #fafafa;
+            border-radius: 0.5rem;
+            border: 1px solid var(--c-border);
+            margin-top: 1.5rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+            color: #047857; /* emerald-800 */
+            font-size: 1.1rem;
+        }
+        summary::after {
+            content: '＋';
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .details-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--c-border);
+            line-height: 1.75;
+        }
+        .criteria-list {
+            list-style-type: upper-alpha;
+            padding-left: 1.5rem;
+        }
+        .criteria-list li {
+            margin-bottom: 0.5rem;
+        }
+        .criteria-list ul {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-top: 0.25rem;
+        }
+        .pill {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            margin: 0.2rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-teal-700">Demencia Tudástár</h1>
+            <nav class="hidden md:flex space-x-8 text-lg">
+                <a href="#kezelheto-demencia" class="nav-link hover:text-teal-600 transition pb-2">Kezelhető Demenciák</a>
+                <a href="#ftd" class="nav-link hover:text-teal-600 transition pb-2">FTD</a>
+                <a href="#terapia" class="nav-link hover:text-teal-600 transition pb-2">Kezelési Stratégiák</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#kezelheto-demencia" class="block py-2 text-lg nav-link">Kezelhető Demenciák</a>
+            <a href="#ftd" class="block py-2 text-lg nav-link">FTD</a>
+            <a href="#terapia" class="block py-2 text-lg nav-link">Kezelési Stratégiák</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Treatable Dementias & NPH Section -->
+        <section id="kezelheto-demencia" class="mb-20 scroll-mt-24">
+            <div class="section-title border-teal-500 text-teal-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.092 1.21-.138 2.43-.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75h.008v.008H12v-.008z" /></svg>
+                <h2>Kezelhető Demenciák és NPH</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-teal-800">A Reverzibilis Okok Jelentősége</h3>
+                    <p class="text-lg mb-4">A demenciával diagnosztizált esetek akár 23%-a is potenciálisan reverzibilis okra vezethető vissza. Ezen állapotok korai felismerése és célzott kezelése a kognitív tünetek javulását vagy teljes megszűnését eredményezheti, ezért a differenciáldiagnosztikai folyamatban kiemelt figyelmet érdemelnek.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Kategória</th><th>Specifikus Okok</th><th>Diagnosztikai Kulcs</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Metabolikus/Endokrin</td>
+                                    <td><strong class="key-term">Pajzsmirigy-alulműködés</strong>, B12-vitamin hiány, máj/veseelégtelenség.</td>
+                                    <td>Laborvizsgálatok (TSH, B12, stb.).</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Fertőzéses</td>
+                                    <td><strong class="key-term">Neurosyphilis</strong>, HIV, Lyme-kór, gombás meningitis.</td>
+                                    <td>Szerológiai és liquorvizsgálatok.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Autoimmun</td>
+                                    <td>Vasculitisek, <strong class="key-term">Hashimoto encephalopathia</strong>, autoimmun limbikus encephalitis.</td>
+                                    <td>Autoantitestek (vér, liquor), MRI.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Intoxikáció/Gyógyszer</td>
+                                    <td>Krónikus <strong class="key-term">alkoholizmus</strong>, gyógyszermellékhatások (pl. antikolinerg szerek).</td>
+                                    <td>Részletes anamnézis, toxikológia.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Strukturális Léziók</td>
+                                    <td><strong class="key-term">Normál nyomású hydrocephalus (NPH)</strong>, krónikus subduralis hematoma, agydaganat.</td>
+                                    <td>Agyi képalkotás (CT, MRI).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-teal-800">Normál Nyomású Hydrocephalus (NPH)</h3>
+                    <p class="text-lg mb-4">Az NPH a kezelhető demenciák egyik legfontosabb formája, melyet a liquor cerebrospinalis (CSF) felszívódási zavara okoz, ami az agykamrák tágulatához vezet.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Klinikai Kép (Hakim-triász)</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li>🚶 <strong class="key-term">Járászavar:</strong> Széles alapú, csoszogó, "mágneses" járás. A leggyakoribb és legkorábbi tünet.</li>
+                                <li>🧠 <strong class="key-term">Kognitív hanyatlás:</strong> Főként frontális-szubkortikális jellegű (lassultság, apátia, figyelemzavar).</li>
+                                <li>🚽 <strong class="key-term">Vizeletinkontinencia:</strong> Jellemzően késői tünet, urgenciával kezdődik.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Diagnózis és Kezelés</h4>
+                            <p class="mb-2"><strong class="key-term">Diagnózis:</strong> A klinikai kép, a jellegzetes MRI lelet (kamratágulat, DESH-jel) és a diagnosztikus liquorlecsapolásra ("Tap Test") adott pozitív válasz alapján.</p>
+                            <p><strong class="key-term">Kezelés:</strong> Az egyetlen hatékony terápia a sebészi beavatkozás, a <strong class="key-term">ventriculoperitonealis (VP) sönt</strong> beültetése, amely a felesleges liquort a hasüregbe vezeti el.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Frontotemporal Dementia Section -->
+        <section id="ftd" class="mb-20 scroll-mt-24">
+            <div class="section-title border-amber-500 text-amber-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <h2>Frontotemporális Demencia (FTD)</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-amber-800">Definíció és Klinikai Variánsok</h3>
+                    <p class="text-lg mb-4">Az FTD az agy homlok- és halántéklebenyeinek sorvadásával járó betegségcsoport. Jellemzően 60 éves kor előtt kezdődik, és a korai kezdetű demenciák leggyakoribb oka lehet.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Viselkedési Variáns (bvFTD)</h4>
+                            <p>A leggyakoribb altípus. A <strong class="key-term">személyiség és viselkedés megváltozása</strong> a fő tünet: apátia, gátlástalanság, empátia elvesztése, kényszeres viselkedés, hyperoralitás.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Primer Progresszív Afázia (PPA)</h4>
+                            <p>A <strong class="key-term">nyelvi készségek</strong> progresszív romlása jellemzi. Altípusai a nem-fluens/agrammatikus (nfvPPA) és a szemantikus (svPPA) variáns.</p>
+                        </div>
+                    </div>
+                     <details>
+                        <summary>bvFTD Diagnosztikai Kritériumok (Konszenzus)</summary>
+                        <div class="details-content">
+                            <p>A lehetséges bvFTD diagnózisához a hat fő klinikai jellemzőből legalább háromnak jelen kell lennie:</p>
+                            <ul class="criteria-list">
+                                <li>Viselkedési gátlástalanság (diszinhibíció).</li>
+                                <li>Apátia vagy közöny (inercia).</li>
+                                <li>Az empátia vagy szimpátia elvesztése.</li>
+                                <li>Perseveratív, sztereotip vagy kényszeres/rituális viselkedés.</li>
+                                <li>Hyperoralitás és étrendi változások.</li>
+                                <li>Neuropszichológiai profil: végrehajtó funkciók deficitje a memória és a vizuospaciális funkciók relatív megőrzése mellett.</li>
+                            </ul>
+                            <p class="mt-2">A valószínű bvFTD diagnózisához a fenti kritériumok mellett funkcionális hanyatlás és jellegzetes képalkotó lelet (frontális és/vagy anterior temporális atrófia/hipometabolizmus) szükséges.</p>
+                        </div>
+                    </details>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-amber-800">Patológia és Kezelés</h3>
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Patológia</h4>
+                            <p class="mb-2">Az FTD hátterében kóros fehérje-aggregátumok állnak. Leggyakrabban a <strong class="key-term">TDP-43</strong> vagy a <strong class="key-term">tau</strong> fehérje kóros formái mutathatók ki.</p>
+                            <p>Az esetek 10-20%-a genetikai eredetű, a leggyakoribb mutációk a <span class="key-term">C9ORF72</span>, <span class="key-term">MAPT</span>, és <span class="key-term">GRN</span> génekben találhatók.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Kezelés</h4>
+                            <p class="mb-2">Jelenleg nincs oki terápia, a kezelés tüneti.</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Viselkedési tünetekre:</strong> SSRI-k, atipikus antipszichotikumok (óvatosan).</li>
+                                <li><strong>Nyelvi zavarokra:</strong> Beszéd- és nyelvterápia, alternatív kommunikációs eszközök.</li>
+                                <li>Intenzív kutatások folynak célzott, pl. génterápiás eljárások fejlesztésére.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dementia Treatment & Neuropsychology Section -->
+        <section id="terapia" class="scroll-mt-24">
+            <div class="section-title border-indigo-500 text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                <h2>Demenciák Kezelése és Neuropszichológia</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-indigo-800">A Neuropszichológiai Vizsgálat Szerepe</h3>
+                    <p class="text-lg mb-4">A neuropszichológiai vizsgálat egy standardizált, átfogó felmérés, amely objektíven méri a különböző kognitív doméneket. Kulcsfontosságú a diagnózisban, a súlyosság felmérésében és a terápia hatékonyságának követésében.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Szűrőtesztek</h4>
+                            <p>Gyors felmérés a kognitív zavar gyanújára (pl. <strong class="key-term">MMSE, MoCA</strong>, Órarajzolás teszt).</p>
+                        </div>
+                         <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Részletes Batteriák</h4>
+                            <p>Átfogó értékelés (pl. <strong class="key-term">ADAS-Cog, ACE-R, CERAD</strong>), segít a demencia típusának meghatározásában.</p>
+                        </div>
+                         <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Differenciáldiagnózis</h4>
+                            <p>A jellegzetes kognitív profilok (pl. memóriazavar AD-ben vs. végrehajtó zavar FTD-ben) segítik az elkülönítést.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-indigo-800">Átfogó Kezelési Stratégiák</h3>
+                    <p class="text-lg mb-4">A demencia kezelése komplex, multidiszciplináris feladat, mely a gyógyszeres és nem-gyógyszeres terápiákat ötvözi.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Farmakológiai Terápia</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Tüneti kezelés:</strong> <span class="key-term">Kolinészteráz-gátlók</span> (Donepezil) és <span class="key-term">Memantin</span> a kognitív funkciók javítására.</li>
+                                <li><strong>Betegségmódosító Terápiák (DMTs):</strong> Új <span class="key-term">anti-amiloid antitestek</span> (Lecanemab, Donanemab) az AK korai stádiumában.</li>
+                                <li><strong>BPSD kezelése:</strong> Antidepresszánsok, atípusos antipszichotikumok (óvatosan).</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Nem-farmakológiai Terápiák</h4>
+                             <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Kognitív tréning és stimuláció.</strong></li>
+                                <li><strong>Foglalkozás- és fizikoterápia</strong> a funkciók megőrzésére.</li>
+                                <li><strong>Zene-, művészet-, állatterápia</strong> a hangulat javítására.</li>
+                                <li><strong>Életmód-tanácsadás</strong> és a gondozók támogatása.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>&copy; 2025 Neurodegeneratív Kórképek Tudástára. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

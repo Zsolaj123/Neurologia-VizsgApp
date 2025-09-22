@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pszichoszomatikus és Neurokognitív Zavarok Részletes Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-primary: #0891b2; /* cyan-600 */
+            --c-primary-dark: #0e7490; /* cyan-700 */
+            --c-secondary: #6d28d9; /* violet-700 */
+            --c-tertiary: #db2777; /* pink-600 */
+            --c-text-dark: #1f2937;
+            --c-text-light: #4b5563;
+            --c-bg-light: #f8fafc;
+            --c-border: #e5e7eb;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--c-bg-light);
+            color: var(--c-text-dark);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-link.active {
+            color: var(--c-primary);
+            font-weight: 700;
+            border-bottom: 3px solid var(--c-primary);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--c-text-dark);
+            margin-bottom: 3rem;
+            border-bottom: 4px solid;
+            padding-bottom: 1.5rem;
+        }
+        .section-title svg {
+            width: 4rem;
+            height: 4rem;
+            margin-right: 1.5rem;
+            stroke-width: 1.5;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border: 1px solid var(--c-border);
+            border-radius: 0.75rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--c-border);
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #374151;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background-color: #ecfeff; /* cyan-50 */
+        }
+        .key-term {
+            font-weight: 700;
+            color: var(--c-primary-dark);
+            background-color: #cffafe;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        details {
+            background: #fafafa;
+            border-radius: 0.5rem;
+            border: 1px solid var(--c-border);
+            margin-top: 1.5rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+            color: #155e75; /* cyan-800 */
+            font-size: 1.1rem;
+        }
+        summary::after {
+            content: '＋';
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .details-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--c-border);
+            line-height: 1.75;
+        }
+        .criteria-list {
+            list-style-type: upper-alpha;
+            padding-left: 1.5rem;
+        }
+        .criteria-list li {
+            margin-bottom: 0.5rem;
+        }
+        .criteria-list ul {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-top: 0.25rem;
+        }
+        .tab-button.active {
+            background-color: var(--c-secondary);
+            color: white;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        .tab-button:hover {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-cyan-700">Pszichoszomatika és Neurokogníció</h1>
+            <nav class="hidden md:flex space-x-8 text-lg">
+                <a href="#fnd" class="nav-link hover:text-cyan-600 transition pb-2">Funkcionális Zavarok</a>
+                <a href="#depresszio" class="nav-link hover:text-cyan-600 transition pb-2">Depresszió</a>
+                <a href="#diffdiag" class="nav-link hover:text-cyan-600 transition pb-2">Differenciáldiagnózis</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#fnd" class="block py-2 text-lg nav-link">Funkcionális Zavarok</a>
+            <a href="#depresszio" class="block py-2 text-lg nav-link">Depresszió</a>
+            <a href="#diffdiag" class="block py-2 text-lg nav-link">Differenciáldiagnózis</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Functional Neurological Disorder Section -->
+        <section id="fnd" class="mb-20 scroll-mt-24">
+            <div class="section-title border-cyan-500 text-cyan-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.375a9.375 9.375 0 006.336-2.348c.54-.539.998-1.13.998-1.797v-1.05a3.375 3.375 0 00-3.375-3.375H12.75v-2.175a2.25 2.25 0 00-1.5-2.091M12 18.375a9.375 9.375 0 01-6.336-2.348c-.54-.539-.998-1.13-.998-1.797v-1.05a3.375 3.375 0 013.375-3.375H11.25v-2.175a2.25 2.25 0 011.5-2.091m0 0a2.25 2.25 0 012.091 1.5 2.25 2.25 0 01-1.5 2.091v2.175H12M12 18.375v-2.175m0 0H11.25m1.5 0H12.75" /></svg>
+                <h2>Funkcionális Neurológiai Zavar (FNTZ)</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-cyan-800">Definíció és Patofiziológia</h3>
+                    <p class="text-lg mb-4">Az FNTZ (korábban konverziós zavar) valós neurológiai tünetekkel (pl. gyengeség, tremor, rohamok) járó állapot, melynek hátterében nem strukturális agykárosodás, hanem az agyi hálózatok <strong class="key-term">funkcionális zavara</strong>, egyfajta "szoftverhiba" áll. A tünetek akaratlanok, és jelentős szenvedést okoznak.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Kiváltó Tényezők</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li>Pszichológiai stressz, trauma (gyakori, de nem kötelező).</li>
+                                <li>Fizikai sérülés vagy betegség.</li>
+                                <li>Gyakori komorbiditás szorongással, depresszióval, PTSD-vel.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Neurobiológiai Háttér</h4>
+                             <ul class="list-disc list-inside space-y-2">
+                                <li>Megváltozott agyi hálózati kapcsolódások.</li>
+                                <li>Figyelmi és érzelemszabályozási rendszerek diszfunkciója.</li>
+                                <li>HPA-tengely diszregulációja.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-cyan-800">Diagnózis és Kezelés</h3>
+                    <p class="text-lg mb-4">A diagnózis nem a leletek negativitásán, hanem <strong class="key-term">pozitív klinikai jelek</strong> kimutatásán alapul, amelyek a tünetek funkcionális eredetére utalnak.</p>
+                    <details>
+                        <summary>Pozitív Klinikai Jelek FNTZ-ben</summary>
+                        <div class="details-content">
+                            <div class="table-container">
+                                <table>
+                                    <thead><tr><th>Tünet</th><th>Pozitív Jel</th><th>Leírás</th></tr></thead>
+                                    <tbody>
+                                        <tr><td class="font-bold">Gyengeség</td><td>Hoover-jel</td><td>A "gyenge" láb akaratlanul erőt fejt ki, miközben a másik lábat emeli.</td></tr>
+                                        <tr><td class="font-bold">Tremor</td><td>Tremor entrainment</td><td>A tremor ritmusa megváltozik, ha a beteg a másik kezével egy másik ritmust követ.</td></tr>
+                                        <tr><td class="font-bold">Rohamok (PNES)</td><td>Zárt szemek a roham alatt</td><td>Epilepsziás rohamok alatt a szemek jellemzően nyitva vannak.</td></tr>
+                                        <tr><td class="font-bold">Érzészavar</td><td>Nem-anatómiai eloszlás</td><td>Az érzéskiesés nem követi a dermatómák vagy idegek lefutását.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                     <details>
+                        <summary>DSM-5-TR Diagnosztikai Kritériumok</summary>
+                        <div class="details-content">
+                            <ul class="criteria-list">
+                                <li>Egy vagy több, az akaratlagos motoros vagy szenzoros funkció megváltozásával járó tünet.</li>
+                                <li>A klinikai leletek bizonyítják a tünet és az ismert neurológiai vagy orvosi állapotok közötti inkompatibilitást.</li>
+                                <li>A tünetet nem magyarázza jobban más orvosi vagy mentális zavar.</li>
+                                <li>A tünet klinikailag jelentős distresszt vagy károsodást okoz.</li>
+                            </ul>
+                        </div>
+                    </details>
+                    <div class="mt-8 bg-cyan-50 p-6 rounded-lg border-l-4 border-cyan-400">
+                        <h4 class="font-bold text-xl text-cyan-900 mb-2">Kezelési Alapelvek</h4>
+                        <p>A kezelés <strong class="key-term">multidiszciplináris</strong>, célja az "agy átképzése". A diagnózis empatikus közlése az első lépés. A leghatékonyabb módszerek a célzott <strong class="key-term">fizikoterápia</strong> (motoros tünetekre) és a <strong class="key-term">kognitív viselkedésterápia (CBT)</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Depression in Neurological Disorders Section -->
+        <section id="depresszio" class="mb-20 scroll-mt-24">
+            <div class="section-title border-secondary text-secondary">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c1.355 0 2.707-.158 4.007-.462a9.006 9.006 0 00-8.014 0c1.3.304 2.652.462 4.007.462z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75a3 3 0 110-6 3 3 0 010 6z" /></svg>
+                <h2>Depresszió Neurológiai Betegségekben</h2>
+            </div>
+            <div class="content-card">
+                 <h3 class="text-3xl font-bold mb-4 text-amber-800">Közös Mechanizmusok és Diagnosztikai Kihívások</h3>
+                 <p class="text-lg mb-6">A depresszió rendkívül gyakori krónikus neurológiai betegségekben, és nem csupán pszichológiai reakció. A háttérben az alapbetegséggel közös neurobiológiai mechanizmusok állnak (pl. HPA-tengely diszreguláció, neuroinflammáció, neurotranszmitter-zavarok). A diagnózist nehezíti a tünetek (fáradtság, apátia, kognitív lassulás) jelentős átfedése.</p>
+                 <div class="flex flex-wrap gap-2 mb-6" id="depresszio-tabs">
+                    <button class="tab-button active" data-tab="parkinson">Parkinson-kór</button>
+                    <button class="tab-button" data-tab="ms">Sclerosis Multiplex</button>
+                    <button class="tab-button" data-tab="stroke">Stroke</button>
+                    <button class="tab-button" data-tab="alzheimer">Alzheimer-kór</button>
+                </div>
+                <div id="parkinson" class="tab-content">
+                    <h4 class="font-semibold text-2xl mb-3 text-amber-700">Depresszió Parkinson-kórban</h4>
+                    <p>A betegek 40-50%-át érinti, gyakran évekkel a motoros tünetek előtt megjelenik. A dopaminerg, szerotonerg és noradrenerg rendszerek degenerációja okozza. Kezelése SSRI-kkal, SNRI-kkel és pszichoterápiával történik.</p>
+                </div>
+                <div id="ms" class="tab-content hidden">
+                    <h4 class="font-semibold text-2xl mb-3 text-amber-700">Depresszió Sclerosis Multiplexben</h4>
+                    <p>Az élettartam-prevalencia ~50%. A krónikus gyulladásos folyamatok és az agyi léziók direkt hatása, valamint a pszichoszociális terhek egyaránt szerepet játszanak. A CBT és a testmozgás mellett az SSRI-k és SNRI-k hatékonyak lehetnek.</p>
+                </div>
+                <div id="stroke" class="tab-content hidden">
+                    <h4 class="font-semibold text-2xl mb-3 text-amber-700">Stroke Utáni Depresszió (PSD)</h4>
+                    <p>A betegek harmadát érinti, és negatívan befolyásolja a rehabilitációt és a túlélést. A stroke által okozott strukturális és neurokémiai változások állnak a háttérben. Az SSRI-k és a pszichoterápia a kezelés alapja.</p>
+                </div>
+                 <div id="alzheimer" class="tab-content hidden">
+                    <h4 class="font-semibold text-2xl mb-3 text-amber-700">Depresszió Alzheimer-kórban</h4>
+                    <p>A betegek 30-50%-ánál jelentkeznek depressziós tünetek. Az antidepresszánsok hatékonysága vitatott, a nem-farmakológiai, támogató terápiák (pl. strukturált napirend, kellemes tevékenységek) kerülnek előtérbe.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Differential Diagnosis Section -->
+        <section id="diffdiag" class="scroll-mt-24">
+            <div class="section-title border-tertiary text-tertiary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
+                <h2>Differenciáldiagnózis: Organikus vs. Funkcionális</h2>
+            </div>
+            <div class="content-card">
+                 <h3 class="text-3xl font-bold mb-6 text-indigo-800">Kulcsfontosságú Elkülönítő Jellemzők</h3>
+                 <p class="text-lg mb-6">A neurokognitív (organikus) és a funkcionális zavarok elkülönítése a klinikai neurológia egyik legnagyobb kihívása. A helyes diagnózis a tünetek jellegének, konzisztenciájának és a vizsgálati leletek értelmezésének gondos elemzésén múlik.</p>
+                 <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Jellemző</th>
+                                <th>Neurokognitív Zavar (Organikus)</th>
+                                <th>Funkcionális Neurológiai Zavar (FNTZ)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold">Etiológia</td>
+                                <td><strong class="key-term">Strukturális/fiziológiai</strong> agyi károsodás.</td>
+                                <td>Az agy <strong class="key-term">funkcionális</strong> zavara, "szoftverhiba".</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Klinikai Kép</td>
+                                <td>A tünetek általában megfelelnek az ismert neurológiai mintázatoknak.</td>
+                                <td>A tünetek gyakran <strong class="key-term">inkongruensek</strong>, változékonyak.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Pozitív Jelek</td>
+                                <td>Fokális neurológiai jelek (pl. reflexeltérés, kóros reflex).</td>
+                                <td><strong class="key-term">Pozitív funkcionális jelek</strong> (pl. Hoover-jel, elvonhatóság).</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Diagnosztika</td>
+                                <td>A háttérben álló ok kimutatása (képalkotó, labor).</td>
+                                <td><strong class="key-term">Pozitív jeleken alapuló klinikai diagnózis</strong>, más okok kizárása mellett.</td>
+                            </tr>
+                             <tr>
+                                <td class="font-bold">Kezelés</td>
+                                <td>Az alapbetegség kezelése, tüneti terápia.</td>
+                                <td>Multidiszciplináris rehabilitáció (pszicho-, fiziko-, foglalkozásterápia).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                 </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>&copy; 2025 Pszichoszomatikus és Neurokognitív Zavarok Tudástára. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // --- Tabs for Depression Section ---
+        const tabContainer = document.getElementById('depresszio-tabs');
+        if (tabContainer) {
+            const tabButtons = tabContainer.querySelectorAll('.tab-button');
+            const tabContents = tabContainer.parentElement.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    tabContents.forEach(content => {
+                        if (content.id === tabId) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        }
+    </script>
+</body>
+</html>

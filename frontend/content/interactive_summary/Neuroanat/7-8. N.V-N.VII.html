@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Agyideg Anatómia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-active {
+            display: block;
+        }
+        .interactive-svg .highlightable:hover {
+            fill: #fbbf24;
+            cursor: pointer;
+            transition: fill 0.2s ease-in-out;
+        }
+        .interactive-svg .highlight {
+            fill: #f59e0b;
+        }
+        .quiz-option:hover {
+            background-color: #e5e7eb;
+        }
+        .quiz-correct {
+            background-color: #dcfce7;
+            border-left-color: #22c55e;
+        }
+        .quiz-incorrect {
+            background-color: #fee2e2;
+            border-left-color: #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">Agyideg Anatómia: Interaktív Tanulási Segédlet</h1>
+            <p class="text-lg text-gray-600 mt-2">V. (Trigeminus) és VII. (Facialis) Agyideg</p>
+        </header>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-8">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                <button onclick="changeTab('trigeminus')" id="tab-trigeminus" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg tab-active">
+                    Nervus Trigeminus (V.)
+                </button>
+                <button onclick="changeTab('facialis')" id="tab-facialis" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    Nervus Facialis (VII.)
+                </button>
+            </nav>
+        </div>
+
+        <!-- Content Area -->
+        <main>
+            <!-- Trigeminus Content -->
+            <div id="content-trigeminus" class="content-section content-active space-y-12">
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-600">Interaktív Ábra: Az Arc Szenzoros Beidegzése</h2>
+                    <p class="mb-4 text-gray-600">Kattints az arc különböző területeire, hogy lásd, melyik trigeminus ág felelős az adott régió érző beidegzéséért.</p>
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="w-full md:w-1/2">
+                            <!-- Simplified Face SVG for Dermatomes -->
+                            <svg viewBox="0 0 300 400" class="interactive-svg w-full h-auto" id="trigeminus-face-svg">
+                                <title>Az arc érző beidegzési területei</title>
+                                <!-- V1 - Ophthalmic -->
+                                <path id="v1-area" class="highlightable" d="M 60,110 C 60,70 100,50 150,50 C 200,50 240,70 240,110 L 220,130 L 190,120 L 150,130 L 110,120 L 80,130 Z" fill="#60a5fa" stroke="#3b82f6" stroke-width="2"/>
+                                <!-- V2 - Maxillaris -->
+                                <path id="v2-area" class="highlightable" d="M 80,130 L 110,120 L 150,130 L 190,120 L 220,130 L 230,190 L 190,220 L 150,210 L 110,220 L 70,190 Z" fill="#34d399" stroke="#059669" stroke-width="2"/>
+                                <!-- V3 - Mandibularis -->
+                                <path id="v3-area" class="highlightable" d="M 70,190 L 110,220 L 150,210 L 190,220 L 230,190 L 220,280 C 220,310 180,330 150,330 C 120,330 80,310 80,280 Z" fill="#facc15" stroke="#d97706" stroke-width="2"/>
+                                <!-- Face Outline -->
+                                <path d="M 50,100 C 50,40 100,20 150,20 C 200,20 250,40 250,100 L 250,280 C 250,350 200,380 150,380 C 100,380 50,350 50,280 Z" fill="none" stroke="#9ca3af" stroke-width="3"/>
+                                <!-- Eyes, Nose, Mouth -->
+                                <circle cx="115" cy="150" r="10" stroke="black" fill="white"/>
+                                <circle cx="185" cy="150" r="10" stroke="black" fill="white"/>
+                                <path d="M 140,160 Q 150,180 160,160 L 150,200 Z" stroke="black" fill="none"/>
+                                <path d="M 120,240 Q 150,260 180,240" stroke="black" fill="none" stroke-width="2"/>
+                                <!-- Labels -->
+                                <text x="150" y="90" font-size="20" text-anchor="middle" fill="black" font-weight="bold">V/1</text>
+                                <text x="150" y="170" font-size="20" text-anchor="middle" fill="black" font-weight="bold">V/2</text>
+                                <text x="150" y="270" font-size="20" text-anchor="middle" fill="black" font-weight="bold">V/3</text>
+                            </svg>
+                        </div>
+                        <div id="trigeminus-info" class="w-full md:w-1/2 p-4 bg-gray-100 rounded-lg min-h-[200px]">
+                            <h3 class="font-bold text-xl mb-2" id="trigeminus-info-title">Információ</h3>
+                            <p id="trigeminus-info-text">Kattints egy területre a részletekért.</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-600">Részletes Anatómia</h2>
+                    <div class="space-y-4 text-gray-700 leading-relaxed">
+                        <h3 class="text-xl font-semibold">Bevezetés</h3>
+                        <p>Az V. agyideg, a nervus trigeminus (háromosztatú ideg), a legnagyobb agyideg, melynek elsődleges feladata az arc területének érző beidegzése, valamint a rágóizmok motoros ellátása. Ez egy kevert ideg, amely egy domináns szenzoros és egy kisebb motoros komponensből áll.</p>
+                        
+                        <h3 class="text-xl font-semibold">Agyidegmagok</h3>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong class="font-semibold">Nucleus motorius nervi trigemini:</strong> A hídban (pons) helyezkedik el. A rágóizmokat (m. masseter, m. temporalis, stb.) és más kisebb izmokat idegez be motorosan.</li>
+                            <li><strong class="font-semibold">Nucleus principalis sensorius:</strong> Szintén a hídban található, felelős a finom tapintási és nyomásérzési (epikritikus) információkért.</li>
+                            <li><strong class="font-semibold">Nucleus spinalis nervi trigemini:</strong> A hídtól a gerincvelő felső szakaszáig húzódik. A fájdalom-, hő- és durva tapintásérzést (protopátiás) dolgozza fel.</li>
+                            <li><strong class="font-semibold">Nucleus mesencephalicus:</strong> A középagyban helyezkedik el, egyedülálló módon primer szenzoros neuronokat tartalmaz, melyek a rágóizmokból és fogmedrekből származó proprioceptív információkat szállítják.</li>
+                        </ul>
+
+                        <h3 class="text-xl font-semibold">Ganglion trigeminale (Gasser-dúc)</h3>
+                        <p>Az érző rostok sejttestjei a koponyaüregben, a halántékcsont sziklacsonti részén elhelyezkedő Gasser-dúcban találhatók. Ebből a dúcból ered a három fő ág.</p>
+
+                         <h3 class="text-xl font-semibold">Fő Ágak és Koponyalapi Kilépések</h3>
+                        <ul class="list-disc list-inside space-y-2">
+                           <li><strong class="font-semibold">V/1 - Nervus ophthalmicus:</strong> Tisztán szenzoros. A <strong class="text-blue-500">fissura orbitalis superior</strong>-on lép ki. Ellátja a homlokot, fejbőrt, felső szemhéjat, corneát.</li>
+                           <li><strong class="font-semibold">V/2 - Nervus maxillaris:</strong> Tisztán szenzoros. A <strong class="text-green-500">foramen rotundum</strong>-on lép ki. Ellátja az arc középső részét, felső fogakat, szájpadot.</li>
+                           <li><strong class="font-semibold">V/3 - Nervus mandibularis:</strong> Kevert (szenzoros és motoros). A <strong class="text-yellow-500">foramen ovale</strong>-n lép ki. Szenzorosan ellátja az alsó ajkat, állat, alsó fogakat, nyelv elülső 2/3-át (általános érzés). Motorosan a rágóizmokat.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-600">Klinikai Vonatkozások</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">Trigeminus neuralgia (tic douloureux)</h3>
+                            <p>Hirtelen, heves, áramütésszerű fájdalomrohamok egy vagy több trigeminus ág területén. Gyakran specifikus "trigger" pontok érintése váltja ki. Leggyakrabban a V/2 vagy V/3 ág érintett.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold">Parézis tünetei</h3>
+                            <p><strong class="font-semibold">Motoros:</strong> Rágóizom-gyengeség, szájnyitáskor az állkapocs a bénult oldal felé deviál. <strong class="font-semibold">Szenzoros:</strong> Érzéskiesés (hypaesthesia), fonákérzés (paraesthesia) az érintett ág területén.</p>
+                        </div>
+                         <div>
+                            <h3 class="text-xl font-semibold">Fontos Reflexek</h3>
+                            <p><strong class="font-semibold">Cornea reflex:</strong> Afferens szár: N. ophthalmicus (V/1). Efferens szár: N. facialis (VII). A cornea érintésére a szemhéjak záródnak. Kiesése az V/1 vagy VII. ideg, vagy az agytörzsi reflexív károsodására utal.</p>
+                            <p><strong class="font-semibold">Masseter reflex (állreflex):</strong> Afferens és efferens szárát is a N. mandibularis (V/3) alkotja. Fokozódása felső motoneuron károsodásra utalhat.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Facialis Content -->
+            <div id="content-facialis" class="content-section space-y-12">
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-600">Interaktív Ábra: A Nervus Facialis Lefutása és Főbb Ágai</h2>
+                    <p class="mb-4 text-gray-600">Kattints az ideg lefutásának kulcsfontosságú pontjaira a részletekért.</p>
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="w-full md:w-2/3">
+                            <!-- Simplified Facial Nerve Pathway SVG -->
+                            <svg viewBox="0 0 600 400" class="interactive-svg w-full h-auto" id="facialis-pathway-svg">
+                                <title>A nervus facialis sematikus lefutása</title>
+                                <!-- Brainstem -->
+                                <rect x="20" y="150" width="80" height="100" fill="#cbd5e1" rx="10"/>
+                                <text x="60" y="205" text-anchor="middle" font-size="12">Agytörzs</text>
+                                
+                                <!-- Nerve path -->
+                                <path d="M 100 180 C 150 180, 160 100, 220 100" stroke="#a78bfa" stroke-width="4" fill="none"/>
+                                <path d="M 220 100 H 300" stroke="#a78bfa" stroke-width="4" fill="none"/>
+                                <path d="M 300 100 C 310 100, 320 110, 320 120 V 250" stroke="#a78bfa" stroke-width="4" fill="none"/>
+                                <path d="M 320 250 H 350" stroke="#a78bfa" stroke-width="4" fill="none"/>
+
+                                <!-- Key points -->
+                                <circle id="facialis-p1" cx="180" cy="125" r="10" fill="#8b5cf6" class="highlightable"/>
+                                <text x="180" y="115" text-anchor="middle" font-size="10" fill="white">1</text>
+                                <circle id="facialis-p2" cx="260" cy="100" r="10" fill="#8b5cf6" class="highlightable"/>
+                                <text x="260" y="105" text-anchor="middle" font-size="10" fill="white">2</text>
+                                <circle id="facialis-p3" cx="305" cy="150" r="10" fill="#8b5cf6" class="highlightable"/>
+                                <text x="305" y="155" text-anchor="middle" font-size="10" fill="white">3</text>
+                                <circle id="facialis-p4" cx="320" cy="220" r="10" fill="#8b5cf6" class="highlightable"/>
+                                <text x="320" y="225" text-anchor="middle" font-size="10" fill="white">4</text>
+                                <circle id="facialis-p5" cx="355" cy="250" r="10" fill="#8b5cf6" class="highlightable"/>
+                                <text x="355" y="255" text-anchor="middle" font-size="10" fill="white">5</text>
+
+                                <!-- Pes Anserinus -->
+                                <path d="M 350 250 C 400 200, 420 180, 480 180" stroke="#c4b5fd" stroke-width="3" fill="none"/>
+                                <path d="M 350 250 C 400 220, 420 220, 480 220" stroke="#c4b5fd" stroke-width="3" fill="none"/>
+                                <path d="M 350 250 C 400 250, 420 250, 480 250" stroke="#c4b5fd" stroke-width="3" fill="none"/>
+                                <path d="M 350 250 C 400 280, 420 280, 480 280" stroke="#c4b5fd" stroke-width="3" fill="none"/>
+                                <path d="M 350 250 C 400 310, 420 330, 480 320" stroke="#c4b5fd" stroke-width="3" fill="none"/>
+                                <text x="500" y="250" font-size="14" font-weight="bold">Pes Anserinus</text>
+                            </svg>
+                        </div>
+                        <div id="facialis-info" class="w-full md:w-1/3 p-4 bg-gray-100 rounded-lg min-h-[200px]">
+                            <h3 class="font-bold text-xl mb-2" id="facialis-info-title">Információ</h3>
+                            <p id="facialis-info-text">Kattints egy pontra a részletekért.</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-600">Részletes Anatómia</h2>
+                    <div class="space-y-4 text-gray-700 leading-relaxed">
+                        <h3 class="text-xl font-semibold">Bevezetés</h3>
+                        <p>A VII. agyideg, a nervus facialis (arcideg), egy komplex, kevert ideg. Fő funkciói: az arc mimikai izmainak motoros beidegzése, ízérzés a nyelv elülső 2/3-áról, és paraszimpatikus beidegzés a könny- és nyálmirigyekhez.</p>
+
+                        <h3 class="text-xl font-semibold">Agyidegmagok</h3>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong class="font-semibold">Nucleus motorius n. facialis:</strong> A híd alsó részén. A mimikai izmokat, a m. stapedius-t és más kisebb izmokat látja el. Felső részét mindkét agyfélteke, alsó részét az ellenoldali agykéreg idegzi be.</li>
+                            <li><strong class="font-semibold">Nucleus salivatorius superior:</strong> Paraszimpatikus mag. Rostjai felelősek a könny- és nyálmirigyek szekréciójáért.</li>
+                            <li><strong class="font-semibold">Nucleus tractus solitarii (pars gustatoria):</strong> Ízérző mag a nyúltvelőben a nyelv elülső 2/3-áról.</li>
+                        </ul>
+
+                        <h3 class="text-xl font-semibold">Ganglion geniculi</h3>
+                        <p>Szenzoros dúc a sziklacsonton belüli facialis csatorna kanyarulatában. Ízérző és általános érző neuronok sejttestjeit tartalmazza. Sérülése (pl. herpes zoster oticus / Ramsay-Hunt szindróma) súlyos tünetekkel jár.</p>
+
+                        <h3 class="text-xl font-semibold">Főbb Ágak és Funkcióik</h3>
+                         <ul class="list-disc list-inside space-y-2">
+                           <li><strong class="font-semibold">N. petrosus major:</strong> A ganglion geniculiból ered. Paraszimpatikus rostokat szállít a könnymirigyhez, valamint az orr- és szájpadmirigyekhez.</li>
+                           <li><strong class="font-semibold">N. stapedius:</strong> A m. stapediust (kengyelizom) idegzi be. Bénulása hyperacusist (hangokra való túlérzékenységet) okoz.</li>
+                           <li><strong class="font-semibold">Chorda tympani:</strong> Kétféle rostot szállít: ízérző rostokat a nyelv elülső 2/3-áról, és paraszimpatikus rostokat a glandula submandibularishoz és sublingualishoz (nyálmirigyek).</li>
+                           <li><strong class="font-semibold">Pes anserinus major (nagy lúdláb):</strong> A fültőmirigyben (parotis) oszlik 5 fő végágra (temporales, zygomatici, buccales, marginalis mandibulae, colli), melyek a mimikai izmokat látják el.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-600">Klinikai Vonatkozások</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-xl font-semibold">Centrális vs. Perifériás Facialis Parézis</h3>
+                            <p><strong class="font-semibold">Centrális:</strong> A supranuclearis pálya (pl. agyi stroke) sérülése. Jellemzően csak az <strong class="text-red-500">ellenoldali alsó arcfél</strong> bénul (a szájzug legörbül), a homlokráncolás és a szemzárás megtartott a kétoldali kérgi beidegzés miatt.</p>
+                            <p><strong class="font-semibold">Perifériás:</strong> Az ideg magjának vagy perifériás szakaszának sérülése (pl. Bell-féle bénulás). Az <strong class="text-red-500">azonos oldali teljes arcfél</strong> megbénul. A beteg nem tudja ráncolni a homlokát, bezárni a szemét (lagophthalmus), és a szájzuga is legörbül. A lézió helyétől függően kísérheti ízérzészavar, hyperacusis, könny- és nyálelválasztási zavar.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Quiz Section -->
+            <section id="quiz-section" class="bg-white mt-12 p-6 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Tudáspróba</h2>
+                <div id="quiz-container" class="max-w-2xl mx-auto">
+                    <!-- Quiz questions will be injected here -->
+                </div>
+                <div class="text-center mt-6">
+                    <button onclick="generateQuiz()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">Új Kvíz</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const trigeminusData = {
+            "v1-area": {
+                title: "V/1 - Nervus Ophthalmicus",
+                text: "Tisztán szenzoros ág. Ellátja a homlokot, a fejbőr elülső részét, a felső szemhéjat, a kötőhártyát és a corneát. A fissura orbitalis superioron lép ki a koponyából."
+            },
+            "v2-area": {
+                title: "V/2 - Nervus Maxillaris",
+                text: "Tisztán szenzoros ág. Ellátja az arc középső részét, az alsó szemhéjat, a felső ajkat, a felső fogsort és a szájpadot. A foramen rotundumon lép ki."
+            },
+            "v3-area": {
+                title: "V/3 - Nervus Mandibularis",
+                text: "Kevert (szenzoros és motoros) ág. Szenzorosan ellátja az alsó ajkat, az állat, az alsó fogsort és a nyelv elülső kétharmadának általános érző beidegzését. Motorosan a rágóizmokat látja el. A foramen ovalén lép ki."
+            }
+        };
+
+        const facialisData = {
+            "facialis-p1": {
+                title: "1. Meatus acusticus internus",
+                text: "A N. facialis (a N. intermediusszal) és a N. vestibulocochlearis (VIII.) együtt lép be a belső hallójáratba."
+            },
+            "facialis-p2": {
+                title: "2. Ganglion geniculi",
+                text: "Szenzoros dúc a canalis facialis kanyarulatában. Itt ered a N. petrosus major, ami a könnyelválasztásért felelős."
+            },
+            "facialis-p3": {
+                title: "3. N. stapedius eredése",
+                text: "Az ideg lead egy ágat a m. stapediushoz. Ennek sérülése hyperacusist (hangérzékenységet) okoz."
+            },
+            "facialis-p4": {
+                title: "4. Chorda tympani eredése",
+                text: "Ez az ág felelős a nyelv elülső 2/3-ának ízérzéséért és a submandibularis/sublingualis nyálmirigyek beidegzéséért."
+            },
+            "facialis-p5": {
+                title: "5. Foramen stylomastoideum",
+                text: "Az ideg itt lép ki a koponyából, mielőtt belépne a parotisba és végágaira (pes anserinus) oszlana a mimikai izmokhoz."
+            }
+        };
+
+        const quizQuestions = [
+            {
+                question: "Melyik koponyalapi nyíláson lép ki a Nervus Mandibularis (V/3)?",
+                options: ["Fissura orbitalis superior", "Foramen rotundum", "Foramen ovale", "Meatus acusticus internus"],
+                answer: "Foramen ovale"
+            },
+            {
+                question: "Melyik tünet jellemző a centrális facialis parézisre?",
+                options: ["Az azonos oldali teljes arcfél bénulása", "Csak az ellenoldali alsó arcfél bénulása", "Hyperacusis", "Ízérzészavar a nyelv elülső 2/3-án"],
+                answer: "Csak az ellenoldali alsó arcfél bénulása"
+            },
+            {
+                question: "Melyik idegág felelős a nyelv elülső kétharmadának ízérzéséért?",
+                options: ["Nervus lingualis", "Nervus petrosus major", "Chorda tympani", "Nervus buccalis"],
+                answer: "Chorda tympani"
+            },
+            {
+                question: "A rágóizmok gyengesége és az állkapocs deviációja melyik ideg sérülésére utal?",
+                options: ["Nervus Facialis", "Nervus Maxillaris", "Nervus Ophthalmicus", "Nervus Mandibularis"],
+                answer: "Nervus Mandibularis"
+            },
+            {
+                question: "A cornea reflex afferens (érző) szárát melyik ideg alkotja?",
+                options: ["Nervus Facialis (VII)", "Nervus Ophthalmicus (V/1)", "Nervus Opticus (II)", "Nervus Maxillaris (V/2)"],
+                answer: "Nervus Ophthalmicus (V/1)"
+            },
+             {
+                question: "Mi okozza a hyperacusist (kóros hangérzékenységet) a nervus facialis sérülésekor?",
+                options: ["A chorda tympani sérülése", "A nervus stapedius bénulása", "A pes anserinus sérülése", "A ganglion geniculi gyulladása"],
+                answer: "A nervus stapedius bénulása"
+            }
+        ];
+
+        let currentTab = 'trigeminus';
+
+        function changeTab(tabName) {
+            document.getElementById(`content-${currentTab}`).classList.remove('content-active');
+            document.getElementById(`tab-${currentTab}`).classList.remove('tab-active', 'text-blue-600');
+            document.getElementById(`tab-${currentTab}`).classList.add('text-gray-500');
+
+
+            document.getElementById(`content-${tabName}`).classList.add('content-active');
+            document.getElementById(`tab-${tabName}`).classList.add('tab-active', 'text-blue-600');
+            document.getElementById(`tab-${tabName}`).classList.remove('text-gray-500');
+
+            currentTab = tabName;
+        }
+
+        // Trigeminus SVG Interaction
+        const trigeminusSvg = document.getElementById('trigeminus-face-svg');
+        const trigeminusInfoTitle = document.getElementById('trigeminus-info-title');
+        const trigeminusInfoText = document.getElementById('trigeminus-info-text');
+
+        trigeminusSvg.addEventListener('click', (e) => {
+            const targetId = e.target.id;
+            if (trigeminusData[targetId]) {
+                trigeminusInfoTitle.textContent = trigeminusData[targetId].title;
+                trigeminusInfoText.textContent = trigeminusData[targetId].text;
+
+                // Remove highlight from all
+                trigeminusSvg.querySelectorAll('.highlightable').forEach(el => el.classList.remove('highlight'));
+                // Add highlight to clicked element
+                e.target.classList.add('highlight');
+            }
+        });
+        
+        // Facialis SVG Interaction
+        const facialisSvg = document.getElementById('facialis-pathway-svg');
+        const facialisInfoTitle = document.getElementById('facialis-info-title');
+        const facialisInfoText = document.getElementById('facialis-info-text');
+
+        facialisSvg.addEventListener('click', (e) => {
+            const targetId = e.target.id;
+            if (facialisData[targetId]) {
+                facialisInfoTitle.textContent = facialisData[targetId].title;
+                facialisInfoText.textContent = facialisData[targetId].text;
+                
+                facialisSvg.querySelectorAll('.highlightable').forEach(el => el.classList.remove('highlight'));
+                e.target.classList.add('highlight');
+            }
+        });
+
+        // Quiz Logic
+        const quizContainer = document.getElementById('quiz-container');
+
+        function generateQuiz() {
+            quizContainer.innerHTML = '';
+            // Shuffle questions and take first 3
+            const shuffled = quizQuestions.sort(() => 0.5 - Math.random());
+            let selectedQuestions = shuffled.slice(0, 3);
+
+            selectedQuestions.forEach((q, index) => {
+                const questionEl = document.createElement('div');
+                questionEl.className = 'mb-6 p-4 border border-gray-200 rounded-lg';
+                
+                // Shuffle options
+                const shuffledOptions = q.options.sort(() => 0.5 - Math.random());
+
+                let optionsHtml = shuffledOptions.map(option => `
+                    <div class="quiz-option p-3 border-l-4 border-gray-200 rounded-r-md cursor-pointer transition-colors" onclick="checkAnswer(this, '${option === q.answer}', ${index})">
+                        ${option}
+                    </div>
+                `).join('');
+
+                questionEl.innerHTML = `
+                    <p class="font-semibold text-lg mb-3">${index + 1}. ${q.question}</p>
+                    <div id="q${index}" class="space-y-2">${optionsHtml}</div>
+                `;
+                quizContainer.appendChild(questionEl);
+            });
+        }
+
+        function checkAnswer(element, isCorrect, questionId) {
+            const questionContainer = document.getElementById(`q${questionId}`);
+            // Disable further clicks
+            Array.from(questionContainer.children).forEach(child => {
+                child.style.pointerEvents = 'none';
+            });
+            
+            if (isCorrect === 'true') {
+                element.classList.add('quiz-correct');
+                element.classList.remove('border-gray-200');
+            } else {
+                element.classList.add('quiz-incorrect');
+                element.classList.remove('border-gray-200');
+            }
+        }
+        
+        // Initial load
+        window.onload = () => {
+            generateQuiz();
+            changeTab('trigeminus');
+        };
+
+    </script>
+
+</body>
+</html>

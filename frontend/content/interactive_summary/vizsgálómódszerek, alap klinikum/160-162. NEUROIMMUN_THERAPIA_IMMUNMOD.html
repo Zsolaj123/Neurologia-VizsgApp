@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroimmunológiai Terápiák - Interaktív Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header és Navigáció -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600 flex items-center">
+                <i data-lucide="brain-circuit" class="mr-2"></i>
+                Neuroimmunológia
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#alapelvek" class="hover:text-blue-600 transition">Alapelvek</a>
+                <a href="#terapiak" class="hover:text-blue-600 transition">Terápiák</a>
+                <a href="#betegsegek" class="hover:text-blue-600 transition">Betegségek</a>
+                <a href="#dmt" class="hover:text-blue-600 transition">DMT-k</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobil menü -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+            <a href="#alapelvek" class="block py-2 hover:text-blue-600 transition">Alapelvek</a>
+            <a href="#terapiak" class="block py-2 hover:text-blue-600 transition">Terápiák</a>
+            <a href="#betegsegek" class="block py-2 hover:text-blue-600 transition">Betegségek</a>
+            <a href="#dmt" class="block py-2 hover:text-blue-600 transition">DMT-k</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Bevezetés és Alapelvek -->
+        <section id="alapelvek" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-blue-500 pl-4">Kezelési Alapelvek</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Célok -->
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-green-600 mb-3">
+                        <i data-lucide="target" class="w-8 h-8 mr-3"></i>
+                        <h3 class="text-xl font-semibold">Terápiás Célok</h3>
+                    </div>
+                    <ul class="space-y-2 list-disc list-inside text-gray-600">
+                        <li>Akut gyulladás csökkentése</li>
+                        <li>Relapszusok megelőzése</li>
+                        <li>Betegség progressziójának lassítása</li>
+                        <li>Életminőség javítása</li>
+                    </ul>
+                </div>
+                <!-- Stratégiák -->
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-yellow-600 mb-3">
+                        <i data-lucide="swords" class="w-8 h-8 mr-3"></i>
+                        <h3 class="text-xl font-semibold">Stratégiák</h3>
+                    </div>
+                    <ul class="space-y-2 list-disc list-inside text-gray-600">
+                        <li><strong>Immunmoduláció:</strong> Immunrendszer finomhangolása</li>
+                        <li><strong>Immunszuppresszió:</strong> Immunrendszer általános elnyomása</li>
+                        <li><strong>Korai kezelés:</strong> Jobb hosszú távú kimenetel</li>
+                    </ul>
+                </div>
+                <!-- Monitorozás -->
+                <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-purple-600 mb-3">
+                        <i data-lucide="activity" class="w-8 h-8 mr-3"></i>
+                        <h3 class="text-xl font-semibold">Monitorozás</h3>
+                    </div>
+                    <ul class="space-y-2 list-disc list-inside text-gray-600">
+                        <li>Klinikai állapot (pl. EDSS)</li>
+                        <li>Képalkotók (MRI)</li>
+                        <li>Laboratóriumi tesztek</li>
+                        <li>Mellékhatások szűrése</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Főbb Terápiás Módszerek -->
+        <section id="terapiak" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-blue-500 pl-4">Főbb Terápiás Módszerek</h2>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="szteroidok" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-blue-500 transition text-center">
+                        <i data-lucide="pill" class="inline-block mr-2"></i>Kortikoszteroidok
+                    </button>
+                    <button data-tab="plex" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-blue-500 transition text-center">
+                        <i data-lucide="droplets" class="inline-block mr-2"></i>Plazmaferézis (PLEX)
+                    </button>
+                    <button data-tab="ivig" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-blue-500 transition text-center">
+                        <i data-lucide="syringe" class="inline-block mr-2"></i>IVIG
+                    </button>
+                </div>
+
+                <!-- Tab tartalmak -->
+                <div id="tab-content">
+                    <!-- Szteroidok -->
+                    <div id="szteroidok" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-blue-700">Kortikoszteroidok</h3>
+                        <p class="mb-4 text-gray-600">Széles spektrumú gyulladáscsökkentő és immunszuppresszív szerek, melyek az akut fázis kezelésében alapvetőek. Gátolják a proinflammatorikus citokineket és stabilizálják a vér-agy gátat.</p>
+                        
+                        <div class="space-y-4">
+                            <!-- Indikációk Accordion -->
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-blue-50 hover:bg-blue-100 font-semibold flex justify-between items-center">
+                                    <span>Főbb Indikációk</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Sclerosis Multiplex (SM) relapszus:</strong> Nagy dózisú lökéskezelés (metilprednizolon).</li>
+                                        <li><strong>Agyi daganatok ödémája:</strong> Dexametazon a vasogén ödéma csökkentésére.</li>
+                                        <li><strong>Autoimmun Encephalitis (AIE):</strong> Első vonalbeli terápia része.</li>
+                                        <li><strong>Myasthenia Gravis (MG):</strong> Hosszú távú immunszuppresszió (óvatos bevezetéssel!).</li>
+                                        <li><strong>CIDP, Bell-parézis:</strong> Hatékony kezelési opciók.</li>
+                                        <li class="font-bold text-red-600"><strong>Guillain-Barré Szindróma (GBS):</strong> NEM HATÁSOSAK, alkalmazásuk nem javasolt!</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Mellékhatások Accordion -->
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-blue-50 hover:bg-blue-100 font-semibold flex justify-between items-center">
+                                    <span>Gyakori Mellékhatások és Monitorozás</span>
+                                     <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-100">
+                                                <tr>
+                                                    <th class="p-3">Kategória</th>
+                                                    <th class="p-3">Tünetek</th>
+                                                    <th class="p-3">Kezelés/Megelőzés</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="border-b">
+                                                    <td class="p-3 font-medium">Metabolikus</td>
+                                                    <td class="p-3">Hyperglykaemia, súlygyarapodás</td>
+                                                    <td class="p-3">Vércukor-ellenőrzés, diéta</td>
+                                                </tr>
+                                                <tr class="border-b">
+                                                    <td class="p-3 font-medium">Kardiovaszkuláris</td>
+                                                    <td class="p-3">Hypertonia, folyadékretenció</td>
+                                                    <td class="p-3">Vérnyomásmérés, sószegény diéta</td>
+                                                </tr>
+                                                <tr class="border-b">
+                                                    <td class="p-3 font-medium">Csontrendszeri</td>
+                                                    <td class="p-3">Osteoporosis, avascularis necrosis</td>
+                                                    <td class="p-3">Ca/D-vitamin pótlás, denzitometria</td>
+                                                </tr>
+                                                <tr class="border-b">
+                                                    <td class="p-3 font-medium">Pszichiátriai</td>
+                                                    <td class="p-3">Insomnia, hangulatzavarok, pszichózis</td>
+                                                    <td class="p-3">Reggeli adagolás, szükség esetén pszichiátriai konz.</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="p-3 font-medium">Immunrendszeri</td>
+                                                    <td class="p-3">Fertőzéshajlam, sebgyógyulási zavar</td>
+                                                    <td class="p-3">Higiénia, PJP profilaxis mérlegelése</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Plazmaferézis -->
+                    <div id="plex" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-green-700">Plazmaferézis (PLEX)</h3>
+                        <p class="mb-4 text-gray-600">Extrakorporális vértisztító eljárás, amely eltávolítja a keringésből a kóros autoantitesteket, immunkomplexeket és gyulladásos mediátorokat. A plazmát pótlófolyadékkal helyettesítik.</p>
+                        
+                        <div class="space-y-4">
+                             <!-- Indikációk Accordion -->
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-green-50 hover:bg-green-100 font-semibold flex justify-between items-center">
+                                    <span>Főbb Indikációk</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Guillain-Barré Szindróma (GBS):</strong> Első vonalbeli terápia, IVIG-vel egyenértékű.</li>
+                                        <li><strong>Myasthenia Gravis (MG):</strong> Myastheniás krízisben, súlyos exacerbációkban hatékony.</li>
+                                        <li><strong>CIDP:</strong> Hatékony a rövid távú kezelésben.</li>
+                                        <li><strong>Sclerosis Multiplex (SM):</strong> Másodvonalbeli kezelés súlyos, szteroidrezisztens relapszusokban.</li>
+                                        <li><strong>NMOSD, AIE:</strong> Súlyos, terápiarezisztens esetekben.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Mellékhatások Accordion -->
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-green-50 hover:bg-green-100 font-semibold flex justify-between items-center">
+                                    <span>Mellékhatások és Komplikációk</span>
+                                     <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Hemodinamikai instabilitás:</strong> Hipotenzió, szédülés.</li>
+                                        <li><strong>Citrát-toxicitás:</strong> Hypocalcaemia (zsibbadás, görcsök). Kalcium pótlással korrigálható.</li>
+                                        <li><strong>Allergiás reakciók:</strong> A pótlófolyadékokra.</li>
+                                        <li><strong>Fertőzések:</strong> Katéter-asszociált fertőzések.</li>
+                                        <li><strong>Vérzési vagy trombózis kockázat.</strong></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IVIG -->
+                    <div id="ivig" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-purple-700">Intravénás Immunglobulin (IVIG)</h3>
+                        <p class="mb-4 text-gray-600">Több ezer donor plazmájából készült, tisztított IgG antitesteket tartalmazó készítmény. Komplex, pleiotróp immunmoduláns hatással bír. Általános dózisa 2 g/ttkg, 2-5 nap alatt elosztva.</p>
+                        
+                        <div class="space-y-4">
+                             <!-- Indikációk Accordion -->
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-purple-50 hover:bg-purple-100 font-semibold flex justify-between items-center">
+                                    <span>Főbb Indikációk</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Guillain-Barré Szindróma (GBS):</strong> Első vonalbeli terápia, PLEX-szel egyenértékű.</li>
+                                        <li><strong>CIDP:</strong> Első vonalbeli indukciós és fenntartó terápia.</li>
+                                        <li><strong>Multifokális Motoros Neuropathia (MMN):</strong> Az elsődleges, bizonyítottan hatékony kezelés.</li>
+                                        <li><strong>Myasthenia Gravis (MG):</strong> "Mentő" terápia akut exacerbációkban, krízisben.</li>
+                                        <li><strong>Dermatomyositis, Stiff Person Szindróma:</strong> Másodvonalbeli terápia.</li>
+                                        <li class="font-bold text-red-600"><strong>Sclerosis Multiplex (SM) relapszus:</strong> Rutinszerű alkalmazása NEM AJÁNLOTT!</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Mellékhatások Accordion -->
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-purple-50 hover:bg-purple-100 font-semibold flex justify-between items-center">
+                                    <span>Mellékhatások és Komplikációk</span>
+                                     <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                     <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Gyakori, enyhe:</strong> Fejfájás, hidegrázás, láz, rossz közérzet (infúzió sebességével összefügg).</li>
+                                        <li><strong>Súlyosabb, ritka:</strong>
+                                            <ul class="pl-5 mt-1 space-y-1 list-disc">
+                                                <li>Tromboembóliás események (artériás és vénás).</li>
+                                                <li>Akut vesekárosodás.</li>
+                                                <li>Aszeptikus meningitis.</li>
+                                                <li>Anafilaxia (különösen IgA-hiányos betegeknél).</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Specifikus Betegségek -->
+        <section id="betegsegek" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-blue-500 pl-4">Specifikus Betegségek Kezelése</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Sclerosis Multiplex -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-semibold mb-4 flex items-center"><i data-lucide="brain" class="mr-3 text-blue-500"></i>Sclerosis Multiplex (SM)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-bold text-lg text-red-600">Akut Schub Kezelése</h4>
+                            <p>Nagy dózisú kortikoszteroid (iv. vagy po.). Szteroid-rezisztencia esetén PLEX. IVIG nem javasolt.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg text-green-600">Hosszú Távú DMT (RRMS)</h4>
+                            <p>Korai kezelés javasolt. Választás a betegség aktivitása és egyéni faktorok alapján (eszkalációs vs. korai magas hatékonyságú terápia).</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg text-yellow-600">Progresszív Formák (PPMS, SPMS)</h4>
+                            <p>Korlátozottabb lehetőségek. PPMS-ben és aktív SPMS-ben az Okrelizumab lassíthatja a progressziót. Tüneti kezelés kulcsfontosságú.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- GBS & CIDP -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-semibold mb-4 flex items-center"><i data-lucide="zap-off" class="mr-3 text-orange-500"></i>GBS & CIDP</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <h4 class="font-bold text-lg text-red-600">GBS Akut Kezelése</h4>
+                            <p>IVIG vagy PLEX (egyenértékűek). A kettő kombinációja nem ad extra előnyt. <strong class="text-red-700">Szteroidok hatástalanok!</strong></p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg text-green-600">GBS Támogató Kezelés</h4>
+                            <p>Intenzív osztályos ellátás, légzéstámogatás, autonóm diszfunkció kezelése, fájdalomcsillapítás, trombózis profilaxis, korai rehabilitáció.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg text-yellow-600">CIDP Kezelése</h4>
+                            <p>A GBS krónikus megfelelője. Itt a kortikoszteroidok hatékonyak, az IVIG és PLEX mellett. Fenntartó kezelés gyakran szükséges.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DMT Táblázat -->
+        <section id="dmt" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-blue-500 pl-4">Betegséglefolyást Módosító Terápiák (DMT-k)</h2>
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 overflow-x-auto">
+                <table class="w-full min-w-[1000px] text-sm">
+                    <thead class="bg-gray-100 text-left">
+                        <tr>
+                            <th class="p-3 font-semibold">Gyógyszer</th>
+                            <th class="p-3 font-semibold">Hatásmechanizmus</th>
+                            <th class="p-3 font-semibold">Fő Indikációk</th>
+                            <th class="p-3 font-semibold">Kritikus Mellékhatások/Figyelmeztetések</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 font-medium">Interferon-β</td>
+                            <td class="p-3">Immunmoduláns</td>
+                            <td class="p-3">SM (RRMS)</td>
+                            <td class="p-3">Influenzaszerű tünetek, májfunkciós zavar, depresszió</td>
+                        </tr>
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 font-medium">Fingolimod</td>
+                            <td class="p-3">S1P receptor modulátor</td>
+                            <td class="p-3">SM (RRMS)</td>
+                            <td class="p-3"><strong class="text-red-600">PML kockázat</strong>, bradycardia, macula ödéma</td>
+                        </tr>
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 font-medium">Natalizumab</td>
+                            <td class="p-3">α4β1-integrin antagonista</td>
+                            <td class="p-3">SM (nagyon aktív RRMS)</td>
+                            <td class="p-3"><strong class="text-red-600">PML kockázat (REMS program)</strong></td>
+                        </tr>
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 font-medium">Okrelizumab</td>
+                            <td class="p-3">Anti-CD20 (B-sejt depléció)</td>
+                            <td class="p-3">SM (RRMS, PPMS)</td>
+                            <td class="p-3">Infúziós reakciók, fertőzések, <strong class="text-red-600">Hepatitis B reaktiváció</strong></td>
+                        </tr>
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 font-medium">Alemtuzumab</td>
+                            <td class="p-3">Anti-CD52 (limfocita depléció)</td>
+                            <td class="p-3">SM (nagyon aktív RRMS)</td>
+                            <td class="p-3"><strong class="text-red-600">Szekunder autoimmun betegségek</strong>, infúziós reakciók</td>
+                        </tr>
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 font-medium">Rituximab</td>
+                            <td class="p-3">Anti-CD20 (B-sejt depléció)</td>
+                            <td class="p-3">NMOSD, refrakter MG, AE</td>
+                            <td class="p-3">Infúziós reakciók, <strong class="text-red-600">PML, Hepatitis B reaktiváció</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">Azatioprin</td>
+                            <td class="p-3">Purin analóg, antimetabolit</td>
+                            <td class="p-3">MG, NMOSD, CIDP</td>
+                            <td class="p-3">Csontvelő-szuppresszió (TPMT függő!), malignitás</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 - Interaktív Tanulási Segédlet. Készült a feltöltött dokumentumok alapján.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobil menü
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Tab váltó
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('tab-active');
+                });
+                button.classList.add('tab-active');
+
+                tabPanes.forEach(pane => {
+                    if (pane.id === tabId) {
+                        pane.classList.remove('hidden');
+                    } else {
+                        pane.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Accordion
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                // JAVÍTÁS: Az ikon `<i>` taget a lucide script lecseréli `<svg>` tagre.
+                // A `querySelector`-nek az `svg`-t kell keresnie az `i` helyett.
+                const icon = header.querySelector('svg');
+                
+                header.parentElement.classList.toggle('open');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klinikai Neurológiai és Vaszkuláris Összefoglaló</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #eef2ff;
+        }
+        .tab-btn {
+            transition: all 0.3s ease-in-out;
+            border-bottom: 4px solid transparent;
+            color: #6b7280;
+        }
+        .tab-btn.active {
+            color: #4338ca;
+            border-bottom-color: #4338ca;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.07);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-top: 6px solid;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .card h3 i {
+            margin-right: 0.75rem;
+            color: #6366f1;
+        }
+        .card h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #312e81;
+        }
+        .card-orange { border-color: #f97316; }
+        .card-green { border-color: #10b981; }
+        .card-purple { border-color: #8b5cf6; }
+        .card-sky { border-color: #0ea5e9; }
+        
+        .interactive-diagram {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            background-color: #f9fafb;
+        }
+        
+        .flow-arrow {
+            animation: flow 2s linear infinite;
+        }
+        .retrograde-flow {
+            animation: flow-retrograde 2s linear infinite;
+            display: none;
+        }
+        .steal-active .flow-arrow {
+            display: none;
+        }
+        .steal-active .retrograde-flow {
+            display: block;
+        }
+        @keyframes flow {
+            from {
+                stroke-dashoffset: 24;
+            }
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        @keyframes flow-retrograde {
+            from {
+                stroke-dashoffset: 0;
+            }
+            to {
+                stroke-dashoffset: 24;
+            }
+        }
+        .info-box {
+            background-color: #f3f4f6;
+            border-left: 4px solid #6366f1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #f9fafb;
+        }
+        .list-disc li::marker {
+            color: #6366f1;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Klinikai Útmutató: Atherosclerosis és Következményei</h1>
+            <p class="text-xl text-gray-600">Átfogó szakmai összefoglaló orvosoknak</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="sticky top-0 bg-eef2ff z-10 mb-8 border-b border-gray-300 shadow-sm">
+            <nav class="flex justify-center -mb-px flex-wrap">
+                <button class="tab-btn active text-lg font-medium py-4 px-5" onclick="showTab('athero')"><i class="fas fa-disease"></i> Atherogenesis & Rizikófaktorok</button>
+                <button class="tab-btn text-lg font-medium py-4 px-5" onclick="showTab('prevencio')"><i class="fas fa-shield-heart"></i> Primer Prevenció</button>
+                <button class="tab-btn text-lg font-medium py-4 px-5" onclick="showTab('steal')"><i class="fas fa-random"></i> Steal Szindrómák</button>
+                <button class="tab-btn text-lg font-medium py-4 px-5" onclick="showTab('ccj')"><i class="fas fa-bone"></i> Craniocervicalis Átmenet</button>
+            </nav>
+        </div>
+
+        <main>
+            <!-- Atherogenesis & Risk Factors Section -->
+            <section id="athero" class="content-section active">
+                <div class="card card-orange">
+                    <h3><i class="fas fa-stream"></i>Az Atherogenesis Folyamata</h3>
+                    <p>Az atherosclerosis egy krónikus, progresszív gyulladásos érbetegség. A folyamat (atherogenesis) egy komplex, évtizedekig tartó kaszkád, melynek főbb lépései a következők:</p>
+                    <ol class="list-decimal list-inside space-y-3 mt-4">
+                        <li><strong>Endothelialis diszfunkció:</strong> A legkorábbi lépés, melyet a hemodinamikai stressz (alacsony nyírófeszültség az elágazódásoknál) és a klasszikus rizikófaktorok (pl. hypertonia, dohányzás, hiperglikémia) váltanak ki. A kulcsmozzanat a védő hatású nitrogén-monoxid (NO) biohasznosulásának csökkenése, ami fokozott permeabilitáshoz és pro-inflammatorikus állapothoz vezet.</li>
+                        <li><strong>Lipidakkumuláció és -oxidáció:</strong> A megnövekedett permeabilitás miatt az LDL-koleszterin bejut az érfal intimájába, ott a proteoglikánokhoz kötődve csapdába esik és oxidálódik (oxLDL). Az oxLDL erősen pro-atherogen, kemotaktikus és citotoxikus.</li>
+                        <li><strong>Gyulladásos válasz és habos sejt képződés:</strong> Az oxLDL és egyéb "veszélyjelek" vonzzák a monocitákat, melyek az intimába vándorolva makrofágokká alakulnak. A makrofágok scavenger receptoraikon keresztül felveszik az oxLDL-t, és lipidekkel telt habos sejtekké (foam cells) válnak. A habos sejtek felhalmozódása hozza létre a zsírcsíkot (fatty streak), az atherosclerosis legkorábbi látható lézióját. A folyamatban T-limfociták is részt vesznek, tovább fokozva a gyulladást.</li>
+                        <li><strong>Simaizomsejt-proliferáció és fibrotikus sapka kialakulása:</strong> A gyulladásos mediátorok hatására a simaizomsejtek a mediából az intimába vándorolnak, szaporodnak, és extracelluláris mátrixot (főként kollagént) termelnek. Ez alkotja a fibrotikus sapkát, amely a kialakuló nekrotikus magot (elhalt habos sejtek, lipidek) fedi be.</li>
+                        <li><strong>Komplikált plakk és trombózis:</strong> A krónikus gyulladás, a mátrixbontó enzimek (MMP-k) és a simaizomsejt-apoptózis hatására a fibrotikus sapka elvékonyodhat. Az így instabillá vált, "vulnerábilis" plakk megrepedhet (ruptúra). A plakk trombogén anyagai a vérárammal érintkezve akut trombózist (vérrögképződést) indítanak el, ami az ér teljes elzáródásához és klinikai eseményhez (szívinfarktus, stroke) vezethet.</li>
+                    </ol>
+                </div>
+                 <div class="card card-orange">
+                    <h3><i class="fas fa-heart-pulse"></i>Cerebrovaszkuláris Betegségek Rizikófaktorai</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4>Nem Módosítható Faktorok 🧬</h4>
+                            <ul class="list-disc list-inside mt-2 space-y-2">
+                                <li><strong>Életkor:</strong> A legfontosabb, a kockázat 55 év felett tízévente megduplázódik.</li>
+                                <li><strong>Nem:</strong> Férfiaknál korábban jelentkezik, de a nők kockázata menopauza után felzárkózik.</li>
+                                <li><strong>Genetika/Családi anamnézis:</strong> Korai (<55 év ♂, <65 év ♀) CV esemény elsőfokú rokonnál. Monogénes betegségek (pl. familiáris hypercholesterinaemia, CADASIL).</li>
+                                <li><strong>Etnikum:</strong> Bizonyos populációkban (pl. afroamerikai, dél-ázsiai) magasabb a rizikó.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>Módosítható Faktorok ✅</h4>
+                             <ul class="list-disc list-inside mt-2 space-y-2">
+                                <li><strong>Magas vérnyomás (Hypertensio):</strong> A legjelentősebb rizikófaktor, a stroke-ok >50%-áért felelős.</li>
+                                <li><strong>Dohányzás:</strong> 2-4-szeresére növeli a kockázatot. A leszokás után a rizikó 5 éven belül jelentősen csökken.</li>
+                                <li><strong>Diabetes Mellitus:</strong> 2-6-szorosára növeli a kockázatot, akcelerált érelmeszesedést okoz.</li>
+                                <li><strong>Diszlipidémia:</strong> Magas LDL, alacsony HDL, magas trigliceridek.</li>
+                                <li><strong>Pitvarfibrilláció:</strong> Az emboliás stroke-ok ~25%-áért felelős, 5x-ös kockázatnövekedés.</li>
+                                <li><strong>Életmódbeli faktorok:</strong> Elhízás (különösen hasi), mozgásszegény életmód, egészségtelen étrend (magas só-, telített zsírtartalom).</li>
+                                <li><strong>Egyéb:</strong> Túlzott alkohol, illegális drogok (kokain, amfetamin), alvási apnoe, krónikus stressz.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="info-box mt-6">
+                        <strong>Klinikai Gyöngyszem:</strong> Az újonnan felismert rizikófaktorok, mint a magas Lipoprotein(a) [Lp(a)] szint és a krónikus gyulladásos állapotok (pl. rheumatoid arthritis, emelkedett hs-CRP) tovább finomítják a kockázatbecslést a hagyományos faktorokon túl.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Primary Prevention Section -->
+            <section id="prevencio" class="content-section">
+                <div class="card card-green">
+                    <h3><i class="fas fa-apple-alt"></i>Primer Prevenció: Életmódbeli Intervenciók (Life's Essential 8)</h3>
+                    <p>A stroke esetek akár 80%-a megelőzhető lenne. Az életmódváltás a prevenció alapja, melynek célja a kardiovaszkuláris egészség optimalizálása.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 text-center">
+                        <div class="p-4 bg-green-50 rounded-lg shadow-sm">
+                            <i class="fas fa-utensils text-4xl text-green-600 mb-2"></i>
+                            <h5 class="font-bold">Egészséges Étrend</h5>
+                            <p class="text-sm">Mediterrán/DASH diéta: sok zöldség, gyümölcs, teljes kiőrlésű gabona, hal. Sóbevitel <5g/nap. Kerülendő: vörös húsok, cukros üdítők, feldolgozott élelmiszerek.</p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg shadow-sm">
+                            <i class="fas fa-person-running text-4xl text-green-600 mb-2"></i>
+                            <h5 class="font-bold">Testmozgás</h5>
+                            <p class="text-sm">Heti 150-300 perc közepes vagy 75-150 perc erős intenzitású aerob mozgás, kiegészítve heti 2x izomerősítéssel.</p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg shadow-sm">
+                            <i class="fas fa-smoking-ban text-4xl text-green-600 mb-2"></i>
+                            <h5 class="font-bold">Dohányzás Elhagyása</h5>
+                            <p class="text-sm">Minden dohánytermék (e-cigaretta is) teljes elhagyása. A passzív dohányzás kerülése is kritikus.</p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg shadow-sm">
+                            <i class="fas fa-bed text-4xl text-green-600 mb-2"></i>
+                             <h5 class="font-bold">Egészséges Alvás</h5>
+                            <p class="text-sm">Cél a napi 7-9 óra pihentető alvás. Az alvási apnoe szűrése és kezelése fontos, különösen elhízás és hypertonia esetén.</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="card card-green">
+                    <h3><i class="fas fa-pills"></i>Rizikófaktorok Orvosi Kezelése</h3>
+                    <p>A gyógyszeres terápia az életmódváltás kiegészítése, célja a rizikófaktorok célértéken tartása az egyéni kockázatbecslés alapján (pl. SCORE2, PREVENT).</p>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white">
+                            <thead>
+                                <tr><th>Rizikófaktor</th><th>Célérték</th><th>Terápiás Megfontolások</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-semibold">Magas vérnyomás</td>
+                                    <td><strong>&lt; 130/80 Hgmm</strong></td>
+                                    <td>Első vonalbeli szerek: ACE-gátlók/ARB-k, CCB-k, thiazid-típusú diuretikumok. Gyakran kombináció szükséges.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Diszlipidémia</td>
+                                    <td><strong>LDL-C &lt; 1.8 mmol/L</strong> (magas rizikó), <strong>&lt; 1.4 mmol/L</strong> (nagyon magas rizikó)</td>
+                                    <td>Nagy intenzitású statin terápia az alap. Szükség esetén kiegészítés ezetimibbel, PCSK9-gátlókkal.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Diabetes Mellitus</td>
+                                    <td><strong>HbA1c ~7% (53 mmol/mol)</strong>, egyénre szabva</td>
+                                    <td>Az életmódváltás és metformin mellett a kardiovaszkuláris védelemmel rendelkező SGLT2-gátlók és GLP-1 RA-k előnyben részesítendők.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-semibold">Pitvarfibrilláció</td>
+                                    <td>Antikoaguláció (CHA₂DS₂-VASc ≥ 2 ♂, ≥ 3 ♀)</td>
+                                    <td>NOAC-ok (apixaban, dabigatran, edoxaban, rivaroxaban) előnyben részesítendők a warfarinnal szemben a legtöbb betegnél.</td>
+                                </tr>
+                                 <tr>
+                                    <td class="font-semibold">Primer Prevenciós Aspirin</td>
+                                    <td>Egyéni mérlegelés</td>
+                                    <td>Rutinszerűen nem javasolt. Megfontolható 40-70 év között, magas CV rizikó és alacsony vérzési rizikó esetén, közös orvos-beteg döntés alapján.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Steal Syndromes Section -->
+            <section id="steal" class="content-section">
+                <div class="card card-purple">
+                    <h3><i class="fas fa-exchange-alt"></i>Subclavian Steal Szindróma (SSS)</h3>
+                    <p>Az a. subclavia proximális szűkülete/elzáródása miatt a véráramlás megfordul az azonos oldali a. vertebralisban, "ellopva" a vért a vertebrobasilaris keringésből a kar ellátására, különösen terheléskor.</p>
+                    <div class="grid md:grid-cols-2 gap-8 mt-4">
+                        <div class="interactive-diagram" id="steal-diagram">
+                             <svg viewBox="0 0 300 220">
+                                <title>Subclavian Steal Mechanizmus</title>
+                                <!-- Labels -->
+                                <text x="10" y="20" font-size="10">A. Basilaris</text>
+                                <text x="10" y="115" font-size="10">A. Subclavia (bal)</text>
+                                <text x="190" y="115" font-size="10">A. Subclavia (jobb)</text>
+                                <text x="10" y="60" font-size="10">A. Vertebralis (bal)</text>
+                                <text x="190" y="60" font-size="10">A. Vertebralis (jobb)</text>
+                                <text x="135" y="190" font-size="10">Aortaív</text>
+                                
+                                <!-- Arteries -->
+                                <line x1="150" y1="180" x2="150" y2="140" stroke="#CD5C5C" stroke-width="8"/> <!-- Aorta -->
+                                <path d="M 150 140 Q 150 100 100 100" stroke="#CD5C5C" stroke-width="8" fill="none"/> <!-- Aorta arch left -->
+                                <path d="M 150 140 Q 150 100 200 100" stroke="#CD5C5C" stroke-width="8" fill="none"/> <!-- Aorta arch right -->
+                                
+                                <line x1="100" y1="100" x2="60" y2="100" stroke="#4682B4" stroke-width="6"/> <!-- Left Subclavian -->
+                                <line x1="200" y1="100" x2="240" y2="100" stroke="#4682B4" stroke-width="6"/> <!-- Right Subclavian -->
+
+                                <line x1="80" y1="100" x2="80" y2="40" stroke="#6A5ACD" stroke-width="4"/> <!-- Left Vertebral -->
+                                <line x1="220" y1="100" x2="220" y2="40" stroke="#6A5ACD" stroke-width="4"/> <!-- Right Vertebral -->
+                                <line x1="80" y1="40" x2="220" y2="40" stroke="#6A5ACD" stroke-width="4"/> <!-- Basilar -->
+
+                                <!-- Stenosis -->
+                                <rect x="95" y="94" width="10" height="12" fill="red" />
+                                <text x="90" y="120" font-size="10" fill="red">Stenosis</text>
+
+                                <!-- Normal Flow -->
+                                <path class="flow-arrow" d="M 220 90 V 50" stroke="#2E8B57" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowhead-normal)"/>
+                                <path class="flow-arrow" d="M 80 90 V 50" stroke="#2E8B57" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowhead-normal)"/>
+                                
+                                <!-- Retrograde Flow -->
+                                <path class="retrograde-flow" d="M 80 50 V 90" stroke="red" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowhead-retro)"/>
+                                <path class="retrograde-flow" d="M 150 40 H 90" stroke="red" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowhead-retro)"/>
+                                
+                                <defs>
+                                    <marker id="arrowhead-normal" markerWidth="5" markerHeight="3.5" refX="0" refY="1.75" orient="auto"><polygon points="0 0, 5 1.75, 0 3.5" fill="#2E8B57"/></marker>
+                                    <marker id="arrowhead-retro" markerWidth="5" markerHeight="3.5" refX="0" refY="1.75" orient="auto"><polygon points="0 0, 5 1.75, 0 3.5" fill="red"/></marker>
+                                </defs>
+                            </svg>
+                             <div class="text-center mt-4">
+                                <button id="toggle-steal" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-md">Kar terhelés szimulálása</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h4>Klinikai Gyöngyszemek</h4>
+                            <ul class="list-disc list-inside space-y-2 text-sm">
+                                <li><strong>Etiológia:</strong> Leggyakrabban atherosclerosis, de fiatal nőknél gondolni kell Takayasu arteritisre is.</li>
+                                <li><strong>Diagnózis:</strong> A >15-20 Hgmm vérnyomáskülönbség a két kar között erős gyanújel. A Doppler UH a választandó első vizsgálat a retrográd áramlás kimutatására.</li>
+                                <li><strong>Kezelés:</strong> Tünetes esetben az endovascularis stentelés az elsődleges választás.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    <div class="card card-purple">
+                        <h4><i class="fas fa-heart-crack"></i>Coronaria-Subclavian Steal</h4>
+                        <p>CABG (koszorúér-áthidaló műtét) után, ha a belső mellkasi artériát (LIMA) használták fel, és a subclavia proximálisan szűkült. A kar "ellopja" a vért a szív elől.</p>
+                        <p class="mt-2"><strong>Tünet:</strong> Angina, különösen a kar terhelésekor.</p>
+                        <p class="mt-2"><strong>Kezelés:</strong> Subclavia stentelés.</p>
+                    </div>
+                     <div class="card card-purple">
+                        <h4><i class="fas fa-hand-paper"></i>Dialízis Asszociált Steal (DASS)</h4>
+                        <p>Hemodialízishez létrehozott AV fisztula/graft okozta kéz ischaemia. A magas áramlású sönt eltereli a vért a kéztől.</p>
+                        <p class="mt-2"><strong>Tünet:</strong> Kézfájdalom, sápadtság, zsibbadás, különösen dialízis alatt.</p>
+                        <p class="mt-2"><strong>Kezelés:</strong> Áramláscsökkentő műtétek (pl. banding), DRIL.</p>
+                    </div>
+                     <div class="card card-purple">
+                        <h4><i class="fas fa-person-walking"></i>Pelvic Steal / Leriche Szindróma</h4>
+                        <p>Az aorta és/vagy az iliacalis artériák elzáródása (aortoiliacalis occlusiv betegség). A lábak terhelése "ellophatja" a vért a kismedencei szervektől.</p>
+                        <p class="mt-2"><strong>Klasszikus triász:</strong> Fartáji claudicatio, erectilis dysfunctio, hiányzó femoralis pulzusok.</p>
+                        <p class="mt-2"><strong>Kezelés:</strong> Aortobifemoralis bypass.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Craniocervicalis Junction Section -->
+            <section id="ccj" class="content-section">
+                <div class="card card-sky">
+                    <h3><i class="fas fa-network-wired"></i>Craniocervicalis Átmenet (CCJ) Károsodásai</h3>
+                    <p>A koponyaalap és a felső nyaki gerinc (C0-C2) komplex régiója. Károsodása változatos és súlyos tüneteket okozhat a létfontosságú ideg- és érképletek (agytörzs, gerincvelő, a. vertebralis) közelsége miatt.</p>
+                     <div class="grid md:grid-cols-2 gap-8 mt-4">
+                        <div>
+                            <h4>Főbb Kórokok</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Traumás sérülések:</strong> Törések (pl. dens axis, Jefferson-törés), ficamok (atlanto-occipitalis dislocatio), szalagszakadások (lig. transversum).</li>
+                                <li><strong>Fejlődési rendellenességek:</strong> Chiari malformáció, basilaris invaginatio, Klippel-Feil szindróma, os odontoideum.</li>
+                                <li><strong>Degeneratív/Gyulladásos:</strong> Rheumatoid arthritis (gyakori oka a szerzett AAI-nak), spondylosis, Paget-kór.</li>
+                                <li><strong>Tumorok:</strong> Chordoma, meningeoma, metasztázisok.</li>
+                            </ul>
+                        </div>
+                        <div>
+                             <h4>Jellemző Tünetegyüttesek</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Nyaki-occipitalis fájdalom:</strong> Gyakran a legelső tünet, mozgásra, köhögésre fokozódik.</li>
+                                <li><strong>Myelopathia:</strong> Spasztikus parézis, hyperreflexia, Babinski-jel, Lhermitte-tünet, érzészavarok, sphincter-zavarok.</li>
+                                <li><strong>Alsó agyideg-tünetek (Bulbaris jelek):</strong> Nyelészavar (dysphagia), rekedtség (dysphonia), elkent beszéd (dysarthria).</li>
+                                <li><strong>Vertebrobasilaris insufficientia:</strong> Szédülés, vertigo, drop attack, látászavarok (az a. vertebralis kompressziója miatt).</li>
+                                <li><strong>Egyéb:</strong> Egyensúlyzavar, nystagmus (jellemzően downbeat Chiari-ban), alvási apnoe.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="info-box mt-6">
+                        <strong>Klinikai Gyöngyszem:</strong> A CCJ károsodás tünetei gyakran aspecifikusak és átfedőek, ami diagnosztikai kihívást jelent. A képalkotó (különösen a dinamikus MRI és a vékony szeletes CT) elengedhetetlen, de a leletet mindig a klinikai képpel együtt kell értékelni. Gondoljunk rá krónikus, nehezen magyarázható nyak/fejfájás, szédülés és progresszív myelopathia esetén!
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Tab switching logic
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // Steal Syndrome Diagram Logic
+        const stealDiagram = document.getElementById('steal-diagram');
+        const toggleStealBtn = document.getElementById('toggle-steal');
+        if (toggleStealBtn) {
+            toggleStealBtn.addEventListener('click', () => {
+                stealDiagram.classList.toggle('steal-active');
+                if (stealDiagram.classList.contains('steal-active')) {
+                    toggleStealBtn.textContent = 'Nyugalmi állapot szimulálása';
+                } else {
+                    toggleStealBtn.textContent = 'Kar terhelés szimulálása';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

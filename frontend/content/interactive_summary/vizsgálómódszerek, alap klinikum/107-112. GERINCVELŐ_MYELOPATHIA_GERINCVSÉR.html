@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerincgyógyászati Tudástár Orvosoknak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] > summary .arrow {
+            transform: rotate(90deg);
+        }
+        .arrow {
+            transition: transform 0.3s ease-in-out;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .sticky-nav {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .section-title i {
+            font-size: 2.5rem;
+        }
+        .vignette {
+            position:relative;
+        }
+        .vignette::after {
+            content:'';
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            box-shadow: inset 0px 0px 15px 5px rgba(0,0,0,0.05);
+            border-radius: 0.75rem;
+            pointer-events: none;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+        .emergency-alert {
+            animation: pulse 2s infinite;
+        }
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table-responsive table {
+            width: 100%;
+            min-width: 600px; /* Ensure table has a minimum width */
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header -->
+    <header class="shadow-md sticky-nav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center gap-2">
+                     <i class="ph-bold ph-bone text-3xl text-blue-600"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">Gerincgyógyászati Tudástár</h1>
+                </div>
+                <nav class="hidden md:flex space-x-1 sm:space-x-4">
+                    <a href="#tetel-107" class="text-gray-600 hover:text-teal-600 font-medium px-3 py-2 rounded-md transition-colors">Térfoglalás</a>
+                    <a href="#tetel-108" class="text-gray-600 hover:text-blue-600 font-medium px-3 py-2 rounded-md transition-colors">Trauma</a>
+                    <a href="#tetel-110" class="text-gray-600 hover:text-amber-600 font-medium px-3 py-2 rounded-md transition-colors">Derékfájás</a>
+                    <a href="#tetel-111" class="text-gray-600 hover:text-indigo-600 font-medium px-3 py-2 rounded-md transition-colors">Radiculopathia</a>
+                    <a href="#tetel-112" class="text-gray-600 hover:text-rose-600 font-medium px-3 py-2 rounded-md transition-colors">Conus-Cauda</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- 107. A spinalis térfoglaló folyamatok -->
+        <section id="tetel-107" class="mb-16">
+            <h2 class="text-3xl font-bold text-teal-600 border-b-4 border-teal-200 pb-2 mb-6 section-title">
+                <i class="ph-bold ph-selection-plus text-teal-500"></i>
+                107. Spinalis Térfoglaló Folyamatok
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-teal-700 flex items-center gap-2"><i class="ph-bold ph-atom"></i>Definíció és Osztályozás</h3>
+                        <p class="mb-4">A spinális térfoglaló folyamatok (STF) a gerinccsatornán belüli kóros elváltozások, melyek kompressziót okozva neurológiai funkciózavarokat idéznek elő. Etiológiájuk változatos: daganatok 🧠, gyulladások (tályog 🦠), vaszkuláris okok (hematóma 🩸) és egyéb elváltozások (ciszta, sérv) is állhatnak a háttérben.</p>
+                        <details class="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                            <summary class="font-semibold text-lg flex justify-between items-center cursor-pointer">
+                                Anatómiai Osztályozás
+                                <i class="ph-bold ph-caret-right arrow text-teal-600 text-2xl"></i>
+                            </summary>
+                            <div class="mt-4 space-y-3 text-gray-700">
+                                <p><strong>1️⃣ Extradurális (epidurális):</strong> A dura matertől kifelé. Leggyakoribb. Pl.: metasztázisok, tályogok.</p>
+                                <p><strong>2️⃣ Intradurális-extramedulláris (IDEM):</strong> A dura materen belül, de a gerincvelőn kívül. Pl.: meningeomák, schwannomák.</p>
+                                <p><strong>3️⃣ Intramedulláris (IMSCT):</strong> Magában a gerincvelő állományában. Pl.: ependymomák, astrocytomák.</p>
+                            </div>
+                        </details>
+                    </div>
+                     <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-teal-700 flex items-center gap-2"><i class="ph-bold ph-siren"></i>Általános Tünettan és Progresszió</h3>
+                         <p class="mb-4">A tünetek a gerincvelő/ideggyökök kompressziójából és a vérellátási zavarból adódnak. A klinikai kép függ a lézió helyzetétől, méretétől és növekedési sebességétől.</p>
+                        <div class="space-y-4">
+                            <details class="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                                <summary class="font-semibold text-lg flex justify-between items-center cursor-pointer">Fájdalom 🤕 (Gyakran első tünet)<i class="ph-bold ph-caret-right arrow text-teal-600 text-2xl"></i></summary>
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li><strong>Lokális:</strong> Az érintett gerincszakasz felett, tompa, mély.</li>
+                                    <li><strong>Radikuláris (gyöki):</strong> Kisugárzó, éles, nyilalló. Köhögésre, tüsszentésre fokozódik.</li>
+                                    <li><strong>Jellemző:</strong> Éjszaka, fekve fokozódó fájdalom. 🌙</li>
+                                </ul>
+                            </details>
+                             <details class="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                                <summary class="font-semibold text-lg flex justify-between items-center cursor-pointer">Motoros, Szenzoros, Vegetatív Tünetek <i class="ph-bold ph-caret-right arrow text-teal-600 text-2xl"></i></summary>
+                                <div class="mt-2 space-y-2">
+                                     <p><strong>💪 Motoros:</strong> Izomgyengeség (parézis) vagy bénulás (plégia) a kompresszió szintje alatt.</p>
+                                     <p><strong>🖐️ Szenzoros:</strong> Érzéskiesés (hypaesthesia), zsibbadás, bizsergés (paraesthesia).</p>
+                                     <p><strong>🚽 Vegetatív:</strong> Hólyag-, bél- és szexuális funkciózavarok.</p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-teal-700 flex items-center gap-2"><i class="ph-bold ph-first-aid-kit"></i>Diagnosztika és Kezelés</h3>
+                        <p class="mb-2"><strong>Diagnosztika:</strong> Anamnézis és neurológiai vizsgálat után a választandó módszer a **kontrasztanyagos MRI**. CT, CT-myelográfia alternatívák. A végső diagnózist gyakran a szövettani vizsgálat adja.</p>
+                        <p><strong>Kezelés:</strong> Multimodális, a kiváltó októl függ:</p>
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li><strong>🔪 Sebészi:</strong> Dekompresszió, lézió eltávolítása, stabilizáció.</li>
+                            <li><strong>☢️ Sugárterápia/Kemoterápia:</strong> Malignus daganatoknál.</li>
+                            <li><strong>💊 Gyógyszeres:</strong> Szteroidok, antibiotikumok, fájdalomcsillapítók.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 108. A gerincvelő traumás károsodása -->
+        <section id="tetel-108" class="mb-16">
+            <h2 class="text-3xl font-bold text-blue-600 border-b-4 border-blue-200 pb-2 mb-6 section-title">
+                <i class="ph-bold ph-ambulance text-blue-500"></i>
+                108. Gerincvelő Traumás Károsodása
+            </h2>
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-blue-700 flex items-center gap-2"><i class="ph-bold ph-microscope"></i>Definíció és Patomechanizmus</h3>
+                        <p class="mb-4">A traumás gerincvelő sérülés (SCI) a gerincvelő külső fizikai behatás okozta károsodása. Sürgősségi állapot, mivel a primer sérülést szekunder folyamatok (ödéma, ischaemia, gyulladás) követik, súlyosbítva a kárt. Az idő kritikus: "Time is spine" ⏳.</p>
+                        <details class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                             <summary class="font-semibold text-lg flex justify-between items-center cursor-pointer">
+                                Osztályozás: Komplett vs. Inkomplett
+                                <i class="ph-bold ph-caret-right arrow text-blue-600 text-2xl"></i>
+                            </summary>
+                             <div class="mt-4 space-y-3 text-gray-700">
+                                <p><strong>⚫ Komplett SCI:</strong> Teljes szenzoros és motoros funkcióvesztés a sérülési szint alatt (beleértve az S4-S5 szegmentumokat is).</p>
+                                <p><strong>◐ Inkomplett SCI:</strong> Valamilyen mértékű funkció megmarad. Kedvezőbb prognózis.</p>
+                             </div>
+                        </details>
+                    </div>
+                     <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-blue-700 flex items-center gap-2"><i class="ph-bold ph-person-simple-walk"></i>Tünetek a Sérülés Szintje Szerint</h3>
+                        <div class="space-y-3">
+                           <p><strong>C nyaki:</strong> 👨‍🦽 Általában tetraplégiát okoz. A magas (C1-C4) sérülések légzési elégtelenséghez vezethetnek.</p>
+                           <p><strong>T háti:</strong> 🧍 Jellemzően paraplégiát eredményez, a karok funkciója megmarad.</p>
+                           <p><strong>L ágyéki:</strong> 🦵 Paraplégiát vagy gyengeséget okoz a csípőben és a lábakban.</p>
+                           <p><strong>S szakrális:</strong> 🚽 Elsősorban a bél-, hólyag- és szexuális funkciók károsodnak.</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="space-y-6">
+                    <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-blue-700 flex items-center gap-2"><i class="ph-bold ph-chart-line-up"></i>ASIA Beeinträchtigungs-Skála</h3>
+                         <p class="mb-3 text-sm text-gray-600">Standardizált rendszer a sérülés súlyosságának felmérésére.</p>
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-blue-100"><tr><th scope="col" class="px-4 py-2 rounded-tl-lg">Fokozat</th><th scope="col" class="px-4 py-2 rounded-tr-lg">Leírás</th></tr></thead>
+                            <tbody>
+                                <tr class="border-b"><td class="px-4 py-2 font-medium">A = Komplett</td><td class="px-4 py-2">Nincs motoros/szenzoros funkció az S4-S5 szegmentumban.</td></tr>
+                                <tr class="bg-blue-50 border-b"><td class="px-4 py-2 font-medium">B = Szenz. Inkomplett</td><td class="px-4 py-2">Szenzoros funkció megmaradt, motoros nincs a szint alatt.</td></tr>
+                                <tr class="border-b"><td class="px-4 py-2 font-medium">C = Mot. Inkomplett</td><td class="px-4 py-2">Motoros funkció megmaradt, de a kulcsizmok >50%-a 3/5 alatti.</td></tr>
+                                <tr class="bg-blue-50 border-b"><td class="px-4 py-2 font-medium">D = Mot. Inkomplett</td><td class="px-4 py-2">Motoros funkció megmaradt, a kulcsizmok >50%-a 3/5 vagy jobb.</td></tr>
+                                <tr><td class="px-4 py-2 font-medium rounded-bl-lg">E = Normális</td><td class="px-4 py-2 rounded-br-lg">Minden funkció normális.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- 110. Derékfájás, lumbago, ischias -->
+        <section id="tetel-110" class="mb-16">
+            <h2 class="text-3xl font-bold text-amber-600 border-b-4 border-amber-200 pb-2 mb-6 section-title">
+                <i class="ph-bold ph-person-simple-run text-amber-500"></i>
+                110. Derékfájás, Lumbágó, Isiász
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-amber-700 flex items-center gap-2"><i class="ph-bold ph-question"></i>Alapfogalmak</h3>
+                        <div class="space-y-4">
+                            <p><strong>🤕 Derékfájás:</strong> Gyűjtőfogalom az ágyéki régióban jelentkező fájdalomra. A népesség ~80%-át érinti.</p>
+                            <p><strong>💥 Lumbágó:</strong> Hirtelen, éles, derékra lokalizálódó fájdalom, gyakran izom eredetű. Nincs kisugárzás.</p>
+                            <p><strong>⚡️ Isiász:</strong> A n. ischiadicus irritációja okozta, alsó végtagba sugárzó fájdalom, zsibbadás, gyengeség.</p>
+                        </div>
+                    </div>
+                    <div class="card p-6 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-amber-700 flex items-center gap-2"><i class="ph-bold ph-magnifying-glass"></i>Okok és Kórállapotok</h3>
+                        <div class="space-y-4">
+                            <details class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                                <summary class="font-semibold text-lg flex justify-between items-center cursor-pointer">Specifikus Kórállapotok<i class="ph-bold ph-caret-right arrow text-amber-600 text-2xl"></i></summary>
+                                 <div class="mt-2 space-y-2">
+                                     <p><strong>Porckorongsérv (Hernia disci):</strong> A nucleus pulposus kitüremkedése, az isiász leggyakoribb oka. (L4-L5, L5-S1).</p>
+                                     <p><strong>Gerinccsatorna-szűkület (Stenosis):</strong> Neurogén claudicatiót okoz (járásra fokozódó lábfájdalom, előrehajlásra enyhül).</p>
+                                     <p><strong>Csigolyaelcsúszás (Spondylolisthesis):</strong> Instabilitást és fájdalmat okoz.</p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+                 <div class="space-y-6">
+                    <div class="card p-6 bg-red-50 border border-red-200 vignette">
+                        <h3 class="font-bold text-xl mb-3 text-red-700 flex items-center gap-2"><i class="ph-bold ph-flag"></i>"Vörös Zászló" Tünetek</h3>
+                        <p class="mb-3 text-sm text-gray-600">Súlyos, sürgős kivizsgálást igénylő jelek:</p>
+                        <ul class="space-y-2 text-red-800 font-medium">
+                            <li class="flex items-center gap-2"><i class="ph-fill ph-toilet"></i>Cauda equina szindróma gyanúja</li>
+                            <li class="flex items-center gap-2"><i class="ph-fill ph-chart-line-down"></i>Progresszív neurológiai deficit</li>
+                            <li class="flex items-center gap-2"><i class="ph-fill ph-pill"></i>Anamnézisben daganat, fogyás</li>
+                            <li class="flex items-center gap-2"><i class="ph-fill ph-thermometer-cold"></i>Láz, hidegrázás (fertőzés)</li>
+                            <li class="flex items-center gap-2"><i class="ph-fill ph-person-simple-throw"></i>Jelentős trauma, csontritkulás</li>
+                        </ul>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- 111. A spinális gyökök károsodása (Radiculopathia) - BŐVÍTETT SZEKCIÓ -->
+        <section id="tetel-111" class="mb-16">
+            <h2 class="text-3xl font-bold text-indigo-600 border-b-4 border-indigo-200 pb-2 mb-6 section-title">
+                <i class="ph-bold ph-lightning text-indigo-500"></i>
+                111. Radiculopathia (Ideggyök Károsodás)
+            </h2>
+            <div class="space-y-8">
+                 <div class="card p-6 vignette">
+                    <h3 class="font-bold text-xl mb-3 text-indigo-700 flex items-center gap-2"><i class="ph-bold ph-list-bullets"></i>Általános Tünetegyüttes</h3>
+                    <p class="mb-4">Egy vagy több ideggyök funkciózavara kompresszió vagy gyulladás miatt. A tünetek klasszikusan a következők:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                        <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"><strong class="block text-indigo-700">⚡️ Radikuláris Fájdalom</strong>Éles, nyilalló, végtagba sugárzó</div>
+                        <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"><strong class="block text-indigo-700">✋ Érzészavar</strong>Dermatómális zsibbadás, bizsergés</div>
+                        <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"><strong class="block text-indigo-700">💪 Motoros Gyengeség</strong>Myotomális parézis, atrófia</div>
+                        <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"><strong class="block text-indigo-700">🔨 Reflexkiesés</strong>Érintett ínreflex gyengülése</div>
+                    </div>
+                </div>
+
+                <div class="card p-6 vignette">
+                    <h3 class="font-bold text-xl mb-3 text-indigo-700 flex items-center gap-2"><i class="ph-bold ph-fingerprint"></i>Specifikus Gyöki Tünettan</h3>
+                    <details class="bg-indigo-50 p-4 rounded-lg border border-indigo-200 mb-4">
+                        <summary class="font-semibold text-lg flex justify-between items-center cursor-pointer">Cervikális Radiculopathia Részletesen <i class="ph-bold ph-caret-right arrow text-indigo-600 text-2xl"></i></summary>
+                        <div class="mt-4 table-responsive">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-indigo-100 text-indigo-800"><tr><th class="p-2">Gyök</th><th class="p-2">Motoros deficit (fő izmok)</th><th class="p-2">Szenzoros zavar</th><th class="p-2">Reflex</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b"> <td class="p-2 font-bold">C1-C2</td> <td class="p-2">Nyak flexio/extensio</td> <td class="p-2">Occipitalis fejfájás, fül mögötti terület</td> <td class="p-2">-</td> </tr>
+                                    <tr class="border-b bg-indigo-50"> <td class="p-2 font-bold">C3</td> <td class="p-2">Nyak lateralflexio</td> <td class="p-2">Nyak oldala, pofa hátsó része</td> <td class="p-2">-</td> </tr>
+                                    <tr class="border-b"> <td class="p-2 font-bold">C4</td> <td class="p-2">Váll emelés (trapezius), rekeszizom</td> <td class="p-2">Vállcsúcs, kulcscsont felett ("gallér")</td> <td class="p-2">-</td> </tr>
+                                    <tr class="border-b bg-indigo-50"> <td class="p-2 font-bold">C5</td> <td class="p-2">Váll abductio (deltoid), könyök flexio (biceps)</td> <td class="p-2">Váll laterális oldala</td> <td class="p-2">Biceps ↓</td> </tr>
+                                    <tr class="border-b"> <td class="p-2 font-bold">C6</td> <td class="p-2">Könyök flexio (biceps), csukló extensio</td> <td class="p-2">Alkar laterális része, hüvelyk-, mutatóujj</td> <td class="p-2">Brachioradialis ↓, Biceps ↓</td> </tr>
+                                    <tr class="border-b bg-indigo-50"> <td class="p-2 font-bold">C7</td> <td class="p-2">Könyök extensio (triceps), csukló flexio, ujj extensio</td> <td class="p-2">Középső ujj</td> <td class="p-2">Triceps ↓</td> </tr>
+                                    <tr class="border-b"> <td class="p-2 font-bold">C8</td> <td class="p-2">Ujj flexio, kéz kisizmai</td> <td class="p-2">Gyűrűs- és kisujj, alkar mediális része</td> <td class="p-2">-</td> </tr>
+                                    <tr class="bg-indigo-50"> <td class="p-2 font-bold">T1</td> <td class="p-2">Kéz kisizmai (interosseusok)</td> <td class="p-2">Felkar mediális oldala</td> <td class="p-2">Horner szindróma lehet!</td> </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                    <details class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                        <summary class="font-semibold text-lg flex justify-between items-center cursor-pointer">Lumbosacralis Radiculopathia Részletesen<i class="ph-bold ph-caret-right arrow text-indigo-600 text-2xl"></i></summary>
+                        <div class="mt-4 table-responsive">
+                             <table class="w-full text-sm text-left">
+                                <thead class="bg-indigo-100 text-indigo-800"><tr><th class="p-2">Gyök</th><th class="p-2">Motoros deficit (fő izmok)</th><th class="p-2">Szenzoros zavar</th><th class="p-2">Reflex</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b"> <td class="p-2 font-bold">L1</td> <td class="p-2">Csípő flexio (iliopsoas)</td> <td class="p-2">Lágyékhajlat</td> <td class="p-2">-</td> </tr>
+                                    <tr class="border-b bg-indigo-50"> <td class="p-2 font-bold">L2</td> <td class="p-2">Csípő flexio, adductio</td> <td class="p-2">Comb elülső-felső része</td> <td class="p-2">-</td> </tr>
+                                    <tr class="border-b"> <td class="p-2 font-bold">L3</td> <td class="p-2">Térd extensio (quadriceps), csípő adductio</td> <td class="p-2">Comb elülső-alsó része, térd mediális oldala</td> <td class="p-2">Patella ↓</td> </tr>
+                                    <tr class="border-b bg-indigo-50"> <td class="p-2 font-bold">L4</td> <td class="p-2">Térd extensio (quadriceps), boka dorsalflexio (tibialis ant.)</td> <td class="p-2">Lábszár mediális oldala, belboka</td> <td class="p-2">Patella ↓</td> </tr>
+                                    <tr class="border-b"> <td class="p-2 font-bold">L5</td> <td class="p-2">Lábfej és nagylábujj emelés (foot drop)</td> <td class="p-2">Lábszár laterális oldala, lábhát, nagylábujj</td> <td class="p-2">- (esetleg tib. post. ↓)</td> </tr>
+                                    <tr class="bg-indigo-50"> <td class="p-2 font-bold">S1</td> <td class="p-2">Lábfej lefeszítés (plantarflexio), lábujjhegyre állás</td> <td class="p-2">Lábszár hátsó része, sarok, talp laterális széle</td> <td class="p-2">Achilles ↓</td> </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+                
+                <div class="card p-6 vignette">
+                     <h3 class="font-bold text-xl mb-3 text-indigo-700 flex items-center gap-2"><i class="ph-bold ph-stethoscope"></i>Kivizsgálás és Kezelés</h3>
+                     <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">🔎 Kivizsgálás</h4>
+                             <ul class="list-disc list-inside space-y-1 text-sm">
+                                <li><strong>Anamnézis:</strong> Fájdalom jellege, provokáló tényezők, "vörös zászlók".</li>
+                                <li><strong>Fizikális vizsgálat:</strong> Tartás, mozgásterjedelem.</li>
+                                <li><strong>Neurológiai tesztek:</strong> Erő-, érzés-, reflexvizsgálat. Provokációs tesztek (Spurling, Lasègue).</li>
+                                <li><strong>Képalkotás:</strong> MRI a gold standard. CT/CT-myelographia alternatíva.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">💊 Kezelés</h4>
+                             <ul class="list-disc list-inside space-y-1 text-sm">
+                                <li><strong>Konzervatív:</strong> Relatív pihenő, gyógyszerek (NSAID, fájdalomcsillapítók, izomlazítók), gyógytorna (core izmok erősítése), manuálterápia.</li>
+                                <li><strong>Invazív:</strong> Epidurális szteroid injekciók (gyulladáscsökkentés).</li>
+                                <li><strong>Sebészi:</strong> Súlyos/progrediáló neurológiai deficit, cauda equina szindróma, konzervatív kezelésre nem reagáló fájdalom esetén (pl. microdiscectomia, laminectomia).</li>
+                            </ul>
+                        </div>
+                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 112. Conus-cauda szindróma - BŐVÍTETT SZEKCIÓ -->
+        <section id="tetel-112" class="mb-16">
+            <h2 class="text-3xl font-bold text-rose-600 border-b-4 border-rose-200 pb-2 mb-6 section-title">
+                <i class="ph-bold ph-warning-octagon text-rose-500"></i>
+                112. Conus-Cauda Szindróma
+            </h2>
+            <div class="mb-8 bg-red-100 border-l-8 border-red-500 text-red-900 p-6 rounded-lg shadow-lg flex items-center gap-4 emergency-alert">
+                <i class="ph-bold ph-first-aid text-5xl text-red-600"></i>
+                <div>
+                    <p class="font-bold text-xl">Orvosi Vészhelyzet!</p>
+                    <p>Mindkét szindróma abszolút idegsebészeti sürgősségi állapot. Azonnali MRI és sebészeti dekompresszió szükséges a maradandó károsodás megelőzése érdekében. Az időfaktor kritikus!</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card p-6 border-t-4 border-rose-400 vignette">
+                    <h3 class="font-bold text-xl mb-3 text-rose-700">Conus Medullaris Szindróma (CMS)</h3>
+                    <p class="mb-2 text-sm">A gerincvelő végső szakaszának (L1-L2) sérülése. Felső és alsó motoneuron (UMN/LMN) tünetek keverednek.</p>
+                    <ul class="list-none space-y-2 mt-4">
+                        <li class="flex gap-2"><i class="ph-fill ph-arrows-horizontal text-rose-500 mt-1"></i><span><strong>Kezdet:</strong> Hirtelen, szimmetrikus.</span></li>
+                        <li class="flex gap-2"><i class="ph-fill ph-radioactive text-rose-500 mt-1"></i><span><strong>Fájdalom:</strong> Derék- és gáttájéki, kevésbé radikuláris.</span></li>
+                        <li class="flex gap-2"><i class="ph-fill ph-person-simple text-rose-500 mt-1"></i><span><strong>Motoros:</strong> Szimmetrikus gyengeség, kevert UMN/LMN jelekkel.</span></li>
+                        <li class="flex gap-2"><i class="ph-fill ph-hand-soap text-rose-500 mt-1"></i><span><strong>Szenzoros:</strong> Szimmetrikus "lovaglónadrág" érzéskiesés.</span></li>
+                        <li class="flex gap-2"><i class="ph-fill ph-toilet-paper text-rose-500 mt-1"></i><span><strong>Autonóm:</strong> <span class="font-bold">Korai és súlyos</span> sphincterzavar, impotencia.</span></li>
+                    </ul>
+                </div>
+                <div class="card p-6 border-t-4 border-rose-400 vignette">
+                    <h3 class="font-bold text-xl mb-3 text-rose-700">Cauda Equina Szindróma (CES)</h3>
+                    <p class="mb-2 text-sm">A conus alatti ideggyökök ("lófarok") kompressziója. Csak alsó motoneuron (LMN) tünetek.</p>
+                    <ul class="list-none space-y-2 mt-4">
+                        <li class="flex gap-2"><i class="ph-fill ph-git-merge text-rose-500 mt-1"></i><span><strong>Kezdet:</strong> Fokozatos/akut, gyakran aszimmetrikus.</span></li>
+                        <li class="flex gap-2"><i class="ph-fill ph-radioactive text-rose-500 mt-1"></i><span><strong>Fájdalom:</strong> Súlyos, kínzó, <span class="font-bold">aszimmetrikus</span> radikuláris lábfájdalom.</span></li>
+                         <li class="flex gap-2"><i class="ph-fill ph-person-simple text-rose-500 mt-1"></i><span><strong>Motoros:</strong> Aszimmetrikus, petyhüdt bénulás.</span></li>
+                        <li class="flex gap-2"><i class="ph-fill ph-hand-soap text-rose-500 mt-1"></i><span><strong>Szenzoros:</strong> Aszimmetrikus "lovaglónadrág" érzéskiesés.</span></li>
+                        <li class="flex gap-2"><i class="ph-fill ph-toilet-paper text-rose-500 mt-1"></i><span><strong>Autonóm:</strong> <span class="font-bold">Későbbi,</span> a vizeletretenció kardinális tünet.</span></li>
+                    </ul>
+                </div>
+                 <div class="card p-6 vignette lg:col-span-2">
+                    <h3 class="font-bold text-xl mb-3 text-rose-700 flex items-center gap-2"><i class="ph-bold ph-magnifying-glass-plus"></i>Kivizsgálás és Diagnózis</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <p>A diagnózis a klinikai gyanún alapul, és sürgős megerősítést igényel.</p>
+                             <ul class="list-disc list-inside space-y-1 mt-2 text-sm">
+                                <li><strong>Anamnézis:</strong> Célzott kérdések a "vörös zászló" tünetekre (lásd fent).</li>
+                                <li><strong>Fizikális vizsgálat:</strong>
+                                    <ul class="list-['-_'] list-inside ml-4">
+                                        <li>Perianális (S3-S5) érzésvizsgálat.</li>
+                                        <li>Anális sphincter tónusának digitális vizsgálata.</li>
+                                        <li>Bulbocavernosus reflex.</li>
+                                        <li>Hólyagkatéterezés a poszt-void reziduális vizelet mérésére.</li>
+                                    </ul>
+                                </li>
+                             </ul>
+                        </div>
+                        <div class="bg-rose-50 p-4 rounded-lg border border-rose-200">
+                             <h4 class="font-semibold text-lg mb-2">🚨 Képalkotás</h4>
+                             <p>A választandó módszer az **azonnali, sürgősségi (emergent) MRI vizsgálat** a lumbosacralis gerincről. Ez mutatja ki a kompresszió okát, helyét és mértékét. Ha MRI nem elérhető vagy kontraindikált, CT-myelographia jöhet szóba.</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="card p-6 vignette lg:col-span-2">
+                    <h3 class="font-bold text-xl mb-3 text-rose-700 flex items-center gap-2"><i class="ph-bold ph-cross"></i>Kezelés és Prognózis</h3>
+                     <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                             <h4 class="font-semibold text-lg mb-2">🔪 Sebészi Kezelés</h4>
+                             <p class="mb-2">A standard terápia a **sürgős sebészeti dekompresszió**. A cél a nyomást okozó elváltozás (pl. porckorongsérv, hematóma) eltávolítása és az ideggyökök felszabadítása.</p>
+                             <p class="font-semibold">Időzítés kritikus: A legjobb funkcionális kimenetel érdekében a műtétet ideálisan a tünetek kezdetétől számított <span class="text-red-600">24-48 órán belül</span> el kell végezni.</p>
+                        </div>
+                        <div class="bg-rose-50 p-4 rounded-lg border border-rose-200">
+                            <h4 class="font-semibold text-lg mb-2">📈 Prognózis</h4>
+                            <p class="text-sm">A prognózis nagyban függ a kompresszió súlyosságától és időtartamától. Minél hamarabb történik a dekompresszió, annál jobbak az esélyek.</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2 text-sm">
+                                <li>A motoros funkciók gyakran jobban javulnak, mint a sphincter- és szexuális funkciók.</li>
+                                <li>A hólyagfunkció visszatérése a legkevésbé kiszámítható.</li>
+                                <li>Maradványtünetként krónikus fájdalom, gyengeség és autonóm diszfunkció is fennmaradhat.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-8">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+            <p>&copy; 2025 Gerincgyógyászati Tudástár. Minden jog fenntartva.</p>
+            <p class="text-sm text-gray-400 mt-2">Jogi nyilatkozat: Ez a weboldal kizárólag oktatási és tájékoztatási célokat szolgál, és nem helyettesíti a szakszerű orvosi diagnózist vagy kezelést.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klinikai Neurovaszkuláris Szindrómák</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .tab-btn {
+            transition: all 0.3s ease-in-out;
+            border-bottom: 4px solid transparent;
+            color: #4b5563;
+        }
+        .tab-btn.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid;
+        }
+        .card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .card h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #374151;
+        }
+        .card-blue { border-color: #3b82f6; }
+        .card-green { border-color: #10b981; }
+        .card-purple { border-color: #8b5cf6; }
+        .card-red { border-color: #ef4444; }
+        
+        .interactive-svg .interactive-path {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .interactive-svg .interactive-path:hover {
+            filter: brightness(1.2);
+        }
+        .interactive-svg .interactive-path.selected {
+            stroke-width: 12;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.9));
+        }
+
+        #willis-info-panel {
+            display: none;
+            background-color: #1f2937;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            position: relative;
+            animation: slideInUp 0.3s ease-out;
+        }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #willis-info-panel.visible {
+            display: block;
+        }
+        #willis-info-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        #willis-info-close:hover {
+            color: white;
+        }
+        #willis-info-content h5 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+         #willis-info-content p {
+            margin-bottom: 0.5rem;
+        }
+        #willis-info-content strong {
+            color: #a5b4fc;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-700">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Klinikai Neurovaszkuláris Szindrómák</h1>
+            <p class="text-xl text-gray-500">Gyorstalpaló Orvosoknak</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="sticky top-0 bg-f8f9fa z-10 mb-8 border-b border-gray-200">
+            <nav class="flex justify-center -mb-px flex-wrap">
+                <button class="tab-btn active text-lg font-medium py-4 px-5" onclick="showTab('nagyerek')">🧠 Nagyér Szindrómák</button>
+                <button class="tab-btn text-lg font-medium py-4 px-5" onclick="showTab('agytorzs')">Brainstem Szindrómák</button>
+                <button class="tab-btn text-lg font-medium py-4 px-5" onclick="showTab('hatarterulet')">💧 Határterületi Infarktusok</button>
+                <button class="tab-btn text-lg font-medium py-4 px-5" onclick="showTab('lacunaris')">🕳️ Lacunaris Szindrómák</button>
+            </nav>
+        </div>
+
+        <!-- Content Sections -->
+        <main>
+            <!-- Nagyér Szindrómák Section -->
+            <section id="nagyerek" class="content-section active">
+                <div class="grid lg:grid-cols-2 gap-8 items-start">
+                    <div class="card card-blue">
+                        <h3>Arteria Cerebri Media (ACM) Elzáródás</h3>
+                        <p>A leggyakoribb iszkémiás stroke típus. A tünetek a lézió helyétől és a domináns féltekétől függnek.</p>
+                        <h4>Jellemző Tünetek:</h4>
+                        <ul class="list-disc list-inside space-y-2 mt-4">
+                            <li><strong>Kontralaterális hemiparesis/plegia</strong> (arc & felső végtag > alsó végtag 💪)</li>
+                            <li><strong>Kontralaterális hemianaesthesia</strong></li>
+                            <li><strong>Homonym hemianopia</strong> (látótérkiesés 👀)</li>
+                            <li><strong>Afázia</strong> (domináns féltekén, pl. Broca, Wernicke 🗣️)</li>
+                            <li><strong>Neglect szindróma</strong> (nem-domináns féltekén)</li>
+                            <li>Fej- és tekintésdeviáció a lézió oldala felé</li>
+                        </ul>
+                    </div>
+                    <div class="card card-green">
+                        <h3>Arteria Cerebri Anterior (ACA) Elzáródás</h3>
+                        <p>Ritkább, de jellegzetes tünetegyüttest okoz, főként a frontális lebeny mediális részének károsodása miatt.</p>
+                        <h4>Jellemző Tünetek:</h4>
+                        <ul class="list-disc list-inside space-y-2 mt-4">
+                           <li><strong>Kontralaterális monoparesis</strong> (alsó végtag > felső végtag 🦵)</li>
+                           <li><strong>Szenzoros deficit</strong> (főként alsó végtagon)</li>
+                           <li><strong>Frontális lebeny tünetek:</strong> abulia, apátia, akinetikus mutizmus 😶</li>
+                           <li><strong>Vizelet inkontinencia</strong></li>
+                           <li>Transcorticalis motoros afázia (domináns féltekén)</li>
+                           <li>Frontális felszabadulási jelek (pl. fogó reflex)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card card-blue mt-8">
+                    <h3>Willis-gyűrű és Fő Artériák</h3>
+                    <p>Az agy vérellátásának alapja. Kattintson a struktúrákra a részletekért.</p>
+                    <div class="mt-4 relative">
+                        <svg viewBox="0 0 500 400" class="w-full interactive-svg" id="willis-svg">
+                           <title>Willis-gyűrű</title>
+                           <!-- Arteries -->
+                           <path class="interactive-path" id="acp_r" data-tooltip="A. Cerebri Posterior (Dex.)" d="M 250,320 C 320,320 350,280 350,200" stroke="#ef4444" stroke-width="8" fill="none"/>
+                           <path class="interactive-path" id="acp_l" data-tooltip="A. Cerebri Posterior (Sin.)" d="M 250,320 C 180,320 150,280 150,200" stroke="#ef4444" stroke-width="8" fill="none"/>
+                           <path class="interactive-path" id="basilar" data-tooltip="A. Basilaris" d="M 250,380 L 250,320" stroke="#f97316" stroke-width="10" fill="none"/>
+                           <path class="interactive-path" id="acm_r" data-tooltip="A. Cerebri Media (Dex.)" d="M 300,150 C 380,150 420,100 420,50" stroke="#3b82f6" stroke-width="8" fill="none"/>
+                           <path class="interactive-path" id="acm_l" data-tooltip="A. Cerebri Media (Sin.)" d="M 200,150 C 120,150 80,100 80,50" stroke="#3b82f6" stroke-width="8" fill="none"/>
+                           <path class="interactive-path" id="aci_r" data-tooltip="A. Carotis Interna (Dex.)" d="M 300,250 L 300,150" stroke="#fbbf24" stroke-width="10" fill="none"/>
+                           <path class="interactive-path" id="aci_l" data-tooltip="A. Carotis Interna (Sin.)" d="M 200,250 L 200,150" stroke="#fbbf24" stroke-width="10" fill="none"/>
+                           <path class="interactive-path" id="aca_r" data-tooltip="A. Cerebri Anterior (Dex.)" d="M 300,150 C 280,100 280,50 260,30" stroke="#10b981" stroke-width="8" fill="none"/>
+                           <path class="interactive-path" id="aca_l" data-tooltip="A. Cerebri Anterior (Sin.)" d="M 200,150 C 220,100 220,50 240,30" stroke="#10b981" stroke-width="8" fill="none"/>
+                           <!-- Communicating Arteries -->
+                           <path class="interactive-path" id="pcom_r" data-tooltip="A. Communicans Posterior (Dex.)" d="M 300,250 C 280,280 260,310 250,320" stroke="#a855f7" stroke-width="6" fill="none"/>
+                           <path class="interactive-path" id="pcom_l" data-tooltip="A. Communicans Posterior (Sin.)" d="M 200,250 C 220,280 240,310 250,320" stroke="#a855f7" stroke-width="6" fill="none"/>
+                           <path class="interactive-path" id="acom" data-tooltip="A. Communicans Anterior" d="M 260,30 C 250,25 240,30 240,30" stroke="#ec4899" stroke-width="6" fill="none"/>
+                        </svg>
+                        <div id="willis-info-panel">
+                            <button id="willis-info-close">&times;</button>
+                            <div id="willis-info-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Agytörzsi Szindrómák Section -->
+            <section id="agytorzs" class="content-section">
+                <div class="card card-red">
+                    <h3>Agytörzsi Vaszkuláris Szindrómák</h3>
+                    <p>Az agytörzsi stroke-ok komplex, gyakran "keresztezett" tüneteket okoznak: ipszilaterális agyideg-kiesés kontralaterális hosszúpálya-tünetekkel. A HINTS vizsgálat kulcsfontosságú az akut vertigo differenciáldiagnosztikájában.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card card-red">
+                        <h4>Laterális Medulláris (Wallenberg) Szindróma</h4>
+                        <p>🩸 <strong>Artéria:</strong> PICA vagy A. vertebralis</p>
+                        <p>📍 <strong>Lokalizáció:</strong> Nyúltvelő laterális része</p>
+                        <ul class="list-disc list-inside mt-2">
+                            <li><strong>Ipszi:</strong> Ataxia, Horner-szindróma, arcérzés-kiesés, dysphagia, vertigo, csuklás</li>
+                            <li><strong>Kontra:</strong> Testfél fájdalom- és hőérzés-kiesés</li>
+                        </ul>
+                    </div>
+                    <div class="card card-red">
+                        <h4>Mediális Medulláris (Dejerine) Szindróma</h4>
+                        <p>🩸 <strong>Artéria:</strong> A. spinalis anterior</p>
+                        <p>📍 <strong>Lokalizáció:</strong> Nyúltvelő mediális része</p>
+                        <ul class="list-disc list-inside mt-2">
+                           <li><strong>Ipszi:</strong> Nyelvbénulás (XII.)</li>
+                           <li><strong>Kontra:</strong> Hemiparesis, mélyérzés-kiesés</li>
+                        </ul>
+                    </div>
+                    <div class="card card-red">
+                        <h4>Ventrális Pontin (Millard-Gubler) Szindróma</h4>
+                        <p>🩸 <strong>Artéria:</strong> A. basilaris paramedián ágai</p>
+                        <p>📍 <strong>Lokalizáció:</strong> Híd ventrális része</p>
+                        <ul class="list-disc list-inside mt-2">
+                           <li><strong>Ipszi:</strong> Abducens (VI.) és facialis (VII.) bénulás</li>
+                           <li><strong>Kontra:</strong> Hemiparesis</li>
+                        </ul>
+                    </div>
+                    <div class="card card-red">
+                        <h4>Ventrális Középagyi (Weber) Szindróma</h4>
+                        <p>🩸 <strong>Artéria:</strong> PCA paramedián ágai</p>
+                        <p>📍 <strong>Lokalizáció:</strong> Crus cerebri</p>
+                        <ul class="list-disc list-inside mt-2">
+                           <li><strong>Ipszi:</strong> Oculomotorius (III.) bénulás</li>
+                           <li><strong>Kontra:</strong> Hemiparesis</li>
+                        </ul>
+                    </div>
+                    <div class="card card-red">
+                        <h4>Középagyi Tegmentum (Benedikt) Szindróma</h4>
+                        <p>🩸 <strong>Artéria:</strong> PCA perforáló ágai</p>
+                        <p>📍 <strong>Lokalizáció:</strong> Középagyi tegmentum</p>
+                        <ul class="list-disc list-inside mt-2">
+                           <li><strong>Ipszi:</strong> Oculomotorius (III.) bénulás</li>
+                           <li><strong>Kontra:</strong> Ataxia, tremor (nucleus ruber!)</li>
+                        </ul>
+                    </div>
+                    <div class="card card-red">
+                        <h4>"Top of the Basilar" Szindróma</h4>
+                        <p>🩸 <strong>Artéria:</strong> A. basilaris csúcsa</p>
+                        <p>📍 <strong>Lokalizáció:</strong> Középagy, thalamus, mediális temporális/occipitális lebenyek</p>
+                        <p>Tünetek: Tudatzavar, látászavarok (kérgi vakság), szemmozgászavarok, memóriazavar.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Határterületi Infarktusok Section -->
+            <section id="hatarterulet" class="content-section">
+                <div class="card card-purple">
+                    <h3>Határterületi (Watershed) Infarktusok</h3>
+                    <p>Az agy nagy artériás territóriumai közötti "utolsó rét" területeken kialakuló iszkémiás károsodások. Két fő mechanizmus: <strong>súlyos hypoperfúzió</strong> (pl. hypotensio) vagy <strong>mikroembóliák</strong>.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card card-purple">
+                        <h4>Kortikális (Külső) Határterületi Infarktusok</h4>
+                        <p>📍 <strong>Lokalizáció:</strong> A nagy artériák (ACA-ACM, ACM-PCA) kérgi ellátási területeinek határán.</p>
+                        <p>⚙️ <strong>Etiológia:</strong> Gyakran mikroembóliás.</p>
+                        <h4>Jellemző Szindrómák:</h4>
+                        <ul class="list-disc list-inside mt-2">
+                            <li><strong>"Man in the barrel" szindróma:</strong> Kétoldali ACA-ACM infarktus, proximális kar gyengeséggel.</li>
+                            <li><strong>Balint-szindróma</strong> (parieto-occipitális): Okulomotoros apraxia, opticus ataxia, szimultánagnózia.</li>
+                            <li>Magasabb kortikális funkciózavarok.</li>
+                        </ul>
+                    </div>
+                    <div class="card card-purple">
+                        <h4>Internális (Mély) Határterületi Infarktusok</h4>
+                        <p>📍 <strong>Lokalizáció:</strong> Mély fehérállomány (centrum semiovale, corona radiata).</p>
+                        <p>⚙️ <strong>Etiológia:</strong> Gyakran hemodinamikai (hypoperfúziós), pl. súlyos carotis stenosis miatt.</p>
+                        <h4>Jellemző Tünetek:</h4>
+                        <ul class="list-disc list-inside mt-2">
+                            <li>Gyakran lacunaris szindrómákat utánoznak (pl. tiszta motoros hemiparesis).</li>
+                            <li>"Rózsafüzérszerű" léziók a képalkotáson.</li>
+                            <li>Rosszabb prognózis, mint a kortikális típusnál.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lacunaris Szindrómák Section -->
+            <section id="lacunaris" class="content-section">
+                 <div class="card card-green">
+                    <h3>Lacunaris Szindrómák</h3>
+                    <p>Kis méretű (<15-20 mm) szubkortikális infarktusok, melyeket egyetlen, mélyen penetráló artéria elzáródása okoz. A cerebrális kisérbetegség (CSVD) manifesztációi, fő rizikófaktor a krónikus hypertonia és a diabetes.</p>
+                    <p class="mt-2 font-semibold">Kulcsfontosságú diagnosztikai jel: a kortikális tünetek (afázia, neglect, hemianopia) hiánya!</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="w-1/4">Szindróma</th>
+                                <th class="w-1/2">Klinikai Jellemzők</th>
+                                <th class="w-1/4">Tipikus Lokalizáció</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-semibold">Tiszta Motoros Hemiparesis (PMH)</td>
+                                <td>Kontralaterális hemiparesis (arc, kar, láb egyenlő arányban). Nincs szenzoros/kortikális deficit.</td>
+                                <td>Capsula interna (hátsó szár), pons</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Tiszta Szenzoros Stroke (PSS)</td>
+                                <td>Kontralaterális zsibbadás/érzéskiesés (arc, kar, láb). Nincs motoros/kortikális deficit.</td>
+                                <td>Thalamus (VPL mag)</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Szenzomotoros Stroke (SMS)</td>
+                                <td>Motoros és szenzoros deficit kombinációja.</td>
+                                <td>Thalamus + capsula interna</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Ataxiás Hemiparesis (AH)</td>
+                                <td>Kontralaterális hemiparesis és a gyengeséghez képest aránytalan ataxia kombinációja.</td>
+                                <td>Pons, capsula interna</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Dysarthria-Ügyetlen Kéz (DCHS)</td>
+                                <td>Elkent beszéd és ellenoldali kéz ügyetlensége, jelentős gyengeség nélkül.</td>
+                                <td>Pons, capsula interna (genu)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Tab switching logic
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // Willis Circle Interaction Logic
+        function setupWillisInteraction() {
+            const svg = document.getElementById('willis-svg');
+            if (!svg) return;
+            
+            const infoPanel = document.getElementById('willis-info-panel');
+            const infoContent = document.getElementById('willis-info-content');
+            const closeButton = document.getElementById('willis-info-close');
+            const paths = svg.querySelectorAll('.interactive-path');
+            let selectedPath = null;
+
+            const arteryData = {
+                'acp_r': {
+                    name: 'Arteria Cerebri Posterior (PCA)',
+                    supplies: 'Occipitális lebeny (látókéreg), temporális lebeny mediális/inferior része, thalamus, középagy.',
+                    occlusion: 'Kontralaterális homonym hemianopia (látótérkiesés), memóriazavarok, agytörzsi szindrómák (pl. Weber, Benedikt), thalamikus fájdalom.',
+                    damage: 'Leggyakrabban cardioembolia vagy az A. basilaris csúcsának atherosclerosisa/thrombosisa okozza.'
+                },
+                'acp_l': {
+                    name: 'Arteria Cerebri Posterior (PCA)',
+                    supplies: 'Occipitális lebeny (látókéreg), temporális lebeny mediális/inferior része, thalamus, középagy.',
+                    occlusion: 'Kontralaterális homonym hemianopia (látótérkiesés), alexia (olvasászavar) agraphia nélkül (ha a domináns félteke spleniumát érinti), memóriazavarok.',
+                    damage: 'Leggyakrabban cardioembolia vagy az A. basilaris csúcsának atherosclerosisa/thrombosisa okozza.'
+                },
+                'basilar': {
+                    name: 'Arteria Basilaris',
+                    supplies: 'Az egész agytörzs (híd, középagy egy része), kisagy egy része, és a két PCA-n keresztül az occipitális és temporális lebenyek.',
+                    occlusion: 'Katasztrofális lehet. Locked-in szindróma, quadriplegia, tudatzavar, kóma, halál. A "Top of the Basilar" szindróma a csúcs elzáródásakor alakul ki.',
+                    damage: 'Atherosclerosis, thrombosis, arteria vertebralisból propagálódó embolus vagy disszekció.'
+                },
+                'acm_r': {
+                    name: 'Arteria Cerebri Media (ACM)',
+                    supplies: 'A félteke laterális felszínének nagy része (frontális, parietális, temporális lebeny), bazális ganglionok, capsula interna.',
+                    occlusion: 'Kontralaterális hemiparesis és érzészavar (arc-kar túlsúlyú), neglect szindróma, vizuospaciális zavarok (nem-domináns félteke).',
+                    damage: 'Leggyakoribb stroke lokalizáció. Okai: A. carotis interna atherosclerosis (arterio-arteriális embolia), cardioembolia.'
+                },
+                'acm_l': {
+                    name: 'Arteria Cerebri Media (ACM)',
+                    supplies: 'A félteke laterális felszínének nagy része (frontális, parietális, temporális lebeny), bazális ganglionok, capsula interna.',
+                    occlusion: 'Kontralaterális hemiparesis és érzészavar (arc-kar túlsúlyú), globális/Broca/Wernicke afázia (domináns félteke).',
+                    damage: 'Leggyakoribb stroke lokalizáció. Okai: A. carotis interna atherosclerosis (arterio-arteriális embolia), cardioembolia.'
+                },
+                 'aci_r': {
+                    name: 'Arteria Carotis Interna (ACI)',
+                    supplies: 'Az azonos oldali agyfélteke nagy részét látja el az ACM-en és ACA-n keresztül.',
+                    occlusion: 'Súlyos szűkülete vagy elzáródása az ACM és/vagy ACA területi stroke-jához, vagy határterületi infarktushoz vezethet. Okozhat tranziens ischaemiás attackot (TIA), amaurosis fugax-ot (átmeneti egyoldali látásvesztés).',
+                    damage: 'Atherosclerosis a carotis bifurkációnál a leggyakoribb ok. Disszekció (traumás vagy spontán) is előfordulhat.'
+                },
+                'aci_l': {
+                    name: 'Arteria Carotis Interna (ACI)',
+                    supplies: 'Az azonos oldali agyfélteke nagy részét látja el az ACM-en és ACA-n keresztül.',
+                    occlusion: 'Súlyos szűkülete vagy elzáródása az ACM és/vagy ACA területi stroke-jához, vagy határterületi infarktushoz vezethet. Okozhat tranziens ischaemiás attackot (TIA), amaurosis fugax-ot (átmeneti egyoldali látásvesztés).',
+                    damage: 'Atherosclerosis a carotis bifurkációnál a leggyakoribb ok. Disszekció (traumás vagy spontán) is előfordulhat.'
+                },
+                'aca_r': {
+                    name: 'Arteria Cerebri Anterior (ACA)',
+                    supplies: 'A frontális és parietális lebenyek mediális felszíne, a corpus callosum elülső része.',
+                    occlusion: 'Kontralaterális alsó végtagi túlsúlyú gyengeség és érzészavar. Akarati, motivációs zavarok (abulia), inkontinencia.',
+                    damage: 'Ritkábban záródik el, mint az ACM. Oka lehet cardioembolia vagy ACI-ből származó embolus.'
+                },
+                'aca_l': {
+                    name: 'Arteria Cerebri Anterior (ACA)',
+                    supplies: 'A frontális és parietális lebenyek mediális felszíne, a corpus callosum elülső része.',
+                    occlusion: 'Kontralaterális alsó végtagi túlsúlyú gyengeség és érzészavar. Domináns oldalon transcorticalis motoros afázia.',
+                    damage: 'Ritkábban záródik el, mint az ACM. Oka lehet cardioembolia vagy ACI-ből származó embolus.'
+                },
+                'pcom_r': {
+                    name: 'Arteria Communicans Posterior (PCom)',
+                    supplies: 'Összeköti az elülső (carotis) és hátsó (vertebrobasilaris) keringést. Ágakat adhat a thalamushoz és a hypothalamushoz.',
+                    occlusion: 'Izolált elzáródása ritkán okoz tüneteket, ha a Willis-gyűrű többi része ép. Aneurysma gyakori lokalizációja, melynek ruptúrája subarachnoidalis vérzést, kompressziója III. agyideg bénulást okozhat.',
+                    damage: 'Aneurysma képződés.'
+                },
+                'pcom_l': {
+                    name: 'Arteria Communicans Posterior (PCom)',
+                    supplies: 'Összeköti az elülső (carotis) és hátsó (vertebrobasilaris) keringést. Ágakat adhat a thalamushoz és a hypothalamushoz.',
+                    occlusion: 'Izolált elzáródása ritkán okoz tüneteket, ha a Willis-gyűrű többi része ép. Aneurysma gyakori lokalizációja, melynek ruptúrája subarachnoidalis vérzést, kompressziója III. agyideg bénulást okozhat.',
+                    damage: 'Aneurysma képződés.'
+                },
+                'acom': {
+                    name: 'Arteria Communicans Anterior (ACom)',
+                    supplies: 'Összeköti a kétoldali ACA-t, kulcsfontosságú kollaterális keringést biztosítva.',
+                    occlusion: 'Az aneurysma leggyakoribb lokalizációja az agyban. Ruptúrája subarachnoidalis vérzést és a frontális lebeny károsodását okozhatja, ami memóriazavarokhoz (konfabuláció) és személyiségváltozáshoz vezethet.',
+                    damage: 'Aneurysma képződés.'
+                }
+            };
+
+            function hideInfo() {
+                infoPanel.classList.remove('visible');
+                if(selectedPath) {
+                    selectedPath.classList.remove('selected');
+                    selectedPath = null;
+                }
+            }
+
+            paths.forEach(path => {
+                path.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    if (selectedPath) {
+                        selectedPath.classList.remove('selected');
+                    }
+
+                    selectedPath = path;
+                    selectedPath.classList.add('selected');
+                    
+                    const data = arteryData[path.id];
+                    if (data) {
+                        infoContent.innerHTML = `
+                            <h5>${data.name}</h5>
+                            <p><strong>Ellátott terület:</strong> ${data.supplies}</p>
+                            <p><strong>Elzáródás következménye:</strong> ${data.occlusion}</p>
+                            <p><strong>Gyakori károsodási okok:</strong> ${data.damage}</p>
+                        `;
+                        infoPanel.classList.add('visible');
+                    }
+                });
+            });
+
+            closeButton.addEventListener('click', hideInfo);
+            document.addEventListener('click', (e) => {
+                if (!svg.contains(e.target)) {
+                    hideInfo();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupWillisInteraction();
+        });
+    </script>
+
+</body>
+</html>

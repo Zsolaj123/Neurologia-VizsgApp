@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Vizsgafelkészítő</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        h2 {
+            font-size: 1.875rem; /* 30px */
+            font-weight: 700;
+            color: #1e3a8a;
+            border-bottom: 2px solid #60a5fa;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        h3 {
+            font-size: 1.5rem; /* 24px */
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .prose {
+            max-width: none;
+        }
+        .prose p, .prose ul {
+            color: #374151;
+            line-height: 1.75;
+        }
+        .prose strong {
+            color: #111827;
+        }
+        .info-box {
+            background-color: #eef2ff;
+            border-left: 4px solid #6366f1;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0.25rem;
+        }
+        .info-box p {
+            margin: 0;
+            color: #4338ca;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #e5e7eb;
+            font-weight: 600;
+        }
+        .quiz-option {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .quiz-option.selected {
+            background-color: #c7d2fe;
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-indigo-800">Neuroanatómia Vizsgafelkészítő</h1>
+            <p class="text-center text-gray-600 mt-2">Részletes, vizuális segédlet a sikeres vizsgához.</p>
+        </div>
+    </header>
+
+    <nav class="sticky top-0 bg-white/80 backdrop-blur-md z-10 shadow-sm">
+        <div class="container mx-auto flex justify-center p-4 gap-2 md:gap-4">
+            <button id="tab-btn-1" class="tab-button active text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-full bg-gray-200 text-gray-700 hover:bg-indigo-500 hover:text-white">A Hippokampusz</button>
+            <button id="tab-btn-2" class="tab-button text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-full bg-gray-200 text-gray-700 hover:bg-indigo-500 hover:text-white">Hypothalamo-hypophysealis rendszer</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <!-- === HIPPOCAMPUS SECTION === -->
+        <section id="content-1" class="content-section active">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                <article class="prose">
+                    <h2>A hippokampusz szerkezete és kapcsolatai</h2>
+                    <p class="lead">A hippokampusz, a mediális temporális lebenyben elhelyezkedő, a limbikus rendszer részét képező agyi struktúra, központi szerepet játszik a tanulásban és a memóriában.</p>
+                    
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Papez_circuit.svg/1200px-Papez_circuit.svg.png" 
+                         alt="A Papez-gyűrű és a hippokampusz kapcsolatai" 
+                         class="w-full md:w-3/4 mx-auto rounded-lg shadow-md my-8"
+                         onerror="this.onerror=null;this.src='https://placehold.co/800x400/e2e8f0/64748b?text=Papez-gyűrű+diagramja';">
+
+                    <h3>A. A hippokampusz formáció anatómiája</h3>
+                    <p>A hippokampusz formáció magában foglalja a tulajdonképpeni hippokampuszt (Cornu Ammonis vagy Ammon-szarv), a gyrus dentatust (fogazott tekervény) és a subiculumot. A Cornu Ammonis (CA) további alrégiókra osztható: CA1, CA2, CA3 és CA4. Ez a komplex, alrégiókra tagolt felépítés alapvető a hippokampuszon belüli specifikus információfeldolgozási útvonalak, mint például a triszinaptikus pálya megértéséhez.</p>
+
+                    <h3>B. Sejtes felépítés és citológiai jellemzők</h3>
+                    <p>A hippokampusz archikortikális, jellegzetesen háromrétegű szerkezettel rendelkezik, ellentétben a neokortex hatrétegű felépítésével.</p>
+                    <ul>
+                        <li><b>Gyrus Dentatus (GD) rétegei:</b> Molekuláris réteg, granulasejtek rétege (stratum granulosum), és a hilus (polimorf réteg).</li>
+                        <li><b>Cornu Ammonis (CA) rétegei:</b> Alveus, oriens réteg, piramissejtek rétege (stratum pyramidale), radiatum réteg és lacunosum-moleculare réteg.</li>
+                    </ul>
+
+                    <h3>C. Intrinsic hippokampális pályák: A triszinaptikus kör</h3>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Hippocampus_-_trisynaptic_circuit.svg/1024px-Hippocampus_-_trisynaptic_circuit.svg.png" 
+                         alt="A triszinaptikus kör diagramja" 
+                         class="w-full md:w-2/3 mx-auto rounded-lg shadow-md my-8"
+                         onerror="this.onerror=null;this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Triszinaptikus+kör+diagram';">
+
+                    <p>A triszinaptikus kör a hippokampuszon belüli fő információáramlási útvonal:</p>
+                    <ol>
+                        <li><b>Perforáns pálya:</b> Az entorhinális kéregből (EC) indul a gyrus dentatus granulasejtjeihez.</li>
+                        <li><b>Moharostok:</b> A gyrus dentatus granulasejtjeinek axonjai a CA3 régió piramissejtjeihez.</li>
+                        <li><b>Schaffer-kollaterálisok:</b> A CA3 piramissejtek axonjai a CA1 régió piramissejtjeihez.</li>
+                    </ol>
+                    <div class="info-box">
+                        <p><b>Funkcionális analógia:</b> A DG mintázat-szétválasztást, a CA3 pedig mintázat-kiegészítést végez, ami elengedhetetlen az új, elkülönült emlékek kódolásához és a régiek felidézéséhez.</p>
+                    </div>
+
+                    <h3>D. Afferens és efferens kapcsolatok</h3>
+                    <p>A hippokampusz kiterjedt kapcsolatrendszerrel rendelkezik, melynek központi eleme az entorhinális kéreg és a fornix. A Papez-gyűrű (Hippokampusz → Fornix → Emlőtestek → Elülső talamikus magok → Cingulum → Entorhinális kéreg → Hippokampusz) kulcsfontosságú az epizodikus memória konszolidációjában.</p>
+                    
+                    <h3>E. A hippokampusz formáció alrégiói és főbb jellemzőik</h3>
+                    <div class="overflow-x-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Alrégió</th>
+                                    <th>Fő Sejttípus(ok)</th>
+                                    <th>Fő Bemenet(ek)</th>
+                                    <th>Fő Kimenet(ek)</th>
+                                    <th>Feltételezett Fő Szerep</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Gyrus Dentatus (DG)</td>
+                                    <td>Granulasejtek</td>
+                                    <td>Entorhinális kéreg (perforáns pálya)</td>
+                                    <td>CA3 (moharostok)</td>
+                                    <td>Mintázat-szétválasztás, új emlékek kódolása</td>
+                                </tr>
+                                <tr>
+                                    <td>CA3</td>
+                                    <td>Piramissejtek</td>
+                                    <td>Gyrus Dentatus (moharostok), EC, septum</td>
+                                    <td>CA1 (Schaffer-kollaterálisok)</td>
+                                    <td>Mintázat-kiegészítés, auto-asszociáció</td>
+                                </tr>
+                                <tr>
+                                    <td>CA1</td>
+                                    <td>Piramissejtek</td>
+                                    <td>CA3 (Schaffer-kollaterálisok), EC</td>
+                                    <td>Subiculum, entorhinális kéreg</td>
+                                    <td>Kimeneti feldolgozás, összehasonlítás</td>
+                                </tr>
+                                <tr>
+                                    <td>Subiculum</td>
+                                    <td>Piramissejtek</td>
+                                    <td>CA1, entorhinális kéreg</td>
+                                    <td>Entorhinális kéreg, prefrontális kéreg, stb.</td>
+                                    <td>Fő kimeneti struktúra, integráció</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- QUIZ SECTION -->
+                    <div id="quiz-1" class="mt-12 p-6 bg-indigo-50 rounded-lg">
+                        <h3 class="mt-0">Önellenőrző Kvíz: Hippokampusz</h3>
+                        <div class="quiz-question mb-6">
+                            <p class="font-semibold mb-2">1. Melyik pálya jelenti az elsődleges bemenetet a hippokampuszba az entorhinális kéregből?</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q1" data-answer="a">a) Perforáns pálya</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q1" data-answer="b">b) Moharostok</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q1" data-answer="c">c) Schaffer-kollaterálisok</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q1" data-answer="d">d) Fornix</div>
+                            </div>
+                        </div>
+                        <div class="quiz-question mb-6">
+                            <p class="font-semibold mb-2">2. A "mintázat-kiegészítés" (pattern completion) elsősorban a hippokampusz melyik alrégiójához köthető?</p>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q2" data-answer="a">a) Gyrus Dentatus (DG)</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q2" data-answer="b">b) CA1</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q2" data-answer="c">c) CA3</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q2" data-answer="d">d) Subiculum</div>
+                            </div>
+                        </div>
+                        <button id="check-quiz-1" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">Válaszok ellenőrzése</button>
+                        <p id="quiz-result-1" class="mt-4 font-semibold"></p>
+                    </div>
+
+                </article>
+            </div>
+        </section>
+
+        <!-- === HYPOTHALAMUS-HYPOPHYSIS SECTION === -->
+        <section id="content-2" class="content-section">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                <article class="prose">
+                    <h2>A hypothalamo-hypophysealis rendszer</h2>
+                    <p class="lead">A hypothalamo-hypophysealis rendszer a neuroendokrin szabályozás központi tengelye, amely a hipotalamusz és az agyalapi mirigy (hipofízis) közötti szoros anatómiai és funkcionális kapcsolaton alapul.</p>
+                    
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Hypothalamus-Pituitary_complex.png/800px-Hypothalamus-Pituitary_complex.png" 
+                         alt="A hypothalamo-hypophysealis rendszer anatómiája" 
+                         class="w-full md:w-3/4 mx-auto rounded-lg shadow-md my-8"
+                         onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/64748b?text=Hypothalamo-hypophysealis+rendszer';">
+
+                    <h3>A. A rendszer anatómiai komponensei</h3>
+                    <ul>
+                        <li><b>Hipotalamusz magjai:</b> A hormonrendszer legfőbb központja (pl. Nucleus paraventricularis, Nucleus supraopticus).</li>
+                        <li><b>Adenohipofízis (Elülső lebeny):</b> Valódi endokrin mirigy, hormonokat termel a hipotalamusz szabályozása alatt.</li>
+                        <li><b>Neurohipofízis (Hátulsó lebeny):</b> A hipotalamusz idegi kiterjesztése; hormonokat tárol és ürít.</li>
+                        <li><b>Infundibulum (Hipofízisnyél):</b> Összeköti a hipotalamuszt és a hipofízist.</li>
+                    </ul>
+
+                    <h3>B. A hipotalamusz és a hipofízis közötti kapcsolatok</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4>1. Hypothalamo-hypophysealis portális keringés</h4>
+                            <p>Ez egy speciális vénás érrendszer, ami a hipotalamusz szabályozó hormonjait (releasing és inhibiting) nagy koncentrációban, közvetlenül az <b>adenohipofízisbe</b> szállítja. Egy "privát kommunikációs vonal".</p>
+                        </div>
+                        <div>
+                            <h4>2. Hypothalamo-hypophysealis tractus</h4>
+                            <p>Ez egy idegi pályaköteg, amely a hipotalamuszban termelt ADH-t és oxitocint a <b>neurohipofízisbe</b> szállítja tárolásra. A hormonfelszabadulás itt közvetlen idegi kontroll alatt áll.</p>
+                        </div>
+                    </div>
+                    
+                    <h3>C. Hipotalamikus szabályozó hormonok</h3>
+                     <div class="overflow-x-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hipotalamikus Hormon</th>
+                                    <th>Hatása az Adenohipofízis Hormonjára</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>GHRH</td>
+                                    <td>GH szekréció serkentése</td>
+                                </tr>
+                                <tr>
+                                    <td>TRH</td>
+                                    <td>TSH (és PRL) szekréció serkentése</td>
+                                </tr>
+                                 <tr>
+                                    <td>CRH</td>
+                                    <td>ACTH szekréció serkentése</td>
+                                </tr>
+                                <tr>
+                                    <td>GnRH</td>
+                                    <td>FSH és LH szekréció serkentése</td>
+                                </tr>
+                                <tr class="bg-red-50">
+                                    <td>Szomatosztatin (GHIH)</td>
+                                    <td class="font-semibold">GH (és TSH) szekréció gátlása</td>
+                                </tr>
+                                <tr class="bg-red-50">
+                                    <td>Dopamin (PIH)</td>
+                                    <td class="font-semibold">Prolaktin szekréció gátlása</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>D. Az adenohipofízis hormonjai</h3>
+                    <p>Az adenohipofízis az "endokrin zenekar karmestere", amely a perifériás mirigyeket irányítja (pl. mellékvese, pajzsmirigy, gonádok) az alábbi hormonokkal: ACTH, TSH, GH, PRL, FSH, LH.</p>
+
+                    <h3>E. A neurohipofízis hormonjai</h3>
+                    <div class="info-box">
+                       <p>A neurohipofízis csak tárolja és felszabadítja a hipotalamuszban termelődő hormonokat!</p>
+                    </div>
+                    <ul>
+                        <li><b>ADH (Antidiuretikus hormon):</b> Fokozza a vízvisszaszívást a vesében, emeli a vérnyomást.</li>
+                        <li><b>Oxitocin:</b> Méhösszehúzódás (szülés), tejkilövellés (szoptatás), szociális kötődés.</li>
+                    </ul>
+
+                    <!-- QUIZ SECTION -->
+                    <div id="quiz-2" class="mt-12 p-6 bg-indigo-50 rounded-lg">
+                        <h3 class="mt-0">Önellenőrző Kvíz: Hypothalamus-Hipofízis</h3>
+                        <div class="quiz-question mb-6">
+                            <p class="font-semibold mb-2">1. Melyik struktúra köti össze a hipotalamuszt az adenohipofízissel, lehetővé téve a szabályozó hormonok szállítását?</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q3" data-answer="a">a) Hypothalamo-hypophysealis tractus</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q3" data-answer="b">b) Fornix</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q3" data-answer="c">c) Hypothalamo-hypophysealis portális keringés</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q3" data-answer="d">d) Corpus callosum</div>
+                            </div>
+                        </div>
+                        <div class="quiz-question mb-6">
+                            <p class="font-semibold mb-2">2. Melyik hormon gátolja a prolaktin felszabadulását?</p>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q4" data-answer="a">a) TRH</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q4" data-answer="b">b) Dopamin (PIH)</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q4" data-answer="c">c) GnRH</div>
+                                <div class="quiz-option border-2 border-gray-300 p-3 rounded-lg" data-question="q4" data-answer="d">d) Oxitocin</div>
+                            </div>
+                        </div>
+                         <button id="check-quiz-2" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">Válaszok ellenőrzése</button>
+                         <p id="quiz-result-2" class="mt-4 font-semibold"></p>
+                    </div>
+
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto p-6 text-center">
+            <p>&copy; 2024 Neuroanatómia Vizsgafelkészítő. Minden jog fenntartva.</p>
+            <p class="text-sm text-gray-400 mt-2">Készült a hatékony és sikeres tanulás támogatására.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.content-section');
+            const quizCorrectAnswers = {
+                q1: 'a',
+                q2: 'c',
+                q3: 'c',
+                q4: 'b'
+            };
+            const selectedAnswers = {};
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetContentId = tab.id.replace('tab-btn-', 'content-');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    contents.forEach(content => {
+                        if (content.id === targetContentId) {
+                            content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
+                        }
+                    });
+                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+
+            // Quiz option selection
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const question = option.dataset.question;
+                    selectedAnswers[question] = option.dataset.answer;
+                    
+                    // Visual feedback for selection
+                    document.querySelectorAll(`.quiz-option[data-question="${question}"]`).forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    option.classList.add('selected');
+                });
+            });
+
+            // Check answers logic
+            function checkQuiz(quizId, resultId) {
+                const quizContainer = document.getElementById(quizId);
+                let score = 0;
+                let total = 0;
+
+                quizContainer.querySelectorAll('.quiz-question').forEach(questionEl => {
+                    total++;
+                    const questionId = questionEl.querySelector('.quiz-option').dataset.question;
+                    const correctAnswer = quizCorrectAnswers[questionId];
+                    const userAnswer = selectedAnswers[questionId];
+
+                    const options = questionEl.querySelectorAll('.quiz-option');
+                    options.forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect');
+                        const answer = opt.dataset.answer;
+                        if (answer === correctAnswer) {
+                            opt.classList.add('correct');
+                        }
+                        if (answer === userAnswer && userAnswer !== correctAnswer) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+
+                    if (userAnswer === correctAnswer) {
+                        score++;
+                    }
+                });
+                
+                const resultP = document.getElementById(resultId);
+                resultP.textContent = `Eredményed: ${score} / ${total}`;
+                if(score === total) {
+                    resultP.style.color = '#10b981'; // green
+                } else {
+                     resultP.style.color = '#ef4444'; // red
+                }
+            }
+
+            document.getElementById('check-quiz-1').addEventListener('click', () => checkQuiz('quiz-1', 'quiz-result-1'));
+            document.getElementById('check-quiz-2').addEventListener('click', () => checkQuiz('quiz-2', 'quiz-result-2'));
+        });
+    </script>
+</body>
+</html>

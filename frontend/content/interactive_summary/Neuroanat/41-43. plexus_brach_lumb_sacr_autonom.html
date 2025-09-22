@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neuroanatómia Segédlet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .tab-btn.active {
+            background-color: #3b82f6; /* Blue-500 */
+            color: white;
+            border-bottom-color: transparent;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .interactive-diagram .diagram-element {
+            transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+            cursor: pointer;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .details-box {
+            border-left: 4px solid #3b82f6;
+            background-color: #eff6ff; /* Blue-50 */
+            min-height: 80px;
+        }
+        .clinical-box {
+            background-color: #fff1f2; /* Rose-50 */
+            border-left: 4px solid #f43f5e; /* Rose-500 */
+        }
+        /* Color Palette for Diagrams */
+        .color-roots            { fill: #f9a8d4; } /* Pink-300 */
+        .color-trunks           { fill: #fcd34d; } /* Amber-300 */
+        .color-divisions        { fill: #86efac; } /* Green-300 */
+        .color-cords            { fill: #93c5fd; } /* Blue-300 */
+        .color-nerves-brachial  { fill: #c4b5fd; } /* Violet-300 */
+        
+        .color-lumbar-plexus    { fill: #6ee7b7; } /* Emerald-300 */
+        .color-sacral-plexus    { fill: #f0abfc; } /* Fuchsia-300 */
+        
+        .color-sympathetic-line { stroke: #fb7185; } /* Rose-400 */
+        .color-parasymp-line    { stroke: #60a5fa; } /* Blue-400 */
+        .color-sympathetic-fill { fill: #fda4af; }   /* Rose-300 */
+        .color-parasymp-fill    { fill: #93c5fd; }   /* Blue-300 */
+        .color-ganglion         { fill: #fcd34d; }   /* Amber-300 */
+        .color-organ            { fill: #d1d5db; }   /* Gray-300 */
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Neuroanatómia Vizsga Segédlet</h1>
+            <p class="text-lg text-gray-600 mt-2">Interaktív áttekintő a perifériás és autonóm idegrendszerről</p>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <div class="mb-8 border-b border-gray-200">
+            <nav class="-mb-px flex flex-wrap justify-center space-x-2 md:space-x-4" aria-label="Tabs">
+                <button class="tab-btn active whitespace-nowrap py-4 px-4 border-b-2 font-medium text-lg rounded-t-lg" data-tab="brachialis">Plexus Brachialis</button>
+                <button class="tab-btn whitespace-nowrap py-4 px-4 border-b-2 font-medium text-lg rounded-t-lg" data-tab="lumbosacralis">Plexus Lumbalis & Sacralis</button>
+                <button class="tab-btn whitespace-nowrap py-4 px-4 border-b-2 font-medium text-lg rounded-t-lg" data-tab="autonom">Autonóm Idegrendszer</button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <main>
+            <!-- Plexus Brachialis Content -->
+            <div id="brachialis" class="tab-content active">
+                <h2 class="text-3xl font-bold mb-6 text-center">Plexus Brachialis (Karfonat)</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Interaktív Séma</h3>
+                        <p class="text-gray-600 mb-4">Vidd az egeret a diagram elemei fölé a részletekért!</p>
+                        <svg id="brachialis-diagram" class="w-full h-auto interactive-diagram" viewBox="0 0 400 250">
+                            <!-- Diagram elements -->
+                            <rect class="diagram-element color-roots" data-info="C5 gyökér" x="10" y="20" width="30" height="15" rx="3"></rect>
+                            <text x="25" y="32" font-size="8" text-anchor="middle">C5</text>
+                            <rect class="diagram-element color-roots" data-info="C6 gyökér" x="10" y="50" width="30" height="15" rx="3"></rect>
+                            <text x="25" y="62" font-size="8" text-anchor="middle">C6</text>
+                            <rect class="diagram-element color-roots" data-info="C7 gyökér" x="10" y="100" width="30" height="15" rx="3"></rect>
+                            <text x="25" y="112" font-size="8" text-anchor="middle">C7</text>
+                            <rect class="diagram-element color-roots" data-info="C8 gyökér" x="10" y="150" width="30" height="15" rx="3"></rect>
+                            <text x="25" y="162" font-size="8" text-anchor="middle">C8</text>
+                            <rect class="diagram-element color-roots" data-info="T1 gyökér" x="10" y="180" width="30" height="15" rx="3"></rect>
+                            <text x="25" y="192" font-size="8" text-anchor="middle">T1</text>
+                            <path fill="none" stroke="#9ca3af" d="M40 27.5 H 60 M40 57.5 H 60 M60 27.5 C 70 27.5, 70 37.5, 80 37.5 M60 57.5 C 70 57.5, 70 37.5, 80 37.5 M40 107.5 H 80 M40 157.5 H 60 M40 187.5 H 60 M60 157.5 C 70 157.5, 70 167.5, 80 167.5 M60 187.5 C 70 187.5, 70 167.5, 80 167.5"></path>
+                            <rect class="diagram-element color-trunks" data-info="Truncus superior (C5, C6)" x="80" y="30" width="40" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-trunks" data-info="Truncus medius (C7)" x="80" y="100" width="40" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-trunks" data-info="Truncus inferior (C8, T1)" x="80" y="160" width="40" height="15" rx="3"></rect>
+                            <path fill="none" stroke="#9ca3af" d="M120 37.5 C 130 37.5, 140 50, 150 65 M120 107.5 H 150 M150 65 L 170 65 M150 107.5 L 170 107.5 M120 167.5 H 170 M120 37.5 C 130 37.5, 130 137.5, 140 137.5 M120 107.5 C 130 107.5, 130 137.5, 140 137.5 M120 167.5 C 130 167.5, 130 137.5, 140 137.5"></path>
+                            <circle class="diagram-element color-divisions" data-info="Elülső divíziók (superior, medius)" cx="160" cy="86.5" r="5"></circle>
+                            <circle class="diagram-element color-divisions" data-info="Elülső divízió (inferior)" cx="170" cy="167.5" r="5"></circle>
+                            <circle class="diagram-element color-divisions" data-info="Hátsó divíziók (összes)" cx="140" cy="137.5" r="5"></circle>
+                            <path fill="none" stroke="#9ca3af" d="M160 86.5 H 180 M140 137.5 H 180 M170 167.5 H 180"></path>
+                            <rect class="diagram-element color-cords" data-info="Fasciculus lateralis (C5-C7)" x="180" y="79" width="50" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-cords" data-info="Fasciculus posterior (C5-T1)" x="180" y="130" width="50" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-cords" data-info="Fasciculus medialis (C8, T1)" x="180" y="160" width="50" height="15" rx="3"></rect>
+                            <path fill="none" stroke="#9ca3af" d="M230 86.5 H 250 C 260 86.5, 260 52.5, 270 52.5 M230 137.5 H 250 C 260 137.5, 260 97.5, 270 97.5 M230 137.5 H 270 M230 86.5 H 250 C 260 86.5, 260 137.5, 270 137.5 M230 167.5 H 250 C 260 167.5, 260 137.5, 270 137.5 M230 167.5 H 270"></path>
+                            <rect class="diagram-element color-nerves-brachial" data-info="N. musculocutaneus" x="270" y="45" width="80" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-nerves-brachial" data-info="N. axillaris" x="270" y="90" width="80" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-nerves-brachial" data-info="N. radialis" x="270" y="110" width="80" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-nerves-brachial" data-info="N. medianus" x="270" y="130" width="80" height="15" rx="3"></rect>
+                            <rect class="diagram-element color-nerves-brachial" data-info="N. ulnaris" x="270" y="160" width="80" height="15" rx="3"></rect>
+                        </svg>
+                        <div class="mt-4 p-4 details-box" id="brachialis-details">
+                            <h4 class="font-semibold text-lg">Felépítés</h4>
+                            <p class="text-sm">Gyökerek ➡️ Törzsek ➡️ Ágak ➡️ Kötegek ➡️ Perifériás idegek</p>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Sérülések</h3>
+                        <div class="space-y-4">
+                            <div class="clinical-box p-4 rounded-lg">
+                                <h4 class="font-bold text-xl text-rose-800">Erb-Duchenne bénulás (Felső sérülés)</h4>
+                                <p class="text-gray-700 mt-2"><strong>Érintett gyökerek:</strong> C5-C6.</p>
+                                <p class="text-gray-700"><strong>Mechanizmus:</strong> Váll lenyomása, fej elfordítása (pl. szülési sérülés).</p>
+                                <p class="text-gray-700 font-semibold"><strong>Tünet:</strong> "Pincérborravalót váró kéz" tartás (befelé rotált, feszített kar).</p>
+                            </div>
+                            <div class="clinical-box p-4 rounded-lg">
+                                <h4 class="font-bold text-xl text-rose-800">Dejerine-Klumpke bénulás (Alsó sérülés)</h4>
+                                <p class="text-gray-700 mt-2"><strong>Érintett gyökerek:</strong> C8-T1.</p>
+                                <p class="text-gray-700"><strong>Mechanizmus:</strong> Kar hirtelen felfelé rántása (hiperabdukció).</p>
+                                <p class="text-gray-700 font-semibold"><strong>Tünet:</strong> "Karomkéz" tartás (kéz kisizmainak bénulása). Gyakran társul Horner-szindrómával.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plexus Lumbalis & Sacralis Content -->
+            <div id="lumbosacralis" class="tab-content">
+                 <h2 class="text-3xl font-bold mb-6 text-center">Plexus Lumbalis & Sacralis</h2>
+                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    <div class="card p-6 lg:col-span-3">
+                        <h3 class="text-2xl font-semibold mb-4">Interaktív Séma</h3>
+                        <p class="text-gray-600 mb-4">Vidd az egeret a diagram elemei fölé a részletekért!</p>
+                        <svg id="lumbalis-sacralis-diagram" class="w-full h-auto interactive-diagram" viewBox="0 0 500 450">
+                            <!-- Roots -->
+                            <rect class="diagram-element color-roots" data-info="L1 gyökér" x="10" y="20" width="30" height="15" rx="3"></rect><text x="25" y="32" font-size="8">L1</text>
+                            <rect class="diagram-element color-roots" data-info="L2 gyökér" x="10" y="50" width="30" height="15" rx="3"></rect><text x="25" y="62" font-size="8">L2</text>
+                            <rect class="diagram-element color-roots" data-info="L3 gyökér" x="10" y="80" width="30" height="15" rx="3"></rect><text x="25" y="92" font-size="8">L3</text>
+                            <rect class="diagram-element color-roots" data-info="L4 gyökér" x="10" y="110" width="30" height="15" rx="3"></rect><text x="25" y="122" font-size="8">L4</text>
+                            <rect class="diagram-element color-roots" data-info="L5 gyökér" x="10" y="190" width="30" height="15" rx="3"></rect><text x="25" y="202" font-size="8">L5</text>
+                            <rect class="diagram-element color-roots" data-info="S1 gyökér" x="10" y="220" width="30" height="15" rx="3"></rect><text x="25" y="232" font-size="8">S1</text>
+                            <rect class="diagram-element color-roots" data-info="S2 gyökér" x="10" y="250" width="30" height="15" rx="3"></rect><text x="25" y="262" font-size="8">S2</text>
+                            <rect class="diagram-element color-roots" data-info="S3 gyökér" x="10" y="280" width="30" height="15" rx="3"></rect><text x="25" y="292" font-size="8">S3</text>
+                            <rect class="diagram-element color-roots" data-info="S4 gyökér" x="10" y="310" width="30" height="15" rx="3"></rect><text x="25" y="322" font-size="8">S4</text>
+
+                            <!-- Lumbar Plexus Nerves -->
+                            <path fill="none" stroke="#9ca3af" d="M40 27.5 H 60 C 80 27.5, 90 10, 110 10"></path>
+                            <rect class="diagram-element color-lumbar-plexus" data-info="N. iliohypogastricus & ilioinguinalis (L1)" x="110" y="2.5" width="200" height="15" rx="3"></rect>
+                            <path fill="none" stroke="#9ca3af" d="M40 27.5 H 55 M40 57.5 H 55 M55 27.5 C 70 27.5, 80 40, 90 40 H 110"></path>
+                            <rect class="diagram-element color-lumbar-plexus" data-info="N. genitofemoralis (L1,L2)" x="110" y="32.5" width="200" height="15" rx="3"></rect>
+                            <path fill="none" stroke="#9ca3af" d="M40 57.5 H 65 M40 87.5 H 65 M65 57.5 C 80 57.5, 90 70, 100 70 H 110"></path>
+                            <rect class="diagram-element color-lumbar-plexus" data-info="N. cutaneus femoris lat. (L2,L3)" x="110" y="62.5" width="200" height="15" rx="3"></rect>
+                            <path fill="none" stroke="#9ca3af" d="M40 57.5 H 75 M40 87.5 H 75 M40 117.5 H 75 M75 57.5 C 90 57.5, 100 120, 120 120 H 130"></path>
+                            <rect class="diagram-element color-lumbar-plexus" data-info="N. femoralis (L2-L4, hátsó ágak)" x="130" y="112.5" width="220" height="15" rx="3"></rect>
+                            <path fill="none" stroke="#9ca3af" d="M40 57.5 H 70 M40 87.5 H 70 M40 117.5 H 70 M70 57.5 C 85 57.5, 95 90, 110 90 H 120"></path>
+                            <rect class="diagram-element color-lumbar-plexus" data-info="N. obturatorius (L2-L4, elülső ágak)" x="120" y="82.5" width="210" height="15" rx="3"></rect>
+                            
+                            <!-- Lumbosacral Trunk -->
+                            <path fill="none" stroke="#9ca3af" d="M40 117.5 C 60 117.5, 70 175, 80 175 M40 197.5 C 60 197.5, 70 175, 80 175 M80 175 H 100"></path>
+                            <rect class="diagram-element color-trunks" data-info="Truncus lumbosacralis (L4,L5)" x="100" y="167.5" width="60" height="15" rx="3"></rect>
+                            
+                            <!-- Sacral Plexus Nerves -->
+                             <path fill="none" stroke="#9ca3af" d="M160 175 H 180 C 190 175, 200 150, 210 150 H 220 M40 227.5 C 100 227.5, 150 150, 210 150"></path>
+                            <rect class="diagram-element color-sacral-plexus" data-info="N. gluteus superior (L4-S1)" x="220" y="142.5" width="220" height="15" rx="3"></rect>
+
+                            <path fill="none" stroke="#9ca3af" d="M40 197.5 C 100 197.5, 150 190, 210 190 H 220 M40 227.5 C 120 227.5, 160 190, 210 190 M40 257.5 C 150 257.5, 180 190, 210 190"></path>
+                            <rect class="diagram-element color-sacral-plexus" data-info="N. gluteus inferior (L5-S2)" x="220" y="182.5" width="220" height="15" rx="3"></rect>
+
+                            <path fill="none" stroke="#9ca3af" d="M160 175 H 170 C 180 175, 190 260, 200 260 H 210 M40 227.5 H 200 M40 257.5 H 200 M40 287.5 H 200"></path>
+                            <rect class="diagram-element color-sacral-plexus" data-info="N. ischiadicus (L4-S3)" x="210" y="252.5" width="280" height="15" rx="3"></rect>
+                             <path fill="none" stroke="#9ca3af" d="M490 260 H 500"></path>
+
+                            <path fill="none" stroke="#9ca3af" d="M40 227.5 C 100 227.5, 150 310, 220 310 H 230 M40 257.5 C 120 257.5, 170 310, 220 310 M40 287.5 C 150 287.5, 190 310, 220 310"></path>
+                            <rect class="diagram-element color-sacral-plexus" data-info="N. cutaneus femoris post. (S1-S3)" x="230" y="302.5" width="230" height="15" rx="3"></rect>
+
+                             <path fill="none" stroke="#9ca3af" d="M40 257.5 C 150 257.5, 200 340, 250 340 H 260 M40 287.5 C 170 287.5, 220 340, 250 340 M40 317.5 C 180 317.5, 230 340, 250 340"></path>
+                            <rect class="diagram-element color-sacral-plexus" data-info="N. pudendus (S2-S4)" x="260" y="332.5" width="200" height="15" rx="3"></rect>
+                        </svg>
+                    </div>
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-4">Információ</h3>
+                             <div class="p-4 details-box" id="lumbalis-sacralis-details">
+                                <p class="text-sm">A plexus lumbalis és sacralis az alsó végtag és a kismedence motoros és szenzoros beidegzését látja el.</p>
+                            </div>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-4">Gyakori Klinikai Képek</h3>
+                             <div class="space-y-3">
+                                <div class="clinical-box p-3 rounded-lg">
+                                    <h4 class="font-bold text-lg text-rose-800">Meralgia Paraesthetica</h4>
+                                    <p class="text-sm text-gray-700">A n. cut. fem. lat. becsípődése. Égő fájdalom a comb külső oldalán.</p>
+                                </div>
+                                <div class="clinical-box p-3 rounded-lg">
+                                    <h4 class="font-bold text-lg text-rose-800">Ischias</h4>
+                                    <p class="text-sm text-gray-700">A n. ischiadicus mentén sugárzó fájdalom, leggyakrabban porckorongsérv miatt.</p>
+                                </div>
+                                 <div class="clinical-box p-3 rounded-lg">
+                                    <h4 class="font-bold text-lg text-rose-800">"Eső Láb" (Foot Drop)</h4>
+                                    <p class="text-sm text-gray-700">A n. peroneus comm. sérülése miatt a lábfej emelése gyengül/kiesik.</p>
+                                </div>
+                                <div class="clinical-box p-3 rounded-lg">
+                                    <h4 class="font-bold text-lg text-rose-800">Trendelenburg-járás</h4>
+                                    <p class="text-sm text-gray-700">A n. gluteus sup. sérülésekor a medence az ellenoldalra lebillen járáskor.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Autonomic Nervous System Content -->
+            <div id="autonom" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6 text-center">Autonóm (Vegetatív) Idegrendszer</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    <div class="card p-6 lg:col-span-3">
+                        <h3 class="text-2xl font-semibold mb-4">Interaktív Séma</h3>
+                        <p class="text-gray-600 mb-4">Vidd az egeret a szervek vagy a rendszerek nevei fölé!</p>
+                        <svg id="autonom-diagram" class="w-full h-auto interactive-diagram" viewBox="0 0 400 320">
+                           <!-- Labels -->
+                           <text class="diagram-element" data-info="Paraszimpatikus Rendszer (Craniosacralis)" x="60" y="15" font-size="12" text-anchor="middle" font-weight="bold">Paraszimpatikus</text>
+                           <text class="diagram-element" data-info="Szimpatikus Rendszer (Thoracolumbalis)" x="340" y="15" font-size="12" text-anchor="middle" font-weight="bold">Szimpatikus</text>
+
+                            <!-- CNS -->
+                            <rect x="180" y="30" width="40" height="260" fill="#e5e7eb" rx="5"></rect>
+                            <text x="200" y="45" font-size="8">Agytörzs</text>
+                            <text x="200" y="150" font-size="8" transform="rotate(-90 200,150)">T1-L2</text>
+                            <text x="200" y="275" font-size="8">S2-S4</text>
+
+                           <!-- Organs -->
+                           <g class="diagram-element" data-info="Szem - Pupilla|Szimp: Tágul (Mydriasis)|Paraszimp: Szűkül (Miosis)">
+                               <circle class="color-organ" cx="200" cy="60" r="10"></circle><circle fill="black" cx="200" cy="60" r="4"></circle>
+                           </g>
+                           <g class="diagram-element" data-info="Szív|Szimp: ↑ Frekvencia, ↑ Erő|Paraszimp: ↓ Frekvencia">
+                               <path class="color-organ" d="M200 95 l-10 -10 a5,5 0 0,1 10,-5 a5,5 0 0,1 10,5 l-10 10z"></path>
+                           </g>
+                           <g class="diagram-element" data-info="Tüdő - Hörgők|Szimp: Tágulnak|Paraszimp: Szűkülnek">
+                                <rect class="color-organ" x="187" y="115" width="26" height="15" rx="3"></rect>
+                           </g>
+                            <g class="diagram-element" data-info="Gyomor/Bél|Szimp: ↓ Perisztaltika|Paraszimp: ↑ Perisztaltika">
+                                <path class="color-organ" d="M190 170 a15,15 0 0,1 20,0 l-2,10 a15,15 0 0,0 -16,0 z"></path>
+                            </g>
+                            <g class="diagram-element" data-info="Húgyhólyag|Szimp: Fal elernyed|Paraszimp: Fal összehúzódik">
+                                <path class="color-organ" d="M190 230 a10,10 0 0,1 20,0 v10 h-20 z"></path>
+                            </g>
+
+                           <!-- Sympathetic pathway -->
+                           <rect class="color-ganglion" x="240" y="70" width="10" height="150" rx="3"></rect>
+                           <path class="color-sympathetic-line" stroke-width="2" fill="none" d="M220 80 h20 M250 80 h-10 c-40 0 -40 -20 -10 -20 h30"/> <!-- Eye -->
+                           <path class="color-sympathetic-line" stroke-width="2" fill="none" d="M220 100 h20 M250 100 c-20 0 -20 -5 -10 -5 h15"/> <!-- Heart -->
+                           <path class="color-sympathetic-line" stroke-width="2" fill="none" d="M220 120 h20 M250 122.5 h-15"/> <!-- Lungs -->
+                           <path class="color-sympathetic-line" stroke-width="2" fill="none" d="M220 180 h20 M250 180 c-30 0 -30 0 -15 0"/> <!-- Gut -->
+                           <path class="color-sympathetic-line" stroke-width="2" fill="none" d="M220 240 h20 M250 240 c-20 0 -20 0 -15 0"/> <!-- Bladder -->
+
+                            <!-- Parasympathetic pathway -->
+                            <circle class="color-ganglion" cx="150" cy="60" r="3"></circle> <!-- Ciliary g. -->
+                            <path class="color-parasymp-line" stroke-width="2" fill="none" d="M180 60 h-27 M147 60 c10 0, 35 0, 38 0"/>
+                            <circle class="color-ganglion" cx="160" cy="90" r="3"></circle> <!-- Cardiac g. -->
+                            <path class="color-parasymp-line" stroke-width="2" fill="none" d="M180 90 h-17 M157 90 c10 0, 25 0, 28 0"/>
+                            <circle class="color-ganglion" cx="165" cy="122" r="3"></circle> <!-- Pulm g. -->
+                            <path class="color-parasymp-line" stroke-width="2" fill="none" d="M180 122 h-12 M162 122 c5 0, 20 0, 23 0"/>
+                            <circle class="color-ganglion" cx="170" cy="175" r="3"></circle> <!-- Enteric g. -->
+                           <path class="color-parasymp-line" stroke-width="2" fill="none" d="M180 175 h-7 M167 175 c5 0, 18 0, 21 0"/>
+                           <circle class="color-ganglion" cx="170" cy="235" r="3"></circle> <!-- Pelvic g. -->
+                           <path class="color-parasymp-line" stroke-width="2" fill="none" d="M180 235 h-7 M167 235 c5 0, 18 0, 21 0"/>
+                        </svg>
+                    </div>
+                     <div class="lg:col-span-2 space-y-4">
+                         <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-4">Rendszerek Összehasonlítása</h3>
+                            <div class="p-4 details-box" id="autonom-details">
+                                <p class="text-sm">Az autonóm rendszer a szervezet belső egyensúlyát szabályozza. A szimpatikus rendszer aktivál, a paraszimpatikus pedig nyugtat és regenerál.</p>
+                            </div>
+                        </div>
+                        <div class="card p-6">
+                           <div class="flex items-center mb-3">
+                                <div class="w-4 h-4 rounded-full color-sympathetic-fill mr-2"></div>
+                                <span class="font-semibold text-rose-600">Szimpatikus ("Fight or Flight")</span>
+                           </div>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>Eredet: Thoracolumbalis (T1-L2)</li>
+                                <li>Transzmitter: Noradrenalin</li>
+                                <li>Hatás: Aktiválja a szervezetet, növeli a pulzust, tágítja a hörgőket és a pupillát.</li>
+                            </ul>
+                        </div>
+                         <div class="card p-6">
+                           <div class="flex items-center mb-3">
+                                <div class="w-4 h-4 rounded-full color-parasymp-fill mr-2"></div>
+                                <span class="font-semibold text-blue-600">Paraszimpatikus ("Rest and Digest")</span>
+                           </div>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>Eredet: Craniosacralis (Agytörzs & S2-S4)</li>
+                                <li>Transzmitter: Acetilkolin</li>
+                                <li>Hatás: Nyugalmi állapot, segíti az emésztést, csökkenti a pulzust, szűkíti a pupillát.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 card p-6">
+                    <h3 class="text-2xl font-semibold mb-4 text-center">Hatások és Pályák Összehasonlítása</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="py-3 px-4 font-bold uppercase text-sm text-gray-800 border-b border-gray-300">Szerv</th>
+                                    <th class="py-3 px-4 font-bold uppercase text-sm text-rose-600 border-b border-gray-300">Szimpatikus Hatás</th>
+                                    <th class="py-3 px-4 font-bold uppercase text-sm text-blue-600 border-b border-gray-300">Paraszimpatikus Hatás</th>
+                                    <th class="py-3 px-4 font-bold uppercase text-sm text-gray-800 border-b border-gray-300">Pálya (Főbb struktúrák)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr class="bg-white hover:bg-gray-50 text-sm">
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Pupilla</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Tágul (Mydriasis)</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Szűkül (Miosis)</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">
+                                        <span class="text-rose-600"><strong>Szimp:</strong> Ggl. cervicale sup.</span><br>
+                                        <span class="text-blue-600"><strong>Paraszimp:</strong> N. III (E-W mag) → Ggl. ciliare</span>
+                                    </td>
+                                </tr>
+                                <tr class="bg-blue-50/20 hover:bg-gray-50 text-sm">
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Szív</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">↑ Frekvencia, ↑ Erő</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">↓ Frekvencia</td>
+                                     <td class="py-3 px-4 border-b border-gray-200 align-top">
+                                        <span class="text-rose-600"><strong>Szimp:</strong> Tr. symp. (thoracalis) → Nn. cardiaci</span><br>
+                                        <span class="text-blue-600"><strong>Paraszimp:</strong> N. vagus (X) → Szív saját dúcai</span>
+                                    </td>
+                                </tr>
+                                 <tr class="bg-white hover:bg-gray-50 text-sm">
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Hörgők</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Tágulnak (Bronchodilatatio)</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Szűkülnek (Bronchoconstrictio)</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">
+                                        <span class="text-rose-600"><strong>Szimp:</strong> Tr. symp. (thoracalis)</span><br>
+                                        <span class="text-blue-600"><strong>Paraszimp:</strong> N. vagus (X) → Plexus pulmonalis</span>
+                                    </td>
+                                </tr>
+                                <tr class="bg-blue-50/20 hover:bg-gray-50 text-sm">
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Emésztés</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">↓ Perisztaltika, ↓ Szekréció</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">↑ Perisztaltika, ↑ Szekréció</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">
+                                       <span class="text-rose-600"><strong>Szimp:</strong> Nn. splanchnici → Ggl. coeliacum/mes. sup.</span><br>
+                                        <span class="text-blue-600"><strong>Paraszimp:</strong> N. vagus (X), Nn. splanchnici pelvini</span>
+                                    </td>
+                                </tr>
+                                <tr class="bg-white hover:bg-gray-50 text-sm">
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Húgyhólyag</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">Fal elernyed, záróizom összehúzódik</td>
+                                    <td class="py-3 px-4 border-b border-ray-200 align-top">Fal összehúzódik, záróizom elernyed</td>
+                                    <td class="py-3 px-4 border-b border-gray-200 align-top">
+                                        <span class="text-rose-600"><strong>Szimp:</strong> Nn. splanchnici lumb. → Plexus hypogastricus</span><br>
+                                        <span class="text-blue-600"><strong>Paraszimp:</strong> Nn. splanchnici pelvini (S2-S4)</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+            const tooltip = document.getElementById('tooltip');
+
+            // Tab functionality
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    contents.forEach(item => item.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+
+            // Reusable function to set up diagram interactivity
+            const setupDiagramInteraction = (diagramId, detailsId) => {
+                const diagram = document.getElementById(diagramId);
+                if (!diagram) return;
+
+                const diagramElements = diagram.querySelectorAll('.diagram-element');
+                const detailsBox = document.getElementById(detailsId);
+                const originalDetailsHTML = detailsBox.innerHTML;
+
+                diagramElements.forEach(el => {
+                    el.addEventListener('mousemove', (e) => {
+                        let info = el.dataset.info || '';
+                        // For multiline info in autonomics
+                        info = info.split('|').join('<br>');
+                        
+                        tooltip.innerHTML = info;
+                        tooltip.style.opacity = '1';
+                        tooltip.style.left = `${e.pageX + 15}px`;
+                        tooltip.style.top = `${e.pageY + 15}px`;
+                    });
+
+                    el.addEventListener('mouseenter', () => {
+                        let info = el.dataset.info || 'Nincs információ';
+                        let [title, ...rest] = info.split('|');
+
+                        detailsBox.innerHTML = `<h4 class="font-bold text-lg text-gray-800 mb-1">${title}</h4>
+                                                <p class="text-sm text-gray-700">${rest.join('<br>')}</p>`;
+                        
+                        el.style.stroke = '#f43f5e';
+                        el.style.strokeWidth = '2';
+                    });
+
+                    el.addEventListener('mouseleave', () => {
+                        tooltip.style.opacity = '0';
+                        detailsBox.innerHTML = originalDetailsHTML;
+                        el.style.stroke = '';
+                        el.style.strokeWidth = '';
+                    });
+                });
+            };
+
+            // Initialize all diagrams
+            setupDiagramInteraction('brachialis-diagram', 'brachialis-details');
+            setupDiagramInteraction('lumbalis-sacralis-diagram', 'lumbalis-sacralis-details');
+            setupDiagramInteraction('autonom-diagram', 'autonom-details');
+        });
+    </script>
+
+</body>
+</html>

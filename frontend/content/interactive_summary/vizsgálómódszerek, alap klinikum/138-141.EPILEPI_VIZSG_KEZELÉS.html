@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Epilepszia Útmutató Orvosoknak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .tab-active {
+            border-bottom-color: #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom-color: transparent;
+            color: #6b7280;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 900px;
+            border-radius: 0.75rem;
+            animation: slideIn 0.3s;
+        }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        @keyframes slideIn { from {transform: translateY(-50px);} to {transform: translateY(0);} }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600">Epilepszia Útmutató</h1>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#bevezetes" class="text-gray-600 hover:text-indigo-600">Bevezetés</a>
+                <a href="#rohamtipusok" class="text-gray-600 hover:text-indigo-600">Rohamtípusok</a>
+                <a href="#diagnosztika" class="text-gray-600 hover:text-indigo-600">Diagnosztika</a>
+                <a href="#kezeles" class="text-gray-600 hover:text-indigo-600">Kezelés</a>
+                <a href="#elso-roham" class="text-gray-600 hover:text-indigo-600">Első Roham</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+
+        <!-- Section: Bevezetés -->
+        <section id="bevezetes" class="py-12">
+            <h2 class="text-4xl font-bold text-center mb-4">Bevezetés az Epilepsziába</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Átfogó bemutató az epilepszia definíciójáról, modern osztályozásáról és etiológiai hátteréről az ILAE 2017-es ajánlása alapján.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="section-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">Definíciók</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg">Epilepsziás Roham</h4>
+                            <p class="text-gray-600">Az agyi idegsejtek kóros, túlzott vagy szinkronizált elektromos aktivitásának átmeneti jele és/vagy tünete.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">Epilepszia Betegség (ILAE 2014)</h4>
+                            <ul class="list-disc list-inside text-gray-600 space-y-2">
+                                <li>Legalább két, 24 óránál nagyobb különbséggel jelentkező, nem provokált roham.</li>
+                                <li>Egy nem provokált roham, ha a kiújulás kockázata a következő 10 évben >60%.</li>
+                                <li>Ismert epilepszia szindróma diagnózisa.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">Etiológiai Kategóriák</h3>
+                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+                        <div class="p-3 bg-indigo-100 rounded-lg">
+                            <span class="text-2xl">🧬</span>
+                            <p class="font-semibold mt-1">Genetikai</p>
+                        </div>
+                        <div class="p-3 bg-purple-100 rounded-lg">
+                            <span class="text-2xl">🏗️</span>
+                            <p class="font-semibold mt-1">Strukturális</p>
+                        </div>
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <span class="text-2xl">🧪</span>
+                            <p class="font-semibold mt-1">Metabolikus</p>
+                        </div>
+                        <div class="p-3 bg-yellow-100 rounded-lg">
+                            <span class="text-2xl">🛡️</span>
+                            <p class="font-semibold mt-1">Immun</p>
+                        </div>
+                        <div class="p-3 bg-red-100 rounded-lg">
+                            <span class="text-2xl">🦠</span>
+                            <p class="font-semibold mt-1">Infektív</p>
+                        </div>
+                        <div class="p-3 bg-gray-200 rounded-lg">
+                            <span class="text-2xl">❓</span>
+                            <p class="font-semibold mt-1">Ismeretlen</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Rohamtípusok -->
+        <section id="rohamtipusok" class="py-12">
+            <h2 class="text-4xl font-bold text-center mb-12">Epilepsziás Rohamtípusok</h2>
+            
+            <!-- Tabs -->
+            <div class="mb-8 border-b border-gray-200">
+                <nav class="flex justify-center -mb-px" id="rohamTabs">
+                    <button data-target="fokalis" class="tab-button py-4 px-6 border-b-2 tab-active">Fokális Rohamok</button>
+                    <button data-target="generalizalt" class="tab-button py-4 px-6 border-b-2 tab-inactive">Generalizált Rohamok</button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="rohamContent">
+                <!-- Fokális Rohamok -->
+                <div id="fokalis" class="tab-pane">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Fokális Tudatos Roham</h3>
+                            <p class="text-gray-600 mb-4">A tudatállapot megtartott. A tünetek az érintett agyterülettől függnek (motoros, szenzoros, autonóm, pszichés).</p>
+                            <button onclick="openModal('fokalis_tudatos')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Fokális Tudatzavaros Roham</h3>
+                            <p class="text-gray-600 mb-4">A tudatállapot károsodott. Gyakoriak az automatizmusok (pl. csámcsogás, matatás).</p>
+                            <button onclick="openModal('fokalis_tudatzavaros')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Fokálisból Bilaterális Tónusos-Klónusos</h3>
+                            <p class="text-gray-600 mb-4">A roham az agy egy pontjáról indul, majd átterjed mindkét agyféltekére, grand mal rohamot okozva.</p>
+                            <button onclick="openModal('fokalis_generalizalt')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Generalizált Rohamok -->
+                <div id="generalizalt" class="hidden tab-pane">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Tónusos-Klónusos (Grand Mal)</h3>
+                            <p class="text-gray-600 mb-4">Eszméletvesztés, testmerevség (tónusos fázis), majd ritmikus rángatózás (klónusos fázis).</p>
+                             <button onclick="openModal('tonusos_klonusos')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Absence (Petit Mal)</h3>
+                            <p class="text-gray-600 mb-4">Rövid tudatmegszakadással járó "elbambulás", főként gyermekkorban. Gyakran ismétlődik.</p>
+                            <button onclick="openModal('absence')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Mioklónusos Roham</h3>
+                            <p class="text-gray-600 mb-4">Hirtelen, rövid, áramütésszerű izomrángások. A tudat általában megtartott.</p>
+                            <button onclick="openModal('mioklonusos')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Tónusos Roham</h3>
+                            <p class="text-gray-600 mb-4">Hirtelen izommerevség, ami elesést okozhat. Általában rövid, gyakran alvás közben jelentkezik.</p>
+                            <button onclick="openModal('tonusos')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                        <div class="section-card p-6">
+                            <h3 class="text-xl font-bold mb-2">Atóniás Roham ("Drop Attack")</h3>
+                            <p class="text-gray-600 mb-4">Az izomtónus hirtelen elvesztése, ami a beteg "összecsuklását", elesését eredményezi.</p>
+                            <button onclick="openModal('atonias')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletek →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Diagnosztika -->
+        <section id="diagnosztika" class="py-12 bg-white rounded-xl">
+            <h2 class="text-4xl font-bold text-center mb-12">Diagnosztikai Stratégia</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="space-y-8">
+                    <div class="section-card p-6 flex items-start space-x-4">
+                        <div class="text-3xl text-indigo-500">📝</div>
+                        <div>
+                            <h3 class="text-xl font-bold">Anamnézis (Auto- és Hetero-)</h3>
+                            <p class="text-gray-600">A diagnózis alapköve. Részletes kikérdezés a roham lefolyásáról, auráról, postictalis tünetekről. A szemtanúk leírása és a videofelvétel kritikus fontosságú.</p>
+                        </div>
+                    </div>
+                     <div class="section-card p-6 flex items-start space-x-4">
+                        <div class="text-3xl text-indigo-500">🧪</div>
+                        <div>
+                            <h3 class="text-xl font-bold">Laboratóriumi Vizsgálatok</h3>
+                            <p class="text-gray-600">Célja az akut szimptómás okok (pl. hipoglikémia, elektrolitzavar, intoxikáció) kizárása. Rutin: vérkép, ionok, vércukor, máj-/vesefunkció.</p>
+                        </div>
+                    </div>
+                    <div class="section-card p-6 flex items-start space-x-4">
+                        <div class="text-3xl text-indigo-500">📈</div>
+                        <div>
+                            <h3 class="text-xl font-bold">Elektroenkefalográfia (EEG)</h3>
+                            <p class="text-gray-600">Az agyi elektromos aktivitás vizsgálata. Célja az epileptiform kisülések kimutatása, a rohamtípus klasszifikálása. Az alvásmegvonásos EEG növeli a diagnosztikus hozamot. A video-EEG a "gold standard" a PNES elkülönítésében.</p>
+                        </div>
+                    </div>
+                    <div class="section-card p-6 flex items-start space-x-4">
+                        <div class="text-3xl text-indigo-500">🧠</div>
+                        <div>
+                            <h3 class="text-xl font-bold">Agyi Képalkotó Vizsgálatok</h3>
+                            <p class="text-gray-600"><strong class="text-gray-800">MRI:</strong> A választandó módszer strukturális eltérések (tumor, sclerosis, fejlődési rendellenesség) kimutatására. Speciális epilepszia protokoll javasolt. <br><strong class="text-gray-800">CT:</strong> Sürgősségi helyzetekben (trauma, vérzés) hasznos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Kezelés -->
+        <section id="kezeles" class="py-12">
+            <h2 class="text-4xl font-bold text-center mb-12">Kezelési Elvek</h2>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Gyógyszeres Kezelés -->
+                <div class="section-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-green-700">Gyógyszeres Kezelés (AED)</h3>
+                    <p class="text-gray-600 mb-4">A terápia alapja. Cél a rohammentesség minimális mellékhatással. A választás függ a rohamtípustól, szindrómától, betegjellemzőktől.</p>
+                    <h4 class="font-semibold mb-2">Alapelvek:</h4>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1">
+                        <li>Monoterápia preferált</li>
+                        <li>"Start low, go slow" dózistitrálás</li>
+                        <li>Individualizált választás</li>
+                        <li>Racionális politerápia rezisztencia esetén</li>
+                    </ul>
+                    <button onclick="openModal('aed_hatas')" class="mt-4 font-semibold text-indigo-600 hover:text-indigo-800">AED Hatásmechanizmusok →</button>
+                </div>
+                <!-- Sebészeti Kezelés -->
+                <div class="section-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-700">Sebészeti Kezelés</h3>
+                    <p class="text-gray-600 mb-4">Gyógyszerrezisztens fokális epilepsziák esetén jön szóba, ha az epileptogén zóna pontosan lokalizálható és biztonságosan eltávolítható.</p>
+                    <h4 class="font-semibold mb-2">Leggyakoribb beavatkozás:</h4>
+                    <p class="text-gray-600">Temporális lebeny rezekció (hippocampus sclerosis esetén a betegek 60-80%-a rohammentessé válhat).</p>
+                </div>
+                <!-- Egyéb Terápiák -->
+                <div class="section-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-700">Egyéb Terápiák</h3>
+                    <p class="text-gray-600 mb-4">Alternatívák gyógyszerrezisztens esetekben, ha a műtét nem lehetséges.</p>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1">
+                        <li><strong>Neuromoduláció:</strong> Vagus ideg stimuláció (VNS), Mélyagyi stimuláció (DBS), Reszponzív neurostimuláció (RNS)</li>
+                        <li><strong>Ketogén diéta:</strong> Főként gyermekkorban, magas zsír-, alacsony szénhidráttartalmú étrend.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Első Roham -->
+        <section id="elso-roham" class="py-12 bg-indigo-50 rounded-xl">
+            <h2 class="text-4xl font-bold text-center mb-4">Az Első Roham Menedzsmentje</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Döntési folyamat egyetlen, nem provokált roham után: a kiújulás kockázatának felmérése és a terápia megkezdésének mérlegelése.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="section-card p-6">
+                    <h3 class="text-xl font-bold mb-3">Kiújulási Kockázatot Növelő Faktorok</h3>
+                    <p class="text-gray-600 mb-4">Ezen tényezők megléte esetén a kiújulás kockázata >60%, ami indokolhatja a kezelés megkezdését már egy roham után.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center"><span class="bg-red-200 text-red-800 rounded-full h-6 w-6 text-center mr-3">!</span>Kóros EEG lelet (epileptiform kisülések)</li>
+                        <li class="flex items-center"><span class="bg-red-200 text-red-800 rounded-full h-6 w-6 text-center mr-3">!</span>Ismert strukturális agyi eltérés (MRI-n)</li>
+                        <li class="flex items-center"><span class="bg-red-200 text-red-800 rounded-full h-6 w-6 text-center mr-3">!</span>Korábbi agyi inzultus az anamnézisben</li>
+                        <li class="flex items-center"><span class="bg-red-200 text-red-800 rounded-full h-6 w-6 text-center mr-3">!</span>Éjszakai (nokturnális) roham</li>
+                    </ul>
+                </div>
+                <div class="section-card p-6">
+                    <h3 class="text-xl font-bold mb-3">Mikor kezdjünk kezelést?</h3>
+                    <p class="text-gray-600 mb-4">A döntés mindig individualizált, a beteggel közösen ("shared decision-making").</p>
+                    <h4 class="font-semibold mb-2 text-green-700">Kezelés indokolt lehet:</h4>
+                    <p class="text-gray-600">Magas kiújulási kockázat esetén, ÉS/VAGY ha a további roham súlyos következményekkel járna (pl. foglalkozás, élethelyzet miatt), VAGY a beteg kéri.</p>
+                    <h4 class="font-semibold mb-2 mt-4 text-yellow-700">Kezelés halasztható:</h4>
+                    <p class="text-gray-600">Alacsony kiújulási kockázat esetén (nincs rizikófaktor). A beteget tájékoztatni kell az életmódbeli tanácsokról és a teendőkről újabb roham esetén.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Structure -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <footer class="text-center py-6 bg-gray-800 text-gray-400 mt-12">
+        <p>&copy; 2025 Interaktív Epilepszia Útmutató. A tartalom a feltöltött neurológiai tételek alapján készült.</p>
+    </footer>
+
+<script>
+    // Tab switching logic
+    const rohamTabs = document.getElementById('rohamTabs');
+    const rohamContent = document.getElementById('rohamContent');
+
+    rohamTabs.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tab-button')) {
+            // Deactivate all tabs and hide all panes
+            rohamTabs.querySelectorAll('.tab-button').forEach(tab => {
+                tab.classList.remove('tab-active');
+                tab.classList.add('tab-inactive');
+            });
+            rohamContent.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+
+            // Activate clicked tab and show corresponding pane
+            e.target.classList.add('tab-active');
+            e.target.classList.remove('tab-inactive');
+            const targetPaneId = e.target.getAttribute('data-target');
+            document.getElementById(targetPaneId).classList.remove('hidden');
+        }
+    });
+
+    // Modal logic
+    const modal = document.getElementById('infoModal');
+    const modalBody = document.getElementById('modalBody');
+
+    const modalData = {
+        fokalis_tudatos: {
+            title: 'Fokális Tudatos Roham (Simple Partial Seizure)',
+            content: `
+                <p class="mb-4">A tudatállapot és az emlékezet a roham alatt végig megtartott. A beteg képes kommunikálni a környezetével.</p>
+                <h4 class="font-semibold text-lg mb-2">Jellemző Tünetek (az érintett agyterülettől függően):</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Motoros:</strong> Akaratlan rángatózás a test egyik oldalán (pl. kar, láb, arc). A tünetek terjedhetnek (Jackson-féle roham).</li>
+                    <li><strong>Szenzoros (Aura):</strong> Bizsergő érzés, zsibbadás, szédülés, villogó fények, szokatlan szagok (pl. égett gumi), ízek vagy hangok.</li>
+                    <li><strong>Autonóm:</strong> Hirtelen kipirulás, verejtékezés, szívdobogásérzés, epigastriális felszálló érzés.</li>
+                    <li><strong>Pszichés:</strong> Hirtelen, indokolatlan félelem, szorongás, öröm. Déjà vu (már átélt érzés) vagy jamais vu (sosem látott érzés).</li>
+                </ul>
+                <p class="mt-4">A roham után átmeneti izomgyengeség (Todd-féle parézis) maradhat vissza az érintett végtagon.</p>
+            `
+        },
+        fokalis_tudatzavaros: {
+            title: 'Fokális Tudatzavaros Roham (Complex Partial Seizure)',
+            content: `
+                <p class="mb-4">Ezek a rohamok a tudatosság és az eszméleti állapot károsodásával járnak. A beteg zavartnak tűnik, nem reagál adekvátan, és a rohamra később nem emlékszik (amnézia).</p>
+                <h4 class="font-semibold text-lg mb-2">Jellemző Tünetek:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Tudatzavar:</strong> A beteg "kikapcsol", üresen bámul, nem követi az utasításokat.</li>
+                    <li><strong>Automatizmusok:</strong> Céltalan, ismétlődő mozgások, mint pl. ajakcsattogtatás, csámcsogás, nyeldeklés, ruhapiszkálás, matatás, céltalan járkálás.</li>
+                    <li><strong>Motoros tünetek:</strong> Előfordulhat a felső végtag görcsös, abnormális tartása (dystonia).</li>
+                    <li><strong>Aura:</strong> A rohamot gyakran fokális tudatos tünetek (aura) vezetik be.</li>
+                </ul>
+                 <p class="mt-4">Időtartamuk általában 30 másodperctől 2-3 percig terjed. Gyakran a temporális lebenyből indulnak ki.</p>
+            `
+        },
+        fokalis_generalizalt: {
+            title: 'Fokálisból Bilaterális Tónusos-Klónusos Roham',
+            content: `
+                <p class="mb-4">Ez a rohamtípus az agy egy körülírt területéről (fokálisan) indul, majd az elektromos kisülés gyorsan átterjed az agy mindkét féltekéjére, ami egy generalizált tónusos-klónusos (grand mal) rohamot eredményez.</p>
+                <h4 class="font-semibold text-lg mb-2">Lefolyása:</h4>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li><strong>Kezdet (Fokális fázis):</strong> A roham egy aurával vagy egyéb fokális tünettel (pl. egyoldali rángás) kezdődik. Ez lehet nagyon rövid, a beteg vagy a szemtanúk észre sem veszik.</li>
+                    <li><strong>Generalizáció:</strong> Az agyi aktivitás szétterjed, a beteg elveszti eszméletét.</li>
+                    <li><strong>Tónusos-Klónusos fázis:</strong> A klasszikus grand mal roham tünetei jelennek meg: testmerevség, majd ritmikus rángatózás, nyelvharapás, inkontinencia.</li>
+                    <li><strong>Postictalis fázis:</strong> A roham után mély alvás, zavartság, fejfájás, izomfájdalom jellemző.</li>
+                </ol>
+                <p class="mt-4">Fontos a fokális kezdet felismerése, mert ez meghatározza az epilepszia típusát (fokális epilepszia) és a kezelési stratégiát.</p>
+            `
+        },
+        tonusos_klonusos: {
+            title: 'Tónusos-Klónusos Roham (Grand Mal)',
+            content: `
+                <p class="mb-4">A legismertebb és legdrámaibb rohamforma, amely az agy mindkét féltekéjét érinti. Jellemzően 1-3 percig tart.</p>
+                <h4 class="font-semibold text-lg mb-2">Két fő fázisa van:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Tónusos fázis (kb. 10-20 mp):</strong> Hirtelen eszméletvesztés, az összes izom megfeszül, a test megmerevedik. A beteg gyakran elesik, a légzés leállhat (apnoe), ami cianózist (elkékülést) okozhat. Gyakori a "felkiáltás" a mellkasi izmok görcse miatt.</li>
+                    <li><strong>Klónusos fázis (kb. 30-60 mp):</strong> A végtagok és a test ritmikus, heves rángatózása. Gyakori a nyelvharapás, habos nyáladzás, vizelet- vagy székletinkontinencia.</li>
+                </ul>
+                <h4 class="font-semibold text-lg mt-4 mb-2">Postictalis fázis:</h4>
+                <p>A rángások megszűnése után a beteg petyhüdt, mélyen lélegzik, majd általában mély álomba merül. Az ébredés lassú, zavartsággal, fejfájással, izomfájdalommal jár. Amnézia a rohamra.</p>
+                <p class="mt-2 font-semibold text-red-600">Ha a roham 5 percnél tovább tart, az status epilepticus, ami életveszélyes állapot és azonnali orvosi beavatkozást igényel!</p>
+            `
+        },
+        absence: {
+            title: 'Absence Roham (Petit Mal)',
+            content: `
+                <p class="mb-4">Főként gyermek- és serdülőkorban jellemző generalizált rohamtípus. Rövid, általában 5-15 másodpercig tartó tudatmegszakadással jár.</p>
+                <h4 class="font-semibold text-lg mb-2">Jellemző Tünetek:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>"Elbambulás":</strong> A beteg hirtelen megszakítja tevékenységét, tekintete üressé, merevvé válik.</li>
+                    <li><strong>Reakcióképesség hiánya:</strong> Nem reagál megszólításra, érintésre.</li>
+                    <li><strong>Enyhe motoros jelek:</strong> Gyakori a szemhéjremegés (kb. 3 Hz frekvenciával), enyhe rángások az arcon vagy a karokban, ajakcsattogtatás.</li>
+                    <li><strong>Hirtelen vég:</strong> A roham hirtelen ér véget, a beteg ott folytatja a tevékenységét, ahol abbahagyta, és nem emlékszik a kiesett időre.</li>
+                </ul>
+                <p class="mt-4">Naponta akár több tucatszor, sőt százszor is ismétlődhet, ami jelentősen zavarhatja a tanulmányi teljesítményt. Fontos elkülöníteni a hétköznapi álmodozástól.</p>
+                 <p class="mt-2"><strong>EEG jellegzetesség:</strong> Tipikus 3 Hz-es generalizált tüske-hullám komplexek.</p>
+            `
+        },
+        mioklonusos: {
+            title: 'Mioklónusos Roham',
+            content: `
+                <p class="mb-4">Hirtelen, rövid, akaratlan, áramütésszerű izomrángások jellemzik. A tudatállapot általában megtartott.</p>
+                <h4 class="font-semibold text-lg mb-2">Jellemzők:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Mozgás:</strong> Rövid, gyors rándulások, amelyek érinthetnek egy izomcsoportot, egy végtagot, vagy szimmetrikusan a test mindkét oldalát (pl. vállak, karok).</li>
+                    <li><strong>Tudat:</strong> A beteg általában tudatánál van, észleli a rángásokat.</li>
+                    <li><strong>Időzítés:</strong> Gyakran ébredés után, a reggeli órákban jelentkeznek.</li>
+                    <li><strong>Provokáló tényezők:</strong> Alvásmegvonás, stressz, alkohol, villogó fények (fotoparoxizmális válasz) provokálhatják.</li>
+                </ul>
+                <p class="mt-4">Gyakran a Juvenilis Mioklónusos Epilepszia (JME) részjelensége, ahol absence és generalizált tónusos-klónusos rohamokkal társul.</p>
+            `
+        },
+        tonusos: {
+            title: 'Tónusos Roham',
+            content: `
+                <p class="mb-4">Az izmok hirtelen, néhány másodpercig vagy akár egy percig tartó megfeszülése, merevsége jellemzi. A rohamok gyakran alvás közben jelentkeznek.</p>
+                <h4 class="font-semibold text-lg mb-2">Jellemzők:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Izommerevség:</strong> A test, a törzs vagy a végtagok hirtelen megfeszülnek.</li>
+                    <li><strong>Elesés:</strong> Ha a roham álló helyzetben éri a beteget, a merevség miatt hirtelen, "mint egy tuskó" eshet el, ami sérülésveszélyes.</li>
+                    <li><strong>Tudat:</strong> A tudatállapot általában károsodik.</li>
+                    <li><strong>Időtartam:</strong> Általában rövidek, kevesebb mint 20-60 másodpercig tartanak.</li>
+                </ul>
+                <p class="mt-4">Gyakran súlyos epilepszia szindrómák, például a Lennox-Gastaut szindróma részét képezik.</p>
+            `
+        },
+        atonias: {
+            title: 'Atóniás Roham (Drop Attack)',
+            content: `
+                <p class="mb-4">Az izomtónus hirtelen, átmeneti elvesztése jellemzi, ami miatt a beteg "összecsuklik" és elesik. A rohamok nagyon rövidek, csak néhány másodpercig tartanak.</p>
+                <h4 class="font-semibold text-lg mb-2">Jellemzők:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Hirtelen tónusvesztés:</strong> Az összes izom hirtelen elernyed.</li>
+                    <li><strong>Elesés:</strong> A beteg hirtelen a földre zuhan. Érintheti csak a fejet (fejbiccenés) vagy a térdeket is.</li>
+                    <li><strong>Sérülésveszély:</strong> A hirtelen, védekezés nélküli esés miatt magas a fejsérülések kockázata. A betegek gyakran viselnek védősisakot.</li>
+                    <li><strong>Tudat:</strong> Rövid tudatzavar kísérheti.</li>
+                </ul>
+                <p class="mt-4">Hasonlóan a tónusos rohamokhoz, gyakran súlyos, nehezen kezelhető epilepszia szindrómák (pl. Lennox-Gastaut) tünetei.</p>
+            `
+        },
+        aed_hatas: {
+            title: 'Antiepileptikumok (AED) Fő Hatásmechanizmusai',
+            content: `
+                <p class="mb-4">Az AED-k különböző molekuláris célpontokon keresztül csökkentik az agyi ingerlékenységet. A hatásmechanizmus ismerete segít a racionális gyógyszerválasztásban és a kombinációs terápiákban.</p>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-lg">1. Feszültségfüggő Na+-csatorna blokkolók</h4>
+                        <p class="text-sm text-gray-600">Gátolják a gyors, repetitív idegsejt-kisüléseket. Főként fokális rohamokra hatékonyak.</p>
+                        <p><strong>Képviselők:</strong> Karbamazepin, Oxkarbazepin, Fenitoin, Lamotrigin, Lakozamid.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg">2. GABAerg transzmissziót fokozó szerek</h4>
+                        <p class="text-sm text-gray-600">Fokozzák a fő gátló neurotranszmitter, a GABA hatását.</p>
+                        <p><strong>Képviselők:</strong> Benzodiazepinek (pl. Klonazepám), Barbiturátok (pl. Fenobarbitál), Vigabatrin, Tiagabin.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg">3. Feszültségfüggő Ca2+-csatorna blokkolók</h4>
+                        <p class="text-sm text-gray-600">A T-típusú csatornák gátlása (absence rohamok) vagy az α2δ alegységhez kötődés (neurotranszmitter-felszabadulás gátlása).</p>
+                        <p><strong>Képviselők:</strong> Etosuximid (T-típus), Gabapentin, Pregabalin (α2δ).</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg">4. Glutamát-mediált serkentést csökkentők</h4>
+                        <p class="text-sm text-gray-600">Gátolják a fő serkentő neurotranszmitter, a glutamát receptorait (pl. AMPA, NMDA).</p>
+                        <p><strong>Képviselők:</strong> Perampanel (AMPA), Felbamát (NMDA).</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg">5. Szinaptikus vezikulum protein 2A (SV2A) ligandok</h4>
+                        <p class="text-sm text-gray-600">Modulálják a neurotranszmitter-felszabadulást.</p>
+                        <p><strong>Képviselők:</strong> Levetiracetám, Brivaracetám.</p>
+                    </div>
+                     <div>
+                        <h4 class="font-semibold text-lg">6. Multiplex hatásmechanizmusú szerek</h4>
+                        <p class="text-sm text-gray-600">Több támadásponton is hatnak, gyakran széles spektrumúak.</p>
+                        <p><strong>Képviselők:</strong> Valproát, Topiramát, Zonisamid.</p>
+                    </div>
+                </div>
+            `
+        }
+    };
+
+    function openModal(id) {
+        const data = modalData[id];
+        if (data) {
+            modalBody.innerHTML = `<h2 class="text-3xl font-bold mb-6 text-indigo-700">${data.title}</h2>${data.content}`;
+            modal.style.display = "block";
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>

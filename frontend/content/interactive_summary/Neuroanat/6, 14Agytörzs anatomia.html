@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agytörzs Anatómia - Vizuális Útmutató</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            border: 1px solid #e5e7eb; /* gray-200 */
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b; /* slate-800 */
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 0.75rem;
+        }
+        .sub-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #334155; /* slate-700 */
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eab308; /* yellow-500 */
+            padding-bottom: 0.5rem;
+        }
+         h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4f46e5; /* indigo-600 */
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        ul li {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: #475569; /* slate-600 */
+        }
+        ul li::before {
+            content: '�';
+            position: absolute;
+            left: 0;
+            font-size: 1rem;
+        }
+        .clinical-card {
+            background-color: #fffbeb; /* amber-50 */
+            border: 1px solid #fcd34d; /* amber-300 */
+            border-left-width: 4px;
+            border-left-color: #f59e0b; /* amber-500 */
+        }
+        .blood-supply-card {
+            background-color: #fef2f2; /* red-50 */
+            border: 1px solid #fecaca; /* red-300 */
+        }
+         .tract-card {
+            background-color: #eff6ff; /* blue-50 */
+            border: 1px solid #bfdbfe; /* blue-200 */
+        }
+        .tract-title {
+            font-weight: 600;
+            color: #1d4ed8; /* blue-700 */
+        }
+        strong {
+            color: #1e293b; /* slate-800 */
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-2">Az Agytörzs Anatómiai Atlasza</h1>
+            <p class="text-lg text-slate-500">Interaktív vizuális útmutató vizsgázóknak</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="flex justify-center flex-wrap gap-2 md:gap-4 mb-8" id="tab-nav">
+            <button data-tab="mesencephalon" class="tab-btn active font-semibold py-2 px-4 rounded-lg flex items-center gap-2">
+                <i data-lucide="brain-circuit"></i>
+                <span>Mesencephalon (Középagy)</span>
+            </button>
+            <button data-tab="pons" class="tab-btn font-semibold py-2 px-4 rounded-lg flex items-center gap-2">
+                <i data-lucide="bridge"></i>
+                <span>Pons (Híd)</span>
+            </button>
+            <button data-tab="medulla" class="tab-btn font-semibold py-2 px-4 rounded-lg flex items-center gap-2">
+                <i data-lucide="heart-pulse"></i>
+                <span>Medulla Oblongata (Nyúltvelő)</span>
+            </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <main>
+            <!-- Mesencephalon Content -->
+            <div id="mesencephalon" class="tab-content active">
+                <div class="section-card">
+                    <h2 class="section-title"><i data-lucide="map-pin"></i>Elhelyezkedés és Külső Jellemzők</h2>
+                    <p>A középagy (mesencephalon) az agytörzs legfelső, legrostrálisabb és legrövidebb szakasza. A hidat köti össze a köztiaggyal (diencephalon). Stratégiai elhelyezkedése miatt kritikus átmeneti és integrációs zóna.</p>
+                    <div class="grid md:grid-cols-2 gap-6 mt-6">
+                        <div>
+                            <h4 class="flex items-center gap-2"><i data-lucide="arrow-down-circle"></i>Elülső (ventrális) felszín</h4>
+                            <ul>
+                                <li><strong>Pedunculi cerebri (agykocsányok):</strong> Két masszív, kiemelkedő köteg.</li>
+                                <li><strong>Fossa interpeduncularis:</strong> Az agykocsányok közötti mély árok.</li>
+                                <li><strong>N. oculomotorius (III.):</strong> Itt, a sulcus oculomotoriiban lép ki.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="flex items-center gap-2"><i data-lucide="arrow-up-circle"></i>Hátulsó (dorzális) felszín</h4>
+                            <ul>
+                                <li><strong>Tectum (középagytető):</strong> Itt található a négyes ikertest (corpora quadrigemina).</li>
+                                <li><strong>Colliculi superiores & inferiores:</strong> A vizuális és auditív reflexek központjai.</li>
+                                <li><strong>N. trochlearis (IV.):</strong> Egyedülálló módon itt, a colliculi inferiores alatt lép ki.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <img src="https://i0.wp.com/teachmeanatomy.info/wp-content/uploads/Anterior-and-Posterior-Surfaces-of-the-Brainstem.jpg" alt="Az agytörzs elülső és hátulsó nézete" class="mt-6 w-full rounded-lg shadow-md">
+                </div>
+                
+                <div class="section-card">
+                    <h2 class="section-title"><i data-lucide="puzzle"></i>A Középagy Fő Részei és Belső Szerkezete</h2>
+                    <h3 class="sub-section-title">Tectum mesencephali (Középagytető) 🧠</h3>
+                    <p>A középagy dorzális része, az aquaeductus cerebri mögött. A vizuális és auditív reflexek fő központja.</p>
+                    <ul>
+                        <li><strong>Colliculi Superiores:</strong> Látási reflexközpontok. Fontosak a szakkadikus szemmozgásokban és a figyelem orientációjában. Bemenetet kapnak a retinából és a látókéregből. Kimenete a tractus tectospinalis (fej-szem koordináció).</li>
+                        <li><strong>Colliculi Inferiores:</strong> Hallási központok. A hallópálya fontos állomásai, a hanglokalizáció és a "startle" (ijedtségi) reflex központjai. Bemenetük a lemniscus lateralis.</li>
+                    </ul>
+
+                    <h3 class="sub-section-title">Tegmentum mesencephali (Középagyi Alap) ⚙️</h3>
+                    <p>Az aquaeductus cerebritől ventrálisan elhelyezkedő, magokban és pályákban gazdag terület. Motoros kontroll, fájdalomcsillapítás, arousal és motiváció központja.</p>
+                    
+                    <h4>Fontosabb Magok:</h4>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                        <div class="p-4 bg-slate-100 rounded-lg">
+                            <h5 class="font-bold text-slate-800">Substantia Nigra</h5>
+                            <p><strong>Funkció:</strong> Mozgásindítás, motoros tanulás. A dopaminerg neuronok pusztulása Parkinson-kórt okoz.</p>
+                            <p class="text-sm mt-1"><strong>Részei:</strong> Pars compacta (SNc, dopaminerg), Pars reticulata (SNr, GABAerg).</p>
+                        </div>
+                        <div class="p-4 bg-slate-100 rounded-lg">
+                            <h5 class="font-bold text-slate-800">Nucleus Ruber (Vörös Mag)</h5>
+                            <p><strong>Funkció:</strong> Motoros koordináció, különösen a felső végtag flexor izmainak facilitálása a tractus rubrospinalis révén.</p>
+                        </div>
+                        <div class="p-4 bg-slate-100 rounded-lg">
+                            <h5 class="font-bold text-slate-800">Area Tegmentalis Ventralis (VTA)</h5>
+                            <p><strong>Funkció:</strong> A jutalmazó rendszer központja. A mesolimbikus és mesocorticalis dopaminerg pályák eredete. Szerepe van a motivációban, függőségben.</p>
+                        </div>
+                        <div class="p-4 bg-slate-100 rounded-lg">
+                            <h5 class="font-bold text-slate-800">Periaqueductalis Szürkeállomány (PAG)</h5>
+                            <p><strong>Funkció:</strong> A leszálló fájdalomcsillapító rendszer fő központja. Szerepet játszik a védekező viselkedésben ("harcolj vagy menekülj").</p>
+                        </div>
+                        <div class="p-4 bg-slate-100 rounded-lg">
+                            <h5 class="font-bold text-slate-800">Agyidegmagok</h5>
+                            <p><strong>III. (Oculomotorius) magja & Edinger-Westphal mag:</strong> Szemmozgások, pupillaszűkítés, akkomodáció. <br> <strong>IV. (Trochlearis) magja:</strong> Az ellenoldali m. obliquus superiort idegzi be. <br> <strong>V. (Trigeminus) mesencephalicus magja:</strong> Propriocepció a rágóizmokból.</p>
+                        </div>
+                        <div class="p-4 bg-slate-100 rounded-lg">
+                            <h5 class="font-bold text-slate-800">Formatio Reticularis</h5>
+                            <p><strong>Funkció:</strong> Arousal, alvás-ébrenlét ciklus (ARAS), mozgásindítás (MLR: PPN, CnF), hangulatszabályozás (Raphe magok).</p>
+                        </div>
+                    </div>
+
+                    <h3 class="sub-section-title">Crura Cerebri & Leszálló Pályák 🛣️</h3>
+                     <div class="tract-card p-4 mt-4">
+                        <p>A crus cerebri (agyszár) a középagy legventrálisabb része, a fő leszálló motoros pályák "autópályája".</p>
+                        <ul>
+                            <li class="tract-title"><strong>Tractus Corticospinalis:</strong> Az akaratlagos, finom mozgások legfontosabb pályája.</li>
+                            <li class="tract-title"><strong>Tractus Corticobulbaris:</strong> Az arc, fej és nyak akaratlagos mozgásait vezérli az agyidegmagokon keresztül.</li>
+                            <li class="tract-title"><strong>Tractus Corticopontinus:</strong> A mozgástervezési információkat továbbítja a kisagy felé.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="sub-section-title">Felszálló Érzőpályák (Lemniscusok) 📡</h3>
+                    <p>A tegmentum laterális részén haladnak a fő érzőpályák a thalamus felé.</p>
+                     <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                           <h5 class="font-bold text-emerald-800">Lemniscus Medialis</h5>
+                           <p>Finom tapintás, vibráció, tudatos propriocepció a testből.</p>
+                        </div>
+                         <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                           <h5 class="font-bold text-emerald-800">Lemniscus Spinalis (Tr. Spinothalamicus)</h5>
+                           <p>Fájdalom, hőmérséklet, durva tapintás a testből.</p>
+                        </div>
+                         <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                           <h5 class="font-bold text-emerald-800">Lemniscus Lateralis</h5>
+                           <p>Hallási információk a colliculus inferior felé.</p>
+                        </div>
+                         <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                           <h5 class="font-bold text-emerald-800">Lemniscus Trigeminalis</h5>
+                           <p>Mindenféle érzéskvalitás az arc területéről.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card blood-supply-card">
+                    <h2 class="section-title"><i data-lucide="droplets"></i>Vérellátás</h2>
+                    <p>A középagy vérellátása a <strong>vertebrobasilaris rendszerből</strong> származik, főként az <strong>a. cerebri posterior (PCA)</strong>, az <strong>a. basilaris</strong> és az <strong>a. cerebelli superior (SCA)</strong> perforáló ágaiból. Ezen kis végartériák elzáródása jellegzetes szindrómákat okoz.</p>
+                </div>
+
+                <div class="section-card clinical-card">
+                    <h2 class="section-title"><i data-lucide="activity"></i>Klinikai Vonatkozások: Középagyi Szindrómák</h2>
+                     <div class="space-y-4">
+                        <div>
+                            <h4 class="text-orange-700">Weber-szindróma</h4>
+                            <p><strong>Érintett:</strong> Crus cerebri + III. agyideg rostjai. <br><strong>Tünetek:</strong> Ipsilateralis III. agyidegbénulás (ptosis, "down and out" szemállás, tág pupilla) + Kontralaterális hemiparesis.</p>
+                        </div>
+                        <div>
+                           <h4 class="text-orange-700">Benedikt-szindróma</h4>
+                           <p><strong>Érintett:</strong> Tegmentum (nucleus ruber + III. agyideg rostjai). <br><strong>Tünetek:</strong> Ipsilateralis III. agyidegbénulás + Kontralaterális hemiataxia és tremor.</p>
+                        </div>
+                         <div>
+                           <h4 class="text-orange-700">Claude-szindróma</h4>
+                           <p><strong>Érintett:</strong> Tegmentum dorzomediális része (n. ruber + pedunculus cerebellaris superior + III. agyideg). <br><strong>Tünetek:</strong> Ipsilateralis III. agyidegbénulás + Kontralaterális ataxia.</p>
+                        </div>
+                     </div>
+                </div>
+            </div>
+
+            <!-- Pons Content -->
+            <div id="pons" class="tab-content">
+                <div class="section-card">
+                    <h2 class="section-title"><i data-lucide="map-pin"></i>A Híd (Pons) Külső Anatómiai Jellemzői</h2>
+                    <p>Az agytörzs középső, kitüremkedő része, amely a középagy és a nyúltvelő között helyezkedik el. Nevét a kisagy két féltekéjét összekötő, hídra emlékeztető harántrostjairól kapta.</p>
+                    <div class="grid md:grid-cols-2 gap-6 mt-6">
+                        <div>
+                            <h4 class="flex items-center gap-2"><i data-lucide="arrow-down-circle"></i>Elülső (ventrális) felszín</h4>
+                            <ul>
+                                <li><strong>Basis pontis:</strong> Domború felszín, haránt rostokkal.</li>
+                                <li><strong>Sulcus basilaris:</strong> Középen futó barázda az a. basilaris számára.</li>
+                                <li><strong>Pedunculus cerebellaris medius:</strong> Oldalra folytatódó, a kisagyhoz vezető vaskos köteg.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="flex items-center gap-2"><i data-lucide="arrow-up-circle"></i>Hátulsó (dorzális) felszín</h4>
+                             <ul>
+                                <li>A <strong>IV. agykamra</strong> fenekének felső részét alkotja.</li>
+                                <li><strong>Colliculus facialis:</strong> A VII. agyideg rostjai által képzett kiemelkedés.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <h4 class="flex items-center gap-2 mt-4"><i data-lucide="sparkles"></i>Kilépő agyidegek</h4>
+                     <p>V. (Trigeminus), VI. (Abducens), VII. (Facialis), VIII. (Vestibulocochlearis).</p>
+                     <img src="https://www.neuroscientificallychallenged.com/hs-fs/hubfs/posts/images/brainstem-labeled.png?width=1800&name=brainstem-labeled.png" alt="Az agytörzs részei, kiemelve a hidat" class="mt-6 w-full rounded-lg shadow-md">
+                </div>
+
+                <div class="section-card">
+                    <h2 class="section-title"><i data-lucide="puzzle"></i>A Híd Belső Szerkezete</h2>
+                    <h3 class="sub-section-title">Basis Pontis (Ventrális rész) 🛣️</h3>
+                    <p>Főként leszálló motoros pályákból és a hozzájuk kapcsolódó magokból áll.</p>
+                    <ul>
+                        <li><strong>Leszálló pályák:</strong> Tractus corticospinalis, corticobulbaris, corticopontinus.</li>
+                        <li><strong>Nuclei pontis (Hídmagvak):</strong> A corticopontinus pályák itt kapcsolódnak át. Axonjaik (fibrae pontis transversae) kereszteződve a kisagyba mennek, létrehozva a cortico-ponto-cerebellaris kört, ami a mozgáskoordináció alapja.</li>
+                    </ul>
+
+                    <h3 class="sub-section-title">Tegmentum Pontis (Dorzális rész) 🧠</h3>
+                    <p>Agyidegmagokat, felszálló pályákat és a formatio reticularist tartalmazza.</p>
+                     <h4>Fontosabb Magok:</h4>
+                     <ul>
+                        <li><strong>V. agyideg magjai:</strong> Nucleus motorius (rágóizmok), Nucleus sensibilis principalis (epikritikus tapintás arcról).</li>
+                        <li><strong>VI. agyideg magja:</strong> Nucleus nervi abducentis (m. rectus lateralis beidegzése).</li>
+                        <li><strong>VII. agyideg magjai:</strong> Nucleus nervi facialis (mimikai izmok), Nucleus salivatorius superior (könny- és nyálmirigyek).</li>
+                        <li><strong>VIII. agyideg magjai:</strong> Nuclei vestibulares (egyensúly), Nuclei cochleares (hallás).</li>
+                     </ul>
+                      <h4>Felszálló pályák:</h4>
+                      <p>Itt halad át a lemniscus medialis, lemniscus spinalis és a lemniscus lateralis.</p>
+                </div>
+                 <div class="section-card clinical-card">
+                    <h2 class="section-title"><i data-lucide="activity"></i>Klinikai Vonatkozások</h2>
+                     <p>A híd sérülései súlyos, változatos tüneteket okoznak. A basis pontis kétoldali kiterjedt károsodása (pl. a. basilaris trombózisa miatt) <strong>"Locked-in" szindrómához</strong> vezethet. A beteg tudata tiszta, de teljesen béna (tetraplegia) és a beszédképtelen (anarthria), kommunikálni csak vertikális szemmozgásokkal és pislogással képes.</p>
+                </div>
+            </div>
+
+            <!-- Medulla Oblongata Content -->
+            <div id="medulla" class="tab-content">
+                <div class="section-card">
+                    <h2 class="section-title"><i data-lucide="map-pin"></i>A Nyúltvelő (Medulla Oblongata) Külső Anatómiai Jellemzői</h2>
+                    <p>Az agytörzs legkaudálisabb része, a híd és a gerincvelő között. Létfontosságú vegetatív központokat tartalmaz.</p>
+                    <div class="grid md:grid-cols-2 gap-6 mt-6">
+                        <div>
+                           <h4 class="flex items-center gap-2"><i data-lucide="arrow-down-circle"></i>Elülső (ventrális) felszín</h4>
+                            <ul>
+                                <li><strong>Pyramisok:</strong> A tractus corticospinalis rostjai alkotják. Alul a <strong>decussatio pyramidum</strong> (motoros kereszteződés) látható.</li>
+                                <li><strong>Oliva:</strong> Jellegzetes ovális kiemelkedés, alatta a nucleus olivaris inferior található.</li>
+                           </ul>
+                        </div>
+                        <div>
+                             <h4 class="flex items-center gap-2"><i data-lucide="arrow-up-circle"></i>Hátulsó (dorzális) felszín</h4>
+                            <ul>
+                               <li><strong>Fasciculus gracilis és cuneatus:</strong> Felszálló érzőpályák, melyek a <strong>tuberculum gracile</strong> és <strong>cuneatum</strong> képletekben végződnek.</li>
+                               <li>A IV. agykamra alsó részét alkotja.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <h4 class="flex items-center gap-2 mt-4"><i data-lucide="sparkles"></i>Kilépő agyidegek</h4>
+                     <p>IX. (Glossopharyngeus), X. (Vagus), XI. (Accessorius), XII. (Hypoglossus).</p>
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Medulla_oblongata.PNG" alt="A nyúltvelő külső anatómiai képletei" class="mt-6 w-full rounded-lg shadow-md">
+                </div>
+
+                <div class="section-card">
+                    <h2 class="section-title"><i data-lucide="puzzle"></i>A Nyúltvelő Belső Szerkezete</h2>
+                    <p>A belső szerkezet a gerincvelőhöz képest jelentősen átrendeződik. Két fontos kereszteződés található itt.</p>
+                    <ul>
+                        <li><strong>Decussatio pyramidum (Motoros kereszteződés):</strong> A tractus corticospinalis rostjainak 85-90%-a itt kereszteződik át az ellenoldalra.</li>
+                        <li><strong>Decussatio lemniscorum (Szenzoros kereszteződés):</strong> A nucleus gracilisből és cuneatusból induló rostok (lemniscus medialis) itt kereszteződnek.</li>
+                    </ul>
+
+                    <h3 class="sub-section-title">Fontos Magok és Központok</h3>
+                    <h4>Agyidegmagvak:</h4>
+                    <p>Itt találhatók a IX., X., XI., XII. agyidegek motoros, paraszimpatikus és érző magcsoportjai (pl. Nucleus ambiguus, Nucleus tractus solitarii, Nucleus dorsalis nervi vagi, Nucleus nervi hypoglossi).</p>
+                    <h4>Relé Magok:</h4>
+                     <ul>
+                         <li><strong>Nucleus gracilis & cuneatus:</strong> A hátsó kötegi rendszer átkapcsoló állomásai.</li>
+                         <li><strong>Nucleus olivaris inferior:</strong> Fontos szerepet játszik a motoros tanulásban, a kisaggyal való szoros kapcsolatán keresztül.</li>
+                     </ul>
+
+                    <h3 class="sub-section-title">Létfontosságú (Vitális) Vegetatív Központok ❤️‍🩹</h3>
+                    <p>A nyúltvelői formatio reticularisban helyezkednek el, és az életfenntartó reflexeket szabályozzák.</p>
+                     <ul>
+                        <li><strong>Légzőközpont:</strong> Szabályozza a légzés ritmusát és mélységét.</li>
+                        <li><strong>Keringési (vasomotor) központ:</strong> Szabályozza a szívműködést és a vérnyomást.</li>
+                        <li><strong>Egyéb reflexközpontok:</strong> Nyelés, hányás, köhögés, tüsszentés.</li>
+                     </ul>
+                </div>
+
+                <div class="section-card blood-supply-card">
+                    <h2 class="section-title"><i data-lucide="droplets"></i>Vérellátás és Klinikai Szindrómák</h2>
+                    <p>A vérellátási zavarok jellegzetes, a károsodott területnek megfelelő tüneteket okoznak.</p>
+                    <div class="overflow-x-auto mt-4">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-red-200">
+                                    <th class="p-2 border border-red-300">Artéria</th>
+                                    <th class="p-2 border border-red-300">Szindróma</th>
+                                    <th class="p-2 border border-red-300">Főbb Tünetek</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white">
+                                    <td class="p-2 border border-red-300 font-semibold">A. spinalis anterior</td>
+                                    <td class="p-2 border border-red-300 font-semibold">Mediális Nyúltvelő Szindróma (Dejerine)</td>
+                                    <td class="p-2 border border-red-300">Kontralaterális hemiparesis, kontralaterális epikritikus érzéskiesés, ipsilateralis nyelvbénulás.</td>
+                                </tr>
+                                <tr class="bg-red-50">
+                                    <td class="p-2 border border-red-300 font-semibold">A. cerebelli inf. post. (PICA)</td>
+                                    <td class="p-2 border border-red-300 font-semibold">Laterális Nyúltvelő Szindróma (Wallenberg)</td>
+                                    <td class="p-2 border border-red-300">Ipsilateralis: arc-fájdalom/hő kiesés, Horner-szindróma, ataxia, dysphagia. Kontralateralis: testi fájdalom/hő kiesés.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <footer class="text-center p-4 text-slate-500 text-sm">
+        <p>Létrehozva neuroanatómiai jegyzetek alapján, vizsgára készülés céljából.</p>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Tab functionality
+        const tabNav = document.getElementById('tab-nav');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+
+        tabNav.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const tabId = button.dataset.tab;
+            
+            // Update button styles
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // Update content visibility
+            tabContents.forEach(content => {
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+�

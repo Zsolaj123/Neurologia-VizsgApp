@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Tételek: Interaktív Tanulási Segédlet (3. rész)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px -2px rgba(0,0,0,0.2);
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background-color: currentColor;
+            border-radius: 2px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-content {
+            flex-grow: 1;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px -5px rgb(0 0 0 / 0.1);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            font-weight: 700;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        h3 {
+            font-size: 1.875rem; /* 30px */
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+        }
+        h4 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .icon {
+            width: 1.5rem; /* 24px */
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        .header-icon {
+             width: 2.25rem; /* 36px */
+            height: 2.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Color Themes */
+        .reflex-theme { --theme-color: #ef4444; --theme-bg: #fee2e2; }
+        .cerebellum-theme { --theme-color: #8b5cf6; --theme-bg: #f5f3ff; }
+        .ataxia-theme { --theme-color: #10b981; --theme-bg: #f0fdf4; }
+        
+        h3, h4 { color: var(--theme-color); }
+        th { background-color: var(--theme-bg); color: var(--theme-color); }
+        
+        .exam-tip-card {
+            background-color: #fefce8;
+            border-color: #eab308;
+            color: #a16207;
+        }
+        .exam-tip-card h4, .exam-tip-card .icon {
+            color: #ca8a04;
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Neurológiai Tételek (3. rész)</h1>
+            <p class="text-xl text-gray-500 mt-3">Interaktív tanulási segédlet vizsgához</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12 p-2 bg-gray-100 rounded-full shadow-inner">
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="reflex">Reflexeltérések</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="cerebellum">Kisagyi Tünetek</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="ataxia">Ataxiák</button>
+        </div>
+
+        <!-- Content Sections -->
+        <main>
+            <!-- Reflexeltérések Section -->
+            <section id="reflex-content" class="tab-content reflex-theme">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" /></svg>
+                            Reflexeltérések
+                        </h3>
+                        <p class="text-lg">A reflexvizsgálat a neurológiai diagnosztika egyik sarokköve. A reflexek eltérései (kiesés, renyheség, fokozódás) pontosan jelzik a központi (UMN) vagy perifériás (LMN) idegrendszeri károsodás helyét és jellegét.</p>
+                    </div>
+
+                    <div class="card exam-tip-card md:col-span-3">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 15.75l-1.42-1.419A9 9 0 0112 3c4.075 0 7.695 2.226 9.37 5.488l-1.42 1.42A7.5 7.5 0 0012 4.5a7.5 7.5 0 00-6.375 3.633z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75h.007v.008H12v-.008z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75a2.25 2.25 0 00-2.25 2.25v.316l-1.5 3.375a.75.75 0 001.06 1.06l3.375-1.5H15a2.25 2.25 0 002.25-2.25v-2.25a2.25 2.25 0 00-2.25-2.25H9.75A2.25 2.25 0 007.5 15v.316l.338.75" /></svg>
+                           Vizsga Kérdés: Centrális (UMN) vs. Perifériás (LMN) Laesio
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div>
+                                <strong class="text-lg">Felső motoneuron (UMN) károsodás</strong>
+                                <ul class="list-disc list-inside space-y-1 mt-2">
+                                    <li><strong>Reflexek:</strong> Fokozottak (hyperreflexia), clonus.</li>
+                                    <li><strong>Kóros reflexek:</strong> Jelen vannak (pl. Babinski-jel).</li>
+                                    <li><strong>Tónus:</strong> Spasztikus.</li>
+                                    <li><strong>Atrófia:</strong> Nincs vagy késői, inaktivitásos.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong class="text-lg">Alsó motoneuron (LMN) károsodás</strong>
+                                 <ul class="list-disc list-inside space-y-1 mt-2">
+                                    <li><strong>Reflexek:</strong> Csökkentek vagy hiányoznak (hypo-/areflexia).</li>
+                                    <li><strong>Kóros reflexek:</strong> Nincsenek.</li>
+                                    <li><strong>Tónus:</strong> Petyhüdt (hypotonia).</li>
+                                    <li><strong>Atrófia:</strong> Korai és kifejezett. Fasciculatiók lehetnek.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5M11.25 4.5l-7.5 7.5 7.5 7.5" /></svg>
+                           Kóros Reflexek (Pyramisjelek)
+                        </h4>
+                        <div class="card-content">
+                            <p>Ezek a felső motoneuron (pyramispálya) sérülésének legspecifikusabb jelei.</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Babinski-jel:</strong> A talp külső élének ingerlésekor a nagylábujj hátrahajlik (dorsalflexio), a többi ujj legyezőszerűen szétterül. 2 éves kor felett mindig kóros.</li>
+                                <li><strong>Hoffmann/Trömner-jel:</strong> A középső ujj megpöccintésére a hüvelyk- és mutatóujj behajlik. Az egyoldali vagy aszimmetrikus kiválthatóság a kóros.</li>
+                                <li><strong>Clonus:</strong> Az izom hirtelen megnyújtásakor ritmikus, önfenntartó rángás (pl. bokaclonus, patellaclonus). Súlyos spaszticitás jele.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card md:col-span-2 table-container">
+                        <h4>Főbb Sajátreflexek és Beidegzésük</h4>
+                        <table>
+                            <thead>
+                                <tr><th>Reflex</th><th>Szegmentális Beidegzés</th><th>Kiváltás</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Bicepsreflex</strong></td><td>C5-C6</td><td>A bicepsz ínára mért ütés a könyökhajlatban.</td></tr>
+                                <tr><td><strong>Tricepsreflex</strong></td><td>C7-C8</td><td>A tricepsz ínára mért ütés a könyök felett.</td></tr>
+                                <tr><td><strong>Patellareflex</strong></td><td>L2-L4</td><td>A térdkalács alatti ínra mért ütés.</td></tr>
+                                <tr><td><strong>Achilles-reflex</strong></td><td>S1-S2</td><td>Az Achilles-ínra mért ütés.</td></tr>
+                            </tbody>
+                        </table>
+                        <p class="mt-4"><strong>Jendrassik-műfogás:</strong> A renyhe reflexek kiváltását segíti a beteg figyelmének elterelésével és a felsőbb központok gátlásának csökkentésével (pl. kezek összekulcsolása és széthúzása).</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Kisagyi tünetek Section -->
+            <section id="cerebellum-content" class="tab-content cerebellum-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" /></svg>
+                            A Kisagy Károsodásának Tünetei
+                        </h3>
+                        <p class="text-lg">A kisagy (cerebellum) a mozgáskoordináció, egyensúly, motoros tanulás és izomtónus szabályozásának központja. Sérülése jellegzetes, a károsodás helyétől (vermis, hemiszférium) függő tünetegyüttest okoz, jellemzően a laesióval azonos oldalon (ipsilateralisan).</p>
+                    </div>
+                    
+                    <div class="card md:col-span-3">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
+                            Kardinális Motoros Tünetek (DANISH Mnemonik)
+                        </h4>
+                        <div class="card-content">
+                            <ul class="list-disc list-inside space-y-2 mt-2">
+                                <li><strong>D - Dysdiadochokinesia:</strong> A gyors, alternáló mozgások (pl. "becsavarom a villanykörtét") ügyetlenné, darabossá válnak.</li>
+                                <li><strong>A - Ataxia:</strong> A mozgáskoordináció általános zavara. Megnyilvánulhat a végtagokon (végtagataxia) vagy a törzsben (törzsataxia).</li>
+                                <li><strong>N - Nystagmus:</strong> Akaratlan, ritmikus szemmozgás, gyakran tekintésirányú.</li>
+                                <li><strong>I - Intenciós tremor:</strong> Célirányos mozgás közben, a célhoz közeledve fokozódó remegés.</li>
+                                <li><strong>S - Slurred/Scanning Speech (Dysarthria):</strong> A beszéd lassú, elmosódott, tagolt, "skandáló" jellegű.</li>
+                                <li><strong>H - Hypotonia:</strong> Csökkent izomtónus, "ingareflex" kiválthatósága.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                            Funkcionális Felosztás és Tünetek
+                        </h4>
+                        <div class="card-content">
+                            <p class="mb-2"><strong>Vestibulocerebellum (Archi-):</strong> Egyensúly, szemmozgás. Károsodása: <strong>törzsataxia, nystagmus, vertigo.</strong></p>
+                            <p class="mb-2"><strong>Spinocerebellum (Paleo-):</strong> Testtartás, járás. Károsodása: <strong>járásataxia,</strong> "részeges" járás.</p>
+                            <p><strong>Cerebrocerebellum (Neo-):</strong> Mozgástervezés, finommotorika. Károsodása: <strong>végtagataxia, dysmetria, intenciós tremor.</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="card exam-tip-card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                            Nem-Motoros Tünetek: CCAS
+                        </h4>
+                        <div class="card-content">
+                        <p>A kisagy a kognícióban és az érzelmekben is szerepet játszik. Károsodása a <strong>Cerebelláris Kognitív Affektív Szindrómát (CCAS)</strong> okozhatja.</p>
+                        <ul class="list-disc list-inside space-y-1 mt-2">
+                            <li><strong>Végrehajtó funkciók zavara:</strong> tervezési, munkamemória problémák.</li>
+                            <li><strong>Nyelvi zavarok:</strong> a beszéd dallamának (prozódia) zavara.</li>
+                            <li><strong>Érzelmi labilitás,</strong> személyiségváltozás.</li>
+                        </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Ataxiák Section -->
+            <section id="ataxia-content" class="tab-content ataxia-theme">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                         <h3 class="flex items-center">
+                             <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" /></svg>
+                             Ataxiák Differenciáldiagnosztikája
+                         </h3>
+                        <p class="text-lg">Az ataxia (mozgáskoordinációs zavar) nem csak a kisagy betegsége lehet. A klinikai kép alapján el kell különíteni a cerebelláris, szenzoros és vesztibuláris ataxiát. A Romberg-próba kulcsfontosságú a differenciálásban.</p>
+                    </div>
+
+                    <div class="card exam-tip-card">
+                        <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                           A Romberg-próba Értékelése
+                        </h4>
+                        <div class="card-content">
+                            <p>A beteget megkérjük, álljon zárt lábakkal, először nyitott, majd csukott szemmel.</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Cerebelláris ataxia:</strong> Már nyitott szemmel is instabil. A szem becsukása <strong>nem vagy alig rontja</strong> a helyzetet.</li>
+                                <li><strong>Szenzoros ataxia:</strong> Nyitott szemmel stabil lehet (vizuális kompenzáció), de a szem becsukásakor <strong>drámaian romlik, dől, elesik.</strong> Ez a pozitív Romberg-jel.</li>
+                                 <li><strong>Vesztibuláris ataxia:</strong> A szem becsukása rontja az egyensúlyt, és a beteg <strong>konzisztensen a károsodott oldal felé dől.</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card md:col-span-3 lg:col-span-3 table-container">
+                        <h4>Az Ataxiák Elkülönítő Jegyei</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Jellemző</th>
+                                    <th>Cerebelláris Ataxia</th>
+                                    <th>Szenzoros Ataxia</th>
+                                    <th>Vesztibuláris Ataxia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Romberg-próba</strong></td>
+                                    <td>Negatív (csukott szem alig ront)</td>
+                                    <td><strong>Pozitív</strong> (csukott szem drámaian ront)</td>
+                                    <td>Pozitív (konzisztens dőlés a laesio felé)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Járás</strong></td>
+                                    <td>Széles alapú, "részeges", támolygó</td>
+                                    <td>Széles alapú, "dobogó", "kalapáló", a lábát figyeli</td>
+                                    <td>Deviál a laesio felé, "csillagjárás"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Vertigo</strong></td>
+                                    <td>Lehet, de nem domináns</td>
+                                    <td>Nincs</td>
+                                    <td><strong>Gyakori, intenzív, forgó jellegű</strong></td>
+                                </tr>
+                                 <tr>
+                                    <td><strong>Nystagmus</strong></td>
+                                    <td>Gyakori (tekintésirányú)</td>
+                                    <td>Nincs</td>
+                                    <td>Gyakori (horizonto-rotáló)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mélyérzés</strong></td>
+                                    <td>Ép</td>
+                                    <td><strong>Csökkent vagy hiányzik</strong> (vibráció, helyzetérzés)</td>
+                                    <td>Ép</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ínreflexek</strong></td>
+                                    <td>Normálisak vagy renyhék (penduláló)</td>
+                                    <td>Gyakran renyhék vagy kiesettek</td>
+                                    <td>Normálisak</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        const colorMap = {
+            reflex: '#ef4444',
+            cerebellum: '#8b5cf6',
+            ataxia: '#10b981'
+        };
+
+        const setActiveTab = (tab) => {
+             // Update button styles
+            tabButtons.forEach(btn => {
+                const btnTab = btn.dataset.tab;
+                if (btnTab === tab) {
+                    btn.classList.add('active');
+                    btn.style.backgroundColor = colorMap[btnTab];
+                    btn.style.color = 'white';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.backgroundColor = '#e5e7eb';
+                    btn.style.color = '#4b5563';
+                }
+            });
+
+            // Update content visibility
+            tabContents.forEach(content => {
+                if (content.id === tab + '-content') {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        };
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                setActiveTab(button.dataset.tab);
+            });
+        });
+
+        // Set initial active tab
+        setActiveTab('reflex');
+    </script>
+
+</body>
+</html>

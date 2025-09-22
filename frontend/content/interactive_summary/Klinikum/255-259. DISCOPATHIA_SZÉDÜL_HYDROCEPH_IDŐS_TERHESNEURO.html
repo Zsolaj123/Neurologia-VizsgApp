@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speciális Neurológiai Kórképek Részletes Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-primary: #047857; /* emerald-700 */
+            --c-primary-dark: #064e3b; /* emerald-900 */
+            --c-secondary: #be123c; /* rose-700 */
+            --c-tertiary: #4f46e5; /* indigo-600 */
+            --c-text-dark: #1f2937;
+            --c-text-light: #4b5563;
+            --c-bg-light: #f8fafc;
+            --c-border: #e5e7eb;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--c-bg-light);
+            color: var(--c-text-dark);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-link.active {
+            color: var(--c-primary);
+            font-weight: 700;
+            border-bottom: 3px solid var(--c-primary);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--c-text-dark);
+            margin-bottom: 3rem;
+            border-bottom: 4px solid;
+            padding-bottom: 1.5rem;
+        }
+        .section-title svg {
+            width: 4rem;
+            height: 4rem;
+            margin-right: 1.5rem;
+            stroke-width: 1.5;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border: 1px solid var(--c-border);
+            border-radius: 0.75rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--c-border);
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #374151;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background-color: #f0fdf4; /* green-50 */
+        }
+        .key-term {
+            font-weight: 700;
+            color: var(--c-primary-dark);
+            background-color: #d1fae5;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        details {
+            background: #fafafa;
+            border-radius: 0.5rem;
+            border: 1px solid var(--c-border);
+            margin-top: 1.5rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+            color: #065f46; /* emerald-800 */
+            font-size: 1.1rem;
+        }
+        summary::after {
+            content: '＋';
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .details-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--c-border);
+            line-height: 1.75;
+        }
+        .tab-button.active {
+            background-color: var(--c-secondary);
+            color: white;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        .tab-button:hover {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-emerald-700">Speciális Neurológia Tudástár</h1>
+            <nav class="hidden md:flex space-x-8 text-lg">
+                <a href="#gerinc" class="nav-link hover:text-emerald-600 transition pb-2">Gerincbetegségek</a>
+                <a href="#szedules" class="nav-link hover:text-emerald-600 transition pb-2">Szédülés & Hydrocephalus</a>
+                <a href="#specialis-populaciok" class="nav-link hover:text-emerald-600 transition pb-2">Speciális Populációk</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#gerinc" class="block py-2 text-lg nav-link">Gerincbetegségek</a>
+            <a href="#szedules" class="block py-2 text-lg nav-link">Szédülés & Hydrocephalus</a>
+            <a href="#specialis-populaciok" class="block py-2 text-lg nav-link">Speciális Populációk</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Spinal Disorders Section -->
+        <section id="gerinc" class="mb-20 scroll-mt-24">
+            <div class="section-title border-primary text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0v11.25a2.25 2.25 0 01-2.25 2.25h-1.5m1.5-13.5l-3.75 4.5m-3.75-4.5l3.75 4.5m-3.75-4.5l-3.75 4.5m6.75 9l-3.75-4.5m3.75 4.5l3.75-4.5m3.75 4.5l-3.75-4.5m0 0l-3.75 4.5" /></svg>
+                <h2>Gerincbetegségek: Discopathia és Discus Hernia</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-emerald-800">Kórélettan és Klinikai Kép</h3>
+                    <p class="text-lg mb-4">A <strong class="key-term">discopathia</strong> a porckorongok korral járó elhasználódása, mely a <strong class="key-term">discus hernia</strong> (gerincsérv) kialakulásához vezethet. A sérv az ideggyökökre (<span class="key-term">radiculopathia</span>) vagy a gerincvelőre (<span class="key-term">myelopathia</span>) gyakorolt nyomással okoz tüneteket.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Tünetek</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Radiculopathia:</strong> Éles, egy dermatómába sugárzó fájdalom (pl. <strong class="key-term">ischias</strong>), zsibbadás, izomgyengeség, reflexkiesés.</li>
+                                <li><strong>Myelopathia:</strong> Járászavar, ügyetlenség, spaszticitás, vizelet- és székletürítési zavarok.</li>
+                                <li><strong class="text-red-600">Vörös Zászlók:</strong> A <strong class="key-term">Cauda Equina Szindróma</strong> (lovaglónadrág-érzészavar, vizelet-/székletürítési zavar) azonnali sebészeti beavatkozást igénylő vészhelyzet!</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Diagnosztika</h4>
+                             <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Fizikális vizsgálat:</strong> Provokációs tesztek (pl. Lasègue-jel), izomerő, reflexek, érzékelés vizsgálata.</li>
+                                <li><strong>Képalkotás:</strong> Az <strong class="key-term">MRI</strong> a választandó módszer a sérv és a kompresszió részletes ábrázolására.</li>
+                                <li><strong>Elektrofiziológia (EMG/NCS):</strong> Az idegkárosodás mértékének és helyének felmérésére.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-emerald-800">Kezelési Stratégiák</h3>
+                    <p class="text-lg mb-4">A kezelés célja a fájdalomcsillapítás és a funkció helyreállítása. A legtöbb beteg konzervatív terápiára javul.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Kezelési Típus</th><th>Leírás és Példák</th><th>Indikációk</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Konzervatív Terápia</td>
+                                    <td>Rövid ideig tartó pihenés, <strong class="key-term">fájdalomcsillapítók</strong> (NSAID-ok), izomlazítók, <strong class="key-term">gyógytorna</strong> (törzsizom-erősítés, McKenzie módszer), manuálterápia.</td>
+                                    <td>A legtöbb akut radiculopathiás esetben ez az első vonalbeli kezelés.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Intervenciós Fájdalomcsillapítás</td>
+                                    <td><strong class="key-term">Epidurális szteroid injekciók</strong>, ideggyöki blokádok a gyulladás és fájdalom csökkentésére.</td>
+                                    <td>Erős, a konzervatív kezelésre nem reagáló radiculáris fájdalom esetén.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Sebészeti Kezelés</td>
+                                    <td><strong class="key-term">Microdiscectomia</strong>, laminectomia a kompresszió megszüntetésére.</td>
+                                    <td><strong class="text-red-600">Abszolút indikáció:</strong> Cauda Equina Szindróma. <br><strong>Relatív indikáció:</strong> Súlyos/progrediáló neurológiai deficit, tűrhetetlen fájdalom.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dizziness & Hydrocephalus Section -->
+        <section id="szedules" class="mb-20 scroll-mt-24">
+            <div class="section-title border-secondary text-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a6 6 0 01-1.27 5.11m-4.57 0a6 6 0 01-5.84-7.38m5.84 2.56H14.25a6 6 0 01-5.84-7.38m5.84 2.56V14.25a6 6 0 01-1.27-5.11m-4.57 0a6 6 0 01-5.84 7.38m5.84-2.56H5.91m12.58 0a6 6 0 01-5.84 7.38m5.84-2.56a6 6 0 011.27 5.11M14.25 12a6 6 0 01-5.84 7.38m5.84-2.56a6 6 0 01-1.27 5.11M14.25 12a6 6 0 016 6m-6-6a6 6 0 01-5.84-7.38M14.25 12H5.91" /></svg>
+                <h2>Szédülés és Hydrocephalus</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-amber-800">A Szédülős Beteg Kivizsgálása</h3>
+                    <p class="text-lg mb-4">A szédülés gyakori, de nem specifikus panasz. A diagnózis kulcsa a tünetek pontosítása és a szédülés típusának (vertigo, presyncope, egyensúlyzavar) meghatározása, melyet az időtartam és a kiváltó tényezők analízise segít.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Szédülés Típusa</th><th>Jellemzők</th><th>Gyakori Okok</th><th>Diagnosztikai Kulcs</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Perifériás Vertigo</td>
+                                    <td>Hirtelen, heves, forgó jellegű rohamok, hányinger. A nystagmus horizontális, fixációra gátlódik.</td>
+                                    <td><strong class="key-term">BPPV</strong>, vestibularis neuronitis, Menière-betegség.</td>
+                                    <td><strong class="key-term">Dix-Hallpike manőver</strong> (BPPV), HINTS vizsgálat (neuronitis).</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Centrális Vertigo</td>
+                                    <td>Kevésbé heves, de tartósabb szédülés. A nystagmus lehet vertikális, többirányú. Gyakran társul más neurológiai tünetekkel.</td>
+                                    <td><strong class="text-red-600">Stroke (agytörzs/kisagy)</strong>, sclerosis multiplex, daganat.</td>
+                                    <td><strong class="key-term">HINTS vizsgálóeljárás</strong>, sürgős MRI.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-amber-800">Hydrocephalusok Elkülönítése</h3>
+                    <p class="text-lg mb-4">A hydrocephalus a liquor (CSF) kóros felhalmozódása az agykamrákban. A kezelés az októl és a típustól függ.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Típus</th><th>Patofiziológia</th><th>Jellemző Okok</th><th>Képalkotó Jellegzetességek</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Kommunikáló</td>
+                                    <td>A CSF felszívódása gátolt a subarachnoidealis térben.</td>
+                                    <td>SAH, meningitis utáni hegesedés.</td>
+                                    <td>Arányos kamra- és külső liquortér tágulat.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Nem-kommunikáló (Obstruktív)</td>
+                                    <td>A CSF elfolyása a kamrarendszeren belül akadályozott.</td>
+                                    <td>Aqueductus stenosis, daganat.</td>
+                                    <td>Az elzáródás feletti kamrák aránytalan tágulata.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Normál Nyomású (NPH)</td>
+                                    <td>Krónikus felszívódási zavar, normális nyitó nyomással.</td>
+                                    <td>Idiopátiás vagy másodlagos.</td>
+                                    <td>Aránytalan kamratágulat (<strong class="key-term">DESH-jel</strong>).</td>
+                                </tr>
+                                 <tr>
+                                    <td class="font-bold">Ex vacuo</td>
+                                    <td>Nem valódi hydrocephalus; agyi atrófia okozza.</td>
+                                    <td>Alzheimer-kór, agyi infarktus.</td>
+                                    <td>A kamrák és a sulcusok arányos tágulata.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <details>
+                        <summary>Normál Nyomású Hydrocephalus (NPH) Diagnosztikai Kritériumai</summary>
+                         <div class="details-content">
+                            <p>A diagnózis a klinikai képen, képalkotáson és a liquorlecsapolásra adott válaszon alapul.</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Klinikai Kép (Hakim-triász):</strong> Járászavar, kognitív hanyatlás, vizeletinkontinencia.</li>
+                                <li><strong>Képalkotás (MRI):</strong> Kamratágulat (Evans-index > 0.3), szűk callosalis szög, DESH-jel.</li>
+                                <li><strong>Diagnosztikus Teszt:</strong> A nagy volumenű liquorlecsapolás ("Tap Test") utáni klinikai javulás jó prognosztikai jel a VP sönt műtét sikerességére.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- Neurology of Special Populations Section -->
+        <section id="specialis-populaciok" class="scroll-mt-24">
+            <div class="section-title border-tertiary text-tertiary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.28a4.5 4.5 0 00-1.88-2.282S7.98 10.06 6 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <h2>Neurológia Speciális Populációkban</h2>
+            </div>
+            <div class="content-card">
+                <h3 class="text-3xl font-bold mb-6 text-indigo-800">Terhesség és Idős Kor</h3>
+                <p class="text-lg mb-6">A terhesség és az idős kor speciális megfontolásokat igényel a neurológiai betegségek kezelésében, figyelembe véve a magzati biztonságot, illetve a multimorbiditást és polifarmáciát.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Betegség</th><th>Megfontolások Terhesség Alatt</th><th>Megfontolások Idős Korban</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold">Epilepszia</td>
+                                <td>Prekoncepcionális tanácsadás, AED optimalizálás (pl. lamotrigin, levetiracetam), magas dózisú folsav.</td>
+                                <td>Fokozott gyógyszerinterakciós és mellékhatás-kockázat.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Sclerosis Multiplex</td>
+                                <td>Relapszusok aránya csökken, de postpartum nő. DMT-k módosítása szükséges.</td>
+                                <td>A betegség lefolyása változhat, a progresszív formák gyakoribbak.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Fejfájás (Migrén)</td>
+                                <td>Gyakran javul. Akut kezelés: paracetamol. Triptánok óvatosan.</td>
+                                <td>A "vörös zászlók" felismerése kritikus a másodlagos okok kizárására.</td>
+                            </tr>
+                             <tr>
+                                <td class="font-bold">Stroke</td>
+                                <td>A kockázat nő, különösen preeclampsia esetén. A kezelés (IVT, MT) mérlegelendő.</td>
+                                <td>Gyakori. A rehabilitáció és a szövődmények kezelése kiemelt fontosságú.</td>
+                            </tr>
+                             <tr>
+                                <td class="font-bold">Demencia</td>
+                                <td>-</td>
+                                <td>A leggyakoribb neurológiai probléma. A reverzibilis okok kizárása és a nem-gyógyszeres kezelések hangsúlyosak.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>&copy; 2025 Speciális Neurológia Tudástár. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

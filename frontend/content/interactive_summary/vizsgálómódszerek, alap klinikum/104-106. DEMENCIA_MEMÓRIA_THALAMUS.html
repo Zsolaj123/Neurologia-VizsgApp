@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kognitív Neurológia Vizuális Jegyzet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .main-gradient-bg {
+            background: linear-gradient(135deg, #09203F 0%, #537895 100%);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .nav-link {
+            transition: color 0.3s ease, background-color 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 9999px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        h1, h2, h3 {
+            font-weight: 800;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tag-red { background-color: #fee2e2; color: #b91c1c; }
+        .tag-blue { background-color: #dbeafe; color: #1e40af; }
+        .tag-green { background-color: #d1fae5; color: #065f46; }
+        .tag-yellow { background-color: #fef9c3; color: #854d0e; }
+        .tag-purple { background-color: #f3e8ff; color: #6b21a8; }
+        .tag-orange { background-color: #ffedd5; color: #9a3412; }
+        
+        .diagram-container {
+            border: 2px solid #e5e7eb;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background-color: #f9fafb;
+        }
+        
+        .info-box {
+            border-left: 4px solid;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .info-box-blue { border-color: #3b82f6; background-color: #eff6ff; }
+        .info-box-red { border-color: #ef4444; background-color: #fef2f2; }
+        .info-box-green { border-color: #22c55e; background-color: #f0fdf4; }
+        
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Interactive Diagram Hotspot Styles */
+        .hotspot {
+            position: absolute;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: rgba(23, 37, 84, 0.8);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+            box-shadow: 0 0 0 0 rgba(23, 37, 84, 1);
+            animation: pulse-blue 2s infinite;
+        }
+        .hotspot:hover, .hotspot.active {
+            transform: scale(1.2);
+            background-color: rgba(30, 58, 138, 1);
+            animation: none;
+        }
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(23, 37, 84, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(23, 37, 84, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(23, 37, 84, 0); }
+        }
+        .details-panel {
+            display: none;
+        }
+        .details-panel.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body class="gradient-bg text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="main-gradient-bg text-white sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 mr-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <span class="font-bold text-xl tracking-tight">Kognitív Neurológia Jegyzet</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="#demencia" class="nav-link">Demencia</a>
+                    <a href="#emlekezet" class="nav-link">Emlékezetzavar</a>
+                    <a href="#thalamus" class="nav-link">Thalamus</a>
+                    <a href="#teszt" class="nav-link">Teszt</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-white focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden absolute top-16 left-0 w-full main-gradient-bg transform -translate-x-full">
+            <a href="#demencia" class="block py-3 px-4 text-sm hover:bg-white/20">Demencia</a>
+            <a href="#emlekezet" class="block py-3 px-4 text-sm hover:bg-white/20">Emlékezetzavar</a>
+            <a href="#thalamus" class="block py-3 px-4 text-sm hover:bg-white/20">Thalamus</a>
+            <a href="#teszt" class="block py-3 px-4 text-sm hover:bg-white/20">Teszt</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- Section: Dementia -->
+        <section id="demencia" class="mb-16">
+            <h1 class="text-4xl font-extrabold mb-6 text-gray-900 border-b-4 border-blue-500 pb-2">Demenciák Tünettana</h1>
+            
+            <div class="card mb-8">
+                 <div class="p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-800">A Demencia Fogalma</h3>
+                    <p class="text-gray-700">A demencia egy gyűjtőfogalom, amely a kognitív funkciók (gondolkodás, emlékezés, érvelés) olyan mértékű, szerzett hanyatlását jelöli, ami már akadályozza a mindennapi önálló életvitelt. Fontos, hogy ez nem az öregedés normális velejárója, és tiszta tudatállapot mellett zajlik.</p>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-bold mt-12 mb-6 text-gray-800">Főbb Demenciatípusok Összehasonlítása</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Alzheimer's -->
+                <div class="card">
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold text-purple-700 mb-3">Alzheimer-kór</h4>
+                        <p class="text-sm font-semibold text-gray-500 mb-4">Leggyakoribb típus</p>
+                        <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
+                           <li><strong class="text-purple-900">Domináns tünet:</strong> Fokozódó epizodikus memóriazavar (új információk!).</li>
+                           <li><strong>Progresszió:</strong> Lassú, fokozatos leépülés.</li>
+                           <li><strong>Viselkedés:</strong> Apátia, depresszió, később agitáció, téveszmék.</li>
+                           <li><strong>Patológia:</strong> Amiloid plakkok, tau-kötegek.</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Vascular -->
+                <div class="card">
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold text-red-700 mb-3">Vaszkuláris Demencia</h4>
+                         <p class="text-sm font-semibold text-gray-500 mb-4">Stroke vagy kisér-betegség okozza</p>
+                        <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
+                           <li><strong class="text-red-900">Domináns tünet:</strong> Exekutív diszfunkció, gondolkodás lassulása.</li>
+                           <li><strong>Progresszió:</strong> "Lépcsőzetes" romlás, hirtelen rosszabbodásokkal.</li>
+                           <li><strong>Kísérő tünetek:</strong> Gyakoriak a fokális neurológiai jelek (pl. féloldali gyengeség, járászavar).</li>
+                           <li><strong>Patológia:</strong> Agyi infarktusok, vérzések.</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Lewy-Body -->
+                <div class="card">
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold text-green-700 mb-3">Lewy-testes Demencia</h4>
+                        <p class="text-sm font-semibold text-gray-500 mb-4">Parkinson-kórral átfedő tünetek</p>
+                        <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
+                           <li><strong class="text-green-900">Központi tünetek:</strong> Fluktuáló kogníció, vizuális hallucinációk, parkinzonizmus.</li>
+                            <li><strong>Specifikus jel:</strong> REM-alvási viselkedészavar (RBD), neuroleptikum érzékenység.</li>
+                           <li><strong>Memória:</strong> Kezdetben a figyelem- és vizuospaciális zavar dominál.</li>
+                           <li><strong>Patológia:</strong> Lewy-testek (alfa-szinuklein).</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- FTD -->
+                <div class="card">
+                    <div class="p-6">
+                        <h4 class="text-xl font-bold text-orange-700 mb-3">Frontotemporális (FTD)</h4>
+                        <p class="text-sm font-semibold text-gray-500 mb-4">Fiatalabb korban kezdődik</p>
+                        <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
+                           <li><strong class="text-orange-900">Domináns tünet:</strong> Személyiség- és viselkedésváltozás (apátia/gátolatlanság) vagy nyelvi zavar (PPA).</li>
+                           <li><strong>Memória:</strong> Kezdetben relatíve megkímélt.</li>
+                           <li><strong>Társuló jelek:</strong> Kényszeres viselkedés, étkezési szokások megváltozása.</li>
+                           <li><strong>Patológia:</strong> Frontális és/vagy temporális lebeny atrófiája.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Memory Disorders -->
+        <section id="emlekezet" class="mb-16">
+            <h1 class="text-4xl font-extrabold mb-6 text-gray-900 border-b-4 border-green-500 pb-2">Emlékezetzavarok és Amnéziák</h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-green-800">Anterográd Amnézia</h3>
+                    <p class="text-gray-700">A kiváltó esemény <strong class="text-red-600">UTÁN</strong> kialakuló új információk elsajátításának képtelensége. A beteg nem tud új emlékeket képezni.</p>
+                    <div class="info-box info-box-red mt-4">
+                        <p class="font-semibold">Kulcsstruktúra:</p>
+                        <p class="text-sm">Leggyakrabban a mediális temporális lebeny, különösen a <strong class="text-red-700">hippokampusz</strong> kétoldali károsodása okozza.</p>
+                    </div>
+                     <p class="text-sm mt-3 text-gray-600">Híres eset: <strong>H.M. (Henry Molaison)</strong>, akinek a hippokampuszát eltávolították, és utána nem tudott új emlékeket rögzíteni.</p>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-green-800">Retrográd Amnézia</h3>
+                    <p class="text-gray-700">A kiváltó esemény <strong class="text-blue-600">ELŐTT</strong> szerzett emlékek, információk felidézésének képtelensége. A beteg "elveszti a múltját".</p>
+                    <div class="info-box info-box-blue mt-4">
+                        <p class="font-semibold">Ribot-törvény (temporális grádiens):</p>
+                        <p class="text-sm">A régebbi, jobban rögzült emlékek kevésbé sérülékenyek, mint a frissebbek. A beteg a gyerekkorára emlékezhet, de a sérülés előtti utolsó évekre nem.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-bold mt-12 mb-4 text-gray-800">Specifikus Amnesztikus Szindrómák</h3>
+            <div class="space-y-6">
+                <div class="card">
+                    <div class="p-6">
+                        <h4 class="font-bold text-xl text-yellow-800">Korsakoff-szindróma</h4>
+                        <p class="text-sm mb-3">Típusosan krónikus alkoholizmus talaján kialakuló <strong>B1-vitamin (tiamin) hiány</strong> okozza.</p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li><strong>Tünetek:</strong> Súlyos anterográd amnézia, változó retrográd amnézia, és jellegzetesen <strong class="text-yellow-900">konfabuláció</strong> (emlékezeti hézagok kitöltése valótlan történetekkel).</li>
+                            <li><strong>Érintett terület:</strong> Mammilláris testek, thalamus dorsomediális magja.</li>
+                            <li>Gyakran a Wernicke-encephalopathia akut fázisa előzi meg (szemmozgászavar, ataxia, zavartság).</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="p-6">
+                        <h4 class="font-bold text-xl text-cyan-800">Tranziens Globális Amnézia (TGA)</h4>
+                        <p class="text-sm mb-3">Hirtelen kezdetű, átmeneti (max. 24 órás), súlyos anterográd amnézia, jóindulatú kórkép.</p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li><strong>Tünetek:</strong> A beteg tiszta tudatú, de zavart, és <strong class="text-cyan-900">ismételgeti ugyanazokat a kérdéseket</strong> (pl. "Hol vagyok?").</li>
+                            <li><strong>Kiváltó okok:</strong> Gyakran fizikai vagy emocionális stressz, hideg víz, szexuális aktus.</li>
+                            <li><strong>Prognózis:</strong> Teljes, maradványtünet nélküli gyógyulás. Az epizódra a beteg nem emlékszik.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Thalamus -->
+        <section id="thalamus" class="mb-16">
+            <h1 class="text-4xl font-extrabold mb-6 text-gray-900 border-b-4 border-orange-500 pb-2">A Thalamus Károsodásának Tünetei</h1>
+             <p class="mb-8 text-lg text-gray-600">A thalamus az agy központi "reléállomása", amely szinte minden érző- és mozgatóinformációt feldolgoz, és kulcsszerepet játszik a memóriában, figyelemben és éberségben. Károsodása ezért rendkívül sokrétű tünetegyüttest okozhat.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Interactive Thalamus Diagram -->
+                <div class="card p-4 sticky top-24">
+                    <h3 class="text-xl font-bold mb-4 text-center text-orange-800">Interaktív Thalamus Térkép</h3>
+                    <div class="relative w-full max-w-sm mx-auto aspect-square">
+                        <svg viewBox="0 0 100 100" class="w-full h-auto">
+                            <path d="M 50,5 A 45 35 0 1 1 50,95 A 45 35 0 1 1 50,5 Z" fill="#fff7ed" stroke="#fb923c" stroke-width="1.5"/>
+                            <path d="M 40,20 C 50,40 50,60 40,80" stroke="#fed7aa" fill="none" stroke-width="1.5"/>
+                            <path d="M 60,20 C 50,40 50,60 60,80" stroke="#fed7aa" fill="none" stroke-width="1.5"/>
+                        </svg>
+                        <!-- Hotspots -->
+                        <div class="hotspot" style="top: 20%; left: 20%;" data-target="thalamus-anterior" title="Anterior magcsoport">A</div>
+                        <div class="hotspot" style="top: 45%; left: 33%;" data-target="thalamus-medial" title="Mediális magcsoport">M</div>
+                        <div class="hotspot" style="top: 45%; left: 55%;" data-target="thalamus-lateral" title="Laterális magcsoport">L</div>
+                        <div class="hotspot" style="top: 70%; left: 25%;" data-target="thalamus-posterior" title="Posterior magcsoport (Pulvinar, Geniculatusok)">P</div>
+                    </div>
+                </div>
+                
+                <!-- Thalamus Details Panel -->
+                 <div class="card">
+                    <div id="thalamus-details-container" class="p-6 min-h-[300px]">
+                        <!-- Default Message -->
+                        <div id="thalamus-default" class="details-panel active text-center flex flex-col justify-center items-center h-full">
+                            <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                             <h4 class="text-xl font-bold text-gray-500">Válasszon egy thalamus régiót!</h4>
+                            <p class="text-gray-400 mt-2">Vigye az egeret vagy kattintson a bal oldali ábra betűvel jelölt pontjaira a részletek megtekintéséhez.</p>
+                        </div>
+                        
+                        <!-- Anterior -->
+                        <div id="thalamus-anterior" class="details-panel">
+                            <h4 class="text-xl font-bold text-orange-700 mb-2">(A) Anterior Magcsoport</h4>
+                            <p class="text-sm text-gray-600 mb-3">Limbikus rendszer része (Papez-gyűrű).</p>
+                            <h5 class="font-semibold mt-4 mb-2">Funkció:</h5>
+                            <p class="text-sm">Memória, érzelmek, éberség.</p>
+                            <h5 class="font-semibold mt-4 mb-2">Károsodásának tünetei:</h5>
+                             <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>Anterográd amnézia</strong> (Korsakoff-szerű)</li>
+                                <li>Apátia, orientációs zavar</li>
+                            </ul>
+                        </div>
+                        <!-- Medial -->
+                        <div id="thalamus-medial" class="details-panel">
+                            <h4 class="text-xl font-bold text-orange-700 mb-2">(M) Mediális Magcsoport (pl. Dorsomediális mag)</h4>
+                            <p class="text-sm text-gray-600 mb-3">Kapcsolatban a prefrontális kéreggel.</p>
+                            <h5 class="font-semibold mt-4 mb-2">Funkció:</h5>
+                            <p class="text-sm">Exekutív funkciók, memória, figyelem.</p>
+                             <h5 class="font-semibold mt-4 mb-2">Károsodásának tünetei:</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>Exekutív diszfunkció</strong> (tervezés, ítéletalkotás zavara)</li>
+                                <li>Személyiségváltozás (apátia/gátolatlanság)</li>
+                                <li>Domináns oldalon: Thalamikus afázia</li>
+                                <li>Kétoldali sérülés: Demencia</li>
+                            </ul>
+                        </div>
+                         <!-- Lateral -->
+                        <div id="thalamus-lateral" class="details-panel">
+                            <h4 class="text-xl font-bold text-orange-700 mb-2">(L) Laterális Magcsoport (pl. VPL, VPM, VL)</h4>
+                            <p class="text-sm text-gray-600 mb-3">Fő szenzoros és motoros reléállomás.</p>
+                            <h5 class="font-semibold mt-4 mb-2">Funkció:</h5>
+                            <p class="text-sm">Test- és arcérzékelés, mozgáskoordináció.</p>
+                            <h5 class="font-semibold mt-4 mb-2">Károsodásának tünetei:</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>Kontralaterális érzéskiesés</strong> (minden modalitás)</li>
+                                <li><strong>Thalamikus fájdalom szindróma</strong> (Dejerine-Roussy)</li>
+                                <li>Ataxia, tremor, dystonia ("thalamikus kéz")</li>
+                            </ul>
+                        </div>
+                        <!-- Posterior -->
+                        <div id="thalamus-posterior" class="details-panel">
+                            <h4 class="text-xl font-bold text-orange-700 mb-2">(P) Posterior Magcsoport (Pulvinar, Geniculatusok)</h4>
+                            <p class="text-sm text-gray-600 mb-3">Magasabb rendű asszociációs és érzékszervi területek.</p>
+                            <h5 class="font-semibold mt-4 mb-2">Funkció:</h5>
+                            <p class="text-sm">Vizuális és hallási információfeldolgozás, figyelem, nyelv.</p>
+                            <h5 class="font-semibold mt-4 mb-2">Károsodásának tünetei:</h5>
+                             <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>Látótérkiesés</strong> (CGL sérülésekor)</li>
+                                <li><strong>Thalamikus neglect</strong> (jobb oldali pulvinar sérülésekor)</li>
+                                <li>Nyelvi zavarok (bal oldali pulvinar)</li>
+                             </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Section: Test -->
+        <section id="teszt" class="mb-16">
+            <h1 class="text-4xl font-extrabold mb-6 text-gray-900 border-b-4 border-yellow-500 pb-2">Tudáspróba</h1>
+            <div class="card p-6 md:p-8">
+                <div id="quiz-container"></div>
+                <div class="mt-6 flex justify-between items-center">
+                    <button id="submit-quiz" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">Teszt Kiértékelése</button>
+                    <div id="quiz-result" class="text-lg font-bold"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto p-6 text-center text-sm">
+            <p>&copy; 2025 Vizuális Neurológia Jegyzet. Készült a vizsgára való felkészülés támogatására.</p>
+            <p class="text-gray-400 mt-2">Az itt található információk kizárólag oktatási célokat szolgálnak és nem helyettesítik a szakszerű orvosi tanácsadást.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('-translate-x-full');
+        });
+
+        const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('-translate-x-full');
+            });
+        });
+
+        // Interactive Thalamus Diagram Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const thalamusHotspots = document.querySelectorAll('#thalamus .hotspot');
+            const thalamusDetailsContainer = document.getElementById('thalamus-details-container');
+            const allThalamusDetails = thalamusDetailsContainer.querySelectorAll('.details-panel');
+
+            thalamusHotspots.forEach(hotspot => {
+                hotspot.addEventListener('mouseover', () => {
+                    const targetId = hotspot.dataset.target;
+                    
+                    allThalamusDetails.forEach(detail => detail.classList.remove('active'));
+                    thalamusHotspots.forEach(spot => spot.classList.remove('active'));
+                    
+                    const targetDetail = document.getElementById(targetId);
+                    if(targetDetail) {
+                       targetDetail.classList.add('active');
+                    }
+                    hotspot.classList.add('active');
+                });
+            });
+        });
+
+        // Quiz data and logic
+        const quizData = [
+            {
+                question: "Melyik a legjellemzőbb korai kognitív tünete az Alzheimer-kórnak?",
+                options: ["Vizuális hallucinációk", "Epizodikus memóriazavar", "Gátolatlanság", "Járászavar"],
+                answer: "Epizodikus memóriazavar"
+            },
+            {
+                question: "Melyik tünetegyüttes NEM tartozik a Lewy-testes demencia központi diagnosztikus tünetei közé?",
+                options: ["Fluktuáló kogníció", "Vizuális hallucinációk", "Parkinzonizmus", "Súlyos apátia"],
+                answer: "Súlyos apátia"
+            },
+            {
+                question: "Mi jellemzi leginkább a retrográd amnéziát?",
+                options: ["Új emlékek képzésének képtelensége.", "A kiváltó esemény előtti emlékek elvesztése.", "Csak a rövid távú memória károsodása.", "Mindig teljes és visszafordíthatatlan."],
+                answer: "A kiváltó esemény előtti emlékek elvesztése."
+            },
+            {
+                question: "Melyik állapot hátterében áll leggyakrabban tiamin (B1-vitamin) hiány?",
+                options: ["Tranziens globális amnézia", "Alzheimer-kór", "Korsakoff-szindróma", "Vaszkuláris demencia"],
+                answer: "Korsakoff-szindróma"
+            },
+            {
+                question: "Melyik thalamikus szindrómára jellemző a spontán, égő fájdalom és az allodynia?",
+                options: ["Thalamikus afázia", "Thalamikus demencia", "Dejerine-Roussy szindróma", "Thalamikus neglect"],
+                answer: "Dejerine-Roussy szindróma"
+            },
+            {
+                question: "A thalamus melyik magcsoportjának károsodása okoz leginkább exekutív diszfunkciót és személyiségváltozást?",
+                options: ["Anterior magcsoport", "Laterális magcsoport (VPL/VPM)", "Mediális magcsoport (MD)", "Posterior magcsoport (Pulvinar)"],
+                answer: "Mediális magcsoport (MD)"
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-quiz');
+        const resultContainer = document.getElementById('quiz-result');
+
+        function buildQuiz() {
+            const output = [];
+            quizData.forEach((currentQuestion, questionNumber) => {
+                const options = [];
+                for (letter in currentQuestion.options) {
+                    options.push(
+                        `<label class="block mt-2 text-gray-700 hover:bg-gray-100 p-2 rounded-lg cursor-pointer">
+                            <input type="radio" name="question${questionNumber}" value="${currentQuestion.options[letter]}" class="mr-2">
+                            ${currentQuestion.options[letter]}
+                        </label>`
+                    );
+                }
+                output.push(
+                    `<div class="mb-6 pb-6 border-b border-gray-200">
+                        <div class="font-bold text-lg mb-2 text-gray-800">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="options">${options.join('')}</div>
+                    </div>`
+                );
+            });
+            quizContainer.innerHTML = output.join('');
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.options');
+            let numCorrect = 0;
+
+            quizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+
+                // Reset styles
+                const labels = answerContainer.querySelectorAll('label');
+                labels.forEach(label => {
+                    label.classList.remove('bg-green-200', 'bg-red-200');
+                });
+
+                if (userAnswer === currentQuestion.answer) {
+                    numCorrect++;
+                    answerContainer.querySelector(selector).parentElement.classList.add('bg-green-200');
+                } else {
+                    if(userAnswer) {
+                        answerContainer.querySelector(selector).parentElement.classList.add('bg-red-200');
+                    }
+                    // Highlight correct answer
+                    labels.forEach(label => {
+                        if (label.querySelector('input').value === currentQuestion.answer) {
+                            label.classList.add('bg-green-200');
+                        }
+                    });
+                }
+            });
+
+            resultContainer.innerHTML = `${numCorrect} / ${quizData.length} helyes válasz`;
+            if (numCorrect/quizData.length > 0.7) {
+                 resultContainer.className = "text-lg font-bold text-green-600";
+            } else {
+                 resultContainer.className = "text-lg font-bold text-red-600";
+            }
+        }
+
+        buildQuiz();
+        submitButton.addEventListener('click', showResults);
+
+    </script>
+</body>
+
+</html>

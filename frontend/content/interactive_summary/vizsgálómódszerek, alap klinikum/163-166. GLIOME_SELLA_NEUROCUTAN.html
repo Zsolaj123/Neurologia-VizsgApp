@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroonkológia és Neurokután Szindrómák - Interaktív Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-active {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header és Navigáció -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600 flex items-center">
+                <i data-lucide="brain" class="mr-2"></i>
+                Neuro-onkológia
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#daganatok" class="hover:text-indigo-600 transition">Agydaganatok</a>
+                <a href="#sella" class="hover:text-indigo-600 transition">Sella Régió</a>
+                <a href="#neurocutan" class="hover:text-indigo-600 transition">Neurokután Szindrómák</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobil menü -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+            <a href="#daganatok" class="block py-2 hover:text-indigo-600 transition">Agydaganatok</a>
+            <a href="#sella" class="block py-2 hover:text-indigo-600 transition">Sella Régió</a>
+            <a href="#neurocutan" class="block py-2 hover:text-indigo-600 transition">Neurokután Szindrómák</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Gliomák és Meningeomák -->
+        <section id="daganatok" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-indigo-500 pl-4">Primer Agydaganatok: Gliomák és Meningeomák</h2>
+            
+            <div id="daganatok-container" class="bg-white rounded-xl shadow-lg p-6">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="gliomak" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-indigo-500 transition text-center">
+                        <i data-lucide="brain-circuit" class="inline-block mr-2"></i>Gliomák
+                    </button>
+                    <button data-tab="meningeomak" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-indigo-500 transition text-center">
+                        <i data-lucide="shield" class="inline-block mr-2"></i>Meningeomák
+                    </button>
+                    <button data-tab="osszehasonlitas" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-indigo-500 transition text-center">
+                        <i data-lucide="git-compare" class="inline-block mr-2"></i>Összehasonlítás
+                    </button>
+                </div>
+
+                <!-- Tab tartalmak -->
+                <div class="tab-content-wrapper">
+                    <!-- Gliomák -->
+                    <div id="gliomak" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-indigo-700">Gliomák</h3>
+                        <p class="mb-4 text-gray-600">A KIR támasztószöveteiből (gliasejtek) kiinduló, általában <strong>infiltratív</strong> növekedésű, <strong>intra-axiális</strong> daganatok. A leggyakoribb primer malignus agydaganatok.</p>
+                        
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-indigo-50 hover:bg-indigo-100 font-semibold flex justify-between items-center">
+                                    <span>WHO 2021 Klasszifikáció és Molekuláris Markerek</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p class="mb-2">A klasszifikáció a molekuláris jellemzőkön alapul. Felnőttkori diffúz gliomák fő típusai:</p>
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Astrocytoma, IDH-mutáns:</strong> CNS WHO grade 2, 3, 4. Jobb prognózisú, mint az IDH-wildtype.</li>
+                                        <li><strong>Oligodendroglioma, IDH-mutáns és 1p/19q-kodélt:</strong> CNS WHO grade 2, 3. Kemoterápiára érzékenyebb.</li>
+                                        <li><strong>Glioblastoma, IDH-wildtype:</strong> CNS WHO grade 4. A leggyakoribb és legagresszívabb típus.</li>
+                                        <li class="mt-2"><strong>Kulcs markerek:</strong> IDH1/2 mutáció, 1p/19q kodéleció, MGMT promoter metiláció (prediktív a Temozolomid válaszra).</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-indigo-50 hover:bg-indigo-100 font-semibold flex justify-between items-center">
+                                    <span>Klinikum, Diagnózis és Kezelés</span>
+                                     <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <h4 class="font-semibold text-lg mb-2">Tünetek és Diagnózis</h4>
+                                    <p class="mb-3">Felnőttkori <strong>újonnan fellépő görcsroham</strong>, fejfájás, fokális neurológiai deficit. A diagnózis alapja a kontrasztanyagos <strong>MRI</strong>, de a végleges diagnózishoz <strong>biopszia</strong> szükséges.</p>
+                                    <h4 class="font-semibold text-lg mb-2">Kezelés (Glioblastoma - Stupp-protokoll)</h4>
+                                    <ol class="space-y-2 list-decimal list-inside">
+                                        <li>Maximálisan biztonságos sebészi reszekció.</li>
+                                        <li>Egyidejű sugárterápia (RT) és <strong>Temozolomid (TMZ)</strong> kemoterápia.</li>
+                                        <li>Adjuváns (fenntartó) TMZ ciklusok.</li>
+                                        <li>Újabb lehetőség: <strong>Tumor Treating Fields (TTF)</strong> a fenntartó kezelés mellett.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Meningeomák -->
+                    <div id="meningeomak" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-teal-700">Meningeomák</h3>
+                        <p class="mb-4 text-gray-600">Az agyburkokból kiinduló, általában jóindulatú, <strong>expanzív</strong> növekedésű, <strong>extra-axiális</strong> daganatok. A leggyakoribb primer intrakraniális daganatok.</p>
+                        
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-teal-50 hover:bg-teal-100 font-semibold flex justify-between items-center">
+                                    <span>WHO 2021 Klasszifikáció és Grádusok</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Grade 1 (Benignus):</strong> Leggyakoribb (~80%), lassú növésű.</li>
+                                        <li><strong>Grade 2 (Atípusos):</strong> Magasabb kiújulási kockázat. Kritériuma pl. az <strong>agyi invázió</strong>.</li>
+                                        <li><strong>Grade 3 (Anaplasztikus):</strong> Agresszív, magas kiújulási arány. A <strong>TERT promoter mutáció</strong> vagy a <strong>CDKN2A/B deléció</strong> önmagában is Grade 3-at definiál.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-teal-50 hover:bg-teal-100 font-semibold flex justify-between items-center">
+                                    <span>Klinikum, Diagnózis és Kezelés</span>
+                                     <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                     <h4 class="font-semibold text-lg mb-2">Tünetek és Diagnózis</h4>
+                                    <p class="mb-3">Gyakran <strong>véletlen lelet</strong>. Tüneteket kompresszió révén okoz (fejfájás, görcsroham, idegkárosodás). Az MRI-n jellegzetes a homogén kontraszthalmozás és a <strong>"dural tail"</strong> jel.</p>
+                                    <h4 class="font-semibold text-lg mb-2">Kezelés</h4>
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Obszerváció:</strong> Kicsi, tünetmentes Grade 1 daganatoknál.</li>
+                                        <li><strong>Sebészet:</strong> Tünetek esetén a cél a teljes reszekció (GTR).</li>
+                                        <li><strong>Sugárterápia (RT):</strong> Adjuváns kezelésként Grade 2 és 3 esetén, vagy inkomplett reszekció után.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Összehasonlítás -->
+                    <div id="osszehasonlitas" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700">Gliomák vs. Meningeomák</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[800px] text-sm text-left">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="p-3">Jellemző</th>
+                                        <th class="p-3 font-semibold text-indigo-700">Gliomák</th>
+                                        <th class="p-3 font-semibold text-teal-700">Meningeomák</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Eredet</td>
+                                        <td class="p-3">Gliasejtek (agyállomány)</td>
+                                        <td class="p-3">Arachnoidealis sejtek (agyburkok)</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Elhelyezkedés</td>
+                                        <td class="p-3">Intra-axiális</td>
+                                        <td class="p-3">Extra-axiális</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Növekedés</td>
+                                        <td class="p-3">Infiltratív</td>
+                                        <td class="p-3">Expanzív, kompresszív</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Malignitás</td>
+                                        <td class="p-3">Gyakran malignus (pl. Glioblastoma)</td>
+                                        <td class="p-3">Többnyire benignus (Grade 1)</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">MRI Megjelenés</td>
+                                        <td class="p-3">Magas grádusnál szabálytalan, gyűrűszerű halmozás, nekrózis</td>
+                                        <td class="p-3">Jól körülírt, homogén halmozás, "dural tail"</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Prognózis</td>
+                                        <td class="p-3">Változó, magas grádusnál rossz</td>
+                                        <td class="p-3">Általában jó, grádustól függ</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sella Régió -->
+        <section id="sella" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-green-500 pl-4">Sella Környéki Térfoglaló Folyamatok</h2>
+            <div id="sella-container" class="bg-white rounded-xl shadow-lg p-6">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="adenomak" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-green-500 transition text-center">
+                        <i data-lucide="gem" class="inline-block mr-2"></i>Hypophysis Adenomák
+                    </button>
+                    <button data-tab="craniopharyngioma" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-green-500 transition text-center">
+                        <i data-lucide="cake" class="inline-block mr-2"></i>Craniopharyngioma
+                    </button>
+                    <button data-tab="egyeb_sella" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-green-500 transition text-center">
+                        <i data-lucide="list-plus" class="inline-block mr-2"></i>Egyéb Elváltozások
+                    </button>
+                </div>
+
+                <div class="tab-content-wrapper">
+                    <!-- Hypophysis Adenomák -->
+                    <div id="adenomak" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-green-700">Hypophysis Adenomák</h3>
+                        <p class="mb-4 text-gray-600">A sellaris régió leggyakoribb daganatai. Osztályozásuk méret (mikro- &lt;10 mm, makro- ≥10 mm) és hormontermelés alapján történik.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[1000px] text-sm">
+                                <thead class="bg-green-50 text-left">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Típus</th>
+                                        <th class="p-3 font-semibold">Klinikai Kép</th>
+                                        <th class="p-3 font-semibold">Diagnózis</th>
+                                        <th class="p-3 font-semibold">Elsődleges Kezelés</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Nem-funkcionáló (NFPA)</td>
+                                        <td class="p-3">Kompressziós tünetek: látászavar (bitemporalis hemianopsia), fejfájás, hypopituitarismus.</td>
+                                        <td class="p-3">MRI, hormonpanel, látótérvizsgálat.</td>
+                                        <td class="p-3"><strong>Transsphenoidalis sebészet (TSS)</strong>, ha tünetes.</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Prolactinoma</td>
+                                        <td class="p-3">Hyperprolactinaemia: Nők: amenorrhea, galactorrhea. Férfiak: libidócsökkenés.</td>
+                                        <td class="p-3">Szérum prolaktin szint (jelentősen emelkedett).</td>
+                                        <td class="p-3"><strong>Gyógyszeres: Dopamin agonisták (Cabergolin)</strong>.</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Cushing-kór (ACTH)</td>
+                                        <td class="p-3">Hypercortisolismus: centrális elhízás, holdvilágarc, striák, hypertonia, diabetes.</td>
+                                        <td class="p-3">Komplex endokrin tesztek, IPSS katéterezés.</td>
+                                        <td class="p-3"><strong>Transsphenoidalis sebészet (TSS)</strong>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Acromegalia (GH)</td>
+                                        <td class="p-3">Akralis növekedés, durva arcvonások, ízületi fájdalmak, hypertonia, diabetes.</td>
+                                        <td class="p-3">Szérum IGF-1 szint (emelkedett), OGTT.</td>
+                                        <td class="p-3"><strong>Transsphenoidalis sebészet (TSS)</strong>.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Craniopharyngioma -->
+                    <div id="craniopharyngioma" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-orange-700">Craniopharyngiomák</h3>
+                        <p class="mb-4 text-gray-600">Jóindulatú (WHO grade 1), de lokálisan agresszív, gyakran cisztás és meszesedést tartalmazó daganatok. Két típusa: <strong>adamanthinomatosus</strong> (gyermekkor, CTNNB1 mutáció) és <strong>papillaris</strong> (felnőttkor, BRAF V600E mutáció).</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-2">Klinikai Kép</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Látászavar</li>
+                                    <li>Endokrin diszfunkció (növekedési zavar, DI)</li>
+                                    <li><strong>Hypothalamicus diszfunkció</strong> (kóros elhízás)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-2">Kezelés</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li><strong>Maximális biztonságos sebészi reszekció</strong> (hypothalamus kíméletével).</li>
+                                    <li>Adjuváns <strong>sugárterápia</strong> STR után.</li>
+                                    <li>Célzott terápia (BRAF/MEK gátlók) papillaris típusban.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Egyéb Sella -->
+                    <div id="egyeb_sella" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-cyan-700">Egyéb Sella Környéki Elváltozások</h3>
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-cyan-50 hover:bg-cyan-100 font-semibold flex justify-between items-center">
+                                    <span>Rathke-tasak Ciszták (RCC)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>Benignus, folyadékkal telt képletek, gyakran véletlen leletek. Tünetek (fejfájás, látászavar, enyhe hyperprolactinaemia) esetén <strong>transsphenoidalis műtét</strong> (fenesztráció) a kezelés.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-cyan-50 hover:bg-cyan-100 font-semibold flex justify-between items-center">
+                                    <span>Hypophysitisek</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>A hypophysis gyulladásos betegségei, daganatot utánozhatnak. Típusai: lymphocytás, granulomatosus, IgG4-asszociált, ICI-indukálta. Kezelésük elsősorban <strong>kortikoszteroidokkal</strong> és hormonpótlással történik.</p>
+                                </div>
+                            </div>
+                             <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-cyan-50 hover:bg-cyan-100 font-semibold flex justify-between items-center">
+                                    <span>Germinomák és Chordomák</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p><strong>Germinoma:</strong> Malignus, de rendkívül sugár- és kemoterápia-érzékeny daganat, főleg gyermek- és fiatal felnőttkorban. <br><strong>Chordoma:</strong> Ritka, lokálisan agresszív csontdaganat a clivuson. Kezelése maximális reszekció és magas dózisú sugárterápia (protonterápia).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Neurokután Szindrómák -->
+        <section id="neurocutan" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-rose-500 pl-4">Neurokután Szindrómák (Phakomatosisok)</h2>
+             <div id="neurocutan-container" class="bg-white rounded-xl shadow-lg p-6">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="nf1" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-rose-500 transition text-center">
+                        <i data-lucide="coffee" class="inline-block mr-2"></i>Neurofibromatózis 1 (NF1)
+                    </button>
+                    <button data-tab="nf2" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-rose-500 transition text-center">
+                        <i data-lucide="ear" class="inline-block mr-2"></i>NF2 & Schwannomatózisok
+                    </button>
+                    <button data-tab="egyeb_neurocutan" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-rose-500 transition text-center">
+                        <i data-lucide="layout-grid" class="inline-block mr-2"></i>TSC és Egyéb Szindrómák
+                    </button>
+                </div>
+
+                <div class="tab-content-wrapper">
+                    <!-- NF1 -->
+                    <div id="nf1" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-rose-700">Neurofibromatózis 1 (NF1)</h3>
+                        <p class="mb-4 text-gray-600">A leggyakoribb neurokután szindróma (1:3000), az _NF1_ gén mutációja okozza. A diagnózishoz ≥2 kritérium szükséges.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-rose-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-2">Főbb Klinikai Jellemzők</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>≥6 <strong>Café-au-lait folt</strong></li>
+                                    <li>Axilláris/inguinális <strong>szeplősödés</strong></li>
+                                    <li>≥2 <strong>Neurofibroma</strong> vagy 1 <strong>plexiform neurofibroma</strong></li>
+                                    <li><strong>Opticus glioma</strong></li>
+                                    <li>≥2 <strong>Lisch-csomó</strong> (írisz hamartoma)</li>
+                                    <li>Jellegzetes csontelváltozás (pl. <strong>sphenoid diszplázia</strong>)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-rose-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-2">Kockázatok és Kezelés</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Nagyon gyakori a <strong>tanulási zavar</strong> és az ADHD.</li>
+                                    <li>Fokozott malignitási kockázat: <strong>MPNST</strong>, emlőrák, gliomák.</li>
+                                    <li>A plexiform neurofibromák kezelésére <strong>MEK-gátlók</strong> (pl. selumetinib) használhatók.</li>
+                                    <li>Kezelés: Szövődmény-orientált, multidiszciplináris követés.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- NF2 -->
+                    <div id="nf2" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-sky-700">NF2-asszociált Schwannomatózis és Egyéb Schwannomatózisok</h3>
+                        <p class="mb-4 text-gray-600">Ritkább kórképek, melyeket a schwannomák (ideghüvely-daganatok) multiplex megjelenése jellemez.</p>
+                        <div class="overflow-x-auto">
+                           <table class="w-full min-w-[800px] text-sm text-left">
+                                <thead class="bg-sky-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Jellemző</th>
+                                        <th class="p-3 font-semibold">NF2-asszociált Schwannomatózis</th>
+                                        <th class="p-3 font-semibold">Egyéb Schwannomatózisok (SMARCB1/LZTR1)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Gén</td>
+                                        <td class="p-3">_NF2_</td>
+                                        <td class="p-3">_SMARCB1_, _LZTR1_</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Meghatározó Jel</td>
+                                        <td class="p-3"><strong>Kétoldali vesztibuláris schwannoma (VS)</strong></td>
+                                        <td class="p-3"><strong>Krónikus, súlyos fájdalom</strong></td>
+                                    </tr>
+                                     <tr class="border-b">
+                                        <td class="p-3 font-medium">Egyéb Tumorok</td>
+                                        <td class="p-3">Meningeomák, ependymomák</td>
+                                        <td class="p-3">Ritkábban meningeomák, VS nem jellemző</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Kezelés</td>
+                                        <td class="p-3">Tumor kontroll (sebészet, RT), hallásrehabilitáció. Progresszív VS esetén <strong>Bevacizumab</strong>.</td>
+                                        <td class="p-3">Fájdalomcsillapítás, tüneti schwannomák eltávolítása.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Egyéb Neurocutan -->
+                    <div id="egyeb_neurocutan" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-amber-700">Tuberous Sclerosis Complex és Egyéb Szindrómák</h3>
+                        <div class="space-y-4">
+                             <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-amber-50 hover:bg-amber-100 font-semibold flex justify-between items-center">
+                                    <span>Tuberous Sclerosis Complex (TSC)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p class="mb-2">A _TSC1/TSC2_ gének mutációja okozza, ami az <strong>mTOR útvonal</strong> túlműködéséhez vezet. Multisystemás hamartomák jellemzik.</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li><strong>Neurológia:</strong> Nagyon gyakori az <strong>epilepszia</strong>, értelmi fogyatékosság, autizmus (TAND). Agyi tumorok: corticalis tuberek, <strong>SEGA</strong>.</li>
+                                        <li><strong>Bőr:</strong> Hypomelanotikus maculák, angiofibromák.</li>
+                                        <li><strong>Kezelés:</strong> Az <strong>mTOR-gátlók</strong> (everolimus) hatékonyak a SEGA-k és egyéb tünetek kezelésében.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                             <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-amber-50 hover:bg-amber-100 font-semibold flex justify-between items-center">
+                                    <span>Sturge-Weber Szindróma (SWS)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>A _GNAQ_ gén szomatikus mozaik mutációja okozza. Klasszikus triász: 1) arcon lévő <strong>"portói bor" folt</strong>, 2) <strong>leptomeningealis angiomatosis</strong>, 3) <strong>glaukóma</strong>. Gyakoriak a görcsrohamok.</p>
+                                </div>
+                            </div>
+                             <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-amber-50 hover:bg-amber-100 font-semibold flex justify-between items-center">
+                                    <span>Von Hippel-Lindau Kór (VHL)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>A _VHL_ tumorszuppresszor gén mutációja okozza. Jellemző tumorai: KIR <strong>hemangioblastomák</strong> (kisagy, gerincvelő), világossejtes <strong>vesekarcinóma (RCC)</strong>, <strong>phaeochromocytoma</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 - Interaktív Tanulási Segédlet. Készült a feltöltött dokumentumok alapján.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobil menü
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Általános Tab váltó funkció
+        function setupTabs(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const tabButtons = container.querySelectorAll('.tab-button');
+            const tabPanes = container.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                    });
+                    button.classList.add('tab-active');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Tabok inicializálása
+        setupTabs('daganatok-container');
+        setupTabs('sella-container');
+        setupTabs('neurocutan-container');
+
+
+        // Accordion
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('svg');
+                
+                header.parentElement.classList.toggle('open');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

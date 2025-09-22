@@ -64,15 +64,21 @@ class QuizApp {
         const canvas = document.getElementById('matrix-rain');
         if (canvas) {
             this.matrixRain = new MatrixRain(canvas);
+            // Stop any existing animation
+            this.matrixRain.stop();
+            
             // Configure for better visibility - same as podcast player
             this.matrixRain.setConfig({
                 fadeColor: 'rgba(10, 10, 10, 0.02)', // Slower fade for stronger trails
                 speed: 25, // Faster animation for more movement
                 density: 0.98, // More characters
-                color: '#00ff41' // Ensure green color
+                color: '#00ff41', // Ensure green color
+                fontSize: 16 // Slightly larger characters
             });
+            
+            // Restart with new config
             this.matrixRain.start();
-            console.log('Matrix rain initialized in quiz engine');
+            console.log('Matrix rain initialized in quiz engine with enhanced settings');
         }
     }
 

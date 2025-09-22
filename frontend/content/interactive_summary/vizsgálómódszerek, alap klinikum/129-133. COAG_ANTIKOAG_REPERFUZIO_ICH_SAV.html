@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurovaszkuláris és Hematológiai Vészhelyzetek: Klinikai Útmutató</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-btn {
+            transition: all 0.3s ease-in-out;
+            border-bottom: 4px solid transparent;
+            color: #475569;
+            font-weight: 500;
+        }
+        .tab-btn.active {
+            color: #4338ca;
+            border-bottom-color: #4338ca;
+            font-weight: 700;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border-left: 8px solid;
+        }
+        .card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            color: #1e293b;
+        }
+        .card h3 i {
+            margin-right: 1rem;
+            width: 30px;
+            text-align: center;
+        }
+        .card h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #1e3a8a;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e0e7ff;
+        }
+        .card-red { border-color: #dc2626; }
+        .card-blue { border-color: #2563eb; }
+        .card-green { border-color: #16a34a; }
+        .card-purple { border-color: #7c3aed; }
+        .card-orange { border-color: #f97316; }
+        
+        .info-box {
+            background-color: #eef2ff;
+            border-left: 4px solid #4f46e5;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        .list-disc li::marker {
+            color: #4f46e5;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2.5rem;
+            border-left: 4px solid #e2e8f0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+        }
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        .timeline-icon {
+            position: absolute;
+            left: -1.5rem;
+            top: 0;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            border: 4px solid #f8fafc;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Neurovaszkuláris és Hematológiai Vészhelyzetek</h1>
+            <p class="text-xl text-gray-600">Klinikai Útmutató Orvosoknak</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="sticky top-0 bg-f4f7fc z-10 mb-8 border-b border-gray-300 shadow-sm">
+            <nav class="flex justify-center -mb-px flex-wrap">
+                <button class="tab-btn active text-lg py-4 px-5" onclick="showTab('reperfusion')"><i class="fas fa-bolt"></i> Reperfúziós Terápiák</button>
+                <button class="tab-btn text-lg py-4 px-5" onclick="showTab('antithrombotic')"><i class="fas fa-pills"></i> Antitrombotikus Kezelések</button>
+                <button class="tab-btn text-lg py-4 px-5" onclick="showTab('ich')"><i class="fas fa-droplet"></i> Intracerebrális Vérzés</button>
+                <button class="tab-btn text-lg py-4 px-5" onclick="showTab('sah')"><i class="fas fa-brain"></i> Subarachnoidealis Vérzés</button>
+                <button class="tab-btn text-lg py-4 px-5" onclick="showTab('coagulopathy')"><i class="fas fa-dna"></i> Koagulopátiák</button>
+            </nav>
+        </div>
+
+        <main>
+            <!-- Reperfusion Therapies Section -->
+            <section id="reperfusion" class="content-section active">
+                <div class="card card-red">
+                    <h3><i class="fas fa-bolt text-red-500"></i>Reperfúziós Terápiák Akut Iszkémiás Stroke-ban</h3>
+                    <p>Az akut iszkémiás stroke ellátásának sarokköve az elzáródott agyi artéria mielőbbi megnyitása (reperfúzió). A cél a menthető agyszövet (penumbra) megóvása az irreverzibilis károsodástól (infarktusmag). Az "idő agy" elve alapján minden perc számít.</p>
+                    <div class="mt-8 timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-icon bg-blue-500"><i class="fas fa-hospital"></i></div>
+                            <h4 class="font-bold text-lg">0-60 perc: Érkezés és Sürgősségi Értékelés</h4>
+                            <p class="text-sm">Azonnali vitális stabilizálás, neurológiai vizsgálat (NIHSS), labor (vércukor!). A legfontosabb lépés a sürgősségi képalkotás: a natív CT kizárja a vérzést, a CTA azonosítja a nagyér elzáródást (LVO).</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-icon bg-green-500"><i class="fas fa-syringe"></i></div>
+                            <h4 class="font-bold text-lg">Intravénás Trombolízis (IVT) - Időablak: < 4.5 óra</h4>
+                            <p class="text-sm">A vérrög gyógyszeres feloldása. <strong>Alteplase (rt-PA)</strong> a standard (0.9 mg/kg, max 90mg), de a <strong>Tenecteplase (TNK)</strong> (0.25 mg/kg, max 25mg) egyre inkább előtérbe kerül egyszerűbb, bólusban történő adagolása és LVO-ban potenciálisan jobb hatékonysága miatt. Az IVT minden arra jogosult betegnek adandó, még ha EVT is tervezett (bridging terápia).</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-icon bg-purple-500"><i class="fas fa-brain"></i></div>
+                            <h4 class="font-bold text-lg">Mechanikus Trombektómia (EVT) - Időablak: < 6-24 óra</h4>
+                            <p class="text-sm">A vérrög katéteres, mechanikus eltávolítása LVO esetén (ICA, M1/M2). <strong>Időablak:</strong> 6 órán belül standard, 6-24 óra között pedig fejlett képalkotó (perfúziós CT/MR) alapján, ha jelentős menthető agyszövet (penumbra) igazolható (DAWN/DEFUSE 3 kritériumok).</p>
+                        </div>
+                         <div class="timeline-item">
+                            <div class="timeline-icon bg-yellow-500"><i class="fas fa-bed-pulse"></i></div>
+                            <h4 class="font-bold text-lg">Stroke Unit Ellátás és Szövődmények Kezelése</h4>
+                            <p class="text-sm">Szoros monitorozás, vérnyomáskontroll (IVT után <180/105 Hgmm). A legrettegettebb szövődmény a <strong>szimptómás intracerebralis vérzés (sICH)</strong>, melynek kezelése az antikoaguláns hatás azonnali felfüggesztésén és a véralvadás rendezésén alapul. Az angioödéma ritka, de potenciálisan életveszélyes mellékhatás.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Antithrombotic Therapy Section -->
+            <section id="antithrombotic" class="content-section">
+                <div class="card card-blue">
+                    <h3><i class="fas fa-pills text-blue-500"></i>Antitrombotikus Kezelések a Neurológiában</h3>
+                    <p>A neurológiai gyakorlatban az antitrombotikus szerek célja az artériás és vénás trombózisok megelőzése és kezelése, egyensúlyozva a trombózis-prevenció és a vérzéses szövődmények kockázata között.</p>
+                    <h4>Antikoaguláns Kezelés</h4>
+                    <p>Célja a véralvadási kaszkád gátlása, elsősorban kardioemboliás stroke prevenciójában (pl. pitvarfibrilláció) és agyi vénás trombózis kezelésében.</p>
+                    <div class="overflow-x-auto">
+                        <table>
+                            <thead><tr><th>Gyógyszercsoport</th><th>Hatóanyag(ok)</th><th>Hatásmechanizmus</th><th>Monitorozás</th><th>Antidotum</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>K-vitamin Antagonisták (VKA)</strong></td><td>Warfarin, Acenokumarol</td><td>II, VII, IX, X faktorok szintézisének gátlása</td><td>INR (cél: 2.0-3.0)</td><td>K-vitamin, PCC</td></tr>
+                                <tr><td><strong>Direkt Trombin Gátló (DTI)</strong></td><td>Dabigatran</td><td>Közvetlenül gátolja a trombint (IIa faktor)</td><td>Nem rutin (dTT)</td><td>Idarucizumab</td></tr>
+                                <tr><td><strong>Direkt Xa Faktor Gátlók</strong></td><td>Rivaroxaban, Apixaban, Edoxaban</td><td>Közvetlenül gátolja a Xa faktort</td><td>Nem rutin (anti-Xa)</td><td>Andexanet alfa</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="info-box mt-4"><strong>Klinikai Gyöngyszem:</strong> Pitvarfibrillációban a DOAC-ok (NOAC-ok) előnyben részesítendők a VKA-kkal szemben a kisebb intrakraniális vérzés kockázata és a könnyebb kezelhetőség miatt, kivéve mechanikus műbillentyű és közepesen súlyos/súlyos mitrális stenosis esetén.</div>
+                    
+                    <h4 class="mt-6">Antiaggregációs Kezelés</h4>
+                    <p>Célja a vérlemezkék összecsapzódásának gátlása, elsősorban az atherotrombotikus eredetű iszkémiás stroke másodlagos prevenciójában.</p>
+                     <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li><strong>Aspirin:</strong> Irreverzibilisen gátolja a COX-1 enzimet, csökkentve a tromboxán A2 termelést.</li>
+                        <li><strong>P2Y12-gátlók (pl. Clopidogrel):</strong> Gátolják az ADP-mediált vérlemezke-aktivációt.</li>
+                        <li><strong>Kettős Antiaggregációs Terápia (DAPT):</strong> Aspirin és clopidogrel kombinációja javasolt minor iszkémiás stroke vagy magas kockázatú TIA után, rövid távon (21-90 napig), a korai kiújulás kockázatának csökkentésére.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ICH Section -->
+            <section id="ich" class="content-section">
+                <div class="card card-orange">
+                     <h3><i class="fas fa-droplet text-orange-500"></i>Intracerebrális Vérzés (ICH)</h3>
+                    <p>Az agyállományba történő, nem traumás eredetű vérzés, mely a stroke-ok ~10-20%-át teszi ki, de aránytalanul magas mortalitással (~40% 1 hónapon belül) és morbiditással jár.</p>
+                    <h4>Etiológia és Lokalizáció</h4>
+                     <div class="grid md:grid-cols-2 gap-8 mt-4">
+                        <div>
+                            <h5>Primer (Spontán) ICH</h5>
+                            <ul class="list-disc list-inside mt-2 space-y-2 text-sm">
+                                <li><strong>Hipertóniás angiopátia (leggyakoribb):</strong> A mély agyi struktúrákat (bazális ganglionok, thalamus, pons) érinti a kis perforáló artériák lipohyalinosisos elváltozása miatt.</li>
+                                <li><strong>Cerebrális Amyloid Angiopátia (CAA):</strong> Főként idős korban. β-amyloid lerakódás a kortikális kiserekben, ami jellegzetesen lobáris (lebenyi) vérzéseket okoz. Gyakori a multiplexitás és a kiújulás.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5>Szekunder ICH</h5>
+                             <ul class="list-disc list-inside mt-2 space-y-2 text-sm">
+                                <li><strong>Antikoaguláns-asszociált:</strong> Egyre gyakoribb, gyors hematóma növekedéssel járhat.</li>
+                                <li><strong>Vaszkuláris malformációk:</strong> AVM, cavernoma (gyakori ok fiataloknál).</li>
+                                <li><strong>Tumor bevérzés:</strong> Különösen glioblastoma, melanoma, tüdőrák metasztázisai.</li>
+                                <li><strong>Egyéb:</strong> Iszkémiás stroke vérzéses transzformációja, vasculitis, drogabúzus.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h4 class="mt-6">Akut Menedzsment</h4>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li><strong>Vérnyomáskontroll:</strong> Agresszív, de óvatos vérnyomáscsökkentés. Cél a szisztolés érték gyors, <140 Hgmm-re történő csökkentése az első órákban.</li>
+                        <li><strong>Koagulopátia Rendezése:</strong> Az antikoaguláns hatás azonnali felfüggesztése specifikus antidotumokkal (idarucizumab, andexanet alfa) vagy PCC-vel.</li>
+                        <li><strong>Sebészeti beavatkozás:</strong> Mérlegelendő cerebelláris vérzés esetén (ha >3 cm és agytörzsi kompressziót okoz), valamint felszínes, nagy lobáris hematómáknál progresszív neurológiai romlás esetén. Akut hydrocephalus esetén külső kamrai drainage (EVD) behelyezése életmentő lehet.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SAH Section -->
+            <section id="sah" class="content-section">
+                <div class="card card-red">
+                    <h3><i class="fas fa-brain text-red-500"></i>Subarachnoidealis Vérzés (SAH)</h3>
+                    <p>A subarachnoidealis térbe (a pókhálóhártya és a lágyagyhártya közé) történő vérzés. A spontán esetek ~85%-át agyi aneurysma ruptúrája okozza. Neurológiai vészhelyzet, magas mortalitással.</p>
+                    <h4>Klinikum és Diagnosztika</h4>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li><strong>Klasszikus tünet:</strong> Hirtelen, ütésszerű, "életem legrosszabb" fejfájása (thunderclap headache).</li>
+                        <li><strong>Kísérő tünetek:</strong> Tarkókötöttség, hányinger, hányás, fotofóbia, tudatzavar.</li>
+                        <li><strong>Diagnózis:</strong> 1. Natív koponya CT (érzékenysége >95% az első 24 órában). 2. Ha a CT negatív, de a gyanú erős: lumbálpunkció (xanthochromia kimutatása). 3. A vérzésforrás azonosítása: CTA, MRA, vagy a gold standard DSA.</li>
+                        <li><strong>Súlyossági skálák:</strong> Hunt-Hess (klinikai), Fisher/Módosított Fisher (radiológiai), WFNS (kombinált).</li>
+                    </ul>
+                    <h4 class="mt-6">Kezelés és Szövődmények</h4>
+                     <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li><strong>Aneurysma ellátása:</strong> A legfontosabb az újravérzés megelőzése. Ezt a lehető leghamarabb (24-72 órán belül) el kell végezni. Módszerei: <strong>endovascularis coiling</strong> (minimálisan invazív, katéteres) vagy <strong>sebészi clipping</strong> (nyitott műtét). A választás multidiszciplináris team döntése.</li>
+                        <li><strong>Késői Cerebrális Ischaemia (DCI) / Vazospazmus:</strong> A SAV után 3-14 nappal kialakuló érszűkület, ami súlyos iszkémiás károsodást okozhat. Prevenciója és kezelése: <strong>Nimodipin</strong> (standard terápia), euvolemia fenntartása, indukált hypertonia. Súlyos esetben endovascularis beavatkozás (intraarteriális vazodilatátorok, ballon angioplastica).</li>
+                        <li><strong>Hydrocephalus:</strong> A liquor keringési/felszívódási zavara. Akut esetben külső kamrai drainage (EVD), krónikus esetben ventriculo-peritonealis (VP) shunt beültetése szükséges.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- Coagulopathy Section -->
+            <section id="coagulopathy" class="content-section">
+                <div class="card card-green">
+                    <h3><i class="fas fa-dna text-green-500"></i>Koagulopátiák a Neurológiában</h3>
+                    <p>A véralvadási rendszer zavarai, melyek fokozott vérzékenységhez (hemorrhagia) vagy fokozott alvadékonysághoz (trombózis) vezetnek, súlyos neurológiai szövődményeket okozhatnak.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card card-green">
+                        <h4>Fokozott Vérzékenységgel Járó Állapotok</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-2">
+                            <li><strong>Hemofília (A, B):</strong> Öröklött, X-kromoszómához kötött VIII/IX faktor hiány. Spontán ízületi, izom- és agyvérzéseket okozhat.</li>
+                            <li><strong>von Willebrand-betegség:</strong> A leggyakoribb öröklött vérzékenység. A vWF hiánya/diszfunkciója a primer hemosztázist károsítja.</li>
+                            <li><strong>Thrombocytopenia/Thrombocytopathia:</strong> Alacsony vérlemezkeszám vagy funkciózavar. Okozhatja ITP, gyógyszerek, májbetegség. Súlyos esetben ICH-hoz vezethet.</li>
+                            <li><strong>Szerzett zavarok:</strong> Súlyos májelégtelenség (csökkent faktorszintézis), K-vitamin hiány, DIC (disszeminált intravaszkuláris koaguláció).</li>
+                        </ul>
+                    </div>
+                    <div class="card card-green">
+                        <h4>Fokozott Alvadékonysággal Járó Állapotok (Trombofíliák)</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-2">
+                             <li><strong>Öröklött Trombofíliák:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><strong>Faktor V Leiden mutáció (leggyakoribb):</strong> APC rezisztenciát okoz.</li>
+                                    <li><strong>Protrombin génmutáció.</strong></li>
+                                    <li><strong>Protein C, S, Antithrombin hiány.</strong></li>
+                                </ul>
+                                <p class="text-sm">Főként vénás trombózisra (DVT, PE, agyi vénás trombózis) hajlamosítanak.</p>
+                             </li>
+                             <li><strong>Szerzett Trombofíliák:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                     <li><strong>Antifoszfolipid Szindróma (APS):</strong> Autoimmun betegség, artériás és vénás trombózisokkal, ismétlődő vetélésekkel.</li>
+                                     <li><strong>Egyéb:</strong> Malignitások, terhesség, immobilizáció, gyógyszerek (pl. fogamzásgátlók).</li>
+                                </ul>
+                             </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Tab switching logic
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+    </script>
+</body>
+</html>

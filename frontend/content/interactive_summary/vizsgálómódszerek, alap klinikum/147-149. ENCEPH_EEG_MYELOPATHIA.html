@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Tudásbázis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .accordion-content.open {
+            max-height: 5000px; /* Adjust as needed */
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb; /* gray-200 */
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-indigo-600 flex items-center">
+                    <svg class="icon mr-3" data-lucide="brain-circuit"></svg>
+                    Neurológiai Tudásbázis
+                </h1>
+                <nav id="main-nav" class="mt-4 md:mt-0 flex flex-wrap justify-center gap-2">
+                    <a href="#encephalopatiak" class="nav-link text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-500 hover:text-white">Encephalopathiák</a>
+                    <a href="#eeg" class="nav-link active text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-500 hover:text-white">EEG Jelek</a>
+                    <a href="#myelopatiak" class="nav-link text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-500 hover:text-white">Myelopathiák</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Encephalopathiák Section -->
+        <section id="encephalopatiak-content" class="content-section">
+            <h2 class="text-3xl font-bold mb-6 text-slate-700 border-b-4 border-indigo-500 pb-2">Encephalopathiák</h2>
+            <p class="mb-8 text-slate-600">Az encephalopathia az agy diffúz működészavarát jelenti, melynek hátterében számos ok állhat. Ez a szekció részletesen bemutatja a különböző típusokat, tüneteket, diagnosztikai és kezelési lehetőségeket.</p>
+
+            <!-- Accordion for Encephalopathy Types -->
+            <div class="space-y-4">
+                <!-- Metabolikus -->
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-indigo-700">
+                        <span><i data-lucide="atom" class="inline-block mr-2"></i>Metabolikus Encephalopathiák</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-slate-600 mb-4">A stabil belső környezet (homeosztázis) zavarai által okozott diffúz agyi diszfunkciók. Gyakran reverzibilisek, ha az alapbetegséget időben rendezik.</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-4 border rounded-lg bg-slate-50">
+                                <h4 class="font-bold text-lg mb-2">Hepatikus Encephalopathia (HE)</h4>
+                                <p class="text-sm text-slate-600">Máj-elégtelenséghez társuló komplex neuropszichiátriai tünetegyüttes. Jellemzője az asterixis (flapping tremor) és a tudatzavar.</p>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-slate-50">
+                                <h4 class="font-bold text-lg mb-2">Uraemiás Encephalopathia</h4>
+                                <p class="text-sm text-slate-600">Veseelégtelenséghez társuló, gyakran myoclonussal, agitáltsággal járó állapot.</p>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-slate-50">
+                                <h4 class="font-bold text-lg mb-2">Hipoxiás-Ischaemiás Encephalopathia (HIE)</h4>
+                                <p class="text-sm text-slate-600">Az agy oxigén- és/vagy vérellátási zavara okozza, gyakran irreverzibilis.</p>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-slate-50">
+                                <h4 class="font-bold text-lg mb-2">Wernicke Encephalopathia</h4>
+                                <p class="text-sm text-slate-600">Tiamin (B1-vitamin) hiány okozza. Klasszikus triász: szemmozgászavar, ataxia, zavartság. Neurológiai vészhelyzet!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toxikus -->
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-indigo-700">
+                        <span><i data-lucide="flask-conical" class="inline-block mr-2"></i>Toxikus Encephalopathiák</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-slate-600 mb-4">Exogén anyagok (gyógyszerek, vegyszerek, alkohol, nehézfémek) által kiváltott agyi működészavarok.</p>
+                         <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><b>Gyógyszer-indukált:</b> Szedatívumok, opioidok, antipszichotikumok, lítium, antiepileptikumok.</li>
+                            <li><b>Vegyszer- és Nehézfém:</b> Ólom, higany, mangán, ipari oldószerek.</li>
+                            <li><b>Alkohol:</b> Akut intoxikáció, elvonási szindróma (delirium tremens), Wernicke-Korsakoff szindróma.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Infekciókhoz Társuló -->
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-indigo-700">
+                        <span><i data-lucide="bug" class="inline-block mr-2"></i>Infekciókhoz Társuló Encephalopathiák</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                       <p class="text-slate-600 mb-4">Direkt agyi fertőzéstől (encephalitis) elkülönítendő állapotok, ahol a szisztémás fertőzés vált ki agyi diszfunkciót.</p>
+                       <div class="space-y-3">
+                           <div>
+                               <h4 class="font-bold">Fertőzés-Triggerelte Encephalopathia Szindrómák (ITES)</h4>
+                               <p class="text-sm text-slate-600">Lázas betegséget követő neurológiai tünetegyüttes direkt agyi fertőzés nélkül. Altípusai: AESD, ANE, MERS.</p>
+                           </div>
+                           <div>
+                               <h4 class="font-bold">Prion Betegségek</h4>
+                               <p class="text-sm text-slate-600">Fertőző szivacsos agyvelőbántalmak (pl. Creutzfeldt-Jakob betegség). Gyorsan progrediáló, fatális kimenetelű neurodegeneratív kórképek.</p>
+                           </div>
+                           <div>
+                               <h4 class="font-bold">Posterior Reverzibilis Encephalopathia Szindróma (PRES)</h4>
+                               <p class="text-sm text-slate-600">Jellemzően fejfájás, tudatzavar, vizuális zavarok és görcsrohamok. Az MRI-n tipikus poszterior vazogén ödéma látható. Gyakran hipertóniás krízishez, eclampsiához társul.</p>
+                           </div>
+                       </div>
+                    </div>
+                </div>
+                
+                <!-- Egyéb -->
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-indigo-700">
+                        <span><i data-lucide="ellipsis" class="inline-block mr-2"></i>Egyéb Fontos Típusok</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                       <div class="space-y-3">
+                           <div>
+                               <h4 class="font-bold">Traumás Encephalopathiák (CTE)</h4>
+                               <p class="text-sm text-slate-600">Krónikus Traumás Encephalopathia: ismétlődő fejsérülések következtében kialakuló progresszív neurodegeneratív betegség.</p>
+                           </div>
+                           <div>
+                               <h4 class="font-bold">Hipertóniás Encephalopathia</h4>
+                               <p class="text-sm text-slate-600">Neurológiai vészhelyzet, melyet a súlyosan emelkedett artériás vérnyomás vált ki. Az agyi autoreguláció zavara agyödémához vezet.</p>
+                           </div>
+                           <div>
+                               <h4 class="font-bold">Autoimmun Encephalopathiák</h4>
+                               <p class="text-sm text-slate-600">Immunmediált agyi gyulladásos állapotok (pl. Anti-NMDA-R, Hashimoto Encephalopathia). Gyakran specifikus autoantitestekkel társulnak.</p>
+                           </div>
+                           <div>
+                               <h4 class="font-bold">Epilepsziás Encephalopathiák</h4>
+                               <p class="text-sm text-slate-600">Az epileptiform agyi aktivitás maga is hozzájárul a kognitív és viselkedési funkciók progresszív romlásához.</p>
+                           </div>
+                       </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EEG Section (Expanded) -->
+        <section id="eeg-content" class="content-section active">
+            <h2 class="text-3xl font-bold mb-6 text-slate-700 border-b-4 border-teal-500 pb-2">Organikus és Metabolikus Idegrendszeri Károsodások EEG Jelei</h2>
+            <p class="mb-8 text-slate-600">Az EEG az agy elektromos tevékenységének non-invazív vizsgálata, amely kulcsfontosságú az agyi funkciózavarok diagnosztikájában. Ez a rész áttekinti a legfontosabb patológiás EEG mintázatokat, részletesen bemutatva azok klinikai és prognosztikai jelentőségét.</p>
+            
+            <div class="space-y-4">
+                <!-- Organikus Károsodások -->
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-teal-700">
+                        <span><i data-lucide="brain" class="inline-block mr-2"></i>Organikus Károsodások Jelei</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-slate-600 mb-4">Strukturális agyi elváltozások (pl. stroke, tumor, trauma) okozta EEG eltérések, melyek segíthetnek a lézió lokalizálásában és funkcionális hatásának megítélésében.</p>
+                        <div class="space-y-3 pl-4 border-l-2 border-teal-200">
+                            <div>
+                                <h4 class="font-bold text-lg text-teal-600">Fokális Abnormalitások</h4>
+                                <ul class="list-disc list-inside space-y-1 mt-2 text-slate-700">
+                                    <li><b>Fokális lassulás (delta, theta):</b> Körülírt strukturális lézióra utal (pl. tumor, infarktus). A folyamatos lassulás súlyosabb, míg az intermittáló kisebb diszfunkciót jelez.</li>
+                                    <li><b>Periodikus Lateralizált Kisülések (PLEDs/LPDs):</b> Akut, destruktív folyamatot (pl. stroke, herpes encephalitis) és fokozott görcskészséget jeleznek. Altípusai: PLEDs plus, BIPLEDs (súlyosabb), GPEDs.</li>
+                                </ul>
+                            </div>
+                             <div>
+                                <h4 class="font-bold text-lg text-teal-600">Diffúz Abnormalitások</h4>
+                                <ul class="list-disc list-inside space-y-1 mt-2 text-slate-700">
+                                    <li><b>Generalizált lassulás:</b> A leggyakoribb nem-specifikus jel, a károsodás súlyosságával korrelál. Neurodegeneratív betegségekben, diffúz traumában jellemző.</li>
+                                    <li><b>Háttértevékenység dezorganizációja:</b> Az alapritmus, az AP-gradiens és a reaktivitás elvesztése.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-teal-600">Kiemelt Kórképek</h4>
+                                <ul class="list-disc list-inside space-y-1 mt-2 text-slate-700">
+                                    <li><b>Stroke:</b> Fokális lassulás (PDA), PLEDs, generalizált lassulás (rossz prognózis).</li>
+                                    <li><b>Tumorok:</b> Fokális lassulás, epileptiform aktivitás (különösen lassan növő tumoroknál).</li>
+                                    <li><b>Traumás agysérülés (TBI):</b> A lelet a súlyosságtól függ, az enyhe TBI-től (PDR lassulás) a súlyosig (burst-szuppresszió, alfa/theta kóma).</li>
+                                    <li><b>Alzheimer-kór:</b> A PDR progresszív lassulása, alfa csökkenés, theta/delta növekedés.</li>
+                                    <li><b>Creutzfeldt-Jakob kór (CJD):</b> Jellemző a periodikus éles hullám komplexek (PSWC, ~1 Hz) megjelenése.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metabolikus Károsodások -->
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-rose-700">
+                        <span><i data-lucide="atom" class="inline-block mr-2"></i>Metabolikus Károsodások Jelei</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-slate-600 mb-4">Szisztémás anyagcserezavarok okozta diffúz agyi funkciózavarok EEG manifesztációi. Az eltérések gyakran reverzibilisek.</p>
+                        <div class="space-y-3 pl-4 border-l-2 border-rose-200">
+                            <div>
+                                <h4 class="font-bold text-lg text-rose-600">Általános Mintázatok</h4>
+                                <ul class="list-disc list-inside space-y-1 mt-2 text-slate-700">
+                                    <li><b>Generalizált folytonos lassulás:</b> A leggyakoribb jel, a tudatzavar mértékével korrelál.</li>
+                                    <li><b>Trifázisos hullámok (TWs):</b> Magas amplitúdójú, 3 fázisú, éles kontúrú hullámok. Nem specifikus, de gyakori hepatikus, urémiás enkefalopátiában.</li>
+                                    <li><b>Burst-szuppressziós minta:</b> Súlyos agyi diszfunkciót jelez (pl. anoxia, mély kóma). Aktivitási csomagok (burst) és csendes (szuppresszió) periódusok váltakozása. Rossz prognózist jelez.</li>
+                                    <li><b>Periodikus/Ritmikus mintázatok:</b> Pl. FIRDA (Frontal Intermittent Rhythmic Delta Activity), OIRDA, alfa/theta/orsó kóma.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-rose-600">Kiemelt Állapotok</h4>
+                                <ul class="list-disc list-inside space-y-1 mt-2 text-slate-700">
+                                    <li><b>Hepatikus enkefalopátia:</b> Az EEG lassulása a West Haven stádiumokkal korrelál. Súlyosabb formában trifázisos hullámok, majd delta kóma jellemző.</li>
+                                    <li><b>Urémiás enkefalopátia:</b> Hasonló a hepatikushoz, gyakori a generalizált lassulás és a trifázisos hullámok.</li>
+                                    <li><b>Hipoglikémia:</b> A lassulás a vércukorszinttel korrelál, súlyos esetben burst-szuppresszió is lehet.</li>
+                                    <li><b>Anoxiás enkefalopátia (HIE):</b> Súlyos, rossz prognózisú mintázatok jellemzők (alfa/theta kóma, burst-szuppresszió, elektrocerebrális inaktivitás).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Myelopathiák Section -->
+        <section id="myelopatiak-content" class="content-section">
+            <h2 class="text-3xl font-bold mb-6 text-slate-700 border-b-4 border-sky-500 pb-2">Myelopathiák</h2>
+            <p class="mb-8 text-slate-600">A myelopathia a gerincvelőt érintő bármely neurológiai funkciózavart jelöli. A tünetek a károsodás helyétől és okától függenek. Ez a rész áttekinti a főbb típusokat és azok jellemzőit.</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Kompressziós -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-sky-600 mb-3">
+                        <i data-lucide="user-minus" class="icon"></i>
+                        <h3 class="text-xl font-bold ml-3">Kompressziós</h3>
+                    </div>
+                    <p class="text-sm text-slate-600">A gerincvelő külső összenyomódása okozza. Leggyakoribb oka a cervicalis spondylosis (CSM) és a porckorongsérv.</p>
+                </div>
+                <!-- Vaszkuláris -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-red-600 mb-3">
+                        <i data-lucide="heart-pulse" class="icon"></i>
+                        <h3 class="text-xl font-bold ml-3">Vaszkuláris</h3>
+                    </div>
+                    <p class="text-sm text-slate-600">A gerincvelő vérellátási zavaraihoz köthető (pl. gerincvelő-infarktus, AVM). Jellemző az akut, hirtelen kezdet.</p>
+                </div>
+                <!-- Gyulladásos -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-orange-600 mb-3">
+                        <i data-lucide="flame" class="icon"></i>
+                        <h3 class="text-xl font-bold ml-3">Gyulladásos</h3>
+                    </div>
+                    <p class="text-sm text-slate-600">Autoimmun vagy parainfekciózus folyamatok eredményezik (pl. transzverzális myelitis, sclerosis multiplex).</p>
+                </div>
+                <!-- Infekciózus -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-green-600 mb-3">
+                        <i data-lucide="virus" class="icon"></i>
+                        <h3 class="text-xl font-bold ml-3">Infekciózus</h3>
+                    </div>
+                    <p class="text-sm text-slate-600">Kórokozó általi direkt invázió (pl. HIV, HTLV-1, TBC, szifilisz) okozza.</p>
+                </div>
+                <!-- Metabolikus/Nutricionális -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-purple-600 mb-3">
+                        <i data-lucide="test-tube-2" class="icon"></i>
+                        <h3 class="text-xl font-bold ml-3">Metabolikus / Nutricionális</h3>
+                    </div>
+                    <p class="text-sm text-slate-600">Anyagcsere-zavarok vagy hiányállapotok (pl. B12-vitamin hiány - funikuláris myelosis) következményei.</p>
+                </div>
+                <!-- Egyéb -->
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="flex items-center text-gray-600 mb-3">
+                        <i data-lucide="more-horizontal" class="icon"></i>
+                        <h3 class="text-xl font-bold ml-3">Egyéb okok</h3>
+                    </div>
+                    <p class="text-sm text-slate-600">Daganatok, sugár-myelopathia, paraneoplasiás és genetikai eredetű formák.</p>
+                </div>
+            </div>
+
+            <!-- Myelopathia Table -->
+            <div class="mt-10 bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-bold mb-4">Myelopathiák Összehasonlító Táblázata</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Típus</th>
+                                <th>Kezdet (Onset)</th>
+                                <th>Tipikus Lokalizáció</th>
+                                <th>Jellegzetes MRI lelet</th>
+                                <th>Prognózis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Cervicalis Spondyloticus Myelopathia (CSM)</td>
+                                <td>Hónapok-évek</td>
+                                <td>Cervicalis</td>
+                                <td>Gerincvelő kompresszió, szűkület</td>
+                                <td>Jó, ha a sebészi kezelés időben megtörténik</td>
+                            </tr>
+                            <tr>
+                                <td>Transzverzális Myelitis</td>
+                                <td>Órák-napok</td>
+                                <td>Bármely szint (gyakran thoracalis)</td>
+                                <td>T2 hyperintenzitás, kontraszthalmozás</td>
+                                <td>Változó, részleges vagy teljes felépülés is lehet</td>
+                            </tr>
+                            <tr>
+                                <td>B12-vitamin hiány</td>
+                                <td>Hónapok</td>
+                                <td>Cervicalis-thoracalis</td>
+                                <td>Hátsó kötegek T2 hyperintenzitása</td>
+                                <td>Jó, ha a B12-pótlás korán megkezdődik</td>
+                            </tr>
+                            <tr>
+                                <td>Neuromyelitis Optica (NMO)</td>
+                                <td>Napok</td>
+                                <td>Cervicalis-thoracalis</td>
+                                <td>Hosszú, kiterjedt lézió (>3 csigolyasegmentum)</td>
+                                <td>Rosszabb, relapszusokkal jár, gyakori a maradványtünet</td>
+                            </tr>
+                             <tr>
+                                <td>Arteria Spinalis Anterior Szindróma</td>
+                                <td>Percek-órák</td>
+                                <td>Bármely szint</td>
+                                <td>"Bagolyszem" jel a gerincvelő elülső részén (DWI/T2)</td>
+                                <td>Általában kedvezőtlen, gyakori a maradandó károsodás</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 mt-8 bg-slate-800 text-slate-400">
+        <p>&copy; 2025 Interaktív Neurológiai Tudásbázis. Kizárólag oktatási és tájékoztatási célokat szolgál.</p>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Navigation Logic
+        const navLinks = document.querySelectorAll('#main-nav a');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Update nav link styles
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Show/hide content sections
+                const targetId = link.getAttribute('href').substring(1) + '-content';
+                contentSections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+                // Set the active tab on page load based on the hash
+                if (window.location.hash) {
+                    const initialLink = document.querySelector(`a[href="${window.location.hash}"]`);
+                    if(initialLink) initialLink.click();
+                }
+
+                window.scrollTo(0, 0);
+            });
+        });
+
+        // Accordion Logic
+        const accordionToggles = document.querySelectorAll('.accordion-toggle');
+
+        accordionToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('.accordion-icon');
+                
+                if (content && icon) {
+                    content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

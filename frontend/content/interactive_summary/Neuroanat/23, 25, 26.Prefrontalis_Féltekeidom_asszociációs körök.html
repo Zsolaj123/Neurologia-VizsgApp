@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológia Vizsgafelkészítő</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #d1d5db;
+        }
+        .prose h1, .prose h2, .prose h3 {
+            color: #f9fafb;
+        }
+        .prose strong {
+            color: #93c5fd;
+        }
+        .prose a {
+            color: #60a5fa;
+        }
+        .prose blockquote {
+            border-left-color: #3b82f6;
+            color: #9ca3af;
+        }
+        .table-auto th {
+            background-color: #1f2937;
+            color: #d1d5db;
+        }
+        .table-auto tr:nth-child(even) {
+            background-color: #1f2937;
+        }
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-item:hover, .nav-item.active {
+            color: #60a5fa;
+            transform: scale(1.05);
+        }
+        .card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -2px rgba(59, 130, 246, 0.1);
+        }
+        .tag {
+            background-color: #374151;
+            color: #9ca3af;
+        }
+        .icon-wrapper {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border-radius: 9999px;
+            padding: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toc-link.active {
+            color: #3b82f6;
+            font-weight: 600;
+            border-left-color: #3b82f6;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-300">
+
+    <!-- Header -->
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="icon-wrapper p-2 mr-3">
+                        <i data-lucide="brain-circuit" class="h-6 w-6"></i>
+                    </div>
+                    <span class="text-xl font-bold text-white">Neurológia Felkészítő</span>
+                </div>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#prefrontalis" class="nav-item text-sm font-medium">Prefrontális lebeny</a>
+                    <a href="#dominancia" class="nav-item text-sm font-medium">Féltekei dominancia</a>
+                    <a href="#asszociacios" class="nav-item text-sm font-medium">Asszociációs rendszerek</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div class="lg:flex lg:space-x-8">
+
+            <!-- Sticky Table of Contents -->
+            <aside class="hidden lg:block w-64 flex-shrink-0">
+                <div class="sticky top-24">
+                    <h3 class="text-lg font-semibold text-white mb-4">Tartalomjegyzék</h3>
+                    <nav id="toc" class="space-y-2 border-l-2 border-gray-700">
+                        <!-- TOC links will be injected by JS -->
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Sections -->
+            <div class="flex-1 min-w-0">
+                <article class="prose prose-invert max-w-none">
+                    <!-- Section 1: Prefrontális lebeny -->
+                    <section id="prefrontalis" class="scroll-mt-20">
+                        <div class="flex items-center mb-6">
+                            <div class="icon-wrapper mr-4"><i data-lucide="brain" class="h-8 w-8"></i></div>
+                            <div>
+                                <h1 class="mb-0">Prefrontális lebeny és frontostriatális körök</h1>
+                                <p class="mt-1 text-gray-400">A végrehajtó funkciók, érzelmek és döntéshozatal központja.</p>
+                            </div>
+                        </div>
+
+                        <h2 id="prefrontalis-alegysegek">A prefrontális kéreg (PFC) főbb alegységei</h2>
+                        <div class="grid md:grid-cols-2 gap-6 my-6">
+                            <div class="card">
+                                <h3 class="mt-0">Dorsolaterális (DLPFC)</h3>
+                                <p>A "kognitív intelligencia" központja. Főbb funkciók: tervezés, szervezés, problémamegoldás, munkamemória, gátlás (inhibíció), absztrakt gondolkodás.</p>
+                            </div>
+                            <div class="card">
+                                <h3 class="mt-0">Ventromediális (VMPFC)</h3>
+                                <p>Az "érzelmi és szociális intelligencia" motorja. Feladatai: érzelmi szabályozás, döntéshozatal (szociális/érzelmi kontextusban), empátia, értékítéletek.</p>
+                            </div>
+                            <div class="card">
+                                <h3 class="mt-0">Orbitofrontális (OFC)</h3>
+                                <p>A viselkedés és impulzusok kontrollálója. Szerepei: impulzuskontroll, önkontroll, a cselekedetek következményeinek mérlegelése, jutalom-alapú tanulás.</p>
+                            </div>
+                            <div class="card">
+                                <h3 class="mt-0">Anterior Cinguláris (ACC)</h3>
+                                <p>A motiváció és a hibajelzés rendszere. Funkciói: motiváció, hibadetekció, konfliktusmonitorozás, szelektív figyelem, fájdalomérzékelés érzelmi komponense.</p>
+                            </div>
+                        </div>
+
+                        <h2 id="frontostriatalis-korok">Frontostriatális körök</h2>
+                        <blockquote>
+                            A PFC és a szubkortikális struktúrák (bazális ganglionok, thalamus) közötti párhuzamos, zárt hálózatok, melyek a kogníció, érzelmek és mozgás szabályozásának alapját képezik.
+                        </blockquote>
+                        <img src="https://www.frontiersin.org/files/Articles/933718/fnhum-16-933718-HTML-r1/image_m/fnhum-16-933718-g001.jpg" alt="A frontostriatális körök sémás ábrázolása" class="rounded-lg shadow-lg my-6 mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/9ca3af?text=Frontostriatális+Körök+Ábrája';">
+                        
+                        <h3 id="frontostriatalis-altalanos">Általános felépítési séma:</h3>
+                        <p class="text-center font-mono text-lg my-4 text-blue-300">
+                            Kéreg → Striatum → Pallidum/Substantia Nigra → Thalamus → Kéreg
+                        </p>
+                        <p>Két fő útvonal modulálja a kérgi aktivitást:</p>
+                        <ul>
+                            <li><strong>Direkt út:</strong> Fokozza a kérgi aktivitást (thalamus gátlásának feloldása, ún. diszinhibíció).</li>
+                            <li><strong>Indirekt út:</strong> Csökkenti a kérgi aktivitást (thalamus fokozott gátlása).</li>
+                        </ul>
+                        <p>A középagyból származó <strong>dopamin</strong> kulcsfontosságú a két út egyensúlyának szabályozásában.</p>
+                        
+                        <h3 id="frontostriatalis-specifikus">Az öt fő specifikus kör</h3>
+                        <div class="overflow-x-auto my-8">
+                            <table class="table-auto w-full text-left text-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2">Kör neve</th>
+                                        <th class="px-4 py-2">Kiinduló Kérgi Terület</th>
+                                        <th class="px-4 py-2">Fő Funkció</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Motoros kör</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">M1, Premotoros kéreg, SMA</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Mozgástervezés, kivitelezés, tanulás.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Okulomotoros kör</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Frontális szemmező (FEF), SEF</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Szemmozgások kontrollja, vizuális figyelem.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Dorzolaterális Prefrontális</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">DLPFC (Br9, 46)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Végrehajtó funkciók, munkamemória.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Laterális Orbitofrontális</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Laterális OFC (Br11, 47/12)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Szociálisan adekvát viselkedés, impulzuskontroll.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Anterior Cinguláris (Limbikus)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">ACC (Br24, 32, 25)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Motiváció, érzelmi szabályozás, hibadetekció.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <hr class="my-16 border-gray-700">
+
+                    <!-- Section 2: Féltekei dominancia -->
+                    <section id="dominancia" class="scroll-mt-20">
+                        <div class="flex items-center mb-6">
+                            <div class="icon-wrapper mr-4"><i data-lucide="split" class="h-8 w-8"></i></div>
+                            <div>
+                                <h1 class="mb-0">A féltekei dominancia</h1>
+                                <p class="mt-1 text-gray-400">A bal és jobb agyfélteke funkcionális aszimmetriája.</p>
+                            </div>
+                        </div>
+
+                        <h2 id="dominancia-funkciok">Funkcionális különbségek a két agyfélteke között</h2>
+                        <img src="https://i.pinimg.com/originals/99/32/38/993238a20ac88f25ab5784334338579e.jpg" alt="A bal és jobb agyfélteke funkcióinak összehasonlítása" class="rounded-lg shadow-lg my-6 mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/600x450/1f2937/9ca3af?text=Agyféltekék+Funkciói';">
+
+                        <div class="overflow-x-auto my-8">
+                            <table class="table-auto w-full text-left text-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2">Funkció</th>
+                                        <th class="px-4 py-2">Bal agyfélteke (jellemzően)</th>
+                                        <th class="px-4 py-2">Jobb agyfélteke (jellemzően)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Nyelv</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Beszédprodukció (Broca), beszédértés (Wernicke), olvasás, írás</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Prozódia (érzelmi hangsúly), pragmatika, non-verbális kommunikáció</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Gondolkodás</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Analitikus, logikus, szekvenciális, részletekre fókuszáló</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Holisztikus, intuitív, mintázatfelismerő, összképre fókuszáló</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Téri-vizuális</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Korlátozottabb</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Tájékozódás, arcfelismerés, mentális rotáció</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Érzelmek</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Pozitív érzelmek feldolgozása</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Negatív érzelmek feldolgozása, érzelemkifejezés</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h2 id="dominancia-kezsseg">Kezesség és agyi lateralizáció</h2>
+                        <ul>
+                            <li><strong>Jobbkezesek (~90%):</strong> Általában a bal agyfélteke domináns a motoros kontroll és a nyelvi funkciók terén.</li>
+                            <li><strong>Balkezesek (~10%):</strong> Változatosabb mintázat; a jobb agyfélteke lehet domináns, vagy a funkciók kevésbé lateralizáltak.</li>
+                            <li><strong>Kevertdominancia:</strong> Különböző feladatokra más-más oldal domináns. Összefügghet tanulási nehézségekkel (pl. diszlexia, diszgráfia).</li>
+                        </ul>
+                        
+                        <h2 id="dominancia-vizsgalat">Vizsgálati módszerek</h2>
+                        <div class="grid md:grid-cols-2 gap-4 my-6">
+                           <div class="flex items-start"><i data-lucide="ear" class="h-5 w-5 mr-3 mt-1 text-blue-400"></i><p><strong>Dichotikus hallgatási teszt:</strong> Két fülbe egyszerre adott ingerek feldolgozása.</p></div>
+                           <div class="flex items-start"><i data-lucide="test-tube-2" class="h-5 w-5 mr-3 mt-1 text-blue-400"></i><p><strong>Wada-teszt:</strong> Egyik félteke átmeneti "elaltatása" injekcióval (epilepszia műtétek előtt).</p></div>
+                           <div class="flex items-start"><i data-lucide="image" class="h-5 w-5 mr-3 mt-1 text-blue-400"></i><p><strong>Funkcionális képalkotás (fMRI, PET):</strong> Agyi aktivitás mérése feladatvégzés közben.</p></div>
+                           <div class="flex items-start"><i data-lucide="scissors" class="h-5 w-5 mr-3 mt-1 text-blue-400"></i><p><strong>Hasított agyú (split-brain) betegek vizsgálata:</strong> A corpus callosum átvágása utáni állapot tanulmányozása.</p></div>
+                        </div>
+
+                        <h2 id="dominancia-tevhitek">Tévhitek és tudományos tények</h2>
+                        <blockquote><strong>Tévhit:</strong> Az embereket mereven "bal agyféltekés" (logikus) és "jobb agyféltekés" (kreatív) kategóriákba lehet sorolni.
+                        <br><strong>Tény:</strong> A komplex funkciók, mint a kreativitás, mindkét agyfélteke összehangolt működését igénylik. A két félteke folyamatosan kommunikál a corpus callosumon keresztül.</blockquote>
+                    </section>
+
+                    <hr class="my-16 border-gray-700">
+
+                    <!-- Section 3: Asszociációs kérgi rendszerek -->
+                    <section id="asszociacios" class="scroll-mt-20">
+                         <div class="flex items-center mb-6">
+                            <div class="icon-wrapper mr-4"><i data-lucide="network" class="h-8 w-8"></i></div>
+                            <div>
+                                <h1 class="mb-0">Az asszociációs kérgi rendszerek</h1>
+                                <p class="mt-1 text-gray-400">A magasabb rendű kognitív funkciók neurális hálózatai.</p>
+                            </div>
+                        </div>
+                        <blockquote>Az asszociációs kéreg az agykéreg azon területeit foglalja magában, amelyek nem primer érző- vagy mozgatófunkciókat látnak el, hanem a különböző modalitású információk integrációjáért felelősek. Az emberi agykéreg legnagyobb részét (kb. 80%) teszik ki.</blockquote>
+                        
+                        <h2 id="asszociacios-palyak">Fehérállományi pályarendszerek</h2>
+                        <div class="grid md:grid-cols-3 gap-6 my-6">
+                            <div class="card">
+                               <h3 class="mt-0 flex items-center"><i data-lucide="arrow-left-right" class="h-5 w-5 mr-2"></i>Asszociációs</h3>
+                               <p>Egyazon féltekén belüli területeket kötnek össze (pl. fasciculus arcuatus, amely a Broca- és Wernicke-területeket kapcsolja össze).</p>
+                            </div>
+                            <div class="card">
+                               <h3 class="mt-0 flex items-center"><i data-lucide="shuffle" class="h-5 w-5 mr-2"></i>Commissuralis</h3>
+                               <p>A két agyféltekét kötik össze (legnagyobb a corpus callosum).</p>
+                            </div>
+                            <div class="card">
+                               <h3 class="mt-0 flex items-center"><i data-lucide="arrow-up-down" class="h-5 w-5 mr-2"></i>Projekciós</h3>
+                               <p>Az agykérget szubkortikális struktúrákkal kötik össze (pl. capsula interna, corticospinalis pálya).</p>
+                            </div>
+                        </div>
+                        
+                        <h2 id="asszociacios-teruletek">Főbb asszociációs területek és sérüléseik</h2>
+                        <div class="space-y-8">
+                             <div class="card">
+                                <h3 class="mt-0">1. Prefrontális asszociációs kéreg (PFC)</h3>
+                                <p><strong>Funkciók:</strong> Végrehajtó funkciók, munkamemória, személyiség, szociális viselkedés. "A viselkedés karmestere".</p>
+                                <p><strong>Sérülésének következményei:</strong> Személyiségváltozás (pl. Phineas Gage), tervezési zavar, gátlástalanság vagy apátia, munkamemória deficit.</p>
+                             </div>
+                             <div class="card">
+                                <h3 class="mt-0">2. Parieto-temporo-occipitális (PTO) asszociációs kéreg</h3>
+                                <p><strong>Funkciók:</strong> Szenzoros integráció (látás, hallás, tapintás), nyelvértés (Wernicke-terület), téri tudatosság, olvasás, írás, számolás.</p>
+                                <p><strong>Sérülésének következményei:</strong>
+                                    <ul>
+                                        <li><strong>Agnózia:</strong> Felismerési zavar (pl. prozopagnózia - arcfelismerési zavar).</li>
+                                        <li><strong>Afázia:</strong> Szerzett nyelvi zavar (pl. Wernicke-afázia - folyékony, de értelmetlen beszéd).</li>
+                                        <li><strong>Apraxia:</strong> Tanult mozgások kivitelezésének zavara.</li>
+                                        <li><strong>Neglect szindróma:</strong> A sérüléssel ellentétes térfél elhanyagolása (jellemzően jobb oldali sérülésnél a bal térfél).</li>
+                                    </ul>
+                                </p>
+                             </div>
+                             <div class="card">
+                                <h3 class="mt-0">3. Limbikus asszociációs kéreg</h3>
+                                <p><strong>Funkciók:</strong> Érzelmek, motiváció, tanulás, memória (hippocampus, amygdala).</p>
+                                <p><strong>Sérülésének következményei:</strong> Memóriazavarok (pl. anterográd amnézia - képtelenség új emlékek kialakítására), érzelmi zavarok, motivációhiány.</p>
+                             </div>
+                        </div>
+                        
+                        <h2 id="asszociacios-brodmann">Releváns Brodmann-areák</h2>
+                        <img src="https://i.pinimg.com/originals/99/3a/81/993a81387d320876f2503d5117cb3f29.png" alt="A Brodmann-areák térképe az agy laterális felszínén" class="rounded-lg shadow-lg my-6 mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1f2937/9ca3af?text=Brodmann+Térkép';">
+                        <p>A Brodmann-areák az agykéreg sejtszerkezeti (citoarchitektonikai) alapú felosztását jelentik, melyek gyakran megfeleltethetők funkcionális egységeknek.</p>
+                        <div class="overflow-x-auto my-8">
+                            <table class="table-auto w-full text-left text-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2">Asszociációs Terület</th>
+                                        <th class="px-4 py-2">Főbb Brodmann-areák</th>
+                                        <th class="px-4 py-2">Sérülésének Főbb Következményei</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Prefrontális Kéreg (PFC)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">BA 9, 10, 11, 45, 46, 47</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Személyiségváltozás, tervezési zavar, gátlástalanság/apátia</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Parieto-temporo-occipitális (PTO)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">BA 5, 7, 39, 40 (Parietális) / BA 22, 37 (Temporális)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Agnóziák, afáziák (Wernicke), apraxiák, neglect</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border-t border-gray-700 px-4 py-3 font-semibold">Limbikus Asszociációs Kéreg</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">BA 23, 24 (Cinguláris), BA 28, 34-36 (Parahippocampalis)</td>
+                                        <td class="border-t border-gray-700 px-4 py-3">Memóriazavarok (amnézia), érzelmi és motivációs zavarok</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </section>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <!-- Back to top button -->
+    <button id="to-top-button" title="Vissza a tetejére"
+        class="hidden fixed z-50 bottom-10 right-10 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all">
+        <i data-lucide="arrow-up" class="h-6 w-6"></i>
+    </button>
+    
+    <script>
+        lucide.createIcons();
+
+        // Back to top button logic
+        const toTopButton = document.getElementById('to-top-button');
+        window.onscroll = () => {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                toTopButton.classList.remove('hidden');
+            } else {
+                toTopButton.classList.add('hidden');
+            }
+        };
+        toTopButton.onclick = () => {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        };
+
+        // TOC generation and active state logic
+        const tocContainer = document.getElementById('toc');
+        const sections = document.querySelectorAll('section');
+        const tocLinks = [];
+
+        sections.forEach(section => {
+            const titles = section.querySelectorAll('h1, h2');
+            titles.forEach(title => {
+                const id = title.id;
+                if (!id) return;
+                
+                const level = parseInt(title.tagName.substring(1), 10);
+                const link = document.createElement('a');
+                link.href = `#${id}`;
+                link.textContent = title.textContent;
+                link.className = `toc-link block border-l-2 border-transparent py-1 text-gray-400 hover:text-white transition-colors duration-200 ${level === 1 ? 'pl-2 text-base font-semibold' : 'pl-6 text-sm'}`;
+                
+                tocContainer.appendChild(link);
+                tocLinks.push({
+                    id: id,
+                    element: link
+                });
+            });
+        });
+        
+        const observer = new IntersectionObserver(entries => {
+            let visibleSectionId = null;
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (!visibleSectionId) {
+                         visibleSectionId = entry.target.id;
+                    }
+                }
+            });
+            
+            // Fallback for when scrolling up past the first section
+            if (!visibleSectionId) {
+                 const firstVisible = Array.from(sections).find(s => {
+                    const rect = s.getBoundingClientRect();
+                    return rect.bottom >= 100; // 100px from top
+                 });
+                 if (firstVisible) {
+                    visibleSectionId = firstVisible.querySelector('h1, h2').id;
+                 }
+            }
+
+
+            tocLinks.forEach(link => {
+                link.element.classList.remove('active');
+                if (link.id === visibleSectionId) {
+                    link.element.classList.add('active');
+                }
+            });
+        }, {
+            rootMargin: '-80px 0px -70% 0px', // Adjust rootMargin to better detect visible section
+            threshold: 0
+        });
+
+        document.querySelectorAll('h1[id], h2[id]').forEach(title => {
+            observer.observe(title);
+        });
+
+    </script>
+</body>
+
+</html>

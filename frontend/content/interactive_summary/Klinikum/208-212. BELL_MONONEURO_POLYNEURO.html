@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perifériás Neuropathiák Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* gray-50 */
+        }
+        .nav-link.active {
+            color: #0ea5e9; /* sky-500 */
+            font-weight: 600;
+        }
+        .tab-button.active {
+            background-color: #0284c7; /* sky-600 */
+            color: white;
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700; /* font-bold */
+            color: #111827; /* text-gray-900 */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .section-title svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-sky-700">Neuropathia Tudástár</h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600">
+                <a href="#bell-paresis" class="nav-link hover:text-sky-500 transition">Bell Paresis</a>
+                <a href="#felso-vegtag" class="nav-link hover:text-sky-500 transition">Felső Végtag</a>
+                <a href="#also-vegtag" class="nav-link hover:text-sky-500 transition">Alsó Végtag</a>
+                <a href="#polyneuropathia" class="nav-link hover:text-sky-500 transition">Polyneuropathia</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#bell-paresis" class="block py-2 nav-link">Bell Paresis</a>
+            <a href="#felso-vegtag" class="block py-2 nav-link">Felső Végtag</a>
+            <a href="#also-vegtag" class="block py-2 nav-link">Alsó Végtag</a>
+            <a href="#polyneuropathia" class="block py-2 nav-link">Polyneuropathia</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Bell's Palsy Section -->
+        <section id="bell-paresis" class="mb-16 scroll-mt-20">
+            <div class="section-title text-sky-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 9.563V9.563a1.125 1.125 0 012.25 0V9.563a1.125 1.125 0 01-2.25 0zM12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+                <h2>Bell-féle Paresis</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="content-card lg:col-span-2">
+                    <h3 class="text-2xl font-semibold mb-3 text-sky-600">Klinikai Jellemzők és Patofiziológia</h3>
+                    <p class="mb-4">A 7. agyideg (n. facialis) hirtelen kialakuló, ismeretlen eredetű bénulása. A legelfogadottabb elmélet szerint a háttérben a <strong class="text-gray-900">Herpes Simplex Vírus (HSV-1) reaktivációja</strong> áll, ami az ideg gyulladásához és duzzanatához vezet. A megduzzadt ideg a szűk csontos csatornában (canalis Fallopii) kompresszió alá kerül, ami iszkémiát és funkciózavart okoz.</p>
+                    <h4 class="font-semibold mb-2">Főbb tünetek:</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Az arc egyik felének hirtelen, teljes bénulása (a homlokizmokat is beleértve).</li>
+                        <li>Nehezített szemzárás (lagoftalmus), ami a szaruhártya kiszáradásához vezethet.</li>
+                        <li>Lógó szájzug, nyálfolyás, az étel-ital kifolyhat.</li>
+                        <li>Retroauricularis (fül mögötti) fájdalom, gyakran a bénulás előtt.</li>
+                        <li>Ízérzészavar a nyelv elülső 2/3-án, hyperacusis (hangok túlérzékenysége).</li>
+                    </ul>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-sky-600">Differenciáldiagnózis</h3>
+                    <p class="mb-4">A legfontosabb a stroke-tól való elkülönítés. A kulcs a homlokizmok vizsgálata:</p>
+                    <div class="bg-sky-50 border-l-4 border-sky-400 p-4 rounded-r-lg">
+                        <p><strong class="text-sky-800">Stroke (centrális paresis):</strong> A homlokizmok működése megtartott ("forehead sparing"), mivel a felső arc félteke kettős beidegzésű.</p>
+                        <hr class="my-2 border-sky-200">
+                        <p><strong class="text-sky-800">Bell-paresis (perifériás paresis):</strong> A teljes arc félteke érintett, a homlokráncolás nem lehetséges.</p>
+                    </div>
+                </div>
+                <div class="content-card lg:col-span-3">
+                    <h3 class="text-2xl font-semibold mb-3 text-sky-600">Kezelés és Prognózis</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">Kezelési Alapelvek:</h4>
+                             <ul class="list-none space-y-3">
+                                <li class="flex items-start"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon text-red-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><strong class="text-red-600">Szemvédelem:</strong> Abszolút prioritás! Műkönny, szemkenőcs, éjszakai leragasztás a szaruhártya-károsodás megelőzésére.</div></li>
+                                <li class="flex items-start"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon text-blue-500"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div><strong class="text-gray-900">Kortikoszteroidok:</strong> A tünetek kezdetétől számított 72 órán belül elindítva a kezelés sarokköve.</div></li>
+                                <li class="flex items-start"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon text-gray-500"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg><div><strong>Antivirális szerek:</strong> Adásuk vitatott, súlyos esetekben szteroiddal kombinálva megfontolandó.</div></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">Prognózis:</h4>
+                            <p>Általában jó, a betegek kb. 85%-a spontán javul. Korai szteroiddal a teljes felépülés aránya ~95%. A leggyakoribb tartós szövődmény a <strong class="text-gray-900">synkinesis</strong> (kóros együttmozgások, pl. szájmozgásra a szem is becsukódik).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upper Limb Section -->
+        <section id="felso-vegtag" class="mb-16 scroll-mt-20">
+             <div class="section-title text-teal-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" /></svg>
+                <h2>Felső Végtagi Mononeuropathiák</h2>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button class="tab-button active" data-tab="cts">Kéztőalagút-szindróma</button>
+                <button class="tab-button" data-tab="cubital">Könyökízületi Alagút-szindróma</button>
+                <button class="tab-button" data-tab="radial">Radiális Ideg Bénulás</button>
+            </div>
+            <div id="cts" class="tab-content">
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-teal-600">Kéztőalagút-szindróma (CTS)</h3>
+                    <div class="grid md:grid-cols-5 gap-6">
+                        <div class="md:col-span-3">
+                            <p class="mb-4">A leggyakoribb alagút szindróma, a <strong class="text-gray-900">n. medianus</strong> kompressziója a csuklóban lévő kéztőalagútban.</p>
+                            <h4 class="font-semibold mb-2">Tünetek és Diagnózis:</h4>
+                            <ul class="list-disc list-inside space-y-1 mb-4">
+                                <li>Éjszakai fájdalom és zsibbadás az 1-3. és a 4. ujj radiális felén.</li>
+                                <li>A kéz rázogatása enyhíti a tüneteket.</li>
+                                <li><strong class="text-gray-900">Pozitív provokációs tesztek:</strong> Tinel-jel (ideg kopogtatása), Phalen-teszt (csukló flexiója).</li>
+                                <li>Súlyos esetben a hüvelykpárna (thenar) izmainak gyengesége, sorvadása.</li>
+                            </ul>
+                            <h4 class="font-semibold mb-2">Kezelés:</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Konzervatív:</strong> Éjszakai csuklósín, szteroid injekciók, ergonómia.</li>
+                                <li><strong>Sebészi:</strong> A ligamentum carpi transversum átvágása (felszabadítás).</li>
+                            </ul>
+                        </div>
+                        <div class="md:col-span-2 flex items-center justify-center">
+                            <svg viewBox="0 0 200 200" class="w-full h-auto"><title>Kéztőalagút és a n. medianus</title><path d="M 60,180 C 40,140 40,80 60,20 L 140,20 C 160,80 160,140 140,180 Z" fill="#fff3e0" stroke="#ffb74d" stroke-width="2"/><rect x="50" y="80" width="100" height="40" fill="#ffcc80" rx="5"/><text x="100" y="105" text-anchor="middle" font-size="12" fill="#bf360c">N. Medianus</text><path d="M 40,90 H 160" stroke="#d84315" stroke-width="3" stroke-dasharray="4 2"/><text x="100" y="70" text-anchor="middle" font-size="10">Lig. Carpi Transversum</text></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="cubital" class="tab-content hidden">
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-teal-600">Könyökízületi Alagút-szindróma</h3>
+                     <p class="mb-4">A második leggyakoribb, a <strong class="text-gray-900">n. ulnaris</strong> kompressziója a könyökben (sulcus nervi ulnaris).</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">Tünetek:</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Zsibbadás, bizsergés a kisujjban és a gyűrűsujj ulnaris felén.</li>
+                                <li>A kéz kisizmainak gyengesége, ügyetlenség.</li>
+                                <li>"Karmos kéztartás" (IV-V. ujj) és az interosseus izmok sorvadása.</li>
+                                <li><strong class="text-gray-900">Pozitív Froment-jel</strong> (papírlap megtartásakor a hüvelykujj végperce behajlik).</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">Kezelés:</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Konzervatív:</strong> Könyök hajlításának, támaszkodásnak kerülése, éjszakai sínezés.</li>
+                                <li><strong>Sebészi:</strong> Ideg felszabadítása, szükség esetén áthelyezése (anterior transzpozíció).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="radial" class="tab-content hidden">
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-teal-600">Radiális Ideg Bénulás ("Saturday Night Palsy")</h3>
+                    <p class="mb-4">A <strong class="text-gray-900">n. radialis</strong> akut kompressziója a felkarcsonton (sulcus nervi radialis), gyakran rossz testhelyzetben alvás miatt.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">Tünetek:</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong class="text-red-600">"Csuklócsüngés"</strong> és ujjcsüngés (extensor izmok bénulása).</li>
+                                <li>Érzészavar a kézhát I. ujjközében.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">Kezelés és Prognózis:</h4>
+                            <p>A prognózis általában kiváló. A legtöbb esetben spontán, jól gyógyul. Dinamikus csuklóemelő sín és fizikoterápia javasolt a kontraktúrák megelőzésére.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lower Limb Section -->
+        <section id="also-vegtag" class="mb-16 scroll-mt-20">
+            <div class="section-title text-amber-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
+                <h2>Alsó Végtagi Mononeuropathiák</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <div class="content-card">
+                    <h3 class="text-xl font-semibold mb-2 text-amber-700">Peroneus Paresis</h3>
+                    <p>A leggyakoribb alsó végtagi mononeuropathia. A <strong class="text-gray-900">n. peroneus communis</strong> sérül a fibulafejecsnél. Fő tünete a <strong class="text-red-600">lábfejcsüngés</strong> és a "szteppázó" járás. Kezelése peroneus-emelő sínnel és a kiváltó ok (pl. lábkeresztezés) kerülésével történik.</p>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-xl font-semibold mb-2 text-amber-700">Meralgia Paresthetica</h3>
+                    <p>A <strong class="text-gray-900">n. cutaneus femoris lateralis</strong> kompressziója a lágyékhajlatban. Tisztán szenzoros tüneteket okoz: égő fájdalom, zsibbadás a comb külső-elülső oldalán. Gyakori oka az elhízás, szűk ruházat.</p>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-xl font-semibold mb-2 text-amber-700">Tarsalis Alagút-szindróma</h3>
+                    <p>A <strong class="text-gray-900">n. tibialis posterior</strong> kompressziója a boka belső oldalán. Égő, szúró fájdalmat és zsibbadást okoz a talpon, amely terhelésre fokozódik. Lúdtalp korrekciója, injekciók segíthetnek.</p>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-xl font-semibold mb-2 text-amber-700">Ischias (Radiculopathia)</h3>
+                    <p>A <strong class="text-gray-900">n. ischiadicus</strong> vagy annak gyökereinek kompressziója, leggyakrabban porckorongsérv miatt. Jellemző a derékból a lábba sugárzó, dermatómának megfelelő fájdalom. A Lasègue-jel pozitív. Kezelése általában konzervatív.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Polyneuropathy Section -->
+        <section id="polyneuropathia" class="mb-16 scroll-mt-20">
+            <div class="section-title text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
+                <h2>Polyneuropathiák</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-indigo-600">Definíció és Diagnózis</h3>
+                    <p class="mb-4">A perifériás idegrendszer több idegének szimmetrikus, <strong class="text-gray-900">"kesztyű-zokni"</strong> eloszlású károsodása. A diagnózis kulcsa a kiváltó ok azonosítása.</p>
+                    <h4 class="font-semibold mb-2">Diagnosztikus Lépések:</h4>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li><strong>Klinikai kép és ENG/EMG:</strong> A PNP megerősítése és a károsodás típusának (axonális vs. demyelinisatiós) meghatározása.</li>
+                        <li><strong>Célzott laborvizsgálatok:</strong> A gyanított ok alapján (pl. vércukor, HbA1c, B12, pajzsmirigy, paraprotein).</li>
+                        <li><strong>További vizsgálatok:</strong> Genetikai tesztek, lumbálpunkció, idegbiopszia (ritkán).</li>
+                    </ol>
+                </div>
+                <div class="content-card">
+                     <h3 class="text-2xl font-semibold mb-3 text-indigo-600">Főbb Etiológiai Csoportok</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Metabolikus:</strong> Diabetes mellitus (leggyakoribb), veseelégtelenség, hypothyreosis.</li>
+                        <li><strong>Toxikus:</strong> Alkohol, nehézfémek, gyógyszerek (pl. kemoterápia).</li>
+                        <li><strong>Gyulladásos/Autoimmun:</strong> Guillain-Barré szindróma (GBS), CIDP.</li>
+                        <li><strong>Infektív:</strong> HIV, Lyme-kór, Hepatitis.</li>
+                        <li><strong>Nutricionális:</strong> B-vitamin hiányok.</li>
+                        <li><strong>Herediter (örökletes):</strong> Charcot-Marie-Tooth (CMT) betegség.</li>
+                    </ul>
+                </div>
+                 <div class="content-card lg:col-span-2">
+                    <h3 class="text-2xl font-semibold mb-3 text-indigo-600">Kezelési Alapelvek</h3>
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="flex-1">
+                            <h4 class="font-semibold mb-2">1. Oki terápia</h4>
+                            <p>A legfontosabb a háttérben álló ok (pl. diabetes, vitaminhiány, toxin) kezelése vagy eliminálása. Gyulladásos PNP-k esetén immunterápia (IVIG, szteroidok).</p>
+                        </div>
+                        <div class="flex-1">
+                             <h4 class="font-semibold mb-2">2. Tüneti kezelés</h4>
+                            <p>Neuropátiás fájdalom csillapítása (pl. gabapentinoidok, SNRI-k). Motoros tünetek esetén gyógytorna, segédeszközök.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto p-6 text-center">
+            <p>&copy; 2025 Interaktív Neuropathia Tudástár. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // --- Tabbed Interface ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                tabContents.forEach(content => {
+                    if (content.id === tabId) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatómia és Fiziológia - Interaktív Vizsgafelkészítő</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-beszed: #06b6d4; /* Cyan */
+            --c-fajdalom: #f97316; /* Orange */
+            --c-anat: #22c55e; /* Green */
+            --c-karosodas: #8b5cf6; /* Violet */
+            --c-izom: #eab308; /* Amber */
+            --c-dark-blue: #1e293b;
+            --c-light-blue: #334155;
+            --c-bg: #f0f4f8;
+            --c-text: #334155;
+            --c-light-text: #64748b;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--c-bg);
+            color: var(--c-text);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #111827, #1f2937);
+            color: #e2e8f0;
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar a {
+            transition: background-color 0.2s, color 0.2s, border-left-color 0.2s;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .sidebar a:hover {
+            background-color: var(--c-light-blue);
+            color: #ffffff;
+        }
+        .sidebar a.active {
+            background-color: #0ea5e920;
+            color: #ffffff;
+            font-weight: 500;
+            border-left-color: #38bdf8;
+        }
+
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            border-top: 4px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .card h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        ul {
+            list-style: none;
+            padding-left: 0.5rem;
+        }
+        li {
+            margin-bottom: 0.75rem;
+            position: relative;
+            padding-left: 1.75rem;
+        }
+        li::before {
+            content: '\f138'; /* fa-solid fa-circle-arrow-right */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-size: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* Thematic coloring */
+        #beszedzavarok .card { border-color: var(--c-beszed); }
+        #beszedzavarok h3, #beszedzavarok li::before { color: var(--c-beszed); }
+        #beszedzavarok thead th { background-color: var(--c-beszed); }
+
+        #fajdalom .card { border-color: var(--c-fajdalom); }
+        #fajdalom h3, #fajdalom li::before { color: var(--c-fajdalom); }
+        #fajdalom thead th { background-color: var(--c-fajdalom); }
+        
+        #gerincvelo_anatomia .card { border-color: var(--c-anat); }
+        #gerincvelo_anatomia h3, #gerincvelo_anatomia li::before { color: var(--c-anat); }
+        #gerincvelo_anatomia thead th { background-color: var(--c-anat); }
+
+        #gerincvelo_karosodas .card { border-color: var(--c-karosodas); }
+        #gerincvelo_karosodas h3, #gerincvelo_karosodas li::before { color: var(--c-karosodas); }
+        #gerincvelo_karosodas thead th { background-color: var(--c-karosodas); }
+
+        #izomtonus .card { border-color: var(--c-izom); }
+        #izomtonus h3, #izomtonus li::before { color: var(--c-izom); }
+        #izomtonus thead th { background-color: var(--c-izom); }
+        
+        .img-container {
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        .img-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .img-container figcaption {
+            margin-top: 0.75rem;
+            font-style: italic;
+            color: var(--c-light-text);
+            font-size: 0.9rem;
+        }
+        
+        .menu-button {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 50;
+            background-color: var(--c-dark-blue);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        @media (min-width: 1024px) {
+            .menu-button { display: none; }
+            .sidebar { transform: translateX(0) !important; }
+        }
+        @media (max-width: 1023px) {
+            body { padding-left: 0; }
+            .sidebar { transform: translateX(-100%); position: fixed; height: 100%; z-index: 40; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar w-72 h-screen p-4 flex flex-col fixed lg:relative">
+        <h2 class="text-3xl font-bold mb-8 text-center text-white"><i class="fas fa-brain mr-2"></i>Neuro-Tételek</h2>
+        <nav class="flex-grow space-y-2">
+            <a href="#beszedzavarok" data-target="beszedzavarok" class="block py-2.5 px-4 rounded-lg"><i class="fas fa-comment-dots fa-fw"></i>Beszédzavarok</a>
+            <a href="#fajdalom" data-target="fajdalom" class="block py-2.5 px-4 rounded-lg"><i class="fas fa-bolt fa-fw"></i>Fájdalomérzés</a>
+            <a href="#gerincvelo_anatomia" data-target="gerincvelo_anatomia" class="block py-2.5 px-4 rounded-lg"><i class="fas fa-bone fa-fw"></i>Gerincvelő Anatómiája</a>
+            <a href="#gerincvelo_karosodas" data-target="gerincvelo_karosodas" class="block py-2.5 px-4 rounded-lg"><i class="fas fa-user-injured fa-fw"></i>Gerincvelő Károsodásai</a>
+            <a href="#izomtonus" data-target="izomtonus" class="block py-2.5 px-4 rounded-lg"><i class="fas fa-dumbbell fa-fw"></i>Izomtónus Szabályozása</a>
+        </nav>
+        <div class="text-xs text-center text-slate-500 mt-4">
+            &copy; 2024 Interaktív Tananyag
+        </div>
+    </aside>
+
+    <!-- Menu Button for Mobile -->
+    <button id="menu-button" class="menu-button lg:hidden">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content flex-1 p-4 sm:p-6 lg:p-10">
+        
+        <!-- Beszédzavarok Section -->
+        <section id="beszedzavarok" class="content-section">
+            <h1 class="text-5xl font-extrabold text-slate-800 mb-8">A beszédzavarok anatómiai alapjai</h1>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-lungs"></i>A Beszédképzés Perifériás Szervei</h3>
+                <h4>1. Légzőrendszer (Mellkas)</h4>
+                <p>A tüdő, rekeszizom és bordaközi izmok biztosítják a beszédhez szükséges levegőáramot. A beszédlégzéskor a kilégzés aktív, kontrollált folyamat.</p>
+                <h4>2. Gége (Hangképző rendszer)</h4>
+                <p>A gégében található hangszalagok rezgése (fonáció) hozza létre a hangot. A hangmagasságot a hangszalagok feszessége, a hangerőt a levegőnyomás határozza meg.</p>
+                <h4>3. Toldalékcső (Artikulációs rendszer)</h4>
+                <p>A garat, száj- és orrüreg rezonátorként működik. Az artikulációs szervek (nyelv, ajkak, szájpadlás) formálják a beszédhangokat.</p>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-brain"></i>A Beszéd Központi Idegrendszeri Szabályozása</h3>
+                <p>A beszéd egy kiterjedt agyi hálózat komplex működése. A klasszikus modell szerint a bal agyfélteke domináns.</p>
+
+                <div class="img-container">
+                    <img src="https://i.imgur.com/8a5BwY3.png" alt="[A Broca és Wernicke területek sematikus ábrázolása az agyban]">
+                    <figcaption>[A Broca és Wernicke területek sematikus ábrázolása az agyban]</figcaption>
+                </div>
+                
+                <h4>Klasszikus Nyelvi Központok</h4>
+                <ul>
+                    <li><strong>Broca-terület (frontális lebeny):</strong> A beszéd motoros tervezéséért, a grammatikai struktúrák létrehozásáért felelős. Sérülése nonfluens, akadozó beszédet okoz (Broca-afázia).</li>
+                    <li><strong>Wernicke-terület (temporális lebeny):</strong> A hallott és írott beszéd megértéséért felelős. Sérülése fluens, de értelmetlen beszédet és súlyos megértési zavart okoz (Wernicke-afázia).</li>
+                    <li><strong>Fasciculus Arcuatus:</strong> A két területet összekötő rostköteg, kulcsfontosságú a hallott szavak megismétlésében. Sérülése vezetéses (kondukciós) afáziát okoz.</li>
+                </ul>
+
+                <h4>A "Dual Stream" Modell</h4>
+                <ul>
+                    <li><strong>Ventris (alsó) áramlat:</strong> A beszédértésért felelős ("sound to meaning").</li>
+                    <li><strong>Dorsalis (felső) áramlat:</strong> A szenzoros-motoros integrációért felelős ("sound to articulation"), ami a beszédprodukcióhoz szükséges.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-comment-slash"></i>Afáziák – Szerzett Nyelvi Zavarok</h3>
+                <p>Az afázia a már kialakult nyelvi képesség (beszédértés, produkció, olvasás, írás) zavara, melyet agysérülés okoz. Az alábbi táblázat a főbb típusokat foglalja össze:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Afázia Típusa</th>
+                            <th>Fluencia</th>
+                            <th>Beszédértés</th>
+                            <th>Utánmondás</th>
+                            <th>Jellemző Helye</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Broca-afázia</strong></td><td>Nonfluens</td><td>Relatíve jó</td><td>Rossz</td><td>Bal inferior frontális gyrus</td></tr>
+                        <tr><td><strong>Wernicke-afázia</strong></td><td>Fluens</td><td>Súlyosan zavart</td><td>Rossz</td><td>Bal superior temporális gyrus</td></tr>
+                        <tr><td><strong>Globális afázia</strong></td><td>Nonfluens</td><td>Súlyosan zavart</td><td>Rossz</td><td>Kiterjedt bal féltekei lézió</td></tr>
+                        <tr><td><strong>Vezetéses afázia</strong></td><td>Fluens</td><td>Relatíve jó</td><td>Nagyon rossz</td><td>Fasciculus arcuatus, inferior parietális lebeny</td></tr>
+                        <tr><td><strong>Transzkortikális Motoros</strong></td><td>Nonfluens</td><td>Jó</td><td>Jó</td><td>Broca-terület körüli kéreg</td></tr>
+                        <tr><td><strong>Transzkortikális Szenzoros</strong></td><td>Fluens</td><td>Súlyosan zavart</td><td>Jó</td><td>Wernicke-terület körüli kéreg</td></tr>
+                        <tr><td><strong>Anómiás afázia</strong></td><td>Fluens</td><td>Jó</td><td>Jó</td><td>Változatos, gyakran bal temporális lebeny</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+             <div class="card">
+                <h3><i class="fa-solid fa-head-side-cough"></i>Dizartria és Beszédapraxia</h3>
+                <h4>Dizartria – Artikulációs Zavar</h4>
+                <p>A beszédmozgások <strong>neuromuszkuláris kivitelezésének</strong> zavara izomgyengeség vagy koordinációs probléma miatt. A beszéd elkent, pontatlan. Nem nyelvi zavar.</p>
+                <h4>Beszédapraxia – Motoros Tervezési Zavar</h4>
+                <p>A beszédmozgások <strong>tervezésének és programozásának</strong> zavara ép izomerő mellett. A beteg tudja, mit akar mondani, de a mozgássort nem tudja létrehozni. A hibák inkonzisztensek, gyakori az artikulációs pozíció keresése ("groping").</p>
+            </div>
+        </section>
+
+        <!-- Fájdalom Section -->
+        <section id="fajdalom" class="content-section">
+            <h1 class="text-5xl font-extrabold text-slate-800 mb-8">A fájdalomérzés fiziológiája</h1>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-satellite-dish"></i>Nociceptorok (Fájdalomérzékelő Receptorok)</h3>
+                <p>A nociceptorok specializált, magas ingerküszöbű szabad idegvégződések, amelyek a tényleges vagy potenciális szövetkárosodást jelző (noxius) ingereket detektálják.</p>
+                <h4>Rosttípusok és fájdalomkvalitások</h4>
+                <ul>
+                    <li><strong>Aδ (A-delta) rostok:</strong> Vékony, velőhüvelyes, gyors rostok. Az "első", éles, nyilalló, jól lokalizálható fájdalmat közvetítik.</li>
+                    <li><strong>C-rostok:</strong> Nagyon vékony, velőhüvely nélküli, lassú rostok. A "második", tompa, égő, rosszul lokalizálható, elhúzódó fájdalmat közvetítik.</li>
+                </ul>
+                <h4>TRP Csatornák: A Fájdalom Molekuláris Kapui</h4>
+                 <ul>
+                    <li><strong>TRPV1:</strong> <i class="fa-solid fa-pepper-hot"></i> Kapszaicin (chili), <i class="fa-solid fa-temperature-high"></i> >42°C hő, <i class="fa-solid fa-flask-vial"></i> savas pH aktiválja. Égető fájdalom.</li>
+                    <li><strong>TRPA1:</strong> <i class="fa-solid fa-leaf"></i> Mustárolaj, wasabi, <i class="fa-solid fa-snowflake"></i> noxius hideg aktiválja. Szúró, irritáló fájdalom.</li>
+                    <li><strong>TRPM8:</strong> <i class="fa-solid fa-ice-cream"></i> Mentol, hűsítő érzés (nem-noxius hideg).</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-route"></i>Felszálló Fájdalomközvetítő Pályák</h3>
+                <div class="img-container">
+                    <img src="https://i.imgur.com/rL45HEx.png" alt="[A gerincvelő felszálló fájdalomközvetítő pályáinak sematikus ábrája]">
+                    <figcaption>[A gerincvelő felszálló fájdalomközvetítő pályáinak sematikus ábrája]</figcaption>
+                </div>
+                <ul>
+                    <li><strong>Tractus Neospinothalamicus:</strong> Az első, éles fájdalom és a hőmérséklet szenzoros-diszkriminatív aspektusaiért felelős (Hol fáj? Milyen jellegű?). A gerincvelőben kereszteződik és a thalamus VPL magján keresztül a szomatoszenzoros kéregbe (S1, S2) vetül.</li>
+                    <li><strong>Tractus Paleospinothalamicus & Spinoreticularis:</strong> A második, tompa fájdalom affektív-motivációs aspektusaiért felelős (Mennyire kellemetlen?). A limbikus rendszerbe (ACC, insula) vetül, érzelmi és vegetatív válaszokat vált ki.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-microchip"></i>Gerincvelői és Szupraspinális Feldolgozás</h3>
+                <h4>Kapuelmélet (Gate Control Theory)</h4>
+                <p>A gerincvelő hátsó szarvában egy "kapu" mechanizmus szabályozza a fájdalomjelek továbbjutását. A vastag, tapintást közvetítő Aβ rostok aktiválása "bezárja a kaput" (gátolja a fájdalom továbbítását), míg a vékony Aδ és C rostok "kinyitják" azt. Ezért enyhíti a fájdalmat a sérült terület dörzsölése.</p>
+                <h4>A "Fájdalom Mátrix"</h4>
+                <p>Nincs egyetlen fájdalomközpont az agyban. A fájdalomélmény egy kiterjedt agyi hálózat (mátrix) összehangolt működésének eredménye, melynek részei:</p>
+                <ul>
+                    <li><strong>Szomatoszenzoros kéreg (S1, S2):</strong> Hely, intenzitás, minőség.</li>
+                    <li><strong>Anterior Cinguláris Kéreg (ACC) és Insula:</strong> Érzelmi, affektív komponens (szenvedés, kellemetlenség).</li>
+                    <li><strong>Prefrontális kéreg (PFC):</strong> Kognitív értékelés, a fájdalomnak tulajdonított jelentés.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-arrow-down-wide-short"></i>Leszálló Fájdalomcsillapító Rendszer</h3>
+                <p>A központi idegrendszer képes aktívan gátolni a beérkező fájdalomjeleket. Ez az endogén analgézia rendszere.</p>
+                <ul>
+                    <li><strong>Fő központok:</strong> Periaqueductalis szürkeállomány (PAG), Rostralis ventromediális medulla (RVM), Locus coeruleus (LC).</li>
+                    <li><strong>Mechanizmus:</strong> Ezek az agytörzsi központok leszálló pályákat küldenek a gerincvelő hátsó szarvába, ahol endogén opioidokat (enkefalin, endorfin), szerotonint és noradrenalint szabadítanak fel. Ezek a neurotranszmitterek gátolják a fájdalomingerület továbbjutását a felszálló pályák felé.</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Gerincvelő Anatómia Section -->
+        <section id="gerincvelo_anatomia" class="content-section">
+            <h1 class="text-5xl font-extrabold text-slate-800 mb-8">A gerincvelő anatómiája</h1>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-ruler-combined"></i>Makroszkópos Felépítés</h3>
+                <div class="img-container">
+                    <img src="https://i.imgur.com/gK9qQ4w.png" alt="[A gerincvelő makroszkópos felépítése, a dúzzanatokkal, conus medullarissal és cauda equinával]">
+                    <figcaption>[A gerincvelő makroszkópos felépítése]</figcaption>
+                </div>
+                <ul>
+                    <li><strong>Elhelyezkedés:</strong> A gerinccsatornában, a foramen magnumtól az L1-L2 csigolyáig terjed.</li>
+                    <li><strong>Szegmentumok:</strong> 31 pár gerincvelői ideg alapján szelvényezett (8 nyaki, 12 háti, 5 ágyéki, 5 keresztcsonti, 1 farkcsonti).</li>
+                    <li><strong>Dúzzanatok (Intumescentiae):</strong> A felső (cervicalis) és alsó (lumbosacralis) végtagok beidegzéséért felelős megnagyobodott területek.</li>
+                    <li><strong>Conus medullaris:</strong> A gerincvelő kúpszerű vége az L1-L2 szintjében.</li>
+                    <li><strong>Cauda equina (lófarok):</strong> Az L1-L2 szint alatti ideggyökér-köteg a gerinccsatornában.</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-layer-group"></i>Gerincvelői Burkok és Terek</h3>
+                <ol class="list-decimal pl-6">
+                    <li><strong>Dura mater (kemény agyhártya):</strong> Legkülső, erős burok.
+                        <ul class="list-disc pl-6 !list-['\25CF']"><li><strong>Epidurális tér:</strong> A dura és a csonthártya között. Zsírszövetet és vénás fonatot tartalmaz. (Helye: epidurális anesztézia).</li></ul>
+                    </li>
+                    <li><strong>Arachnoidea (pókhálóhártya):</strong> Középső, finom burok.
+                         <ul class="list-disc pl-6 !list-['\25CF']"><li><strong>Szubdurális tér:</strong> Potenciális rés a dura és az arachnoidea között.</li></ul>
+                    </li>
+                    <li><strong>Pia mater (lágy agyhártya):</strong> Legbelső, erekben gazdag hártya, szorosan a gerincvelő felszínén.
+                        <ul class="list-disc pl-6 !list-['\25CF']">
+                            <li><strong>Szubarachnoidális tér:</strong> Az arachnoidea és a pia között. Liquor cerebrospinalis (agy-gerincvelői folyadék) tölti ki. (Helye: lumbálpunkció).</li>
+                            <li><strong>Ligamentum denticulatum:</strong> A pia mater fogazott szalagjai, amelyek a gerincvelőt rögzítik oldalt.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-microscope"></i>Mikroszkópos Szerkezet: Szürke- és Fehérállomány</h3>
+                 <div class="img-container">
+                    <img src="https://i.imgur.com/GjE2w3C.png" alt="[A gerincvelő keresztmetszete a szürke- és fehérállománnyal]">
+                    <figcaption>[A gerincvelő keresztmetszete a szürke- és fehérállománnyal, a főbb pályákkal]</figcaption>
+                </div>
+                <h4>Szürkeállomány (Substantia Grisea)</h4>
+                <p>Pillangó alakú, centrális rész. Idegsejtek sejttestjeit, dendriteket, szinapszisokat tartalmaz.</p>
+                <ul>
+                    <li><strong>Cornu anterius (elülső szarv):</strong> Motoros neuronok (alfa- és gamma-motoneuronok) helye.</li>
+                    <li><strong>Cornu posterius (hátsó szarv):</strong> Érző neuronok (interneuronok, tractus sejtek) helye. Itt történik az érző információk elsődleges feldolgozása.</li>
+                    <li><strong>Cornu laterale (oldalsó szarv):</strong> Csak a T1-L2 és S2-S4 szinteken. Vegetatív (szimpatikus/paraszimpatikus) preganglionáris neuronokat tartalmaz.</li>
+                </ul>
+                
+                <h4>Fehérállomány (Substantia Alba)</h4>
+                <p>A szürkeállományt körülvevő rész. Főként velőhüvelyes idegrostokból (axonokból) áll, melyek pályákat (tractus) alkotnak.</p>
+                <ul>
+                    <li><strong>Funiculus posterior (hátsó köteg):</strong> Felszálló érzőpályák (fasciculus gracilis és cuneatus) - finom tapintás, vibráció, propriocepció.</li>
+                    <li><strong>Funiculus lateralis (oldalsó köteg):</strong> Felszálló (pl. tractus spinothalamicus lateralis) és leszálló (pl. tractus corticospinalis lateralis) pályák.</li>
+                    <li><strong>Funiculus anterior (elülső köteg):</strong> Felszálló (pl. tractus spinothalamicus anterior) és leszálló (pl. tractus corticospinalis anterior, vestibulospinalis) pályák.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Gerincvelő Károsodás Section -->
+        <section id="gerincvelo_karosodas" class="content-section">
+            <h1 class="text-5xl font-extrabold text-slate-800 mb-8">Magassági és keresztmetszeti kórisme a gerincvelő károsodásnál</h1>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-magnifying-glass-location"></i>A Sérülés Szintjének Meghatározása</h3>
+                <p>A sérülés neurológiai szintjét a legalsó, még ép funkciójú gerincvelői szegmentum alapján határozzuk meg. Ehhez a dermatomák (bőrterületek) és myotomok (izomcsoportok) szisztematikus vizsgálata szükséges.</p>
+                <h4>Sérülési magasság és a tünetek</h4>
+                <ul>
+                    <li><strong>C1-C4 (magas nyaki):</strong> Tetraplegia (mind a négy végtag bénulása), gyakran légzési elégtelenség (lélegeztetőgép-függőség).</li>
+                    <li><strong>C5-C7 (alsó nyaki):</strong> Tetraplegia/tetraparesis, de a karok mozgása részben megmaradhat. A kéz funkciói károsodnak.</li>
+                    <li><strong>T1-T12 (háti):</strong> Paraplegia (alsó végtagok bénulása), a törzskontroll a sérülés magasságától függ.</li>
+                    <li><strong>L1-S2 (ágyéki-keresztcsonti):</strong> Az alsó végtagok változó mértékű bénulása, súlyos hólyag-, bél- és szexuális funkciózavarok.</li>
+                </ul>
+                <h4>Reflexvizsgálatok</h4>
+                <ul>
+                    <li><strong>Kiesett/renyhe reflexek:</strong> Alsó motoneuron sérülésre vagy a sérülés utáni spinalis shock fázisára utalnak.</li>
+                    <li><strong>Fokozott reflexek (hiperreflexia), kóros reflexek (pl. Babinski-jel):</strong> Felső motoneuron sérülés jelei (a leszálló gátló pályák károsodása).</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-square-xmark"></i>Fontosabb Gerincvelői Szindrómák</h3>
+                <h4>Teljes Harántlézió</h4>
+                <p>A gerincvelő teljes keresztmetszetének funkcionális megszakadása. A sérülés alatt minden motoros, szenzoros és vegetatív funkció kiesik.</p>
+                <ul>
+                    <li><strong>Spinalis shock fázisa (akut):</strong> Közvetlenül a sérülés után. Petyhüdt bénulás, areflexia, érzéskiesés, vizelet- és székletretenció. Óráktól hetekig tarthat.</li>
+                    <li><strong>Későbbi fázis:</strong> A spinalis shock lezajlása után. Spaszticitás, hiperreflexia, kóros reflexek, automatikus hólyag/bélműködés alakul ki.</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-chart-pie"></i>Inkomplett (Részleges) Gerincvelői Szindrómák</h3>
+                <div class="img-container">
+                    <img src="https://i.imgur.com/8f83oYp.png" alt="[Az inkomplett gerincvelői szindrómák (Brown-Séquard, anterior, centrális) sematikus ábrázolása]">
+                    <figcaption>[Az inkomplett gerincvelői szindrómák sematikus ábrázolása]</figcaption>
+                </div>
+                <h4>Conus Medullaris és Cauda Equina Szindróma</h4>
+                 <ul>
+                    <li><strong>Conus Medullaris Szindróma:</strong> A gerincvelő legvégének (conus) sérülése (L1-L2 csigolya magasságában). Jellemzően szimmetrikus tünetek: korai és súlyos hólyag/bél zavarok, "lovaglónadrág" érzéskiesés, enyhe motoros kiesés.</li>
+                    <li><strong>Cauda Equina Szindróma:</strong> Az L1-L2 szint alatti ideggyökerek (lófarok) kompressziója. Alsó motoneuron tünetek: gyakran aszimmetrikus, súlyos, kisugárzó fájdalom, petyhüdt bénulás, érzészavar a dermatomáknak megfelelően, vizeletretenció. Sürgős műtéti beavatkozást igényel!</li>
+                </ul>
+                <h4>Brown-Séquard Szindróma (Féloldali gerincvelő-sérülés)</h4>
+                <p>A gerincvelő egyik felének sérülése, ami disszociált érzészavart okoz:</p>
+                <ul>
+                    <li><strong>A sérülés oldalán (ipszilaterálisan):</strong> Motoros bénulás (piramispálya sérülése) és a finom tapintás, vibráció, propriocepció elvesztése (hátsó köteg sérülése).</li>
+                    <li><strong>Az ellenkező oldalon (kontralaterálisan):</strong> Fájdalom- és hőérzés kiesése (a spinothalamicus pálya a gerincvelőben kereszteződik).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Izomtónus Section -->
+        <section id="izomtonus" class="content-section">
+            <h1 class="text-5xl font-extrabold text-slate-800 mb-8">Az izomtónus szabályozása</h1>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-person-running"></i>Az izomtónus fogalma és perifériás mechanizmusai</h3>
+                <p>Az izomtónus az izmok nyugalmi állapotban is meglévő, enyhe, állandó feszülési állapota. Alapvető a testtartás fenntartásához és a mozgások indításához.</p>
+                <h4>Perifériás szabályozó elemek</h4>
+                <ul>
+                    <li><strong>Izomorsók:</strong> Az izomrostokkal párhuzamosan helyezkednek el, az izom megnyúlását és a nyúlás sebességét érzékelik. A nyújtási reflex receptorai.</li>
+                    <li><strong>Golgi-féle ínorsók:</strong> Az izom-ín átmenetnél találhatóak, az izom által kifejtett feszülést (erőt) érzékelik. Az inverz nyújtási reflex receptorai.</li>
+                    <li><strong>Alfa- és Gamma-motoneuronok:</strong> Az alfa-motoneuronok a munkaizomrostokat (extrafuzális), a gamma-motoneuronok az izomorsók rostjait (intrafuzális) idegzik be. Az <strong>alfa-gamma koaktiváció</strong> biztosítja, hogy az izomorsó az izom rövidülése közben is érzékeny maradjon.</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-bolt-lightning"></i>Gerincvelői reflexek a tónusszabályozásban</h3>
+                <ul>
+                    <li><strong>Nyújtási reflex (miotatikus reflex):</strong> Monoszinaptikus. Az izom hirtelen megnyúlására az izom összehúzódik. Védi az izmot a túlzott nyúlástól és fenntartja az izomhosszt. (Pl. patella reflex).</li>
+                    <li><strong>Inverz nyújtási reflex (autogén gátlás):</strong> Poliszinaptikus. Az izom erős feszülésére az izom elernyed. Védi az izmot és az ínt a túlzott erőkifejtés okozta szakadástól.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-tower-broadcast"></i>Az izomtónus centrális szabályozása</h3>
+                <p>A felsőbb agyi központok finomhangolják a gerincvelői reflexeket és az izomtónust a leszálló pályákon keresztül.</p>
+                <h4>A Kisagy és a Bazális Ganglionok szerepe</h4>
+                <div class="img-container">
+                    <img src="https://i.imgur.com/B9B1ZgU.png" alt="[A kisagy és a bazális ganglionok szerepe a motoros szabályozásban]">
+                    <figcaption>[A kisagy és a bazális ganglionok szerepe a motoros szabályozásban]</figcaption>
+                </div>
+                <ul>
+                    <li><strong>Kisagy:</strong> A mozgáskoordináció, egyensúly és a tónus finomhangolásának központja. Hibajavítóként működik. Sérülése <strong>hipotóniát</strong> (csökkent izomtónust) és ataxiát (koordinációs zavart) okoz.</li>
+                    <li><strong>Bazális ganglionok:</strong> A mozgások tervezésében, indításában és a tónus megfelelő beállításában játszanak szerepet. Működési zavaruk kóros tónusállapotokhoz vezet.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-notes-medical"></i>Kóros izomtónus-állapotok</h3>
+                <ul>
+                    <li><strong>Hipotónia:</strong> Csökkent izomtónus ("petyhüdt" izmok). Oka lehet kisagyi károsodás vagy alsó motoneuron sérülés.</li>
+                    <li><strong>Hipertónia (fokozott izomtónus):</strong>
+                        <ul class="!list-['\25CF'] pl-6">
+                            <li><strong>Spaszticitás:</strong> Sebességfüggő tónusfokozódás, fokozott reflexekkel. Felső motoneuron sérülés (pl. stroke, gerincvelő-sérülés) okozza. Jellemzője a "zsebkéstünet".</li>
+                            <li><strong>Rigiditás:</strong> Nem sebességfüggő, a teljes mozgáspályán egyenletes tónusfokozódás. A bazális ganglionok betegsége (pl. Parkinson-kór) okozza. Jellemzője az "ólomcső" vagy "fogaskerék" jelenség.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.sidebar a');
+            const contentSections = document.querySelectorAll('.content-section');
+            const menuButton = document.getElementById('menu-button');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+
+            function showSection(targetId, fromHistory = false) {
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.classList.add('active');
+                } else {
+                    // Fallback to the first section if target is not found
+                    document.querySelector('.content-section').classList.add('active');
+                    targetId = document.querySelector('.content-section').id;
+                }
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.dataset.target === targetId) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // Only push state if not from back/forward navigation
+                if (!fromHistory) {
+                    history.pushState({section: targetId}, '', `#${targetId}`);
+                }
+            }
+
+            // Handle initial page load
+            const initialHash = window.location.hash.substring(1);
+            if (initialHash) {
+                showSection(initialHash);
+            } else {
+                showSection('beszedzavarok'); // Default section
+            }
+
+            // Handle navigation clicks
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.dataset.target;
+                    showSection(targetId);
+                    
+                    // Close sidebar on mobile after clicking a link
+                    if (window.innerWidth < 1024) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(event) {
+                if (event.state && event.state.section) {
+                    showSection(event.state.section, true);
+                } else {
+                    // Handle cases where state is null (e.g., initial page)
+                    const hash = window.location.hash.substring(1) || 'beszedzavarok';
+                    showSection(hash, true);
+                }
+            });
+
+            // Mobile menu toggle
+            menuButton.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+            
+            // Close sidebar if clicking outside of it on mobile
+            mainContent.addEventListener('click', () => {
+                if (sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

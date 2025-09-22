@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológia Vizsgafelkészítő: Bazális Ganglionok</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        .hero {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #a78bfa;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        h2 i {
+            margin-right: 12px;
+        }
+        .pathway-arrow {
+            font-size: 1.5rem;
+            color: #9ca3af;
+        }
+        .pathway-box {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            background-color: #f9fafb;
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4f46e5;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: opacity 0.3s, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold">
+                <i class="fa-solid fa-brain mr-2"></i>Neurológia Tárgy
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#szerkezet" class="nav-link border-b-2 border-transparent hover:border-blue-400">Szerkezet</a>
+                <a href="#palyak" class="nav-link border-b-2 border-transparent hover:border-blue-400">Belső Pályák</a>
+                <a href="#mozgasszabalyozas" class="nav-link border-b-2 border-transparent hover:border-blue-400">Mozgásszabályozás</a>
+                <a href="#klinikum" class="nav-link border-b-2 border-transparent hover:border-blue-400">Klinikum</a>
+            </div>
+             <div class="md:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+             <a href="#szerkezet" class="block py-2 px-4 text-sm hover:bg-gray-700">Szerkezet</a>
+             <a href="#palyak" class="block py-2 px-4 text-sm hover:bg-gray-700">Belső Pályák</a>
+             <a href="#mozgasszabalyozas" class="block py-2 px-4 text-sm hover:bg-gray-700">Mozgásszabályozás</a>
+             <a href="#klinikum" class="block py-2 px-4 text-sm hover:bg-gray-700">Klinikum</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero text-white text-center py-20 px-6">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">A Bazális Ganglionok</h1>
+        <p class="text-lg md:text-xl max-w-3xl mx-auto">Részletes vizsgafelkészítő a törzsdúcok szerkezetéről, a mozgásszabályozásban betöltött szerepükről és klinikai vonatkozásaikról.</p>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-6">
+
+        <!-- Section 1: Szerkezet és Kapcsolatok -->
+        <section id="szerkezet" class="section-card">
+            <h2 class="text-3xl font-bold mb-6 text-blue-800"><i class="fa-solid fa-sitemap"></i>Szerkezet és Kapcsolatok</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Főbb Anatómiai Komponensek</h3>
+                    <p class="mb-4">Az agyféltekék mélyén elhelyezkedő, funkcionálisan összekapcsolt szürkeállomány-magvak, melyek a mozgások kritikus modulátorai.</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Striatum (Neostriatum):</strong> A fő bemeneti struktúra. Részei a <span class="tag">Nucleus Caudatus</span> és a <span class="tag">Putamen</span>. Ide tartozik a jutalmazásban fontos <span class="tag">Nucleus Accumbens</span> is.</li>
+                        <li><strong>Globus Pallidus (GPe/GPi):</strong> A GPi (belső szegmentum) az egyik fő kimeneti struktúra.</li>
+                        <li><strong>Substantia Nigra (SNc/SNr):</strong> Az SNc <span class="tag">dopamint</span> termel, az SNr a másik fő kimeneti struktúra.</li>
+                        <li><strong>Nucleus Subthalamicus (STN):</strong> Fontos serkentő mag a belső körökben.</li>
+                    </ul>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <img src="https://storage.googleapis.com/maker-me-assets/Images/Pasted%20image%2020250511124253.jpg" alt="A bazális ganglionok anatómiája" class="w-full h-auto rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/600x400/EEE/31343C?text=Bazális+Ganglionok';">
+                     <p class="text-center text-sm text-gray-500 mt-2">Ábra: A bazális ganglionok elhelyezkedése és részei</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Belső Pályák -->
+        <section id="palyak" class="section-card">
+            <h2 class="text-3xl font-bold mb-6 text-indigo-800"><i class="fa-solid fa-route"></i>Belső Pályák: Direkt, Indirekt és Hiperdirekt Út</h2>
+            <p class="mb-6">A bazális ganglionok működésének lényege a mozgásokat serkentő (direkt) és gátló (indirekt, hiperdirekt) pályák finom egyensúlya, melyet a dopamin modulál.</p>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-700">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Jellemző</th>
+                            <th scope="col" class="px-6 py-3">Direkt Út ✅</th>
+                            <th scope="col" class="px-6 py-3">Indirekt Út ❌</th>
+                            <th scope="col" class="px-6 py-3">Hiperdirekt Út ⚡️</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white border-b">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Hatás a mozgásra</th>
+                            <td class="px-6 py-4 font-bold text-green-600">Facilitálás (mozgásindítás)</td>
+                            <td class="px-6 py-4 font-bold text-red-600">Gátlás (nem kívánt mozgások szűrése)</td>
+                            <td class="px-6 py-4 font-bold text-orange-600">Gyors, globális gátlás ("Stop jel")</td>
+                        </tr>
+                         <tr class="bg-gray-50 border-b">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Dopamin (SNc) hatása</th>
+                            <td class="px-6 py-4">Serkenti (D1 receptoron)</td>
+                            <td class="px-6 py-4">Gátolja (D2 receptoron)</td>
+                            <td class="px-6 py-4">Közvetlen hatás nincs</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Fő útvonal</th>
+                            <td class="px-6 py-4">Kéreg → Striatum → GPi/SNr dash→ Thalamus</td>
+                            <td class="px-6 py-4">Kéreg → Striatum → GPe → STN → GPi/SNr → Thalamus</td>
+                            <td class="px-6 py-4">Kéreg → STN → GPi/SNr → Thalamus</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+             <div class="mt-6 p-4 bg-indigo-50 rounded-lg">
+                <img src="https://storage.googleapis.com/maker-me-assets/Images/Pasted%20image%2020250511124307.png" alt="A direkt és indirekt utak sémája" class="w-full h-auto rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/800x500/EEE/31343C?text=Direkt+és+Indirekt+Utak';">
+                <p class="text-center text-sm text-gray-500 mt-2">Ábra: A direkt és indirekt utak sematikus kapcsolási rajza</p>
+            </div>
+        </section>
+
+
+        <!-- Section 3: Mozgásszabályozás Szerepe -->
+        <section id="mozgasszabalyozas" class="section-card">
+            <h2 class="text-3xl font-bold mb-6 text-teal-800"><i class="fa-solid fa-person-running"></i>A Mozgásszabályozásban Betöltött Szerep</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2"><i class="fa-solid fa-check-double mr-2"></i>Akcióválasztás</h4>
+                    <p class="text-sm">A BG "kapuként" működik: a <span class="tag">direkt út</span> aktiválásával "elengedi" a kívánt mozgásprogramot, miközben az <span class="tag">indirekt út</span> elnyomja a versengőket.</p>
+                </div>
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2"><i class="fa-solid fa-gauge-high mr-2"></i>Paraméterek Modulációja</h4>
+                    <p class="text-sm">Szabályozza a mozgások erejét, sebességét és amplitúdóját. A dopaminerg tónus befolyásolja a mozgás "energikusságát" (vigor).</p>
+                </div>
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2"><i class="fa-solid fa-book-skull mr-2"></i>Motoros Tanulás</h4>
+                    <p class="text-sm">Kulcsszerepet játszik a procedurális memóriában (pl. biciklizés) és a <span class="tag">szokások kialakításában</span>. A dopamin jutalom-predikciós hibajelként működik.</p>
+                </div>
+                 <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2"><i class="fa-solid fa-robot mr-2"></i>Automatikus Mozgások</h4>
+                    <p class="text-sm">A jól begyakorolt mozgássorozatok (pl. járás) vezérlését a tudatos kéregi kontroll alól a BG veszi át, hatékonnyá téve azokat.</p>
+                </div>
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2"><i class="fa-solid fa-lightbulb mr-2"></i>Motiváció és Mozgás</h4>
+                    <p class="text-sm">A <span class="tag">Nucleus Accumbens</span> összeköti a limbikus (motivációs) és a motoros rendszereket, biztosítva, hogy a motivált állapotok megfelelő mozgásos válaszokhoz vezessenek.</p>
+                </div>
+                 <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2"><i class="fa-solid fa-person-chalkboard mr-2"></i>Testtartás és Tónus</h4>
+                    <p class="text-sm">Az agytörzsi pályák modulálásán keresztül hozzájárul a testtartás beállításához és az izomtónus szabályozásához mozgás közben.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Klinikai Vonatkozások -->
+        <section id="klinikum" class="section-card">
+            <h2 class="text-3xl font-bold mb-6 text-rose-800"><i class="fa-solid fa-stethoscope"></i>Klinikai Vonatkozások: Mozgászavarok</h2>
+            <p class="mb-4">A bazális ganglionok pályáinak egyensúlyzavara jellegzetes mozgászavarokat okoz.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <!-- Card: Parkinson-kór -->
+                <div class="border p-6 rounded-lg bg-rose-50">
+                    <h4 class="font-bold text-xl mb-2">Parkinson-kór (Hipokinetikus)</h4>
+                    <p class="mb-2 text-sm"><span class="tag">Ok:</span> Az SNc dopaminerg neuronjainak pusztulása.</p>
+                    <p class="mb-2 text-sm"><span class="tag">Pato-mechanizmus:</span> A direkt út alulműködik, az indirekt túlsúlyba kerül → a thalamus fokozott gátlása.</p>
+                    <p class="text-sm"><span class="tag">Tünetek:</span> Bradykinesia (mozgásmeglassulás), rigiditás, nyugalmi tremor.</p>
+                </div>
+                <!-- Card: Huntington-kór -->
+                <div class="border p-6 rounded-lg bg-green-50">
+                    <h4 class="font-bold text-xl mb-2">Huntington-kór (Hiperkinetikus)</h4>
+                    <p class="mb-2 text-sm"><span class="tag">Ok:</span> A striatum (főleg indirekt úti) neuronjainak pusztulása.</p>
+                    <p class="mb-2 text-sm"><span class="tag">Pato-mechanizmus:</span> A direkt út relatív túlsúlya → a thalamus csökkent gátlása.</p>
+                    <p class="text-sm"><span class="tag">Tünetek:</span> Chorea (akaratlan, dobáló mozgások), kognitív hanyatlás.</p>
+                </div>
+                <!-- Card: Hemiballismus -->
+                <div class="border p-6 rounded-lg bg-green-50">
+                    <h4 class="font-bold text-xl mb-2">Hemiballismus (Hiperkinetikus)</h4>
+                    <p class="mb-2 text-sm"><span class="tag">Ok:</span> A Nucleus Subthalamicus (STN) károsodása (pl. stroke).</p>
+                    <p class="mb-2 text-sm"><span class="tag">Pato-mechanizmus:</span> Az indirekt út megszakad → a thalamus csökkent gátlása.</p>
+                    <p class="text-sm"><span class="tag">Tünetek:</span> Heves, nagy amplitúdójú, dobáló mozgások az ellenoldali végtagokon.</p>
+                </div>
+                <!-- Card: Dystonia -->
+                <div class="border p-6 rounded-lg bg-rose-50">
+                    <h4 class="font-bold text-xl mb-2">Dystonia (Vegyes)</h4>
+                    <p class="mb-2 text-sm"><span class="tag">Ok:</span> Komplex hálózati diszfunkció (BG, cerebellum, kéreg).</p>
+                    <p class="mb-2 text-sm"><span class="tag">Pato-mechanizmus:</span> A gátló mechanizmusok és a szenzorimotoros integráció zavara.</p>
+                    <p class="text-sm"><span class="tag">Tünetek:</span> Tartós izomösszehúzódások, csavaró mozgások, kóros testtartás.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white text-center p-6 mt-8">
+        <p>Sikeres felkészülést a vizsgára!</p>
+        <p class="text-sm text-gray-400">&copy; 2025 Neurológia Vizsgafelkészítő</p>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" id="back-to-top" class="back-to-top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const backToTopBtn = document.getElementById('back-to-top');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                mobileMenu.classList.add('hidden'); // Close menu on click
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mozgászavarok - Részletes Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-container .tab-button.tab-active {
+            color: var(--active-color, #4f46e5);
+            border-color: var(--active-color, #4f46e5);
+            background-color: var(--active-bg-color, #eef2ff);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header és Navigáció -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-700 flex items-center">
+                <i data-lucide="move-3d" class="mr-2"></i>
+                Mozgászavarok
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#tremor" class="hover:text-indigo-600 transition">Tremor</a>
+                <a href="#parkinsonizmus" class="hover:text-indigo-600 transition">Parkinsonizmus</a>
+                <a href="#hyperkinesis" class="hover:text-indigo-600 transition">Hyperkinesis</a>
+                <a href="#wilson" class="hover:text-indigo-600 transition">Wilson-kór</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobil menü -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+            <a href="#tremor" class="block py-2 hover:text-indigo-600 transition">Tremor</a>
+            <a href="#parkinsonizmus" class="block py-2 hover:text-indigo-600 transition">Parkinsonizmus</a>
+            <a href="#hyperkinesis" class="block py-2 hover:text-indigo-600 transition">Hyperkinesis</a>
+            <a href="#wilson" class="block py-2 hover:text-indigo-600 transition">Wilson-kór</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Tremor -->
+        <section id="tremor" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-indigo-500 pl-4">A Tremor Kivizsgálása és Kezelése</h2>
+            <div id="tremor-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #4f46e5; --active-bg-color: #eef2ff;">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="tremor-osztalyozas" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-indigo-500 transition text-center">
+                        <i data-lucide="list-tree" class="inline-block mr-2"></i>Osztályozás
+                    </button>
+                    <button data-tab="tremor-kivizsgalas" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-indigo-500 transition text-center">
+                        <i data-lucide="stethoscope" class="inline-block mr-2"></i>Kivizsgálás
+                    </button>
+                    <button data-tab="tremor-kezeles" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-indigo-500 transition text-center">
+                        <i data-lucide="pilcrow" class="inline-block mr-2"></i>Kezelés
+                    </button>
+                </div>
+
+                <div class="tab-content-wrapper">
+                    <div id="tremor-osztalyozas" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-indigo-700">A Tremor Osztályozása és Jellemzői</h3>
+                        <p class="mb-4">A tremor egy akaratlan, ritmikus, oszcilláló mozgás. A leggyakoribb mozgászavar. Osztályozása a kiváltó helyzet alapján történik.</p>
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-indigo-50 hover:bg-indigo-100 font-semibold flex justify-between items-center"><span>Nyugalmi Tremor</span><i data-lucide="chevron-down" class="transition-transform"></i></button>
+                                <div class="accordion-content p-4 border-t">Teljesen ellazult, alátámasztott végtagon jelentkezik. Jellemzően a <strong>Parkinson-kór</strong> tünete (4-6 Hz), gyakran aszimmetrikus, "pirula-sodró" jellegű. Stresszre fokozódik, célirányos mozgásra csökken.</div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-indigo-50 hover:bg-indigo-100 font-semibold flex justify-between items-center"><span>Akciós Tremor</span><i data-lucide="chevron-down" class="transition-transform"></i></button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>Bármely akaratlagos izomösszehúzódás során megjelenik. Altípusai:</p>
+                                    <ul class="list-disc list-inside mt-2 space-y-1">
+                                        <li><strong>Poszturális:</strong> Végtag gravitáció elleni tartásakor (pl. kinyújtott kar). Jellemző az <strong>esszenciális tremorra (ET)</strong>, fokozott fiziológiás tremorra.</li>
+                                        <li><strong>Kinetikus/Intenciós:</strong> Mozgás közben, a célhoz közeledve fokozódik. Tipikusan <strong>kisagyi (cerebelláris)</strong> laesióra utal.</li>
+                                        <li><strong>Feladatspecifikus:</strong> Csak bizonyos tevékenységeknél (pl. írás).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tremor-kivizsgalas" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-indigo-700">Klinikai Kivizsgálás</h3>
+                        <p class="mb-4">A diagnózis sarokköve a részletes anamnézis és a neurológiai vizsgálat.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Anamnézis:</strong> Időbeli lefolyás, súlyosbító/enyhítő tényezők (alkohol, stressz), gyógyszerszedés, családi kórtörténet.</li>
+                            <li><strong>Neurológiai vizsgálat:</strong> A tremor megfigyelése különböző helyzetekben (nyugalom, tartás, mozgás - pl. spirálrajzolás). Társult jelek keresése: Parkinsonizmus (bradykinesia, rigiditás), cerebelláris jelek (ataxia, dysmetria), dystonia.</li>
+                            <li><strong>Kiegészítő vizsgálatok:</strong> Labor (pajzsmirigy, réz), képalkotás (<strong>DaTscan</strong> a dopaminerg rendszer vizsgálatára, MRI strukturális okok kizárására), elektrofiziológia (EMG).</li>
+                        </ul>
+                    </div>
+                    <div id="tremor-kezeles" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-indigo-700">Kezelési Stratégiák</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[800px] text-sm text-left">
+                                <thead class="bg-indigo-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Tremor Típus</th>
+                                        <th class="p-3 font-semibold">Gyógyszeres Kezelés</th>
+                                        <th class="p-3 font-semibold">Invazív / Egyéb Kezelés</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Esszenciális Tremor (ET)</td>
+                                        <td class="p-3"><strong>1. vonal:</strong> Propranolol, Primidon. <strong>2. vonal:</strong> Gabapentin, Topiramát.</td>
+                                        <td class="p-3">Botulinum toxin injekciók, Mélyagyi Stimuláció (DBS), Fókuszált Ultrahang (FUS).</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Parkinson-kór Tremora</td>
+                                        <td class="p-3">Levodopa, Dopamin agonisták, Antikolinerg szerek.</td>
+                                        <td class="p-3">Mélyagyi Stimuláció (DBS).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Disztóniás Tremor</td>
+                                        <td class="p-3">Antikolinerg szerek, Clonazepam.</td>
+                                        <td class="p-3"><strong>Botulinum toxin injekciók</strong> (fokális formában).</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Parkinsonizmus -->
+        <section id="parkinsonizmus" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-purple-500 pl-4">Parkinson Szindrómák</h2>
+            <div id="parkinsonizmus-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #8b5cf6; --active-bg-color: #f5f3ff;">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="parkinson-atipusos" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-purple-500 transition text-center">
+                        <i data-lucide="users" class="inline-block mr-2"></i>Atípusos Parkinsonizmusok
+                    </button>
+                    <button data-tab="msa" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-purple-500 transition text-center">
+                        <i data-lucide="atom" class="inline-block mr-2"></i>Multiszisztémás Atrófia (MSA)
+                    </button>
+                     <button data-tab="parkinson-szekunder" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-purple-500 transition text-center">
+                        <i data-lucide="syringe" class="inline-block mr-2"></i>Másodlagos Parkinsonizmusok
+                    </button>
+                </div>
+                <div class="tab-content-wrapper">
+                    <div id="parkinson-atipusos" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-purple-700">Atípusos Parkinsonizmusok (Parkinson-Plusz)</h3>
+                        <p class="mb-4">Neurodegeneratív betegségek, melyek a parkinsonizmus mellett további, a Parkinson-kórra nem jellemző tünetekkel is járnak, és jellemzően rosszul reagálnak a levodopa kezelésre. A diagnózisuk gyakran kihívást jelent.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[1200px] text-sm">
+                                <thead class="bg-purple-50 text-left">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Kórkép</th>
+                                        <th class="p-3 font-semibold">Fő Klinikai Jellemzők (a parkinsonizmuson túl)</th>
+                                        <th class="p-3 font-semibold">Kórszövettani Alap (Proteinopátia)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Progresszív Szupranukleáris Bénulás (PSP)</td>
+                                        <td class="p-3"><strong>Korai esések (hátra)</strong>, <strong>vertikális tekintészavar</strong> (főleg lefelé), nyakmerevség (axiális rigiditás), frontális kognitív zavar.</td>
+                                        <td class="p-3"><strong>4R Tauopátia</strong> (kóros tau fehérje, főleg a gliasejtekben: "tufted astrocytes").</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Kortikobazális Szindróma (CBS) / Degeneráció (CBD)</td>
+                                        <td class="p-3">Kifejezetten <strong>aszimmetrikus</strong> tünetek: végtagi disztónia, myoclonus, <strong>apraxia</strong>, <strong>"alien limb"</strong> fenomén.</td>
+                                        <td class="p-3"><strong>4R Tauopátia</strong> (kóros tau fehérje, jellegzetes "asztrocitás plakkok"-kal).</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Multiszisztémás Atrófia (MSA)</td>
+                                        <td class="p-3">Korai és súlyos <strong>autonóm diszfunkció</strong> (ortosztatikus hipotenzió, inkontinencia), <strong>cerebelláris ataxia</strong>.</td>
+                                        <td class="p-3"><strong>Alfa-szinukleinopátia</strong> (a kóros fehérje a <strong>gliasejtekben</strong> halmozódik fel: GCI).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Lewy-testes Demencia (DLB)</td>
+                                        <td class="p-3">A <strong>demencia</strong> a motoros tünetek előtt vagy azokkal egy időben jelenik meg. <strong>Fluktuáló kogníció</strong>, <strong>vizuális hallucinációk</strong>, <strong>REM alvási viselkedészavar (RBD)</strong>.</td>
+                                        <td class="p-3"><strong>Alfa-szinukleinopátia</strong> (Lewy-testek főleg az <strong>agykérgi neuronokban</strong>).</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <div id="msa" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-purple-700">Multiszisztémás Atrófia (MSA) Részletesen</h3>
+                        <p class="mb-4">Gyorsan progrediáló, fatális kimenetelű neurodegeneratív betegség, melyet a parkinsonizmus, a cerebelláris ataxia és a súlyos autonóm diszfunkció kombinációja jellemez.</p>
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-purple-50 hover:bg-purple-100 font-semibold flex justify-between items-center"><span>Klinikai Altípusok és Autonóm Diszfunkció</span><i data-lucide="chevron-down" class="transition-transform"></i></button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="list-disc list-inside space-y-2">
+                                        <li><strong>MSA-P:</strong> A <strong>parkinsonos</strong> tünetek dominálnak (bradykinesia, rigiditás), jellemzően gyenge levodopa-válasszal.</li>
+                                        <li><strong>MSA-C:</strong> A <strong>cerebelláris</strong> tünetek (járásataxia, dysarthria) állnak előtérben.</li>
+                                        <li><strong>Autonóm Diszfunkció (Kardinális Tünet):</strong> Korai és súlyos. Férfiaknál a <strong>merevedési zavar</strong> gyakran a legelső tünet. Jellemző a neurogén orthostaticus hypotensio (nOH) és a vizelet inkontinencia/retenció.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-purple-50 hover:bg-purple-100 font-semibold flex justify-between items-center"><span>Diagnosztika és Patológia</span><i data-lucide="chevron-down" class="transition-transform"></i></button>
+                                <div class="accordion-content p-4 border-t">
+                                     <ul class="list-disc list-inside space-y-2">
+                                        <li><strong>Diagnózis (MDS 2022 kritériumok):</strong> A klinikai kép, autonóm tesztek és az MRI leletek ("hot cross bun" jel, putamen atrófia) alapján.</li>
+                                        <li><strong>Patológia:</strong> Az MSA egy <strong>alfa-szinukleinopátia</strong>, de a Parkinson-kórtól eltérően a kóros fehérje elsődlegesen a <strong>gliasejtekben (oligodendrocytákban)</strong> halmozódik fel, jellegzetes <strong>gliális citoplazmatikus inklúziókat (GCI)</strong> képezve.</li>
+                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                     <div id="parkinson-szekunder" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-purple-700">Másodlagos Parkinsonizmusok</h3>
+                        <p class="mb-4">A tüneteket ismert külső ok vagy alapbetegség váltja ki. Némelyikük potenciálisan reverzibilis.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Gyógyszer-indukálta Parkinsonizmus (DIP):</strong> A leggyakoribb másodlagos forma. Kiváltói: antipszichotikumok (tipikus és atipikus), bizonyos hányáscsillapítók (pl. metoclopramid). A tünetek általában szimmetrikusak és a gyógyszer elhagyása után javulnak.</li>
+                            <li><strong>Vaszkuláris Parkinsonizmus (VP):</strong> Agyi kisérbetegség vagy stratégiai infarktusok okozzák. Jellemző a "lower body parkinsonism" (alsótesti dominancia), a csoszogó járás és a gyenge levodopa válasz.</li>
+                            <li><strong>Egyéb okok:</strong> Toxinok (MPTP, CO, mangán), fertőzések, trauma, normál nyomású hydrocephalus.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hyperkinesis -->
+        <section id="hyperkinesis" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-sky-500 pl-4">Hyperkinesissel Járó Kórképek</h2>
+            <div id="hyperkinesis-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #0ea5e9; --active-bg-color: #f0f9ff;">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="dystonia" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-sky-500 transition text-center">
+                        <i data-lucide="git-pull-request-closed" class="inline-block mr-2"></i>Dystonia
+                    </button>
+                    <button data-tab="chorea" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-sky-500 transition text-center">
+                        <i data-lucide="move" class="inline-block mr-2"></i>Chorea
+                    </button>
+                    <button data-tab="myoclonus" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-sky-500 transition text-center">
+                        <i data-lucide="zap" class="inline-block mr-2"></i>Myoclonus és Tics
+                    </button>
+                </div>
+                <div class="tab-content-wrapper">
+                    <div id="dystonia" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-sky-700">Dystonia</h3>
+                        <p class="mb-4">Akaratlan, tartós izomösszehúzódások, amelyek csavaró, ismétlődő mozgásokat és kóros testtartásokat okoznak. Gyakran akaratlagos mozgás indítja el.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Osztályozás:</strong> Fokális (pl. blepharospasmus, torticollis), szegmentális, generalizált.</li>
+                            <li><strong>Klinikai jelek:</strong> <strong>Geste Antagoniste (szenzoros trükk)</strong> - egy enyhe érintés, ami enyhíti a görcsöt.</li>
+                            <li><strong>Kezelés:</strong> Fokális formában a <strong>Botulinum toxin (BoNT)</strong> az első választás. Generalizált esetben gyógyszerek (antikolinerg szerek, baclofen), súlyos esetben <strong>DBS</strong> (GPi célponttal).</li>
+                        </ul>
+                    </div>
+                    <div id="chorea" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-sky-700">Chorea</h3>
+                        <p class="mb-4">Folyamatos, véletlenszerű, rövid, "táncszerű", akaratlan mozgások sorozata.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Etiológia:</strong> Leggyakoribb örökletes oka a <strong>Huntington-kór</strong>. Szerzett okok: gyógyszer, fertőzés (Sydenham-chorea), stroke.</li>
+                            <li><strong>Patofiziológia:</strong> A bazális ganglionok dopaminerg rendszerének túlműködése.</li>
+                            <li><strong>Kezelés:</strong> Az alapbetegség kezelése. Tüneti kezelésre <strong>VMAT2-gátlók</strong> (tetrabenazin) vagy dopamin-antagonisták.</li>
+                        </ul>
+                    </div>
+                    <div id="myoclonus" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-sky-700">Myoclonus és Tics</h3>
+                        <ul class="list-disc list-inside space-y-4">
+                            <li><strong>Myoclonus:</strong> Hirtelen, rövid, sokkszerű izomrángás. Lehet fiziológiás (pl. csuklás, elalváskor), epilepsziás vagy szekunder (pl. hipoxia után). Kezelése az alapoktól függ.</li>
+                            <li><strong>Tics:</strong> Akaratlan, gyors, ismétlődő, de átmenetileg elnyomható mozgások vagy vokalizációk. <strong>Tourette-szindróma:</strong> multiplex motoros és legalább egy vokális tic. Kezelés: viselkedésterápia, gyógyszerek (alfa-adrenerg agonisták, antipszichotikumok).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wilson-kór -->
+        <section id="wilson" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-yellow-500 pl-4">Wilson-kór</h2>
+            <div id="wilson-container" class="bg-white rounded-xl shadow-lg p-6">
+                <p class="mb-4 text-gray-600">Ritka, autoszomális recesszív öröklődésű genetikai rendellenesség, melyet a réz kóros felhalmozódása jellemez a májban és az agyban az <strong>ATP7B gén</strong> mutációja miatt. A korai diagnózis és az élethosszig tartó kezelés kritikus.</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-lg mb-2 flex items-center"><i data-lucide="presentation" class="mr-2"></i>Klinikai Kép</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Májbetegség:</strong> Gyermekkorban a leggyakoribb megjelenés (hepatitis, cirrhosis, májelégtelenség).</li>
+                            <li><strong>Neurológiai tünetek:</strong> Tremor, dysarthria, dystonia, parkinsonizmus.</li>
+                            <li><strong>Pszichiátriai tünetek:</strong> Depresszió, személyiségváltozás, pszichózis.</li>
+                            <li><strong>Szemészeti jel:</strong> <strong>Kayser-Fleischer gyűrű</strong> - aranybarna rézlerakódás a szaruhártya szélén.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-lg mb-2 flex items-center"><i data-lucide="beaker" class="mr-2"></i>Diagnózis és Kezelés</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Diagnózis:</strong> Alacsony szérum <strong>ceruloplazmin</strong>, magas 24 órás <strong>vizelet rézürítés</strong>, genetikai teszt. Agyi MRI-n a bazális ganglionok érintettsége ("face of the giant panda" jel).</li>
+                            <li><strong>Kezelés (élethosszig tartó):</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><strong>Kelátképzők:</strong> Réz eltávolítása (Penicillamin, Trientin).</li>
+                                    <li><strong>Cink-sók:</strong> Réz felszívódásának gátlása (fenntartó kezelés).</li>
+                                    <li><strong>Májátültetés:</strong> Súlyos májelégtelenség esetén.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 - Interaktív Tanulási Segédlet. Készült a feltöltött dokumentumok alapján.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobil menü
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Általános Tab váltó funkció
+        function setupTabs(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const tabButtons = container.querySelectorAll('.tab-button');
+            const tabPanes = container.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                    });
+                    button.classList.add('tab-active');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Tabok inicializálása
+        setupTabs('tremor-container');
+        setupTabs('parkinsonizmus-container');
+        setupTabs('hyperkinesis-container');
+        setupTabs('wilson-container');
+
+
+        // Accordion
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('svg');
+                
+                header.parentElement.classList.toggle('open');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

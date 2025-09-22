@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológia Vizsgafelkészítő: Hallás és Szaglás</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #a78bfa; /* lighter purple */
+        }
+        .tag {
+            display: inline-block;
+            background-color: #e9d5ff;
+            color: #581c87;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        h2 i {
+            margin-right: 12px;
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #6d28d9;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: opacity 0.3s, visibility 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold">
+                <i class="fa-solid fa-brain mr-2"></i>Neurológia Tárgy
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#fiziologia" class="nav-link border-b-2 border-transparent hover:border-purple-400">Hallás Fiziológiája</a>
+                <a href="#korismek" class="nav-link border-b-2 border-transparent hover:border-purple-400">Neurológiai Kórképek</a>
+                <a href="#szaglas" class="nav-link border-b-2 border-transparent hover:border-purple-400">Szaglászavarok</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+             <a href="#fiziologia" class="block py-2 px-4 text-sm hover:bg-gray-700">Hallás Fiziológiája</a>
+             <a href="#korismek" class="block py-2 px-4 text-sm hover:bg-gray-700">Neurológiai Kórképek</a>
+             <a href="#szaglas" class="block py-2 px-4 text-sm hover:bg-gray-700">Szaglászavarok</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero text-white text-center py-20 px-6">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">A Hallás és Szaglás Neurológiája</h1>
+        <p class="text-lg md:text-xl max-w-3xl mx-auto">Átfogó vizsgafelkészítő anyag a hallás fiziológiájáról, valamint a hallás- és szaglászavarokról neurológiai kórképekben.</p>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-6">
+
+        <!-- Section 1: A hallás fiziológiája -->
+        <section id="fiziologia" class="section-card">
+            <h2 class="text-3xl font-bold mb-6 text-purple-800"><i class="fa-solid fa-ear-listen"></i>A Hallás Fiziológiája</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">A Fül Anatómiai Felépítése</h3>
+                    <p class="mb-4">A hallószerv három fő részből áll, amelyek együttesen alakítják át a levegő rezgéseit az agy által értelmezhető idegi jelekké.</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Külső fül:</strong> A fülkagyló összegyűjti, a külső hallójárat pedig a dobhártyához vezeti a hanghullámokat.</li>
+                        <li><strong>Középfül:</strong> A dobhártya rezgéseit a hallócsontocskák (kalapács, üllő, kengyel) felerősítik (kb. 20-30x) és továbbítják a belső fül felé. Ezt a folyamatot <span class="tag">impedanciaillesztésnek</span> nevezzük.</li>
+                        <li><strong>Belső fül:</strong> A csigában (cochlea) található Corti-szerv alakítja át a mechanikai rezgéseket elektromos impulzusokká.</li>
+                    </ul>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-lg">
+                    <img src="https://storage.googleapis.com/maker-me-assets/Images/the-human-ear.png" alt="A fül anatómiája" class="w-full h-auto rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/600x400/EEE/31343C?text=A+Fül+Anatómiája';">
+                     <p class="text-center text-sm text-gray-500 mt-2">Ábra: A fül anatómiája</p>
+                </div>
+            </div>
+
+            <hr class="my-8 border-gray-200">
+
+            <h3 class="text-2xl font-semibold mb-4">A Cochlea és a Mechanoelektromos Transzdukció</h3>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="order-2 md:order-1 p-4 bg-indigo-50 rounded-lg">
+                    <img src="https://storage.googleapis.com/maker-me-assets/Images/organ-of-corti.png" alt="A Corti-szerv működése" class="w-full h-auto rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/600x400/EEE/31343C?text=Corti-Szerv';">
+                    <p class="text-center text-sm text-gray-500 mt-2">Ábra: A Corti-szerv és a transzdukció</p>
+                </div>
+                <div class="order-1 md:order-2">
+                    <p class="mb-4">A hanginger feldolgozásának kulcsa a Corti-szervben történik.</p>
+                    <ul class="list-none space-y-4">
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div><strong>Baziláris membrán:</strong> A hang frekvenciájától függően különböző helyeken tér ki maximálisan. Ez a <span class="tag">tonotópia</span> alapja (magas hangok a bázison, mélyek a csúcson).</div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div><strong>Szőrsejtek:</strong> A mechanoreceptorok.
+                                <ul class="list-decimal list-inside ml-4 mt-2">
+                                    <li><strong>Belső szőrsejtek (IHC):</strong> A hang tényleges érzékelői, a hallóidegrostok 95%-a itt szinaptizál.</li>
+                                    <li><strong>Külső szőrsejtek (OHC):</strong> Aktívan felerősítik a halk hangokat (cochlearis amplifikáció).</li>
+                                </ul>
+                            </div>
+                        </li>
+                         <li class="flex items-start">
+                            <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div><strong>Transzdukció:</strong> A szőrsejtek elhajlása K+ ioncsatornákat nyit, ami depolarizációhoz és neurotranszmitter (glutamát) felszabadulásához vezet, kiváltva az akciós potenciált a hallóidegen.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-8 border-gray-200">
+            
+            <h3 class="text-2xl font-semibold mb-4">A Centrális Hallópálya</h3>
+            <p class="mb-4">A hallási információ egy többneuronospályán keresztül jut el az agykéregig, miközben megőrzi tonotópiás rendezettségét.</p>
+            <div class="relative">
+                <!-- A vonal, ami összeköti a pontokat -->
+                <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-purple-200 hidden md:block"></div>
+                <div class="space-y-6 relative">
+                    <!-- 1. állomás -->
+                    <div class="flex items-center">
+                        <div class="z-10 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</div>
+                        <div class="ml-4 p-3 bg-white rounded-lg border border-gray-200 flex-1"><strong>Ganglion spirale cochleae:</strong> Az elsődleges neuronok sejttestjei.</div>
+                    </div>
+                    <!-- 2. állomás -->
+                     <div class="flex items-center">
+                        <div class="z-10 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+                        <div class="ml-4 p-3 bg-white rounded-lg border border-gray-200 flex-1"><strong>Nuclei cochleares (agytörzs):</strong> Átkapcsolódás, az átkereszteződés kezdete.</div>
+                    </div>
+                    <!-- 3. állomás -->
+                     <div class="flex items-center">
+                        <div class="z-10 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</div>
+                        <div class="ml-4 p-3 bg-white rounded-lg border border-gray-200 flex-1"><strong>Nucleus olivaris superior:</strong> Az első binaurális (két fülből származó) integráció, kulcs a hanglokalizációhoz (ITD, ILD).</div>
+                    </div>
+                     <!-- 4. állomás -->
+                     <div class="flex items-center">
+                        <div class="z-10 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">4</div>
+                        <div class="ml-4 p-3 bg-white rounded-lg border border-gray-200 flex-1"><strong>Colliculus inferior (középagy):</strong> Fontos hallási integrációs központ, hallási reflexek.</div>
+                    </div>
+                     <!-- 5. állomás -->
+                     <div class="flex items-center">
+                        <div class="z-10 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">5</div>
+                        <div class="ml-4 p-3 bg-white rounded-lg border border-gray-200 flex-1"><strong>Corpus geniculatum mediale (thalamus):</strong> Az utolsó szubkortikális állomás, a "kapu" a kéreg felé.</div>
+                    </div>
+                    <!-- 6. állomás -->
+                     <div class="flex items-center">
+                        <div class="z-10 bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">6</div>
+                        <div class="ml-4 p-3 bg-white rounded-lg border border-gray-200 flex-1"><strong>Primer hallókéreg (temporalis lebeny):</strong> A hang tudatosulása, részletes analízise (Brodmann 41, 42).</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Hallászavarok Neurológiai Kórképekben -->
+        <section id="korismek" class="section-card">
+            <h2 class="text-3xl font-bold mb-6 text-indigo-800"><i class="fa-solid fa-user-doctor"></i>Hallászavarok Neurológiai Kórképekben</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Card: Acusticus neurinoma -->
+                <div class="border p-4 rounded-lg bg-indigo-50">
+                    <h4 class="font-bold text-lg mb-2">Acusticus Neurinoma (Vestibularis Schwannoma)</h4>
+                    <p class="text-sm">A VIII. agyideg jóindulatú daganata. Jellemzője a <span class="tag">lassan progrediáló, egyoldali szenzorineurális halláscsökkenés</span>, fülzúgás (tinnitus) és egyensúlyzavar.</p>
+                </div>
+                <!-- Card: Sclerosis Multiplex -->
+                <div class="border p-4 rounded-lg bg-indigo-50">
+                    <h4 class="font-bold text-lg mb-2">Sclerosis Multiplex (SM)</h4>
+                    <p class="text-sm">A központi idegrendszer demyelinizációs betegsége. A plakkok érinthetik az agytörzsi hallópályákat, <span class="tag">hirtelen vagy fluktuáló halláscsökkenést</span> okozva.</p>
+                </div>
+                <!-- Card: Stroke -->
+                <div class="border p-4 rounded-lg bg-indigo-50">
+                    <h4 class="font-bold text-lg mb-2">Stroke</h4>
+                    <p class="text-sm">Főleg a hátsó keringési rendszer (pl. AICA) elzáródása okozhat <span class="tag">hirtelen hallásvesztést</span> és vertigót a belső fül vagy az agytörzsi magvak ischémiája miatt.</p>
+                </div>
+                 <!-- Card: Menière-betegség -->
+                <div class="border p-4 rounded-lg bg-indigo-50">
+                    <h4 class="font-bold text-lg mb-2">Menière-betegség</h4>
+                    <p class="text-sm">A belső fül folyadéktereinek nyomásfokozódása (endolymphaticus hydrops) okozza. Rohamokban jelentkező <span class="tag">vertigo, fluktuáló halláscsökkenés</span> és fülzúgás jellemzi.</p>
+                </div>
+                <!-- Card: Koponyatrauma -->
+                 <div class="border p-4 rounded-lg bg-indigo-50">
+                    <h4 class="font-bold text-lg mb-2">Koponyatrauma</h4>
+                    <p class="text-sm">A sziklacsont törése közvetlenül károsíthatja a közép- vagy belső fül struktúráit, ami <span class="tag">vezetéses vagy szenzorineurális</span> hallásvesztést okozhat.</p>
+                </div>
+                <!-- Card: Centrális hallászavar -->
+                 <div class="border p-4 rounded-lg bg-indigo-50">
+                    <h4 class="font-bold text-lg mb-2">Centrális Hallászavar</h4>
+                    <p class="text-sm">Agytörzsi vagy kérgi lézió okozza. Nem süketség, hanem a <span class="tag">hangfeldolgozás zavara</span> (pl. beszédértés zajban, hanglokalizáció) jellemzi a pályák kétoldali reprezentációja miatt.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 3: Szaglászavarok Neurológiai Kórképekben -->
+        <section id="szaglas" class="section-card">
+            <h2 class="text-3xl font-bold mb-6 text-teal-800"><i class="fa-solid fa-wind"></i>Szaglászavarok Neurológiai Kórképekben</h2>
+            <p class="mb-4">A szaglás zavara (dysosmia) gyakran korai és fontos diagnosztikai jel lehet neurodegeneratív betegségekben.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Card: Alzheimer-kór -->
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2">Alzheimer-kór</h4>
+                    <p class="text-sm">A szaglásromlás (hyposmia/anosmia) az <span class="tag">egyik legkorábbi tünet</span>, gyakran megelőzi a kognitív hanyatlást. A patológia a teljes szaglórendszert érinti.</p>
+                </div>
+                <!-- Card: Parkinson-kór -->
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2">Parkinson-kór</h4>
+                    <p class="text-sm">A hyposmia a betegek >90%-át érinti és <span class="tag">évekkel megelőzheti a motoros tüneteket</span>. Lewy-testek mutathatók ki a szaglóhagymában.</p>
+                </div>
+                <!-- Card: Koponyatrauma -->
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2">Koponyatrauma</h4>
+                    <p class="text-sm">A tartós anosmia egyik leggyakoribb oka. A <span class="tag">szaglórostok elszakadnak</span> a lamina cribrosánál, vagy a szaglóhagyma sérül.</p>
+                </div>
+                <!-- Card: Tumorok -->
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2">Intracranialis Tumorok</h4>
+                    <p class="text-sm">Az elülső koponyagödörben növő daganatok (pl. meningeoma) <span class="tag">nyomhatják a szaglóhagymát</span> vagy a pályákat, anosmiát okozva.</p>
+                </div>
+                <!-- Card: Temporalis epilepszia -->
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2">Temporalis Lebeny Epilepszia</h4>
+                    <p class="text-sm">Roham bevezetőjeként (aura) jelentkezhet <span class="tag">phantosmia</span> (szaghallucináció), ami gyakran kellemetlen, égett szag.</p>
+                </div>
+                 <!-- Card: Típusok -->
+                <div class="border p-4 rounded-lg bg-teal-50">
+                    <h4 class="font-bold text-lg mb-2">Főbb Típusok</h4>
+                     <ul class="list-disc list-inside text-sm">
+                        <li><strong>Anosmia:</strong> Teljes szaglásvesztés</li>
+                        <li><strong>Hyposmia:</strong> Csökkent szaglás</li>
+                        <li><strong>Parosmia:</strong> Torz szagérzékelés</li>
+                        <li><strong>Phantosmia:</strong> Szaghallucináció</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white text-center p-6 mt-8">
+        <p>Sikeres felkészülést a vizsgára!</p>
+        <p class="text-sm text-gray-400">&copy; 2025 Neurológia Vizsgafelkészítő</p>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" id="back-to-top" class="back-to-top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const backToTopBtn = document.getElementById('back-to-top');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                mobileMenu.classList.add('hidden'); // Close menu on click
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

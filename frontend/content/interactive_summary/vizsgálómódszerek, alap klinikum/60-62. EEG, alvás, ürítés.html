@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Részletes Élettani Összefoglaló Szakvizsgára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .tab-button.active {
+            font-weight: 700;
+        }
+        #delta-btn.active { border-color: #3B82F6; background-color: #3B82F6; color: white; }
+        #theta-btn.active { border-color: #8B5CF6; background-color: #8B5CF6; color: white; }
+        #alpha-btn.active { border-color: #10B981; background-color: #10B981; color: white; }
+        #beta-btn.active { border-color: #F59E0B; background-color: #F59E0B; color: white; }
+        #gamma-btn.active { border-color: #EF4444; background-color: #EF4444; color: white; }
+
+        .tab-content {
+            display: none;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+        .pill {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .bg-blue-100 { background-color: #DBEAFE; } .text-blue-800 { color: #1E40AF; }
+        .bg-purple-100 { background-color: #E9D5FF; } .text-purple-800 { color: #5B21B6; }
+        .bg-green-100 { background-color: #D1FAE5; } .text-green-800 { color: #065F46; }
+        .bg-yellow-100 { background-color: #FEF9C3; } .text-yellow-800 { color: #854D0E; }
+        .bg-red-100 { background-color: #FEE2E2; } .text-red-800 { color: #991B1B; }
+        .icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+            flex-shrink: 0;
+        }
+        strong {
+            font-weight: 600;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600">Részletes Élettani Összefoglaló</h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600">
+                <a href="#eeg" class="hover:text-blue-600 transition">EEG</a>
+                <a href="#alvas" class="hover:text-blue-600 transition">Alvás Fiziológiája</a>
+                <a href="#kivalasztas" class="hover:text-blue-600 transition">Ürítési Funkciók</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 py-12">
+
+        <!-- ===== EEG Section ===== -->
+        <section id="eeg" class="mb-20">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-center text-gray-800">Az EEG Élettani Alapjai</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card lg:col-span-2">
+                    <div class="card-header">
+                        <svg class="icon text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <h3 class="text-xl font-semibold">Az EEG Definíciója és Neurális Eredete</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-gray-700">Az <strong>elektroenkefalográfia (EEG)</strong> egy non-invazív eljárás, amely az agy elektromos aktivitását regisztrálja. Nem egyetlen idegsejt, hanem nagy neuronpopulációk (több millió) <strong>szinkronizált, összegzett posztszinaptikus potenciáljait</strong> (EPSP és IPSP) méri. A jel fő forrásai a kérgi <strong>piramissejtek</strong>, melyek merőlegesen, paliszádszerűen helyezkednek el az agykéreg felszínére. Ez az ún. "open field" elrendezés teszi lehetővé az általuk generált apró elektromos mezők összeadódását, ami a fejbőrön is mérhető dipólust hoz létre. Kiváló időbeli felbontása (milliszekundum) miatt valós idejű betekintést nyújt az agy funkcionális állapotába.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <svg class="icon text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" /></svg>
+                        <h3 class="text-xl font-semibold">Klinikai Alkalmazások</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-disc list-inside text-gray-700 space-y-2">
+                            <li><strong>Epilepszia:</strong> Interiktális (rohamok közötti) és iktális (roham alatti) epileptiform jelek (tüske, éles hullám) detektálása, góc lokalizálása.</li>
+                            <li><strong>Alvászavarok:</strong> Poliszomnográfia (PSG) részeként az alvásstádiumok objektív meghatározása.</li>
+                            <li><strong>Strukturális léziók:</strong> Tumor, stroke, tályog esetén fokális lassulás (delta-aktivitás) jelezheti a károsodást.</li>
+                            <li><strong>Enkefalopátiák:</strong> Diffúz lassulás jelzi az agy általános funkciózavarát (pl. metabolikus, toxikus okok miatt).</li>
+                            <li><strong>Agyhalál:</strong> Az elektrocerebrális csend igazolása.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card lg:col-span-3">
+                    <div class="card-header">
+                         <svg class="icon text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12h2l2-4 2 8 2-4h2"/></svg>
+                        <h3 class="text-xl font-semibold">EEG Frekvenciasávok (Interaktív)</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="flex flex-wrap gap-2 mb-4 border-b pb-4">
+                            <button id="delta-btn" onclick="switchTab('delta')" class="tab-button bg-gray-200 text-gray-700 px-4 py-2 rounded-full">Delta (δ)</button>
+                            <button id="theta-btn" onclick="switchTab('theta')" class="tab-button bg-gray-200 text-gray-700 px-4 py-2 rounded-full">Théta (θ)</button>
+                            <button id="alpha-btn" onclick="switchTab('alpha')" class="tab-button bg-gray-200 text-gray-700 px-4 py-2 rounded-full">Alfa (α)</button>
+                            <button id="beta-btn" onclick="switchTab('beta')" class="tab-button bg-gray-200 text-gray-700 px-4 py-2 rounded-full">Béta (β)</button>
+                            <button id="gamma-btn" onclick="switchTab('gamma')" class="tab-button bg-gray-200 text-gray-700 px-4 py-2 rounded-full">Gamma (γ)</button>
+                        </div>
+                        <div id="tab-content-container">
+                            <div id="delta-content" class="tab-content">
+                                <h4 class="text-lg font-semibold mb-2 text-blue-700">Delta (δ) hullámok</h4>
+                                <p class="pill bg-blue-100 text-blue-800">0.5 - 4 Hz</p>
+                                <p class="mt-2 text-gray-700"><strong>Jellemzői:</strong> Magas amplitúdó, lassú. <br><strong>Állapot:</strong> Felnőtteknél a <strong>mély, lassú hullámú alvás (NREM 3)</strong> fő jellemzője. Csecsemőknél éber állapotban is normális. Éber felnőttnél kóros, agyi diszfunkcióra utalhat.</p>
+                            </div>
+                            <div id="theta-content" class="tab-content">
+                                <h4 class="text-lg font-semibold mb-2 text-purple-700">Théta (θ) hullámok</h4>
+                                <p class="pill bg-purple-100 text-purple-800">4 - 7 Hz</p>
+                                <p class="mt-2 text-gray-700"><strong>Jellemzői:</strong> Lassú, közepes amplitúdó. <br><strong>Állapot:</strong> Könnyű alvás (NREM 1-2), álmosság, mély relaxáció. Éber állapotban feszült figyelem, érzelmek vagy mentális feladatok során jelenhet meg. Gyermekeknél éber állapotban is fiziológiás.</p>
+                            </div>
+                             <div id="alpha-content" class="tab-content">
+                                <h4 class="text-lg font-semibold mb-2 text-green-700">Alfa (α) hullámok</h4>
+                                <p class="pill bg-green-100 text-green-800">8 - 12 Hz</p>
+                                <p class="mt-2 text-gray-700"><strong>Jellemzői:</strong> Közepes amplitúdó, főként a tarkói (occipitális) területeken. <br><strong>Állapot:</strong> Nyugodt, relaxált ébrenlét, <strong>csukott szemmel</strong>. Szemnyitásra, figyelemre vagy gondolkodásra blokkolódik (alfa-gátlás), és helyét béta hullámok veszik át.</p>
+                            </div>
+                            <div id="beta-content" class="tab-content">
+                                <h4 class="text-lg font-semibold mb-2 text-yellow-700">Béta (β) hullámok</h4>
+                                <p class="pill bg-yellow-100 text-yellow-800">13 - 30 Hz</p>
+                                <p class="mt-2 text-gray-700"><strong>Jellemzői:</strong> Alacsony amplitúdó, gyors. <br><strong>Állapot:</strong> Aktív, koncentrált ébrenlét, mentális tevékenység, problémamegoldás. Magasabb frekvenciái stresszel, szorongással társulhatnak.</p>
+                            </div>
+                            <div id="gamma-content" class="tab-content">
+                                <h4 class="text-lg font-semibold mb-2 text-red-700">Gamma (γ) hullámok</h4>
+                                <p class="pill bg-red-100 text-red-800">&gt; 30 Hz</p>
+                                <p class="mt-2 text-gray-700"><strong>Jellemzői:</strong> Nagyon alacsony amplitúdó, leggyorsabb hullámok. <br><strong>Állapot:</strong> Magas szintű kognitív funkciók, mint a tanulás, memória, érzékszervi információk integrációja és a tudatosság. Távoli agyterületek közötti kommunikációt jelez.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Alvás Section ===== -->
+        <section id="alvas" class="mb-20">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-center text-gray-800">Az Alvás Fiziológiája</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card lg:col-span-2">
+                    <div class="card-header">
+                        <svg class="icon text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 1 0 10 10"/><path d="M12 22a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                        <h3 class="text-xl font-semibold">Alvási Ciklus és Stádiumok</h3>
+                    </div>
+                    <div class="card-body space-y-4">
+                        <p class="text-gray-700">Az alvás <strong>NREM</strong> (Non-Rapid Eye Movement) és <strong>REM</strong> (Rapid Eye Movement) szakaszokból áll, melyek ~90-110 perces ciklusokban ismétlődnek (4-6 ciklus/éjjel).</p>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">NREM Alvás (75-80%)</h4>
+                            <ul class="list-disc list-inside text-gray-700 ml-4 space-y-2 mt-2">
+                                <li><strong>N1 (Szendergés):</strong> Átmenet ébrenlét és alvás között. EEG-n théta-hullámok.</li>
+                                <li><strong>N2 (Felületes alvás):</strong> Jellegzetes <strong>alvási orsók</strong> és <strong>K-komplexek</strong>. Fontos szerep a memóriakonszolidációban és a külső ingerek blokkolásában.</li>
+                                <li><strong>N3 (Mélyalvás - SWS):</strong> Delta-hullámok dominálnak. Kiemelt szerep a testi regenerációban, növekedési hormon termelésében és a deklaratív memória rögzítésében.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">REM Alvás (20-25%)</h4>
+                             <ul class="list-disc list-inside text-gray-700 ml-4 space-y-2 mt-2">
+                                <li>Gyors, kis amplitúdójú, deszinkronizált EEG (az éber állapothoz hasonló).</li>
+                                <li>Jellemző a <strong>gyors szemmozgás</strong> és a vázizom-atónia (bénulás), ami megakadályozza az álmok "lemozgását".</li>
+                                <li>Élénk, narratív álmok. Kulcsfontosságú az érzelmi és procedurális (készségszintű) memória feldolgozásában.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <svg class="icon text-pink-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5c-4.2 0-8-3.5-8-8s3.8-8 8-8 8 3.5 8 8-3.8 8-8 8Z"/><path d="M10 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg>
+                        <h3 class="text-xl font-semibold">Az Alvás Szabályozása</h3>
+                    </div>
+                    <div class="card-body">
+                         <p class="text-gray-700 mb-2">A <strong>Borbély-féle kétfolyamatos modell</strong> írja le a legjobban:</p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-2">
+                            <li><strong>Process S (Homeosztatikus):</strong> Az "alvásnyomás", ami az ébrenlét során felhalmozódó <strong>adenozin</strong> miatt nő. A koffein az adenozin receptorokat blokkolja.</li>
+                            <li><strong>Process C (Cirkadián):</strong> A belső óra, a hipotalamuszban lévő <strong>szuprakiazmatikus mag (SCN)</strong>, ami a fény-sötét ciklus alapján a tobozmirigy <strong>melatonin</strong> termelését szabályozza.</li>
+                        </ul>
+                        <p class="text-gray-700 mt-4">Az ébrenlétért a felszálló aktiváló rendszer (ARAS) és az <strong>orexin</strong>-termelő sejtek, míg az alvásért a <strong>VLPO</strong> (ventrolaterális preoptikus terület) gátló neuronjai felelősek (flip-flop switch modell).</p>
+                    </div>
+                </div>
+                 <div class="card lg:col-span-3">
+                    <div class="card-header">
+                        <svg class="icon text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <h3 class="text-xl font-semibold">Az Alváshiány Súlyos Következményei</h3>
+                    </div>
+                    <div class="card-body grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-700">
+                        <div>
+                            <h4 class="font-semibold">Kognitív Funkciók</h4>
+                            <ul class="list-disc list-inside mt-1 space-y-1">
+                                <li>Figyelemzavar, mikoralvások</li>
+                                <li>Memóriaromlás (kódolás és konszolidáció)</li>
+                                <li>Csökkent végrehajtó funkciók, rosszabb döntéshozatal</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h4 class="font-semibold">Érzelmi Szabályozás</h4>
+                            <ul class="list-disc list-inside mt-1 space-y-1">
+                                <li>Fokozott ingerlékenység, érzelmi labilitás</li>
+                                <li>Csökkent empátia, romló szociális kapcsolatok</li>
+                                <li>Szoros kapcsolat a depresszióval és szorongásos zavarokkal</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h4 class="font-semibold">Fizikai Egészség</h4>
+                            <ul class="list-disc list-inside mt-1 space-y-1">
+                                <li>Gyengült immunrendszer, fokozott fertőzéshajlam</li>
+                                <li>Fokozott kockázat: elhízás, 2-es típusú cukorbetegség, magas vérnyomás, szívinfarktus</li>
+                                <li>Hormonális egyensúly felborulása (étvágy, nemi hormonok)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Kiválasztás Section ===== -->
+        <section id="kivalasztas" class="mb-16">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-center text-gray-800">Az Ürítési Funkciók Szabályozása</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <div class="card-header">
+                         <svg class="icon text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+                        <h3 class="text-xl font-semibold">Vizeletürítés (Micturition) Részletesen</h3>
+                    </div>
+                    <div class="card-body text-gray-700">
+                        <p class="mb-4">A folyamatot a tárolás és ürítés komplex, hierarchikus idegrendszeri összjátéka vezérli.</p>
+                        <ul class="space-y-4">
+                            <li>
+                                <h4 class="font-semibold">Tárolási fázis (Kontinencia):</h4>
+                                <p>A <strong>szimpatikus idegrendszer</strong> (Th10-L2) dominál. A <strong>noradrenalin</strong> a detrusor izom β3-receptorain relaxációt, a hólyagnyak és a belső (akaratlan) sphincter α1-receptorain kontrakciót okoz. Eközben az akaratlagos (szomatikus) kontroll alatt álló külső sphincter is tónusosan zárt (ún. <strong>guarding reflex</strong>).</p>
+                            </li>
+                            <li>
+                                <h4 class="font-semibold">Ürítési fázis (Micturitiós reflex):</h4>
+                                <p>A hólyag telítődésekor az agytörzsi <strong>pontin micturitiós központ (PMC)</strong> aktiválódik. Ez a "kapcsoló" gátolja a szimpatikus tónust és a külső sphincter szomatikus beidegzését (N. pudendus), miközben serkenti a <strong>paraszimpatikus</strong> idegrendszert (S2-S4). Az <strong>acetilkolin</strong> a detrusor M3-receptorain kontrakciót vált ki, ami a vizelet kiürüléséhez vezet.</p>
+                            </li>
+                             <li>
+                                <h4 class="font-semibold">Központi kontroll:</h4>
+                                <p>A <strong>prefrontális kéreg</strong> és más magasabb központok tónusosan gátolják a PMC-t, lehetővé téve a vizelés szociálisan megfelelő időzítését. A döntést követően ez a gátlás feloldódik.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                         <svg class="icon text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+                        <h3 class="text-xl font-semibold">Székletürítés (Defecation) Részletesen</h3>
+                    </div>
+                    <div class="card-body text-gray-700">
+                        <p class="mb-4">A végbél (rectum) telítődése indítja el a komplex, több szinten szabályozott reflexet.</p>
+                         <ul class="space-y-4">
+                            <li>
+                                <h4 class="font-semibold">Defecatiós reflex:</h4>
+                                <p>A végbél falának feszülése kiváltja a <strong>rectoanalis inhibitoros reflexet (RAIR)</strong>: a belső analis sphincter (simaizom, akaratlan) ellazul. Ez lehetővé teszi a tartalom "mintavételezését" az érzékeny analis csatornában, így megkülönböztethető a gáz a szilárd/folyékony széklettől. Ezzel egyidőben a paraszimpatikus reflex végbél-összehúzódást vált ki.</p>
+                            </li>
+                            <li>
+                                <h4 class="font-semibold">Akaratlagos kontroll:</h4>
+                                <p>A kontinenciát a <strong>külső analis sphincter</strong> és a <strong>m. puborectalis</strong> (harántcsíkolt izmok) akaratlagos összehúzása biztosítja. Az ürítéshez ezen izmokat tudatosan ellazítjuk, amit gyakran a hasűri nyomás fokozása (<strong>Valsalva-manőver</strong>) segít.</p>
+                            </li>
+                            <li>
+                                <h4 class="font-semibold">Idegi szabályozás:</h4>
+                                <p>Az <strong>enterális (bél) idegrendszer</strong> lokális reflexei, a <strong>paraszimpatikus</strong> és <strong>szomatikus</strong> (N. pudendus) idegrendszer, valamint az agykérgi gátló/serkentő parancsok bonyolult összjátéka vezérli a folyamatot.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card md:col-span-2">
+                    <div class="card-header">
+                        <svg class="icon text-rose-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" /></svg>
+                        <h3 class="text-xl font-semibold">Klinikai Vonatkozások és Zavarok</h3>
+                    </div>
+                    <div class="card-body grid grid-cols-1 lg:grid-cols-2 gap-6 text-gray-700">
+                        <div>
+                            <h4 class="font-semibold text-rose-800">Vizeletinkontinencia</h4>
+                            <ul class="list-disc list-inside mt-2 space-y-2">
+                                <li><strong>Stressz-inkontinencia:</strong> Medencefenéki/záróizom gyengeség (pl. szülés után).</li>
+                                <li><strong>Sürgősségi (Urge) inkontinencia:</strong> A detrusor izom akaratlan, gátolhatatlan összehúzódása (túlműködő hólyag). Gyakori neurológiai kórképekben (stroke, SM, Parkinson-kór), ahol a központi gátló pályák sérülnek.</li>
+                                <li><strong>Túlfolyásos inkontinencia:</strong> Hólyagürülési zavar (pl. prosztata-megnagyobbodás, petyhüdt hólyag) miatti vizeletcsepegés.</li>
+                                <li><strong>Detrusor-sphincter diszszinergia:</strong> A hólyagizom és a záróizom koordinációjának hiánya, jellemzően gerincvelő-sérülésekben.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-rose-800">Székletürítési Zavarok</h4>
+                            <ul class="list-disc list-inside mt-2 space-y-2">
+                                <li><strong>Székletinkontinencia:</strong> Oka lehet záróizom-sérülés (pl. szülés, műtét), a végbél csökkent tárolókapacitása (pl. gyulladásos bélbetegség) vagy neurológiai zavar (érzékelés vagy motoros kontroll károsodása).</li>
+                                <li><strong>Székrekedés:</strong> Lassult bélpasszázs vagy ürítési nehézség (diszszinerg defekáció).</li>
+                                <li><strong>Neurogén béldiszfunkció:</strong> A központi idegrendszeri betegségek (stroke, gerincvelő-sérülés) gyakran okoznak a bélműködés kontrolljában is zavart.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-white mt-8 border-t">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+            <p>&copy; 2024 Részletes Élettani Összefoglaló. Sok sikert a vizsgához!</p>
+        </div>
+    </footer>
+
+    <script>
+        function switchTab(tabId) {
+            const container = document.getElementById('tab-content-container');
+            const contents = container.querySelectorAll('.tab-content');
+            const buttons = container.parentElement.querySelectorAll('.tab-button');
+            
+            contents.forEach(content => content.classList.remove('active'));
+            buttons.forEach(button => button.classList.remove('active'));
+
+            const activeContent = document.getElementById(tabId + '-content');
+            const activeButton = document.getElementById(tabId + '-btn');
+
+            if (activeContent) activeContent.classList.add('active');
+            if (activeButton) activeButton.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the first tab as active
+            switchTab('delta');
+        });
+    </script>
+</body>
+</html>

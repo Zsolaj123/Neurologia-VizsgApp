@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Tanulási Oldal: Vestibularis Rendszer és Szédülés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .section-title {
+            color: #0f172a; /* slate-900 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .nav-link {
+            transition: color 0.2s, border-bottom-color 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #2563eb; /* blue-600 */
+            border-bottom-color: #2563eb; /* blue-600 */
+        }
+        .tag {
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #3730a3; /* indigo-800 */
+            font-weight: 600;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #e5e7eb; /* gray-200 */
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .comparison-table .highlight-peripherial {
+            background-color: #dbeafe; /* blue-100 */
+        }
+        .comparison-table .highlight-central {
+            background-color: #fee2e2; /* red-100 */
+        }
+        .accordion-header {
+            cursor: pointer;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-slate-800">Vestibularis Rendszer & Szédülés</h1>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#anatomia" class="nav-link text-slate-600 font-semibold pb-1">Anatómia</a>
+                <a href="#elettan" class="nav-link text-slate-600 font-semibold pb-1">Élettan</a>
+                <a href="#korkepek" class="nav-link text-slate-600 font-semibold pb-1">Gyakori Kórképek</a>
+                <a href="#diagnosztika" class="nav-link text-slate-600 font-semibold pb-1">Diagnosztika</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#anatomia" class="block py-2 text-slate-600 font-semibold">Anatómia</a>
+            <a href="#elettan" class="block py-2 text-slate-600 font-semibold">Élettan</a>
+            <a href="#korkepek" class="block py-2 text-slate-600 font-semibold">Gyakori Kórképek</a>
+            <a href="#diagnosztika" class="block py-2 text-slate-600 font-semibold">Diagnosztika</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Bevezetés -->
+        <section class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-extrabold section-title mb-4">A Szédülés Világa</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600">
+                Egy átfogó útmutató az egyensúlyérzékelő rendszer felépítéséhez, működéséhez, és a leggyakoribb, szédüléssel járó kórképek megértéséhez.
+            </p>
+        </section>
+
+        <!-- Anatómia Szekció -->
+        <section id="anatomia" class="mb-16 scroll-mt-24">
+            <h3 class="text-3xl font-bold section-title mb-8 text-center">A Vestibularis Rendszer Anatómiája</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Perifériás Rendszer -->
+                <div class="card p-6">
+                    <div class="flex items-center mb-4">
+                        <i data-lucide="ear" class="w-10 h-10 text-blue-600 mr-4"></i>
+                        <h4 class="text-2xl font-semibold text-slate-800">Perifériás Szervek</h4>
+                    </div>
+                    <p class="mb-4 text-slate-600">A belső fülben található érzékszervek, melyek a fej mozgását és helyzetét detektálják.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-bold">Íves járatok (Canales semicirculares)</h5>
+                            <p class="text-sm">A fej forgó mozgásait (szöggyorsulás) érzékelik három, egymásra merőleges síkban. A mozgás hatására az endolympha nevű folyadék elmozdul, ingerelve a szőrsejteket.</p>
+                        </div>
+                        <div>
+                            <h5 class="font-bold">Otolith szervek (Utriculus és Sacculus)</h5>
+                            <p class="text-sm">A lineáris gyorsulást (pl. előre, hátra, fel, le) és a gravitációt érzékelik a bennük lévő kalcium-karbonát kristályok (otoconiumok) segítségével.</p>
+                        </div>
+                    </div>
+                     <img src="https://placehold.co/600x400/dbeafe/4338ca?text=Belső+fül+anatómiája" alt="Belső fül anatómiája" class="mt-4 rounded-lg object-cover w-full h-48" onerror="this.onerror=null;this.src='https://placehold.co/600x400/dbeafe/4338ca?text=Kép+nem+elérhető';">
+                </div>
+                <!-- Centrális Rendszer -->
+                <div class="card p-6">
+                    <div class="flex items-center mb-4">
+                        <i data-lucide="brain-circuit" class="w-10 h-10 text-indigo-600 mr-4"></i>
+                        <h4 class="text-2xl font-semibold text-slate-800">Centrális Rendszer</h4>
+                    </div>
+                    <p class="mb-4 text-slate-600">Az agytörzsi és agykérgi területek, melyek feldolgozzák a perifériáról érkező információkat.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-bold">Nervus Vestibularis (VIII. agyideg)</h5>
+                            <p class="text-sm">Az információt a belső fülből az agytörzsbe szállítja.</p>
+                        </div>
+                        <div>
+                            <h5 class="font-bold">Vestibularis Magok</h5>
+                            <p class="text-sm">Az agytörzsben található négy magcsoport, melyek integrálják a vestibularis, látási és proprioceptív jeleket.</p>
+                        </div>
+                        <div>
+                            <h5 class="font-bold">Pályák és Kapcsolatok</h5>
+                            <p class="text-sm">A magokból pályák indulnak a kisagy, a szemmozgató magok, a gerincvelő és az agykéreg felé, koordinálva az egyensúlyt, testtartást és tekintetstabilizálást.</p>
+                        </div>
+                    </div>
+                     <img src="https://placehold.co/600x400/e0e7ff/4338ca?text=Vestibularis+pályák" alt="Vestibularis pályák" class="mt-4 rounded-lg object-cover w-full h-48" onerror="this.onerror=null;this.src='https://placehold.co/600x400/e0e7ff/4338ca?text=Kép+nem+elérhető';">
+                </div>
+            </div>
+        </section>
+
+        <!-- Élettan Szekció -->
+        <section id="elettan" class="mb-16 scroll-mt-24">
+            <h3 class="text-3xl font-bold section-title mb-8 text-center">Élettani Működés</h3>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card p-6 text-center">
+                    <i data-lucide="move-3d" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Ingerfeldolgozás</h4>
+                    <p>A fej mozgására a szőrsejtek elhajlanak. A kinocilium felé hajlás ingerületet (depolarizáció), az ellenkező irányú gátlást (hiperpolarizáció) vált ki.</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <i data-lucide="eye" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Vestibulo-Ocularis Reflex (VOR)</h4>
+                    <p>Biztosítja a tiszta látást a fej mozgása közben. A fej mozgásával ellentétes irányú, kompenzáló szemmozgást generál. Ez egy gyors, 3 neuronból álló reflexív.</p>
+                </div>
+                 <div class="card p-6 text-center">
+                    <i data-lucide="move" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Vestibulospinalis Pályák</h4>
+                    <p>A testtartás és egyensúly fenntartásáért felelősek az antigravitációs izmok tónusának szabályozásával és a fej-nyak koordinációjával.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Perifériás vs Centrális Vertigo -->
+        <section id="vertigo-tipusok" class="mb-16 scroll-mt-24">
+            <h3 class="text-3xl font-bold section-title mb-8 text-center">Perifériás vs. Centrális Vertigo</h3>
+            <p class="max-w-3xl mx-auto text-center text-lg text-slate-600 mb-8">
+                A vertigo okának helye alapján két fő típust különítünk el. Az elkülönítés kulcsfontosságú a diagnózis és a terápia szempontjából.
+            </p>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[800px] comparison-table rounded-lg shadow-lg">
+                    <thead>
+                        <tr>
+                            <th>Jellemző</th>
+                            <th class="highlight-peripherial">Perifériás Vertigo</th>
+                            <th class="highlight-central">Centrális Vertigo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold">Eredet</td>
+                            <td>Belső fül (labyrinth), Nervus vestibularis</td>
+                            <td>Agytörzs, Kisagy</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Szédülés jellege</td>
+                            <td class="highlight-peripherial">Hirtelen, heves, forgó, rohamokban jelentkező</td>
+                            <td class="highlight-central">Kevésbé intenzív, elhúzódó, bizonytalan, "lebegő" jellegű</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Nystagmus</td>
+                            <td class="highlight-peripherial">Horizontális vagy horizonto-rotatoros, egyirányú, fixációval gátolható, "harmonikus"</td>
+                            <td class="highlight-central">Tisztán vertikális/rotatoros, tekintésirányú (irányváltó), fixációval nem gátolható, "diszharmonikus"</td>
+                        </tr>
+                         <tr>
+                            <td class="font-semibold">Egyensúlyzavar</td>
+                            <td class="highlight-peripherial">A beteg a károsodott oldal felé dől</td>
+                            <td class="highlight-central">Súlyos törzsataxia, a dőlés iránya változó lehet</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Vegetatív tünetek</td>
+                            <td class="highlight-peripherial">Kifejezett (hányinger, hányás, sápadtság)</td>
+                            <td class="highlight-central">Enyhék vagy hiányozhatnak</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Hallási tünetek</td>
+                            <td class="highlight-peripherial">Gyakori (halláscsökkenés, fülzúgás)</td>
+                            <td class="highlight-central">Ritka</td>
+                        </tr>
+                         <tr>
+                            <td class="font-semibold">Neurológiai gócjelek</td>
+                            <td class="highlight-peripherial">Tipikusan hiányoznak</td>
+                            <td class="highlight-central">Gyakran társulnak (kettőslátás, bénulás, beszédzavar)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Gyakori Kórképek Szekció -->
+        <section id="korkepek" class="mb-16 scroll-mt-24">
+            <h3 class="text-3xl font-bold section-title mb-8 text-center">Gyakori Kórképek</h3>
+            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- BPPV -->
+                <div class="card p-6 flex flex-col">
+                    <h4 class="text-xl font-bold mb-2 text-indigo-700">Benignus Paroxysmalis Pozicionális Vertigo (BPPV)</h4>
+                    <span class="tag self-start px-3 py-1 text-sm rounded-full mb-4">Leggyakoribb ok</span>
+                    <p class="mb-4 flex-grow"><strong class="text-slate-800">Lényege:</strong> Elszabadult otoconium (kristály) kerül az ívjáratokba, fejhelyzet-változásra heves, rövid szédülést okozva.</p>
+                    <div class="space-y-3 mt-auto">
+                        <p class="flex items-start"><i data-lucide="clock-3" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Tünet:</span> Rövid (másodpercek-perc), heves, forgó szédés fejhelyzet-változásra (pl. lefekvés, felkelés).</p>
+                        <p class="flex items-start"><i data-lucide="stethoscope" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Diagnózis:</span> Dix-Hallpike manőver.</p>
+                        <p class="flex items-start"><i data-lucide="helping-hand" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Terápia:</span> Repozíciós manőverek (pl. Epley-manőver).</p>
+                    </div>
+                </div>
+
+                <!-- Menière-betegség -->
+                <div class="card p-6 flex flex-col">
+                    <h4 class="text-xl font-bold mb-2 text-indigo-700">Menière-betegség</h4>
+                    <span class="tag self-start px-3 py-1 text-sm rounded-full mb-4">Klasszikus triász</span>
+                    <p class="mb-4 flex-grow"><strong class="text-slate-800">Lényege:</strong> A belső fülben az endolympha folyadék nyomásának fokozódása (hydrops) okozza a rohamokat.</p>
+                    <div class="space-y-3 mt-auto">
+                        <p class="flex items-start"><i data-lucide="wind" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Tünetek (rohamokban):</span> 1. Forgó vertigo (20 perctől órákig), 2. Fluktuáló halláscsökkenés, 3. Fülzúgás és/vagy fül teltségérzés.</p>
+                        <p class="flex items-start"><i data-lucide="test-tube-2" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Diagnózis:</span> Anamnézis, audiometria.</p>
+                        <p class="flex items-start"><i data-lucide="pilcrow" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Terápia:</span> Sószegény diéta, betahisztin, vízhajtók, súlyos esetben intratympanalis kezelés vagy műtét.</p>
+                    </div>
+                </div>
+
+                <!-- Vestibularis Neuritis -->
+                <div class="card p-6 flex flex-col">
+                    <h4 class="text-xl font-bold mb-2 text-indigo-700">Vestibularis Neuritis / Labyrinthitis</h4>
+                    <span class="tag self-start px-3 py-1 text-sm rounded-full mb-4">Akut, drámai kezdet</span>
+                    <p class="mb-4 flex-grow"><strong class="text-slate-800">Lényege:</strong> A nervus vestibularis (neuritis) vagy a teljes labyrinthus (labyrinthitis) gyulladása, leggyakrabban vírusfertőzés után.</p>
+                    <div class="space-y-3 mt-auto">
+                        <p class="flex items-start"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Tünetek:</span> Hirtelen, napokig tartó, folyamatos, heves vertigo, hányinger, egyensúlyzavar. <strong class="text-red-600">Labyrinthitis esetén halláscsökkenés is van!</strong></p>
+                        <p class="flex items-start"><i data-lucide="activity" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Diagnózis:</span> Klinikai kép, pozitív fejimpulzus teszt.</p>
+                        <p class="flex items-start"><i data-lucide="heart-pulse" class="w-5 h-5 mr-2 mt-1 text-indigo-500 flex-shrink-0"></i><span class="font-semibold">Terápia:</span> Tüneti kezelés (hányáscsillapítók), szteroidok, majd korai vestibularis rehabilitációs torna.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diagnosztika Szekció -->
+        <section id="diagnosztika" class="scroll-mt-24">
+            <h3 class="text-3xl font-bold section-title mb-8 text-center">Diagnosztikai Megközelítés</h3>
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <p class="text-center text-slate-600 mb-8">A helyes diagnózis a részletes anamnézisen, alapos fizikális és neurológiai vizsgálaton, valamint célzott teszteken alapul.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <h4 class="text-xl font-semibold mb-3 text-slate-800">Vizsgálati Lépések</h4>
+                        <ul class="space-y-3 list-inside">
+                           <li class="flex items-start"><i data-lucide="clipboard-list" class="w-5 h-5 mr-3 mt-1 text-blue-600 flex-shrink-0"></i><span><strong class="font-semibold">Anamnézis:</strong> A szédülés pontos jellege, időbeli lefolyása, kiváltó tényezők és kísérő tünetek.</span></li>
+                           <li class="flex items-start"><i data-lucide="user-check" class="w-5 h-5 mr-3 mt-1 text-blue-600 flex-shrink-0"></i><span><strong class="font-semibold">Fizikális és Neurológiai Vizsgálat:</strong> Vérnyomás, pulzus, agyidegek, kisagyi funkciók, reflexek.</span></li>
+                           <li class="flex items-start"><i data-lucide="ear-off" class="w-5 h-5 mr-3 mt-1 text-blue-600 flex-shrink-0"></i><span><strong class="font-semibold">Otoneurológiai Vizsgálat:</strong> Nystagmus, Romberg-, Unterberger-próba, fejimpulzus teszt.</span></li>
+                           <li class="flex items-start"><i data-lucide="image" class="w-5 h-5 mr-3 mt-1 text-blue-600 flex-shrink-0"></i><span><strong class="font-semibold">Képalkotó Vizsgálatok:</strong> Centrális ok gyanúja esetén MRI (stroke, SM, daganat kizárására).</span></li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                        <h4 class="text-xl font-semibold mb-3 text-red-800">Figyelmeztető Jelek (Red Flags)</h4>
+                        <p class="text-red-700 mb-3">Azonnali orvosi vizsgálatot igényelnek, mert centrális (súlyos) okra utalhatnak:</p>
+                        <ul class="space-y-2 list-inside text-red-700">
+                           <li class="flex items-center"><i data-lucide="alert-circle" class="w-5 h-5 mr-2 flex-shrink-0"></i>Újkeletű, súlyos fejfájás</li>
+                           <li class="flex items-center"><i data-lucide="alert-circle" class="w-5 h-5 mr-2 flex-shrink-0"></i>Bármilyen neurológiai gócjel</li>
+                           <li class="flex items-center"><i data-lucide="alert-circle" class="w-5 h-5 mr-2 flex-shrink-0"></i>Vertikális nystagmus</li>
+                           <li class="flex items-center"><i data-lucide="alert-circle" class="w-5 h-5 mr-2 flex-shrink-0"></i>Súlyos, hirtelen járásképtelenség</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- HINTS Protokoll -->
+                <div class="bg-slate-800 text-white rounded-lg p-6 mt-8">
+                    <h4 class="text-2xl font-bold mb-4 text-center">A HINTS Protokoll: Stroke vs. Neuritis</h4>
+                    <p class="text-center text-slate-300 mb-6">Akut, folyamatosan fennálló vertigo esetén ez a 3 lépéses vizsgálat rendkívül hasznos a stroke és a jóindulatú vestibularis neuritis elkülönítésében.</p>
+                    <div class="space-y-4" id="hints-accordion">
+                        <div class="accordion-item bg-slate-700 rounded-lg">
+                            <div class="accordion-header flex justify-between items-center p-4">
+                                <span class="font-semibold text-lg">HI: Head Impulse (Fejimpulzus teszt)</span>
+                                <i data-lucide="chevron-down" class="transition-transform"></i>
+                            </div>
+                            <div class="accordion-content px-4 pb-4">
+                                <p><strong class="text-lime-400">Perifériás jel (jóindulatú):</strong> Kóros HIT (korrekciós szakkád látható).</p>
+                                <p><strong class="text-red-400">Centrális jel (veszélyes):</strong> Normális HIT (nincs korrekciós szakkád).</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-slate-700 rounded-lg">
+                            <div class="accordion-header flex justify-between items-center p-4">
+                                <span class="font-semibold text-lg">N: Nystagmus</span>
+                                <i data-lucide="chevron-down" class="transition-transform"></i>
+                            </div>
+                            <div class="accordion-content px-4 pb-4">
+                                <p><strong class="text-lime-400">Perifériás jel:</strong> Egyirányú, horizontális nystagmus.</p>
+                                <p><strong class="text-red-400">Centrális jel:</strong> Tekintésirányú (irányváltó) vagy vertikális nystagmus.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-slate-700 rounded-lg">
+                            <div class="accordion-header flex justify-between items-center p-4">
+                                <span class="font-semibold text-lg">TS: Test of Skew (Szemtengely-ferdeség teszt)</span>
+                                <i data-lucide="chevron-down" class="transition-transform"></i>
+                            </div>
+                            <div class="accordion-content px-4 pb-4">
+                                <p><strong class="text-lime-400">Perifériás jel:</strong> Nincs skew deviáció.</p>
+                                <p><strong class="text-red-400">Centrális jel:</strong> Skew deviáció jelen van (a letakart szem feltárásakor vertikálisan korrigál).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-center bg-red-900/50 p-3 rounded-md border border-red-500"><strong class="font-bold">Konklúzió:</strong> Ha a HINTS akár egyetlen centrális jelet is mutat (normál HIT, irányváltó nystagmus, vagy skew), a beteg stroke-gyanús!</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-slate-300 py-8 mt-16">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Interaktív Tanulási Portál. Minden jog fenntartva.</p>
+            <p class="text-sm text-slate-400 mt-2">Ez az oldal oktatási célokat szolgál és nem helyettesíti a professzionális orvosi tanácsadást.</p>
+        </div>
+    </footer>
+    
+    <script>
+        lucide.createIcons();
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Accordion for HINTS protocol
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                // FIX: Select the SVG icon, not the original 'i' tag which gets replaced by Lucide icons library.
+                const icon = header.querySelector('svg');
+                
+                // Close other open accordions
+                document.querySelectorAll('.accordion-content').forEach(item => {
+                    if (item !== content && item.style.maxHeight) {
+                        item.style.maxHeight = null;
+                        // FIX: Select the other icon correctly and check if it exists before changing its style.
+                        const otherIcon = item.previousElementSibling.querySelector('svg');
+                        if (otherIcon) {
+                            otherIcon.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    if (icon) { // Check if icon exists before changing its style
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    if (icon) { // Check if icon exists before changing its style
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                }
+            });
+        });
+
+        // Active nav link on scroll
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('nav a');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

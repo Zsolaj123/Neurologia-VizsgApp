@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Izom- és Neuromuszkuláris Betegségek Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .nav-link.active {
+            color: #059669; /* emerald-600 */
+            font-weight: 600;
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid;
+            padding-bottom: 0.5rem;
+        }
+        .section-title svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-right: 1rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        tbody tr:hover {
+            background-color: #f0fdf4; /* green-50 */
+        }
+        .key-term {
+            font-weight: 600;
+            color: #15803d; /* green-700 */
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-emerald-700">Izom- és NMJ Betegségek</h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600">
+                <a href="#kivizsgalas" class="nav-link hover:text-emerald-600 transition">Kivizsgálás</a>
+                <a href="#izomdystrophia" class="nav-link hover:text-emerald-600 transition">Izomdystrophiák</a>
+                <a href="#myotonia" class="nav-link hover:text-emerald-600 transition">Myotoniák</a>
+                <a href="#nmj" class="nav-link hover:text-emerald-600 transition">NMJ Zavarok</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#kivizsgalas" class="block py-2 nav-link">Kivizsgálás</a>
+            <a href="#izomdystrophia" class="block py-2 nav-link">Izomdystrophiák</a>
+            <a href="#myotonia" class="block py-2 nav-link">Myotoniák</a>
+            <a href="#nmj" class="block py-2 nav-link">NMJ Zavarok</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Investigation of Muscle Diseases Section -->
+        <section id="kivizsgalas" class="mb-16 scroll-mt-20">
+            <div class="section-title border-cyan-500 text-cyan-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                <h2>Az Izombetegségek Kivizsgálásának Menete</h2>
+            </div>
+            <div class="content-card mb-8">
+                <h3 class="text-2xl font-semibold mb-3 text-cyan-700">A Gyengeség Differenciáldiagnózisa</h3>
+                <p class="mb-4">A kivizsgálás első és legfontosabb lépése a gyengeség okának lokalizálása. A klinikai kép alapján el kell különíteni a központi idegrendszeri, perifériás idegrendszeri, neuromuszkuláris junkció és a primer izomeredetű gyengeséget.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Lokalizáció</th><th>Jellemző Tünetek</th><th>Reflexek</th><th>CK Szint</th><th>EMG Minta</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-semibold">Központi Idegrendszer (UMN)</td>
+                                <td>Spaszticitás, fokális gyengeség, kóros reflexek.</td>
+                                <td class="key-term">Fokozottak</td>
+                                <td>Normális</td>
+                                <td>Normális vagy csökkent aktiváció.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Perifériás Ideg (LMN / Neuropathia)</td>
+                                <td>Disztális gyengeség, atrófia, érzészavar, fasciculatio.</td>
+                                <td class="key-term">Csökkentek/Hiányoznak</td>
+                                <td>Normális/Enyhén emelkedett</td>
+                                <td class="key-term">Neurogén</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Neuromuszkuláris Junkció</td>
+                                <td><strong class="text-red-600">Fluktuáló, fáradékonyság</strong>, ptosis, diplopia.</td>
+                                <td>Normálisak</td>
+                                <td>Normális</td>
+                                <td class="key-term">Repetitív ingerlésre decrementum.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">Izom (Myopathia)</td>
+                                <td><strong class="text-red-600">Proximális, szimmetrikus gyengeség</strong>.</td>
+                                <td class="key-term">Megtartottak (a gyengeséghez képest)</td>
+                                <td class="key-term">Emelkedett</td>
+                                <td class="key-term">Myopathiás</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="content-card">
+                 <h3 class="text-2xl font-semibold mb-3 text-cyan-700">A Kivizsgálás Lépései</h3>
+                 <ol class="list-decimal list-inside space-y-3">
+                     <li><strong>Klinikai Értékelés:</strong> Részletes anamnézis (kezdet, lefolyás, családi háttér) és neurológiai vizsgálat (gyengeség mintázata, reflexek). A <span class="key-term">proximális, szimmetrikus gyengeség</span> myopathiára utal.</li>
+                     <li><strong>Laboratóriumi Vizsgálatok:</strong> A <span class="key-term">Kreatin-kináz (CK)</span> a legfontosabb szűrővizsgálat. Emelkedett szintje izomkárosodásra utal. Emellett autoantitestek, hormonok vizsgálata.</li>
+                     <li><strong>Elektrodiagnosztika (EMG/NCS):</strong> Megerősíti a myopathiát és elkülöníti más kórképektől. Jellemző a <span class="key-term">myopathiás EMG minta</span> (rövid, alacsony, polifázisos MUP-ok).</li>
+                     <li><strong>További Specifikus Vizsgálatok:</strong>
+                        <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
+                            <li><strong>Izom MRI:</strong> Segít az érintett izmok azonosításában, irányíthatja a biopsziát.</li>
+                            <li><strong>Izombiopszia:</strong> Gyakran döntő a végleges diagnózishoz, különösen gyulladásos és veleszületett myopathiák esetén.</li>
+                            <li><strong>Genetikai Tesztelés:</strong> Az örökletes myopathiák (pl. izomdystrophiák) diagnózisának alapja.</li>
+                        </ul>
+                     </li>
+                 </ol>
+            </div>
+        </section>
+
+        <!-- Muscular Dystrophies Section -->
+        <section id="izomdystrophia" class="mb-16 scroll-mt-20">
+            <div class="section-title border-green-500 text-green-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <h2>Izomdystrophiák</h2>
+            </div>
+            <p class="text-lg mb-6 text-center">Progresszív izomdegenerációval és gyengeséggel járó, genetikailag meghatározott betegségek csoportja.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-green-700">Duchenne (DMD) és Becker (BMD)</h3>
+                    <p class="mb-2"><strong class="key-term">Genetika:</strong> X-kromoszómához kötött, a dystrophin gént érintő mutáció. DMD-ben a fehérje hiányzik, BMD-ben csökkent mennyiségű/kóros.</p>
+                    <p class="mb-2"><strong class="key-term">Klinikai kép (DMD):</strong> Korai kezdet (3-5 év), proximális gyengeség, <strong class="text-red-600">Gowers-jel</strong>, kacsázó járás, álló vádlik (pseudohypertrophia). Gyors progresszió.</p>
+                    <p><strong class="key-term">Kezelés:</strong> Kortikoszteroidok lassítják a lefolyást. A jövő a génterápiáé.</p>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-2xl font-semibold mb-3 text-green-700">Myotoniás Dystrophia (DM1/DM2)</h3>
+                    <p class="mb-2"><strong class="key-term">Jellemzők:</strong> Multisystemás betegség, melyet <strong class="text-red-600">myotonia</strong> (izomrelaxációs zavar) és progresszív izomgyengeség jellemez.</p>
+                    <p class="mb-2"><strong class="key-term">DM1 (Steinert-kór):</strong> Disztális gyengeség, cataracta, szívritmuszavarok, kopaszodás.</p>
+                    <p><strong class="key-term">DM2 (PROMM):</strong> Enyhébb, proximális gyengeséggel jár.</p>
+                </div>
+                 <div class="content-card lg:col-span-2">
+                    <h3 class="text-2xl font-semibold mb-3 text-green-700">Egyéb Típusok</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Végtagövi (Limb-Girdle, LGMD):</strong> Proximális medence- és vállövi gyengeség, scapula winging.</li>
+                        <li><strong>Facioscapulohumeralis (FSHD):</strong> Arc-, váll- és felkarizom gyengeség.</li>
+                        <li><strong>Oculopharyngealis (OPMD):</strong> Szemhéjcsüngés (ptosis) és nyelési zavar (dysphagia).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Myotonias Section -->
+        <section id="myotonia" class="mb-16 scroll-mt-20">
+            <div class="section-title border-teal-500 text-teal-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                <h2>Myotoniák</h2>
+            </div>
+            <div class="content-card">
+                <p class="text-lg mb-4">Az izom akaratlagos összehúzódás utáni elernyedésének kóros késlekedése, melyet az izommembrán ioncsatornáinak genetikai hibája (channelopathia) okoz.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3 text-teal-700">Myotonia Congenita</h3>
+                        <p><strong class="key-term">Patofiziológia:</strong> A kloridcsatorna (CLCN1) gén mutációja.</p>
+                        <p><strong class="key-term">Klinikai kép:</strong> Izommerevség, amely ismételt mozgásra javul (<strong class="text-red-600">"warm-up" jelenség</strong>). Izomnagyobbodás előfordulhat.</p>
+                        <p><strong class="key-term">Kezelés:</strong> Tüneti, pl. mexiletin.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3 text-teal-700">Nem-dystrophiás Myotoniák</h3>
+                        <p><strong class="key-term">Patofiziológia:</strong> A nátriumcsatorna (SCN4A) gén mutációja.</p>
+                        <p><strong class="key-term">Paramyotonia Congenita (PMC):</strong> Hideg által kiváltott, aktivitásra rosszabbodó (<strong class="text-red-600">paradox myotonia</strong>) merevség.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NMJ Disorders Section -->
+        <section id="nmj" class="mb-16 scroll-mt-20">
+            <div class="section-title border-blue-500 text-blue-600">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                <h2>A Neuromuszkuláris Ingerületátvitel Zavarai</h2>
+            </div>
+            <div class="content-card">
+                <h3 class="text-2xl font-semibold mb-4 text-blue-700">Differenciáldiagnosztikai Összefoglaló</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Kórkép</th><th>Patofiziológia</th><th>Főbb Klinikai Jellemzők</th><th>Kezelés</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-semibold">Myasthenia Gravis (MG)</td>
+                                <td>Autoimmun: antitestek a <strong>posztszinaptikus</strong> ACh-receptorok ellen.</td>
+                                <td><strong>Fluktuáló, fáradékonysággal fokozódó gyengeség</strong>. Gyakori szemészeti (ptosis) és bulbáris tünetek.</td>
+                                <td>AChE-gátlók, immunszuppresszánsok, timektómia.</td>
+                            </tr>
+                             <tr>
+                                <td class="font-semibold">Lambert-Eaton (LEMS)</td>
+                                <td>Autoimmun/Paraneopláziás: antitestek a <strong>preszinaptikus</strong> Ca<sup>2+</sup>-csatornák ellen. Gyakran kissejtes tüdőrákhoz társul.</td>
+                                <td>Proximális gyengeség, renyhe reflexek, autonóm tünetek. Izomerő rövid kontrakcióra nőhet.</td>
+                                <td>Alapdaganat kezelése, 3,4-diaminopiridin.</td>
+                            </tr>
+                             <tr>
+                                <td class="font-semibold">Botulizmus</td>
+                                <td>A _C. botulinum_ toxinja gátolja a <strong>preszinaptikus</strong> ACh-felszabadulást.</td>
+                                <td>Akut, szimmetrikus, <strong>leszálló petyhüdt bénulás</strong>. Pupillatágulat.</td>
+                                <td>Intenzív terápia, légzéstámogatás, antitoxin.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-6 text-center">
+            <p>&copy; 2025 Izom- és Neuromuszkuláris Betegségek Tudástára. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

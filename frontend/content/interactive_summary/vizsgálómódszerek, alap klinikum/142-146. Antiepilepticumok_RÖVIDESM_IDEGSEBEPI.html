@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haladó Epilepszia Útmutató Orvosoknak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .tab-active {
+            border-bottom-color: #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom-color: transparent;
+            color: #6b7280;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 900px;
+            border-radius: 0.75rem;
+            animation: slideIn 0.3s;
+        }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        @keyframes slideIn { from {transform: translateY(-50px);} to {transform: translateY(0);} }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600">Haladó Epilepszia Útmutató</h1>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#aed" class="text-gray-600 hover:text-indigo-600">Antiepileptikumok</a>
+                <a href="#status" class="text-gray-600 hover:text-indigo-600">Status Epilepticus</a>
+                <a href="#tloc" class="text-gray-600 hover:text-indigo-600">Eszméletvesztés</a>
+                <a href="#sebeszet" class="text-gray-600 hover:text-indigo-600">Idegsebészet</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+
+        <!-- Section: Antiepileptikumok -->
+        <section id="aed" class="py-12">
+            <h2 class="text-4xl font-bold text-center mb-4">Antiepileptikumok (AED) Alkalmazása</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">A gyógyszeres terápia megkezdésének és kiválasztásának elvei a modern epileptológiában.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="section-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">Mikor kezdjünk kezelést?</h3>
+                    <p class="text-gray-600 mb-4">A kezelés indokolt, ha az epilepszia diagnózisa megalapozott. Egyetlen roham után a döntés a kiújulási kockázat és a beteg egyéni helyzetének mérlegelésén alapul.</p>
+                    <button onclick="openModal('aed_start')" class="mt-auto font-semibold text-indigo-600 hover:text-indigo-800">Kiújulási kockázatot növelő faktorok →</button>
+                </div>
+                <div class="section-card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">A Gyógyszerválasztás Szempontjai</h3>
+                    <p class="text-gray-600 mb-4">Az optimális AED kiválasztása egyénre szabott, figyelembe véve a rohamtípust, a beteg korát, nemét, társbetegségeit és a gyógyszerprofilt.</p>
+                    <button onclick="openModal('aed_choice')" class="mt-auto font-semibold text-indigo-600 hover:text-indigo-800">Részletes szempontok →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Status Epilepticus -->
+        <section id="status" class="py-12 bg-red-50 rounded-xl">
+            <h2 class="text-4xl font-bold text-center mb-4 text-red-800">Status Epilepticus (SE) Kezelése</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">A "Time is Brain" elv érvényesülése a konvulzív és non-konvulzív status epilepticus ellátása során.</p>
+            
+            <div class="mb-8 border-b border-gray-200">
+                <nav class="flex justify-center -mb-px" id="statusTabs">
+                    <button data-target="cse" class="tab-button py-4 px-6 border-b-2 tab-active">Konvulzív SE</button>
+                    <button data-target="ncse" class="tab-button py-4 px-6 border-b-2 tab-inactive">Non-konvulzív SE</button>
+                </nav>
+            </div>
+
+            <div id="statusContent">
+                <div id="cse" class="tab-pane">
+                    <h3 class="text-2xl font-bold text-center mb-6">Konvulzív SE Lépcsőzetes Kezelése</h3>
+                    <div class="grid md:grid-cols-3 gap-4 text-center">
+                        <div class="section-card p-4">
+                            <h4 class="font-bold text-lg text-red-600">1. Lépés (0-10 perc)</h4>
+                            <p class="font-semibold">Elsővonalbeli terápia</p>
+                            <p class="text-gray-600 mt-2">IV Benzodiazepinek (Lorazepam, Diazepam) vagy IM/Bukkális Midazolam</p>
+                        </div>
+                        <div class="section-card p-4">
+                            <h4 class="font-bold text-lg text-orange-600">2. Lépés (10-30 perc)</h4>
+                            <p class="font-semibold">Másodvonalbeli terápia</p>
+                            <p class="text-gray-600 mt-2">IV AED telítő dózis (Foszfenitoin, Valproát, Levetiracetám)</p>
+                        </div>
+                        <div class="section-card p-4">
+                            <h4 class="font-bold text-lg text-yellow-600">3. Lépés (>30 perc)</h4>
+                            <p class="font-semibold">Refrakter SE</p>
+                            <p class="text-gray-600 mt-2">Intenzív terápia, anesztetikumok (Midazolam, Propofol), cEEG monitorozás</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="ncse" class="hidden tab-pane">
+                    <h3 class="text-2xl font-bold text-center mb-6">Non-konvulzív SE Menedzsmentje</h3>
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div class="section-card p-6">
+                            <h4 class="font-bold text-lg mb-2">Diagnosztikai Kihívás</h4>
+                            <p class="text-gray-600">A tünetek nem specifikusak (zavartság, viselkedésváltozás). A diagnózis EEG megerősítést igényel (Salzburgi kritériumok). A folyamatos EEG (cEEG) kulcsfontosságú.</p>
+                        </div>
+                        <div class="section-card p-6">
+                            <h4 class="font-bold text-lg mb-2">Kezelési Stratégia</h4>
+                            <p class="text-gray-600">Kevésbé agresszív, mint a CSE esetén. A kezelés intenzitása az alapbetegségtől és a klinikai képtől függ. Első vonalban itt is a benzodiazepinek állnak, majd IV AED-k. Anesztézia ritkán szükséges.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Eszméletvesztés (TLOC) -->
+        <section id="tloc" class="py-12">
+            <h2 class="text-4xl font-bold text-center mb-4">Rövid Ideig Tartó Eszméletvesztések (TLOC)</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Differenciáldiagnosztikai útmutató a syncope, epilepsziás roham és pszichogén rohamok elkülönítéséhez.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="section-card p-6">
+                    <div class="text-4xl mb-4">❤️</div>
+                    <h3 class="text-2xl font-bold mb-2">Syncope</h3>
+                    <p class="text-gray-600 flex-grow">Átmeneti agyi hipoperfúzió okozza. Jellemző a prodroma (sápadtság, szédülés, verejtékezés) és a gyors, teljes felépülés. A rángások (konvulzív syncope) rövidek lehetnek.</p>
+                    <button onclick="openModal('syncope_details')" class="mt-4 font-semibold text-indigo-600 hover:text-indigo-800">Típusok és jellemzők →</button>
+                </div>
+                <div class="section-card p-6">
+                    <div class="text-4xl mb-4">⚡</div>
+                    <h3 class="text-2xl font-bold mb-2">Epilepsziás Roham</h3>
+                    <p class="text-gray-600 flex-grow">Kóros agyi elektromos aktivitás eredménye. Jellemző az aura, a sztereotip mozgásmintázat (pl. tónusos-klónusos), oldalsó nyelvharapás és az elhúzódó posztiktális zavartság.</p>
+                    <button onclick="openModal('epilepsy_details')" class="mt-4 font-semibold text-indigo-600 hover:text-indigo-800">Elkülönítő jelek →</button>
+                </div>
+                <div class="section-card p-6">
+                    <div class="text-4xl mb-4">🧠</div>
+                    <h3 class="text-2xl font-bold mb-2">Pszichogén Roham (PNES)</h3>
+                    <p class="text-gray-600 flex-grow">Pszichológiai folyamatok okozzák. Jellemző a hosszú, fluktuáló roham, csukott szemek, aszinkron, bizarr mozgások (pl. medence emelgetés), és a gyors felépülés posztiktális zavartság nélkül.</p>
+                    <button onclick="openModal('pnes_details')" class="mt-4 font-semibold text-indigo-600 hover:text-indigo-800">Elkülönítő jelek →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Idegsebészet -->
+        <section id="sebeszet" class="py-12 bg-gray-100 rounded-xl">
+            <h2 class="text-4xl font-bold text-center mb-12">Idegsebészeti Beavatkozások Epilepsziában</h2>
+            
+            <div class="mb-8 border-b border-gray-200">
+                <nav class="flex justify-center -mb-px" id="surgeryTabs">
+                    <button data-target="reszektiv" class="tab-button py-4 px-6 border-b-2 tab-active">Reszektív Műtétek</button>
+                    <button data-target="diszkonnektiv" class="tab-button py-4 px-6 border-b-2 tab-inactive">Diszkonnektív Műtétek</button>
+                    <button data-target="neuromodulacio" class="tab-button py-4 px-6 border-b-2 tab-inactive">Neuromoduláció</button>
+                </nav>
+            </div>
+
+            <div id="surgeryContent">
+                <div id="reszektiv" class="tab-pane">
+                    <p class="text-center text-gray-600 mb-6">Az epileptogén zóna (a rohamok kiindulási helye) eltávolítása. Cél a rohammentesség.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="section-card p-4"><strong>Temporális lebenyműtét:</strong> Leggyakoribb, MTLE esetén ~60-70% rohammentesség.</div>
+                        <div class="section-card p-4"><strong>Léziónektómia:</strong> Tumor, caverna, FCD eltávolítása. Magas sikerességi arány.</div>
+                        <div class="section-card p-4"><strong>Hemiszferektómia:</strong> Súlyos, egy agyféltekét érintő epilepszia esetén, főleg gyermekkorban.</div>
+                    </div>
+                </div>
+                <div id="diszkonnektiv" class="hidden tab-pane">
+                     <p class="text-center text-gray-600 mb-6">A rohamok terjedésének megakadályozása az idegpályák átvágásával. Palliatív célú.</p>
+                     <div class="grid md:grid-cols-2 gap-6">
+                        <div class="section-card p-4"><strong>Corpus Callosotomia:</strong> "Drop attack"-ek (atóniás rohamok) kezelésére. Átvágja a két agyféltekét összekötő pályát.</div>
+                        <div class="section-card p-4"><strong>Multiplex Subpialis Transzekció (MST):</strong> Eloquens kéregben lévő fókusz esetén, a horizontális rostok átvágása a funkció megőrzése mellett.</div>
+                    </div>
+                </div>
+                <div id="neuromodulacio" class="hidden tab-pane">
+                    <p class="text-center text-gray-600 mb-6">Beültetett eszközökkel történő agyi aktivitás-moduláció. Palliatív, gyógyszerrezisztens esetekben, ha a műtét nem opció.</p>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="section-card p-4"><strong>Vagus Ideg Stimuláció (VNS):</strong> A bal vagus ideg stimulálása. Széles körben alkalmazható.</div>
+                        <div class="section-card p-4"><strong>Mély Agyi Stimuláció (DBS):</strong> Mély agyi magvak (pl. talamusz) célzott stimulációja.</div>
+                        <div class="section-card p-4"><strong>Reszponzív Neurostimuláció (RNS):</strong> Zárt hurkú rendszer, amely észleli és megszakítja a rohamokat a fókuszban.</div>
+                    </div>
+                </div>
+            </div>
+             <div class="text-center mt-8">
+                <button onclick="openModal('surgery_details')" class="font-semibold text-indigo-600 hover:text-indigo-800">Részletes sebészeti eljárások összehasonlítása →</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Structure -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <div id="modalBody" class="prose max-w-none"></div>
+        </div>
+    </div>
+
+    <footer class="text-center py-6 bg-gray-800 text-gray-400 mt-12">
+        <p>&copy; 2025 Haladó Epilepszia Útmutató. A tartalom a feltöltött neurológiai tételek alapján készült.</p>
+    </footer>
+
+<script>
+    // Tab switching logic
+    function setupTabs(tabsId, contentId) {
+        const tabs = document.getElementById(tabsId);
+        const content = document.getElementById(contentId);
+        if (!tabs || !content) return;
+
+        tabs.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-button')) {
+                tabs.querySelectorAll('.tab-button').forEach(tab => {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('tab-inactive');
+                });
+                content.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.add('hidden');
+                });
+
+                e.target.classList.add('tab-active');
+                e.target.classList.remove('tab-inactive');
+                const targetPaneId = e.target.getAttribute('data-target');
+                document.getElementById(targetPaneId).classList.remove('hidden');
+            }
+        });
+    }
+
+    setupTabs('statusTabs', 'statusContent');
+    setupTabs('surgeryTabs', 'surgeryContent');
+
+    // Modal logic
+    const modal = document.getElementById('infoModal');
+    const modalBody = document.getElementById('modalBody');
+
+    const modalData = {
+        aed_start: {
+            title: 'Kiújulási Kockázatot Növelő Faktorok',
+            content: `
+                <p class="mb-4">Egyetlen nem provokált roham után az AED kezelés megkezdése akkor mérlegelendő, ha a kiújulás kockázata magas (az ILAE definíciója szerint >60%). A kockázatot szignifikánsan növelő tényezők:</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><b>Kóros EEG lelet:</b> Az interiktális (rohammentes) időszakban észlelt egyértelmű epileptiform kisülések (pl. tüskék, éles hullámok) jelenléte kb. kétszeresére növeli a kockázatot.</li>
+                    <li><b>Ismert strukturális agyi eltérés:</b> Az agyi képalkotóval (elsősorban MRI) kimutatott, az epilepszia okaként azonosítható lézió (pl. tumor, stroke utáni heg, fejlődési rendellenesség) szintén megduplázza a kockázatot.</li>
+                    <li><b>Korábbi agyi inzultus:</b> Az anamnézisben szereplő agykárosodás (trauma, fertőzés) szintén rizikófaktor.</li>
+                    <li><b>Éjszakai (nokturnális) roham:</b> Ha az első roham alvás közben jelentkezett, az is magasabb kockázattal társul.</li>
+                </ul>
+                <p class="mt-4">Ha ezen faktorok közül egy vagy több is fennáll, az epilepszia diagnózisa már egy roham után is felállítható, és a kezelés megkezdése indokolt lehet a beteggel való közös döntés alapján.</p>
+            `
+        },
+        aed_choice: {
+            title: 'Az Antiepileptikum Választás Fő Szempontjai',
+            content: `
+                <ol class="list-decimal list-inside space-y-3">
+                    <li><b>Rohamtípus és Epilepszia Szindróma:</b> Ez a legfontosabb szempont. Bizonyos szerek hatékonyak fokális rohamokban (pl. karbamazepin, levetiracetám), míg mások generalizáltban (pl. valproát). Néhány szer ronthat bizonyos rohamtípusokat (pl. karbamazepin absence vagy myoclonusos rohamok esetén).</li>
+                    <li><b>Betegjellemzők:</b>
+                        <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
+                            <li><b>Életkor:</b> Időseknél a csökkent vese-/májfunkció és a polifarmácia, gyermekeknél az eltérő metabolizmus és kognitív mellékhatásokra való érzékenység a fő szempont.</li>
+                            <li><b>Nem:</b> Fogamzóképes nőknél a teratogenitás (magzatkárosító hatás) és a fogamzásgátlókkal való interakciók kulcsfontosságúak. A valproát magas teratogén kockázatú.</li>
+                            <li><b>Társbetegségek (Komorbiditások):</b> Máj- és vesebetegség, pszichiátriai kórképek, csontritkulás, testsúlyproblémák mind befolyásolják a választást.</li>
+                        </ul>
+                    </li>
+                    <li><b>Gyógyszerprofil:</b>
+                         <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
+                            <li><b>Mellékhatásprofil:</b> A cél a legjobb tolerálhatóság.</li>
+                            <li><b>Gyógyszerinterakciók:</b> Különösen az enzimindukáló (pl. karbamazepin, fenitoin) vagy -gátló (pl. valproát) szerek esetén fontos.</li>
+                            <li><b>Farmakokinetika:</b> Felszívódás, metabolizmus, felezési idő (adagolás gyakorisága).</li>
+                        </ul>
+                    </li>
+                </ol>
+            `
+        },
+        syncope_details: {
+            title: 'Syncope Jellemzői',
+            content: `
+                <p class="mb-4"><b>Definíció:</b> Átmeneti, globális agyi hipoperfúzió (elégtelen vérellátás) okozta rövid eszméletvesztés.</p>
+                <h4 class="font-semibold text-lg mb-2">Típusai:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><b>Neurogén/Reflex Syncope:</b> Leggyakoribb.
+                        <ul class="list-circle list-inside ml-6">
+                            <li><i>Vazovagális:</i> Érzelmi stressz, fájdalom, hosszú állás váltja ki.</li>
+                            <li><i>Szituációs:</i> Köhögés, nyelés, vizelés stb. váltja ki.</li>
+                            <li><i>Carotis sinus syncope:</i> Nyak ingerlése váltja ki.</li>
+                        </ul>
+                    </li>
+                    <li><b>Ortosztatikus Hypotonia:</b> Felálláskor jelentkező vérnyomásesés (gyógyszerek, autonóm diszfunkció, dehidráció miatt).</li>
+                    <li><b>Kardiális Syncope:</b> Legveszélyesebb! Szívritmuszavar (brady- vagy tachycardia) vagy strukturális szívbetegség (pl. aorta stenosis) okozza. Hirtelen szívhalál kockázatával jár.</li>
+                </ul>
+                <h4 class="font-semibold text-lg mt-4 mb-2">Klinikai Jellemzők:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><b>Prodroma:</b> Gyakori (kivéve kardiálisnál): sápadtság, verejtékezés, émelygés, látás-/hallászavar.</li>
+                    <li><b>Esemény alatt:</b> Rövid (<1-2 perc), petyhüdt tónus, nyitott szemek. Rövid, aszinkron rángások előfordulhatnak (konvulzív syncope).</li>
+                    <li><b>Post-syncopés állapot:</b> Gyors, teljes tudattisztulás, minimális zavartság.</li>
+                </ul>
+            `
+        },
+        epilepsy_details: {
+            title: 'Epilepsziás Roham Jellemzői',
+            content: `
+                <p class="mb-4"><b>Definíció:</b> Az agyi neuronok kóros, túlzott vagy szinkronizált elektromos aktivitásának klinikai manifesztációja.</p>
+                <h4 class="font-semibold text-lg mb-2">Elkülönítő Jelek a Syncope-tól:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><b>Aura:</b> Gyakori, specifikus és sztereotip (pl. epigastriális felszálló érzés, deja vu, szaghallucináció).</li>
+                    <li><b>Esemény alatt:</b>
+                        <ul class="list-circle list-inside ml-6">
+                            <li>A mozgások szervezettebbek, sztereotipabbak (pl. tónusos-klónusos progresszió).</li>
+                            <li><b>Oldalsó nyelvharapás</b> erősen specifikus.</li>
+                            <li>Az eszméletvesztés gyakran hosszabb (1-3 perc).</li>
+                            <li>A szemek általában nyitva vannak.</li>
+                        </ul>
+                    </li>
+                    <li><b>Postictalis állapot:</b> Jellemzően elhúzódó (percek-órák) zavartság, álmosság, fejfájás, izomfájdalom. Átmeneti fokális neurológiai deficit (Todd-parézis) előfordulhat.</li>
+                    <li><b>Kiváltó tényezők:</b> Alvásmegvonás, villogó fények, alkoholmegvonás.</li>
+                </ul>
+            `
+        },
+        pnes_details: {
+            title: 'Pszichogén Nem Epilepsziás Roham (PNES) Jellemzői',
+            content: `
+                <p class="mb-4"><b>Definíció:</b> Epilepsziás rohamot utánzó esemény, amelyet pszichológiai folyamatok (konverzió, disszociáció) okoznak, nem pedig kóros agyi elektromos tevékenység.</p>
+                <h4 class="font-semibold text-lg mb-2">Elkülönítő Jelek:</h4>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><b>Kiváltó tényezők:</b> Gyakran érzelmi stressz, interperszonális konfliktus.</li>
+                    <li><b>Esemény alatt:</b>
+                        <ul class="list-circle list-inside ml-6">
+                            <li><b>Időtartam:</b> Gyakran hosszú (percek-órák), fluktuáló intenzitással.</li>
+                            <li><b>Mozgások:</b> Aszinkron, szabálytalan, bizarr (pl. medence emelgetés, fejoldalra rázás).</li>
+                            <li><b>Szemek:</b> Jellemzően csukva vannak, a beteg ellenáll a felnyitásnak.</li>
+                            <li><b>Vokalizáció:</b> Sírás, kiabálás gyakori.</li>
+                        </ul>
+                    </li>
+                    <li><b>Post-roham állapot:</b> Gyors visszatérés a normál tudatállapothoz, nincs vagy atipikus a posztiktális zavartság. A beteg gyakran emlékszik az eseményre.</li>
+                    <li><b>Diagnózis:</b> A "gold standard" a video-EEG monitorozás, amely a klinikai esemény alatt nem mutat epileptiform aktivitást.</li>
+                </ul>
+            `
+        },
+        surgery_details: {
+            title: 'Idegsebészeti Eljárások Összehasonlítása',
+            content: `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2">Eljárás</th>
+                                <th class="px-4 py-2">Típus</th>
+                                <th class="px-4 py-2">Fő Indikáció</th>
+                                <th class="px-4 py-2">Várható Eredmény</th>
+                                <th class="px-4 py-2">Fő Kockázat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b">
+                                <td class="px-4 py-2 font-medium">Temporális Lobektómia</td>
+                                <td class="px-4 py-2">Reszektív</td>
+                                <td class="px-4 py-2">Mediális temporális epilepszia (MTS)</td>
+                                <td class="px-4 py-2">~60-70% rohammentesség</td>
+                                <td class="px-4 py-2">Memóriazavar, látótérkiesés</td>
+                            </tr>
+                            <tr class="bg-gray-50 border-b">
+                                <td class="px-4 py-2 font-medium">Léziónektómia</td>
+                                <td class="px-4 py-2">Reszektív</td>
+                                <td class="px-4 py-2">Jól körülírt léziók (tumor, FCD)</td>
+                                <td class="px-4 py-2">Magas rohammentesség</td>
+                                <td class="px-4 py-2">Lézió helyétől függő deficit</td>
+                            </tr>
+                            <tr class="bg-white border-b">
+                                <td class="px-4 py-2 font-medium">Hemiszferektómia</td>
+                                <td class="px-4 py-2">Reszektív/Diszkonnektív</td>
+                                <td class="px-4 py-2">Egyoldali, kiterjedt gyermekkori epilepszia</td>
+                                <td class="px-4 py-2">>80% rohammentesség</td>
+                                <td class="px-4 py-2">Hemiplegia, hemianopsia</td>
+                            </tr>
+                             <tr class="bg-gray-50 border-b">
+                                <td class="px-4 py-2 font-medium">Corpus Callosotomia</td>
+                                <td class="px-4 py-2">Diszkonnektív</td>
+                                <td class="px-4 py-2">Atóniás rohamok (drop attacks)</td>
+                                <td class="px-4 py-2">Rohamok súlyosságának csökkenése</td>
+                                <td class="px-4 py-2">Diszkonnekciós szindróma</td>
+                            </tr>
+                            <tr class="bg-white border-b">
+                                <td class="px-4 py-2 font-medium">Vagus Ideg Stimuláció (VNS)</td>
+                                <td class="px-4 py-2">Neuromoduláció</td>
+                                <td class="px-4 py-2">DRE, ha műtét nem opció</td>
+                                <td class="px-4 py-2">~50% eséllyel >50% rohamcsökkenés</td>
+                                <td class="px-4 py-2">Rekedtség, köhögés</td>
+                            </tr>
+                             <tr class="bg-gray-50 border-b">
+                                <td class="px-4 py-2 font-medium">Mély Agyi Stimuláció (DBS)</td>
+                                <td class="px-4 py-2">Neuromoduláció</td>
+                                <td class="px-4 py-2">Fokális DRE (pl. ANT-DBS)</td>
+                                <td class="px-4 py-2">Idővel javuló rohamcsökkenés</td>
+                                <td class="px-4 py-2">Memóriazavar, depresszió</td>
+                            </tr>
+                             <tr class="bg-white border-b">
+                                <td class="px-4 py-2 font-medium">Reszponzív Neurostimuláció (RNS)</td>
+                                <td class="px-4 py-2">Neuromoduláció</td>
+                                <td class="px-4 py-2">1-2 fókuszú DRE (eloquens kéreg)</td>
+                                <td class="px-4 py-2">~75% rohamcsökkenés 9 év alatt</td>
+                                <td class="px-4 py-2">Sebészeti kockázatok (fertőzés)</td>
+                            </tr>
+                             <tr class="bg-gray-50">
+                                <td class="px-4 py-2 font-medium">Lézer Abláció (LITT)</td>
+                                <td class="px-4 py-2">Minimálisan invazív</td>
+                                <td class="px-4 py-2">Mély, kis léziók (MTS, HH)</td>
+                                <td class="px-4 py-2">~50-60% rohammentesség</td>
+                                <td class="px-4 py-2">Látótérkiesés, agyidegbénulás</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `
+        }
+    };
+
+    function openModal(id) {
+        const data = modalData[id];
+        if (data) {
+            modalBody.innerHTML = `<h2 class="text-3xl font-bold mb-6 text-indigo-700">${data.title}</h2>${data.content}`;
+            modal.style.display = "block";
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>

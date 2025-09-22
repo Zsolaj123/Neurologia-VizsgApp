@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Részletes Neurológiai Vizsgaanyag - Mozgászavarok</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark .bg-gray-50 { background-color: #171923; }
+        .dark .text-gray-800 { color: #e2e8f0; }
+        .dark .text-gray-700 { color: #cbd5e0; }
+        .dark .text-gray-600 { color: #a0aec0; }
+        .dark .text-gray-500 { color: #cbd5e0; }
+        .dark .border-gray-200 { border-color: #4a5568; }
+        .dark .bg-gray-100 { background-color: #2d3748; }
+        .dark .hover\:bg-gray-200:hover { background-color: #4a5568; }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25); }
+        .dark h1, .dark h2, .dark h3, .dark h4 { color: #f7fafc; }
+        .dark th { background-color: #4a5568; }
+        .dark td { border-color: #4a5568; }
+        .dark tr:nth-child(even) { background-color: #2d3748; }
+        .dark tr:nth-child(odd) { background-color: #4a5568; }
+        
+        .content-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid;
+        }
+        .content-section h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .content-section h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .content-section p, .content-section li {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+        .content-section ul {
+            list-style-type: none;
+            padding-left: 1rem;
+        }
+        .content-section ul li::before {
+            content: '🔹';
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        .content-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .content-section th, .content-section td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        .content-section th {
+            background-color: #f7fafc;
+            font-weight: 600;
+        }
+        .content-section tr:nth-child(even) {
+            background-color: #edf2f7;
+        }
+        
+        .nav-item.active {
+            background-color: #4c51bf;
+            color: white;
+            font-weight: 600;
+        }
+        .dark .nav-item.active {
+            background-color: #9f7aea;
+        }
+        .nav-item.active i {
+            color: white !important;
+        }
+
+        .highlight {
+            background: linear-gradient(to top, rgba(255, 235, 59, 0.6) 50%, transparent 50%);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .dark .highlight {
+             background: linear-gradient(to top, rgba(251, 211, 141, 0.5) 50%, transparent 50%);
+        }
+        .key-term {
+            font-weight: 600;
+            color: #c53030;
+        }
+        .dark .key-term {
+            color: #fc8181;
+        }
+        .alert {
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-left-width: 5px;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+        }
+        .alert-icon {
+            margin-right: 1rem;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+        .alert-danger { background-color: #fff5f5; border-color: #e53e3e; color: #c53030; }
+        .dark .alert-danger { background-color: #4c1d1d; border-color: #fc8181; color: #fed7d7; }
+        .alert-warning { background-color: #fffaf0; border-color: #dd6b20; color: #b7791f; }
+        .dark .alert-warning { background-color: #4a2a0c; border-color: #f6ad55; color: #fbd38d; }
+        .alert-info { background-color: #ebf8ff; border-color: #4299e1; color: #2c5282; }
+        .dark .alert-info { background-color: #2a4365; border-color: #63b3ed; color: #bee3f8; }
+
+        #menu-toggle { display: none; }
+        @media (max-width: 768px) {
+            #menu-toggle { display: block; }
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                position: fixed;
+                z-index: 40;
+                height: 100%;
+            }
+            #sidebar.open { transform: translateX(0); }
+            #main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex h-screen">
+        <aside id="sidebar" class="w-72 bg-white shadow-lg p-4 space-y-2 overflow-y-auto">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-teal-500">Neurológia</h1>
+                <p class="text-sm text-gray-500">Mozgászavarok</p>
+            </div>
+            <nav id="nav-menu">
+                <!-- Navigation items will be inserted here by JavaScript -->
+            </nav>
+            <div class="absolute bottom-4 left-4">
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun hidden"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main id="main-content" class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div id="content-display" class="bg-white p-6 md:p-10 rounded-lg shadow-lg">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-gray-700">Mozgászavarok Részletes Vizsgaanyaga</h1>
+                    <p class="mt-4 text-lg text-gray-600">Válassz egy témakört a bal oldali menüből a felkészüléshez.</p>
+                    <i class="fas fa-walking text-9xl text-green-300 mt-12 animate-pulse"></i>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const contentData = {
+            "t185": {
+                title: "Parkinson-kór",
+                icon: "fa-solid fa-person-dots-from-line",
+                color: "text-green-500",
+                content: {
+                    "t185_bevezetes": {
+                        title: "Bevezetés és Patofiziológia",
+                        html: `
+                            <h2 style="border-color: #22c55e;">A Parkinson-kór (PK)</h2>
+                            <p>A PK egy krónikus, progresszív neurodegeneratív rendellenesség, amely elsődlegesen a mozgásszabályozást érinti, de kiterjedt nem-motoros tünetekkel is jár. Az Alzheimer-kór után a második leggyakoribb neurodegeneratív kórkép.</p>
+                            <h4 class="text-green-700 dark:text-green-400">Patofiziológia</h4>
+                            <p>Hátterében a középagyban (substantia nigra) található <span class="key-term">dopamint termelő idegsejtek fokozatos pusztulása</span> áll. Ez dopaminhiányt okoz a striatumban, ami a mozgászavarokért felelős. A kórszövettani jellegzetesség az <span class="highlight">alfa-szinuklein fehérje</span> kóros felhalmozódása, amely <span class="key-term">Lewy-testeket</span> képez az idegsejtekben.</p>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-hourglass-start alert-icon"></i>
+                                <div><h5 class="font-bold">Prodromális Fázis</h5><p class="text-sm">Mire a jellegzetes motoros tünetek megjelennek, a dopamintermelő sejtek 60-80%-a már elpusztult. Ezt egy évekig tartó, preklinikai szakasz előzi meg, amelyben már jelen lehetnek nem-motoros tünetek, mint a <span class="highlight">szaglászavar (hyposmia), REM alvási viselkedészavar (RBD)</span> vagy székrekedés.</p></div>
+                            </div>
+                        `
+                    },
+                    "t185_klinikum": {
+                        title: "Klinikai Megjelenés",
+                        html: `
+                            <h3 style="color: #16a34a;">Klinikai Megjelenés</h3>
+                            <p>A diagnózis alapvetően klinikai, a jellegzetes motoros tünetegyüttes felismerésén alapul, melyek jellemzően <span class="highlight">aszimmetrikusan</span> kezdődnek.</p>
+                            
+                            <h4>Motoros Kardinális Tünetek</h4>
+                            <ul>
+                                <li><strong>Bradykinesia (meglassultság):</strong> A mozgások lelassulása és amplitúdójának csökkenése. Ez a diagnózishoz <span class="key-term">elengedhetetlen</span>. Megnyilvánulásai: csökkent arcmimika (hypomimia), halk beszéd (hypophonia), apró betűs írás (micrographia).</li>
+                                <li><strong>Nyugalmi Tremor:</strong> Alacsony frekvenciájú (4-6 Hz) remegés, amely nyugalomban a legkifejezettebb és mozgásra csökken. Jellemző a "pill-rolling" (pénzszámoló) mozgás.</li>
+                                <li><strong>Rigiditás (izommerevség):</strong> A végtagok passzív mozgatásakor érzékelhető, fogaskerékszerű ellenállás.</li>
+                                <li><strong>Poszturális Instabilitás:</strong> Egyensúlyzavar, amely a betegség későbbi fázisában jelentkezik és esésekhez vezet.</li>
+                            </ul>
+
+                            <h4>Nem-motoros Tünetek (NMS)</h4>
+                            <p>Rendkívül gyakoriak és jelentősen rontják az életminőséget.</p>
+                            <ul>
+                                <li><strong>Neuropszichiátriai:</strong> Kognitív hanyatlás, demencia (PDD), depresszió, szorongás, apátia, vizuális hallucinációk, impulzuskontroll-zavarok.</li>
+                                <li><strong>Alvászavarok:</strong> REM alvási viselkedészavar (RBD), inszomnia, nyugtalan láb szindróma (RLS).</li>
+                                <li><strong>Autonóm Diszfunkció:</strong> Ortosztatikus hipotenzió, székrekedés, vizeletürítési zavarok.</li>
+                                <li><strong>Szenzoros:</strong> Szaglásvesztés (hyposmia), fájdalom.</li>
+                            </ul>
+                        `
+                    },
+                    "t185_diagnosztika": {
+                        title: "Diagnosztika",
+                        html: `
+                            <h3 style="color: #16a34a;">Diagnosztika</h3>
+                            <p>A diagnózis elsősorban klinikai, a <span class="key-term">Movement Disorder Society (MDS)</span> vagy az UK Brain Bank kritériumrendszere alapján történik. A diagnózis a parkinsonizmus (bradykinesia + rigiditás és/vagy nyugalmi tremor) azonosításán, a kizáró kritériumok és a "red flag"-ek (figyelmeztető jelek) értékelésén, valamint a támogató kritériumok (pl. egyértelmű levodopa-válasz) meglétén alapul.</p>
+                            <h4>Kiegészítő vizsgálatok</h4>
+                            <ul>
+                                <li><strong>MRI/CT:</strong> Főként másodlagos parkinsonizmusok (pl. vaszkuláris) vagy atípusos parkinson szindrómák kizárására szolgál.</li>
+                                <li><strong>DaTscan (SPECT):</strong> Segíthet a preszinaptikus dopaminerg deficit igazolásában és az esszenciális tremortól való elkülönítésben, de nem képes megkülönböztetni a PK-t az atípusos parkinsonizmusoktól.</li>
+                                <li><strong>Levodopa teszt:</strong> A motoros tünetek jelentős javulása a levodopa hatására erősen támogatja a PK diagnózisát.</li>
+                            </ul>
+                        `
+                    },
+                    "t185_kezeles": {
+                        title: "Kezelési Stratégiák",
+                        html: `
+                            <h3 style="color: #16a34a;">Kezelési Stratégiák</h3>
+                            <p>A kezelés célja a tünetek enyhítése és az életminőség javítása multidiszciplináris megközelítéssel.</p>
+                            <h4>Gyógyszeres Terápia</h4>
+                            <ul>
+                                <li><strong>Levodopa (L-DOPA):</strong> A leghatékonyabb tüneti szer. Hosszú távú mellékhatásai a motoros fluktuációk (wearing-off, on-off) és a diszkinéziák.</li>
+                                <li><strong>Dopamin Agonisták:</strong> Főként fiatalabb betegeknél monoterápiában, vagy levodopával kombinálva. Mellékhatásként gyakrabban okoznak impulzuskontroll-zavarokat.</li>
+                                <li><strong>MAO-B gátlók & COMT gátlók:</strong> A dopamin/levodopa hatását nyújtják meg, a "wearing-off" kezelésére használják.</li>
+                            </ul>
+                             <div class="alert alert-info">
+                                <i class="fas fa-procedures alert-icon"></i>
+                                <div><h5 class="font-bold">Előrehaladott Terápiák</h5><p class="text-sm">Súlyos motoros komplikációk esetén <span class="key-term">Mélyagyi Stimuláció (DBS)</span> vagy <span class="key-term">Levodopa-Carbidopa Intesztinális Gél (LCIG)</span> pumpa jöhet szóba.</p></div>
+                            </div>
+                            <h4>Nem-gyógyszeres kezelések</h4>
+                            <p>A gyógytorna, logopédia, foglalkozásterápia és pszichés támogatás elengedhetetlen részei a komplex ellátásnak.</p>
+                        `
+                    }
+                }
+            },
+            "t188": {
+                title: "Tremor Szindrómák",
+                icon: "fa-solid fa-hand-dots",
+                color: "text-blue-500",
+                content: {
+                    "t188_osztalyozas": {
+                        title: "Osztályozás és Kivizsgálás",
+                        html: `
+                            <h2 style="border-color: #3b82f6;">A Tremor Kivizsgálása és Kezelése</h2>
+                            <p>A tremor egy akaratlan, ritmikus, oszcilláló mozgás, a leggyakoribb mozgászavar. Nem önálló betegség, hanem egy mögöttes állapot tünete.</p>
+                            <h4>Fenomenológiai Osztályozás</h4>
+                            <ul>
+                                <li><strong>Nyugalmi tremor:</strong> Teljesen ellazult végtagon jelentkezik. Tipikusan a <span class="key-term">Parkinson-kór</span> jellemzője (4-6 Hz).</li>
+                                <li><strong>Akciós tremor:</strong> Mozgás közben jelenik meg.
+                                    <ul>
+                                        <li><strong>Poszturális:</strong> Végtag kitartásakor (pl. kinyújtott kar). Jellemző az <span class="key-term">esszenciális tremorra</span> (ET, 4-12 Hz).</li>
+                                        <li><strong>Kinetikus/Intenciós:</strong> Célirányos mozgás során, a célhoz közeledve fokozódik. <span class="key-term">Kisagyi (cerebelláris)</span> diszfunkcióra utal (<5 Hz).</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <div class="alert alert-info">
+                                <i class="fas fa-stethoscope alert-icon"></i>
+                                <div><h5 class="font-bold">Klinikai Kivizsgálás</h5><p class="text-sm">A diagnózis alapja a részletes anamnézis és a neurológiai vizsgálat. A tremort különböző helyzetekben kell megfigyelni, és keresni kell a társult neurológiai jeleket (parkinsonizmus, cerebelláris jelek, disztónia).</p></div>
+                            </div>
+                        `
+                    },
+                    "t188_diffdiag": {
+                        title: "Differenciáldiagnózis",
+                        html: `
+                            <h3 style="color: #2563eb;">Gyakori Tremor Szindrómák Differenciáldiagnózisa</h3>
+                            <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700">
+                                    <tr><th class="px-6 py-3">Jellemző</th><th class="px-6 py-3">Esszenciális Tremor (ET)</th><th class="px-6 py-3">Parkinson-kór Tremora (PT)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Típus</td><td class="px-6 py-4">Főként <span class="highlight">akciós</span> (poszturális, kinetikus)</td><td class="px-6 py-4">Főként <span class="highlight">nyugalmi</span></td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Szimmetria</td><td class="px-6 py-4">Általában szimmetrikus, kétoldali</td><td class="px-6 py-4">Jellemzően <span class="key-term">aszimmetrikus</span> kezdet és lefolyás</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Társult tünetek</td><td class="px-6 py-4">Nincsenek (izolált tremor)</td><td class="px-6 py-4">Bradykinesia, rigiditás, poszturális instabilitás</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Alkohol hatása</td><td class="px-6 py-4">Kis mennyiség gyakran <span class="highlight">javítja</span></td><td class="px-6 py-4">Nincs jellegzetes hatása</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">DaTscan</td><td class="px-6 py-4">Normális</td><td class="px-6 py-4">Kóros (csökkent dopaminerg aktivitás)</td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        `
+                    },
+                    "t188_kezeles": {
+                        title: "Kezelés",
+                        html: `
+                            <h3 style="color: #2563eb;">Kezelési Stratégiák</h3>
+                            <p>A kezelés az alapbetegségtől függ. Súlyos, gyógyszerrezisztens esetekben invazív eljárások is szóba jöhetnek.</p>
+                            <ul>
+                                <li><strong>Esszenciális Tremor:</strong> Első vonalbeli szerek a <span class="key-term">Propranolol</span> (béta-blokkoló) és a <span class="key-term">Primidon</span> (antiepileptikum).</li>
+                                <li><strong>Parkinson-kór Tremora:</strong> A standard Parkinson-gyógyszerek (Levodopa, dopamin agonisták) általában hatékonyak.</li>
+                                <li><strong>Disztóniás Tremor:</strong> A <span class="highlight">Botulinum toxin injekciók</span> lehetnek a leghatékonyabbak.</li>
+                                <li><strong>Invazív Kezelés:</strong> Súlyos ET és PT esetén <span class="key-term">Mélyagyi Stimuláció (DBS)</span> vagy <span class="key-term">Fókuszált Ultrahangos Talamotómia (FUS-T)</span> mérlegelendő.</li>
+                            </ul>
+                        `
+                    }
+                }
+            },
+            "t189": {
+                title: "Atípusos Parkinsonizmusok",
+                icon: "fa-solid fa-puzzle-piece",
+                color: "text-orange-500",
+                content: {
+                    "t189_bevezetes": {
+                        title: "Bevezetés és Felosztás",
+                        html: `
+                            <h2 style="border-color: #f97316;">Atípusos Parkinsonizmusok (Parkinson-plusz)</h2>
+                            <p>Olyan neurodegeneratív betegségek, amelyek a parkinsonizmus mellett további, a Parkinson-kórra nem jellemző ("plusz") tünetekkel is járnak. Jellemzően <span class="highlight">gyorsabb a progressziójuk</span> és <span class="highlight">rosszul reagálnak a levodopa kezelésre</span>.</p>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-circle alert-icon"></i>
+                                <div><h5 class="font-bold">Differenciáldiagnosztikai Kulcs</h5><p class="text-sm">A "plusz" tünetek (pl. korai esések, autonóm zavar, demencia, tekintészavar) és a gyenge levodopa-válasz felismerése kulcsfontosságú az elkülönítésben.</p></div>
+                            </div>
+                        `
+                    },
+                    "t189_attekintes": {
+                        title: "Főbb Típusok",
+                        html: `
+                            <h3 style="color: #ea580c;">Főbb Atípusos Parkinson Szindrómák</h3>
+                             <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700">
+                                    <tr><th class="px-6 py-3">Kórkép</th><th class="px-6 py-3">Fő "Plusz" Tünetek</th><th class="px-6 py-3">Kórszövettan (Proteinopátia)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Progresszív Szupranukleáris Bénulás (PSP)</td><td class="px-6 py-4"><span class="key-term">Korai esések (hátra)</span>, vertikális tekintészavar</td><td class="px-6 py-4">4R Tauopátia</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Kortikobazális Szindróma (CBS)</td><td class="px-6 py-4">Aszimmetrikus apraxia, disztónia, <span class="key-term">"alien limb"</span></td><td class="px-6 py-4">4R Tauopátia</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Multiszisztémás Atrófia (MSA)</td><td class="px-6 py-4">Korai, súlyos <span class="key-term">autonóm diszfunkció</span>, cerebelláris ataxia</td><td class="px-6 py-4">Alfa-szinukleinopátia (gliális)</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Lewy-testes Demencia (DLB)</td><td class="px-6 py-4">Korai demencia, <span class="key-term">fluktuáló kogníció</span>, vizuális hallucinációk</td><td class="px-6 py-4">Alfa-szinukleinopátia (kortikális)</td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        `
+                    },
+                    "t190_msa": {
+                        title: "Multiszisztémás Atrófia (MSA)",
+                        html: `
+                            <h3 style="color: #ea580c;">Multiszisztémás Atrófia (MSA) Részletesen</h3>
+                            <p>Gyorsan progrediáló, fatális kimenetelű neurodegeneratív betegség, melyet a parkinsonizmus, a cerebelláris ataxia és a súlyos autonóm diszfunkció kombinációja jellemez.</p>
+                            <h4>Klinikai Altípusok</h4>
+                            <ul>
+                                <li><strong>MSA-P:</strong> A <span class="key-term">parkinsonos</span> tünetek dominálnak (bradykinesia, rigiditás), jellemzően gyenge levodopa-válasszal.</li>
+                                <li><strong>MSA-C:</strong> A <span class="key-term">cerebelláris</span> tünetek (járásataxia, dysarthria) állnak előtérben.</li>
+                            </ul>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle alert-icon"></i>
+                                <div><h5 class="font-bold">Kardinális Tünet: Autonóm Diszfunkció</h5><p class="text-sm">Korai és súlyos. Férfiaknál a <span class="highlight">merevedési zavar</span> gyakran az első tünet. Jellemző az <span class="highlight">ortosztatikus hipotenzió</span> (súlyos szédülés felálláskor) és a vizelet inkontinencia.</p></div>
+                            </div>
+                            <h4>Kórszövettan</h4>
+                            <p>Az MSA egy <span class="key-term">alfa-szinukleinopátia</span>, de a Parkinson-kórtól eltérően a kóros fehérje elsődlegesen a <span class="highlight">gliasejtekben (oligodendrocytákban)</span> halmozódik fel, jellegzetes <span class="key-term">gliális citoplazmatikus inklúziókat (GCI)</span> képezve. Ez a primer oligodendrogliopathia másodlagos idegsejt-pusztuláshoz vezet.</p>
+                        `
+                    }
+                }
+            }
+        };
+
+        const navMenu = document.getElementById('nav-menu');
+        const contentDisplay = document.getElementById('content-display');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // Generate navigation menu
+        Object.keys(contentData).forEach(mainKey => {
+            const mainTopic = contentData[mainKey];
+            const mainNavItem = document.createElement('div');
+            mainNavItem.innerHTML = `
+                <button class="w-full text-left p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between nav-item" data-id="${mainKey}">
+                    <span class="font-semibold"><i class="${mainTopic.icon} ${mainTopic.color} mr-3"></i>${mainTopic.title}</span>
+                    <i class="fas fa-chevron-down transform transition-transform"></i>
+                </button>
+            `;
+            const subMenu = document.createElement('div');
+            subMenu.className = 'pl-6 mt-2 space-y-1 hidden';
+            
+            Object.keys(mainTopic.content).forEach(subKey => {
+                const subTopic = mainTopic.content[subKey];
+                const subNavItem = document.createElement('a');
+                subNavItem.href = '#';
+                subNavItem.className = 'block p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 nav-item';
+                subNavItem.textContent = subTopic.title;
+                subNavItem.dataset.id = subKey;
+                subMenu.appendChild(subNavItem);
+            });
+
+            mainNavItem.querySelector('button').addEventListener('click', (e) => {
+                subMenu.classList.toggle('hidden');
+                e.currentTarget.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
+            });
+
+            navMenu.appendChild(mainNavItem);
+            navMenu.appendChild(subMenu);
+        });
+
+        // Handle content display
+        navMenu.addEventListener('click', (e) => {
+            e.preventDefault();
+            let target = e.target;
+            while(target && !target.classList.contains('nav-item')) {
+                target = target.parentElement;
+            }
+
+            if (target && target.matches('.nav-item')) {
+                const id = target.dataset.id;
+                
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                target.classList.add('active');
+
+                let contentHtml = '';
+                for (const mainKey in contentData) {
+                    if (contentData[mainKey].content[id]) {
+                        contentHtml = contentData[mainKey].content[id].html;
+                        break;
+                    }
+                }
+                
+                if (contentHtml) {
+                    contentDisplay.innerHTML = contentHtml;
+                    contentDisplay.scrollTop = 0;
+                    if(window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            }
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = themeToggle.querySelector('.fa-sun');
+        const moonIcon = themeToggle.querySelector('.fa-moon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+
+        // Mobile menu toggle
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+    </script>
+</body>
+</html>

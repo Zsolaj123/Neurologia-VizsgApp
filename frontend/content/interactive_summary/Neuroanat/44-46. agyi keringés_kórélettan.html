@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Vizsgafelkészítő: Az Agyi Keringés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+        }
+        .section-title {
+            background: linear-gradient(to right, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .nav-item {
+            transition: color 0.2s, border-bottom-color 0.2s;
+        }
+        .nav-item:hover {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .willis-circle-svg path, .willis-circle-svg circle {
+            transition: all 0.3s ease-in-out;
+            stroke-width: 4px;
+            cursor: pointer;
+        }
+        .willis-circle-svg .artery:hover {
+            stroke: #ef4444;
+            stroke-width: 8px;
+            filter: drop-shadow(0 0 5px #ef4444);
+        }
+         #willis-tooltip {
+            position: absolute;
+            display: none;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .accordion-button.active + .accordion-content {
+             max-height: 1000px; /* Adjust as needed */
+        }
+        .patho-step {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px dashed #9ca3af;
+        }
+        .patho-step:before {
+            content: '';
+            position: absolute;
+            left: -11px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            border: 3px solid #f0f4f8;
+        }
+        .penumbra-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: auto;
+        }
+        .penumbra-circle {
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-weight: 600;
+        }
+        .penumbra-core {
+            width: 150px;
+            height: 150px;
+            background-color: rgba(239, 68, 68, 0.7);
+            color: white;
+            z-index: 2;
+        }
+        .penumbra-zone {
+            width: 300px;
+            height: 300px;
+            background-color: rgba(251, 146, 60, 0.6);
+            color: #444;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Az Agyi Keringés</h1>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#anatomy" class="nav-item text-gray-600 font-semibold pb-1 border-b-2 border-transparent">Anatómia</a>
+                <a href="#physiology" class="nav-item text-gray-600 font-semibold pb-1 border-b-2 border-transparent">Fiziológia</a>
+                <a href="#pathophysiology" class="nav-item text-gray-600 font-semibold pb-1 border-b-2 border-transparent">Kórélettan</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Anatomy Section -->
+        <section id="anatomy" class="mb-20">
+            <h2 class="text-4xl font-bold text-center mb-12 section-title">Anatómia: Az Agy Vérellátása</h2>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Carotid System -->
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-600">🟦 Elülső Keringés (Carotis Rendszer)</h3>
+                    <p class="mb-4">Az <span class="font-semibold">arteria carotis interna (ACI)</span> és ágai látják el a nagyagy elülső és középső részeit.</p>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><span class="font-semibold">A. cerebri anterior (ACA):</span> A frontális és parietális lebenyek mediális felszíne.</li>
+                        <li><span class="font-semibold">A. cerebri media (ACM):</span> A nagyagyféltekék laterális felszíne, törzsdúcok. Klinikailag a leggyakrabban érintett ér stroke esetén.</li>
+                        <li><span class="font-semibold">A. ophthalmica:</span> A szemgolyó és a látóideg.</li>
+                    </ul>
+                </div>
+                <!-- Vertebrobasilaris System -->
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-green-600">🟩 Hátulsó Keringés (Vertebrobasilaris Rendszer)</h3>
+                    <p class="mb-4">A két <span class="font-semibold">arteria vertebralis</span> egyesüléséből létrejövő <span class="font-semibold">arteria basilaris</span> és ágai látják el az agytörzset, a kisagyat és az agy hátsó részeit.</p>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><span class="font-semibold">A. cerebri posterior (ACP):</span> Occipitális lebeny (látókéreg), temporális lebeny mediális része.</li>
+                        <li><span class="font-semibold">PICA, AICA, SCA:</span> A kisagy különböző részeit látják el.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Willis Circle -->
+            <div class="card p-6 md:p-8">
+                <h3 class="text-3xl font-bold mb-4 text-center text-purple-700">🔄 Interaktív Willis-Kör (Circulus Arteriosus Willisii)</h3>
+                <p class="text-center text-gray-600 mb-6">Mozgassa az egeret az artériák fölé az információért. A Willis-kör összeköti az elülső és hátulsó keringési rendszert, potenciális kollaterális keringést biztosítva.</p>
+                <div id="willis-tooltip"></div>
+                <div class="w-full flex justify-center">
+                    <svg id="willis-svg" class="willis-circle-svg" viewBox="0 0 400 350" width="100%" height="auto" style="max-width: 500px;">
+                        <!-- SVG paths for the Circle of Willis arteries -->
+                        <!-- AComA -->
+                        <path id="acoma" data-info="A. Communicans Anterior (AComA): Összeköti a két ACA-t." class="artery" fill="none" stroke="#4a90e2" d="M 175 60 h 50"/>
+                        <!-- ACA -->
+                        <path id="aca-r" data-info="A. Cerebri Anterior (ACA) - Jobb: A frontális lebeny mediális felszíne." class="artery" fill="none" stroke="#4a90e2" d="M 225 60 q 20 -20 30 -50"/>
+                        <path id="aca-l" data-info="A. Cerebri Anterior (ACA) - Bal: A frontális lebeny mediális felszíne." class="artery" fill="none" stroke="#4a90e2" d="M 175 60 q -20 -20 -30 -50"/>
+                        <!-- ACM -->
+                        <path id="acm-r" data-info="A. Cerebri Media (ACM) - Jobb: A nagyagy laterális felszíne. Leggyakoribb stroke helyszín." class="artery" fill="none" stroke="#f5a623" d="M 260 100 h 80"/>
+                        <path id="acm-l" data-info="A. Cerebri Media (ACM) - Bal: A nagyagy laterális felszíne. Leggyakoribb stroke helyszín." class="artery" fill="none" stroke="#f5a623" d="M 140 100 h -80"/>
+                        <!-- ACI -->
+                        <path id="aci-r" data-info="A. Carotis Interna (ACI) - Jobb: Az elülső keringés fő artériája." class="artery" fill="none" stroke="#d0021b" d="M 240 100 q 0 40 -20 70"/>
+                        <path id="aci-l" data-info="A. Carotis Interna (ACI) - Bal: Az elülső keringés fő artériája." class="artery" fill="none" stroke="#d0021b" d="M 160 100 q 0 40 20 70"/>
+                        <!-- AComP -->
+                        <path id="acomp-r" data-info="A. Communicans Posterior (AComP) - Jobb: Összeköti az ACI-t az ACP-vel." class="artery" fill="none" stroke="#bd10e0" d="M 220 170 q 0 -35 -20 -70"/>
+                        <path id="acomp-l" data-info="A. Communicans Posterior (AComP) - Bal: Összeköti az ACI-t az ACP-vel." class="artery" fill="none" stroke="#bd10e0" d="M 180 170 q 0 -35 20 -70"/>
+                        <!-- ACP -->
+                        <path id="acp-r" data-info="A. Cerebri Posterior (ACP) - Jobb: Az occipitális lebenyt (látókérget) látja el." class="artery" fill="none" stroke="#7ed321" d="M 220 190 q 30 10 50 -20"/>
+                        <path id="acp-l" data-info="A. Cerebri Posterior (ACP) - Bal: Az occipitális lebenyt (látókérget) látja el." class="artery" fill="none" stroke="#7ed321" d="M 180 190 q -30 10 -50 -20"/>
+                        <!-- Basilar Artery -->
+                        <path id="ab" data-info="A. Basilaris (AB): A két a. vertebralis egyesüléséből jön létre. Ellátja az agytörzset, kisagyat." class="artery" fill="none" stroke="#4a4a4a" d="M 200 190 v 100"/>
+                        <!-- Vertebral Arteries -->
+                        <path id="av-r" data-info="A. Vertebralis (AV) - Jobb: A hátulsó keringés eredete." class="artery" fill="none" stroke="#50e3c2" d="M 200 290 l 20 50"/>
+                        <path id="av-l" data-info="A. Vertebralis (AV) - Bal: A hátulsó keringés eredete." class="artery" fill="none" stroke="#50e3c2" d="M 200 290 l -20 50"/>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Physiology Section -->
+        <section id="physiology" class="mb-20">
+            <h2 class="text-4xl font-bold text-center mb-12 section-title">Fiziológia: A Szabályozás Mesterműve</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3 text-cyan-600">🧠 Magas Metabolikus Igény</h3>
+                    <p>Az agy a testtömeg ~2%-a, de a nyugalmi perctérfogat 15-20%-át, és az oxigénfogyasztás ~20%-át használja fel. Minimális energiaraktárai miatt rendkívül érzékeny a vérellátás zavaraira.</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3 text-cyan-600">🩸 Agyi Véráramlás (CBF)</h3>
+                    <p>Átlagos értéke ~50 ml/100g/perc. A szürkeállományban (neuronok) 4-5x magasabb, mint a fehérállományban (axonok), tükrözve az eltérő metabolikus aktivitást.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3 text-cyan-600">🔗 Neurovaszkuláris Csatolás</h3>
+                    <p>A neuronális aktivitás növekedése helyi véráramlás-fokozódást (funkcionális hyperaemia) vált ki, biztosítva a megnövekedett O₂ és glükóz igényt. Ez az fMRI alapja.</p>
+                </div>
+            </div>
+
+            <div class="card p-6 md:p-8">
+                <h3 class="text-2xl font-bold mb-6 text-center">A CBF Szabályozásának Pillérei</h3>
+                <div class="space-y-4" id="accordion-container">
+                    <!-- Autoreguláció -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <button class="accordion-button w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-semibold flex justify-between items-center">
+                            <span>⚙️ Autoreguláció</span>
+                            <span>+</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white">
+                            <p>Az agyi erek képessége, hogy a vérnyomás (CPP) változásai ellenére állandó szinten tartsák a véráramlást (CBF). Kb. 60-160 Hgmm CPP tartományban hatékony.</p>
+                            <p class="mt-2"><span class="font-semibold">Mechanizmusai:</span> miogén (érfal feszülése), metabolikus (anyagcseretermékek) és endoteliális (NO) faktorok.</p>
+                            <p class="mt-2 text-red-600">⚠️ <span class="font-semibold">Klinikum:</span> Krónikus magas vérnyomás esetén az autoregulációs görbe jobbra tolódik, így a betegek már relatíve magasabb vérnyomásesésre is ischaemiával reagálhatnak.</p>
+                        </div>
+                    </div>
+                    <!-- Kémiai szabályozás -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <button class="accordion-button w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-semibold flex justify-between items-center">
+                            <span>🧪 Kémiai Szabályozás</span>
+                            <span>+</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white">
+                            <p>Az artériás vérgázok a legerősebb szabályozók.</p>
+                             <ul class="space-y-2 mt-2 list-disc list-inside">
+                                <li><span class="font-semibold">PaCO₂ (Szén-dioxid):</span> A legerősebb agyi értágító. A hypercapnia (magas CO₂) jelentősen növeli a CBF-et, míg a hypocapnia (alacsony CO₂) csökkenti. Hatását főleg a szöveti pH-n keresztül fejti ki.</li>
+                                <li><span class="font-semibold">PaO₂ (Oxigén):</span> Súlyos hypoxia (PaO₂ < 50-60 Hgmm) okoz jelentős értágulatot és CBF növekedést.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Vér-agy gát -->
+                     <div class="border rounded-lg overflow-hidden">
+                        <button class="accordion-button w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-semibold flex justify-between items-center">
+                            <span>🧱 Vér-Agy Gát (BBB)</span>
+                            <span>+</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white">
+                            <p>Szelektív barrier, amely védi az agyat a káros anyagoktól és fenntartja a stabil belső környezetet (homeosztázis). A <span class="font-semibold">neurovaszkuláris egység (NVU)</span> alkotja.</p>
+                            <ul class="space-y-2 mt-2 list-disc list-inside">
+                                <li><span class="font-semibold">Felépítés:</span> Szoros tight junction-ökkel kapcsolódó endothelsejtek, periciták és asztrocita végtalpak.</li>
+                                <li><span class="font-semibold">Transzport:</span> Passzív diffúzió (lipofil anyagok), carrier-mediált transzport (glükóz, aminosavak) és aktív efflux pumpák (P-glikoprotein), melyek a gyógyszereket távolítják el.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pathophysiology Section -->
+        <section id="pathophysiology">
+            <h2 class="text-4xl font-bold text-center mb-12 section-title">Kórélettan: Az Ischaemiás Kaszkád</h2>
+            
+            <div class="card p-6 md:p-8 mb-12">
+                 <h3 class="text-2xl font-bold mb-6 text-center text-red-700">Az Ischaemiás Károsodás Lépései</h3>
+                 <div class="relative">
+                    <div class="patho-step pb-8">
+                        <h4 class="font-bold text-lg">1. Energiahiány (ATP depléció)</h4>
+                        <p class="text-gray-600">A vérellátás hiánya miatt leáll az ATP-termelés. Az ionpumpák (főleg a Na⁺/K⁺-pumpa) leállnak, ami a sejtmembrán depolarizációjához és citotoxikus ödémához (sejten belüli vizenyő) vezet.</p>
+                    </div>
+                     <div class="patho-step pb-8">
+                        <h4 class="font-bold text-lg">2. Excitotoxicitás</h4>
+                        <p class="text-gray-600">A depolarizáció hatására a sejtekből kontrollálatlanul szabadul fel a glutamát (serkentő neurotranszmitter). Ez túlstimulálja a receptorokat, ami masszív Ca²⁺ beáramlást okoz a sejtekbe.</p>
+                    </div>
+                    <div class="patho-step pb-8">
+                        <h4 class="font-bold text-lg">3. Kalcium-Túlterhelés és Oxidatív Stressz</h4>
+                        <p class="text-gray-600">A magas intracelluláris Ca²⁺ aktiválja a sejtkárosító enzimeket (proteázok, foszfolipázok). A mitokondriális diszfunkció és a reperfúzió során reaktív oxigénszármazékok (szabad gyökök) keletkeznek, melyek károsítják a membránokat, fehérjéket és a DNS-t.</p>
+                    </div>
+                    <div class="patho-step pb-8">
+                        <h4 class="font-bold text-lg">4. Neuroinflammatio (Gyulladás)</h4>
+                        <p class="text-gray-600">Az agy immunsejtjei (mikroglia) aktiválódnak, gyulladásos citokinek szabadulnak fel. A vér-agy gát károsodik, lehetővé téve a perifériás immunsejtek beáramlását, ami tovább súlyosbítja a károsodást és vasogén ödémát okoz.</p>
+                    </div>
+                    <div class="patho-step">
+                        <h4 class="font-bold text-lg">5. Sejthalál (Nekrózis & Apoptózis)</h4>
+                        <p class="text-gray-600">A folyamatok végül sejthalálhoz vezetnek. Az ischaemiás magban gyors, kontrollálatlan nekrózis, míg a környező, még megmenthető penumbra területén lassabb, programozott sejthalál (apoptózis) zajlik.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Penumbra -->
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-orange-600">🎯 Az Ischaemiás Penumbra</h3>
+                    <p class="mb-4">"Time is Brain!" A penumbra az ischaemiás magot körülvevő, csökkent keringésű, de még életképes, potenciálisan megmenthető agyszövet. Az akut stroke terápia fő célja a penumbra megmentése a keringés helyreállításával.</p>
+                    <div class="penumbra-diagram">
+                        <div class="penumbra-circle penumbra-zone">
+                            <span class="p-4"><strong>Penumbra</strong><br>Funkcionálisan károsodott,<br>de még életképes</span>
+                        </div>
+                        <div class="penumbra-circle penumbra-core">
+                            <span><strong>Ischaemiás Mag</strong><br>Irreverzibilis<br>károsodás</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Influencing Factors -->
+                <div class="card p-6">
+                     <h3 class="text-2xl font-bold mb-4 text-indigo-600">🔍 Károsodást Befolyásoló Tényezők</h3>
+                    <p class="mb-4">A kimenetelt számos tényező befolyásolja:</p>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><span class="font-semibold">Időtartam és mérték:</span> A legfontosabb faktor.</li>
+                        <li><span class="font-semibold">Vérnyomás:</span> A hypotensio rontja a perfúziót.</li>
+                        <li><span class="font-semibold">Vércukorszint:</span> A hyperglykaemia fokozza a tejsavas acidózist.</li>
+                        <li><span class="font-semibold">Testhőmérséklet:</span> A hyperthermia növeli az anyagcserét, rontja a kimenetelt.</li>
+                        <li><span class="font-semibold">Kollaterális keringés:</span> A jó kollaterális hálózat (pl. ép Willis-kör) javítja a prognózist.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-12">
+        <p>&copy; 2024 Interaktív Vizsgafelkészítő. Sok sikert a vizsgához!</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Willis Circle Interactivity ---
+            const svg = document.getElementById('willis-svg');
+            const tooltip = document.getElementById('willis-tooltip');
+            
+            if (svg && tooltip) {
+                const arteries = svg.querySelectorAll('.artery');
+                
+                arteries.forEach(artery => {
+                    artery.addEventListener('mouseover', (event) => {
+                        const info = artery.getAttribute('data-info');
+                        tooltip.innerHTML = info;
+                        tooltip.style.display = 'block';
+                    });
+                    
+                    artery.addEventListener('mousemove', (event) => {
+                        // Adjust tooltip position relative to the viewport
+                        const x = event.clientX + 15;
+                        const y = event.clientY + 15;
+                        tooltip.style.left = `${x}px`;
+                        tooltip.style.top = `${y}px`;
+                    });
+
+                    artery.addEventListener('mouseout', () => {
+                        tooltip.style.display = 'none';
+                    });
+                });
+            }
+
+            // --- Smooth Scrolling for Nav Links ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // --- Accordion Functionality ---
+            const accordionContainer = document.getElementById('accordion-container');
+            if(accordionContainer) {
+                accordionContainer.addEventListener('click', function(e) {
+                    const button = e.target.closest('.accordion-button');
+                    if (!button) return;
+
+                    // Close all other accordions
+                    const allButtons = accordionContainer.querySelectorAll('.accordion-button');
+                    allButtons.forEach(btn => {
+                        if (btn !== button) {
+                            btn.classList.remove('active');
+                            btn.querySelector('span:last-child').textContent = '+';
+                        }
+                    });
+                    
+                    // Toggle current accordion
+                    button.classList.toggle('active');
+                    const icon = button.querySelector('span:last-child');
+                    if (button.classList.contains('active')) {
+                        icon.textContent = '-';
+                    } else {
+                        icon.textContent = '+';
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

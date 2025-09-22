@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Tételek: Interaktív Tanulási Segédlet (4. rész)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px -2px rgba(0,0,0,0.2);
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background-color: currentColor;
+            border-radius: 2px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-content {
+            flex-grow: 1;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px -5px rgb(0 0 0 / 0.1);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            font-weight: 700;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        h3 {
+            font-size: 1.875rem; /* 30px */
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+        }
+        h4 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .icon {
+            width: 1.5rem; /* 24px */
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        .header-icon {
+             width: 2.25rem; /* 36px */
+            height: 2.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Color Themes */
+        .aphasia-theme { --theme-color: #3b82f6; --theme-bg: #eff6ff; }
+        .neglect-theme { --theme-color: #f97316; --theme-bg: #fff7ed; }
+        .apraxia-agnosia-theme { --theme-color: #8b5cf6; --theme-bg: #f5f3ff; }
+        .executive-theme { --theme-color: #10b981; --theme-bg: #f0fdf4; }
+        .liberation-theme { --theme-color: #ef4444; --theme-bg: #fee2e2; }
+        
+        h3, h4 { color: var(--theme-color); }
+        th { background-color: var(--theme-bg); color: var(--theme-color); }
+        
+        .exam-tip-card {
+            background-color: #fefce8;
+            border-color: #eab308;
+            color: #a16207;
+        }
+        .exam-tip-card h4, .exam-tip-card .icon {
+            color: #ca8a04;
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Neurológiai Tételek (4. rész)</h1>
+            <p class="text-xl text-gray-500 mt-3">Interaktív tanulási segédlet vizsgához</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12 p-2 bg-gray-100 rounded-full shadow-inner">
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="aphasia">Afázia</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="neglect">Neglekt</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="apraxia-agnosia">Apraxia/Agnosia</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="executive">Exekutív Zavarok</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="liberation">Liberációs Jelek</button>
+        </div>
+
+        <!-- Content Sections -->
+        <main>
+            <!-- Afázia Section -->
+            <section id="aphasia-content" class="tab-content aphasia-theme">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.482l.262.262c.762.762 1.79 1.215 2.87 1.245H8.25c.399 0 .79.063 1.158.185l.757.252c.266.088.526.196.786.313a9 9 0 01-1.332 5.093l-.37.625a1.75 1.75 0 01-3.134 0l-.37-.625a9 9 0 01-1.332-5.093A3.375 3.375 0 016.75 12.19l.37-.625a1.75 1.75 0 013.134 0l.37.625a9 9 0 011.332 5.093c.26-.117.52-.225.786-.313l.757-.252c.368-.122.759-.185 1.158-.185h.253a2.848 2.848 0 012.87-1.245l.262-.262M12 20.25a9 9 0 004.33-1.313M12 20.25a9 9 0 01-4.33-1.313" /></svg>
+                            Afázia (Szerzett Nyelvi Zavar)
+                        </h3>
+                        <p class="text-lg">Az afázia a már kialakult nyelvi képességek zavara, amelyet agyi sérülés (leggyakrabban bal féltekei stroke) okoz. Érintheti a beszédprodukciót, a megértést, az olvasást és az írást is. Fontos elkülöníteni a dizartriától (kivitelezési zavar) és a beszédapraxiától (tervezési zavar).</p>
+                    </div>
+
+                    <div class="card exam-tip-card md:col-span-3">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 15.75l-1.42-1.419A9 9 0 0112 3c4.075 0 7.695 2.226 9.37 5.488l-1.42 1.42A7.5 7.5 0 0012 4.5a7.5 7.5 0 00-6.375 3.633z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75h.007v.008H12v-.008z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75a2.25 2.25 0 00-2.25 2.25v.316l-1.5 3.375a.75.75 0 001.06 1.06l3.375-1.5H15a2.25 2.25 0 002.25-2.25v-2.25a2.25 2.25 0 00-2.25-2.25H9.75A2.25 2.25 0 007.5 15v.316l.338.75" /></svg>
+                           Vizsga Kérdés: Afázia Típusok Elkülönítése
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div>
+                                <strong class="text-lg">Non-fluens Afáziák</strong>
+                                <p class="mt-1">A beszéd akadozó, erőlködő, agrammatikus. A beteg nehezen találja a szavakat, a közlés szegényes. Jellemző típus a <strong>Broca-afázia</strong>, ahol a beszédértés relatíve jó.</p>
+                            </div>
+                            <div>
+                                <strong class="text-lg">Fluens Afáziák</strong>
+                                 <p class="mt-1">A beszéd folyamatos, de tartalmilag üres, érthetetlen. Jellemzőek a szó- és hangcserék (parafázia). Tipikus példa a <strong>Wernicke-afázia</strong>, ahol a beszédértés súlyosan sérült.</p>
+                            </div>
+                        </div>
+                         <p class="mt-4 font-semibold">Kulcs az elkülönítésben az <strong>utánmondási képesség</strong>: a transzkortikális típusokban meglepően jó, míg a Broca-, Wernicke-, kondukciós és globális afáziában súlyosan károsodott.</p>
+                    </div>
+                    
+                    <div class="card md:col-span-3 lg:col-span-3 table-container">
+                        <h4>Az Afázia Típusok Összefoglaló Táblázata</h4>
+                        <table>
+                            <thead>
+                                <tr><th>Afázia típusa</th><th>Fluencia</th><th>Beszédértés</th><th>Utánmondás</th><th>Fő Jellemző</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Broca</strong></td><td>Non-fluens</td><td>Relatíve jó</td><td>Rossz</td><td>Agrammatikus, erőlködő beszéd.</td></tr>
+                                <tr><td><strong>Wernicke</strong></td><td>Fluens</td><td>Súlyosan károsodott</td><td>Rossz</td><td>Érthetetlen, "szósaláta", betegségtudat hiánya (anozognózia).</td></tr>
+                                <tr><td><strong>Globális</strong></td><td>Non-fluens</td><td>Súlyosan károsodott</td><td>Rossz</td><td>Minden nyelvi modalitás súlyosan érintett.</td></tr>
+                                <tr><td><strong>Kondukciós</strong></td><td>Fluens</td><td>Jó</td><td><strong>Súlyosan károsodott</strong></td><td>Az utánmondás aránytalanul rossz a többi képességhez képest.</td></tr>
+                                <tr><td><strong>Transzkortikális Motoros</strong></td><td>Non-fluens</td><td>Jó</td><td><strong>Jó</strong></td><td>A beszédindítás nehéz, de az utánmondás jó (echolalia).</td></tr>
+                                <tr><td><strong>Transzkortikális Szenzoros</strong></td><td>Fluens</td><td>Súlyosan károsodott</td><td><strong>Jó</strong></td><td>A Wernicke-afáziához hasonló, de jó utánmondással.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Neglekt Section -->
+            <section id="neglect-content" class="tab-content neglect-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                            Neglekt Szindróma
+                        </h3>
+                        <p class="text-lg">Összetett neuropszichológiai kórkép, ahol a beteg az agysérüléssel ellentétes (kontralaterális) téri ingereket és/vagy saját testének felét figyelmen kívül hagyja. Ez nem látótérkiesés, hanem egy magasabb szintű <strong>figyelmi és téri reprezentációs zavar</strong>, melyet leggyakrabban a <strong>jobb parietális lebeny</strong> sérülése okoz.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" /></svg>
+                            Klinikai Megjelenés
+                        </h4>
+                        <div class="card-content">
+                        <p>A beteg úgy viselkedik, mintha a bal térfele nem létezne:</p>
+                        <ul class="list-disc list-inside space-y-1 mt-2">
+                            <li>Csak a tányér jobb oldaláról eszik.</li>
+                            <li>Csak az arc jobb oldalát borotválja/sminkeli.</li>
+                            <li>Nekiütközik a bal oldali tárgyaknak, ajtófélfának.</li>
+                            <li>Olvasáskor a sorok elejét kihagyja.</li>
+                            <li>Rajzoláskor a kép bal oldalát lehagyja.</li>
+                        </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                         <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                            Típusok
+                        </h4>
+                        <div class="card-content">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Input vs. Output:</strong> A figyelmi (szenzoros) vagy a motoros kezdeményezés sérül.</li>
+                                <li><strong>Egocentrikus vs. Allocentrikus:</strong> A saját testhez vagy a tárgyakhoz viszonyított térfél elhanyagolása.</li>
+                                <li><strong>Személyi neglekt:</strong> A saját test bal felének elhanyagolása.</li>
+                                <li><strong>Extinkció:</strong> Enyhe forma, ahol a bal oldali ingert csak akkor hagyja figyelmen kívül, ha egyszerre a jobb oldalon is van inger.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card exam-tip-card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                            Diagnosztikai Tesztek
+                        </h4>
+                        <div class="card-content">
+                            <p>A neglekt szűrésére egyszerű betegágy melletti tesztek használhatók:</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Vonalfelezési teszt:</strong> A beteg a vonal közepét jobbra tolva jelöli meg.</li>
+                                <li><strong>Törlési tesztek (pl. Albert-teszt):</strong> A beteg a lap bal oldalán lévő cél-ingereket kihagyja.</li>
+                                <li><strong>Órarajz teszt:</strong> A számokat a számlap jobb oldalára zsúfolja.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Apraxia/Agnosia Section -->
+            <section id="apraxia-agnosia-content" class="tab-content apraxia-agnosia-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="card md:col-span-2">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5h-6a6 6 0 01-6-6v-1.5m12 7.5v-1.5m-6-6v-1.5m6 1.5v-1.5m-6 0h6m-6 1.5h6" /></svg>
+                           Apraxia & Agnosia
+                        </h3>
+                        <p class="text-lg">Két különböző, magasabb szintű neurológiai zavar, amelyeket gyakran együtt vizsgálnak. Mindkettő specifikus agyi asszociációs területek sérülésére utal.</p>
+                    </div>
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" /></svg>
+                            Apraxia
+                        </h4>
+                        <div class="card-content">
+                            <p>A tanult, célirányos mozgások tervezésének és kivitelezésének zavara. A beteg fizikailag képes lenne a mozgásra, de nem tudja, <strong>"hogyan"</strong> csinálja.</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Ideomotoros:</strong> A beteg nem tudja parancsra vagy utánzásra végrehajtani a mozdulatot (pl. integetés).</li>
+                                <li><strong>Ideatoros:</strong> A komplex cselekvés tervének, "ötletének" zavara (pl. rossz sorrendben próbál teát főzni).</li>
+                                <li><strong>Beszédapraxia:</strong> A beszédmozgások tervezésének zavara.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                           Agnosia
+                        </h4>
+                        <div class="card-content">
+                            <p>Az érzékelt ingerek felismerésének zavara ép érzékszervek mellett. A beteg látja/hallja az ingert, de nem tudja, <strong>"mi"</strong> az.</p>
+                            <ul class="list-disc list-inside space-y-1 mt-2">
+                                <li><strong>Vizuális (tárgy-):</strong> Nem ismeri fel a látott tárgyakat.</li>
+                                <li><strong>Prozopagnózia:</strong> Nem ismeri fel az ismerős arcokat.</li>
+                                <li><strong>Auditív:</strong> Nem ismeri fel a hallott hangokat (pl. kutyaugatás).</li>
+                                <li><strong>Asztereognózis:</strong> Tapintás útján nem ismeri fel a tárgyakat.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Exekutív Zavarok Section -->
+            <section id="executive-content" class="tab-content executive-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.25 21l-.648-.428a2.25 2.25 0 01-1.47-2.185l-.275-1.651a3.375 3.375 0 00-2.455-2.456L9.75 14.25l1.036-.259a3.375 3.375 0 002.455-2.456l.275-1.651a2.25 2.25 0 011.47-2.185l.648-.428L19.75 9l.648.428a2.25 2.25 0 011.47 2.185l.275 1.651a3.375 3.375 0 002.456 2.456L25.25 16.5l-1.036.259a3.375 3.375 0 00-2.456 2.456l-.275 1.651a2.25 2.25 0 01-1.47 2.185l-.648.428z" /></svg>
+                            Exekutív Zavarok
+                        </h3>
+                        <p class="text-lg">A végrehajtó (exekutív) funkciók a magasabb rendű kognitív képességek gyűjtőneve, melyek a célorientált viselkedésért felelősek. Központjuk a <strong>prefrontális kéreg (PFC)</strong>. Zavaruk (dysexecutive szindróma) a mindennapi élet számos területén okozhat nehézséget.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>
+                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
+                            Fő Komponensek
+                        </h4>
+                         <div class="card-content">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Munkamemória:</strong> Információk aktív manipulálása.</li>
+                                <li><strong>Gátlás (Inhibíció):</strong> Nem megfelelő válaszok elnyomása, impulzuskontroll.</li>
+                                <li><strong>Kognitív flexibilitás:</strong> Stratégiák, gondolkodásmód rugalmas váltása.</li>
+                                <li><strong>Tervezés és szervezés:</strong> Célok eléréséhez szükséges lépések megtervezése.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card exam-tip-card">
+                        <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                           Vizsgálati Eszközök
+                        </h4>
+                         <div class="card-content">
+                            <p>Ezekkel a tesztekkel mérhetőek a különböző exekutív funkciók:</p>
+                             <ul class="list-disc list-inside space-y-1 mt-2">
+                                 <li><strong>Stroop teszt:</strong> Gátlás, szelektív figyelem.</li>
+                                 <li><strong>Wisconsin Kártyaszortírozási Teszt (WCST):</strong> Kognitív flexibilitás, szabálytanulás.</li>
+                                 <li><strong>Trail Making Test (TMT) B:</strong> Feladatváltás, munkamemória.</li>
+                                 <li><strong>Torony tesztek (Hanoi, London):</strong> Tervezés, problémamegoldás.</li>
+                             </ul>
+                         </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Liberációs Jelek Section -->
+            <section id="liberation-content" class="tab-content liberation-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                           Liberációs Jelek (Frontális Felszabadulási Jelek)
+                        </h3>
+                        <p class="text-lg">Olyan primitív reflexek, amelyek csecsemőkorban normálisak, de az idegrendszer érésével a <strong>frontális lebeny</strong> gátlása alá kerülnek. Felnőttkori újbóli megjelenésük a frontális gátlás "felszabadulására", azaz a frontális lebeny károsodására utal.</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 9.563V9.75a3.375 3.375 0 00-3.375 3.375h.007a3.375 3.375 0 003.368 3.368H9.75a3.375 3.375 0 003.375-3.375v-.007a3.375 3.375 0 00-3.375-3.368H9.563zM15 9.563V9.75a3.375 3.375 0 00-3.375 3.375h.007a3.375 3.375 0 003.368 3.368H15.75a3.375 3.375 0 003.375-3.375v-.007a3.375 3.375 0 00-3.375-3.368H15.563z" /></svg>
+                           Orális Reflexcsoport
+                        </h4>
+                        <div class="card-content">
+                             <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Szopóreflex:</strong> Az ajkak érintésére szopó mozgások.</li>
+                                <li><strong>Orr-száj (Snout) reflex:</strong> Az ajkak megütögetésére csücsörítés.</li>
+                                <li><strong>Bulldog reflex:</strong> Spatulára való ráharapás, elengedési képtelenség.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" /></svg>
+                            Egyéb Fontos Jelek
+                        </h4>
+                         <div class="card-content">
+                             <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Fogóreflex (Grasp):</strong> A tenyérbe helyezett tárgy akaratlan megragadása.</li>
+                                <li><strong>Palmomentális reflex:</strong> A tenyérpárna ingerlésére az állizom rándul.</li>
+                                 <li><strong>Glabellareflex (Myerson-jel):</strong> A szemöldökök közötti terület ismételt ütögetésére a pislogás nem merül ki. Gyakori Parkinson-kórban.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card exam-tip-card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                           Klinikai Jelentőség
+                        </h4>
+                        <div class="card-content">
+                            <p>Ezek a jelek önmagukban nem specifikusak, de több jel együttes jelenléte, különösen ha aszimmetrikus, erősen utal a <strong>frontális lebeny károsodására</strong>.</p>
+                            <p class="mt-2">Gyakran jelennek meg:</p>
+                             <ul class="list-disc list-inside space-y-1 mt-1">
+                                <li><strong>Demenciákban</strong> (főleg frontotemporális demencia)</li>
+                                <li><strong>Traumás agysérülés</strong> után</li>
+                                <li><strong>Frontális lebenyt érintő stroke</strong> esetén</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        const colorMap = {
+            aphasia: '#3b82f6',
+            neglect: '#f97316',
+            'apraxia-agnosia': '#8b5cf6',
+            executive: '#10b981',
+            liberation: '#ef4444'
+        };
+
+        const setActiveTab = (tab) => {
+             // Update button styles
+            tabButtons.forEach(btn => {
+                const btnTab = btn.dataset.tab;
+                if (btnTab === tab) {
+                    btn.classList.add('active');
+                    btn.style.backgroundColor = colorMap[btnTab];
+                    btn.style.color = 'white';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.backgroundColor = '#e5e7eb';
+                    btn.style.color = '#4b5563';
+                }
+            });
+
+            // Update content visibility
+            tabContents.forEach(content => {
+                if (content.id === tab + '-content') {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        };
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                setActiveTab(button.dataset.tab);
+            });
+        });
+
+        // Set initial active tab
+        setActiveTab('aphasia');
+    </script>
+
+</body>
+</html>

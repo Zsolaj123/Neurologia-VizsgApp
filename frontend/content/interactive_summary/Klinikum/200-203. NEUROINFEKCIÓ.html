@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Tananyag: Neuroinfekciók</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Lighter gray */
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        html { scroll-behavior: smooth; }
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding: 0 1.5rem;
+        }
+        .accordion-header.active + .accordion-content {
+            padding: 1.5rem;
+        }
+
+        .nav-link.active {
+            background-color: #e0f2fe; /* light-blue-100 */
+            color: #0c4a6e; /* blue-800 */
+            border-left: 4px solid #3b82f6; /* blue-500 */
+            padding-left: calc(1.5rem - 4px);
+        }
+        .nav-link {
+            border-left: 4px solid transparent;
+        }
+        .callout {
+            border-left-width: 4px;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-top: 1rem;
+        }
+        .callout-info { background-color: #eff6ff; border-color: #60a5fa; color: #1e40af; }
+        .callout-warning { background-color: #fefce8; border-color: #facc15; color: #854d0e; }
+        .callout-success { background-color: #f0fdf4; border-color: #4ade80; color: #166534; }
+        .callout-danger { background-color: #fef2f2; border-color: #f87171; color: #991b1b; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-72 bg-white shadow-lg md:sticky md:top-0 md:self-start">
+            <div class="p-6 border-b">
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V3m0 18v-3M10 12a2 2 0 11-4 0 2 2 0 014 0zM18 12a2 2 0 11-4 0 2 2 0 014 0zM14 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    Neuroinfekciók
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">Interaktív Klinikai Tananyag</p>
+            </div>
+            <nav id="nav-menu" class="p-4">
+                <a href="#altalanos-elvek" class="nav-link flex items-center py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-md transition duration-200 font-medium">Általános Elvek</a>
+                <a href="#bakterialis-meningitis" class="nav-link flex items-center py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-md transition duration-200 font-medium">Bakteriális Meningitis</a>
+                <a href="#agytalyog" class="nav-link flex items-center py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-md transition duration-200 font-medium">Agytályog</a>
+                <a href="#aids" class="nav-link flex items-center py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-md transition duration-200 font-medium">AIDS Neurológiai Vonatkozásai</a>
+                <a href="#neuroborreliosis" class="nav-link flex items-center py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-md transition duration-200 font-medium">Neuroborreliosis</a>
+                <a href="#neurosyphilis" class="nav-link flex items-center py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-md transition duration-200 font-medium">Neurosyphilis</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-10">
+
+            <!-- Section: Általános Elvek -->
+            <section id="altalanos-elvek" class="content-section">
+                <h2 class="text-4xl font-bold mb-6 text-gray-800 border-b-4 border-blue-500 pb-3">Antibiotikus Kezelés Általános Elvei</h2>
+                
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        A vér-agy gát (VAG) áttörése
+                    </h3>
+                    <p class="mb-4">A KIR-fertőzések sikeres kezelésének kulcsa, hogy az antibiotikum terápiás koncentrációt érjen el az agyban. A VAG-on való átjutást befolyásoló tényezők:</p>
+                    <div class="grid md:grid-cols-3 gap-4 text-center">
+                        <div class="bg-blue-50 p-4 rounded-lg"><strong class="block text-blue-800">Lipofilitás</strong>Zsíroldékony szerek előnyben</div>
+                        <div class="bg-blue-50 p-4 rounded-lg"><strong class="block text-blue-800">Molekulaméret</strong>Kisebb molekulák könnyebben átjutnak</div>
+                        <div class="bg-blue-50 p-4 rounded-lg"><strong class="block text-blue-800">Fehérjekötés</strong>Alacsony kötődésű szerek hatékonyabbak</div>
+                    </div>
+                    <div class="callout callout-info">
+                        <p><strong class="font-semibold">Klinikai Gyöngyszem:</strong> Meningitisben a VAG gyulladása miatt megnő az áteresztőképesség. Ezért tudnak hatékonyak lenni olyan antibiotikumok (pl. penicillinek, cefalosporinok), amelyek normál esetben rosszul penetrálnak. Ehhez azonban maximális dózisok szükségesek!</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-semibold text-green-700 mb-4">Empirikus terápia</h3>
+                        <p>Bakteriális neuroinfekció gyanúja neurológiai vészhelyzet! A terápiát a hemokultúrák levétele után **haladéktalanul** el kell kezdeni, a kórokozó azonosítása előtt. A késlekedés rontja a prognózist. Az empirikus séma kiválasztása a beteg életkorán, rizikófaktorain és a helyi epidemiológián alapul.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-semibold text-red-700 mb-4">Adjunktív Dexametazon</h3>
+                        <p>Erősen javasolt bakteriális meningitis esetén (főleg pneumococcus és _H. influenzae_ b), ideális esetben az első antibiotikum adag előtt 10-20 perccel. Csökkenti a gyulladást, az agyödémát és a neurológiai szövődmények (pl. halláskárosodás) kockázatát.</p>
+                         <div class="callout callout-warning">
+                            <p><strong class="font-semibold">Figyelem:</strong> Az irányelvek eltérhetnek. Míg a legtöbb nyugati protokoll javasolja, egyes szervezetek (pl. MSF) nem tartják indokoltnak. Mindig a helyi, legfrissebb irányelveket kövesse!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Bakteriális Meningitis -->
+            <section id="bakterialis-meningitis" class="content-section">
+                <h2 class="text-4xl font-bold mb-6 text-gray-800 border-b-4 border-blue-500 pb-3">Bakteriális Meningitis</h2>
+                
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-4">Empirikus Antibiotikus Terápia</h3>
+                    <p class="mb-4">Azonnali, széles spektrumú lefedettséget kell biztosítani. Az ampicillin hozzáadása a _Listeria_ lefedésére kritikus a rizikócsoportokban (>50 év, immunszuppresszió).</p>
+                    <div class="accordion-item bg-gray-50 rounded-lg border">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg hover:bg-gray-200 transition flex justify-between items-center">
+                            <span>Empirikus Kezelési Protokollok (kattintson a részletekért)</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border">
+                                    <thead class="bg-blue-600 text-white">
+                                        <tr>
+                                            <th class="py-3 px-4 border">Életkor / Tényező</th>
+                                            <th class="py-3 px-4 border">Ajánlott Antibiotikumok</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr><td class="py-3 px-4 border">0-4 hét</td><td class="py-3 px-4 border">Ampicillin + Cefotaxim vagy Aminoglikozid</td></tr>
+                                        <tr><td class="py-3 px-4 border">1 hónap - 50 év</td><td class="py-3 px-4 border">Vancomycin + Ceftriaxon vagy Cefotaxim</td></tr>
+                                        <tr><td class="py-3 px-4 border">>50 év, immunszupprimált</td><td class="py-3 px-4 border">Vancomycin + Ampicillin + Ceftriaxon/Cefotaxim</td></tr>
+                                        <tr><td class="py-3 px-4 border">Fejsérülés, idegsebészet, shunt</td><td class="py-3 px-4 border">Vancomycin + Ceftazidim/Cefepim/Meropenem</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-4">Patogén-specifikus (Célzott) Terápia</h3>
+                    <p class="mb-4">A kórokozó azonosítása után a kezelést szűkíteni kell (de-eszkaláció). A terápia hossza a kórokozótól és a klinikai választól függ, nem egy fix protokoll.</p>
+                     <div class="accordion-item bg-gray-50 rounded-lg border">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg hover:bg-gray-200 transition flex justify-between items-center">
+                            <span>Célzott Kezelés és Időtartam (kattintson a részletekért)</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border">
+                                    <thead class="bg-blue-600 text-white">
+                                        <tr>
+                                            <th class="py-3 px-4 border">Baktérium</th>
+                                            <th class="py-3 px-4 border">Ajánlott Antibiotikum</th>
+                                            <th class="py-3 px-4 border">Időtartam (nap)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr><td class="py-3 px-4 border font-semibold">S. pneumoniae</td><td class="py-3 px-4 border">Penicillin G (érzékeny) / Vancomycin + Ceftriaxon (rezisztens)</td><td class="py-3 px-4 border">10-14</td></tr>
+                                        <tr><td class="py-3 px-4 border font-semibold">N. meningitidis</td><td class="py-3 px-4 border">Penicillin G (érzékeny) / Ceftriaxon</td><td class="py-3 px-4 border">7</td></tr>
+                                        <tr><td class="py-3 px-4 border font-semibold">L. monocytogenes</td><td class="py-3 px-4 border">Ampicillin vagy Penicillin G</td><td class="py-3 px-4 border">≥ 21</td></tr>
+                                        <tr><td class="py-3 px-4 border font-semibold">H. influenzae b</td><td class="py-3 px-4 border">Ceftriaxon vagy Cefotaxim</td><td class="py-3 px-4 border">7-10</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Agytályog -->
+            <section id="agytalyog" class="content-section">
+                <h2 class="text-4xl font-bold mb-6 text-gray-800 border-b-4 border-orange-500 pb-3">Agytályog</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h3 class="text-2xl font-semibold text-orange-700 mb-4">Kezelési Stratégia: Gyógyszer vs. Sebészet</h3>
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="md:w-2/3">
+                            <p class="mb-4">Az agytályog kezelése multidiszciplináris döntést igényel (infektológus, idegsebész, neurológus). A diagnózis alapja a kontrasztanyagos MRI, a kórokozó azonosításához pedig sztereotaxiás aspiráció vagy excízió szükséges.</p>
+                            <div class="flex items-center justify-center my-4">
+                                <div class="text-center p-4 bg-green-50 rounded-l-lg border-2 border-r-0 border-green-300">
+                                    <h4 class="font-bold text-green-800">Konzervatív Kezelés</h4>
+                                    <p class="text-sm">Kis (<2.5 cm) tályogok<br>Mély lokalizáció<br>Többszörös tályogok</p>
+                                </div>
+                                <div class="text-5xl font-bold text-gray-400 mx-4">vs</div>
+                                <div class="text-center p-4 bg-red-50 rounded-r-lg border-2 border-l-0 border-red-300">
+                                    <h4 class="font-bold text-red-800">Sebészeti Drenázs</h4>
+                                    <p class="text-sm">Nagy (>2.5 cm) tályogok<br>Jelentős tömeghatás<br>Terápiarezisztencia</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-1/3">
+                            <img src="https://placehold.co/400x300/ffedd5/8c2d04?text=Agytályog+MRI" alt="[Kép: Agytályog MRI képe]" class="rounded-lg shadow-md w-full h-auto object-cover">
+                            <p class="text-center text-sm text-gray-500 mt-2">Jellegzetes gyűrűszerűen kontrasztot halmozó lézió</p>
+                        </div>
+                    </div>
+                     <div class="callout callout-danger">
+                        <p><strong class="font-semibold">Fontos:</strong> Az antibiotikum terápia hosszú, 6-8 hétig tart! Ez a tokozott fertőzés komplex természete miatt szükséges, ami gátolja az antibiotikum penetrációját és lassú eradikációt tesz lehetővé.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: AIDS -->
+            <section id="aids" class="content-section">
+                <h2 class="text-4xl font-bold mb-6 text-gray-800 border-b-4 border-purple-500 pb-3">AIDS Neurológiai Vonatkozásai</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h3 class="text-2xl font-semibold text-purple-700 mb-4">Paradigmaváltás az ART Korszakban</h3>
+                    <p class="mb-4">A kombinált antiretrovirális terápia (cART/ART) megjelenése alapvetően megváltoztatta a HIV-asszociált neurológiai komplikációk spektrumát. Míg korábban a súlyos, halálos opportunista fertőzések domináltak, ma már az enyhébb neurokognitív zavarok (HAND) és a kezelés mellékhatásai kerültek előtérbe.</p>
+                    <div class="callout callout-success">
+                        <p><strong class="font-semibold">Kulcsüzenet:</strong> Az ART korai megkezdése a leghatékonyabb módszer a HIV-vel összefüggő agykárosodás megelőzésére vagy progressziójának megállítására.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-semibold text-purple-700 mb-4">KIR Opportunista Fertőzések</h3>
+                    <p class="mb-4">A CD4+ sejtszám kritikus a differenciáldiagnózisban. A legtöbb súlyos fertőzés &lt;100 sejt/mm³ értéknél jelentkezik.</p>
+                    <div class="accordion-item bg-gray-50 rounded-lg border">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg hover:bg-gray-200 transition flex justify-between items-center">
+                            <span>Gyakori Opportunista Fertőzések (kattintson a részletekért)</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border">
+                                    <thead class="bg-purple-600 text-white">
+                                        <tr>
+                                            <th class="py-3 px-4 border">Fertőzés</th>
+                                            <th class="py-3 px-4 border">Jell. CD4</th>
+                                            <th class="py-3 px-4 border">Képalkotó (MRI)</th>
+                                            <th class="py-3 px-4 border">Kezelés</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr><td class="py-3 px-4 border font-semibold">Toxoplasmosis</td><td class="py-3 px-4 border">&lt;100</td><td class="py-3 px-4 border">Többszörös, gyűrűszerűen halmozó léziók</td><td class="py-3 px-4 border">Pirimetamin + Szulfadiazin</td></tr>
+                                        <tr><td class="py-3 px-4 border font-semibold">Cryptococcus Meningitis</td><td class="py-3 px-4 border">&lt;100</td><td class="py-3 px-4 border">Liquor CrAg teszt a kulcs!</td><td class="py-3 px-4 border">Amfotericin B + Flucitozin</td></tr>
+                                        <tr><td class="py-3 px-4 border font-semibold">PML (JC vírus)</td><td class="py-3 px-4 border">Változó</td><td class="py-3 px-4 border">Fehérállományi léziók kontraszthalmozás nélkül</td><td class="py-3 px-4 border">ART optimalizálása</td></tr>
+                                        <tr><td class="py-3 px-4 border font-semibold">Primer KIR Lymphoma (EBV)</td><td class="py-3 px-4 border">&lt;50</td><td class="py-3 px-4 border">Ált. szoliter, periventrikuláris, homogén halmozó lézió</td><td class="py-3 px-4 border">Kemoterápia (MTX)</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="callout callout-warning mt-6">
+                        <p><strong class="font-semibold">Immunrekonstitúciós Gyulladásos Szindróma (IRIS):</strong> Az ART megkezdésekor a helyreálló immunrendszer paradox módon a tünetek rosszabbodását okozhatja egy szubklinikai fertőzésre adott heves válasszal. Ez különösen TBC meningitis és PML esetén jelentős.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Neuroborreliosis -->
+            <section id="neuroborreliosis" class="content-section">
+                <h2 class="text-4xl font-bold mb-6 text-gray-800 border-b-4 border-green-500 pb-3">Neuroborreliosis (Lyme)</h2>
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h3 class="text-2xl font-semibold text-green-700 mb-4">A "Nagy Imitátor"</h3>
+                    <p class="mb-4">A _Borrelia burgdorferi_ által okozott, kullancscsípéssel terjedő fertőzés. Rendkívül változatos klinikai képe miatt számos kórképet utánozhat (Bell-paresis, asepticus meningitis, porckorongsérv, SM, stroke).</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 text-green-800">Korai Stádium (hetek)</h4>
+                            <ul class="list-disc list-inside space-y-1 pl-4">
+                                <li><strong>Bannwarth-szindróma:</strong> A leggyakoribb európai forma. Triász: fájdalmas radiculoneuritis + lymphocytás meningitis + agyidegbénulás (gyakran facialis).</li>
+                                <li><strong>Izolált facialis paresis:</strong> Gyermekeknél gyakori.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 text-green-800">Késői Stádium (hónapok-évek)</h4>
+                            <ul class="list-disc list-inside space-y-1 pl-4">
+                                <li><strong>Encephalopathia:</strong> Kognitív zavarok ("agyköd"), memóriazavar.</li>
+                                <li><strong>Krónikus polyneuropathia.</strong></li>
+                                <li><strong>Encephalomyelitis:</strong> Ritka, de súlyos, SM-szerű kórkép.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-semibold text-green-700 mb-4">Diagnosztika</h3>
+                        <div class="callout callout-info">
+                            <p><strong class="font-semibold">Diagnosztikai Aranystandard:</strong> A KIR érintettség igazolásához az **intrathecalis Borrelia-specifikus antitest termelés** kimutatása szükséges liquor-szérum párosból.</p>
+                        </div>
+                        <ul class="list-none space-y-3 mt-4">
+                            <li class="flex items-start"><strong class="mr-2 text-green-600">1.</strong> <div><strong>Szerológia (vér):</strong> Kétlépcsős teszt (ELISA + Western blot).</div></li>
+                            <li class="flex items-start"><strong class="mr-2 text-green-600">2.</strong> <div><strong>Liquorvizsgálat:</strong> Lymphocytás pleocytosis, emelkedett fehérje, és a fent említett antitest index.</div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-semibold text-green-700 mb-4">Kezelés</h3>
+                        <p class="mb-2">A prognózis időben megkezdett kezeléssel kiváló.</p>
+                        <ul class="list-disc list-inside space-y-2 pl-4">
+                            <li><strong>Korai (pl. izolált facialis paresis):</strong> Doxycyclin p.o. (14 nap).</li>
+                            <li><strong>Súlyosabb korai / Késői LNB:</strong> Ceftriaxon i.v. (14-21 nap).</li>
+                        </ul>
+                        <div class="callout callout-warning mt-4">
+                            <p><strong class="font-semibold">Tévhit:</strong> A "krónikus Lyme-kór" miatti hosszan tartó antibiotikum kezelés nem bizonyítottan hatékony, sőt káros lehet. A 2-3 hetes kúra általában elegendő.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Neurosyphilis -->
+            <section id="neurosyphilis" class="content-section">
+                <h2 class="text-4xl font-bold mb-6 text-gray-800 border-b-4 border-red-500 pb-3">Neurosyphilis</h2>
+                 <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                    <h3 class="text-2xl font-semibold text-red-700 mb-4">A másik "Nagy Imitátor"</h3>
+                    <p class="mb-4">A _Treponema pallidum_ okozta fertőzés idegrendszeri manifesztációja. A klasszikus késői formák ma már ritkák, de az atipikus, korai és pszichiátriai tünetekkel járó esetek száma nő, különösen a HIV-pozitív populációban.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 text-red-800">Korai Stádium (évek)</h4>
+                            <ul class="list-disc list-inside space-y-1 pl-4">
+                                <li>Szifiliszes meningitis</li>
+                                <li><strong>Meningovascularis syphilis:</strong> Fiatal kori stroke oka lehet!</li>
+                                <li>Ocularis/Otosyphilis (látás-/hallásromlás)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 text-red-800">Késői Stádium (évtizedek)</h4>
+                            <ul class="list-disc list-inside space-y-1 pl-4">
+                                <li><strong>Tabes Dorsalis:</strong> Szenzoros ataxia, villámló fájdalmak, <strong class="text-red-600">Argyll Robertson pupilla</strong> (fényre nem, akkomodációra szűkül).</li>
+                                <li><strong>Paralysis Generalisans:</strong> Progresszív demencia, pszichózis.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-semibold text-red-700 mb-4">Diagnosztika</h3>
+                        <div class="callout callout-info">
+                            <p><strong class="font-semibold">Diagnosztikai Aranystandard:</strong> Reaktív **CSF-VDRL** teszt. Ez 100% specifikus, de érzékenysége alacsony (álnegatív lehet!). Negatív CSF-VDRL esetén a kóros liquorlelet (pleocytosis) és reaktív treponemális teszt (pl. TPHA) kombinációja diagnosztikus értékű.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-semibold text-red-700 mb-4">Kezelés</h3>
+                        <p class="mb-2">A kezelés hatékonyságát a liquor VDRL titerének és a sejtszámnak a csökkenésével kell követni.</p>
+                        <ul class="list-disc list-inside space-y-2 pl-4">
+                            <li><strong>Elsődleges választás:</strong> Nagy dózisú intravénás **Penicillin G** (10-14 nap).</li>
+                        </ul>
+                         <div class="callout callout-danger mt-4">
+                            <p><strong class="font-semibold">Penicillin allergia:</strong> A KIR érintettség súlyossága miatt a deszenzitizálás és a penicillin adása erősen javasolt, mivel az alternatívák hatékonysága nem megfelelő.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+            function showSection(hash) {
+                const targetHash = hash || '#altalanos-elvek';
+                let sectionFound = false;
+
+                contentSections.forEach(section => {
+                    if ('#' + section.id === targetHash) {
+                        section.classList.add('active');
+                        sectionFound = true;
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                if (!sectionFound) {
+                    contentSections[0].classList.add('active');
+                }
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === targetHash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    history.pushState(null, null, targetId);
+                    showSection(targetId);
+                    window.scrollTo(0, 0);
+                });
+            });
+
+            window.addEventListener('popstate', () => showSection(window.location.hash));
+            showSection(window.location.hash);
+
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', function () {
+                    const content = this.nextElementSibling;
+                    const isActive = this.classList.toggle('active');
+                    this.querySelector('svg').style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
+                    
+                    if (isActive) {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    } else {
+                        content.style.maxHeight = null;
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

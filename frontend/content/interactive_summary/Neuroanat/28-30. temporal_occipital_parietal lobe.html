@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Agytérkép: Részletes Vizsgafelkészítő</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+        }
+        .lobe-path {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            stroke: #475569;
+            stroke-width: 2px;
+        }
+        .lobe-path:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .active-lobe {
+            transform: scale(1.05);
+            stroke-width: 4px;
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        details > summary {
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+            list-style: none; /* Remove default marker */
+        }
+        details > summary::-webkit-details-marker {
+            display: none; /* Hide for Chrome */
+        }
+        details > summary:hover {
+            background-color: #f1f5f9;
+        }
+        details[open] > summary {
+            font-weight: 600;
+        }
+        .summary-arrow {
+            transition: transform 0.3s ease-in-out;
+            margin-right: 0.75rem;
+        }
+        details[open] .summary-arrow {
+            transform: rotate(90deg);
+        }
+        .nested-details summary {
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+        .nested-details[open] > summary {
+            background-color: #f8fafc;
+        }
+        .nested-details .content {
+            padding: 0.5rem 1rem 1rem 2.5rem;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800">Interaktív Agytérkép</h1>
+            <p class="mt-2 text-lg text-slate-600">Részletes vizsgafelkészítő az Occipitális, Parietális és Temporális lebenyekről</p>
+            <p class="mt-1 text-sm text-slate-500">Kattints egy lebenyre az ábrán vagy válassz a gombok közül a részletekért.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Panel: Brain Diagram and Controls -->
+            <div class="lg:col-span-1 lg:sticky top-8 self-start">
+                <div class="content-card p-4 sm:p-6">
+                    <h2 id="selected-lobe-title" class="text-2xl font-bold text-center mb-4 text-slate-700">Válassz egy lebenyt!</h2>
+                    
+                    <!-- Simplified Interactive SVG Brain Diagram -->
+                    <svg id="brain-svg" viewBox="0 0 300 250" class="w-full h-auto" aria-labelledby="brain-title">
+                        <title id="brain-title">Egyszerűsített interaktív agy ábra</title>
+                        <!-- Frontal Lobe (for context, not interactive) -->
+                        <path id="frontal" fill="#93c5fd" d="M 61.16,34.39 C 22.81,51.89 3.28,95.34 2.03,142.06 C 1.2,172.03 9.38,200.22 23.53,224.22 C 32.53,223.51 42.14,219.78 50.15,213.98 C 65.05,203.22 72.33,184.45 74.53,165.73 C 82.52,102.34 118.84,52.26 172.48,30.93 C 160.4,22.8 141.45,21.03 124.63,22.38 C 103.3,24.09 81.02,28.49 61.16,34.39 Z"/>
+                        <!-- Temporal Lobe -->
+                        <path id="temporal" class="lobe-path" fill="#a5b4fc" d="M 75.03,166.73 C 71.83,186.45 64.05,205.22 49.15,215.98 C 60.15,229.08 76.54,238.16 95.17,241.6 C 127.38,247.3 160.36,236.45 182.8,213.98 C 203.95,192.8 212.03,162.22 205.15,133.02 C 187.52,137.34 168.84,134.26 152.48,124.93 C 130.4,112.8 101.45,108.03 78.63,118.38 C 75.3,134.09 76.02,150.49 75.03,166.73 Z" data-name="Temporális lebeny"/>
+                        <!-- Parietal Lobe -->
+                        <path id="parietal" class="lobe-path" fill="#fde047" d="M 172.98,29.93 C 119.34,51.26 83.02,101.34 75.03,164.73 C 75.52,150.00 78.80,135.02 85.15,122.02 C 100.52,94.34 130.84,79.26 162.48,80.93 C 190.4,82.8 211.45,98.03 224.63,122.38 C 230.3,134.09 231.02,148.49 229.03,161.73 C 248.83,148.45 264.05,129.22 271.15,105.98 C 278.54,81.16 275.17,54.6 261.8,34.00 C 242.38,3.3 207.36,-6.45 172.98,29.93 Z" data-name="Fali lebeny"/>
+                        <!-- Occipital Lobe -->
+                        <path id="occipital" class="lobe-path" fill="#6ee7b7" d="M 271.65,106.98 C 264.55,130.22 249.33,149.45 230.03,162.73 C 231.52,150.00 231.30,135.02 225.15,122.02 C 212.02,96.34 189.84,81.26 162.98,80.93 C 187.36,65.45 220.38,68.8 245.8,88.98 C 269.95,107.8 277.03,138.22 271.65,166.02 C 283.54,151.16 286.17,130.6 271.65,106.98 Z" data-name="Nyakszirti lebeny"/>
+                    </svg>
+                    
+                    <div id="lobe-selector-buttons" class="mt-6 flex flex-col space-y-2">
+                        <button data-lobe="occipital" class="w-full text-left p-3 rounded-lg font-semibold transition-colors duration-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
+                            Nyakszirti lebeny (Occipitális)
+                        </button>
+                        <button data-lobe="parietal" class="w-full text-left p-3 rounded-lg font-semibold transition-colors duration-200 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+                            Fali lebeny (Parietális)
+                        </button>
+                        <button data-lobe="temporal" class="w-full text-left p-3 rounded-lg font-semibold transition-colors duration-200 bg-indigo-100 text-indigo-800 hover:bg-indigo-200">
+                            Halánték lebeny (Temporális)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Content -->
+            <div id="content-area" class="lg:col-span-2 space-y-6">
+                <!-- Placeholder -->
+                <div id="placeholder" class="content-card p-8 text-center">
+                    <h3 class="text-xl font-semibold text-slate-700">A részletes információk itt jelennek meg.</h3>
+                    <p class="text-slate-500 mt-2">Válassz egy agylebenyt a bal oldali ábráról vagy a gombokkal a kezdéshez.</p>
+                </div>
+                
+                <div id="content-occipital" class="hidden space-y-6"></div>
+                <div id="content-parietal" class="hidden space-y-6"></div>
+                <div id="content-temporal" class="hidden space-y-6"></div>
+            </div>
+        </main>
+        
+        <footer class="text-center mt-12 py-4 border-t border-slate-300">
+            <p class="text-sm text-slate-500">Készült a feltöltött neuroanatómiai jegyzetek alapján. Kizárólag tanulmányi célokra.</p>
+        </footer>
+    </div>
+
+    <script>
+        const contentData = {
+            occipital: {
+                title: 'Nyakszirti lebeny (Lobus Occipitalis)',
+                themeColor: 'emerald',
+                sections: [
+                    {
+                        title: 'Összefoglaló Táblázat',
+                        content: `
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-emerald-900 uppercase bg-emerald-200">
+                                        <tr><th class="px-4 py-2">Terület</th><th class="px-4 py-2">Fő Funkció</th><th class="px-4 py-2">Brodmann Area</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b">
+                                            <td class="px-4 py-2 font-medium">Primer látókéreg (V1)</td>
+                                            <td class="px-4 py-2">Elemi vizuális feldolgozás (élek, kontraszt, mozgás)</td>
+                                            <td class="px-4 py-2">17</td>
+                                        </tr>
+                                        <tr class="border-b bg-emerald-50"><td class="px-4 py-2 font-medium">Másodlagos látókéreg (V2)</td><td class="px-4 py-2">Illuzórikus kontúrok, mélység, figura-háttér</td><td class="px-4 py-2">18</td></tr>
+                                        <tr class="border-b"><td class="px-4 py-2 font-medium">V3 / V4</td><td class="px-4 py-2">Forma- és színfeldolgozás, színkonstancia</td><td class="px-4 py-2">19</td></tr>
+                                        <tr class="bg-emerald-50"><td class="px-4 py-2 font-medium">V5 / MT</td><td class="px-4 py-2">Mozgás irányának és sebességének érzékelése</td><td class="px-4 py-2">19</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Anatómia és Főbb Képletek',
+                        content: `
+                            <p>Az agy leghátsó részén elhelyezkedő, legkisebb lebeny, melynek elsődleges funkciója a látás. A <strong>sulcus parietooccipitalis</strong> választja el a fali lebenytől. A mediális felszín kulcsfontosságú képlete a <strong>sulcus calcarinus</strong>, melyben és amely körül a primer látókéreg (V1) található. Ezt veszi körül a másodlagos (V2) és további asszociációs látókérgi területek (V3, V4, V5/MT).</p>
+                        `
+                    },
+                    {
+                        title: 'Vizuális Pályák: Dorzális és Ventrális Rendszer',
+                        content: `
+                            <p>A V1-ből a vizuális információ két, funkcionálisan elkülönült pályán halad tovább:</p>
+                             <div class="mt-4 p-4 border-l-4 border-indigo-400 bg-indigo-50 rounded-r-lg">
+                                <h4 class="font-bold text-indigo-800">Ventrális ("Mi?") pálya</h4>
+                                <p><strong>Útvonal:</strong> Occipitális (V1, V2, V4) → Temporális lebeny inferior részei.</p>
+                                <p><strong>Funkció:</strong> Tárgyak vizuális azonosítása (forma, szín, textúra). Létrehozza a tárgyak tudatos reprezentációját.</p>
+                                <p><strong>Sérülése:</strong> Vizuális agnóziákhoz vezet.</p>
+                            </div>
+                            <div class="mt-4 p-4 border-l-4 border-teal-400 bg-teal-50 rounded-r-lg">
+                                <h4 class="font-bold text-teal-800">Dorzális ("Hol?" / "Hogyan?") pálya</h4>
+                                <p><strong>Útvonal:</strong> Occipitális (V1, V2, V3, V5/MT) → Parietális lebeny poszterior részei.</p>
+                                <p><strong>Funkció:</strong> Tárgyak térbeli helyzetének és mozgásának elemzése, vizuálisan vezérelt cselekvések (pl. nyúlás, megfogás) irányítása.</p>
+                                <p><strong>Sérülése:</strong> Téri orientációs zavarokhoz és vizuomotoros koordinációs nehézségekhez vezet.</p>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Klinikai Vonatkozások: Sérülések Következményei',
+                        content: `
+                            <div class="nested-details">
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Látótérkiesések</strong></summary>
+                                    <div class="content">
+                                        <ul class="list-disc pl-5 space-y-1">
+                                            <li><strong>Homonym hemianopsia:</strong> A V1 egyoldali, teljes sérülése az ellenoldali látótérfél kiesését okozza mindkét szemen.</li>
+                                            <li><strong>Kérgi vakság:</strong> A V1 kétoldali, kiterjedt sérülése. A beteg nem lát, bár a szemei és a perifériás látópályák épek.</li>
+                                            <li><strong>Vaklátás (Blindsight):</strong> A betegek tudatos élmény nélkül képesek reagálni a vak látótérfelen megjelenő vizuális ingerekre, valószínűleg a V1-et elkerülő, colliculus superioron és pulvinaron keresztül haladó pályák révén.</li>
+                                        </ul>
+                                    </div>
+                                </details>
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Vizuális Agnóziák</strong></summary>
+                                    <div class="content">
+                                        <p>A látott tárgyak felismerésének zavara ép látásélesség mellett, tipikusan a ventrális pálya sérülésekor.</p>
+                                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                                            <li><strong>Apperceptív agnózia:</strong> A beteg nem tudja a látott elemeket egységes egésszé (perceptum) szervezni, nem ismeri fel, nem tudja másolni.</li>
+                                            <li><strong>Asszociatív agnózia:</strong> A beteg a tárgyat le tudja rajzolni, de nem tudja megnevezni, mert a perceptumot nem tudja a szemantikai tudásához kötni.</li>
+                                            <li><strong>Prozopagnózia:</strong> Arcfelismerési zavar.</li>
+                                            <li><strong>Akinetopszia (mozgásvakság):</strong> A mozgás érzékelésének képtelensége, jellemzően a V5/MT terület kétoldali sérülésekor.</li>
+                                        </ul>
+                                    </div>
+                                </details>
+                                 <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Tiszta Alexia (Alexia agráfia nélkül)</strong></summary>
+                                    <div class="content"><p>A beteg elveszti olvasási képességét, de írni tud. A bal oldali occipitalis lebeny sérülése miatt a jobb látótérfélből (ahol a szavak nagy része van) érkező vizuális információ nem jut el a bal oldali nyelvi központokhoz. Az írás megmarad, mert a motoros pályák épek.</p></div>
+                                </details>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Vérellátás',
+                        content: `<p>Az occipitális lebeny és a látókéreg vérellátását szinte kizárólag az <strong>arteria cerebri posterior (ACP)</strong> biztosítja. Az ACP elzáródása az ellátási területnek megfelelő látótérkiesést, például ellenoldali homonim hemianopsiát okozhat.</p>`
+                    }
+                ]
+            },
+            parietal: {
+                title: 'Fali lebeny (Lobus Parietalis)',
+                themeColor: 'yellow',
+                 sections: [
+                    {
+                        title: 'Összefoglaló Táblázat',
+                        content: `
+                             <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-yellow-900 uppercase bg-yellow-200">
+                                        <tr><th class="px-4 py-2">Terület / Struktúra</th><th class="px-4 py-2">Fő Funkció</th><th class="px-4 py-2">Brodmann Area</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b"><td class="px-4 py-2 font-medium">Gyrus postcentralis</td><td class="px-4 py-2">Primer szomatoszenzoros kéreg (tapintás, fájdalom, propriocepció)</td><td class="px-4 py-2">1, 2, 3</td></tr>
+                                        <tr class="border-b bg-yellow-50"><td class="px-4 py-2 font-medium">Lobulus parietalis superior</td><td class="px-4 py-2">Téri orientáció, vizuomotoros koordináció, testkép</td><td class="px-4 py-2">5, 7</td></tr>
+                                        <tr class="border-b"><td class="px-4 py-2 font-medium">Gyrus supramarginalis</td><td class="px-4 py-2">Nyelvi (fonológiai) feldolgozás, téri figyelem</td><td class="px-4 py-2">40</td></tr>
+                                        <tr class="border-b bg-yellow-50"><td class="px-4 py-2 font-medium">Gyrus angularis</td><td class="px-4 py-2">Olvasás, írás, számolás, szemantikai feldolgozás</td><td class="px-4 py-2">39</td></tr>
+                                         <tr class=""><td class="px-4 py-2 font-medium">Precuneus</td><td class="px-4 py-2">Epizodikus memória, éntudatosság, vizuális képzelet</td><td class="px-4 py-2">7 (mediális)</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Anatómiai Felépítés és Funkciók',
+                        content: `
+                            <p>A szenzoros információk integrációjának, a téri észlelésnek és a figyelemnek a központi területe. A <strong>sulcus centralis</strong> mögött helyezkedik el. A <strong>sulcus intraparietalis</strong> egy felső (LPS) és egy alsó (LPI) lebenykére osztja. Az LPI a <strong>gyrus supramarginalis</strong>-t és a <strong>gyrus angularis</strong>-t foglalja magában, melyek a domináns (általában bal) féltekén a nyelvi és matematikai képességek kulcsfontosságú területei.</p>
+                        `
+                    },
+                    {
+                        title: 'Fontosabb Összeköttetések',
+                        content: `
+                             <p>A parietális lebeny egy kiterjedt neurális hálózat csomópontja, amely összeköti az érzékelést a cselekvéssel.</p>
+                             <div class="nested-details">
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Fasciculus Longitudinalis Superior (SLF)</strong></summary>
+                                    <div class="content"><p>A frontális és parietális lebeny közötti kétirányú kapcsolatrendszer. Három fő komponense van, melyek a motoros viselkedés szabályozásában (SLF I), a téri figyelemben (SLF II) és a nyelvi artikulációhoz kapcsolódó szomatoszenzoros információk közvetítésében (SLF III) játszanak szerepet.</p></div>
+                                </details>
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Fasciculus Arcuatus</strong></summary>
+                                    <div class="content"><p>A dorzális nyelvi útvonal része, amely a temporális és frontális nyelvi központokat köti össze az inferior parietális lebenykén keresztül. Elengedhetetlen a hallott szavak ismétléséhez és a fonológiai feldolgozáshoz.</p></div>
+                                </details>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Klinikai Jelentőség: Léziók Tünetei',
+                        content: `
+                            <div class="nested-details">
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Neglect szindróma (féloldali figyelmen kívül hagyás)</strong></summary>
+                                    <div class="content"><p>Jellemzően a <strong>jobb oldali</strong>, nem domináns parietális lebeny károsodásakor lép fel. A beteg a külvilág és saját testének lézióval ellentétes (bal) oldalát figyelmen kívül hagyja, mintha az nem is létezne. Extrém esetben a beteg tagadhatja saját végtagjainak létezését (asomatognosia).</p></div>
+                                </details>
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Gerstmann-szindróma</strong></summary>
+                                    <div class="content"><p>A domináns (általában <strong>bal oldali</strong>) gyrus angularis (BA 39) károsodásakor jelentkezik. Négy fő tünete van: <strong>acalculia</strong> (számolási zavar), <strong>agraphia</strong> (írászavar), <strong>ujjagnózia</strong> (ujjak felismerésének zavara) és <strong>jobb-bal tévesztés</strong>.</p></div>
+                                </details>
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Apraxia és Agnózia</strong></summary>
+                                    <div class="content">
+                                        <ul class="list-disc pl-5 space-y-1">
+                                            <li><strong>Konstrukciós apraxia:</strong> Képtelenség ábrák másolására vagy tárgyak összerakására.</li>
+                                            <li><strong>Asztereognózis (taktilis agnózia):</strong> Tárgyak tapintás útján történő felismerésének képtelensége.</li>
+                                            <li><strong>Anosognosia:</strong> A betegségtudat hiánya, a beteg nem ismeri el a neurológiai deficitjét (pl. bénulását).</li>
+                                        </ul>
+                                    </div>
+                                </details>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Vérellátás',
+                        content: `<p>A parietális lebeny vérellátását főként az <strong>arteria cerebri media (ACM)</strong> biztosítja a laterális felszínen, míg a mediális felszínt az <strong>arteria cerebri anterior (ACA)</strong> látja el. Az ACM elzáródása kiterjedt parietális tüneteket (pl. neglect, Gerstmann-szindróma, afázia) okozhat.</p>`
+                    }
+                ]
+            },
+            temporal: {
+                title: 'Halánték lebeny (Lobus Temporalis)',
+                themeColor: 'indigo',
+                sections: [
+                    {
+                        title: 'Összefoglaló Táblázat',
+                        content: `
+                             <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-indigo-900 uppercase bg-indigo-200">
+                                        <tr><th class="px-4 py-2">Terület / Struktúra</th><th class="px-4 py-2">Fő Funkció</th><th class="px-4 py-2">Brodmann Area</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b"><td class="px-4 py-2 font-medium">Heschl-féle haránttekervények</td><td class="px-4 py-2">Primer hallókéreg</td><td class="px-4 py-2">41, 42</td></tr>
+                                        <tr class="border-b bg-indigo-50"><td class="px-4 py-2 font-medium">Wernicke-mező (STG)</td><td class="px-4 py-2">Nyelvértés (domináns félteke)</td><td class="px-4 py-2">22</td></tr>
+                                        <tr class="border-b"><td class="px-4 py-2 font-medium">Gyrus fusiformis</td><td class="px-4 py-2">Arcfelismerés (FFA), tárgyfelismerés</td><td class="px-4 py-2">37</td></tr>
+                                        <tr class="border-b bg-indigo-50"><td class="px-4 py-2 font-medium">Mediális Temporális Lebeny (MTL)</td><td class="px-4 py-2">Epizodikus memória, emlékezet konszolidáció</td><td class="px-4 py-2">28, 34, 35, 36</td></tr>
+                                        <tr class=""><td class="px-4 py-2 font-medium">Amygdala</td><td class="px-4 py-2">Érzelmi feldolgozás (főleg félelem)</td><td class="px-4 py-2">N/A</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Anatómia és Funkcionális Szerepkörök',
+                        content: `
+                            <p>A temporális lebeny a hallás, a nyelv, az emlékezet és az érzelmek feldolgozásának kritikus központja. A laterális felszínen található a <strong>gyrus temporalis superior (STG)</strong>, mely a hallókérget és a <strong>Wernicke-mezőt</strong> tartalmazza. A ventrális felszín a vizuális feldolgozás ("Mi?" pálya) része, itt található a <strong>gyrus fusiformis</strong>. A mediális temporális lebeny (MTL) – beleértve a <strong>hippocampust</strong> és a környező kérgeket – elengedhetetlen az új emlékek kialakításához.</p>
+                        `
+                    },
+                    {
+                        title: 'Klinikai Szindrómák és Sérülések',
+                        content: `
+                            <div class="nested-details">
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Wernicke-afázia (Receptív afázia)</strong></summary>
+                                    <div class="content"><p>A domináns féltekei Wernicke-mező (BA 22) sérülése okozza. Jellemzője a súlyosan károsodott beszédmegértés, miközben a beszéd fluens, de tartalmilag üres, értelmetlen (neologizmusokkal, parafáziákkal teli). A betegek gyakran nincsenek tudatában a problémájuknak (anozognózia).</p></div>
+                                </details>
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Amnéziás Szindrómák</strong></summary>
+                                    <div class="content"><p>A mediális temporális lebeny (főleg a hippocampus) kétoldali sérülése súlyos <strong>anterográd amnéziát</strong> okoz, vagyis a beteg képtelen új tényeket és eseményeket megjegyezni. Emellett változó mértékű retrográd amnézia (régi emlékek elvesztése) is felléphet.</p></div>
+                                </details>
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Klüver–Bucy-szindróma</strong></summary>
+                                    <div class="content">
+                                        <p>Ritka szindróma, mely az amygdala és a hippocampus kétoldali károsodásából ered. Főbb tünetei:</p>
+                                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                                            <li><strong>Hiperoralitás:</strong> Mindent a szájába vesz.</li>
+                                            <li><strong>Hiperszexualitás:</strong> Fokozott, gátlástalan szexuális viselkedés.</li>
+                                            <li><strong>Vizuális agnózia ("lelki vakság"):</strong> A látott tárgyak érzelmi jelentőségének fel nem ismerése.</li>
+                                            <li><strong>Placiditás:</strong> Az érzelmi élet (főleg a félelem és agresszió) teljes eltompulása.</li>
+                                        </ul>
+                                    </div>
+                                </details>
+                                <details>
+                                    <summary class="flex items-center"><span class="summary-arrow">&#9654;</span><strong>Temporális Lebeny Epilepszia (TLE)</strong></summary>
+                                    <div class="content"><p>A felnőttkori fokális epilepsziák leggyakoribb típusa. A rohamokat gyakran komplex aura vezeti be, pl. <strong>déjà vu</strong> (már átélt élmény), <strong>jamais vu</strong> (az ismerős hely/szituáció idegennek tűnik), szaglási hallucinációk vagy felszálló epigastriális érzés.</p></div>
+                                </details>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Vérellátás és Fehérállományi Pályák',
+                        content: `
+                            <p>A temporális lebeny vérellátását nagyrészt az <strong>arteria cerebri media (ACM)</strong> és az <strong>arteria cerebri posterior (ACP)</strong> ágrendszere biztosítja. Fontos asszociációs pályái közé tartozik a <strong>fasciculus arcuatus</strong> (nyelvi területeket köt össze), a <strong>fasciculus uncinatus</strong> (frontális és temporális lebenyt köt össze az érzelmi és memória funkciókhoz) és a <strong>fasciculus longitudinalis inferior</strong> (occipitális és temporális lebenyt köt össze a vizuális felismeréshez).</p>
+                        `
+                    }
+                ]
+            }
+        };
+
+        const brainSvg = document.getElementById('brain-svg');
+        const contentArea = document.getElementById('content-area');
+        const placeholder = document.getElementById('placeholder');
+        const selectedLobeTitle = document.getElementById('selected-lobe-title');
+        const lobeSelectorButtons = document.getElementById('lobe-selector-buttons');
+        let currentLobe = null;
+
+        function createContentCard(section, themeColor) {
+            const card = document.createElement('div');
+            card.className = 'content-card';
+            
+            const details = document.createElement('details');
+            details.className = 'overflow-hidden rounded-lg';
+            
+            const summary = document.createElement('summary');
+            summary.className = `flex justify-between items-center font-semibold text-lg p-4 bg-${themeColor}-100 text-${themeColor}-800`;
+            
+            const summaryTitle = document.createElement('span');
+            summaryTitle.className = 'flex items-center';
+            summaryTitle.innerHTML = `<span class="summary-arrow">&#9654;</span>${section.title}`;
+            
+            summary.appendChild(summaryTitle);
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `p-4 border-t border-${themeColor}-200`;
+            contentDiv.innerHTML = section.content;
+            
+            details.appendChild(summary);
+            details.appendChild(contentDiv);
+            card.appendChild(details);
+
+            if (contentData[currentLobe].sections[0].title === section.title) {
+                details.open = true;
+            }
+            
+            return card;
+        }
+        
+        function displayLobeContent(lobeId) {
+            if (currentLobe === lobeId) return;
+            currentLobe = lobeId;
+
+            placeholder.classList.add('hidden');
+            document.querySelectorAll('#content-area > div[id^="content-"]').forEach(div => div.classList.add('hidden'));
+
+            const lobeData = contentData[lobeId];
+            if (!lobeData) return;
+
+            selectedLobeTitle.textContent = lobeData.title;
+            const titleColorClass = `text-${lobeData.themeColor}-700`;
+            selectedLobeTitle.className = `text-2xl font-bold text-center mb-4 ${titleColorClass}`;
+
+            const contentContainer = document.getElementById(`content-${lobeId}`);
+            contentContainer.innerHTML = ''; 
+
+            lobeData.sections.forEach(section => {
+                const card = createContentCard(section, lobeData.themeColor);
+                contentContainer.appendChild(card);
+            });
+
+            contentContainer.classList.remove('hidden');
+
+            // Update SVG styles
+            brainSvg.querySelectorAll('.lobe-path').forEach(path => {
+                path.classList.remove('active-lobe');
+                path.style.stroke = '#475569';
+                if (path.id === lobeId) {
+                    path.classList.add('active-lobe');
+                    path.style.stroke = lobeData.themeColor === 'emerald' ? '#34d399' : (lobeData.themeColor === 'yellow' ? '#facc15' : '#818cf8');
+                }
+            });
+            
+            // Update button styles
+            document.querySelectorAll('#lobe-selector-buttons button').forEach(button => {
+                const buttonLobe = button.dataset.lobe;
+                const buttonTheme = contentData[buttonLobe].themeColor;
+                if(buttonLobe === lobeId) {
+                    button.className = `w-full text-left p-3 rounded-lg font-semibold transition-colors duration-200 bg-${buttonTheme}-300 text-${buttonTheme}-900 ring-2 ring-${buttonTheme}-500`;
+                } else {
+                     button.className = `w-full text-left p-3 rounded-lg font-semibold transition-colors duration-200 bg-${buttonTheme}-100 text-${buttonTheme}-800 hover:bg-${buttonTheme}-200`;
+                }
+            });
+        }
+
+        brainSvg.addEventListener('click', (e) => {
+            const path = e.target.closest('.lobe-path');
+            if (path && contentData[path.id]) {
+                displayLobeContent(path.id);
+            }
+        });
+
+        lobeSelectorButtons.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if(button && button.dataset.lobe) {
+                displayLobeContent(button.dataset.lobe);
+            }
+        });
+
+    </script>
+</body>
+</html>

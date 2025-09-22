@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Átfogó Interaktív Neuroanatómia Tananyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+        }
+        .tab-button.active {
+            border-color: #3b82f6;
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .interactive-svg .label, .interactive-svg .structure {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .interactive-svg .structure:hover {
+            filter: brightness(1.2);
+            transform: scale(1.02);
+        }
+        .interactive-svg .label:hover {
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1d4ed8;
+            border-bottom: 3px solid #60a5fa;
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+         h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .highlight-card {
+            background-color: #eef2ff;
+            border-left: 5px solid #4f46e5;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+        }
+        .highlight-card h4 {
+            margin-top: 0;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-800">Neuroanatómia Vizsgafelkészítő</h1>
+            <p class="text-slate-600 mt-3 text-lg">Bővített, interaktív tananyag a sikeres vizsgához.</p>
+        </header>
+
+        <div class="tabs mb-8 flex flex-wrap justify-center gap-3">
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-6 rounded-full border-2 border-slate-300 transition-all duration-300" data-tab="meninges">55. Agyhártyák</button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-6 rounded-full border-2 border-slate-300 transition-all duration-300" data-tab="barriers">56. Gátrendszerek</button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-6 rounded-full border-2 border-slate-300 transition-all duration-300" data-tab="glia">57. A glia</button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-6 rounded-full border-2 border-slate-300 transition-all duration-300" data-tab="neurotransmitters">58. Neurotranszmitterek</button>
+            <button class="tab-button text-sm sm:text-base font-medium py-3 px-6 rounded-full border-2 border-slate-300 transition-all duration-300" data-tab="transmission">59. Transzmisszió</button>
+        </div>
+
+        <!-- TARTALMI SZEKCIÓK -->
+
+        <!-- 55. Az agyhártyák -->
+        <section id="meninges-content" class="content-section">
+            <div class="card">
+                <h2><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>55. Az agyhártyák anatómiája</h2>
+                <p class="mb-4 text-lg">Az agyhártyák (meninges) három védelmező membránréteget képeznek az agy és a gerincvelő körül. Funkcióik messze túlmutatnak a mechanikai védelmen: részt vesznek a CSF keringésében, az erek és idegek rögzítésében és a koponyaűri nyomás szabályozásában.</p>
+                <div class="card bg-blue-50 border border-blue-200">
+                    <h3 class="mt-0">Interaktív ábra: Az agyhártyák és terek</h3>
+                    <p class="text-sm text-slate-600 mb-4">Kattints a struktúrákra vagy a neveikre a leírásért!</p>
+                    <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="w-full md:w-2/3">
+                             <svg id="meninges-svg" class="w-full h-auto rounded-lg shadow-md bg-white" viewBox="0 0 400 350">
+                                <title>Az agyhártyák és a hozzájuk kapcsolódó terek</title>
+                                <rect class="structure" data-info="koponya" x="0" y="20" width="400" height="40" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5"/>
+                                <rect class="structure" data-info="epidural" x="0" y="60" width="400" height="5" fill="#fca5a5"/>
+                                <rect class="structure" data-info="dura-periosteal" x="0" y="65" width="400" height="15" fill="#60a5fa"/>
+                                <rect class="structure" data-info="dura-meningeal" x="0" y="80" width="400" height="15" fill="#3b82f6"/>
+                                <rect class="structure" data-info="subdural" x="0" y="95" width="400" height="5" fill="#fde68a"/>
+                                <rect class="structure" data-info="arachnoidea" x="0" y="100" width="400" height="15" fill="#67e8f9"/>
+                                <path class="structure" data-info="pia" d="M0,145 Q20,125 40,145 T80,145 T120,145 T160,145 T200,145 T240,145 T280,145 T320,145 T360,145 T400,145" fill="#f472b6" stroke-width="0"/>
+                                <path d="M0,148 Q20,128 40,148 T80,148 T120,148 T160,148 T200,148 T240,148 T280,148 T320,148 T360,148 T400,148 L400,350 L0,350Z" fill="#fbcfe8"/>
+                                <rect class="structure" data-info="subarachnoid" x="0" y="115" width="400" height="30" fill="#22d3ee" fill-opacity="0.3"/>
+                                <line x1="25" y1="115" x2="35" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="75" y1="115" x2="65" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="105" y1="115" x2="115" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="155" y1="115" x2="145" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="185" y1="115" x2="195" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="235" y1="115" x2="225" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="265" y1="115" x2="275" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="315" y1="115" x2="305" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="345" y1="115" x2="355" y2="145" stroke="#06b6d4" stroke-width="1.5"/><line x1="385" y1="115" x2="375" y2="145" stroke="#06b6d4" stroke-width="1.5"/>
+                                <text x="10" y="15" class="label text-sm font-semibold" data-info="koponya">Koponyacsont</text>
+                                <text x="10" y="55" class="label text-sm font-semibold" fill="#b91c1c" data-info="epidural">Epiduralis tér (potenciális)</text>
+                                <text x="10" y="77" class="label text-sm font-semibold" data-info="dura-periosteal">Dura mater (periostealis r.)</text>
+                                <text x="10" y="92" class="label text-sm font-semibold" data-info="dura-meningeal">Dura mater (meningealis r.)</text>
+                                <text x="10" y="107" class="label text-sm font-semibold" fill="#ca8a04" data-info="subdural">Subduralis tér (potenciális)</text>
+                                <text x="10" y="122" class="label text-sm font-semibold" data-info="arachnoidea">Arachnoidea mater</text>
+                                <text x="10" y="137" class="label text-sm font-semibold" data-info="subarachnoid">Subarachnoidealis tér</text>
+                                <text x="10" y="152" class="label text-sm font-semibold" data-info="pia">Pia mater</text>
+                                <text x="200" y="300" class="label text-lg font-bold" data-info="brain">Agyállomány</text>
+                            </svg>
+                        </div>
+                        <div id="meninges-info-box" class="w-full md:w-1/3 p-4 bg-white rounded-lg border-2 border-slate-200 min-h-[150px] shadow-inner">
+                            <p class="text-slate-500">Válassz egy elemet az ábráról a részletes leíráshoz.</p>
+                        </div>
+                    </div>
+                </div>
+                <h3>A Dura Mater Részletesen</h3>
+                <p>A kemény agyhártya kettőzetei (duralis redők) a koponyaüreget rekeszekre osztják, stabilizálva az agyat. Ezek a redők egyúttal a vénás sinusokat is magukba foglalják.</p>
+                <ul class="list-disc list-inside space-y-2 mb-4 pl-4">
+                    <li><strong>Falx Cerebri:</strong> A két agyfélteke között. Felső szélében fut a <strong class="text-blue-600">sinus sagittalis superior</strong>, alsó szabad szélében a <strong class="text-blue-600">sinus sagittalis inferior</strong>.</li>
+                    <li><strong>Tentorium Cerebelli:</strong> A nagyagy és kisagy között. Kritikus nyílása az <strong class="text-red-600">incisura tentorii</strong>, ahol az agytörzs áthalad. Agyduzzanat esetén itt történhet a beékelődés (herniatio).</li>
+                </ul>
+                <h3>Klinikai vonatkozások: Haematomák</h3>
+                 <div class="overflow-x-auto rounded-lg shadow-md mt-4">
+                    <table class="w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-4">Vérzés Típusa</th>
+                                <th scope="col" class="px-6 py-4">Érintett Ér</th>
+                                <th scope="col" class="px-6 py-4">CT Megjelenés</th>
+                                <th scope="col" class="px-6 py-4">Klinikai Kulcsszó</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b hover:bg-red-50">
+                                <th scope="row" class="px-6 py-4 font-bold text-red-700">Epiduralis</th>
+                                <td class="px-6 py-4">A. meningea media (artériás)</td>
+                                <td class="px-6 py-4 font-semibold">Lencse alakú (bikonvex)</td>
+                                <td class="px-6 py-4">"Lucid intervallum"</td>
+                            </tr>
+                            <tr class="bg-white border-b hover:bg-yellow-50">
+                                <th scope="row" class="px-6 py-4 font-bold text-yellow-700">Subduralis</th>
+                                <td class="px-6 py-4">Áthidaló vénák (vénás)</td>
+                                <td class="px-6 py-4 font-semibold">Sarló alakú (konkáv)</td>
+                                <td class="px-6 py-4">Fokozatos, időseknél gyakoribb</td>
+                            </tr>
+                            <tr class="bg-white hover:bg-cyan-50">
+                                <th scope="row" class="px-6 py-4 font-bold text-cyan-700">Subarachnoidealis</th>
+                                <td class="px-6 py-4">Agyalapi artériák (aneurizma)</td>
+                                <td class="px-6 py-4 font-semibold">Vér a cisternákban/sulcusokban</td>
+                                <td class="px-6 py-4">"Életem legrosszabb fejfájása"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="highlight-card">
+                    <h4><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 5.25a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9-6.375h18M3.75 6.375h18m-18 0V4.5a1.5 1.5 0 011.5-1.5h15A1.5 1.5 0 0122.5 4.5v1.875m-18 0v1.875a1.5 1.5 0 001.5 1.5h15a1.5 1.5 0 001.5-1.5V6.375m-18 0h18" /></svg>Vizsgatippek</h4>
+                    <p>A haematomák CT-képének megkülönböztetése kulcsfontosságú! Az <strong class="text-red-600">epiduralis</strong> vérzés nem lépi át a suturákat (mert a dura ott erősen tapad a csonthoz), míg a <strong class="text-yellow-600">subduralis</strong> átlépheti, de a dura kettőzetek (pl. falx) megállítják. A <strong class="text-cyan-600">subarachnoidealis</strong> vér kitölti az agy barázdáit, "pókhálószerű" mintázatot adva.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 56. Gátrendszerek -->
+        <section id="barriers-content" class="content-section">
+            <div class="card">
+                <h2><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008H12v-.008z" /></svg>56. Gátrendszerek</h2>
+                <p class="text-lg">A KIR homeosztázisának őrzői. Ezek a dinamikus, szelektív gátak megvédik az érzékeny idegszövetet a vérben keringő potenciálisan káros anyagoktól, miközben biztosítják a létfontosságú tápanyagok bejutását.</p>
+                <h3>A Vér-Agy Gát (VAG / BBB)</h3>
+                <p>A VAG egy komplex, sejtes határfelület, az ún. <strong>neurovaszkuláris egység (NVU)</strong> része.</p>
+                <div class="card bg-indigo-50 border border-indigo-200">
+                    <h3 class="mt-0">Interaktív ábra: A Neurovaszkuláris Egység</h3>
+                    <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="w-full md:w-2/3">
+                            <svg id="bbb-svg" viewBox="0 0 500 350" class="w-full h-auto rounded-lg shadow-md bg-white">
+                                <title>A Neurovaszkuláris Egység (VAG) alkotóelemei</title>
+                                <!-- Asztrocita -->
+                                <path class="structure" data-info="astrocyte" d="M450,300 C 400,200 350,250 250,150 C 150,50 100,100 50,50" stroke="#10b981" stroke-width="15" fill="none" stroke-linecap="round" opacity="0.5"/>
+                                <text x="350" y="280" class="label font-semibold text-lg" data-info="astrocyte" fill="#047857">Asztrocita végtalp</text>
+                                <!-- Bazális membrán -->
+                                <ellipse class="structure" data-info="basal-lamina" cx="250" cy="170" rx="180" ry="90" fill="none" stroke="#d1d5db" stroke-width="15"/>
+                                <text x="30" y="270" class="label font-semibold" data-info="basal-lamina">Bazális Membrán</text>
+                                <!-- Pericita -->
+                                <path class="structure" data-info="pericyte" d="M120,230 Q250,260 380,230" stroke="#fdbf6f" fill="none" stroke-width="20" stroke-linecap="round"/>
+                                <circle cx="160" cy="230" r="12" fill="#fb923c"/>
+                                <text x="110" y="200" class="label font-semibold" data-info="pericyte" fill="#d97706">Pericita</text>
+                                <!-- Endothel -->
+                                <ellipse class="structure" data-info="endothel" cx="250" cy="170" rx="150" ry="60" fill="#fecaca" stroke="#dc2626" stroke-width="2"/>
+                                <text x="210" y="175" class="label font-bold text-xl" data-info="endothel">Endothel</text>
+                                <!-- Tight Junction -->
+                                <circle class="structure" data-info="tight-junction" cx="325" cy="138" r="15" fill="white" stroke="#be123c" stroke-width="3"/>
+                                <line x1="320" y1="133" x2="330" y2="143" stroke="#be123c" stroke-width="2"/>
+                                <line x1="320" y1="143" x2="330" y2="133" stroke="#be123c" stroke-width="2"/>
+                                <text x="345" y="120" class="label font-semibold" data-info="tight-junction" fill="#be123c">Tight Junction</text>
+                            </svg>
+                        </div>
+                         <div id="bbb-info-box" class="w-full md:w-1/3 p-4 bg-white rounded-lg border-2 border-slate-200 min-h-[150px] shadow-inner">
+                            <p class="text-slate-500">Kattints az ábra egy elemére a leíráshoz.</p>
+                        </div>
+                    </div>
+                </div>
+                <h4>Molekuláris Transzportmechanizmusok a VAG-on</h4>
+                <ul class="list-none space-y-3 mt-4">
+                    <li class="flex items-start"><strong class="w-48 shrink-0 text-indigo-700">Passzív Diffúzió:</strong> Kis, lipofil molekulák (O₂, CO₂, alkohol) számára.</li>
+                    <li class="flex items-start"><strong class="w-48 shrink-0 text-indigo-700">Carrier-Mediált:</strong> Specifikus transzporterek (pl. <span class="bg-yellow-200 px-1 rounded">GLUT1</span> a glükóznak, LAT1 az aminosavaknak).</li>
+                    <li class="flex items-start"><strong class="w-48 shrink-0 text-indigo-700">Receptor-Mediált:</strong> Nagyobb molekulák (inzulin, transzferrin) számára.</li>
+                    <li class="flex items-start"><strong class="w-48 shrink-0 text-indigo-700">Efflux Pumpák:</strong> Aktívan kipumpálják a toxinokat és gyógyszereket (pl. <span class="bg-yellow-200 px-1 rounded">P-glikoprotein</span>).</li>
+                </ul>
+                <h3>A Vér-Liquor Gát (VLG / BCSFB)</h3>
+                <p>Főként a <strong>plexus choroideusokban</strong> található, ahol a CSF termelődik. Itt a kapillárisok fenesztráltak, a gátat a <strong>choroidalis epithelsejtek</strong> közötti tight junctionok képezik.</p>
+                 <div class="highlight-card">
+                    <h4><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>Klinikai Gyöngyszemek</h4>
+                    <p>A VAG diszfunkciója központi szerepet játszik számos neurológiai kórképben (stroke, sclerosis multiplex, Alzheimer-kór). A gát megnyílása neuroinflammációhoz és ödémához vezet. A VAG ugyanakkor a KIR-betegségek gyógyszeres terápiájának fő akadálya is, mivel a legtöbb gyógyszert nem engedi át. A terápiás stratégiák célja a VAG szelektív, átmeneti megnyitása vagy a rajta keresztüli transzportmechanizmusok kihasználása.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 57. A glia -->
+        <section id="glia-content" class="content-section">
+            <div class="card">
+                <h2><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM18 15.75l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 20l-1.035.259a3.375 3.375 0 00-2.456 2.456L18 23.75l-.259-1.035a3.375 3.375 0 00-2.456-2.456L14.25 20l1.035-.259a3.375 3.375 0 002.456-2.456L18 15.75z" /></svg>57. A glia: Az idegrendszer csendes partnerei</h2>
+                <p class="text-lg">A gliasejtek az idegrendszer aktív és nélkülözhetetlen szereplői, akik a neuronok működésének minden aspektusát támogatják és szabályozzák, a homeosztázistól az immunvédekezésen át az információfeldolgozásig.</p>
+                <h3>A Gliasejtek Családfája</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
+                    <div class="card bg-green-50 border-l-4 border-green-500">
+                        <h4 class="text-green-800">Asztrociták</h4>
+                        <p class="text-sm">A KIR "mindenesei", a VAG és a szinapszisok őrei. Funkcióik: homeosztázis, metabolikus támogatás, neurotranszmitter-újrahasznosítás, hegképzés.</p>
+                    </div>
+                     <div class="card bg-cyan-50 border-l-4 border-cyan-500">
+                        <h4 class="text-cyan-800">Oligodendrociták</h4>
+                        <p class="text-sm">A KIR mielinhüvely-gyárai. Egy sejt több axont is képes mielinizálni, lehetővé téve a gyors, szaltatórikus ingerületvezetést.</p>
+                    </div>
+                     <div class="card bg-orange-50 border-l-4 border-orange-500">
+                        <h4 class="text-orange-800">Mikroglia</h4>
+                        <p class="text-sm">A KIR rezidens immunsejtjei. Sérülésre aktiválódnak, fagocitálnak és szabályozzák a neuroinflammációt. Kettős szerepük van: lehetnek védők és károsítók is.</p>
+                    </div>
+                     <div class="card bg-sky-50 border-l-4 border-sky-500">
+                        <h4 class="text-sky-800">Schwann-sejtek</h4>
+                        <p class="text-sm">A PIR mielinképzői és regenerációs segítői. Sérülés után <strong class="text-sky-700">Büngner-szalagokat</strong> képeznek, amelyek vezetik a növő axonokat.</p>
+                    </div>
+                </div>
+                <h3>A Háromoldalú (Tripartit) Szinapszis Koncepciója</h3>
+                <p>Ez a modell forradalmasította a szinaptikus működésről alkotott képünket. Eszerint a szinapszis egy dinamikus egység, amelyet a preszinaptikus terminál, a posztszinaptikus membrán és a szorosan hozzájuk kapcsolódó <strong>asztrocita nyúlvány</strong> alkot.</p>
+                <div class="card bg-purple-50 border border-purple-200 mt-4">
+                     <h4 class="mt-0 text-purple-800">Interaktív ábra: A Tripartit Szinapszis</h4>
+                     <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="w-full md:w-2/3">
+                            <svg id="synapse-svg" viewBox="0 0 500 300" class="w-full h-auto">
+                                <title>A Háromoldalú (Tripartit) Szinapszis</title>
+                                <!-- Asztrocita -->
+                                <path class="structure" data-info="syn-astrocyte" d="M50,150 C150,-20 350,-20 450,150" fill="#e9d5ff" stroke="#a855f7" stroke-width="4"/>
+                                <!-- Preszinaptikus neuron -->
+                                <path class="structure" data-info="syn-pre" d="M100,300 V150 C100,100 150,100 150,100 H350 C350,100 400,100 400,150 V300" fill="#bfdbfe"/>
+                                <!-- Posztszinaptikus neuron -->
+                                <path class="structure" data-info="syn-post" d="M150,100 H350 L350,120 L150,120 Z" fill="#bbf7d0"/>
+                                <text x="210" y="50" class="label text-lg font-bold" data-info="syn-astrocyte" fill="#9333ea">Asztrocita</text>
+                                <text x="200" y="200" class="label text-lg font-bold" data-info="syn-pre" fill="#1e40af">Preszinaptikus neuron</text>
+                                <text x="180" y="145" class="label font-bold" data-info="syn-post" fill="#166534">Posztszinaptikus neuron</text>
+                                <!-- Gliotranszmitterek -->
+                                <circle cx="120" cy="80" r="5" fill="#f43f5e"/><text x="20" y="85" class="label" fill="#f43f5e" data-info="syn-glio">Gliotranszmitter</text>
+                                <!-- Neurotranszmitterek -->
+                                <circle class="structure" data-info="syn-neuro" cx="250" cy="110" r="4" fill="#2563eb"/><circle cx="260" cy="110" r="4" fill="#2563eb"/><circle cx="240" cy="110" r="4" fill="#2563eb"/>
+                                <text x="270" y="100" class="label" data-info="syn-neuro">Neurotranszmitter</text>
+                            </svg>
+                        </div>
+                        <div id="synapse-info-box" class="w-full md:w-1/3 p-4 bg-white rounded-lg border-2 border-slate-200 min-h-[150px] shadow-inner">
+                            <p class="text-slate-500">Kattints az ábra elemeire.</p>
+                        </div>
+                     </div>
+                </div>
+                <div class="highlight-card">
+                    <h4><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 5.25a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9-6.375h18M3.75 6.375h18m-18 0V4.5a1.5 1.5 0 011.5-1.5h15A1.5 1.5 0 0122.5 4.5v1.875m-18 0v1.875a1.5 1.5 0 001.5 1.5h15a1.5 1.5 0 001.5-1.5V6.375m-18 0h18" /></svg>Vizsgatippek</h4>
+                    <p>A gliasejtek szerepe a patológiában egyre fontosabb vizsgatéma. Jegyezd meg a kulcsfogalmakat: <strong>reaktív asztrogliózis</strong> (hegesedés a KIR-ben), <strong>demyelinizáció</strong> (oligodendrocita/Schwann-sejt pusztulás, pl. SM-ben), és a <strong>mikroglia kettős természete</strong> (M1 pro-inflammatorikus vs. M2 anti-inflammatorikus/javító fenotípus). A gliómák (asztrocitóma, oligodendroglióma) szintén gyakori kérdések.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 58. Neurotranszmitterek -->
+        <section id="neurotransmitters-content" class="content-section">
+            <div class="card">
+                <h2><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v.01M12 12v.01M12 21v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>58. Neurotranszmitter rendszerek az agyban</h2>
+                <p class="text-lg">Az agy működését a neurotranszmittereknek nevezett kémiai hírvivők komplex hálózata irányítja. Ezek a rendszerek felelősek a hangulatért, a motivációért, a mozgásért, a tanulásért és szinte minden más agyi funkcióért.</p>
+                
+                <h3>A fő neurotranszmitter rendszerek áttekintése</h3>
+                <div class="overflow-x-auto rounded-lg shadow-md mt-4">
+                    <table class="w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th class="px-6 py-4">Rendszer</th>
+                                <th class="px-6 py-4">Fő Funkciók</th>
+                                <th class="px-6 py-4">Kulcs mag/pálya</th>
+                                <th class="px-6 py-4">Főbb kórképek</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b hover:bg-blue-50">
+                                <td class="px-6 py-4 font-bold text-blue-700">Kolinerg (ACh)</td>
+                                <td class="px-6 py-4">Memória, tanulás, figyelem</td>
+                                <td class="px-6 py-4">N. basalis Meynert</td>
+                                <td class="px-6 py-4">Alzheimer-kór, Myasthenia gravis</td>
+                            </tr>
+                             <tr class="bg-white border-b hover:bg-yellow-50">
+                                <td class="px-6 py-4 font-bold text-yellow-700">Dopaminerg (DA)</td>
+                                <td class="px-6 py-4">Jutalom, motiváció, mozgás</td>
+                                <td class="px-6 py-4">Substantia nigra, VTA</td>
+                                <td class="px-6 py-4">Parkinson-kór, skizofrénia, függőségek</td>
+                            </tr>
+                             <tr class="bg-white border-b hover:bg-green-50">
+                                <td class="px-6 py-4 font-bold text-green-700">Szerotonerg (5-HT)</td>
+                                <td class="px-6 py-4">Hangulat, alvás, étvágy</td>
+                                <td class="px-6 py-4">Raphe magvak</td>
+                                <td class="px-6 py-4">Depresszió, szorongás, OCD</td>
+                            </tr>
+                             <tr class="bg-white border-b hover:bg-red-50">
+                                <td class="px-6 py-4 font-bold text-red-700">Noradrenerg (NA)</td>
+                                <td class="px-6 py-4">Éberség, stresszválasz</td>
+                                <td class="px-6 py-4">Locus coeruleus</td>
+                                <td class="px-6 py-4">ADHD, depresszió, PTSD</td>
+                            </tr>
+                              <tr class="bg-white border-b hover:bg-purple-50">
+                                <td class="px-6 py-4 font-bold text-purple-700">GABAerg (GABA)</td>
+                                <td class="px-6 py-4">Fő gátló rendszer</td>
+                                <td class="px-6 py-4">Interneuronok</td>
+                                <td class="px-6 py-4">Epilepszia, szorongás</td>
+                            </tr>
+                              <tr class="bg-white hover:bg-orange-50">
+                                <td class="px-6 py-4 font-bold text-orange-700">Glutamáterg (Glu)</td>
+                                <td class="px-6 py-4">Fő serkentő rendszer</td>
+                                <td class="px-6 py-4">Kérgi piramissejtek</td>
+                                <td class="px-6 py-4">Excitotoxicitás (stroke), epilepszia</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Receptor Típusok: Ionotróp vs. Metabotróp</h3>
+                <div class="grid md:grid-cols-2 gap-6 mt-4">
+                    <div class="card border-l-4 border-teal-500">
+                        <h4 class="text-teal-700">Ionotróp Receptorok</h4>
+                        <p>Ligand-kapuzott ioncsatornák, amelyek a neurotranszmitter kötődésekor közvetlenül megnyílnak. Gyors, fázisos választ közvetítenek (milliszekundumok).</p>
+                        <p class="mt-2 font-semibold">Példák: nAChR, GABA-A, AMPA, NMDA.</p>
+                    </div>
+                     <div class="card border-l-4 border-rose-500">
+                        <h4 class="text-rose-700">Metabotróp Receptorok</h4>
+                        <p>G-fehérjéhez kapcsolt receptorok (GPCR), amelyek másodlagos hírvivő rendszereket aktiválnak. Lassabb, tónusos, moduláló választ közvetítenek (másodpercek-percek).</p>
+                         <p class="mt-2 font-semibold">Példák: mAChR, dopamin, szerotonin, adrenerg receptorok.</p>
+                    </div>
+                </div>
+
+                 <div class="highlight-card">
+                    <h4><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>Klinikai Gyöngyszemek</h4>
+                    <p>A modern pszichofarmakológia alapja a neurotranszmitter rendszerek célzott befolyásolása. A <strong class="text-green-600">depresszió</strong> kezelésére használt SSRI-k a szerotonin visszavételét gátolják. A <strong class="text-yellow-600">Parkinson-kór</strong> terápiája a dopaminszint pótlására irányul (L-DOPA). A <strong class="text-purple-600">szorongásoldók</strong> (benzodiazepinek) a GABAerg gátlást erősítik. A neurotranszmitter rendszerek megértése tehát a neurológiai és pszichiátriai betegségek terápiájának kulcsa.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 59. Transzmisszió -->
+        <section id="transmission-content" class="content-section">
+             <div class="card">
+                <h2><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.17 48.17 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>59. Szinaptikus és Extraszinaptikus Transzmisszió</h2>
+                <p class="text-lg">A neuronális kommunikáció két alapvető módja, amelyek együttesen biztosítják az agy rendkívüli rugalmasságát és információfeldolgozó kapacitását. A kettő nem kizárja, hanem kiegészíti egymást.</p>
+                
+                <h3>Két kommunikációs stratégia</h3>
+                 <div class="grid md:grid-cols-2 gap-6 mt-4">
+                    <div class="card border-l-4 border-blue-500">
+                        <h4 class="text-blue-700">Szinaptikus Transzmisszió ("Vezetékes")</h4>
+                        <p>Gyors, precíz, pont-pont közötti jelátvitel a szinaptikus résen keresztül. Alapvető a gyors reflexekhez és a specifikus információ továbbításához.</p>
+                        <ul class="list-disc list-inside text-sm mt-2 space-y-1">
+                            <li><strong>Sebesség:</strong> Nagyon gyors (ms)</li>
+                            <li><strong>Tér:</strong> Korlátozott, lokális</li>
+                            <li><strong>Mediátorok:</strong> Főleg Glu, GABA</li>
+                        </ul>
+                    </div>
+                     <div class="card border-l-4 border-violet-500">
+                        <h4 class="text-violet-700">Extraszinaptikus Transzmisszió ("Vezeték nélküli")</h4>
+                        <p>Lassú, diffúz, moduláló jelátvitel az extracelluláris téren keresztül (volume transmission). Az agy globális állapotait (hangulat, éberség) szabályozza.</p>
+                         <ul class="list-disc list-inside text-sm mt-2 space-y-1">
+                            <li><strong>Sebesség:</strong> Lassú (s-perc)</li>
+                            <li><strong>Tér:</strong> Kiterjedt, diffúz</li>
+                            <li><strong>Mediátorok:</strong> Monoaminok, neuropeptidek</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card bg-gray-50 border border-gray-200 mt-6">
+                     <h3 class="mt-0">Interaktív ábra: Transzmissziós Módok</h3>
+                     <p class="text-sm text-slate-600 mb-4">Az ábra a két kommunikációs mód közötti különbséget szemlélteti. Kattints az elemekre!</p>
+                     <div class="flex justify-center items-center">
+                         <svg id="transmission-svg" viewBox="0 0 600 350" class="w-full h-auto">
+                             <title>Szinaptikus vs Extraszinaptikus Transzmisszió</title>
+                             <!-- Presynaptic Neuron -->
+                             <path class="structure" data-info="trans-pre" d="M50,150 C50,50 150,50 150,150" fill="#bfdbfe" stroke="#2563eb" stroke-width="2"/>
+                             <text x="55" y="40" class="label font-semibold">Preszinaptikus Neuron</text>
+
+                             <!-- Synaptic Cleft -->
+                             <g class="structure" data-info="trans-synaptic">
+                                 <path d="M150,140 L250,140 L250,160 L150,160 Z" fill="#e0f2fe"/>
+                                 <text x="160" y="125" class="label font-semibold text-blue-700">Szinaptikus Transzmisszió</text>
+                                 <circle cx="160" cy="150" r="3" fill="#3b82f6"/><circle cx="170" cy="150" r="3" fill="#3b82f6"/>
+                             </g>
+                             
+                             <!-- Postsynaptic Neuron 1 -->
+                              <path class="structure" data-info="trans-post1" d="M250,150 C250,50 350,50 350,150" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+                              <text x="230" y="40" class="label font-semibold">Posztszinaptikus Neuron</text>
+                             
+                             <!-- Volume Transmission / Spillover -->
+                             <g class="structure" data-info="trans-volume">
+                                 <text x="300" y="200" class="label font-semibold text-purple-700">Extraszinaptikus ("Volume") Transzmisszió</text>
+                                 <circle cx="200" cy="200" r="3" fill="#a855f7" opacity="0.8"/><circle cx="250" cy="220" r="3" fill="#a855f7" opacity="0.6"/>
+                                 <circle cx="320" cy="240" r="3" fill="#a855f7" opacity="0.4"/><circle cx="380" cy="260" r="3" fill="#a855f7" opacity="0.2"/>
+                             </g>
+
+                             <!-- Extrasynaptic Receptor -->
+                             <path class="structure" data-info="trans-post2" d="M400,150 C400,50 500,50 500,150" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                             <text x="390" y="40" class="label font-semibold">Távoli Neuron</text>
+                             <rect x="445" y="145" width="10" height="10" fill="#a855f7" class="structure" data-info="trans-extra-receptor"/>
+                             <text x="440" y="175" class="label" data-info="trans-extra-receptor">Extraszinaptikus Receptor</text>
+
+                         </svg>
+                     </div>
+                     <div id="transmission-info-box" class="mt-4 p-4 bg-white rounded-lg border-2 border-slate-200 min-h-[50px] shadow-inner">
+                        <p class="text-slate-500">Kattints az ábra egy elemére a leíráshoz.</p>
+                     </div>
+                </div>
+
+                <h3>Funkcionális jelentőség és integráció</h3>
+                <p>A két rendszer nem elszigetelten működik. A szinaptikus aktivitás (spillover) befolyásolhatja az extraszinaptikus tereket, míg a neuromodulátorok (volume transmission) finomhangolják a szinapszisok erejét és a plaszticitást (LTP/LTD).</p>
+                
+                 <div class="highlight-card">
+                    <h4><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 5.25a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9-6.375h18M3.75 6.375h18m-18 0V4.5a1.5 1.5 0 011.5-1.5h15A1.5 1.5 0 0122.5 4.5v1.875m-18 0v1.875a1.5 1.5 0 001.5 1.5h15a1.5 1.5 0 001.5-1.5V6.375m-18 0h18" /></svg>Vizsgatippek</h4>
+                    <p>A vizsgán fontos megkülönböztetni a két fő transzmissziós módot. A <strong class="text-blue-600">szinaptikus</strong> a gyors, pontos információfeldolgozásért (pl. glutamát, GABA), míg az <strong class="text-violet-600">extraszinaptikus</strong> a lassú, globális állapot-modulációért (pl. dopamin, szerotonin) felelős. Kulcsfogalmak: <strong>spillover</strong> (túlcsordulás), <strong>volume transmission</strong>, és a <strong>neuromoduláció</strong> fogalma, amely az idegi hálózatok működésének finomhangolását jelenti.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Általános funkciók ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            function switchTab(tabName) {
+                tabButtons.forEach(button => {
+                    button.classList.toggle('active', button.dataset.tab === tabName);
+                });
+                contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === `${tabName}-content`);
+                });
+                 window.scrollTo(0, 0);
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.tab));
+            });
+
+            function setupInteractiveSVG(svgId, infoBoxId, infoData) {
+                const svgElements = document.querySelectorAll(`#${svgId} .structure, #${svgId} .label`);
+                const infoBox = document.getElementById(infoBoxId);
+                svgElements.forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        const key = e.target.dataset.info || e.target.parentElement.dataset.info;
+                        infoBox.innerHTML = infoData[key] || `<p class="text-slate-500">Válassz egy elemet az ábráról.</p>`;
+                    });
+                });
+            }
+
+            // --- Agyhártyák (Meninges) ---
+            const meningesInfo = {
+                'koponya': '<strong>Koponyacsont (Calvaria):</strong> Kemény, csontos burok, amely a legkülső védelmi vonalat biztosítja az agy számára.',
+                'epidural': '<strong>Epiduralis tér (potenciális):</strong> A koponyacsont és a dura mater között. Artériás (a. meningea media) sérülésnél vérrel telhet meg, epiduralis haematomát okozva.',
+                'dura-periosteal': '<strong>Dura Mater - Stratum Periosteale:</strong> A dura külső rétege, amely szorosan a koponyacsont belső felszínéhez tapad.',
+                'dura-meningeal': '<strong>Dura Mater - Stratum Meningeale:</strong> A dura belső, sima felszínű rétege. Ez alkotja a dura kettőzeteket (pl. falx cerebri).',
+                'subdural': '<strong>Subduralis tér (potenciális):</strong> A dura mater és az arachnoidea között. Áthidaló vénák sérülésekor itt alakul ki a subduralis haematoma.',
+                'arachnoidea': '<strong>Arachnoidea Mater (Pókhálóhártya):</strong> Vékony, avaszkuláris réteg a dura alatt.',
+                'subarachnoid': '<strong>Subarachnoidealis Tér:</strong> Valódi tér, amelyet CSF tölt ki. Agyalapi aneurizma ruptura esetén ide vérzik be (SAV).',
+                'pia': '<strong>Pia Mater (Lágy Agyhártya):</strong> A legbelső, vékony membrán, amely szorosan követi az agy felszínét.',
+                'brain': '<strong>Agyállomány (Parenchyma):</strong> A neuronokból és gliasejtekből álló funkcionális idegszövet.'
+            };
+            setupInteractiveSVG('meninges-svg', 'meninges-info-box', meningesInfo);
+            
+            // --- Gátrendszerek (Barriers) ---
+            const bbbInfo = {
+                'endothel': '<strong>Kapilláris Endothelsejt:</strong> A VAG alapját képező sejtréteg. A sejtek között tight junctionok találhatók.',
+                'tight-junction': '<strong>Tight Junction:</strong> Fehérjekomplexek, amelyek szorosan lezárják az endothelsejtek közötti teret, létrehozva a fizikai gátat és a magas elektromos ellenállást.',
+                'basal-lamina': '<strong>Bazális Membrán:</strong> Extracelluláris mátrix, amely strukturális támaszt nyújt a kapillárisnak és a környező sejteknek.',
+                'pericyte': '<strong>Pericita:</strong> A kapillárist körülvevő sejt, amely szabályozza a kapilláris átmérőjét és a VAG permeabilitását.',
+                'astrocyte': '<strong>Asztrocita Végtalp:</strong> Az asztrociták nyúlványai, amelyek körülveszik a kapillárist és kulcsfontosságúak a VAG indukciójában és fenntartásában.'
+            };
+            setupInteractiveSVG('bbb-svg', 'bbb-info-box', bbbInfo);
+
+            // --- Glia ---
+            const synapseInfo = {
+                'syn-astrocyte': '<strong>Asztrocita:</strong> Befolyásolja a szinapszist. Receptorain érzékeli a neurotranszmittereket, és válaszul gliotranszmittereket bocsát ki, modulálva a jelátvitelt.',
+                'syn-pre': '<strong>Preszinaptikus neuron:</strong> Az akciós potenciál hatására neurotranszmittereket bocsát ki a szinaptikus résbe.',
+                'syn-post': '<strong>Posztszinaptikus neuron:</strong> Receptorai megkötik a neurotranszmittereket, ami ingerületet vagy gátlást vált ki.',
+                'syn-glio': '<strong>Gliotranszmitter (pl. ATP, D-szerin):</strong> Az asztrocita által kibocsátott jelmolekula, amely visszahat a neuronokra.',
+                'syn-neuro': '<strong>Neurotranszmitter (pl. Glutamát):</strong> A preszinaptikus neuron által felszabadított kémiai hírvivő.'
+            };
+            setupInteractiveSVG('synapse-svg', 'synapse-info-box', synapseInfo);
+
+            // --- Transzmisszió ---
+            const transmissionInfo = {
+                 'trans-pre': '<strong>Preszinaptikus Neuron:</strong> Az ingerületet küldő idegsejt.',
+                 'trans-synaptic': '<strong>Szinaptikus Transzmisszió:</strong> Gyors, célzott jelátvitel a szinaptikus résen keresztül a közvetlenül szemben lévő posztszinaptikus neuronra.',
+                 'trans-post1': '<strong>Posztszinaptikus Neuron:</strong> A szinaptikus jelet fogadó idegsejt.',
+                 'trans-volume': '<strong>Extraszinaptikus Transzmisszió:</strong> A neurotranszmitter a szinapszisból kiszivárogva (spillover) vagy nem-szinaptikus helyről felszabadulva diffundál az extracelluláris térben, és távolabbi sejtekre is hathat.',
+                 'trans-post2': '<strong>Távoli Neuron:</strong> Olyan sejt, amely nem áll közvetlen szinaptikus kapcsolatban, de az extraszinaptikusan terjedő neurotranszmitter eléri és befolyásolja.',
+                 'trans-extra-receptor': '<strong>Extraszinaptikus Receptor:</strong> Magas affinitású receptor a szinapszison kívül, amely képes érzékelni az alacsony koncentrációjú, diffúzan terjedő neurotranszmittereket.'
+            };
+            setupInteractiveSVG('transmission-svg', 'transmission-info-box', transmissionInfo);
+
+            // Alapértelmezett tab beállítása
+            switchTab('neurotransmitters');
+        });
+    </script>
+</body>
+</html>

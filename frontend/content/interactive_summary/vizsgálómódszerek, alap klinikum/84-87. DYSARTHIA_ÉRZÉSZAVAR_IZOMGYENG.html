@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Tételek: Interaktív Tanulási Segédlet (2. rész)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px -2px rgba(0,0,0,0.2);
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background-color: currentColor;
+            border-radius: 2px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-content {
+            flex-grow: 1;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px -5px rgb(0 0 0 / 0.1);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            font-weight: 700;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        h3 {
+            font-size: 1.875rem; /* 30px */
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+        }
+        h4 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .icon {
+            width: 1.5rem; /* 24px */
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        .header-icon {
+             width: 2.25rem; /* 36px */
+            height: 2.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Color Themes */
+        .dysphagia-theme { --theme-color: #ef4444; --theme-bg: #fee2e2; }
+        .paresis-theme { --theme-color: #0ea5e9; --theme-bg: #e0f2fe; }
+        .sensorium-theme { --theme-color: #f59e0b; --theme-bg: #fef3c7; }
+        .dissociated-theme { --theme-color: #14b8a6; --theme-bg: #ccfbf1; }
+        
+        h3, h4 { color: var(--theme-color); }
+        th { background-color: var(--theme-bg); color: var(--theme-color); }
+
+        .red-flag-card {
+            background-color: #fff1f2;
+            border-color: #f43f5e;
+            color: #be123c;
+        }
+        .red-flag-card h4, .red-flag-card .icon {
+            color: #f43f5e;
+        }
+        .exam-tip-card {
+            background-color: #fefce8;
+            border-color: #eab308;
+            color: #a16207;
+        }
+        .exam-tip-card h4, .exam-tip-card .icon {
+            color: #ca8a04;
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Neurológiai Tételek (2. rész)</h1>
+            <p class="text-xl text-gray-500 mt-3">Interaktív tanulási segédlet vizsgához</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12 p-2 bg-gray-100 rounded-full shadow-inner">
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="dysphagia">Dysarthria/Dysphagia</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="paresis">Izomgyengeség</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="sensorium">Érzészavarok</button>
+            <button class="tab-btn flex-grow md:flex-grow-0 py-3 px-6 rounded-full font-bold" data-tab="dissociated">Disszociált Érzészavar</button>
+        </div>
+
+        <!-- Content Sections -->
+        <main>
+            <!-- Dysarthria/Dysphagia Section -->
+            <section id="dysphagia-content" class="tab-content dysphagia-theme">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            Dysarthria & Dysphagia
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="card-content">
+                                <p class="text-lg"><strong>Dysarthria:</strong> Neuromotoros beszédzavar, a beszéd kivitelezésének (artikuláció, fonáció, rezonancia) zavara. A nyelvi tartalom ép, de a beszéd érthetetlenné válhat. Olyan, mintha egy képzett zenész hibás hangszeren próbálna játszani.</p>
+                            </div>
+                            <div class="card-content">
+                                <p class="text-lg"><strong>Dysphagia:</strong> Nyelési zavar. Az étel vagy folyadék szájból a gyomorba való juttatásának nehézsége. Komoly, akár életveszélyes szövődménye az aspirációs pneumonia (félrenyeléses tüdőgyulladás).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card red-flag-card">
+                         <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                            Dysphagia Veszélyjelek!
+                        </h4>
+                        <p class="card-content">Ezek a jelek azonnali beavatkozást igényelnek, mert súlyos szövődményekre utalhatnak!</p>
+                        <ul class="list-disc list-inside space-y-1 mt-2">
+                            <li><strong>Nem szándékos testsúlycsökkenés:</strong> Kalóriabevitel zavara.</li>
+                            <li><strong>Ismétlődő tüdőgyulladás:</strong> "Csendes" aspiráció jele lehet.</li>
+                            <li><strong>Láz étkezés után:</strong> Aspiráció és kezdődő fertőzés gyanúja.</li>
+                            <li><strong>Köhögés, fulladás nyeléskor:</strong> A légutak védelmének elégtelensége.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                            Oropharyngealis vs. Oesophagealis Dysphagia
+                        </h4>
+                        <div class="card-content">
+                            <strong>Oropharyngealis:</strong> A probléma a torokban van. A nyelés elindítása nehéz. Tipikus okok: Stroke, Parkinson-kór, ALS, Myasthenia Gravis.
+                            <br><br><strong>Oesophagealis:</strong> A probléma a nyelőcsőben van. Az étel elakadásának érzése a mellkasban. Tipikus okok: Reflux (GERD), striktúrák, tumor, motilitási zavarok (pl. achalasia).
+                        </div>
+                    </div>
+
+                    <div class="card md:col-span-3 lg:col-span-3 table-container">
+                        <h4>Dysarthria Típusai és Lokalizációja</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Típus</th>
+                                    <th>Károsodás helye</th>
+                                    <th>Fő Jellemzők</th>
+                                    <th>Példa Betegség</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Flaccid (Petyhüdt)</strong></td><td>Alsó motoneuron (LMN)</td><td>Levegős, rekedt hang, hypernasalitás, pontatlan mássalhangzók.</td><td>Myasthenia Gravis, Bell-parézis</td></tr>
+                                <tr><td><strong>Spasztikus</strong></td><td>Kétoldali felső motoneuron (UMN)</td><td>Feszes, préselt, rekedt hang, lassú beszéd, monoton hangmagasság.</td><td>Pseudobulbaris paresis, agytörzsi stroke</td></tr>
+                                <tr><td><strong>Ataxiás</strong></td><td>Kisagy (Cerebellum)</td><td>Skandáló, egyenetlen beszéd, szabálytalan artikulációs törések.</td><td>Cerebelláris ataxia, MS</td></tr>
+                                <tr><td><strong>Hipokinetikus</strong></td><td>Bazális ganglionok</td><td>Monoton, halk (hypophonia), gyorsuló beszédrohamok, "elmosódott".</td><td>Parkinson-kór</td></tr>
+                                <tr><td><strong>Kevert</strong></td><td>Több rendszer</td><td>A fenti típusok kombinációja. Pl. spasztikus-flaccid vagy spasztikus-ataxiás.</td><td>ALS, Sclerosis Multiplex, TBI</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Izomgyengeség Section -->
+            <section id="paresis-content" class="tab-content paresis-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
+                            Izomgyengeség (Paresis)
+                        </h3>
+                        <p class="text-lg">Az izomerő objektív csökkenése. Lehet részleges (<strong>parézis</strong>) vagy teljes (<strong>plégia</strong>). Eloszlása (mono-, hemi-, para-, quadri-) kulcsfontosságú a sérülés helyének (lokalizáció) meghatározásában.</p>
+                    </div>
+
+                    <div class="card exam-tip-card md:col-span-3">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 15.75l-1.42-1.419A9 9 0 0112 3c4.075 0 7.695 2.226 9.37 5.488l-1.42 1.42A7.5 7.5 0 0012 4.5a7.5 7.5 0 00-6.375 3.633z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75h.007v.008H12v-.008z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75a2.25 2.25 0 00-2.25 2.25v.316l-1.5 3.375a.75.75 0 001.06 1.06l3.375-1.5H15a2.25 2.25 0 002.25-2.25v-2.25a2.25 2.25 0 00-2.25-2.25H9.75A2.25 2.25 0 007.5 15v.316l.338.75" /></svg>
+                           Vizsga Kérdés: Felső vs. Alsó Motoneuron
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div>
+                                <strong class="text-lg">Felső motoneuron (UMN) károsodás</strong>
+                                <p class="mt-1">Helye: Agy, gerincvelő. Tünetek: <strong>Spasztikus</strong> bénulás, <strong>fokozott</strong> sajátreflexek (hyperreflexia), kóros reflexek (pl. <strong>Babinski-jel</strong>). Nincs jelentős izomatrófia, nincsenek fasciculatiók.</p>
+                            </div>
+                            <div>
+                                <strong class="text-lg">Alsó motoneuron (LMN) károsodás</strong>
+                                <p class="mt-1">Helye: Perifériás ideg, izom. Tünetek: <strong>Petyhüdt</strong> (flaccid) bénulás, <strong>csökkent/hiányzó</strong> sajátreflexek (hypo-/areflexia), korai és kifejezett <strong>izomatrófia</strong>, <strong>fasciculatiók</strong> (izomrángások).</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" /></svg>
+                           Központi Idegrendszeri Okok (UMN)
+                        </h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Stroke (leggyakoribb)</li>
+                            <li>Traumás agysérülés (TBI)</li>
+                            <li>Agydaganatok</li>
+                            <li>Sclerosis Multiplex (MS)</li>
+                            <li>ALS (UMN + LMN)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                           Perifériás Idegrendszeri Okok (LMN)
+                        </h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Neuropathiák:</strong> Guillain-Barré, diabeteszes neuropathia, alagút szindrómák.</li>
+                            <li><strong>NMJ zavarok:</strong> Myasthenia Gravis, LEMS.</li>
+                            <li><strong>Myopathiák:</strong> Izomdisztrófiák, gyulladásos myopathiák (polymyositis).</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                           Diagnosztika
+                        </h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Izomerő tesztelés (MRC skála)</li>
+                            <li>Reflexvizsgálat (UMN vs. LMN)</li>
+                            <li>Labor: CK (izom), autoantitestek (MG)</li>
+                            <li>Elektrofiziológia: EMG, ENG</li>
+                            <li>Képalkotók: MRI (agy, gerincvelő)</li>
+                            <li>Izombiopszia, genetika</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Érzészavarok Section -->
+            <section id="sensorium-content" class="tab-content sensorium-theme">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                        <h3 class="flex items-center">
+                           <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.115 5.19l.319 1.913A6 6 0 0012 12h0a6 6 0 005.566-4.897l.319-1.913A2.25 2.25 0 0113.5 3h-3a2.25 2.25 0 01-2.385 2.19z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 12v9" /></svg>
+                           Érzészavarok
+                        </h3>
+                        <p class="text-lg">Az érzékelés minőségének vagy mennyiségének kóros eltérései. Lehetnek negatív tünetek (pl. <strong>hypaesthesia</strong> - csökkent érzés, <strong>anaesthesia</strong> - teljes érzéskiesés) vagy irritatív, pozitív tünetek (pl. <strong>paraesthesia</strong> - zsibbadás, bizsergés, <strong>dysaesthesia</strong> - kellemetlen, fájdalmas érzet).</p>
+                    </div>
+
+                    <div class="card exam-tip-card">
+                        <h4>
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                           Vizsga Tipp: Jellemző Mintázatok
+                        </h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Kesztyű-harisnya eloszlás:</strong> A polyneuropathiák klasszikus jele (pl. diabeteszes, alkoholos). Disztálisan kezdődik és szimmetrikus.</li>
+                            <li><strong>Dermatomális:</strong> Egyetlen ideggyök (radix) károsodására utal. Pontosan követi a dermatoma határát (pl. porckorongsérv).</li>
+                            <li><strong>Testfél érintettség (Hemiszenzoros):</strong> Mindig centrális eredetű, a laesio a thalamusban vagy az agykéregben van.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
+                           Érzésféleségek & Pályák
+                        </h4>
+                        <div class="card-content">
+                            <p class="mb-2"><strong>Protopathiás (fájdalom, hő):</strong> A spinothalamicus pályán fut, a gerincvelőben hamar (1-2 szegmentummal feljebb) kereszteződik.</p>
+                            <p><strong>Epikritikus (finom tapintás, vibráció, propriocepció):</strong> A hátsó kötegen fut, azonos oldalon száll fel, és csak a nyúltvelőben kereszteződik.</p>
+                            <p class="mt-2 font-semibold">Ez az anatómiai elkülönülés a disszociált érzészavarok alapja.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Dissociated Sensory Loss Section -->
+            <section id="dissociated-content" class="tab-content dissociated-theme">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card md:col-span-2 lg:col-span-3">
+                         <h3 class="flex items-center">
+                             <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.62m0 0a15.998 15.998 0 013.388-1.62m0 0a15.998 15.998 0 013.388-1.62m-13.5 6.493l5.043-.025M9.53 16.122a15.998 15.998 0 00-3.388-1.62m0 0a15.998 15.998 0 00-3.388-1.62m0 0A15.998 15.998 0 001.13 6.322a15.998 15.998 0 003.388 1.622m6.762 8.178a15.998 15.998 0 003.388 1.62m0 0a15.998 15.998 0 003.388 1.62m0 0a15.998 15.998 0 003.388-1.62m0 0a15.998 15.998 0 003.388-1.62m-13.5-6.493l5.043 .025" /></svg>
+                             Disszociált Érzészavar
+                         </h3>
+                        <p class="text-lg">Specifikus érzészavar, ahol egyes érzéskvalitások kiesnek, míg mások ugyanazon a területen megmaradnak. Nagy <strong>lokalizációs értékkel</strong> bír, specifikus idegpályák szelektív károsodására utal a központi idegrendszerben, leggyakrabban a gerincvelőben vagy az agytörzsben.</p>
+                    </div>
+
+                    <div class="card md:col-span-3 lg:col-span-3 table-container">
+                        <h4>Klasszikus Szindrómák</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Szindróma</th>
+                                    <th>Érintett Struktúra</th>
+                                    <th>Érzészavar Mintázata</th>
+                                    <th>Jellemző Motoros Tünet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Syringomyelia</strong></td>
+                                    <td>Gerincvelő központi része (commissura alba)</td>
+                                    <td><strong>Köpenyszerű</strong> (vállöv, karok) kétoldali fájdalom/hő kiesés, tapintás megtartott.</td>
+                                    <td>Kéz kisizmainak sorvadása (LMN), alsó végtagi spaszticitás (UMN).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Brown-Séquard szindróma</strong></td>
+                                    <td>Gerincvelő féloldali léziója</td>
+                                    <td><strong>Ipsilateralis</strong> (azonos oldali) propriocepció/vibráció kiesés, <strong>kontralaterális</strong> (ellenoldali) fájdalom/hő kiesés.</td>
+                                    <td>Ipsilateralis spasztikus bénulás.</td>
+                                </tr>
+                                 <tr>
+                                    <td><strong>Wallenberg-szindróma</strong></td>
+                                    <td>Nyúltvelő lateralis része (PICA)</td>
+                                    <td><strong>Keresztezett:</strong> Ipsilateralis arcon, kontralaterális testen fájdalom/hő kiesés. Tapintás megtartott.</td>
+                                    <td>Nincs végtagbénulás, de ipsilateralis ataxia igen.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>A. Spinalis Ant. szindróma</strong></td>
+                                    <td>Gerincvelő elülső 2/3-a</td>
+                                    <td>Kétoldali fájdalom/hő kiesés a lézió szintje alatt. <strong>Hátsó kötegi funkciók megtartottak.</strong></td>
+                                    <td>Kétoldali petyhüdt/spasztikus bénulás.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        const colorMap = {
+            dysphagia: '#ef4444',
+            paresis: '#0ea5e9',
+            sensorium: '#f59e0b',
+            dissociated: '#14b8a6'
+        };
+
+        const setActiveTab = (tab) => {
+             // Update button styles
+            tabButtons.forEach(btn => {
+                const btnTab = btn.dataset.tab;
+                if (btnTab === tab) {
+                    btn.classList.add('active');
+                    btn.style.backgroundColor = colorMap[btnTab];
+                    btn.style.color = 'white';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.backgroundColor = '#e5e7eb';
+                    btn.style.color = '#4b5563';
+                }
+            });
+
+            // Update content visibility
+            tabContents.forEach(content => {
+                if (content.id === tab + '-content') {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        };
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                setActiveTab(button.dataset.tab);
+            });
+        });
+
+        // Set initial active tab
+        setActiveTab('dysphagia');
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Tudásbázis: Speciális Kórképek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23d1d5db' fill-opacity='0.1'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 9999px;
+        }
+        .nav-link.active {
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #3730a3; /* indigo-800 */
+            font-weight: 600;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out;
+        }
+        .accordion-content.open {
+            max-height: 8000px; /* Adjust as needed for long content */
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb; /* gray-200 */
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9fafb; /* gray-50 */
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .card-gradient-blue {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+        .card-gradient-emerald {
+            background: linear-gradient(135deg, #5eead4, #10b981);
+        }
+        .card-gradient-violet {
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+        }
+        .section-title-blue { border-color: #3b82f6; }
+        .section-title-emerald { border-color: #10b981; }
+        .section-title-violet { border-color: #8b5cf6; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-blue-700 flex items-center">
+                    <svg class="icon mr-3" data-lucide="microscope"></svg>
+                    Speciális Neurológiai Kórképek
+                </h1>
+                <nav id="main-nav" class="mt-4 md:mt-0 flex flex-wrap justify-center items-center gap-2 md:gap-4 bg-gray-100 p-1.5 rounded-full">
+                    <a href="#kiserbetegsegek" class="nav-link text-sm font-medium text-gray-700 hover:bg-gray-200">Kisérbetegségek</a>
+                    <a href="#feherallomany" class="nav-link text-sm font-medium text-gray-700 hover:bg-gray-200">Fehérállományi Károsodások</a>
+                    <a href="#pres" class="nav-link text-sm font-medium text-gray-700 hover:bg-gray-200">PRES</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Kisérbetegségek Section -->
+        <section id="kiserbetegsegek-content" class="content-section">
+            <h2 class="text-3xl font-bold mb-2 text-slate-800">Idegrendszeri Kisérbetegségek</h2>
+            <div class="w-24 h-1.5 bg-blue-500 rounded-full mb-6"></div>
+            <p class="mb-8 text-slate-600 max-w-3xl">Az agyi kisérbetegségek (cerebral small vessel disease, SVD) az agy kis artériáinak, arterioláinak, venuláinak és kapillárisainak kóros állapotait foglalják magukban. Ezek a kórképek felelősek a lakunáris stroke-okért, és jelentősen hozzájárulnak a kognitív hanyatlás és a vaszkuláris demencia kialakulásához.</p>
+
+            <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-blue-800">
+                        <span class="flex items-center"><i data-lucide="droplets" class="mr-3 text-blue-500"></i>Diabeteses Neuropathia</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-blue-500"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-slate-600 mb-4 border-l-4 border-blue-300 pl-4">A tartósan magas vércukorszint (hyperglycemia) által okozott idegkárosodás, amely a perifériás és autonóm idegrendszert is érintheti. Főbb formái:</p>
+                        <div class="grid md:grid-cols-3 gap-4 mt-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h4 class="font-semibold text-blue-900 mb-2">Disztális szimmetrikus polyneuropathia</h4>
+                                <p class="text-sm text-slate-700">A leggyakoribb forma, "zokni-kesztyű" eloszlású érzészavarral (égő fájdalom, zsibbadás) és gyengeséggel jár.</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h4 class="font-semibold text-blue-900 mb-2">Mononeuropathiák</h4>
+                                <p class="text-sm text-slate-700">Egyetlen ideg károsodása, gyakran az agyidegeket (pl. III., VI.) vagy a törzs idegeit érinti.</p>
+                            </div>
+                             <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h4 class="font-semibold text-blue-900 mb-2">Autonóm neuropathia</h4>
+                                <p class="text-sm text-slate-700">A belső szervek beidegzésének zavara, ami szív-, emésztőrendszeri és urogenitális problémákat okozhat.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-blue-800">
+                        <span class="flex items-center"><i data-lucide="gauge-circle" class="mr-3 text-blue-500"></i>Hipertóniás Kisérbetegség</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-blue-500"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                         <p class="text-slate-600 mb-4 border-l-4 border-blue-300 pl-4">A krónikus magas vérnyomás károsítja a kisereket, ami retinopathiához és encephalopathiához vezethet.</p>
+                         <div class="grid md:grid-cols-2 gap-4 mt-4">
+                             <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h4 class="font-semibold text-blue-900 mb-2">Hipertóniás retinopathia</h4>
+                                <p class="text-sm text-slate-700">A retina ereinek szűkülete, bevérzések, exsudátumok (Keith-Wagener-Barker klasszifikáció). Súlyos formája (papillaoedema) neurológiai vészhelyzetet jelezhet.</p>
+                            </div>
+                             <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h4 class="font-semibold text-blue-900 mb-2">Hipertóniás encephalopathia</h4>
+                                <p class="text-sm text-slate-700">Akut, súlyos vérnyomás-emelkedés okozta agyi működészavar, fejfájással, látászavarral, görcsrohamokkal. Gyakran a PRES hátterében áll.</p>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+                
+                 <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-blue-800">
+                        <span class="flex items-center"><i data-lucide="heart-crack" class="mr-3 text-blue-500"></i>Atherosclerotikus Kisérbetegség (SVD)</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-blue-500"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                       <p class="text-slate-600 mb-4 border-l-4 border-blue-300 pl-4">Az agyi kiserek érelmeszesedése, amely az MRI-n jellegzetes elváltozásokat okoz (STRIVE kritériumok):</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                           <li><b>Lakunáris infarktusok:</b> Kisméretű (<15 mm) infarktusok a mély agyi területeken, jellegzetes klinikai szindrómákat okozva (pl. tiszta motoros hemiparesis).</li>
+                           <li><b>Fehérállományi hiperintenzitások (WMH):</b> A fehérállomány károsodásának jelei.</li>
+                           <li><b>Cerebrális mikrohemorrhágiák (CMB):</b> Apró bevérzések, melyek a T2*/SWI szekvenciákon láthatók.</li>
+                           <li><b>Tágult perivaszkuláris terek (EPVS):</b> A Virchow-Robin terek kitágulása.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-blue-800">
+                        <span class="flex items-center"><i data-lucide="dna" class="mr-3 text-blue-500"></i>Örökölhető Kisérbetegségek</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-blue-500"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                       <p class="text-slate-600 mb-4 border-l-4 border-blue-300 pl-4">Ritka, genetikailag meghatározott kórképek, melyek az agyi kisereket érintik.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                           <li><b>CADASIL:</b> A leggyakoribb örökletes forma, a NOTCH3 gén mutációja okozza. Jellemzői: migrén aurával, ismétlődő stroke-ok, hangulatzavarok és kognitív hanyatlás. Az MRI-n jellegzetes az anterior temporális pólusok érintettsége.</li>
+                           <li><b>CARASIL:</b> A HTRA1 gén mutációja okozza, jellemzően alopecia (kopaszság) és spondylosis (gerinc-degeneráció) is társul a neurológiai tünetekhez.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fehérállományi Károsodások Section -->
+        <section id="feherallomany-content" class="content-section">
+            <h2 class="text-3xl font-bold mb-2 text-slate-800">Multiplex Agyi Fehérállományi Károsodások</h2>
+            <div class="w-24 h-1.5 bg-emerald-500 rounded-full mb-6"></div>
+            <p class="mb-8 text-slate-600 max-w-3xl">A fehérállományi léziók (WML) az agyi MRI-n látható elváltozások, melyek hátterében számos ok állhat. Az elkülönítésük komplex diagnosztikai feladat, amely a klinikai kép, az MRI-mintázat és egyéb vizsgálatok szintézisén alapul.</p>
+             <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-emerald-800">
+                        <span class="flex items-center"><i data-lucide="shield-half" class="mr-3 text-emerald-500"></i>Demyelinizációs Betegségek</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-emerald-500"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-slate-600 mb-4 border-l-4 border-emerald-300 pl-4">A mielinhüvely károsodása jellemzi őket. Főbb típusok:</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><b>Sclerosis Multiplex (MS):</b> A leggyakoribb gyulladásos-demyelinizációs autoimmun betegség. MRI-n jellegzetesek a periventrikuláris, juxtakortikális, corpus callosum és infratentoriális léziók (Dawson-ujjak). A liquorban az esetek >95%-ában oligoklonális bandák (OCB) mutathatók ki.</li>
+                            <li><b>Neuromyelitis Optica Spektrum Betegség (NMOSD):</b> Súlyos opticus neuritist és longitudinálisan kiterjedt transzverz myelitist (LETM) okoz. Az AQP4-antitest pozitivitás diagnosztikus.</li>
+                            <li><b>MOG Antitest Asszociált Betegség (MOGAD):</b> Klinikailag az MS-hez vagy NMOSD-hez hasonló lehet, de a MOG-antitestek jelenléte elkülöníti.</li>
+                            <li><b>Akut Disszeminált Encephalomyelitis (ADEM):</b> Jellemzően monofázisos, fertőzést követő kórkép, melyet encephalopathia (tudatzavar) kísér.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-emerald-800">
+                        <span class="flex items-center"><i data-lucide="activity" class="mr-3 text-emerald-500"></i>Vaszkuláris, Infektív és Egyéb Okok</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-emerald-500"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-slate-600 mb-4 border-l-4 border-emerald-300 pl-4">A fehérállomány károsodását számos egyéb folyamat is okozhatja.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><b>Vaszkuláris:</b> A leggyakoribb ok, különösen idősebb korban. A kisérbetegség (SVD) multiplex, gyakran konfluáló léziókat okoz.</li>
+                            <li><b>Infektív:</b> Pl. Progresszív Multifokális Leukoencephalopathia (PML) immunszupprimáltaknál (JC vírus), HIV encephalopathia, neuroborreliosis.</li>
+                            <li><b>Metabolikus/Toxikus:</b> B12-vitamin hiány, alkoholizmus, szén-monoxid mérgezés, gyógyszerek.</li>
+                            <li><b>Neoplasztikus:</b> Primer agydaganatok (glioma, limfóma) vagy metasztázisok.</li>
+                             <li><b>Genetikai:</b> Örökletes leukodystrophiák (pl. X-ALD, MLD, CADASIL).</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-emerald-800">
+                        <span class="flex items-center"><i data-lucide="search" class="mr-3 text-emerald-500"></i>Diagnosztikus Megközelítés</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-emerald-500"></i>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                       <p class="text-slate-600 mb-4 border-l-4 border-emerald-300 pl-4">A diagnózis a klinikai kép, az MRI és a liquorvizsgálat szintézisén alapul.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                           <li><b>MRI:</b> A léziók eloszlása (pl. periventrikuláris), morfológiája (pl. ovoid) és kontraszthalmozása (pl. nyitott gyűrű) kulcsfontosságú.</li>
+                           <li><b>Liquor (CSF):</b> Az OCB-k, a sejtszám és a specifikus antitestek (AQP4, MOG) vizsgálata elengedhetetlen a gyulladásos kórképek elkülönítésében.</li>
+                        </ul>
+                        <div class="mt-4 table-container">
+                             <table class="text-sm">
+                                <thead>
+                                    <tr><th>Jellemző</th><th>Sclerosis Multiplex (MS)</th><th>Akut Disszeminált Encephalomyelitis (ADEM)</th><th>Neuromyelitis Optica (NMOSD)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Klinikum</td><td>Relapszáló-remittáló vagy progresszív</td><td>Monofázisos, **encephalopathia**</td><td>Súlyos opticus neuritis, **LETM**</td></tr>
+                                    <tr><td>MRI</td><td>Dawson-ujjak, juxtakortikális léziók</td><td>Nagy, egyidős léziók, mély szürkeállományi érintettség</td><td>LETM (>3 szegmentum), area postrema léziók</td></tr>
+                                    <tr><td>Liquor</td><td>**OCB-k >95%-ban pozitívak**</td><td>OCB-k általában negatívak</td><td>OCB-k ritkák, magasabb sejtszám lehet</td></tr>
+                                    <tr><td>Antitest</td><td>Nincs specifikus</td><td>Gyakran MOG-IgG pozitív</td><td>**AQP4-IgG pozitív** a legtöbb esetben</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </section>
+        
+        <!-- PRES Section -->
+        <section id="pres-content" class="content-section">
+            <h2 class="text-3xl font-bold mb-2 text-slate-800">Posterior Reverzibilis Encephalopathia Szindróma (PRES)</h2>
+            <div class="w-24 h-1.5 bg-violet-500 rounded-full mb-6"></div>
+            <p class="mb-8 text-slate-600 max-w-3xl">A PRES egy akut neurológiai tünetegyüttes, melyet az agy (főként a hátsó területein) kialakuló, jellemzően reverzibilis vazogén ödéma jellemez. A korai felismerés és a kiváltó ok haladéktalan kezelése kulcsfontosságú.</p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-violet-400">
+                    <h3 class="text-2xl font-bold mb-4 text-violet-800 flex items-center"><i data-lucide="alert-circle" class="mr-3"></i>Klinikai Kép és Kiváltó Okok</h3>
+                    <p class="text-slate-600 mb-2 font-semibold">Jellemző tünetek:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-700 mb-4">
+                        <li>Fejfájás (gyakran hirtelen, súlyos)</li>
+                        <li>Görcsrohamok (fokális vagy generalizált)</li>
+                        <li>Tudatzavar (konfúziótól a kómáig)</li>
+                        <li>Látászavarok (homályos látás, kortikális vakság)</li>
+                    </ul>
+                    <p class="text-slate-600 mb-2 font-semibold">Gyakori kiváltó okok:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-700">
+                        <li><b>Hipertóniás állapotok:</b> Akut hipertóniás krízis.</li>
+                        <li><b>Terhesség:</b> Pre-eclampsia, eclampsia.</li>
+                        <li><b>Gyógyszerek:</b> Immunszuppresszánsok, kemoterápiás szerek.</li>
+                        <li><b>Vesebetegség, autoimmun kórképek, szepszis.</b></li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-violet-400">
+                     <h3 class="text-2xl font-bold mb-4 text-violet-800 flex items-center"><i data-lucide="stethoscope" class="mr-3"></i>Kezelés és Prognózis</h3>
+                     <p class="text-slate-600 mb-2 font-semibold">Kezelés:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-700 mb-4">
+                        <li>A kiváltó ok gyors azonosítása és kezelése (pl. gyógyszer elhagyása).</li>
+                        <li>Kontrollált vérnyomáscsökkentés intravénás szerekkel.</li>
+                        <li>Görcsrohamok menedzselése antiepileptikumokkal.</li>
+                    </ul>
+                    <p class="text-slate-600 mb-2 font-semibold">Prognózis:</p>
+                    <p class="text-slate-700">Általában jó, a tünetek és a radiológiai elváltozások többsége napokon-heteken belül visszafejlődik. Maradandó károsodás vagy halál súlyos szövődmények (pl. vérzés, infarktus) esetén fordulhat elő.</p>
+                </div>
+            </div>
+            <div class="mt-6 bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-violet-800">
+                    <span class="flex items-center"><i data-lucide="image" class="mr-3 text-violet-500"></i>Diagnosztika (MRI Részletesen)</span>
+                    <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-violet-500"></i>
+                </button>
+                <div class="accordion-content px-5 pb-5">
+                    <p class="text-slate-600 my-4 border-l-4 border-violet-300 pl-4">Az MRI a választandó módszer. A legjellemzőbb a kétoldali, szimmetrikus vazogén ödéma a posterior agyi területeken.</p>
+                    <div class="table-container">
+                        <table class="text-sm">
+                            <thead>
+                                <tr><th>MRI Jellemző</th><th>Tipikus Megjelenés</th><th>Atipikus Megjelenés</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Lokalizáció</td><td>Bilaterális, szimmetrikus; **Parietális és occipitális** lebenyek dominálnak.</td><td>Unilaterális, agytörzsi, bazális ganglion, gerincvelői érintettség.</td></tr>
+                                <tr><td>T2/FLAIR</td><td>Magas jelintenzitás (vazogén ödéma).</td><td>Hasonló jellegű ödéma atipikus helyeken.</td></tr>
+                                <tr><td>DWI/ADC</td><td>Általában **nincs diffúziórestrikció**.</td><td>Diffúziórestrikció előfordulhat (rosszabb prognózis).</td></tr>
+                                <tr><td>Vérzés (SWI/T2*)</td><td>Mikro- vagy makrohemorrhágiák előfordulhatnak.</td><td>-</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 mt-8 bg-slate-800 text-slate-400">
+        <p>&copy; 2025 Neurológiai Tudásbázis: Speciális Kórképek. Kizárólag oktatási és tájékoztatási célokat szolgál.</p>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Navigation Logic
+        const navLinks = document.querySelectorAll('#main-nav a');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        function switchTab(hash) {
+            const targetLink = document.querySelector(`a[href="${hash}"]`);
+            if (!targetLink) return;
+
+            navLinks.forEach(l => l.classList.remove('active'));
+            targetLink.classList.add('active');
+
+            const targetId = hash.substring(1) + '-content';
+            contentSections.forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hash = link.getAttribute('href');
+                history.pushState(null, null, hash);
+                switchTab(hash);
+                window.scrollTo(0, 0);
+            });
+        });
+
+        // Set the active tab on page load based on the hash
+        if (window.location.hash) {
+            switchTab(window.location.hash);
+        } else {
+            // Default to the first tab if no hash is present
+            switchTab('#kiserbetegsegek');
+        }
+
+        // Accordion Logic
+        const accordionToggles = document.querySelectorAll('.accordion-toggle');
+
+        accordionToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('.accordion-icon');
+                
+                if (content && icon) {
+                    content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

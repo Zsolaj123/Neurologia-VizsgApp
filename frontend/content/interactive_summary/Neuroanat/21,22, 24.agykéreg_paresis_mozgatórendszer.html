@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuroanatómia Vizsga Portál</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .section-title {
+            color: #1e3a8a; /* Dark blue */
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .nav-link {
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            color: #1d4ed8; /* Medium blue */
+            border-bottom-color: #1d4ed8;
+        }
+        .nav-link:hover {
+            color: #1e3a8a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #eef2ff; /* Light indigo */
+            color: #312e81; /* Dark indigo */
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb; /* Off-white */
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-900 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M12 7a5 5 0 1 0 5 5 5.006 5.006 0 0 0-5-5zm2.446 7.879.001.001-3.1-1.241.618-1.543 3.1 1.241-.619 1.542zM12.5 9.5a1 1 0 1 1-1 1 1 1 0 0 1 1-1zM11 14.5a1 1 0 1 1 1-1 1 1 0 0 1-1 1z"/></svg>
+                Neuroanatómia Portál
+            </h1>
+            <nav id="nav-menu" class="hidden md:flex items-center space-x-8 text-lg font-medium text-gray-600">
+                <a href="#mozgatorendszer" class="nav-link">Mozgatórendszer</a>
+                <a href="#paresis" class="nav-link">Paresis Lokalizáció</a>
+                <a href="#agykerereg" class="nav-link">Agykéreg</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white/90">
+             <a href="#mozgatorendszer" class="block py-2 px-4 text-sm hover:bg-gray-200">Mozgatórendszer</a>
+             <a href="#paresis" class="block py-2 px-4 text-sm hover:bg-gray-200">Paresis Lokalizáció</a>
+             <a href="#agykerereg" class="block py-2 px-4 text-sm hover:bg-gray-200">Agykéreg</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Section 1: Mozgatórendszer -->
+        <section id="mozgatorendszer" class="mb-24 scroll-mt-24">
+            <h2 class="text-4xl font-bold mb-8 section-title">🏃 I. A Mozgatórendszer Felépítése</h2>
+            <p class="text-lg text-gray-700 mb-10">Az emberi mozgás egy komplex, hierarchikusan és párhuzamosan szervezett rendszer precíz működésének eredménye, az idegrendszertől az izmokig.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Központi Összetevők -->
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-800">🧠 1. Központi Összetevők (A Tervezők és Irányítók)</h3>
+                    <ul class="space-y-4">
+                        <li><strong>Mozgató kéreg:</strong> 🧭 Akaratlagos mozgások tervezése, indítása, parancsok kiadása.</li>
+                        <li><strong>Bazális ganglionok:</strong> 🎯 Mozgásprogramok finomítása és kiválasztása, nem kívánt mozgások gátlása.</li>
+                        <li><strong>Kisagy (Cerebellum):</strong> ⚖️ Mozgáskoordináció, egyensúly, finommotorika, a tervezett és valós mozgás összevetése, korrekció.</li>
+                        <li><strong>Agytörzs:</strong> 🛤️ Testtartás, egyensúly, szemmozgások, alapvető reflexek, a felsőbb központok és a gerincvelő összekötése.</li>
+                        <li><strong>Gerincvelő:</strong> 🔄 Felsőbb parancsok közvetítése az izmok felé, a gerincvelői reflexek központja.</li>
+                    </ul>
+                </div>
+                <!-- Perifériás Összetevők -->
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-800">💪 2. Perifériás Összetevők (A Végrehajtók)</h3>
+                     <ul class="space-y-4">
+                        <li><strong>Motoros idegek:</strong> ⚡ Efferens rostok, a központi parancsokat az izmokhoz szállítják.</li>
+                        <li><strong>Neuromuszkuláris junkció:</strong> 🔌 Szinapszis ideg és izom között, ingerületátvitel acetilkolinnal.</li>
+                        <li><strong>Vázizmok:</strong> 🔥 A mozgatórendszer aktív szervei, a mozgás létrehozói.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="text-3xl font-bold mb-6 text-blue-800">Leszálló Motoros Pályák</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h4 class="text-xl font-semibold mb-3 text-green-700">🟩 1. Piramispálya (Tractus Corticospinalis & Corticobulbaris)</h4>
+                    <p class="mb-4">Ez a pálya a finom, akaratlagos mozgások direkt, kérgi kontrollját biztosítja.</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Eredés:</strong> Elsődlegesen a motoros kéregből.</li>
+                        <li><strong>Kereszteződés:</strong> A rostok ~90%-a a nyúltvelő alján átkereszteződik.</li>
+                        <li><strong>Funkció:</strong> Akaratlagos, precíz mozgások (pl. írás, arcmimika).</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h4 class="text-xl font-semibold mb-3 text-orange-700">🟧 2. Extrapiramidális Rendszer</h4>
+                    <p class="mb-4">Ezek a pályák az automatikus, testtartásért felelős és reflexes mozgásokat szabályozzák.</p>
+                     <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Tractus Reticulospinalis:</strong> 🌐 Testtartás és izomtónus.</li>
+                        <li><strong>Tractus Vestibulospinalis:</strong> ⚖️ Egyensúly, antigravitáció.</li>
+                        <li><strong>Tractus Rubrospinalis:</strong> 💪 Felső végtagi hajlítók facilitálása.</li>
+                        <li><strong>Tractus Tectospinalis:</strong> 👁️ Fej és szem reflexos fordítása.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Paresis -->
+        <section id="paresis" class="mb-24 scroll-mt-24">
+            <h2 class="text-4xl font-bold mb-8 section-title">🩺 II. Paresist Okozó Idegrendszeri Károsodások</h2>
+             <p class="text-lg text-gray-700 mb-10">Az izomgyengeség (paresis) helyének azonosítása a neurológiai diagnosztika alapja. A kulcs a felső (FMN) és alsó (AMN) motoneuron sérülésének elkülönítése.</p>
+            
+            <div class="card p-6 mb-12">
+                 <h3 class="text-2xl font-bold mb-4 text-blue-800">Felső (FMN) vs. Alsó (AMN) Motoneuron</h3>
+                 <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                         <p><span class="font-bold">Felső Motoneuron (FMN):</span> Az agykéregben vagy agytörzsben lévő idegsejt, amely az alsó motoneuronhoz fut. A központi idegrendszeren belül van. <span class="font-semibold text-blue-700">A karmester.</span></p>
+                    </div>
+                     <div>
+                         <p><span class="font-bold">Alsó Motoneuron (AMN):</span> A gerincvelőben vagy agytörzsben lévő idegsejt, amely közvetlenül az izomhoz fut. <span class="font-semibold text-blue-700">A zenész.</span></p>
+                    </div>
+                 </div>
+            </div>
+
+            <h3 class="text-3xl font-bold mb-6 text-center text-blue-800">FMN vs. AMN Laesio: A Nagy Összehasonlító Táblázat</h3>
+            <div class="overflow-x-auto card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jellemző</th>
+                            <th>Felső Motoneuron (FMN) Laesio (Centrális)</th>
+                            <th>Alsó Motoneuron (AMN) Laesio (Perifériás)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Paresis jellege</strong></td>
+                            <td>Spasztikus (görcsös)</td>
+                            <td>Petyhüdt (flaccid)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Izomtónus</strong></td>
+                            <td>Fokozott (Hipertónia, "bicskatünet")</td>
+                            <td>Csökkent vagy hiányzó (Hipotónia)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sajátreflexek</strong></td>
+                            <td>Fokozottak (Hiperreflexia)</td>
+                            <td>Gyengültek vagy kiesettek (Areflexia)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kóros reflexek</strong></td>
+                            <td><span class="tag bg-red-100 text-red-800">Jelen (pl. Babinski-jel)</span></td>
+                            <td><span class="tag bg-green-100 text-green-800">Nincsenek</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Izomatrófia</strong></td>
+                            <td>Nincs, vagy csak késői, inaktivitásos</td>
+                            <td>Kifejezett és gyors (Denervációs)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fasciculatio</strong></td>
+                            <td>Nincs</td>
+                            <td>Gyakran előfordul</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tipikus okok</strong></td>
+                            <td>Stroke, Sclerosis Multiplex, Agydaganat</td>
+                            <td>Porcksérv, Guillain-Barré szindróma, Neuropathiák</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 3: Agykéreg -->
+        <section id="agykerereg" class="mb-16 scroll-mt-24">
+            <h2 class="text-4xl font-bold mb-8 section-title">🏛️ III. Az Agykéreg Szerkezete és Régiói</h2>
+            <p class="text-lg text-gray-700 mb-10">Az agykéreg a tudat, a gondolkodás, az érzékelés és az akaratlagos cselekvés legmagasabb szintű központja.</p>
+            
+            <h3 class="text-3xl font-bold mb-6 text-blue-800">A. Makroszkópos Anatómia: Lebenyek és Funkciók</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <div class="card p-6">
+                    <h4 class="font-bold text-xl mb-2">Frontális (homlok-)</h4>
+                    <p>Tervezés, döntéshozatal, személyiség, akaratlagos mozgás, beszédprodukció (Broca-központ).</p>
+                </div>
+                 <div class="card p-6">
+                    <h4 class="font-bold text-xl mb-2">Parietális (fali-)</h4>
+                    <p>Érzékelés (tapintás, fájdalom), téri tájékozódás, figyelem, testséma, olvasás.</p>
+                </div>
+                 <div class="card p-6">
+                    <h4 class="font-bold text-xl mb-2">Temporális (halánték-)</h4>
+                    <p>Hallás, memória, beszédértés (Wernicke-központ), arcfelismerés.</p>
+                </div>
+                 <div class="card p-6">
+                    <h4 class="font-bold text-xl mb-2">Occipitális (nyakszirti-)</h4>
+                    <p>Látás feldolgozása (szín, forma, mozgás).</p>
+                </div>
+                 <div class="card p-6">
+                    <h4 class="font-bold text-xl mb-2">Insula (sziget-)</h4>
+                    <p>Belső testi érzetek (interocepció), érzelmek (undor), ízérzékelés.</p>
+                </div>
+                 <div class="card p-6">
+                    <h4 class="font-bold text-xl mb-2">Limbikus Rendszer</h4>
+                    <p>Érzelmek, motiváció, tanulás, memória.</p>
+                </div>
+            </div>
+
+            <h3 class="text-3xl font-bold mb-6 text-blue-800">B. Mikroszkópos Anatómia: A Neocortex 6 Rétege</h3>
+            <div class="overflow-x-auto card">
+                 <table>
+                    <thead>
+                        <tr>
+                            <th>Réteg (Lamina)</th>
+                            <th>Neve</th>
+                            <th>Fő Szerepe és Jellemzői</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>I. réteg</td><td>Lamina molecularis</td><td>🌐 <strong>Kapcsolati zóna:</strong> Sejtszegény, főleg dendritek és axonok alkotják.</td></tr>
+                        <tr><td>II. réteg</td><td>Lamina granularis externa</td><td>🔄 <strong>Asszociációs réteg:</strong> Kérgen belüli kapcsolatok.</td></tr>
+                        <tr><td>III. réteg</td><td>Lamina pyramidalis externa</td><td>🔗 <strong>Asszociációs és komisszurális kimenet:</strong> Rostokat küld más kérgi területekre és az ellenoldali féltekébe.</td></tr>
+                        <tr><td>IV. réteg</td><td><strong>Lamina granularis interna</strong></td><td>📥 <strong>FŐ BEJÁRAT:</strong> A thalamusból érkező érző információk fő fogadóállomása.</td></tr>
+                        <tr><td>V. réteg</td><td><strong>Lamina pyramidalis interna</strong></td><td>📤 <strong>FŐ KIJÁRAT:</strong> Fő kimeneti réteg a kéreg alatti struktúrák felé (pl. piramispálya).</td></tr>
+                        <tr><td>VI. réteg</td><td>Lamina multiformis</td><td>↩️ <strong>Visszacsatolás a thalamus felé:</strong> A kérgi-thalamikus körök fontos része.</td></tr>
+                    </tbody>
+                 </table>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white text-center p-6">
+        <p>&copy; 2024 Neuroanatómia Vizsga Portál. Minden jog fenntartva.</p>
+        <p class="text-sm text-blue-200 mt-1">Sikeres felkészülést kívánunk!</p>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="to-top-button" title="Vissza a tetejére"
+        class="hidden fixed z-50 bottom-10 right-10 p-4 border-0 w-14 h-14 rounded-full shadow-md bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-300">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+            <path d="M12 4l8 8h-6v8h-4v-8H4l8-8z"/>
+        </svg>
+    </button>
+    
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when a link is clicked
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // --- Back to Top Button ---
+        const toTopButton = document.getElementById('to-top-button');
+
+        window.onscroll = function() {
+            if (document.body.scrollTop > 500 || document.documentElement.scrollTop > 500) {
+                toTopButton.classList.remove('hidden');
+            } else {
+                toTopButton.classList.add('hidden');
+            }
+        };
+
+        toTopButton.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // --- Active Navigation Link on Scroll ---
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('#nav-menu a');
+
+        const observerOptions = {
+            root: null, // relative to the viewport
+            rootMargin: '0px',
+            threshold: 0.4 // 40% of the section must be visible
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    // Remove active class from all links
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        // Also remove active class from mobile links
+                        const mobileLink = document.querySelector(`#mobile-menu a[href*="${link.getAttribute('href').substring(1)}"]`);
+                        if(mobileLink) mobileLink.style.fontWeight = 'normal';
+                    });
+                    
+                    // Add active class to the corresponding link
+                    const activeLink = document.querySelector(`#nav-menu a[href*="${id}"]`);
+                    if(activeLink){
+                        activeLink.classList.add('active');
+                    }
+                     const activeMobileLink = document.querySelector(`#mobile-menu a[href*="${id}"]`);
+                     if(activeMobileLink){
+                        activeMobileLink.style.fontWeight = 'bold';
+                     }
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+    });
+</script>
+
+</body>
+</html>

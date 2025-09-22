@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vizuális Neurológiai Összefoglaló Szakvizsgára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+        .icon {
+            width: 28px;
+            height: 28px;
+            stroke-width: 2;
+            flex-shrink: 0;
+        }
+        strong {
+            font-weight: 600;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #1e293b;
+        }
+        .section-title-gradient {
+            background-image: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        .list-disc-colored li::marker {
+            color: var(--marker-color, #4f46e5);
+        }
+
+        /* Section Specific Styles */
+        #plaszticitas .card-header { background: linear-gradient(135deg, #f5f3ff, #ede9fe); }
+        #plaszticitas strong { color: #6d28d9; }
+        
+        #genetika .card-header { background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+        #genetika strong { color: #166534; }
+
+        #interakciok .card-header { background: linear-gradient(135deg, #fffbeb, #fef3c7); }
+        #interakciok strong { color: #b45309; }
+
+        @media (min-width: 640px) {
+            .section-title {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-800">
+                Neurológia <span class="text-indigo-500">Összefoglaló</span>
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-slate-600 font-medium">
+                <a href="#plaszticitas" class="hover:text-indigo-500 transition">Neuroplaszticitás</a>
+                <a href="#genetika" class="hover:text-indigo-500 transition">Neurogenetika</a>
+                <a href="#interakciok" class="hover:text-indigo-500 transition">Gyógyszerinterakciók</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 py-16">
+
+        <!-- ===== Neuroplaszticitás Section ===== -->
+        <section id="plaszticitas" class="mb-24">
+            <h2 class="section-title">🧠 Az Idegrendszer <span class="section-title-gradient">Plaszticitása</span></h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <div class="card lg:col-span-1">
+                    <div class="card-header">
+                        <svg class="icon text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.311a7.5 7.5 0 0 1-7.5 0c-1.255 0-2.443.29-3.5.832m14.5.002c1.057-.542 2.245-.832 3.5-.832a7.5 7.5 0 0 1 0 15c-1.255 0-2.443-.29-3.5-.832m0 0a7.5 7.5 0 0 1-7.5 0" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">A Neuroplaszticitás Lényege</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600">A <strong>neuroplaszticitás</strong> az idegrendszer azon képessége, hogy szerkezetét és működését a tapasztalatok, tanulás vagy sérülés hatására megváltoztassa. Ez egy élethosszig tartó folyamat, amely lehetővé teszi az agy számára az adaptációt és a felépülést.</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2 mt-4 list-disc-colored" style="--marker-color: #7c3aed;">
+                           <li><strong>Funkcionális plaszticitás:</strong> A szinaptikus kapcsolatok erősségének változása (LTP, LTD), funkciók áthelyeződése.</li>
+                           <li><strong>Strukturális plaszticitás:</strong> Az agy fizikai szerkezetének megváltozása (pl. új szinapszisok, dendritikus tüskék átépülése).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card lg:col-span-2">
+                    <div class="card-header">
+                        <svg class="icon text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-5.25 3h9" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Szinaptikus és Strukturális Plaszticitás</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="font-semibold text-lg mb-2 text-slate-700">⚡ Szinaptikus Plaszticitás</h4>
+                        <p class="text-slate-600 mb-2">A tanulás molekuláris alapja, a szinapszisok hatékonyságának módosulása.</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-1 ml-4 list-disc-colored" style="--marker-color: #4f46e5;">
+                            <li><strong>Hosszú Távú Potenciáció (LTP):</strong> Szinaptikus erősödés, magas frekvenciájú ingerlés hatására. Kulcsszereplője az NMDA-receptor és a Ca²⁺ beáramlás, ami AMPA-receptorok beépüléséhez vezet.</li>
+                            <li><strong>Hosszú Távú Depresszió (LTD):</strong> Szinaptikus gyengülés, alacsony frekvenciájú ingerlés hatására. AMPA-receptorok eltávolítását eredményezi.</li>
+                        </ul>
+                         <h4 class="font-semibold text-lg mt-4 mb-2 text-slate-700">🏗️ Strukturális Plaszticitás</h4>
+                        <p class="text-slate-600 mb-2">Tartósabb, fizikai változások az idegi hálózatokban.</p>
+                         <ul class="list-disc list-inside text-slate-600 space-y-1 ml-4 list-disc-colored" style="--marker-color: #4f46e5;">
+                            <li><strong>Dendritikus tüske átépülés:</strong> A serkentő szinapszisok helyéül szolgáló tüskék méretének, alakjának és számának változása.</li>
+                            <li><strong>Axonális sarjadás:</strong> Új axonok növekedése, sérülés utáni helyreállítás.</li>
+                            <li><strong>Felnőttkori neurogenezis:</strong> Új neuronok képződése, főleg a hippocampusban, ami a tanuláshoz és hangulatszabályozáshoz járul hozzá.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card lg:col-span-3">
+                    <div class="card-header">
+                        <svg class="icon text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.527-1.042.45-2.341-.2-3.356a2.33 2.33 0 0 0-3.356-.2l-3.031 2.496m4.136 4.136L5.877 21" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Klinikai Jelentőség: Felépülés és Maladaptáció</h3>
+                    </div>
+                     <div class="card-body grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-600">
+                        <div>
+                            <h4 class="font-semibold text-lg text-slate-700">✅ Adaptív Plaszticitás: Rehabilitáció</h4>
+                            <p class="mt-2 mb-2">Az agysérülések (stroke, TBI) utáni felépülés alapja. A rehabilitációs stratégiák célja ezen folyamatok serkentése.</p>
+                            <ul class="list-disc list-inside space-y-2 list-disc-colored" style="--marker-color: #16a34a;">
+                                <li><strong>Kortikális átstrukturálódás:</strong> Ép agyterületek átveszik a sérült részek funkcióit.</li>
+                                <li><strong>Constraint-Induced Movement Therapy (CIMT):</strong> A sérült végtag erőltetett használata serkenti az átszerveződést.</li>
+                                <li><strong>Tükörterápia:</strong> Vizuális visszacsatolás segíti az agyi hálózatok újraépülését.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-slate-700">❌ Maladaptív Plaszticitás</h4>
+                             <p class="mt-2 mb-2">A plaszticitás nem mindig előnyös; kóros állapotokhoz is vezethet.</p>
+                            <ul class="list-disc list-inside space-y-2 list-disc-colored" style="--marker-color: #dc2626;">
+                                <li><strong>Fantomfájdalom:</strong> Amputáció utáni fájdalom, ami a szenzoros kéreg átszerveződésének következménye.</li>
+                                <li><strong>Fokális disztónia:</strong> Ismétlődő mozgások (pl. zenészeknél) miatti kóros szenzomotoros plaszticitás.</li>
+                                <li><strong>Krónikus fájdalom:</strong> Centrális szenzitizáció, a fájdalompályák "túlérzékennyé" válása.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Genetika Section ===== -->
+        <section id="genetika" class="mb-24">
+            <h2 class="section-title">🧬 Neurogenetikai <span class="section-title-gradient">Alapismeretek és Tanácsadás</span></h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card lg:col-span-1">
+                    <div class="card-header">
+                        <svg class="icon text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m-3-1-3-1m5.25 7.5-3-1.636M3 15V4.5" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Öröklődésmenetek</h3>
+                    </div>
+                    <div class="card-body">
+                         <ul class="space-y-4 text-slate-600">
+                            <li><span class="font-semibold text-green-700">Domináns (AD):</span> Egy mutáns allél is elég. <strong>Pl.:</strong> Huntington-kór.</li>
+                            <li><span class="font-semibold text-green-700">Recesszív (AR):</span> Két mutáns allél szükséges. <strong>Pl.:</strong> Spinális izomatrófia (SMA).</li>
+                            <li><span class="font-semibold text-green-700">X-Kötött (XLR):</span> Főleg férfiakat érint. <strong>Pl.:</strong> Duchenne izomdisztrófia.</li>
+                            <li><span class="font-semibold text-green-700">Mitokondriális:</span> Anyai ágon öröklődik. <strong>Pl.:</strong> LHON.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card lg:col-span-2">
+                    <div class="card-header">
+                        <svg class="icon text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Genetikai Tanácsadás Folyamata</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-slate-600 mb-4">Komplex kommunikációs folyamat a genetikai betegségekkel kapcsolatos tájékoztatásra, a kockázatok felmérésére és a tájékozott döntéshozatal segítésére.</p>
+                        <ol class="space-y-3">
+                           <li class="flex items-start gap-3">
+                                <span class="flex-shrink-0 bg-cyan-100 text-cyan-700 font-bold rounded-full w-8 h-8 flex items-center justify-center">1</span>
+                                <div><strong class="text-slate-700">Preteszt tanácsadás:</strong> Anamnézis, családfa elemzés, a tesztelés lehetőségeinek és korlátainak megbeszélése.</div>
+                            </li>
+                           <li class="flex items-start gap-3">
+                                <span class="flex-shrink-0 bg-cyan-100 text-cyan-700 font-bold rounded-full w-8 h-8 flex items-center justify-center">2</span>
+                                <div><strong class="text-slate-700">Tesztelés:</strong> Minta levétele és laboratóriumi analízise.</div>
+                           </li>
+                           <li class="flex items-start gap-3">
+                                <span class="flex-shrink-0 bg-cyan-100 text-cyan-700 font-bold rounded-full w-8 h-8 flex items-center justify-center">3</span>
+                                <div><strong class="text-slate-700">Posztteszt tanácsadás:</strong> Eredmények értelmezése, klinikai következmények, prognózis, családtervezés, pszichoszociális támogatás.</div>
+                           </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="card lg:col-span-3">
+                    <div class="card-header">
+                        <svg class="icon text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Gyakori Neurogenetikai Kórképek</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="space-y-4 text-slate-600 list-disc-colored" style="--marker-color: #2563eb;">
+                           <li class="ml-5"><strong>Alzheimer-kór:</strong> Korai forma: <strong>APP, PSEN1, PSEN2</strong> gének. Késői forma: <strong>APOE ε4</strong> rizikóallél.</li>
+                           <li class="ml-5"><strong>Parkinson-kór:</strong> Monogénes formák: <strong>LRRK2, SNCA, Parkin, PINK1</strong>. Rizikófaktor: <strong>GBA</strong>.</li>
+                           <li class="ml-5"><strong>Huntington-kór:</strong> A <strong>HTT</strong> gén CAG-repeat expanziója.</li>
+                           <li class="ml-5"><strong>Spinális izomatrófia (SMA):</strong> Az <strong>SMN1</strong> gén deléciója, súlyosságát az <strong>SMN2</strong> kópiaszám módosítja.</li>
+                           <li class="ml-5"><strong>Charcot-Marie-Tooth (CMT):</strong> Genetikailag heterogén, több mint 100 gén érintett (pl. <strong>PMP22, MPZ, GJB1</strong>).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Gyógyszerinterakciók Section ===== -->
+        <section id="interakciok" class="mb-16">
+            <h2 class="section-title">💊 Gyógyszerinterakciók <span class="section-title-gradient">a Neurológiában</span></h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <div class="card-header">
+                        <svg class="icon text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75c0-.231-.035-.454-.1-.664M6.75 7.5h1.5v.75h-1.5V7.5Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">Interakciók Típusai és Mechanizmusai</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="font-semibold text-lg mb-2 text-slate-700">💨 Farmakokinetikai (PK)</h4>
+                        <p class="text-slate-600 mb-3">Az egyik gyógyszer megváltoztatja a másik sorsát a szervezetben (ADME).</p>
+                        <ul class="list-disc list-inside text-slate-600 space-y-1 ml-4 list-disc-colored" style="--marker-color: #d97706;">
+                            <li><strong>Metabolikus:</strong> A leggyakoribb. A <strong>Citokróm P450 (CYP)</strong> enzimek gátlása (több gyógyszer marad) vagy serkentése (kevesebb gyógyszer marad).</li>
+                            <li><strong>Transzporterek:</strong> A <strong>P-glikoprotein (P-gp)</strong> pumpa gátlása/serkentése a bélfalban vagy a vér-agy gátnál.</li>
+                        </ul>
+                        <h4 class="font-semibold text-lg mt-4 mb-2 text-slate-700">🎯 Farmakodinámiás (PD)</h4>
+                        <p class="text-slate-600 mb-3">A gyógyszerek a hatás helyén (pl. receptoron) lépnek kölcsönhatásba.</p>
+                         <ul class="list-disc list-inside text-slate-600 space-y-1 ml-4 list-disc-colored" style="--marker-color: #d97706;">
+                            <li><strong>Additív/Szinergista:</strong> Hatások összeadódnak (pl. két altató együtt).</li>
+                            <li><strong>Antagonista:</strong> Ellentétes hatások kioltják egymást (pl. dopaminerg szerek + antipszichotikumok).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <svg class="icon text-rose-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                        <h3 class="text-xl font-semibold text-slate-800">⚠️ Klinikailag Jelentős Interakciók</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="space-y-4 text-slate-600">
+                            <li><strong>Antiepileptikumok (AED):</strong>
+                                <ul class="list-disc list-inside ml-5 mt-1 list-disc-colored" style="--marker-color: #be123c;">
+                                    <li><strong>Enziminduktorok</strong> (pl. karbamazepin) csökkentik pl. az orális fogamzásgátlók hatását.</li>
+                                    <li><strong>Valproát</strong> (enzimgátló) növeli pl. a lamotrigin toxicitását.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Parkinson-kór gyógyszerei:</strong>
+                                <ul class="list-disc list-inside ml-5 mt-1 list-disc-colored" style="--marker-color: #be123c;">
+                                    <li><strong>MAO-B gátlók</strong> + SSRI/tramadol → <strong>szerotonin szindróma</strong> veszélye.</li>
+                                    <li><strong>Dopaminerg szerek</strong> + tipikus antipszichotikumok → PK tünetek rosszabbodása.</li>
+                                </ul>
+                            </li>
+                             <li><strong>Demencia gyógyszerei:</strong>
+                                <ul class="list-disc list-inside ml-5 mt-1 list-disc-colored" style="--marker-color: #be123c;">
+                                    <li><strong>Acetilkolinészteráz-gátlók</strong> + antikolinerg szerek → hatás-antagonizmus.</li>
+                                    <li>A <strong>polifarmácia</strong> (több gyógyszer) kiemelt kockázat.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-white mt-8 border-t">
+        <div class="container mx-auto px-6 py-4 text-center text-slate-500">
+            <p>&copy; 2024 Vizuális Neurológiai Összefoglaló. Sok sikert a vizsgához!</p>
+        </div>
+    </footer>
+
+</body>
+</html>

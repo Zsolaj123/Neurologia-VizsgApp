@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark .bg-gray-50 { background-color: #171923; }
+        .dark .text-gray-800 { color: #e2e8f0; }
+        .dark .text-gray-600 { color: #a0aec0; }
+        .dark .text-gray-500 { color: #cbd5e0; }
+        .dark .border-gray-200 { border-color: #4a5568; }
+        .dark .bg-gray-100 { background-color: #2d3748; }
+        .dark .hover\:bg-gray-200:hover { background-color: #4a5568; }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25); }
+        .dark h1, .dark h2, .dark h3 { color: #f7fafc; }
+        .dark th { background-color: #4a5568; }
+        .dark tr:nth-child(even) { background-color: #2d3748; }
+        .dark tr:nth-child(odd) { background-color: #4a5568; }
+        
+        .content-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid;
+        }
+        .content-section h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .content-section h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .content-section p, .content-section li {
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-item.active {
+            background-color: #4c51bf;
+            color: white;
+            font-weight: 600;
+        }
+        .dark .nav-item.active {
+            background-color: #9f7aea;
+        }
+        .nav-item.active i {
+            color: white !important;
+        }
+
+        /* Highlighting and Alerts */
+        .highlight {
+            background: linear-gradient(to top, rgba(255, 235, 59, 0.6) 50%, transparent 50%);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .dark .highlight {
+             background: linear-gradient(to top, rgba(251, 211, 141, 0.5) 50%, transparent 50%);
+        }
+        .key-term {
+            font-weight: 600;
+            color: #c53030;
+        }
+        .dark .key-term {
+            color: #fc8181;
+        }
+        .alert {
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-left-width: 5px;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+        }
+        .alert-icon {
+            margin-right: 1rem;
+            font-size: 1.75rem;
+        }
+        .alert-danger { background-color: #fff5f5; border-color: #e53e3e; color: #c53030; }
+        .dark .alert-danger { background-color: #4c1d1d; border-color: #fc8181; color: #fed7d7; }
+        .alert-warning { background-color: #fffaf0; border-color: #dd6b20; color: #b7791f; }
+        .dark .alert-warning { background-color: #4a2a0c; border-color: #f6ad55; color: #fbd38d; }
+        .alert-info { background-color: #ebf8ff; border-color: #4299e1; color: #2c5282; }
+        .dark .alert-info { background-color: #2a4365; border-color: #63b3ed; color: #bee3f8; }
+
+        /* Card styles */
+        .info-card {
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            border-top: 5px solid;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .dark .info-card {
+            background-color: #2d3748;
+        }
+        .dark .info-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        #menu-toggle { display: none; }
+        @media (max-width: 768px) {
+            #menu-toggle { display: block; }
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                position: fixed;
+                z-index: 40;
+                height: 100%;
+            }
+            #sidebar.open { transform: translateX(0); }
+            #main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-64 bg-white shadow-lg p-4 space-y-4 overflow-y-auto">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">Neurológia</h1>
+                <p class="text-sm text-gray-500">Ismétlő Kártyák 🧠</p>
+            </div>
+            <nav id="nav-menu">
+                <!-- Navigation items will be inserted here by JavaScript -->
+            </nav>
+            <div class="absolute bottom-4 left-4">
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun hidden"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content" class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div id="content-display" class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <!-- Content will be displayed here -->
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-gray-700">Üdv a Neurológiai Ismétlőn!</h1>
+                    <p class="mt-4 text-lg text-gray-600">Válassz egy témakört a bal oldali menüből a gyors áttekintéshez.</p>
+                    <i class="fas fa-brain text-9xl text-purple-300 mt-12 animate-pulse"></i>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const contentData = {
+            // Tétel 171: Belsőelválasztású mirigyek
+            "t171": {
+                title: "Endokrin Zavarok",
+                icon: "fa-solid fa-gland",
+                color: "text-blue-500",
+                content: {
+                    "t171_pajzsmirigy": {
+                        title: "Pajzsmirigybetegségek",
+                        html: `
+                            <h2 style="border-color: #3b82f6;">Pajzsmirigybetegségek</h2>
+                            <p>A pajzsmirigy hormonjai alapvetőek az idegrendszer működéséhez. Zavaruk súlyos neurológiai és pszichiátriai következményekkel jár.</p>
+                            
+                            <h3 style="color: #3b82f6;">Hypothyreosis (Alulműködés) 🐢</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="info-card" style="border-color: #60a5fa;">
+                                    <h5 class="card-title"><i class="fas fa-brain mr-2"></i>Kognitív/Pszichés Tünetek</h5>
+                                    <p>A leggyakoribbak. <span class="highlight">Gondolkodás és beszéd lelassulása</span>, apátia, koncentrációs és memóriazavarok, depressziószerű kép.</p>
+                                </div>
+                                <div class="info-card" style="border-color: #60a5fa;">
+                                    <h5 class="card-title"><i class="fas fa-dumbbell mr-2"></i>Motoros Tünetek</h5>
+                                    <p>Proximális izomgyengeség, izomfájdalom, renyhe reflexek, <span class="key-term">cerebelláris ataxia</span> (járásbizonytalanság).</p>
+                                </div>
+                            </div>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-triangle-exclamation alert-icon"></i>
+                                <div><h5 class="font-bold">Vészhelyzet: Myxoedemás kóma</h5><p class="text-sm">Életveszélyes szövődmény: hypotermia, bradycardia, hypoventillatio, súlyos tudatzavar.</p></div>
+                            </div>
+
+                            <h3 style="color: #ef4444;">Hyperthyreosis (Túlműködés) 🐇</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="info-card" style="border-color: #f87171;">
+                                    <h5 class="card-title"><i class="fas fa-bolt mr-2"></i>Pszichés Tünetek</h5>
+                                    <p><span class="highlight">Fokozott ingerlékenység</span>, szorongás, nyugtalanság, alvászavar. Időseknél apátia is lehet ("apatikus hyperthyreosis").</p>
+                                </div>
+                                <div class="info-card" style="border-color: #f87171;">
+                                    <h5 class="card-title"><i class="fas fa-hands-praying mr-2"></i>Motoros Tünetek</h5>
+                                    <p>Finom, poszturális <span class="key-term">kézremegés (tremor)</span>, proximális izomgyengeség, hyperreflexia.</p>
+                                </div>
+                            </div>
+                             <div class="alert alert-danger">
+                                <i class="fas fa-triangle-exclamation alert-icon"></i>
+                                <div><h5 class="font-bold">Vészhelyzet: Thyreotoxikus krízis</h5><p class="text-sm">Életveszélyes állapot: magas láz, tachycardia, delírium, kóma.</p></div>
+                            </div>
+                            
+                            <h3 style="color: #8b5cf6;">Hashimoto Encephalopathia</h3>
+                            <div class="alert alert-info">
+                                <i class="fas fa-shield-virus alert-icon"></i>
+                                <div><h5 class="font-bold">Autoimmun Kórkép</h5><p class="text-sm">Ritka, magas anti-TPO antitest titerrel jár. A tünetek <span class="highlight">függetlenek a pajzsmirigy funkciójától</span>. Jellemzők: tudatzavar, görcsök, myoclonus, ataxia. Jól reagál <span class="key-term">szteroid</span> kezelésre.</p></div>
+                            </div>
+                        `
+                    },
+                    "t171_mellekvese": {
+                        title: "Mellékvese",
+                        html: `
+                            <h2 style="border-color: #f97316;">Mellékvese-rendellenességek</h2>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                <div class="info-card" style="border-color: #fbbf24;">
+                                    <h5 class="card-title">Mellékvese-elégtelenség (Addison) 📉</h5>
+                                    <p>Krónikus fáradtság, gyengeség, depresszió. <span class="key-term">Addison-krízis</span> (sokk, kóma) életveszélyes!</p>
+                                </div>
+                                <div class="info-card" style="border-color: #f59e0b;">
+                                    <h5 class="card-title">Cushing-szindróma (Hypercortisolismus) 📈</h5>
+                                    <p>A <span class="highlight">major depresszió</span> a leggyakoribb (>50%). Szorongás, kognitív zavarok, szteroid myopathia.</p>
+                                </div>
+                                <div class="info-card" style="border-color: #ea580c;">
+                                    <h5 class="card-title">Pheochromocytoma ⚡</h5>
+                                    <p>Klasszikus triász: <span class="highlight">epizodikus fejfájás, izzadás, tachycardia</span>. Súlyos szorongás, pánikrohamok.</p>
+                                </div>
+                            </div>
+                        `
+                    },
+                    "t171_diabetes": {
+                        title: "Diabetes Mellitus",
+                        html: `
+                            <h2 style="border-color: #10b981;">Diabetes Mellitus 🍬</h2>
+                            <p>A krónikus hiperglikémia a perifériás és a központi idegrendszert is károsítja.</p>
+                             <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="info-card" style="border-color: #34d399;">
+                                    <h5 class="card-title"><i class="fas fa-shoe-prints mr-2"></i>Perifériás Neuropathia (DPN)</h5>
+                                    <p>"Kesztyű-harisnya" eloszlású érző (fájdalom, zsibbadás, <span class="key-term">érzéskiesés</span>) és motoros tünetek. Magas a diabéteszes láb szövődményeinek kockázata.</p>
+                                </div>
+                                <div class="info-card" style="border-color: #34d399;">
+                                    <h5 class="card-title"><i class="fas fa-heart-pulse mr-2"></i>Autonóm Neuropathia (DAN)</h5>
+                                    <p>Orthostaticus hypotensio, gastroparesis (késleltetett gyomorürülés), erektilis diszfunkció.</p>
+                                </div>
+                                <div class="info-card" style="border-color: #34d399;">
+                                    <h5 class="card-title"><i class="fas fa-head-side-virus mr-2"></i>Központi Idegrendszeri Szövődmények</h5>
+                                    <p>Fokozott <span class="key-term">kognitív hanyatlás</span>, demencia és stroke kockázat.</p>
+                                </div>
+                                <div class="info-card" style="border-color: #34d399;">
+                                    <h5 class="card-title"><i class="fas fa-pills mr-2"></i>Kezelés</h5>
+                                    <p>Alapja a <span class="highlight">jó és stabil glikémiás kontroll</span>. Fájdalmas neuropátia tüneti kezelése (pl. pregabalin, duloxetin).</p>
+                                </div>
+                            </div>
+                        `
+                    }
+                }
+            },
+            // Tétel 172: Metabolikus encephalopathiák
+            "t172": {
+                title: "Metabolikus Encephalopathiák",
+                icon: "fa-solid fa-bolt-lightning",
+                color: "text-green-500",
+                content: {
+                    "t172_bevezetes": {
+                        title: "Bevezetés",
+                        html: `
+                            <h2 style="border-color: #22c55e;">Metabolikus Encephalopathiák</h2>
+                            <p>Az agyműködés globális, diffúz zavara, amit szisztémás betegség, anyagcsere-eltérés vagy toxikus hatás okoz. A tünetek az enyhe kognitív zavartól a kómáig terjedhetnek, és gyakran <span class="highlight">reverzibilisek</span> az alapbetegség kezelésével.</p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-lightbulb alert-icon"></i>
+                                <div><h5 class="font-bold">Kulcsgondolat</h5><p class="text-sm">A diagnózis "kizárásos" alapon történik. Mindig az alapjául szolgáló specifikus okot kell azonosítani és kezelni.</p></div>
+                            </div>
+                        `
+                    },
+                    "t172_osszehasonlitas": {
+                        title: "Összehasonlító Táblázat",
+                        html: `
+                            <h3 style="color: #16a34a;">Főbb Típusok Gyors Áttekintése</h3>
+                            <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700">
+                                    <tr><th class="px-6 py-3">Típus</th><th class="px-6 py-3">Fő Ok</th><th class="px-6 py-3">Jellegzetes Tünet</th><th class="px-6 py-3">Kezelés</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Hepatikus (HE) 🍳</td><td class="px-6 py-4"><span class="key-term">Ammónia</span></td><td class="px-6 py-4">Asterixis (flapping tremor)</td><td class="px-6 py-4">Laktulóz, Rifaximin</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Urémiás (UE) 💧</td><td class="px-6 py-4"><span class="key-term">Urémiás toxinok</span></td><td class="px-6 py-4">Myoclonus, görcsök</td><td class="px-6 py-4">Dialízis</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Hipoglikémiás 📉</td><td class="px-6 py-4"><span class="key-term">Energiahiány</span></td><td class="px-6 py-4">Görcsök, kóma</td><td class="px-6 py-4">Azonnali glükóz</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Hiperglikémiás 📈</td><td class="px-6 py-4"><span class="key-term">Hiperozmolaritás</span></td><td class="px-6 py-4">Fokális tünetek, kóma</td><td class="px-6 py-4">Óvatos folyadék, inzulin</td></tr>
+                                    <tr class="border-b"><td class="px-6 py-4 font-medium">Anoxiás/Hipoxiás 💨</td><td class="px-6 py-4"><span class="key-term">Oxigénhiány</span></td><td class="px-6 py-4">Myoclonus, kóma</td><td class="px-6 py-4">Terápiás hipotermia</td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        `
+                    }
+                }
+            },
+             // Tétel 173: Só- és vízháztartás
+            "t173": {
+                title: "Só- & Vízháztartás",
+                icon: "fa-solid fa-water",
+                color: "text-red-500",
+                content: {
+                    "t173_natrium": {
+                        title: "Nátrium Zavarok",
+                        html: `
+                            <h2 style="border-color: #ef4444;">Nátriumháztartás Zavarai 🧂</h2>
+                            <p>Kritikus az agysejt-térfogat szempontjából. A korrekció sebessége kulcsfontosságú!</p>
+                            <div class="grid md:grid-cols-2 gap-6 mt-4">
+                                <div>
+                                    <h3 style="color: #3b82f6;">Hyponatraemia (Na+ < 135)</h3>
+                                    <div class="info-card" style="border-color: #3b82f6;">
+                                        <h5 class="card-title"><i class="fas fa-brain mr-2"></i>Patofiziológia & Tünetek</h5>
+                                        <p>Víz áramlik az agysejtekbe ➡️ <span class="key-term">Agyödéma</span>. Tünetek: fejfájás, zavartság, <span class="highlight">görcsrohamok, kóma</span>.</p>
+                                    </div>
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-triangle-exclamation alert-icon"></i>
+                                        <div><h5 class="font-bold">Korrekciós Veszély!</h5><p class="text-sm">A túl gyors korrekció <span class="key-term">ozmotikus demielinizációs szindrómát (ODS)</span> okozhat!</p></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 style="color: #ef4444;">Hypernatraemia (Na+ > 145)</h3>
+                                    <div class="info-card" style="border-color: #ef4444;">
+                                        <h5 class="card-title"><i class="fas fa-brain mr-2"></i>Patofiziológia & Tünetek</h5>
+                                        <p>Víz áramlik ki az agysejtekből ➡️ <span class="key-term">Agyzsugorodás</span>. Tünetek: szomjúság, irritabilitás, görcsök, <span class="highlight">intracerebrális vérzés</span>.</p>
+                                    </div>
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-triangle-exclamation alert-icon"></i>
+                                        <div><h5 class="font-bold">Korrekciós Veszély!</h5><p class="text-sm">A túl gyors korrekció <span class="key-term">agyödémát</span> okozhat!</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    "t173_kalium": {
+                        title: "Kálium Zavarok",
+                        html: `
+                            <h2 style="border-color: #eab308;">Káliumháztartás Zavarai 🍌</h2>
+                            <p>Elsősorban a neuromuszkuláris ingerlékenységet és a szívműködést befolyásolják.</p>
+                            <div class="grid md:grid-cols-2 gap-6 mt-4">
+                                <div>
+                                    <h3 style="color: #a16207;">Hypokalaemia (K+ < 3.5)</h3>
+                                    <div class="info-card" style="border-color: #a16207;">
+                                        <h5 class="card-title"><i class="fas fa-battery-quarter mr-2"></i>Hatás & Tünetek</h5>
+                                        <p>Csökkent ingerlékenység. Tünetek: <span class="highlight">izomgyengeség</span>, petyhüdt bénulás, <span class="key-term">légzési elégtelenség</span>.</p>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-wave-square alert-icon"></i>
+                                        <div><h5 class="font-bold">EKG Jelek</h5><p class="text-sm">T-laposodás, ST-depresszió, prominens U-hullám.</p></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 style="color: #ca8a04;">Hyperkalaemia (K+ > 5.5)</h3>
+                                    <div class="info-card" style="border-color: #ca8a04;">
+                                        <h5 class="card-title"><i class="fas fa-battery-full mr-2"></i>Hatás & Tünetek</h5>
+                                        <p>Súlyos esetben csökkent ingerlékenység. Tünetek: paresztéziák, <span class="highlight">izomgyengeség</span>, petyhüdt bénulás.</p>
+                                    </div>
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-heart-crack alert-icon"></i>
+                                        <div><h5 class="font-bold">EKG Jelek & Vészhelyzet</h5><p class="text-sm">Magas, csúcsos T-hullámok, QRS-szélesedés, szívmegállás!</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    }
+                }
+            },
+            // Tétel 174: Hypoglikémia
+            "t174": {
+                title: "Hypoglikémia",
+                icon: "fa-solid fa-arrow-down-9-1",
+                color: "text-yellow-500",
+                content: {
+                    "t174_klinikum": {
+                        title: "Klinikai Kép",
+                        html: `
+                            <h2 style="border-color: #f59e0b;">A Hypoglikémia Klinikai Képe 🍭</h2>
+                            <p>Az agy fő energiaforrása a glükóz, hiánya gyorsan tüneteket okoz. A diagnózis alapja a <span class="key-term">Whipple-triász</span>.</p>
+                             <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="info-card" style="border-color: #facc15;">
+                                    <h5 class="card-title"><i class="fas fa-bell mr-2"></i>Neurogén (Autonóm) Tünetek</h5>
+                                    <p>Korai figyelmeztető jelek: <span class="highlight">remegés, izzadás, szívdobogás</span>, szorongás, éhség.</p>
+                                </div>
+                                <div class="info-card" style="border-color: #eab308;">
+                                    <h5 class="card-title"><i class="fas fa-dizzy mr-2"></i>Neuroglikopéniás Tünetek</h5>
+                                    <p>Agyi glükózhiány miatt: zavartság, fejfájás, homályos látás. Súlyos esetben: <span class="key-term">görcsrohamok, kóma</span>.</p>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-eye-slash alert-icon"></i>
+                                <div><h5 class="font-bold">Hypoglycemia Unawareness</h5><p class="text-sm">A visszatérő hipoglikémia tompíthatja a figyelmeztető jeleket, ami növeli a súlyos epizódok kockázatát.</p></div>
+                            </div>
+                        `
+                    },
+                    "t174_kovetkezmenyek": {
+                        title: "Következmények",
+                        html: `
+                            <h3 style="color: #d97706;">Patofiziológia és Hosszú Távú Következmények</h3>
+                            <div class="info-card" style="border-color: #d97706;">
+                                <h5 class="card-title"><i class="fas fa-cogs mr-2"></i>Agyi Károsodás Mechanizmusa</h5>
+                                <p>Súlyos hipoglikémiában az energiahiány <span class="key-term">citotoxikus ödémához</span> és <span class="key-term">excitotoxicitáshoz</span> (glutamát felszabadulás) vezet, ami neuronpusztulást okoz. Szelektíven sérülékeny területek: <span class="highlight">hippokampusz, agykéreg, bazális ganglionok</span>.</p>
+                            </div>
+                            <div class="info-card mt-4" style="border-color: #b45309;">
+                                <h5 class="card-title"><i class="fas fa-chart-line mr-2"></i>Hosszú Távú Hatások</h5>
+                                <p>A súlyos/ismétlődő epizódok <span class="highlight">kognitív hanyatláshoz</span> és időseknél a <span class="key-term">demencia</span> fokozott kockázatához vezethetnek.</p>
+                            </div>
+                        `
+                    },
+                    "t174_kezeles": {
+                        title: "Kezelés",
+                        html: `
+                            <h3 style="color: #92400e;">Kezelés és Megelőzés</h3>
+                             <div class="alert alert-info">
+                                <i class="fas fa-first-aid alert-icon"></i>
+                                <div><h5 class="font-bold">Azonnali Beavatkozás</h5><p class="text-sm">Tudatos betegnél <span class="highlight">15-20g gyorsan felszívódó szénhidrát</span> (pl. gyümölcslé). Eszméletlen betegnél <span class="key-term">IV dextróz</span> vagy <span class="key-term">IM glukagon</span>.</p></div>
+                            </div>
+                            <p class="mt-4">A hosszú távú kezelés a kiváltó ok (pl. gyógyszeradag) rendezésére és a betegoktatásra fókuszál a megelőzés érdekében.</p>
+                        `
+                    }
+                }
+            }
+        };
+
+        const navMenu = document.getElementById('nav-menu');
+        const contentDisplay = document.getElementById('content-display');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // Generate navigation menu
+        Object.keys(contentData).forEach(mainKey => {
+            const mainTopic = contentData[mainKey];
+            const mainNavItem = document.createElement('div');
+            mainNavItem.innerHTML = `
+                <button class="w-full text-left p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between nav-item" data-id="${mainKey}">
+                    <span class="font-semibold"><i class="${mainTopic.icon} ${mainTopic.color} mr-3"></i>${mainTopic.title}</span>
+                    <i class="fas fa-chevron-down transform transition-transform"></i>
+                </button>
+            `;
+            const subMenu = document.createElement('div');
+            subMenu.className = 'pl-6 mt-2 space-y-1 hidden';
+            
+            Object.keys(mainTopic.content).forEach(subKey => {
+                const subTopic = mainTopic.content[subKey];
+                const subNavItem = document.createElement('a');
+                subNavItem.href = '#';
+                subNavItem.className = 'block p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 nav-item';
+                subNavItem.textContent = subTopic.title;
+                subNavItem.dataset.id = subKey;
+                subMenu.appendChild(subNavItem);
+            });
+
+            mainNavItem.querySelector('button').addEventListener('click', (e) => {
+                subMenu.classList.toggle('hidden');
+                e.currentTarget.querySelector('.fa-chevron-down').classList.toggle('rotate-180');
+            });
+
+            navMenu.appendChild(mainNavItem);
+            navMenu.appendChild(subMenu);
+        });
+
+        // Handle content display
+        navMenu.addEventListener('click', (e) => {
+            e.preventDefault();
+            let target = e.target;
+            while(target && !target.classList.contains('nav-item')) {
+                target = target.parentElement;
+            }
+
+            if (target && target.matches('.nav-item')) {
+                const id = target.dataset.id;
+                
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                target.classList.add('active');
+
+                let contentHtml = '';
+                for (const mainKey in contentData) {
+                    if (contentData[mainKey].content[id]) {
+                        contentHtml = contentData[mainKey].content[id].html;
+                        break;
+                    }
+                }
+                
+                if (contentHtml) {
+                    contentDisplay.innerHTML = contentHtml;
+                    contentDisplay.scrollTop = 0;
+                    if(window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            }
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = themeToggle.querySelector('.fa-sun');
+        const moonIcon = themeToggle.querySelector('.fa-moon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+
+        // Mobile menu toggle
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+    </script>
+</body>
+</html>

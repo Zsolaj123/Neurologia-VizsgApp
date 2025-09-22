@@ -27,11 +27,29 @@
    QUIZ CONTAINER & LAYOUT
    ============================================ */
 
+/* Override body background to show matrix effect */
+body {
+    background: transparent !important;
+}
+
+/* Dark background for readability */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0a0a;
+    z-index: -1;
+}
+
 .quiz-container {
     min-height: calc(100vh - var(--header-height));
     padding-top: var(--header-height);
     position: relative;
     overflow-x: hidden;
+    background: transparent; /* Allow matrix to show through */
 }
 
 /* Header modifications for quiz */
@@ -671,6 +689,25 @@
 .quiz-container {
     position: relative;
     z-index: 1;
+}
+
+/* Make backgrounds semi-transparent to show matrix effect */
+.category-card,
+.quiz-item,
+.quiz-header,
+.quiz-content,
+.answer-option,
+.results-breakdown,
+.loading-overlay {
+    background-color: rgba(26, 26, 26, 0.95) !important; /* Semi-transparent dark */
+}
+
+.answer-option {
+    background-color: rgba(26, 26, 26, 0.9) !important; /* Slightly more transparent */
+}
+
+.quiz-item:hover {
+    background-color: rgba(26, 26, 26, 0.98) !important;
 }
 
 /* ============================================

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intrakraniális Hipertónia és Demenciák Részletes Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-purple: #8b5cf6;
+            --c-teal: #14b8a6;
+            --c-orange: #f97316;
+            --c-text-dark: #1f2937;
+            --c-text-light: #4b5563;
+            --c-bg-light: #f9fafb;
+            --c-border: #e5e7eb;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--c-bg-light);
+            color: var(--c-text-dark);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-link.active {
+            color: var(--c-purple);
+            font-weight: 700;
+            border-bottom: 3px solid var(--c-purple);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--c-text-dark);
+            margin-bottom: 3rem;
+            border-bottom: 4px solid;
+            padding-bottom: 1.5rem;
+        }
+        .section-title svg {
+            width: 4rem;
+            height: 4rem;
+            margin-right: 1.5rem;
+            stroke-width: 1.5;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border: 1px solid var(--c-border);
+            border-radius: 0.75rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--c-border);
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #374151;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background-color: #f5f3ff; /* violet-50 */
+        }
+        .key-term {
+            font-weight: 700;
+            color: #7e22ce; /* purple-700 */
+            background-color: #f5f3ff;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        details {
+            background: #fafafa;
+            border-radius: 0.5rem;
+            border: 1px solid var(--c-border);
+            margin-top: 1.5rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+            color: #581c87; /* violet-900 */
+            font-size: 1.1rem;
+        }
+        summary::after {
+            content: '＋';
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .details-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--c-border);
+            line-height: 1.75;
+        }
+        .criteria-list {
+            list-style-type: upper-alpha;
+            padding-left: 1.5rem;
+        }
+        .criteria-list li {
+            margin-bottom: 0.5rem;
+        }
+        .criteria-list ul {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-purple-800">Neurodegeneratív Kórképek Tudástára</h1>
+            <nav class="hidden md:flex space-x-8 text-lg">
+                <a href="#iih" class="nav-link hover:text-fuchsia-600 transition pb-2">IIH</a>
+                <a href="#alzheimer" class="nav-link hover:text-fuchsia-600 transition pb-2">Alzheimer-kór</a>
+                <a href="#non-ad-dementia" class="nav-link hover:text-fuchsia-600 transition pb-2">Egyéb Demenciák</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#iih" class="block py-2 text-lg nav-link">IIH</a>
+            <a href="#alzheimer" class="block py-2 text-lg nav-link">Alzheimer-kór</a>
+            <a href="#non-ad-dementia" class="block py-2 text-lg nav-link">Egyéb Demenciák</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Idiopathic Intracranial Hypertension Section -->
+        <section id="iih" class="mb-20 scroll-mt-24">
+            <div class="section-title border-purple-500 text-purple-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                <h2>Pseudotumor Cerebri / IIH</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-purple-800">Definíció és Klinikai Kép</h3>
+                    <p class="text-lg mb-4">Az idiopátiás intrakraniális hipertónia (IIH) a koponyaűri nyomás (ICP) megemelkedése nyilvánvaló ok nélkül. A tünetek agydaganatot utánozhatnak, a fő veszély a <strong class="key-term">tartós látásvesztés</strong> a látóidegfő (papilla) ödémája miatt.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Főbb Tünetek</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Fejfájás (>90%):</strong> Diffúz, lüktető, reggel vagy erőlködésre rosszabbodó.</li>
+                                <li><strong>Látászavarok:</strong> Átmeneti látáselsötétedés (TVO), látótérkiesés, kettőslátás (diplopia).</li>
+                                <li><strong>Papillaödéma:</strong> A szemfenéki vizsgálat kulcsfontosságú lelete.</li>
+                                <li><strong>Pulzatilis tinnitus:</strong> Szívveréssel szinkron fülzúgás.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Epidemiológia és Kockázatok</h4>
+                            <p>Tipikusan a <strong class="key-term">fiatal, fogamzóképes korú, elhízott nőket</strong> érinti. Az elhízás a legerősebb kockázati tényező. Bizonyos gyógyszerek (pl. tetraciklinek, A-vitamin) is provokálhatják.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-purple-800">Diagnózis és Kezelés</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Diagnosztika</h4>
+                            <p>A diagnózis a <strong class="key-term">módosított Dandy kritériumokon</strong> alapul, melynek lényege más okok kizárása.</p>
+                            <details>
+                                <summary>Módosított Dandy Kritériumok</summary>
+                                <div class="details-content">
+                                    <ul class="criteria-list">
+                                        <li>Koponyaűri nyomásfokozódás jelei és tünetei.</li>
+                                        <li>Nincs fokális neurológiai deficit (kivéve VI. agyideg bénulás).</li>
+                                        <li>Normális agyi képalkotó (MRI/MRV) a strukturális okok és vénás trombózis kizárására.</li>
+                                        <li>Normális összetételű liquor.</li>
+                                        <li>Megemelkedett nyitó nyomás a lumbálpunkció során (&gt;25 cmH₂O).</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Kezelés</h4>
+                            <p>A terápia célja a látás megőrzése és a tünetek enyhítése.</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong class="key-term">Testsúlycsökkentés:</strong> A leghatékonyabb terápia.</li>
+                                <li><strong>Gyógyszeres:</strong> <span class="key-term">Acetazolamid</span> (csökkenti a liquor termelést), topiramát.</li>
+                                <li><strong>Sebészi:</strong> Súlyos látásromlás esetén látóideghüvely-fenesztráció vagy liquor-elterelő sönt.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Alzheimer's Disease Section -->
+        <section id="alzheimer" class="mb-20 scroll-mt-24">
+            <div class="section-title border-teal-500 text-teal-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.62" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+                <h2>Alzheimer-kór (AK)</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-teal-800">Patofiziológia és Klinikai Stádiumok</h3>
+                    <p class="text-lg mb-4">A leggyakoribb demencia, melyet a kognitív funkciók, elsősorban a memória, progresszív hanyatlása jellemez. A patológiai hátterében két kóros fehérje felhalmozódása áll.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Patológiai Jellemzők</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong class="key-term">Amiloid-béta (Aβ) plakkok:</strong> Extracellulárisan felhalmozódó fehérje aggregátumok.</li>
+                                <li><strong class="key-term">Neurofibrilláris kötegek (NFTs):</strong> A <span class="key-term">tau fehérje</span> intracelluláris, kóros aggregátumai.</li>
+                                <li>Ezek neuroinflammációhoz és kiterjedt neuronvesztéshez vezetnek.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Klinikai Stádiumok</h4>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li><strong>Preklinikai AK:</strong> Tünetmentes, de a biomarkerek már pozitívak.</li>
+                                <li><strong>Enyhe Kognitív Zavar (MCI):</strong> Mérhető memóriaromlás, de a mindennapi önállóság még megőrzött.</li>
+                                <li><strong>AK Demencia (enyhe, közepes, súlyos):</strong> A kognitív hanyatlás már a mindennapi életvitelt is befolyásolja.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-teal-800">Diagnózis és Kezelés</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Diagnosztika</h4>
+                            <p class="mb-2">A diagnózis a klinikai képen és a specifikus biomarkereken alapul.</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Liquor (CSF):</strong> Alacsony Aβ42, magas t-tau és p-tau szint.</li>
+                                <li><strong>PET Képalkotás:</strong> Amiloid-PET és Tau-PET a kóros fehérjék kimutatására.</li>
+                                <li><strong>Vérvizsgálat:</strong> Új, plazma alapú p-tau tesztek ígéretesek.</li>
+                            </ul>
+                             <details>
+                                <summary>NIA-AA Diagnosztikai Kritériumok (2018)</summary>
+                                <div class="details-content">
+                                    <p>Az Alzheimer-kórt biológiai alapon definiálja, az AT(N) rendszer segítségével:</p>
+                                    <ul class="list-disc list-inside ml-4 mt-2">
+                                        <li><strong>A:</strong> Amiloid plakkok (Aβ) biomarkerei (alacsony CSF Aβ42, pozitív amiloid PET).</li>
+                                        <li><strong>T:</strong> Tau patológia (NFTs) biomarkerei (magas CSF p-tau, pozitív tau PET).</li>
+                                        <li><strong>(N):</strong> Neurodegeneráció vagy neuronális sérülés biomarkerei (magas CSF t-tau, hippokampusz atrófia MRI-n, hipometabolizmus FDG-PET-en).</li>
+                                    </ul>
+                                    <p class="mt-2">A diagnózis a biomarkerek kombinációján alapul, a klinikai stádiumtól (preklinikai, MCI, demencia) függetlenül.</p>
+                                </div>
+                            </details>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Kezelés</h4>
+                            <p class="mb-2">Cél a tünetek enyhítése és a progresszió lassítása.</p>
+                             <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Tüneti:</strong> Kolinészteráz-gátlók (donepezil), memantin.</li>
+                                <li><strong>Betegségmódosító (DMT):</strong> Új <strong class="key-term">anti-amiloid monoklonális antitestek</strong> (pl. lecanemab, donanemab) a korai stádiumban lassíthatják a hanyatlást. Fő mellékhatásuk az ARIA (agyi ödéma/vérzés).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Dementias Section -->
+        <section id="non-ad-dementia" class="scroll-mt-24">
+            <div class="section-title border-orange-500 text-orange-600">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5M14.25 3.104c.251.023.501.05.75.082M19.8 14.5L14.25 18l-2.47-2.47a.75.75 0 00-1.06 0L8.25 18 2.7 12.45a.75.75 0 010-1.06l2.47-2.47a.75.75 0 011.06 0L9 11.25l2.47 2.47a.75.75 0 001.06 0l2.47-2.47 2.47-2.47a.75.75 0 011.06 0l2.7 5.4z" /></svg>
+                <h2>Nem-Alzheimer Típusú Demenciák</h2>
+            </div>
+            <div class="content-card">
+                 <h3 class="text-3xl font-bold mb-6 text-orange-800">Differenciáldiagnosztikai Összefoglaló</h3>
+                 <p class="text-lg mb-6">A demenciák elkülönítése a korai, domináns tüneteken, a betegség lefolyásán és a specifikus biomarkereken alapul. A pontos diagnózis elengedhetetlen a megfelelő kezeléshez és prognózishoz.</p>
+                 <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Jellemző</th>
+                                <th>Vaszkuláris Demencia (VaD)</th>
+                                <th>Lewy-testes Demencia (DLB)</th>
+                                <th>Frontotemporális Demencia (FTD)</th>
+                                <th>Huntington-kór (HD)</th>
+                                <th>Creutzfeldt-Jakob (CJD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold">Kezdeti Fő Tünet</td>
+                                <td><span class="key-term">Végrehajtó funkciók zavara</span>, lassultság, fokális jelek.</td>
+                                <td><span class="key-term">Fluktuáló kogníció</span>, vizuális hallucinációk, REM alvási zavar.</td>
+                                <td><span class="key-term">Személyiség/viselkedésváltozás</span> vagy nyelvi zavar.</td>
+                                <td><span class="key-term">Chorea</span> (mozgászavar), pszichiátriai tünetek.</td>
+                                <td><strong class="text-red-600">Gyorsan progresszív demencia</strong>, myoclonus.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Lefolyás</td>
+                                <td><strong class="key-term">Lépcsőzetes</strong> vagy fokozatos.</td>
+                                <td>Fluktuáló.</td>
+                                <td>Fokozatosan progrediáló.</td>
+                                <td>Lassú, progresszív.</td>
+                                <td><strong class="text-red-600">Rendkívül gyors</strong> (hónapok).</td>
+                            </tr>
+                             <tr>
+                                <td class="font-bold">Motoros Tünetek</td>
+                                <td>Gyakran fokális jelek (pl. hemiparesis).</td>
+                                <td>Korai parkinsonizmus.</td>
+                                <td>Lehet parkinsonizmus, ALS tünetei.</td>
+                                <td>Chorea, dystonia, rigiditás.</td>
+                                <td>Myoclonus, cerebelláris jelek.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Patológia</td>
+                                <td>Agyi érbetegség (infarktusok).</td>
+                                <td>Lewy-testek (α-szinuklein).</td>
+                                <td>Tau, TDP-43 fehérje aggregátumok.</td>
+                                <td>HTT gén CAG-repeat expanzió.</td>
+                                <td>Prion fehérjék.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Kulcs Diagnosztika</td>
+                                <td>MRI (agyi infarktusok).</td>
+                                <td>DAT-scan, MIBG szcintigráfia.</td>
+                                <td>MRI/PET (fronto-temporális atrófia).</td>
+                                <td>Genetikai teszt.</td>
+                                <td>Liquor (14-3-3, RT-QuIC), MRI (DWI).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                 </div>
+                 <details>
+                    <summary>DLB Diagnosztikai Kritériumok (Konszenzus)</summary>
+                    <div class="details-content">
+                        <p>A diagnózishoz demencia szükséges, plusz az alábbiak közül legalább kettő:</p>
+                        <ul class="criteria-list">
+                            <li><strong>Fő klinikai jellemzők:</strong>
+                                <ul>
+                                    <li>Fluktuáló kogníció, a figyelem és éberség kifejezett ingadozásaival.</li>
+                                    <li>Visszatérő, jól formált vizuális hallucinációk.</li>
+                                    <li>REM alvási viselkedészavar (RBD), mely megelőzheti a kognitív hanyatlást.</li>
+                                    <li>Spontán parkinsonizmus jelei.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Indikatív biomarkerek:</strong>
+                                <ul>
+                                    <li>Csökkent dopamin transzporter (DAT) felvétel a bazális ganglionokban (SPECT/PET).</li>
+                                    <li>Abnormális (alacsony felvételű) ¹²³I-MIBG miokardiális szcintigráfia.</li>
+                                    <li>Poliszomnográfiával megerősített REM alvás atónia nélkül.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p class="mt-2">A valószínű DLB diagnózisához két fő klinikai jellemző, vagy egy fő jellemző és egy vagy több indikatív biomarker szükséges.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>&copy; 2025 Neurodegeneratív Kórképek Tudástára. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

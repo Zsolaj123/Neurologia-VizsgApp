@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktív Neurológiai Vizsgafelkészítő</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-item.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .tab-button.active {
+            border-bottom-color: #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .interactive-diagram-tooltip {
+            /* Switched to fixed for robust positioning across scrollable containers */
+            position: fixed;
+            background-color: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            max-width: 250px;
+        }
+        .quiz-option.correct {
+            background-color: #10B981;
+            color: white;
+        }
+        .quiz-option.incorrect {
+            background-color: #EF4444;
+            color: white;
+        }
+        .diagram-part {
+             cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200">
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-gray-800 shadow-lg flex-shrink-0">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h1 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Neuroanatómia</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Vizsgafelkészítő</p>
+            </div>
+            <nav class="p-4 space-y-2">
+                <a href="#" class="sidebar-item flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-target="cerebellum">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2 1M4 7l2-1M4 7v2.5M12 21.5v-2.5M12 19l2-1m-2 1l-2-1m2-15a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Cerebellum</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-target="capsula-interna">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                    <span>Capsula Interna</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-target="thalamus">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.881 4.002L12 7.82l4.119-3.818M12 21.998V12M5.055 16.945L7 15a2 2 0 012-2h6a2 2 0 012 2l1.945 1.945"></path></svg>
+                    <span>Thalamus</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            <!-- Cerebellum Section -->
+            <section id="cerebellum" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">A Cerebellum Működési Egységei</h2>
+                <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
+                    <nav class="flex space-x-4" aria-label="Tabs">
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="cerebellum-funkcionalis">Funkcionális felosztás</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="cerebellum-klinika">Klinikai vonatkozások</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="cerebellum-interaktiv">Interaktív Ábra</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="cerebellum-kviz">Villámkvíz</button>
+                    </nav>
+                </div>
+                
+                <div id="cerebellum-funkcionalis" class="tab-content">
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <h3 class="font-bold text-lg text-indigo-500">⚖️ Vestibulocerebellum</h3>
+                            <p class="text-sm font-semibold">(Archicerebellum)</p>
+                            <p class="mt-2 text-sm"><strong>Anatómia:</strong> Flocculonodularis lebeny.</p>
+                            <p class="mt-1 text-sm"><strong>Input:</strong> Vestibularis rendszer (egyensúlyszerv).</p>
+                            <p class="mt-1 text-sm"><strong>Output:</strong> Vestibularis magvak.</p>
+                            <p class="mt-1 text-sm"><strong>Funkció:</strong> Egyensúly, testtartás, szemmozgások koordinációja (VOR).</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <h3 class="font-bold text-lg text-teal-500">🦵 Spinocerebellum</h3>
+                            <p class="text-sm font-semibold">(Paleocerebellum)</p>
+                             <p class="mt-2 text-sm"><strong>Anatómia:</strong> Vermis és paravermalis zóna.</p>
+                            <p class="mt-1 text-sm"><strong>Input:</strong> Gerincvelő (propriocepció), motoros kéreg.</p>
+                            <p class="mt-1 text-sm"><strong>Output:</strong> Ncl. fastigii, ncl. interpositus.</p>
+                            <p class="mt-1 text-sm"><strong>Funkció:</strong> Törzs- és végtagmozgások kivitelezésének szabályozása, hibakorrekció.</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <h3 class="font-bold text-lg text-rose-500">🤹 Cerebrocerebellum</h3>
+                            <p class="text-sm font-semibold">(Neocerebellum)</p>
+                             <p class="mt-2 text-sm"><strong>Anatómia:</strong> Kisagyféltekék laterális része.</p>
+                            <p class="mt-1 text-sm"><strong>Input:</strong> Nagyagykéreg (cortico-ponto-cerebellaris pálya).</p>
+                            <p class="mt-1 text-sm"><strong>Output:</strong> Ncl. dentatus.</p>
+                            <p class="mt-1 text-sm"><strong>Funkció:</strong> Komplex, tanult mozgások tervezése, időzítése, finomhangolása.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cerebellum-klinika" class="tab-content">
+                    <h3 class="text-xl font-semibold mb-2">Kisagyi szindrómák (DANISH mnemotechnika)</h3>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><strong>D</strong>ysdiadochokinesis: Gyors, alternáló mozgások zavara.</li>
+                        <li><strong>A</strong>taxia: Mozgáskoordináció zavara (törzs- és végtagataxia).</li>
+                        <li><strong>N</strong>ystagmus: Akaratlan, ritmikus szemmozgások.</li>
+                        <li><strong>I</strong>ntention tremor: Célirányos mozgás közben fokozódó remegés.</li>
+                        <li><strong>S</strong>lurred/Scanning speech (Dysarthria): Skandáló, elmosódott beszéd.</li>
+                        <li><strong>H</strong>ypotonia: Csökkent izomtónus.</li>
+                    </ul>
+                </div>
+
+                <div id="cerebellum-interaktiv" class="tab-content">
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-xl font-semibold mb-4">Interaktív ábra: A Cerebellum funkcionális részei</h3>
+                        <div id="cerebellum-diagram-container" class="relative">
+                            <!-- [Kép a Cerebellum funkcionális részeiről] -->
+                            <svg width="400" height="300" viewBox="0 0 250 190">
+                                <title>A Cerebellum részei (szagittális nézet)</title>
+                                <!-- Cerebrocerebellum (Hemisphere) -->
+                                <path class="diagram-part" fill="#fb7185" stroke="#e11d48" stroke-width="1.5"
+                                      data-info="Cerebrocerebellum (Laterális félteke): Komplex, tanult mozgások tervezése."
+                                      d="M 50,150 C 10,150 10,20 80,20 C 150,20 180,60 170,110 C 150,180 50,180 50,150 Z" />
+                                <!-- Spinocerebellum (Vermis) -->
+                                <path class="diagram-part" fill="#5eead4" stroke="#0d9488" stroke-width="1.5"
+                                      data-info="Spinocerebellum (Vermis & Paravermalis zóna): Mozgások kivitelezése és hibakorrekció."
+                                      d="M 170,110 C 180,60 220,70 230,120 C 235,150 180,180 150,180 C 150,180 150,180 170,110 Z" />
+                                <!-- Vestibulocerebellum (Flocculonodular Lobe) -->
+                                <path class="diagram-part" fill="#818cf8" stroke="#4f46e5" stroke-width="1.5"
+                                      data-info="Vestibulocerebellum (Flocculonodularis lebeny): Egyensúly, testtartás, szemmozgások."
+                                      d="M 190,145 a 20,15 0 1,0 40,0 a 20,15 0 1,0 -40,0" />
+                                <text x="10" y="180" font-size="12" fill="currentColor">Anterior</text>
+                                <text x="200" y="180" font-size="12" fill="currentColor">Posterior</text>
+                            </svg>
+                            <div id="cerebellum-tooltip" class="interactive-diagram-tooltip"></div>
+                        </div>
+                         <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Vidd az egeret a különböző területek fölé az információért.</p>
+                    </div>
+                </div>
+                
+                <div id="cerebellum-kviz" class="tab-content">
+                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow" data-quiz="cerebellum">
+                        <h3 class="text-xl font-semibold mb-4">Teszteld a tudásod!</h3>
+                        <p class="mb-4 font-medium" data-question>Melyik kisagyi rész sérülése okoz leginkább egyensúlyzavart, törzsataxiát és nystagmust?</p>
+                        <div class="space-y-3" data-options>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="false">Cerebrocerebellum</button>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="true">Vestibulocerebellum</button>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="false">Spinocerebellum</button>
+                        </div>
+                        <p class="mt-4 text-sm font-semibold hidden" data-feedback></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Capsula Interna Section -->
+            <section id="capsula-interna" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">A Capsula Interna</h2>
+                <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
+                     <nav class="flex space-x-4" aria-label="Tabs">
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="capsula-palyak">Pályák topográfiája</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="capsula-klinika">Klinikai vonatkozások</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="capsula-interaktiv">Interaktív Ábra</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="capsula-kviz">Villámkvíz</button>
+                    </nav>
+                </div>
+
+                <div id="capsula-palyak" class="tab-content">
+                    <div class="space-y-4">
+                        <div><strong>Crus anterius:</strong> Tractus frontopontinus, Radiatio thalamica anterior. (Kognitív/limbikus hurkok)</div>
+                        <div><strong>Genu:</strong> Tractus corticonuclearis (corticobulbaris). (Arc, fej, nyak mozgatópályái)</div>
+                        <div><strong>Crus posterius:</strong> Tractus corticospinalis (piramispálya), Radiatio thalamica centralis. (Test és végtagok mozgató- és érzőpályái)</div>
+                        <div><strong>Pars retrolentiformis:</strong> Radiatio optica (látópálya).</div>
+                        <div><strong>Pars sublentiformis:</strong> Radiatio acustica (hallópálya).</div>
+                    </div>
+                </div>
+                
+                <div id="capsula-klinika" class="tab-content">
+                    <h3 class="text-xl font-semibold mb-2">Capsularis stroke/vérzés tünetei</h3>
+                    <p>A capsula interna sérülése az ellenoldali (kontralaterális) testfélen okoz tüneteket.</p>
+                    <ul class="space-y-2 list-disc list-inside mt-2">
+                        <li><strong>Kontralaterális hemiparesis/hemiplegia:</strong> Ellenoldali testfél bénulása.</li>
+                        <li><strong>Kontralaterális hemihypaesthesia:</strong> Ellenoldali testfél érzéskiesése.</li>
+                        <li><strong>Kontralaterális homonym hemianopia:</strong> Ellenoldali látótérfél-kiesés.</li>
+                        <li><strong>Dysarthria:</strong> Elkent beszéd.</li>
+                    </ul>
+                </div>
+
+                <div id="capsula-interaktiv" class="tab-content">
+                     <div class="flex flex-col items-center">
+                        <h3 class="text-xl font-semibold mb-4">Interaktív ábra: Capsula Interna</h3>
+                        <div id="capsula-diagram-container" class="relative">
+                            <!-- [Kép a Capsula Interna részeiről] -->
+                            <svg width="400" height="320" viewBox="0 0 200 160">
+                                <title>Capsula Interna (horizontális nézet)</title>
+                                <!-- Surrounding Structures -->
+                                <text x="125" y="20" font-size="10" fill="currentColor">Elülső</text>
+                                <text x="125" y="155" font-size="10" fill="currentColor">Hátsó</text>
+                                <path d="M95,30 C150,30 150,80 95,80" fill="#c7d2fe" stroke="#4f46e5" />
+                                <text x="100" y="58" font-size="10" fill="#312e81" transform="rotate(-15 100 58)">Ncl. Caudatus</text>
+                                <path d="M95,130 L95,80 L150,80 L150,130 z" fill="#c7d2fe" stroke="#4f46e5" />
+                                <text x="115" y="108" font-size="10" fill="#312e81">Thalamus</text>
+                                <path d="M45,40 L85,80 L45,120 Z" fill="#e9d5ff" stroke="#7e22ce"/>
+                                <text x="50" y="83" font-size="10" fill="#581c87">Ncl. Lentiformis</text>
+
+                                <!-- Interactive Parts of Internal Capsule -->
+                                <path class="diagram-part" data-info="Crus Anterius: Tractus frontopontinus, Radiatio thalamica anterior (Kogníció, emóciók)" 
+                                      d="M95,80 L45,40 L95,30 Z" fill="#67e8f9" stroke="#0e7490" stroke-width="1.5"/>
+                                <path class="diagram-part" data-info="Genu: Tractus corticonuclearis (Arc, fej, nyak mozgatópályái)" 
+                                      d="M95,80 L85,80 C88,80 92,80 95,80 Z" stroke="#ca8a04" fill="#fde047" stroke-width="4"/>
+                                <path class="diagram-part" data-info="Crus Posterius: Tractus corticospinalis, Szenzoros pályák (Test és végtagok)" 
+                                      d="M85,80 L45,120 L95,130 Z" fill="#fca5a5" stroke="#b91c1c" stroke-width="1.5"/>
+                                <path class="diagram-part" data-info="Pars Retrolentiformis: Radiatio optica (látópálya)" 
+                                      d="M45,120 L95,130 L95,145 L45,135 Z" fill="#f9a8d4" stroke="#be185d" stroke-width="1.5"/>
+                            </svg>
+                             <div id="capsula-tooltip" class="interactive-diagram-tooltip"></div>
+                        </div>
+                        <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Vidd az egeret a különböző területek fölé az információért.</p>
+                    </div>
+                </div>
+                
+                <div id="capsula-kviz" class="tab-content">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow" data-quiz="capsula-interna">
+                        <h3 class="text-xl font-semibold mb-4">Teszteld a tudásod!</h3>
+                        <p class="mb-4 font-medium" data-question>Melyik részén halad át a látópálya (radiatio optica)?</p>
+                        <div class="space-y-3" data-options>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="false">Genu</button>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="false">Crus posterius</button>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="true">Pars retrolentiformis</button>
+                        </div>
+                        <p class="mt-4 text-sm font-semibold hidden" data-feedback></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Thalamus Section -->
+            <section id="thalamus" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">A Thalamus Szerkezete</h2>
+                 <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
+                     <nav class="flex space-x-4" aria-label="Tabs">
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="thalamus-magok">Fő magcsoportok</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="thalamus-klinika">Klinikai vonatkozások</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="thalamus-interaktiv">Interaktív Ábra</button>
+                        <button class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="thalamus-kviz">Villámkvíz</button>
+                    </nav>
+                </div>
+                
+                <div id="thalamus-magok" class="tab-content">
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li><strong>Nuclei Anteriores:</strong> Limbikus rendszer része (memória, érzelmek - Papez-kör).</li>
+                        <li><strong>Nuclei Mediales (pl. MD):</strong> Prefrontális kéreggel való kapcsolat (kognitív funkciók, emóciók).</li>
+                        <li><strong>Nuclei Laterales - Ventralis csoport:</strong>
+                            <ul class="ml-6 list-['-_'] list-inside">
+                                <li><strong>VA/VL:</strong> Motoros kontroll (input: bazális ganglionok, cerebellum).</li>
+                                <li><strong>VPL:</strong> Szenzoros információ a testből és végtagokból.</li>
+                                <li><strong>VPM:</strong> Szenzoros információ az arcból, ízérzés.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Metathalamus:</strong>
+                            <ul class="ml-6 list-['-_'] list-inside">
+                                <li><strong>Corpus Geniculatum Laterale (CGL):</strong> Látópálya átkapcsoló állomása.</li>
+                                <li><strong>Corpus Geniculatum Mediale (CGM):</strong> Hallópálya átkapcsoló állomása.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Nem specifikus magok (Intralaminaris, Reticularis):</strong> Éberség, tudatosság, figyelem, a thalamus aktivitásának modulálása.</li>
+                    </ul>
+                </div>
+
+                <div id="thalamus-klinika" class="tab-content">
+                    <h3 class="text-xl font-semibold mb-2">Thalamikus szindróma (Dejerine-Roussy)</h3>
+                    <p>A thalamus posterolateralis részének sérülése okozza.</p>
+                     <ul class="space-y-2 list-disc list-inside mt-2">
+                        <li>Kezdetben ellenoldali érzéskiesés (hemihypaesthesia).</li>
+                        <li>Később kínzó, égő, nehezen csillapítható spontán fájdalom (<strong>thalamikus fájdalom</strong>) alakul ki az érintett testfélen.</li>
+                        <li>Átmeneti hemiparesis, hemiataxia és akaratlan mozgások is társulhatnak hozzá.</li>
+                    </ul>
+                </div>
+
+                <div id="thalamus-interaktiv" class="tab-content">
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-xl font-semibold mb-4">Interaktív ábra: A Thalamus fő magjai</h3>
+                        <div id="thalamus-diagram-container" class="relative">
+                            <!-- [Kép a Thalamus magjairól] -->
+                            <svg width="400" height="300" viewBox="0 0 200 150">
+                                <title>Thalamus magcsoportok</title>
+                                <!-- Reticular Nucleus (shell) -->
+                                <ellipse cx="100" cy="75" rx="82" ry="57" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4 2"/>
+                                <text x="5" y="20" font-size="9" fill="currentColor">Ncl. Reticularis</text>
+                                <!-- Main Body & Groups-->
+                                <ellipse cx="100" cy="75" rx="78" ry="53" fill="#f3f4f6"/>
+                                <!-- Anterior Group -->
+                                <path class="diagram-part" d="M 55 55 C 40 75, 55 95, 55 95 L 80 75 L 55 55 Z" 
+                                      fill="#f87171" stroke="#dc2626" stroke-width="1.5" 
+                                      data-info="Anterior Magok: Memória, emóciók (Papez-kör)"/>
+                                <!-- Medial Group -->
+                                <path class="diagram-part" d="M 55 55 L 80 75 L 140 50 C 110 30, 80 35, 55 55 Z" 
+                                      fill="#fbbf24" stroke="#d97706" stroke-width="1.5"
+                                      data-info="Medialis Magok (pl. MD): Kognitív funkciók, emóciók, tervezés"/>
+                                <!-- Lateral Group -->
+                                <path class="diagram-part" d="M 55 95 L 80 75 L 140 100 C 110 120, 80 115, 55 95 Z" 
+                                      fill="#4ade80" stroke="#16a34a" stroke-width="1.5"
+                                      data-info="Lateralis Magok (VA/VL, VPL/VPM): Motoros és szenzoros integráció"/>
+                                <!-- Pulvinar/Posterior Group -->
+                                <path class="diagram-part" d="M 140 50 L 170 75 L 140 100 Z" 
+                                      fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"
+                                      data-info="Posterior Magok (Pulvinar, LP): Komplex szenzoros integráció, figyelem"/>
+                                <!-- Metathalamus -->
+                                <path class="diagram-part" d="M 140 100 L 160 115 L 150 125 L 130 110 Z" 
+                                      fill="#a78bfa" stroke="#6d28d9" stroke-width="1.5"
+                                      data-info="Metathalamus (CGL/CGM): Látó- és hallópálya"/>
+                                <!-- Lamina Medullaris Interna (Y-shape divider) -->
+                                <path d="M 55 55 L 80 75 L 55 95" stroke="#4f46e5" stroke-width="2.5" fill="none"/>
+                            </svg>
+                            <div id="thalamus-tooltip" class="interactive-diagram-tooltip"></div>
+                        </div>
+                        <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Vidd az egeret a különböző területek fölé az információért.</p>
+                    </div>
+                </div>
+                
+                <div id="thalamus-kviz" class="tab-content">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow" data-quiz="thalamus">
+                        <h3 class="text-xl font-semibold mb-4">Teszteld a tudásod!</h3>
+                        <p class="mb-4 font-medium" data-question>Melyik thalamus magcsoport a látópálya (radiatio optica) fő átkapcsoló állomása?</p>
+                        <div class="space-y-3" data-options>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="false">Nucleus Ventralis Posterolateralis (VPL)</button>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="true">Corpus Geniculatum Laterale (CGL)</button>
+                            <button class="quiz-option w-full text-left p-3 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-correct="false">Nuclei Anteriores</button>
+                        </div>
+                        <p class="mt-4 text-sm font-semibold hidden" data-feedback></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const contentSections = document.querySelectorAll('.content-section');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            // --- Sidebar Navigation ---
+            function showContent(targetId) {
+                sidebarItems.forEach(item => item.classList.remove('active'));
+                contentSections.forEach(section => section.classList.remove('active'));
+
+                const targetSidebarItem = document.querySelector(`.sidebar-item[data-target='${targetId}']`);
+                const targetContentSection = document.getElementById(targetId);
+
+                if (targetSidebarItem) targetSidebarItem.classList.add('active');
+                if (targetContentSection) {
+                    targetContentSection.classList.add('active');
+                    const firstTabButton = targetContentSection.querySelector('.tab-button');
+                    if (firstTabButton) {
+                        firstTabButton.click();
+                    }
+                }
+            }
+
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.dataset.target;
+                    showContent(targetId);
+                });
+            });
+
+            // --- Tabbed Interface ---
+            tabButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const targetContentId = e.currentTarget.dataset.target;
+                    const parentSection = e.currentTarget.closest('.content-section');
+
+                    parentSection.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    parentSection.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    e.currentTarget.classList.add('active');
+                    document.getElementById(targetContentId).classList.add('active');
+                });
+            });
+
+            // --- REVISED Interactive Diagrams ---
+            function setupDiagram(containerId, tooltipId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                const tooltip = document.getElementById(tooltipId);
+                const diagramParts = container.querySelectorAll('.diagram-part');
+
+                diagramParts.forEach(part => {
+                    part.addEventListener('mouseenter', (e) => {
+                        tooltip.textContent = part.dataset.info;
+                        tooltip.style.opacity = '1';
+                    });
+
+                    part.addEventListener('mousemove', (e) => {
+                        // Using clientX/clientY with fixed positioning for the tooltip
+                        // provides robust coordinates regardless of page scroll.
+                        // An offset is added to prevent the tooltip from flickering
+                        // by appearing directly under the cursor.
+                        tooltip.style.left = `${e.clientX + 15}px`;
+                        tooltip.style.top = `${e.clientY + 15}px`;
+                    });
+                    
+                    part.addEventListener('mouseleave', () => {
+                        tooltip.style.opacity = '0';
+                    });
+                });
+            }
+            
+            setupDiagram('cerebellum-diagram-container', 'cerebellum-tooltip');
+            setupDiagram('capsula-diagram-container', 'capsula-tooltip');
+            setupDiagram('thalamus-diagram-container', 'thalamus-tooltip');
+
+
+            // --- Quiz Logic ---
+            const quizContainers = document.querySelectorAll('[data-quiz]');
+            quizContainers.forEach(container => {
+                const options = container.querySelectorAll('.quiz-option');
+                const feedbackEl = container.querySelector('[data-feedback]');
+                let answered = false;
+
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        if (answered) return;
+                        answered = true;
+                        const isCorrect = option.dataset.correct === 'true';
+                        
+                        if (isCorrect) {
+                            option.classList.add('correct');
+                            feedbackEl.textContent = 'Helyes válasz! ✅';
+                            feedbackEl.className = 'mt-4 text-sm font-semibold text-green-500';
+                        } else {
+                            option.classList.add('incorrect');
+                            feedbackEl.textContent = 'Helytelen válasz. ❌';
+                            feedbackEl.className = 'mt-4 text-sm font-semibold text-red-500';
+                            container.querySelector('[data-correct="true"]').classList.add('correct');
+                        }
+                         feedbackEl.classList.remove('hidden');
+                    });
+                });
+            });
+
+
+            // --- Initial State ---
+            if (sidebarItems.length > 0) {
+                sidebarItems[0].click();
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agydaganatok Kezelése és Komplikációi - Interaktív Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .tab-active {
+            border-color: #7c3aed;
+            color: #7c3aed;
+            background-color: #f5f3ff;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header és Navigáció -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-violet-600 flex items-center">
+                <i data-lucide="activity" class="mr-2"></i>
+                Neuro-onkológiai Terápiák
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#kezeles" class="hover:text-violet-600 transition">Kezelés</a>
+                <a href="#metasztazisok" class="hover:text-violet-600 transition">Metasztázisok</a>
+                <a href="#icp" class="hover:text-violet-600 transition">Agyödéma & ICP</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobil menü -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+            <a href="#kezeles" class="block py-2 hover:text-violet-600 transition">Kezelés</a>
+            <a href="#metasztazisok" class="block py-2 hover:text-violet-600 transition">Metasztázisok</a>
+            <a href="#icp" class="block py-2 hover:text-violet-600 transition">Agyödéma & ICP</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Agydaganatok Kezelése -->
+        <section id="kezeles" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-violet-500 pl-4">Az Agydaganatok Kezelése</h2>
+            
+            <div id="kezeles-container" class="bg-white rounded-xl shadow-lg p-6">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="alapelvek" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-violet-500 transition text-center">
+                        <i data-lucide="book-open" class="inline-block mr-2"></i>Általános Elvek
+                    </button>
+                    <button data-tab="sebeszet" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-violet-500 transition text-center">
+                        <i data-lucide="scalpel" class="inline-block mr-2"></i>Sebészet
+                    </button>
+                    <button data-tab="sugar" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-violet-500 transition text-center">
+                        <i data-lucide="radiation" class="inline-block mr-2"></i>Sugárterápia
+                    </button>
+                    <button data-tab="szisztemas" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-violet-500 transition text-center">
+                        <i data-lucide="syringe" class="inline-block mr-2"></i>Szisztémás Terápiák
+                    </button>
+                </div>
+
+                <!-- Tab tartalmak -->
+                <div class="tab-content-wrapper">
+                    <!-- Általános Elvek -->
+                    <div id="alapelvek" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-violet-700">Általános Kezelési Elvek</h3>
+                        <p class="mb-4 text-gray-600">Az agydaganatok kezelése komplex, <strong>multidiszciplináris</strong> feladat. A terápia alapja a daganat pontos <strong>szövettani és molekuláris diagnózisa</strong>, amelyet a WHO klasszifikáció szerint határoznak meg.</p>
+                        <div class="accordion-item border rounded-lg">
+                            <button class="accordion-header w-full text-left p-4 bg-violet-50 hover:bg-violet-100 font-semibold flex justify-between items-center">
+                                <span>Kulcsfontosságú Molekuláris Markerek</span>
+                                <i data-lucide="chevron-down" class="transition-transform"></i>
+                            </button>
+                            <div class="accordion-content p-4 border-t">
+                                <ul class="space-y-2 list-disc list-inside">
+                                    <li><strong>IDH1/IDH2 mutációk:</strong> Diffúz gliomákban. Az IDH-mutált tumorok jobb prognózisúak. A <strong>vorasidenib</strong> (IDH-gátló) hatékony terápia.</li>
+                                    <li><strong>MGMT promoter metiláció:</strong> Glioblasztómában (GBM) jobb választ jelez előre a <strong>temozolomid (TMZ)</strong> kemoterápiára.</li>
+                                    <li><strong>1p/19q kodéleció:</strong> Oligodendrogliomákra jellemző, jobb prognózist és kemoterápiás választ jelez.</li>
+                                    <li><strong>BRAF V600E mutáció:</strong> Bizonyos gliomákban célzott terápiás lehetőséget kínál BRAF/MEK-gátlókkal.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sebészet -->
+                    <div id="sebeszet" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-violet-700">Sebészeti Kezelés</h3>
+                        <p class="mb-4 text-gray-600">A sebészet célja a <strong>maximális biztonságos reszekció (MSR)</strong>, a szövettani mintavétel és a koponyaűri nyomás csökkentése. A reszekció mértéke szorosan korrelál a túléléssel.</p>
+                        <div class="accordion-item border rounded-lg">
+                            <button class="accordion-header w-full text-left p-4 bg-violet-50 hover:bg-violet-100 font-semibold flex justify-between items-center">
+                                <span>Modern Sebészeti Technikák</span>
+                                <i data-lucide="chevron-down" class="transition-transform"></i>
+                            </button>
+                            <div class="accordion-content p-4 border-t">
+                                <ul class="space-y-2 list-disc list-inside">
+                                    <li><strong>Éber kraniotómia:</strong> Lehetővé teszi a beszéd- és mozgásfunkciók valós idejű monitorozását.</li>
+                                    <li><strong>Neuronavigáció:</strong> A preoperatív képek alapján segíti a sebészi tájékozódást.</li>
+                                    <li><strong>Intraoperatív MRI (iMRI):</strong> Lehetővé teszi a reszekció mértékének műtét közbeni ellenőrzését.</li>
+                                    <li><strong>Fluoreszcencia-vezérelt sebészet (5-ALA):</strong> A daganatszövet fluoreszkál, segítve a vizuális elkülönítést.</li>
+                                    <li><strong>Intraoperatív neurofiziológiai monitorozás (IONM):</strong> A fontos idegpályák funkciójának folyamatos ellenőrzése.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sugárterápia -->
+                    <div id="sugar" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-violet-700">Sugárterápia</h3>
+                        <p class="mb-4 text-gray-600">Nagyenergiájú sugárzással pusztítja el a daganatsejteket, miközben a környező ép szöveteket kíméli. A modern technikák a precíz, fókuszált besugárzásra törekednek.</p>
+                        <div class="accordion-item border rounded-lg">
+                            <button class="accordion-header w-full text-left p-4 bg-violet-50 hover:bg-violet-100 font-semibold flex justify-between items-center">
+                                <span>Főbb Technikák és Alkalmazási Területek</span>
+                                <i data-lucide="chevron-down" class="transition-transform"></i>
+                            </button>
+                            <div class="accordion-content p-4 border-t">
+                                <ul class="space-y-2 list-disc list-inside">
+                                    <li><strong>Sztereotaxiás Sugársebészet (SRS):</strong> Egyetlen, nagy dózisú kezelés kisebb, jól körülírt daganatokra (pl. agyi áttétek, akusztikus neuroma). Eszközei: <strong>Gamma-kés, CyberKnife</strong>.</li>
+                                    <li><strong>Frakcionált Sztereotaxiás Sugárterápia (FSRT):</strong> A dózist több frakcióban adják le nagyobb vagy kritikus struktúrákhoz közeli tumorok esetén.</li>
+                                    <li><strong>Protonterápia:</strong> A protonok fizikai tulajdonságai (Bragg-csúcs) miatt kiválóan kíméli a daganat mögötti szöveteket. Előnyös gyermekgyógyászati és koponyaalapi tumoroknál.</li>
+                                    <li><strong>Teljes agyi sugárkezelés (WBRT):</strong> Multiplex agyi áttétek esetén alkalmazzák, de jelentős neurokognitív mellékhatásai miatt szerepe csökken.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Szisztémás Terápiák -->
+                    <div id="szisztemas" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-violet-700">Szisztémás Terápiák</h3>
+                        <p class="mb-4 text-gray-600">Olyan gyógyszeres kezelések, amelyek a véráram útján az egész szervezetre hatnak. A fő kihívás a <strong>vér-agy gát (BBB)</strong> leküzdése.</p>
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-violet-50 hover:bg-violet-100 font-semibold flex justify-between items-center">
+                                    <span>Kemoterápia és Célzott Terápia</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Temozolomid (TMZ):</strong> Orális kemoterápia, a <strong>glioblasztóma standard kezelésének</strong> része.</li>
+                                        <li><strong>Bevacizumab (anti-VEGF):</strong> Célzott terápia, gátolja az érképződést. Recidiváló GBM kezelésére engedélyezett.</li>
+                                        <li><strong>IDH-gátlók (Vorasidenib):</strong> Hatékonyak IDH-mutáns alacsony grádusú gliomákban.</li>
+                                        <li><strong>BRAF/MEK-gátlók:</strong> Hatékonyak BRAF V600E mutáns gliomákban.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-violet-50 hover:bg-violet-100 font-semibold flex justify-between items-center">
+                                    <span>Immunterápia és Innovatív Megközelítések</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="space-y-2 list-disc list-inside">
+                                        <li><strong>Immunellenőrzőpont-gátlók (ICIs):</strong> Agydaganatokban eddig korlátozott sikerrel, kombinációs vizsgálatok folynak.</li>
+                                        <li><strong>Daganatvakcinák és CAR-T sejt terápia:</strong> Ígéretes kísérleti megközelítések.</li>
+                                        <li><strong>Tumor Treating Fields (TTF) (Optune®):</strong> Hordozható eszköz, amely elektromos mezőkkel gátolja a sejtosztódást. GBM-ben a standard kezeléshez adva javítja a túlélést.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Idegrendszeri Metasztázisok -->
+        <section id="metasztazisok" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-cyan-500 pl-4">Idegrendszeri Metasztázisok</h2>
+            <div id="metasztazisok-container" class="bg-white rounded-xl shadow-lg p-6">
+                <p class="mb-4 text-gray-600">A test más részén lévő primer daganatból a KIR-be terjedő másodlagos daganatok. Az <strong>agyi áttétek a leggyakoribb intrakraniális tumorok</strong> felnőttkorban.</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[1000px] text-sm">
+                        <thead class="bg-cyan-50 text-left">
+                            <tr>
+                                <th class="p-3 font-semibold">Áttét Típusa</th>
+                                <th class="p-3 font-semibold">Jellemző Klinikai Tünetek</th>
+                                <th class="p-3 font-semibold">Diagnosztika és Kezelés</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">Agyi Metasztázisok (parenchymás)</td>
+                                <td class="p-3"><strong>Fejfájás</strong>, <strong>újonnan fellépő görcsroham</strong>, <strong>fokális neurológiai deficit</strong>.</td>
+                                <td class="p-3"><strong>Diagnózis:</strong> Kontrasztos MRI. <strong>Kezelés:</strong> SRS (1-4 áttétnél), WBRT (multiplex áttéteknél), sebészet, szisztémás terápia.</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">Gerincvelői Metasztázisok (MESCC)</td>
+                                <td class="p-3"><strong>Fájdalom</strong> (leggyakoribb, "red flag"!), végtaggyengeség, érzészavar, hólyag/bélzavarok.</td>
+                                <td class="p-3"><strong>Diagnózis:</strong> Kontrasztos gerinc MRI. <strong>Kezelés:</strong> Sürgősségi állapot! Szteroidok, sugárterápia, sebészet.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium">Leptomeningealis Metasztázisok (LMD)</td>
+                                <td class="p-3"><strong>Multifokális tünetek:</strong> fejfájás, <strong>agyidegtünetek</strong> (kettőslátás), radicularis fájdalom, cauda equina szindróma.</td>
+                                <td class="p-3"><strong>Diagnózis:</strong> Kontrasztos MRI és <strong>liquor (CSF) citológia</strong>. <strong>Kezelés:</strong> Intrathekális/szisztémás terápia, RT.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agyödéma és ICP -->
+        <section id="icp" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-amber-500 pl-4">Agyödéma és Intracranialis Nyomás Menedzsmentje</h2>
+            <div id="icp-container" class="bg-white rounded-xl shadow-lg p-6">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="oedema" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-amber-500 transition text-center">
+                        <i data-lucide="waves" class="inline-block mr-2"></i>Agyödéma Típusai
+                    </button>
+                    <button data-tab="icp_kezeles" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-amber-500 transition text-center">
+                        <i data-lucide="arrow-down-circle" class="inline-block mr-2"></i>ICP Csökkentés Stratégiái
+                    </button>
+                </div>
+
+                <div class="tab-content-wrapper">
+                    <!-- Agyödéma -->
+                    <div id="oedema" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-amber-700">Az Agyödéma Típusainak Elkülönítése</h3>
+                        <p class="mb-4 text-gray-600">Az agyödéma az agyszövet kóros víztartalom-növekedése. A helyes terápia kiválasztásához kulcsfontosságú a domináns ödéma típusának azonosítása.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[800px] text-sm text-left">
+                                <thead class="bg-amber-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Jellemző</th>
+                                        <th class="p-3 font-semibold">Vazogén Ödéma</th>
+                                        <th class="p-3 font-semibold">Citotoxikus Ödéma</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Patofiziológia</td>
+                                        <td class="p-3"><strong>Vér-agy gát (BBB) károsodás</strong>. Folyadék és fehérjék szivárgása az <strong>extracelluláris</strong> térbe.</td>
+                                        <td class="p-3"><strong>Sejtszintű energiahiány (ATP↓)</strong>. Az ionpumpák hibája miatti <strong>intracelluláris</strong> sejduzzanat.</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Fő Lokalizáció</td>
+                                        <td class="p-3">Fehérállomány</td>
+                                        <td class="p-3">Szürkeállomány (kezdetben)</td>
+                                    </tr>
+                                     <tr class="border-b">
+                                        <td class="p-3 font-medium">Gyakori Okok</td>
+                                        <td class="p-3"><strong>Agydaganatok</strong>, tályog, trauma, gyulladás.</td>
+                                        <td class="p-3"><strong>Akut ischaemiás stroke</strong>, hypoxia.</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Kulcs MRI Jel</td>
+                                        <td class="p-3">T2/FLAIR ↑ (ujjlenyomatszerű), <strong>ADC normál/↑</strong>, kontraszthalmozás.</td>
+                                        <td class="p-3"><strong>DWI ↑ / ADC ↓ (diffúziórestrikció)</strong>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Specifikus Terápia</td>
+                                        <td class="p-3"><strong>Kortikoszteroidok (Dexamethason)</strong> a BBB stabilizálására.</td>
+                                        <td class="p-3">A szteroidok hatástalanok. A kezelés az alapfolyamat (pl. stroke) kezelésére és az ICP általános csökkentésére irányul.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                             <p class="mt-4 text-sm text-gray-500"><strong>Intersticiális ödéma:</strong> Liquorkeringési zavar (hydrocephalus) okozza. Kezelése a liquor elvezetésére irányul (pl. EVD, shunt).<br><strong>Ozmotikus ödéma:</strong> Súlyos elektrolitzavar (pl. hyponatraemia) okozza. Kezelése az ozmotikus egyensúly helyreállítása.</p>
+                        </div>
+                    </div>
+                    <!-- ICP Kezelés -->
+                    <div id="icp_kezeles" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-red-700">Intracranialis Nyomás (ICP) Csökkentésének Lépcsőzetes Stratégiái</h3>
+                        <p class="mb-4 text-gray-600">A kezelés célja a másodlagos agykárosodás megelőzése a cerebrális perfúziós nyomás (CPP) optimalizálásával (CPP = MAP - ICP).</p>
+                        <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-red-50 hover:bg-red-100 font-semibold flex justify-between items-center">
+                                    <span>Alapvető Intézkedések (Tier 0/1)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="list-disc list-inside space-y-2">
+                                        <li><strong>Pozícionálás:</strong> Fej 30°-os emelése, neutrális helyzetben a vénás elfolyás javítására.</li>
+                                        <li><strong>Fájdalomcsillapítás és Szedálás:</strong> Az agyi metabolizmus csökkentése (pl. propofol, fentanil).</li>
+                                        <li><strong>Fiziológiás állapot fenntartása:</strong> Normothermia, normocapnia, euvolaemia, euglykaemia.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-red-50 hover:bg-red-100 font-semibold flex justify-between items-center">
+                                    <span>Gyógyszeres Terápia (Tier 1)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                     <h4 class="font-semibold text-lg mb-2">Kortikoszteroidok</h4>
+                                     <p class="mb-3"><strong>Dexamethason:</strong> A <strong>vazogén ödéma</strong> specifikus kezelésének alapszere. Stabilizálja a sérült vér-agy gátat. Dózis: 4-16 mg/nap, a tünetek súlyosságától függően. Citotoxikus ödémában hatástalan!</p>
+                                     <h4 class="font-semibold text-lg mb-2">Ozmotikus Terápia</h4>
+                                     <p class="mb-3">Ozmotikus grádienssel vizet vonnak el az agyszövetből. Hatékonyak mindkét fő ödéma típusban az ICP csökkentésére.</p>
+                                    <ul class="list-disc list-inside space-y-2">
+                                        <li><strong>Mannitol (Mannisol):</strong> 0.25-1 g/kg IV bólus. Gyors hatású, de diurézist okoz. Monitorozás: szérum ozmolalitás, vesefunkció.</li>
+                                        <li><strong>Hipertóniás Sóoldat (HTS):</strong> Pl. 3% NaCl. Kevésbé okoz hipovolémiát. Monitorozás: szérum nátrium.</li>
+                                        <li><strong>Glicerin (Glycerol):</strong> Enyhébb hatású ozmotikus szer. Adható orálisan vagy IV. Előnye a kevesebb rebound hatás és a kalóriaforrásként való hasznosulás.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                             <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-red-50 hover:bg-red-100 font-semibold flex justify-between items-center">
+                                    <span>Invazív és "Rescue" Terápiák (Tier 2/3)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <ul class="list-disc list-inside space-y-2">
+                                        <li><strong>Liquor Drenázs (EVD):</strong> Külső ventricularis drain behelyezése a CSF elvezetésére és az ICP direkt monitorozására.</li>
+                                        <li><strong>Kontrollált Hiperventilláció:</strong> Csak rövid ideig, "rescue" terápiaként, mert agyi ischaemiát okozhat.</li>
+                                        <li><strong>Barbiturát Kóma:</strong> Refrakter ICP esetén, az agyi metabolizmus drasztikus csökkentésére.</li>
+                                        <li><strong>Dekompresszív Kraniektómia (DC):</strong> A koponyacsont egy részének eltávolítása a duzzadt agy számára. Csökkenti a mortalitást, de gyakran súlyos fogyatékossággal jár.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 - Interaktív Tanulási Segédlet. Készült a feltöltött dokumentumok alapján.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobil menü
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Általános Tab váltó funkció
+        function setupTabs(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const tabButtons = container.querySelectorAll('.tab-button');
+            const tabPanes = container.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                    });
+                    button.classList.add('tab-active');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Tabok inicializálása
+        setupTabs('kezeles-container');
+        setupTabs('metasztazisok-container');
+        setupTabs('icp-container');
+
+
+        // Accordion
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('svg');
+                
+                header.parentElement.classList.toggle('open');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

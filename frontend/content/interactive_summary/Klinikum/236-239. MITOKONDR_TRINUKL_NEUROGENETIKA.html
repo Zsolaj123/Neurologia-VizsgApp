@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurogenetikai Kórképek Részletes Tudástára</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c-primary: #0891b2; /* cyan-600 */
+            --c-primary-dark: #0e7490; /* cyan-700 */
+            --c-secondary: #ea580c; /* orange-600 */
+            --c-tertiary: #4338ca; /* indigo-700 */
+            --c-text-dark: #1f2937;
+            --c-text-light: #4b5563;
+            --c-bg-light: #f8fafc;
+            --c-border: #e5e7eb;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--c-bg-light);
+            color: var(--c-text-dark);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-link.active {
+            color: var(--c-primary);
+            font-weight: 700;
+            border-bottom: 3px solid var(--c-primary);
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--c-text-dark);
+            margin-bottom: 3rem;
+            border-bottom: 4px solid;
+            padding-bottom: 1.5rem;
+        }
+        .section-title svg {
+            width: 4rem;
+            height: 4rem;
+            margin-right: 1.5rem;
+            stroke-width: 1.5;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border: 1px solid var(--c-border);
+            border-radius: 0.75rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--c-border);
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #374151;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background-color: #ecfeff; /* cyan-50 */
+        }
+        .key-term {
+            font-weight: 700;
+            color: var(--c-primary-dark);
+            background-color: #cffafe;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+        details {
+            background: #fafafa;
+            border-radius: 0.5rem;
+            border: 1px solid var(--c-border);
+            margin-top: 1.5rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+            color: #155e75; /* cyan-800 */
+            font-size: 1.1rem;
+        }
+        summary::after {
+            content: '＋';
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .details-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--c-border);
+            line-height: 1.75;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-cyan-700">Neurogenetikai Tudástár</h1>
+            <nav class="hidden md:flex space-x-8 text-lg">
+                <a href="#mitochondrialis" class="nav-link hover:text-cyan-600 transition pb-2">Mitokondriális Betegségek</a>
+                <a href="#trinukleotid" class="nav-link hover:text-cyan-600 transition pb-2">Trinukleotid Repeat</a>
+                <a href="#neurogenetika" class="nav-link hover:text-cyan-600 transition pb-2">Neurogenetika</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#mitochondrialis" class="block py-2 text-lg nav-link">Mitokondriális Betegségek</a>
+            <a href="#trinukleotid" class="block py-2 text-lg nav-link">Trinukleotid Repeat</a>
+            <a href="#neurogenetika" class="block py-2 text-lg nav-link">Neurogenetika</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Mitochondrial Diseases Section -->
+        <section id="mitochondrialis" class="mb-20 scroll-mt-24">
+            <div class="section-title border-cyan-500 text-cyan-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                <h2>Mitokondriális Betegségek</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-cyan-800">Definíció és Genetikai Háttér</h3>
+                    <p class="text-lg mb-4">A mitokondriális betegségek az energiatermelés (ATP-szintézis) zavarával járó, genetikailag és klinikailag heterogén kórképek. Az agy, szív és izmok magas energiaigénye miatt ezek a szervek a leginkább érintettek.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Kettős Genetikai Kontroll</h4>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Mitokondriális DNS (mtDNS):</strong> Anyai ágon öröklődik, a légzési lánc 13 fehérjéjét kódolja.</li>
+                                <li><strong>Nukleáris DNS (nDNS):</strong> A mitokondriális fehérjék többségét kódolja, mendeli öröklődésmenettel.</li>
+                                <li><strong class="key-term">Heteroplazmia:</strong> A mutáns és vad típusú mtDNS aránya sejten belül, ami a klinikai kép súlyosságát és variabilitását határozza meg.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl mb-3">Patofiziológia</h4>
+                            <p>Az "energiaválság" a központi elem: a csökkent ATP-termelés, a reaktív oxigénfajták (ROS) felszaporodása és a kalcium-homeosztázis zavara sejtkárosodáshoz és apoptózishoz vezet.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-cyan-800">Klinikai Szindrómák és Diagnosztika</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Szindróma</th><th>Főbb Neurológiai Jellemzők</th><th>Jellemző Kezdet</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">MELAS</td>
+                                    <td><strong class="key-term">M</strong>itokondriális <strong class="key-term">E</strong>ncephalomyopathia, <strong class="key-term">L</strong>aktát<strong class="key-term">a</strong>cidózis és <strong class="key-term">S</strong>troke-szerű epizódok.</td>
+                                    <td>&lt; 40 év</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">MERRF</td>
+                                    <td><strong class="key-term">M</strong>yoclonusos <strong class="key-term">E</strong>pilepszia <strong class="key-term">R</strong>agged-<strong>R</strong>ed <strong class="key-term">F</strong>iber rostokkal.</td>
+                                    <td>Változó</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">KSS</td>
+                                    <td>Krónikus progresszív külső ophthalmoplegia (CPEO), retinitis pigmentosa, cerebelláris ataxia, szívblokk.</td>
+                                    <td>&lt; 20 év</td>
+                                </tr>
+                                 <tr>
+                                    <td class="font-bold">LHON</td>
+                                    <td>Leber-féle Herediter Opticus Neuropathia: szubakut, fájdalmatlan, kétoldali látásvesztés.</td>
+                                    <td>Fiatal felnőttkor</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <details>
+                        <summary>Diagnosztikai Megközelítés</summary>
+                        <div class="details-content">
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Klinikai gyanú:</strong> Multisystemás érintettség, atipikus neurológiai tünetek.</li>
+                                <li><strong>Biokémiai markerek:</strong> Emelkedett laktát és piruvát, magas L:P arány, emelkedett GDF-15 és FGF-21. Ezek nem specifikusak, de támogathatják a diagnózist.</li>
+                                <li><strong>Genetikai tesztelés:</strong> A diagnózis "arany standardja", az mtDNS és releváns nDNS gének szekvenálása.</li>
+                                <li><strong>Izombiopszia:</strong> "Ragged-red fiber" rostok és COX-negatív rostok kimutatása.</li>
+                                <li><strong>Képalkotás:</strong> MRI/MRS az agyi érintettség (pl. bazális ganglion léziók Leigh-szindrómában) felmérésére.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trinucleotide Repeat Expansion Diseases Section -->
+        <section id="trinukleotid" class="mb-20 scroll-mt-24">
+            <div class="section-title border-orange-500 text-orange-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                <h2>Trinukleotid Repeat Betegségek</h2>
+            </div>
+             <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-orange-800">Definíció és Patomechanizmusok</h3>
+                    <p class="text-lg mb-4">Ezeket a betegségeket specifikus génekben található, három nukleotidból álló szekvenciák (pl. CAG, CTG, GAA) kóros mértékű megismétlődése (expanziója) okozza. A repeat-szám generációról generációra nőhet, ami a tünetek korábbi kezdetét és súlyosabb lefolyását eredményezi (<strong class="key-term">anticipáció</strong>).</p>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Toxikus Funkciónyerés</h4>
+                            <p>A kóros fehérje (pl. <strong class="key-term">polyQ</strong>) aggregálódik és károsítja a sejteket (pl. Huntington-kór).</p>
+                        </div>
+                         <div class="bg-orange-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Funkcióvesztés</h4>
+                            <p>A gén expressziója gátlódik, ami fehérjehiányhoz vezet (pl. <strong class="key-term">Friedreich-ataxia</strong>).</p>
+                        </div>
+                         <div class="bg-orange-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Toxikus RNS</h4>
+                            <p>A kóros RNS molekula "elcsalogatja" a sejtmagi fehérjéket, megzavarva a sejt működését (pl. <strong class="key-term">Myotoniás Dystrophia</strong>).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-orange-800">Főbb Kórképek Összefoglalása</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Betegség</th><th>Gén / Repeat</th><th>Fő Klinikai Jellemzők</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Huntington-kór (HD)</td>
+                                    <td>HTT / <strong class="key-term">CAG</strong></td>
+                                    <td>Chorea, kognitív hanyatlás (demencia), pszichiátriai zavarok.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Myotoniás Dystrophia 1 (DM1)</td>
+                                    <td>DMPK / <strong class="key-term">CTG</strong></td>
+                                    <td>Disztális izomgyengeség, myotonia, multisystemás tünetek (cataracta, szívritmuszavarok).</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Friedreich-ataxia (FRDA)</td>
+                                    <td>FXN / <strong class="key-term">GAA</strong></td>
+                                    <td>Progresszív ataxia, dysarthria, érzészavar, cardiomyopathia, diabetes.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Fragilis X Szindróma</td>
+                                    <td>FMR1 / <strong class="key-term">CGG</strong></td>
+                                    <td>Értelmi fogyatékosság, autizmus spektrum zavar, jellegzetes arcvonások.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Spinocerebelláris Ataxiák (SCA)</td>
+                                    <td>Több gén / <strong class="key-term">CAG</strong></td>
+                                    <td>Progresszív cerebelláris ataxia, dysarthria, szemmozgászavarok.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Neurogenetics of Dementias and Muscle Diseases Section -->
+        <section id="neurogenetika" class="scroll-mt-24">
+            <div class="section-title border-indigo-500 text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                <h2>Neurogenetika a Klinikumban</h2>
+            </div>
+            <div class="space-y-12">
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-indigo-800">Demenciák Genetikája</h3>
+                    <p class="text-lg mb-4">A demenciák hátterében komplex genetikai tényezők állnak, melyek lehetnek kóroki (determinisztikus) vagy hajlamosító (kockázati) gének.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Betegség</th><th>Főbb Génhibák</th><th>Öröklődés és Jelentőség</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold">Alzheimer-kór (AK)</td>
+                                    <td><strong>Korai kezdetű:</strong> _APP, PSEN1, PSEN2_. <br><strong>Késői kezdetű:</strong> <strong class="key-term">APOE ε4 allél</strong>.</td>
+                                    <td>A korai formák autoszomális dominánsak. Az APOE ε4 dózisfüggően növeli a kockázatot.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Frontotemporális Demencia (FTD)</td>
+                                    <td>_C9orf72, GRN, MAPT_</td>
+                                    <td>Az esetek 40%-a familiáris. A <strong class="key-term">C9orf72</strong> expanzió FTD-t és ALS-t is okozhat.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-3xl font-bold mb-4 text-indigo-800">Izombetegségek Genetikája és Terápiás Áttörések</h3>
+                    <p class="text-lg mb-4">A genetikai diagnosztika forradalmasította az izombetegségek kezelését, lehetővé téve a célzott, betegségmódosító terápiák fejlesztését.</p>
+                    <div class="table-container">
+                         <table>
+                            <thead>
+                                <tr><th>Betegség</th><th>Gén</th><th>Öröklődés</th><th>Kezelési Áttörések</th></tr>
+                            </thead>
+                            <tbody>
+                                 <tr>
+                                    <td class="font-bold">DMD/BMD</td>
+                                    <td>_DMD_ (dystrophin)</td>
+                                    <td>X-kromoszómához kötött</td>
+                                    <td>Exon-skipping terápiák, mikro-dystrophin génterápiák.</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold">Gerincvelői Izomsorvadás (SMA)</td>
+                                    <td>_SMN1_</td>
+                                    <td>Autoszomális recesszív</td>
+                                    <td><strong class="text-green-600">Forradalmi génterápiák:</strong> Nusinersen, Zolgensma, Risdiplam.</td>
+                                </tr>
+                                 <tr>
+                                    <td class="font-bold">Charcot-Marie-Tooth (CMT)</td>
+                                    <td>>80 gén (pl. _PMP22_)</td>
+                                    <td>Heterogén</td>
+                                    <td>Nincs oki terápia, a kezelés szupportív.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto p-8 text-center">
+            <p>&copy; 2025 Neurogenetikai Kórképek Tudástára. Kizárólag oktatási célokra.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Smooth Scrolling & Active Nav Link ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

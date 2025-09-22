@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológiai Tudásbázis: Autoimmun és Myelin Betegségek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --c-purple: #8b5cf6; /* violet-500 */
+            --c-teal: #14b8a6;   /* teal-500 */
+            --c-orange: #f97316; /* orange-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-link.active.nav-purple { border-color: var(--c-purple); color: var(--c-purple); }
+        .nav-link.active.nav-teal { border-color: var(--c-teal); color: var(--c-teal); }
+        .nav-link.active.nav-orange { border-color: var(--c-orange); color: var(--c-orange); }
+        
+        .accordion-toggle {
+            transition: background-color 0.2s ease;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out, padding 0.5s ease;
+            padding: 0 1.25rem;
+        }
+        .accordion-content.open {
+            max-height: 9999px; /* Adjust as needed */
+            padding: 0 1.25rem 1.25rem 1.25rem;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb; /* gray-200 */
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9fafb; /* gray-50 */
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .hero-gradient {
+             background: linear-gradient(45deg, #f3e8ff, #eef2ff);
+        }
+        .hero-gradient-orange {
+             background: linear-gradient(45deg, #fff7ed, #fffbeb);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 flex items-center">
+                    <svg class="icon mr-3 text-purple-600" data-lucide="brain-circuit"></svg>
+                    <span>Neuro-Immunológia <span class="font-light text-slate-500">Tudásbázis</span></span>
+                </h1>
+                <nav id="main-nav" class="mt-4 md:mt-0 flex flex-wrap justify-center items-center gap-2 md:gap-6">
+                    <a href="#autoimmun" class="nav-link nav-purple text-base font-semibold text-gray-600 hover:text-purple-600">Autoimmun Encephalitisek</a>
+                    <a href="#myelin" class="nav-link nav-teal text-base font-semibold text-gray-600 hover:text-teal-600">Myelinpatológiák</a>
+                    <a href="#sm" class="nav-link nav-orange text-base font-semibold text-gray-600 hover:text-orange-600">Sclerosis Multiplex</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Autoimmun Encephalitisek Section -->
+        <section id="autoimmun-content" class="content-section">
+            <div class="p-8 rounded-2xl hero-gradient mb-8">
+                <h2 class="text-4xl font-bold text-purple-800">Autoimmun Encephalitisek</h2>
+                <p class="mt-2 text-purple-700 max-w-3xl">Az agy gyulladásos megbetegedései, ahol az immunrendszer a saját neuronális fehérjéi ellen indít támadást. A korai felismerés és a célzott immunterápia kulcsfontosságú.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-purple-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-purple-800 hover:bg-purple-50">
+                        <span class="flex items-center"><i data-lucide="swords" class="mr-3 text-purple-500"></i>Főbb Típusok és Jellemzőik</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-purple-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">Az AE típusokat a cél-autoantitest alapján osztályozzák. Az alábbi táblázat a legfontosabbakat foglalja össze.</p>
+                        <div class="table-container">
+                            <table class="text-sm">
+                                <thead class="bg-purple-50">
+                                    <tr><th>AE Típus</th><th>Célantigén</th><th>Főbb Klinikai Jellemzők</th><th>Gyakori Tumor Asszociáció</th><th>Életkor/Nem</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><b>Anti-NMDAR</b></td><td>NMDA receptor (GluN1)</td><td>Pszichiátriai tünetek, rohamok, <b>orofaciális dyskinesiák</b>, autonóm instabilitás</td><td><b>Ovariális teratóma</b></td><td>Fiatal nőkben gyakoribb</td></tr>
+                                    <tr><td><b>LGI1 Antitest</b></td><td>LGI1</td><td><b>Faciobrachiális dystoniás rohamok (FBDS)</b>, memóriazavar, rohamok, hyponatrémia</td><td>Ritka (thymoma)</td><td>Idősebb (>50 év) férfiak</td></tr>
+                                    <tr><td><b>CASPR2 Antitest</b></td><td>CASPR2</td><td>Limbikus encephalitis, <b>perifériás ideg hiperexcitabilitás</b> (PNH), ataxia</td><td>Thymoma</td><td>Idősebb férfiak</td></tr>
+                                    <tr><td><b>GAD65 Asszociált</b></td><td>GAD65</td><td><b>Stiff-person szindróma</b>, cerebelláris ataxia, refrakter epilepszia. Gyakran társul T1DM-mel.</td><td>Általában nem</td><td>Nőkben gyakoribb</td></tr>
+                                    <tr><td><b>GABA-B Receptor</b></td><td>GABA-B Receptor</td><td>Súlyos rohamokkal járó encephalitis</td><td><b>Kissejtes tüdőrák</b></td><td>-</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-purple-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-purple-800 hover:bg-purple-50">
+                        <span class="flex items-center"><i data-lucide="clipboard-check" class="mr-3 text-purple-500"></i>Diagnosztikus Megközelítés</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-purple-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                         <p class="text-slate-600 mt-4 mb-4">A diagnózis a klinikai kép, az antitest-vizsgálatok, az MRI és az EEG eredményeinek szintézisén alapul (Graus et al. kritériumok).</p>
+                         <ul class="list-none space-y-3">
+                            <li class="flex items-start"><i data-lucide="flask-conical" class="h-5 w-5 mr-3 mt-1 text-purple-500 flex-shrink-0"></i><div><b>Antitest Vizsgálat:</b> Szérum és liquor egyidejű vizsgálata javasolt. Az anti-NMDAR antitestek a liquorban érzékenyebben mutathatók ki.</div></li>
+                            <li class="flex items-start"><i data-lucide="image" class="h-5 w-5 mr-3 mt-1 text-purple-500 flex-shrink-0"></i><div><b>MRI:</b> Gyakori a mediális temporális lebenyek T2/FLAIR hiperintenzitása (limbikus encephalitis), de az MRI az esetek akár 50%-ában normális lehet.</div></li>
+                            <li class="flex items-start"><i data-lucide="activity" class="h-5 w-5 mr-3 mt-1 text-purple-500 flex-shrink-0"></i><div><b>EEG:</b> Gyakran kóros, az anti-NMDAR encephalitisre specifikus lehet az "extrém delta brush" minta.</div></li>
+                         </ul>
+                         <div class="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                            <p class="font-semibold text-purple-900">Klinikai Gyöngyszem: Szeronegativitás</p>
+                            <p class="text-sm text-slate-700">Az AE betegek jelentős része (akár 50%) szeronegatív. Ilyenkor a diagnózis a klinikai képen, más okok kizárásán és az immunterápiára adott válaszon alapul.</p>
+                         </div>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-lg shadow-md border-l-4 border-purple-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-purple-800 hover:bg-purple-50">
+                        <span class="flex items-center"><i data-lucide="syringe" class="mr-3 text-purple-500"></i>Terápiás Menedzsment és Prognózis</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-purple-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A kezelés célja az immunválasz elnyomása és a tünetek enyhítése. A korai kezelés jobb kimenetellel jár.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li><b>Elsővonalbeli terápia:</b> Kortikoszteroidok, IVIG, plazmaferezis (PLEX), és paraneopláziás esetekben a tumor eltávolítása.</li>
+                            <li><b>Másodvonalbeli terápia:</b> Rituximab, ciklofoszfamid, ha az elsővonalbeli kezelés sikertelen.</li>
+                            <li><b>Prognózis:</b> Változó. Korai kezeléssel a betegek többsége funkcionálisan jól gyógyul, de a felépülés lassú lehet, és gyakoriak a tartós kognitív és pszichiátriai maradványtünetek.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Myelinpatológiák Section -->
+        <section id="myelin-content" class="content-section">
+            <h2 class="text-3xl font-bold mb-2 text-slate-800">Myelinpatológiák</h2>
+            <div class="w-24 h-1.5 bg-teal-500 rounded-full mb-6"></div>
+            <p class="mb-8 text-slate-600 max-w-3xl">A myelinhüvely az idegrostokat szigetelő burok, melynek károsodása súlyos neurológiai zavarokhoz vezet. A myelinpatológiák a myelin szerzett vagy örökletes rendellenességeit foglalják magukban.</p>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-teal-400">
+                <h3 class="text-xl font-bold mb-2 text-teal-800">Alapfogalmak</h3>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div><b class="text-teal-700">Demyelinisatio:</b> A korábban normálisan kialakult myelin pusztulása (szerzett, pl. SM).</div>
+                    <div><b class="text-teal-700">Dysmyelinisatio:</b> A myelin hibás képződése vagy fenntartása (örökletes, pl. leukodystrophiák).</div>
+                    <div><b class="text-teal-700">Hypomyelinisatio:</b> A myelin csökkent mennyiségű, hiányos lerakódása.</div>
+                </div>
+            </div>
+
+             <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-teal-800 hover:bg-teal-50">
+                        <span class="flex items-center"><i data-lucide="shield-off" class="mr-3 text-teal-500"></i>Demyelinisatiós Betegségek (Szerzett)</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-teal-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="grid md:grid-cols-2 gap-4 mt-4">
+                            <div class="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                                <h4 class="font-semibold text-teal-900 mb-2">Központi Idegrendszer (KIR)</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li><b>Sclerosis Multiplex (SM):</b> Krónikus gyulladásos betegség, időben és térben disszeminált léziókkal.</li>
+                                    <li><b>ADEM:</b> Akut, monofázisos, posztinfekciós, encephalopathiával jár.</li>
+                                    <li><b>NMOSD:</b> Súlyos opticus neuritist és LETM-et okoz, AQP4-IgG pozitív.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                                <h4 class="font-semibold text-teal-900 mb-2">Perifériás Idegrendszer (PIR)</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li><b>Guillain-Barré Szindróma (GBS):</b> Akut, felszálló petyhüdt bénulás, gyakran fertőzést követően.</li>
+                                    <li><b>CIDP:</b> A GBS krónikus, progresszív vagy relapszáló megfelelője.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-teal-800 hover:bg-teal-50">
+                        <span class="flex items-center"><i data-lucide="dna" class="mr-3 text-teal-500"></i>Dysmyelinisatiós Betegségek (Leukodystrophiák)</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-teal-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A KIR fehérállományát érintő, örökletes, progresszív rendellenességek. A diagnózis genetikai és biokémiai teszteken alapul.</p>
+                        <div class="table-container">
+                            <table class="text-sm">
+                                <thead class="bg-teal-50">
+                                    <tr><th>Betegség</th><th>Gén/Öröklődés</th><th>Felhalmozódó Anyag</th><th>Főbb Jellemzők és Kezelés</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><b>Metachromasiás Leukodystrophia (MLD)</b></td><td>ARSA / AR</td><td>Szulfatidok</td><td>Motoros regresszió, neuropathia. Kezelés: HSCT, génterápia (Libmeldy).</td></tr>
+                                    <tr><td><b>Krabbe-Betegség</b></td><td>GALC / AR</td><td>Pszichozin (toxikus)</td><td>Extrém ingerlékenység, merevség, gyors progresszió. Kezelés: HSCT (csak preszimptomatikusan).</td></tr>
+                                    <tr><td><b>X-kötött Adrenoleukodystrophia (X-ALD)</b></td><td>ABCD1 / X-kötött</td><td>Nagyon Hosszú Láncú Zsírsavak (VLCFA)</td><td>Változatos fenotípusok (cerebrális, AMN, Addison-kór). Kezelés: HSCT, génterápia (Skysona).</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                         <div class="mt-4 p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                            <p class="font-semibold text-teal-900">Klinikai Gyöngyszem: Korai Diagnózis</p>
+                            <p class="text-sm text-slate-700">A leukodystrophiák kezelésében a korai, ideális esetben preszimptomatikus diagnózis kritikus, mivel a leghatékonyabb beavatkozások (HSCT, génterápia) csak a jelentős, irreverzibilis neurológiai károsodás kialakulása előtt sikeresek. Ez hangsúlyozza az újszülöttkori szűrés fontosságát.</p>
+                         </div>
+                    </div>
+                </div>
+             </div>
+        </section>
+        
+        <!-- Sclerosis Multiplex Section (EXPANDED) -->
+        <section id="sm-content" class="content-section">
+             <div class="p-8 rounded-2xl hero-gradient-orange mb-8">
+                <h2 class="text-4xl font-bold text-orange-800">Sclerosis Multiplex</h2>
+                <p class="mt-2 text-orange-700 max-w-3xl">A központi idegrendszer leggyakoribb krónikus gyulladásos, demielinizációs betegsége, melynek kezelése az elmúlt évtizedekben forradalmi változásokon ment keresztül.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-orange-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-orange-800 hover:bg-orange-50">
+                        <span class="flex items-center"><i data-lucide="info" class="mr-3 text-orange-500"></i>Alapok: Definíció, Patofiziológia és Epidemiológia</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-orange-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <ul class="list-none space-y-4 mt-4">
+                            <li class="flex items-start"><i data-lucide="microscope" class="h-5 w-5 mr-3 mt-1 text-orange-500 flex-shrink-0"></i><div><b>Definíció:</b> Krónikus, autoimmun betegség, mely a KIR idegsejtjeit szigetelő mielinhüvely és maguknak az axonoknak a károsodásával jár.</div></li>
+                            <li class="flex items-start"><i data-lucide="webhook" class="h-5 w-5 mr-3 mt-1 text-orange-500 flex-shrink-0"></i><div><b>Patofiziológia:</b> A T- és B-limfociták által vezérelt gyulladásos folyamat demielinizációs plakkok kialakulásához és axonális degenerációhoz vezet. Az axonkárosodás a maradandó rokkantság fő oka.</div></li>
+                            <li class="flex items-start"><i data-lucide="globe-2" class="h-5 w-5 mr-3 mt-1 text-orange-500 flex-shrink-0"></i><div><b>Epidemiológia:</b> Világszerte kb. 2.8 millió embert érint. Jellemzően 20-50 év között kezdődik, nőkben 2x gyakoribb.</div></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-orange-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-orange-800 hover:bg-orange-50">
+                        <span class="flex items-center"><i data-lucide="list-checks" class="mr-3 text-orange-500"></i>Klinikai Kép és Lefolyási Formák</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-orange-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-2 font-semibold">Gyakori tünetek:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-700 mb-4 text-sm">
+                           <li><b>Látászavarok:</b> Optic neuritis (látóideg-gyulladás), kettőslátás.</li>
+                           <li><b>Motoros tünetek:</b> Izomgyengeség, spaszticitás.</li>
+                           <li><b>Érzészavarok:</b> Zsibbadás, bizsergés, Lhermitte-tünet.</li>
+                           <li><b>Koordinációs zavarok:</b> Ataxia, egyensúlyzavar.</li>
+                           <li><b>"Láthatatlan" tünetek:</b> Fáradékonyság (fatigue), kognitív zavarok, depresszió.</li>
+                        </ul>
+                        <p class="text-slate-600 mb-2 font-semibold">Klinikai lefolyási formák:</p>
+                        <div class="table-container">
+                             <table class="text-sm">
+                                <thead class="bg-orange-50">
+                                    <tr><th>Forma</th><th>Leírás</th><th>Gyakoriság</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><b>CIS</b> (Klinikailag Izolált Szindróma)</td><td>Első, demielinizációra utaló neurológiai epizód.</td><td>SM előtti állapot</td></tr>
+                                    <tr><td><b>RRMS</b> (Relapszáló-Remittáló)</td><td>Jól elkülönülő relapszusok és remissziók váltakoznak.</td><td>~85% (kezdetben)</td></tr>
+                                    <tr><td><b>SPMS</b> (Szekunder Progresszív)</td><td>RRMS-t követően kialakuló, fokozatos rokkantság-romlás.</td><td>RRMS betegek jelentős része idővel átalakul.</td></tr>
+                                    <tr><td><b>PPMS</b> (Primer Progresszív)</td><td>Kezdettől fogva fokozatos rokkantság-romlás, relapszusok nélkül.</td><td>~10-15%</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-orange-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-orange-800 hover:bg-orange-50">
+                        <span class="flex items-center"><i data-lucide="file-check-2" class="mr-3 text-orange-500"></i>Diagnózis (Frissített 2024-es McDonald Kritériumok)</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-orange-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A diagnózis a neurológiai károsodások térbeli (DIS) és időbeli (DIT) szóródásának igazolásán alapul. A 2024-es frissítés célja a korábbi és pontosabb diagnózis.</p>
+                         <div class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                            <p class="font-semibold text-orange-900">Klinikai Gyöngyszem: Főbb Változások a 2024-es Kritériumokban</p>
+                            <ul class="text-sm text-slate-700 list-disc list-inside mt-2 space-y-1">
+                                <li>Az **MRI vizsgálat kötelező** a diagnózishoz.</li>
+                                <li>A **látóideg (optic nerve)** bekerült 5. lokalizációként a térbeli disszemináció (DIS) igazolására.</li>
+                                <li>A liquor **kappa free light chain (kFLC)** index használható az oligoklonális sávok (OCB) alternatívájaként a DIT igazolására.</li>
+                                <li>Új MRI biomarkerek, mint a **centrális véna jel (CVS)** és a **paramágneses peremű léziók (PRL)** segítik a specificitást.</li>
+                                <li>Kiterjedt DIS esetén (léziók 4-5 jellegzetes helyen) a DIT igazolása már nem feltétlenül szükséges a diagnózishoz.</li>
+                            </ul>
+                         </div>
+                        <div class="table-container mt-4">
+                            <table class="text-sm">
+                                <thead class="bg-orange-50">
+                                    <tr><th>Klinikai Forgatókönyv</th><th>Diagnózishoz Szükséges Kritériumok (2024)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><b>≥2 klinikai attack, ≥2 objektív lézió</b></td><td>Nincs szükség további adatra.</td></tr>
+                                    <tr><td><b>1 klinikai attack (CIS), ≥2 objektív lézió</b></td><td>DIT igazolása (új klinikai esemény VAGY új MRI lézió VAGY CSF OCB/kFLC pozitivitás).</td></tr>
+                                    <tr><td><b>1 klinikai attack (CIS), 1 objektív lézió</b></td><td>DIS igazolása (új klinikai esemény más lokalizációban VAGY MRI-vel) ÉS DIT igazolása.</td></tr>
+                                    <tr><td><b>Primer Progresszív SM (PPMS)</b></td><td>≥1 év progresszió ÉS 2 a 3-ból: ≥1 agyi T2 lézió; ≥2 gerincvelői T2 lézió; CSF OCB/kFLC pozitivitás.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2"><b>DIS:</b> Térbeli disszemináció (≥1 T2 lézió ≥2 az 5 régióból: periventricularis, corticalis/juxtacorticalis, infratentorialis, gerincvelő, látóideg). <b>DIT:</b> Időbeli disszemináció.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md border-l-4 border-orange-400 overflow-hidden">
+                    <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left text-xl font-semibold text-orange-800 hover:bg-orange-50">
+                        <span class="flex items-center"><i data-lucide="pilcrow" class="mr-3 text-orange-500"></i>Kezelési Stratégiák</span>
+                        <i data-lucide="chevron-down" class="transform transition-transform accordion-icon text-orange-500"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="text-slate-600 mt-4 mb-4">A kezelés célja az akut relapszusok enyhítése, a betegség hosszú távú lefolyásának módosítása és a tünetek kezelése.</p>
+                        <h4 class="font-semibold text-lg text-orange-900 mb-2">Akut Relapszus Kezelése</h4>
+                        <p class="text-sm text-slate-700 mb-4">Nagy dózisú kortikoszteroidok (pl. metilprednizolon) a felépülés gyorsítására. Szteroidrezisztens esetben plazmaferezis.</p>
+                        
+                        <h4 class="font-semibold text-lg text-orange-900 mb-2">Betegséglefolyást Módosító Terápiák (DMT-k)</h4>
+                        <p class="text-sm text-slate-700 mb-4">A korai és folyamatos kezelés lassítja a progressziót. A terápiaválasztás egyénre szabott, a betegség aktivitásától és a beteg preferenciáitól függ.</p>
+                        <div class="table-container">
+                            <table class="text-sm">
+                                <thead class="bg-orange-50">
+                                    <tr><th>Gyógyszercsoport</th><th>Példa Készítmény(ek)</th><th>Beadási Mód</th><th>Főbb Indikációk</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Interferon-béták</td><td>Avonex, Rebif, Betaferon</td><td>Injekció (s.c./i.m.)</td><td>RRMS, aktív SPMS, CIS</td></tr>
+                                    <tr><td>Glatiramer-acetát</td><td>Copaxone</td><td>Injekció (s.c.)</td><td>RRMS, CIS</td></tr>
+                                    <tr><td>S1P Receptor Modulátorok</td><td>Fingolimod, Siponimod</td><td>Orális</td><td>RRMS, aktív SPMS</td></tr>
+                                    <tr><td>Fumarátok</td><td>Dimetil-fumarát (Tecfidera)</td><td>Orális</td><td>RRMS</td></tr>
+                                    <tr><td>Anti-CD20 Antitestek</td><td>Ocrelizumab, Ofatumumab</td><td>Infúzió/Injekció</td><td>RRMS, aktív SPMS, **PPMS**</td></tr>
+                                    <tr><td>Alfa-4 Integrin Antagonista</td><td>Natalizumab (Tysabri)</td><td>Infúzió</td><td>Magas aktivitású RRMS</td></tr>
+                                    <tr><td>Anti-CD52 Antitest</td><td>Alemtuzumab (Lemtrada)</td><td>Infúzió</td><td>Magas aktivitású RRMS</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="font-semibold text-lg text-orange-900 mt-6 mb-2">Tüneti Kezelés és Életmód</h4>
+                        <ul class="list-disc list-inside text-sm text-slate-700">
+                            <li><b>Rehabilitáció:</b> Gyógytorna, foglalkozásterápia, logopédia a funkciók javítására.</li>
+                            <li><b>Tüneti gyógyszerek:</b> Spaszticitásra (baclofen), neuropátiás fájdalomra, fáradékonyságra.</li>
+                            <li><b>Életmód:</b> D-vitamin pótlás, dohányzás elhagyása, rendszeres testmozgás, stresszkezelés.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 mt-8 bg-slate-800 text-slate-400">
+        <p>&copy; 2025 Neurológiai Tudásbázis. Kizárólag oktatási és tájékoztatási célokat szolgál.</p>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Navigation Logic
+        const navLinks = document.querySelectorAll('#main-nav a');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        function switchTab(hash) {
+            const targetLink = document.querySelector(`a[href="${hash}"]`);
+            if (!targetLink) return;
+
+            navLinks.forEach(l => l.classList.remove('active'));
+            targetLink.classList.add('active');
+
+            const targetId = hash.substring(1) + '-content';
+            contentSections.forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hash = link.getAttribute('href');
+                // Use replaceState to avoid cluttering browser history on a single page
+                history.replaceState(null, null, hash);
+                switchTab(hash);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Set the active tab on page load based on the hash
+        if (window.location.hash) {
+            switchTab(window.location.hash);
+        } else {
+            // Default to the first tab if no hash is present
+            switchTab('#autoimmun');
+        }
+
+        // Accordion Logic
+        const accordionToggles = document.querySelectorAll('.accordion-toggle');
+
+        accordionToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('.accordion-icon');
+                
+                if (content && icon) {
+                    content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

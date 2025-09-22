@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szisztémás Betegségek Neurológiai Vonatkozásai - Részletes Vizsgaanyag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .tab-active {
+            border-color: #059669;
+            color: #059669;
+            background-color: #f0fdf4;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .tab-container .tab-button.tab-active {
+            color: var(--active-color);
+            border-color: var(--active-color);
+            background-color: var(--active-bg-color);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header és Navigáció -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-emerald-700 flex items-center">
+                <i data-lucide="brain-cog" class="mr-2"></i>
+                Szisztémás Neurológia
+            </h1>
+            <nav class="hidden md:flex space-x-6 text-gray-600 font-medium">
+                <a href="#vitaminok" class="hover:text-emerald-600 transition">Vitaminhiányok</a>
+                <a href="#hematologia" class="hover:text-emerald-600 transition">Hematológia</a>
+                <a href="#onko" class="hover:text-emerald-600 transition">Onko-neurológia</a>
+                <a href="#intoxikacio" class="hover:text-emerald-600 transition">Intoxikációk</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobil menü -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+            <a href="#vitaminok" class="block py-2 hover:text-emerald-600 transition">Vitaminhiányok</a>
+            <a href="#hematologia" class="block py-2 hover:text-emerald-600 transition">Hematológia</a>
+            <a href="#onko" class="block py-2 hover:text-emerald-600 transition">Onko-neurológia</a>
+            <a href="#intoxikacio" class="block py-2 hover:text-emerald-600 transition">Intoxikációk</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Vitaminhiányok -->
+        <section id="vitaminok" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-emerald-500 pl-4">Vitaminhiány Szindrómák a Neurológiában</h2>
+            <div id="vitaminok-container" class="bg-white rounded-xl shadow-lg p-6">
+                <p class="mb-4 text-gray-600">A vitaminok elengedhetetlenek az idegrendszer megfelelő működéséhez. Hiányuk súlyos, de gyakran kezelhető neurológiai kórképeket okozhat.</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[1200px] text-sm">
+                        <thead class="bg-emerald-50 text-left">
+                            <tr>
+                                <th class="p-3 font-semibold">Vitamin</th>
+                                <th class="p-3 font-semibold">Főbb Neurológiai Szindrómák</th>
+                                <th class="p-3 font-semibold">Jellegzetes Tünetek</th>
+                                <th class="p-3 font-semibold">Diagnosztikai Kulcsok</th>
+                                <th class="p-3 font-semibold">Kezelési Alapelv</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">B1 (Tiamin)</td>
+                                <td class="p-3">Wernicke encephalopathia (WE), Korsakoff szindróma, Polyneuropathia (Dry Beriberi)</td>
+                                <td class="p-3">WE: konfúzió, ataxia, ophthalmoplegia (klasszikus triász, de nem mindig teljes). KS: anterográd/retrográd amnézia, konfabuláció.</td>
+                                <td class="p-3">Klinikai kép, rizikófaktorok (alkoholizmus, malnutríció, bariatrikus műtét). MRI: mediális thalamus, mamilláris testek T2 hyperintenzitása.</td>
+                                <td class="p-3"><strong>Sürgős parenterális tiamin!</strong> (pl. 500 mg IV 3x/nap 2-3 napig). <strong>Glükóz adása előtt kötelező!</strong></td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">B12 (Kobalamin)</td>
+                                <td class="p-3">Subacut Kombinált Degeneráció (SCD), Perifériás neuropathia, Kognitív zavarok, Opticus neuropathia</td>
+                                <td class="p-3">SCD: szimmetrikus paraesthesia, mélyérzés-zavar miatti ataxia, spaszticitás.</td>
+                                <td class="p-3">Szérum B12↓, <strong>MMA↑</strong> (érzékenyebb), Homocisztein↑. MRI: hátsó kötegek T2 hyperintenzitása ("fordított V jel").</td>
+                                <td class="p-3"><strong>Intenzív parenterális B12</strong> (pl. 1000 µg IM másnaponta), majd fenntartó kezelés. A korai kezelés kritikus.</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">B9 (Folsav)</td>
+                                <td class="p-3">Neuropszichiátriai tünetek, Perifériás neuropathia, Terhességi komplikációk (velőcső-záródási rendellenesség)</td>
+                                <td class="p-3">Depresszió, irritabilitás, kognitív hanyatlás, feledékenység.</td>
+                                <td class="p-3">Szérum folsav↓, Homocisztein↑, <strong>MMA normális</strong>.</td>
+                                <td class="p-3">Orális folsavpótlás. <strong>Kritikus: B12 hiány kizárása előtte</strong>, a neurológiai tünetek súlyosbodásának elkerülése érdekében!</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">D-vitamin</td>
+                                <td class="p-3">Összefüggés: Sclerosis Multiplex (MS), Parkinson-kór, Dementia, Epilepszia</td>
+                                <td class="p-3">Nem specifikus. MS esetén alacsonyabb relapszus rátával, Parkinson-kórnál enyhébb tünetekkel korrelálhat.</td>
+                                <td class="p-3">Szérum 25-OH D szint mérése.</td>
+                                <td class="p-3">MS esetén a D-vitamin szint normalizálása javasolt (pl. 2000-4000 NE/nap). Egyéb kórképekben a pótlás szerepe még kutatott.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium">E-vitamin</td>
+                                <td class="p-3">Ataxia E-vitamin hiánnyal (AVED - genetikai), Szerzett hiány (zsírfelszívódási zavar)</td>
+                                <td class="p-3">Progresszív spinocerebellaris ataxia, areflexia, mélyérzés-zavar. Friedreich-ataxiát utánozhat.</td>
+                                <td class="p-3">Szérum alfa-tokoferol↓. AVED: <strong>TTPA gén mutáció</strong> kimutatása.</td>
+                                <td class="p-3">Magas dózisú orális E-vitamin pótlás (AVED esetén élethosszig).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hematológia -->
+        <section id="hematologia" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-red-500 pl-4">Hematológiai Betegségek Neurológiai Vonatkozásai</h2>
+            <div id="hematologia-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #ef4444; --active-bg-color: #fee2e2;">
+                 <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="anemia" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-red-500 transition text-center">
+                        <i data-lucide="droplet" class="inline-block mr-2"></i>Anémiák
+                    </button>
+                    <button data-tab="malignitas" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-red-500 transition text-center">
+                        <i data-lucide="microscope" class="inline-block mr-2"></i>Vérképzőszervi Daganatok
+                    </button>
+                    <button data-tab="alvadas" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-red-500 transition text-center">
+                        <i data-lucide="swords" class="inline-block mr-2"></i>Véralvadási Zavarok
+                    </button>
+                </div>
+                 <div class="tab-content-wrapper">
+                    <!-- Anémiák -->
+                    <div id="anemia" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-red-700">Anémiák</h3>
+                        <p class="mb-4 text-gray-600">A vér oxigénszállító kapacitásának csökkenése agyi hipoxiához és neurológiai tünetekhez vezethet.</p>
+                        <ul class="space-y-2 list-disc list-inside">
+                            <li><strong>Vashiányos anémia:</strong> Általános tünetek (fejfájás, szédülés) az agyi oxigénhiány miatt.</li>
+                            <li><strong>B12-vitamin hiányos anémia:</strong> Specifikus neurológiai tüneteket okoz (lásd Vitaminhiányok szekció). <strong>Fontos:</strong> a neurológiai tünetek megelőzhetik a hematológiai eltéréseket!</li>
+                            <li><strong>Sarlósejtes anémia:</strong> A kóros vörösvértestek elzárhatják az agyi ereket, ami <strong>stroke</strong>-hoz vezethet, különösen gyermekkorban.</li>
+                        </ul>
+                    </div>
+                    <!-- Vérképzőszervi Daganatok -->
+                    <div id="malignitas" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-red-700">Vérképzőszervi Daganatok</h3>
+                        <p class="mb-4 text-gray-600">A neurológiai érintettség mechanizmusai: direkt infiltráció, paraneopláziás szindrómák, szisztémás hatások.</p>
+                        <ul class="space-y-2 list-disc list-inside">
+                            <li><strong>Leukémia:</strong> A KIR direkt infiltrációja (meningealis leukaemosis) fejfájást, hányást, agyidegtüneteket okozhat.</li>
+                            <li><strong>Limfóma (Hodgkin-kór):</strong> Távoli hatású <strong>paraneopláziás szindrómákat</strong> okozhat (pl. szenzoros neuropátia, limbikus enkefalitisz) az immunrendszer kóros reakciója révén.</li>
+                            <li><strong>Myeloma Multiplex:</strong> Polyneuropathia (paraproteinek miatt), kompressziós tünetek (csontléziók miatt), hiperviszkozitás miatti keringészavar.</li>
+                        </ul>
+                    </div>
+                    <!-- Véralvadási Zavarok -->
+                    <div id="alvadas" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-red-700">Véralvadási Zavarok</h3>
+                        <p class="mb-4 text-gray-600">Kettős neurológiai kockázatot jelentenek: a vérzés és a trombózis egyaránt súlyos szövődményekhez vezethet.</p>
+                         <ul class="space-y-2 list-disc list-inside">
+                            <li><strong>Thrombocytopenia (alacsony vérlemezkeszám):</strong> Fokozott vérzési hajlam, legrettegettebb szövődménye az <strong>intrakraniális vérzés</strong>.</li>
+                            <li><strong>Fokozott alvadékonyság (Trombofília):</strong> Növeli a trombózis kockázatát. A <strong>Polycythemia Vera</strong> (magas vörösvértestszám) hiperviszkozitás révén hajlamosít artériás és vénás trombózisra, így <strong>stroke</strong>-ra is.</li>
+                        </ul>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- Onko-neurológia -->
+        <section id="onko" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-blue-500 pl-4">Paraneopláziás Szindrómák és Onko-terápiás Szövődmények</h2>
+            <div id="onko-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #3b82f6; --active-bg-color: #dbeafe;">
+                <!-- Tab gombok -->
+                <div class="flex flex-wrap border-b mb-6">
+                    <button data-tab="pns" class="tab-button tab-active flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-blue-500 transition text-center">
+                        <i data-lucide="user-x" class="inline-block mr-2"></i>Paraneopláziás Szindrómák (PNS)
+                    </button>
+                    <button data-tab="onko_szovodmeny" class="tab-button flex-1 md:flex-none py-3 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:text-blue-500 transition text-center">
+                        <i data-lucide="shield-alert" class="inline-block mr-2"></i>Kezelési Szövődmények
+                    </button>
+                </div>
+                <div class="tab-content-wrapper">
+                    <!-- PNS -->
+                    <div id="pns" class="tab-pane">
+                        <h3 class="text-2xl font-semibold mb-4 text-blue-700">Paraneopláziás Neurológiai Szindrómák (PNS)</h3>
+                        <p class="mb-4 text-gray-600">Ritka, autoimmun kórképek, ahol a daganat ellen indított immunválasz keresztreagál az idegrendszerrel. A neurológiai tünetek gyakran megelőzik a daganat diagnózisát. A kezelés alapja a daganat terápája és az immunszuppresszió.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[1000px] text-sm">
+                                <thead class="bg-blue-50 text-left">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Szindróma</th>
+                                        <th class="p-3 font-semibold">Főbb Tünetek</th>
+                                        <th class="p-3 font-semibold">Jellemző Antitestek</th>
+                                        <th class="p-3 font-semibold">Gyakori Daganatok</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Limbikus Enkefalitisz</td>
+                                        <td class="p-3">Memóriazavar, rohamok, személyiségváltozás</td>
+                                        <td class="p-3">Anti-Hu, Anti-Ma2, Anti-NMDAR</td>
+                                        <td class="p-3">SCLC, heredaganat, thymoma</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Cerebelláris Degeneráció</td>
+                                        <td class="p-3">Járászavar, egyensúlyzavar, koordinációs zavar</td>
+                                        <td class="p-3">Anti-Yo, Anti-Hu, Anti-Tr</td>
+                                        <td class="p-3">SCLC, emlőrák, petefészekrák</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-3 font-medium">Lambert-Eaton Myastheniás Szindróma (LEMS)</td>
+                                        <td class="p-3">Proximális izomgyengeség, fáradtság, szájszárazság</td>
+                                        <td class="p-3">Anti-P/Q-típusú VGCC</td>
+                                        <td class="p-3"><strong>SCLC</strong> (az esetek ~50%-a)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Stiff Person Szindróma</td>
+                                        <td class="p-3">Progresszív izommerevség, fájdalmas görcsök</td>
+                                        <td class="p-3">Anti-amfifizin</td>
+                                        <td class="p-3">Emlőrák, SCLC</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Kezelési Szövődmények -->
+                    <div id="onko_szovodmeny" class="tab-pane hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-blue-700">Onkológiai Kezelések Neurológiai Szövődményei</h3>
+                        <p class="mb-4 text-gray-600">A daganatellenes terápiák jelentős neurológiai mellékhatásokat okozhatnak.</p>
+                         <div class="space-y-4">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-blue-50 hover:bg-blue-100 font-semibold flex justify-between items-center">
+                                    <span>Kemoterápia okozta Perifériás Neuropátia (CIPN)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>Gyakori, dózisfüggő mellékhatás. Tünetei: érzészavar (zsibbadás, fájdalom), gyengeség, egyensúlyzavar "kesztyű-harisnya" eloszlásban. Kezelése nagy kihívás, gyakran a kemoterápia dózisának csökkentését teszi szükségessé. A neuropátiás fájdalomra a <strong>duloxetin</strong> az egyetlen FDA által jóváhagyott szer.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-blue-50 hover:bg-blue-100 font-semibold flex justify-between items-center">
+                                    <span>Sugárterápia okozta Agyi Károsodás (RIBI)</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>A koponyabesugárzás késői szövődménye lehet a <strong>kognitív hanyatlás</strong> (főleg memória), demencia, vagy a <strong>sugárnekrózis</strong>. Megelőzésére hippokampusz-kímélő technikákat fejlesztenek. A sugárnekrózis kezelésére kortikoszteroidok és <strong>bevacizumab</strong> használható.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-blue-50 hover:bg-blue-100 font-semibold flex justify-between items-center">
+                                    <span>Immunellenőrzőpont-gátló (ICI) Terápia Mellékhatásai</span>
+                                    <i data-lucide="chevron-down" class="transition-transform"></i>
+                                </button>
+                                <div class="accordion-content p-4 border-t">
+                                    <p>Az immunrendszer "fékeinek kioldása" autoimmun reakciókat válthat ki az idegrendszer ellen is (<strong>irAEs</strong>). Bár ritkák (1-3%), súlyosak lehetnek (pl. myositis, encephalitis, GBS). Kezelésük alapja az ICI felfüggesztése és immunszuppresszió (kortikoszteroidok, IVIG, PLEX).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Intoxikációk -->
+        <section id="intoxikacio" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-gray-700 border-l-4 border-slate-500 pl-4">Neurológiai Gyógyszerintoxikációk</h2>
+             <div id="intoxikacio-container" class="bg-white rounded-xl shadow-lg p-6 tab-container" style="--active-color: #475569; --active-bg-color: #f1f5f9;">
+                 <p class="mb-4 text-gray-600">A túladagolás kezelésének alapja a beteg stabilizálása (ABC), a dekontamináció és a specifikus tünetek kezelése. A jellegzetes tünetegyüttesek (toxidrómák) felismerése kulcsfontosságú.</p>
+                 <div class="space-y-4">
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 bg-slate-50 hover:bg-slate-100 font-semibold flex justify-between items-center">
+                            <span>Antiepileptikumok</span>
+                            <i data-lucide="chevron-down" class="transition-transform"></i>
+                        </button>
+                        <div class="accordion-content p-4 border-t">
+                            <p><strong>Általános triász:</strong> KIR depresszió (kóma), ataxia, nystagmus. <strong>Specifikus veszélyek:</strong> Valproátnál hiperammonémia, carbamazepinnél kardiotoxicitás. Kezelés: tüneti, szer-specifikus (pl. levocarnitin valproátnál).</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 bg-slate-50 hover:bg-slate-100 font-semibold flex justify-between items-center">
+                            <span>Antipszichotikumok</span>
+                            <i data-lucide="chevron-down" class="transition-transform"></i>
+                        </button>
+                        <div class="accordion-content p-4 border-t">
+                            <p><strong>Tünetek:</strong> Szedáció, görcsrohamok, extrapyramidális tünetek (EPS). <strong>Fő veszélyek:</strong> <strong>Neuroleptikus Malignus Szindróma (NMS)</strong> (izommerevség, hipertermia, tudatzavar) és kardiotoxicitás (QT-megnyúlás). Kezelés: NMS esetén azonnali leállítás, hűtés, dantrolén.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 bg-slate-50 hover:bg-slate-100 font-semibold flex justify-between items-center">
+                            <span>Antidepresszánsok</span>
+                            <i data-lucide="chevron-down" class="transition-transform"></i>
+                        </button>
+                        <div class="accordion-content p-4 border-t">
+                            <p><strong>Fő veszélyek:</strong> <strong>Szerotonin Szindróma</strong> (neuromuszkuláris, autonóm és mentális státusz változások) és <strong>Triciklikus (TCA) Kardiotoxicitás</strong>. A kettő elkülönítése kritikus, mert a kezelésük eltérő (TCA-nál Na-bikarbonát, szerotonin szindrómánál ciproheptadin).</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 bg-slate-50 hover:bg-slate-100 font-semibold flex justify-between items-center">
+                            <span>Opioidok</span>
+                            <i data-lucide="chevron-down" class="transition-transform"></i>
+                        </button>
+                        <div class="accordion-content p-4 border-t">
+                            <p><strong>Fő veszély:</strong> <strong>Légzésdepresszió</strong>. Klasszikus tünetek: szűk pupillák, eszméletlenség, lassú légzés. <strong>Antidotum:</strong> <strong>Naloxon</strong>, amely gyorsan visszafordítja a hatást, de rövid felezési ideje miatt ismételt adagolásra lehet szükség.</p>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 - Interaktív Tanulási Segédlet. Készült a feltöltött dokumentumok alapján.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobil menü
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Általános Tab váltó funkció
+        function setupTabs(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const tabButtons = container.querySelectorAll('.tab-button');
+            const tabPanes = container.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                    });
+                    button.classList.add('tab-active');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Tabok inicializálása
+        setupTabs('vitaminok-container');
+        setupTabs('hematologia-container');
+        setupTabs('onko-container');
+        setupTabs('intoxikacio-container');
+
+
+        // Accordion
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('svg');
+                
+                header.parentElement.classList.toggle('open');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
