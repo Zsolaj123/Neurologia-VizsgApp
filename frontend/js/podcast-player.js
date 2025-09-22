@@ -13,6 +13,8 @@ export class PodcastPlayer {
         
         // Player elements
         this.player = document.getElementById('audio-player');
+        // Remove the minimized class to start expanded
+        this.player.classList.remove('minimized');
         this.playPauseBtn = document.getElementById('play-pause-btn');
         this.prevBtn = document.getElementById('prev-btn');
         this.nextBtn = document.getElementById('next-btn');
