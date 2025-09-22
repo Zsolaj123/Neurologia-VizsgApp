@@ -914,16 +914,10 @@ body {
 }
 
 /* Z-index hierarchy to prevent overlaps */
-.app-header {
-    z-index: 1000;
-}
+/* Removed duplicates - defined above */
 
 .back-btn {
     z-index: 100;
-}
-
-.audio-player {
-    z-index: 900;
 }
 
 .playlist-panel {
@@ -958,11 +952,20 @@ body {
 }
 
 /* Ensure all content is above matrix rain */
-.app-header,
-.podcast-container,
-.audio-player {
+.app-header {
+    position: fixed;
+    z-index: 1000;
+}
+
+.podcast-container {
     position: relative;
     z-index: 1;
+}
+
+/* Audio player should be above everything except header */
+.audio-player {
+    position: fixed !important;
+    z-index: 900 !important;
 }
 
 /* Scrollbar Styling */
