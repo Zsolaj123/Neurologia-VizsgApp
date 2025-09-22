@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurológia VizsgApp - Podcast Player</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/app-optimized.css">
+    <link rel="stylesheet" href="css/podcast-player.css">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">
+                Neurológia Podcast Player
+                <span class="author-credit">by Zsolaj</span>
+            </h1>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">←</span>
+                    Vissza a főoldalra
+                </a>
+                <a href="quiz.html" class="nav-link">
+                    <span class="nav-icon">🧠</span>
+                    Quiz Engine
+                </a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main id="podcast-main" class="podcast-container">
+        <!-- Category Selection Screen -->
+        <section id="category-screen" class="screen active">
+            <div class="screen-header">
+                <h2 class="screen-title">Podcast Kategóriák</h2>
+                <p class="screen-subtitle">Hallgasd meg az AI által generált oktatási podcasteket</p>
+            </div>
+            
+            <div class="category-grid">
+                <!-- Neuroanatómia Category -->
+                <div class="category-card" data-category="neuroanat">
+                    <div class="category-glow"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Neuroanatómia</h3>
+                        <p class="category-description">
+                            Koponya, gerinc, agyidegek és idegrendszeri struktúrák részletes bemutatása
+                        </p>
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Témák:</span>
+                                <span class="stat-value">1-59</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Epizódok:</span>
+                                <span class="stat-value podcast-count" data-category="neuroanat">-</span>
+                            </div>
+                        </div>
+                        <button class="category-btn">
+                            <span class="btn-text">Hallgatás</span>
+                            <span class="btn-icon">▶</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vizsgálómódszerek Category -->
+                <div class="category-card" data-category="vizsgalat">
+                    <div class="category-glow"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Vizsgálómódszerek</h3>
+                        <p class="category-description">
+                            Diagnosztikai módszerek és alap klinikai ismeretek
+                        </p>
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Témák:</span>
+                                <span class="stat-value">60-179</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Epizódok:</span>
+                                <span class="stat-value podcast-count" data-category="vizsgalat">-</span>
+                            </div>
+                        </div>
+                        <button class="category-btn">
+                            <span class="btn-text">Hallgatás</span>
+                            <span class="btn-icon">▶</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Részletes Klinikum Category -->
+                <div class="category-card" data-category="klinikum">
+                    <div class="category-glow"></div>
+                    <div class="category-content">
+                        <h3 class="category-title">Részletes Klinikum</h3>
+                        <p class="category-description">
+                            Klinikai esetek és betegségek átfogó tárgyalása
+                        </p>
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Témák:</span>
+                                <span class="stat-value">180-259</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Epizódok:</span>
+                                <span class="stat-value podcast-count" data-category="klinikum">-</span>
+                            </div>
+                        </div>
+                        <button class="category-btn">
+                            <span class="btn-text">Hallgatás</span>
+                            <span class="btn-icon">▶</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Podcast List Screen -->
+        <section id="podcast-list-screen" class="screen">
+            <div class="screen-header">
+                <button class="back-btn" data-target="category-screen">
+                    <span class="btn-icon">←</span>
+                    <span class="btn-text">Vissza</span>
+                </button>
+                <h2 class="screen-title" id="category-title">Podcastok</h2>
+            </div>
+
+            <!-- Search/Filter Bar -->
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Keresés témaszám vagy cím alapján...">
+                <button class="search-btn">
+                    <span class="search-icon">🔍</span>
+                </button>
+            </div>
+
+            <!-- Podcast List -->
+            <div class="podcast-list" id="podcast-list">
+                <!-- Podcasts will be loaded here dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Audio Player -->
+    <div id="audio-player" class="audio-player minimized">
+        <div class="player-container">
+            <!-- Waveform Visualizer -->
+            <canvas id="waveform" class="waveform-canvas"></canvas>
+            
+            <!-- Track Info -->
+            <div class="track-info">
+                <div class="track-number">-</div>
+                <div class="track-details">
+                    <div class="track-title">Nincs kiválasztott podcast</div>
+                    <div class="track-category">-</div>
+                </div>
+            </div>
+
+            <!-- Player Controls -->
+            <div class="player-controls">
+                <button class="control-btn" id="prev-btn" title="Előző">
+                    <span class="control-icon">⏮</span>
+                </button>
+                <button class="control-btn large" id="play-pause-btn" title="Lejátszás/Szünet">
+                    <span class="control-icon">▶</span>
+                </button>
+                <button class="control-btn" id="next-btn" title="Következő">
+                    <span class="control-icon">⏭</span>
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <span class="time-current">0:00</span>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                    <div class="progress-handle"></div>
+                </div>
+                <span class="time-total">0:00</span>
+            </div>
+
+            <!-- Volume Control -->
+            <div class="volume-container">
+                <button class="control-btn" id="volume-btn" title="Hangerő">
+                    <span class="control-icon">🔊</span>
+                </button>
+                <div class="volume-slider">
+                    <div class="volume-fill"></div>
+                    <div class="volume-handle"></div>
+                </div>
+            </div>
+
+            <!-- Playlist Toggle -->
+            <button class="control-btn" id="playlist-toggle" title="Lejátszási lista">
+                <span class="control-icon">☰</span>
+            </button>
+
+            <!-- Minimize Button -->
+            <button class="control-btn" id="minimize-btn" title="Minimalizálás">
+                <span class="control-icon">_</span>
+            </button>
+        </div>
+
+        <!-- Playlist Panel -->
+        <div class="playlist-panel" id="playlist-panel">
+            <div class="playlist-header">
+                <h3>Lejátszási lista</h3>
+                <button class="playlist-clear">Törlés</button>
+            </div>
+            <div class="playlist-items" id="playlist-items">
+                <!-- Playlist items will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="audio-element"></audio>
+
+    <!-- JavaScript -->
+    <script type="module" src="js/podcast-app.js"></script>
+</body>
+</html>

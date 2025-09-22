@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Clinical Quiz Loading Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background: #003300;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005500;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background: #000;
+            border: 1px solid #00ff00;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #ff0000;
+        }
+        .success {
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clinical Quiz Loading Test</h1>
+    <p>Test clinical quiz data loading and topic selection</p>
+    
+    <div>
+        <button onclick="testClinicalLoading()">Test Clinical Quiz 60-64</button>
+        <button onclick="testTopicSelection()">Test Topic Selection</button>
+        <button onclick="clearOutput()">Clear Output</button>
+    </div>
+    
+    <div id="output"></div>
+    
+    <script type="module">
+        import { QuizLoader } from './js/quiz-engine/quiz-loader.js';
+        import { ClinicalTopicSelector } from './js/quiz-engine/clinical-topic-selector.js';
+        import { getQuestionsForClinicalTopic } from './js/data/clinical-quiz-mapping.js';
+        
+        window.output = document.getElementById('output');
+        
+        window.log = function(message, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = isError ? 'error' : 'success';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            console.log(message);
+        };
+        
+        window.clearOutput = function() {
+            output.innerHTML = '';
+        };
+        
+        window.testClinicalLoading = async function() {
+            const loader = new QuizLoader();
+            const quizPath = 'content/quizzes/Vizsgálómódszerek, alap klinikum/60-64. EEG, alvás, ürítés, plasztic, genetika.html';
+            
+            log('Starting clinical quiz loading test...');
+            log(`Quiz path: ${quizPath}`);
+            
+            try {
+                const quizData = await loader.loadQuiz(quizPath);
+                
+                log(`✓ Quiz loaded successfully!`);
+                log(`Title: ${quizData.title}`);
+                log(`Total questions: ${quizData.totalQuestions}`);
+                log(`Questions array length: ${quizData.questions.length}`);
+                
+                if (quizData.questions.length > 0) {
+                    log('\nFirst question sample:');
+                    const firstQ = quizData.questions[0];
+                    log(`Question: ${firstQ.question.substring(0, 100)}...`);
+                    log(`Answers: ${Object.keys(firstQ.answers).length} options`);
+                    log(`Correct answer: ${firstQ.correctAnswer}`);
+                    log(`Has explanation: ${!!firstQ.explanation}`);
+                    log(`Topic: ${firstQ.topic || 'N/A'}`);
+                    
+                    // Test filtering for topic 60 (EEG)
+                    log('\n\nTesting topic filtering for topic 60 (EEG):');
+                    const topic60Questions = getQuestionsForClinicalTopic(60, quizData.questions);
+                    log(`Found ${topic60Questions.length} questions for topic 60`);
+                    
+                    if (topic60Questions.length > 0) {
+                        log('First EEG question:');
+                        log(topic60Questions[0].question);
+                    }
+                }
+                
+                log(`\n✓ All tests passed!`);
+                
+            } catch (error) {
+                log(`✗ Error loading quiz: ${error.message}`, true);
+                log(`Stack trace:\n${error.stack}`, true);
+            }
+        };
+        
+        window.testTopicSelection = async function() {
+            const selector = new ClinicalTopicSelector();
+            const quizPath = 'content/quizzes/Vizsgálómódszerek, alap klinikum/60-64. EEG, alvás, ürítés, plasztic, genetika.html';
+            
+            log('Opening topic selector...');
+            
+            try {
+                const selectedTopics = await selector.showTopicSelector(quizPath);
+                
+                if (selectedTopics === null) {
+                    log('User cancelled topic selection');
+                } else {
+                    log(`User selected ${selectedTopics.length} topics: ${selectedTopics.join(', ')}`);
+                }
+                
+            } catch (error) {
+                log(`✗ Error in topic selection: ${error.message}`, true);
+            }
+        };
+        
+        // Auto-run test on load
+        window.testClinicalLoading();
+    </script>
+</body>
+</html>
