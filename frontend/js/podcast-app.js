@@ -5,11 +5,13 @@
 
 import { podcastData } from './podcast-data.js';
 import { podcastPlayer } from './podcast-player.js';
+import { MatrixRain } from './quiz-engine/matrix-rain.js';
 
 class PodcastApp {
     constructor() {
         this.currentCategory = null;
         this.currentScreen = 'category-screen';
+        this.matrixRain = null;
         
         // Screen elements
         this.screens = {
@@ -34,6 +36,9 @@ class PodcastApp {
     async initialize() {
         console.log('Initializing Podcast App...');
         
+        // Initialize matrix rain effect
+        this.initMatrixRain();
+        
         // Load podcast data
         await this.loadPodcastData();
         
@@ -44,6 +49,23 @@ class PodcastApp {
         this.updateCategoryCounts();
         
         console.log('Podcast App initialized successfully');
+    }
+
+    /**
+     * Initialize matrix rain effect with enhanced visibility
+     */
+    initMatrixRain() {
+        const canvas = document.getElementById('matrix-rain');
+        if (canvas) {
+            this.matrixRain = new MatrixRain(canvas);
+            // Configure for better visibility
+            this.matrixRain.setConfig({
+                fadeColor: 'rgba(10, 10, 10, 0.03)', // Slower fade for stronger trails
+                speed: 30, // Slightly faster animation
+                density: 0.97 // More characters
+            });
+            this.matrixRain.start();
+        }
     }
 
     /**
