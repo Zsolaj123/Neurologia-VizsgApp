@@ -60,11 +60,13 @@ class PodcastApp {
             this.matrixRain = new MatrixRain(canvas);
             // Configure for better visibility
             this.matrixRain.setConfig({
-                fadeColor: 'rgba(10, 10, 10, 0.03)', // Slower fade for stronger trails
-                speed: 30, // Slightly faster animation
-                density: 0.97 // More characters
+                fadeColor: 'rgba(10, 10, 10, 0.02)', // Even slower fade for stronger trails
+                speed: 25, // Faster animation for more movement
+                density: 0.98, // More characters
+                color: '#00ff41' // Ensure green color
             });
             this.matrixRain.start();
+            console.log('Matrix rain initialized');
         }
     }
 

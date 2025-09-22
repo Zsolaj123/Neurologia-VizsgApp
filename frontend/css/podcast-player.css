@@ -6,32 +6,27 @@
 /* Prevent layout shift - Critical CSS */
 body {
     overflow-x: hidden;
+    background-color: #0a0a0a !important; /* Ensure dark background for matrix effect */
 }
 
 /* Pre-position elements to prevent shift */
 .category-grid {
-    opacity: 0;
-    animation: contentFadeIn 0.2s ease forwards;
-    /* Force layout calculation */
-    transform: translateZ(0);
-    will-change: opacity;
+    position: relative;
+    opacity: 1; /* Start visible to prevent shift */
+    transform: translateX(0) !important; /* Force position */
 }
 
-.podcast-list,
+.podcast-list {
+    position: relative;
+    opacity: 1;
+}
+
 .screen-header {
-    opacity: 0;
-    animation: contentFadeIn 0.2s ease forwards;
-    animation-delay: 0.05s;
+    position: relative;
+    opacity: 1;
 }
 
-@keyframes contentFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
+/* Removed contentFadeIn - not needed */
 
 /* Base Variables */
 :root {
@@ -123,25 +118,24 @@ body {
 .podcast-container {
     min-height: 100vh;
     padding: 80px 2rem 2rem; /* Add top padding for fixed header */
-    background: var(--podcast-bg-primary);
+    background: transparent; /* Allow matrix effect to show through */
+    position: relative;
 }
 
 /* Screen Management */
 .screen {
     display: none;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    animation: screenFadeIn 0.4s ease-out;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .screen.active {
     display: block;
-    opacity: 1;
-    transform: translateY(0);
-    animation: fadeIn 0.5s ease;
 }
 
-@keyframes fadeIn {
+@keyframes screenFadeIn {
     from {
         opacity: 0;
         transform: translateY(20px);
@@ -189,6 +183,8 @@ body {
     margin: 0 auto;
     width: 100%;
     justify-items: center;
+    transform: none !important; /* Prevent any transform animations */
+    transition: none !important; /* Disable transitions that might cause shift */
 }
 
 @media (max-width: 1024px) {
@@ -211,8 +207,9 @@ body {
     border-radius: 10px;
     padding: 2rem;
     cursor: pointer;
-    transition: var(--podcast-transition);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Only transition specific properties */
     overflow: hidden;
+    transform: none !important; /* Prevent slide-in */
 }
 
 .category-glow {
@@ -955,9 +952,17 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
-    opacity: 0.08; /* Increased from 0.03 for better visibility */
+    z-index: 0; /* Changed from -1 to ensure it's visible */
+    opacity: 0.15; /* Further increased for better visibility */
     pointer-events: none;
+}
+
+/* Ensure all content is above matrix rain */
+.app-header,
+.podcast-container,
+.audio-player {
+    position: relative;
+    z-index: 1;
 }
 
 /* Scrollbar Styling */
