@@ -1,11 +1,11 @@
 /**
- * Topic Selector Module for Neuroanatomy
- * Handles individual topic selection for neuroanatomy quizzes
+ * Klinikum Topic Selector Module
+ * Handles individual topic selection for klinikum quizzes
  */
 
-import { neuronatQuizMapping, getQuestionsForNeuronatTopic } from '../data/neuroanat-quiz-mapping.js';
+import { klinikumQuizMapping, getQuestionsForKlinikumTopic } from '../data/klinikum-quiz-mapping.js';
 
-export class TopicSelector {
+export class KlinikumTopicSelector {
     constructor() {
         this.selectedTopics = new Set();
         this.topicModalElement = null;
@@ -22,7 +22,7 @@ export class TopicSelector {
             const filename = quizPath.split('/').pop();
             
             // Find all topics that use this quiz file
-            const availableTopics = Object.entries(neuronatQuizMapping)
+            const availableTopics = Object.entries(klinikumQuizMapping)
                 .filter(([_, data]) => data.quizFile.includes(filename))
                 .map(([number, data]) => ({
                     number: parseInt(number),
@@ -79,7 +79,7 @@ export class TopicSelector {
             </div>
         `;
 
-        // Add styles
+        // Add styles (reuse from clinical-topic-selector)
         this.addModalStyles();
 
         // Add to document
@@ -102,7 +102,7 @@ export class TopicSelector {
         if (document.getElementById('clinical-topic-selector-styles')) return;
 
         const style = document.createElement('style');
-        style.id = 'neuroanat-topic-selector-styles';
+        style.id = 'topic-selector-styles';
         style.textContent = `
             .topic-selector-modal {
                 position: fixed;
@@ -348,7 +348,7 @@ export class TopicSelector {
         const filteredQuestions = [];
 
         selectedTopics.forEach(topicNumber => {
-            const topicQuestions = getQuestionsForNeuronatTopic(topicNumber, allQuestions);
+            const topicQuestions = getQuestionsForKlinikumTopic(topicNumber, allQuestions);
             filteredQuestions.push(...topicQuestions);
         });
 
@@ -357,7 +357,7 @@ export class TopicSelector {
             filteredQuestions.findIndex(q => q.question === question.question) === index
         );
 
-        console.log(`[TopicSelector] Filtered ${uniqueQuestions.length} questions for topics:`, selectedTopics);
+        console.log(`[KlinikumTopicSelector] Filtered ${uniqueQuestions.length} questions for topics:`, selectedTopics);
         return uniqueQuestions;
     }
 }

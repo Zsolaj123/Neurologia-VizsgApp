@@ -8,6 +8,9 @@ import { QuizManager } from './quiz-engine/quiz-manager.js';
 import { QuizUI } from './quiz-engine/quiz-ui.js';
 import { QuizResults } from './quiz-engine/quiz-results.js';
 import { MatrixRain } from './quiz-engine/matrix-rain.js';
+import { TopicSelector } from './quiz-engine/topic-selector.js';
+import { ClinicalTopicSelector } from './quiz-engine/clinical-topic-selector.js';
+import { KlinikumTopicSelector } from './quiz-engine/klinikum-topic-selector.js';
 
 class QuizApp {
     constructor() {
@@ -24,6 +27,9 @@ class QuizApp {
         this.ui = new QuizUI();
         this.results = new QuizResults();
         this.matrixRain = null;
+        this.neuronatTopicSelector = new TopicSelector();
+        this.clinicalTopicSelector = new ClinicalTopicSelector();
+        this.klinikumTopicSelector = new KlinikumTopicSelector();
 
         this.init();
     }
@@ -132,12 +138,50 @@ class QuizApp {
             vizsmod: {
                 title: 'Vizsgálómódszerek, alap klinikum',
                 path: 'content/quizzes/Vizsgálómódszerek, alap klinikum',
-                quizzes: [] // To be filled similarly
+                quizzes: [
+                    { file: '60-64. EEG, alvás, ürítés, plasztic, genetika.html', topics: '60-64', title: 'EEG, alvás, ürítés, plaszticitás, genetika' },
+                    { file: '65-69. gyógyszer, liquor, EEG, EP.html', topics: '65-69', title: 'Gyógyszerinterakciók, liquor, EEG, EP' },
+                    { file: '70-75 EMG_ENG_CT_MR_ANGIO_UH.html', topics: '70-75', title: 'EMG, ENG, CT, MR, angiográfia, ultrahang' },
+                    { file: '76-79. HEMAT_SZAGLÁS_TEKINTÉS_PUPILLA.html', topics: '76-79', title: 'Haemorheológia, szaglás, tekintés, pupilla' },
+                    { file: '80-84.DIPLOPA_NYSTAGMUS_NFAC_BELL_DYSARTH_DYSPHAG.html', topics: '80-84', title: 'Diplopia, nystagmus, facialis, Bell, dysarthria' },
+                    { file: '85-89. IZOMGYEENG_ÉRZÉS_DISSZOC_REFLEX_KISAGY.html', topics: '85-89', title: 'Izomgyengeség, érzészavar, reflexek, kisagy' },
+                    { file: '90-95. ATAXIA_APHASIA_NEGLECT_APRAXIA_EXEKUTIV.html', topics: '90-95', title: 'Ataxia, aphasia, neglect, apraxia, exekutív' },
+                    { file: '96-99. LIBERÁCIÓS_ESZMÉLETLEN_ZAVART_HYPNOID.html', topics: '96-99', title: 'Liberációs jelek, eszméletlen, zavart, hypnoid' },
+                    { file: '100-105. NEMHYPN_HERNIA_DEMENCIA_EMLÉKE.html', topics: '100-105', title: 'Nem hypnoid, herniáció, demencia, emlékezés' },
+                    { file: '106-110. THALAMUS_SPINALIS_GVTRAUMA_FVPERIF_DERÉK.html', topics: '106-110', title: 'Thalamus, spinális, GV trauma, derékfájás' },
+                    { file: '111-115. SPINGYÖK_CONUSCAUDA_ALSÓVÉGTAG_TARDIV_ACM.html', topics: '111-115', title: 'Spinális gyökök, conus/cauda, alsóvégtag, ACM' },
+                    { file: '116-119. AGYTÖRZS_HATÁRTER_LACUNA_STEAL.html', topics: '116-119', title: 'Agytörzsi, határterületi, lacunaris, steal' },
+                    { file: '120-124. CRANIOCERV_ATHEROGEN_CEREBROVASC_PRIMERPREV_ISCHSTROKE.html', topics: '120-124', title: 'Craniocervicalis, atherogén, cerebrovascularis, primer prevenció' },
+                    { file: '125-129 TIA_CARDEMB_AGYIISCH_FIATAL_COAGULO.html', topics: '125-129', title: 'TIA, cardiális embólia, fiatalok stroke-ja' },
+                    { file: '130-134. ANTIKOAG_REPERF_INTRACEREBRVÉRZ_SAV_EREKFEJL.html', topics: '130-134', title: 'Antikoaguláns, reperfúzió, ICH, SAV' },
+                    { file: '135-139. GVVASC_EPILEPI.html', topics: '135-139', title: 'Gerincvelő vaszkuláris, epilepszia' },
+                    { file: '140-145. EPILEPI_ANTIEPI_STATUSEPI_ESZMÉLETRÖV.html', topics: '140-145', title: 'Epilepszia, antiepileptikum, status, eszméletvesztés' },
+                    { file: '146-150. IDEGSEBEPI_ENCEPH_EEG_MYELO_KISÉR.html', topics: '146-150', title: 'Idegsebészeti epilepszia, encephalitis, myelopathia' },
+                    { file: '151-156. FEHÉRÁLL_PRES_AUTOI_DEMYELIN_SM.html', topics: '151-156', title: 'Fehérállomány, PRES, autoimmun, SM' },
+                    { file: '157-161. GVGYULL_GBS_MG_IVIG.html', topics: '157-161', title: 'GV gyulladás, GBS, myasthenia, IVIG' },
+                    { file: '162-166. IMMUNTH_GLIOMA_TÉRFOGL_NEUROCUTAN.html', topics: '162-166', title: 'Immunoterápia, glioma, térfoglaló, neurocutan' },
+                    { file: '167-170. AGYDAGANAT_IMMUN_NEUROKUTAN_SELLA_ICP.html', topics: '167-170', title: 'Agydaganatok, sella régió, ICP' },
+                    { file: '171-175. MIRIGY_SÓVIZ_HYPOGLYK_VITAMIN.html', topics: '171-175', title: 'Endokrin, só-víz, hypoglycaemia, vitamin' },
+                    { file: '176-179. HEMAT_PARANEO_ONKO_GYSZ.html', topics: '176-179', title: 'Hematológia, paraneoplasztikus, onkológia, gyógyszer' }
+                ]
             },
             klinikum: {
                 title: 'Klinikum',
                 path: 'content/quizzes/Klinikum',
-                quizzes: [] // To be filled similarly
+                quizzes: [
+                    { file: '180-187. TRANSZPLAT_PARKINSON_OSAS_ALVÁS.html', topics: '180-187', title: 'Transzplantáció, Parkinson, OSAS, Alvás' },
+                    { file: '188-194. PARKINSONP_DYSTONIA_WILSON_TREMOR.html', topics: '188-194', title: 'Parkinson-plus, Dystonia, Wilson, Tremor' },
+                    { file: '195-199. BOTOX_JARAS_IGESEB_MENINGITIS.html', topics: '195-199', title: 'Botox, Járás, Idegsebészet, Meningitis' },
+                    { file: '200-206. ANTIBIO_NEUROINFEKT_PRION_ENCEPH.html', topics: '200-206', title: 'Antibiotikum, Neuroinfekció, Prion, Encephalitis' },
+                    { file: '207-212. ENCEPHALITIS_BELL_MONONEURO_POLY.html', topics: '207-212', title: 'Encephalitis, Bell, Mononeuritis, Polyneuritis' },
+                    { file: '213-219. POLYNEURO_ALAGUT_MOTONEURON_IZOMDYS.html', topics: '213-219', title: 'Polyneuropathia, Alagút, Motoneuron, Izomdisztrófia' },
+                    { file: '220-225. MYOPATHIA_FÁJDALOMSY_MIGRÉN_TENSIO_NEURALGIA.html', topics: '220-225', title: 'Myopathia, Fájdalom, Migrén, Neuralgia' },
+                    { file: '226-230. NEUROPATHIA_PSEUDOTUMOR_ALZHEIMER_DEMENCIA.html', topics: '226-230', title: 'Neuropathia, Pseudotumor, Alzheimer, Demencia' },
+                    { file: '231-239. FTD_NPH_NEUROPSZICH_MITOKONDR_TRINUKL_NEUROGENETIKA.html', topics: '231-239', title: 'FTD, NPH, Neuropszichiátria, Mitokondriális, Neurogenetika' },
+                    { file: '240-247. NEUROREHAB_KOPONYASÉR_POSTTRAUMA_GVKÁR.html', topics: '240-247', title: 'Neurorehabilitáció, Koponyasérülés, Posttrauma, GV károsodás' },
+                    { file: '248-254. PSZISCHOSZOM_ORGANIKUSPSZICH_MONITORINTENZ.html', topics: '248-254', title: 'Pszichoszomatika, Organikus pszichiátria, Monitorozás' },
+                    { file: '255-259. DISCOPATHIA_SZÉDÜLŐS_HYDROCEPH_TERHESSÉG_IDŐS.html', topics: '255-259', title: 'Discopathia, Szédülés, Hydrocephalus, Terhesség, Időskor' }
+                ]
             }
         };
     }
@@ -159,6 +203,38 @@ class QuizApp {
         try {
             this.ui.showLoading(true);
             
+            // Determine if we should show topic selector
+            let selectedTopics = null;
+            const isNeuroanat = quizPath.includes('Neuroanat');
+            const isClinical = quizPath.includes('Vizsgálómódszerek');
+            const isKlinikum = quizPath.includes('Klinikum');
+            
+            if (isNeuroanat) {
+                // Show neuroanat topic selector
+                selectedTopics = await this.neuronatTopicSelector.showTopicSelector(quizPath);
+                if (selectedTopics === null) {
+                    // User cancelled
+                    this.ui.showLoading(false);
+                    return;
+                }
+            } else if (isClinical) {
+                // Show clinical topic selector
+                selectedTopics = await this.clinicalTopicSelector.showTopicSelector(quizPath);
+                if (selectedTopics === null && this.clinicalTopicSelector.selectedTopics.size === 0) {
+                    // User cancelled or no individual topics available
+                    this.ui.showLoading(false);
+                    return;
+                }
+            } else if (isKlinikum) {
+                // Show klinikum topic selector
+                selectedTopics = await this.klinikumTopicSelector.showTopicSelector(quizPath);
+                if (selectedTopics === null && this.klinikumTopicSelector.selectedTopics.size === 0) {
+                    // User cancelled or no individual topics available
+                    this.ui.showLoading(false);
+                    return;
+                }
+            }
+            
             // Load quiz data
             console.log('[QuizApp] Loading quiz data...');
             const quizData = await this.loader.loadQuiz(quizPath);
@@ -171,9 +247,42 @@ class QuizApp {
                 throw new Error('No questions found in quiz data');
             }
             
+            // Filter questions if topics were selected
+            if (selectedTopics && selectedTopics.length > 0) {
+                const originalQuestionCount = quizData.questions.length;
+                console.log(`[QuizApp] Filtering questions for ${selectedTopics.length} selected topics from ${originalQuestionCount} total questions`);
+                
+                if (isNeuroanat) {
+                    quizData.questions = this.neuronatTopicSelector.filterQuestionsForTopics(
+                        quizData.questions, 
+                        selectedTopics
+                    );
+                } else if (isClinical) {
+                    quizData.questions = this.clinicalTopicSelector.filterQuestionsForTopics(
+                        quizData.questions,
+                        selectedTopics
+                    );
+                } else if (isKlinikum) {
+                    quizData.questions = this.klinikumTopicSelector.filterQuestionsForTopics(
+                        quizData.questions,
+                        selectedTopics
+                    );
+                }
+                
+                console.log(`[QuizApp] After filtering: ${quizData.questions.length} questions remain`);
+                
+                if (quizData.questions.length === 0) {
+                    throw new Error(`No questions found for the selected topics: ${selectedTopics.join(', ')}`);
+                }
+                
+                // Update title to reflect selected topics
+                quizData.title += ` (${selectedTopics.length} témakör)`;
+            }
+            
             console.log('[QuizApp] Quiz data loaded successfully:', {
                 title: quizData.title,
-                questionsCount: quizData.questions.length
+                questionsCount: quizData.questions.length,
+                selectedTopics: selectedTopics
             });
             
             this.state.quizData = quizData;

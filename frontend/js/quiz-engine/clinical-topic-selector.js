@@ -1,11 +1,11 @@
 /**
- * Topic Selector Module for Neuroanatomy
- * Handles individual topic selection for neuroanatomy quizzes
+ * Clinical Topic Selector Module
+ * Handles individual topic selection for clinical quizzes
  */
 
-import { neuronatQuizMapping, getQuestionsForNeuronatTopic } from '../data/neuroanat-quiz-mapping.js';
+import { clinicalQuizMapping, getQuestionsForClinicalTopic } from '../data/clinical-quiz-mapping.js';
 
-export class TopicSelector {
+export class ClinicalTopicSelector {
     constructor() {
         this.selectedTopics = new Set();
         this.topicModalElement = null;
@@ -22,7 +22,7 @@ export class TopicSelector {
             const filename = quizPath.split('/').pop();
             
             // Find all topics that use this quiz file
-            const availableTopics = Object.entries(neuronatQuizMapping)
+            const availableTopics = Object.entries(clinicalQuizMapping)
                 .filter(([_, data]) => data.quizFile.includes(filename))
                 .map(([number, data]) => ({
                     number: parseInt(number),
@@ -97,12 +97,10 @@ export class TopicSelector {
      * Add modal styles to document
      */
     addModalStyles() {
-        // Check if styles already exist from other selectors
-        if (document.getElementById('topic-selector-styles')) return;
         if (document.getElementById('clinical-topic-selector-styles')) return;
 
         const style = document.createElement('style');
-        style.id = 'neuroanat-topic-selector-styles';
+        style.id = 'clinical-topic-selector-styles';
         style.textContent = `
             .topic-selector-modal {
                 position: fixed;
@@ -346,18 +344,22 @@ export class TopicSelector {
      */
     filterQuestionsForTopics(allQuestions, selectedTopics) {
         const filteredQuestions = [];
+        console.log(`[ClinicalTopicSelector] Starting to filter ${allQuestions.length} questions for topics:`, selectedTopics);
 
         selectedTopics.forEach(topicNumber => {
-            const topicQuestions = getQuestionsForNeuronatTopic(topicNumber, allQuestions);
+            const topicQuestions = getQuestionsForClinicalTopic(topicNumber, allQuestions);
+            console.log(`[ClinicalTopicSelector] Topic ${topicNumber} matched ${topicQuestions.length} questions`);
             filteredQuestions.push(...topicQuestions);
         });
+
+        console.log(`[ClinicalTopicSelector] Total filtered questions before deduplication: ${filteredQuestions.length}`);
 
         // Remove duplicates (in case some questions match multiple topics)
         const uniqueQuestions = filteredQuestions.filter((question, index) => 
             filteredQuestions.findIndex(q => q.question === question.question) === index
         );
 
-        console.log(`[TopicSelector] Filtered ${uniqueQuestions.length} questions for topics:`, selectedTopics);
+        console.log(`[ClinicalTopicSelector] Final unique questions: ${uniqueQuestions.length}`);
         return uniqueQuestions;
     }
 }

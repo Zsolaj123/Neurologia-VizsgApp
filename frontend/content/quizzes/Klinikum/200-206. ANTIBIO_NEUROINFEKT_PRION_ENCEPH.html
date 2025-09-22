@@ -94,6 +94,35 @@
     </div>
 
     <script>
+        // Clinical format quiz data for quiz engine
+        const quizData = [
+            {
+                topic: "Antibiotikus kezelés neuroinfekciókban",
+                questions: []
+            },
+            {
+                topic: "Az AIDS neurológiai vonatkozásai",
+                questions: []
+            },
+            {
+                topic: "Neuroborreliosis és Neurosyphilis",
+                questions: []
+            },
+            {
+                topic: "Tuberkulózis és egyéb mycobakteriális fertőzések",
+                questions: []
+            },
+            {
+                topic: "Idegrendszeri parazitózisok, protozoonózisok",
+                questions: []
+            },
+            {
+                topic: "Lassú vírusfertőzések és Prion betegségek",
+                questions: []
+            }
+        ];
+
+        // Now populate quizData from the questions object below
         const questions = {
             "antibiotikumok": {
                 title: "Antibiotikus kezelés neuroinfekciókban",
@@ -847,6 +876,31 @@
                 ]
             }
         };
+
+        // Convert questions to quizData format for quiz engine
+        const topicMap = {
+            "antibiotikumok": 0,
+            "aids": 1,
+            "neuroborreliosis_neurosyphilis": 2,
+            "tuberkulozis": 3,
+            "parazitozisok": 4,
+            "lassu_virusok_prionok": 5
+        };
+
+        // Populate quizData from questions object
+        Object.keys(questions).forEach(key => {
+            const topicIndex = topicMap[key];
+            if (topicIndex !== undefined && questions[key].data) {
+                questions[key].data.forEach(q => {
+                    quizData[topicIndex].questions.push({
+                        question: q.question,
+                        options: q.options,
+                        answer: q.options.indexOf(q.answer),
+                        explanation: q.explanation
+                    });
+                });
+            }
+        });
 
         const app = document.getElementById('app');
         const topicSelectionScreen = document.getElementById('topic-selection');

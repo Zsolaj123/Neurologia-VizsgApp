@@ -95,7 +95,7 @@ export class QuizLoader {
         
         for (const script of scripts) {
             const content = script.textContent;
-            if (content.includes('fullQuizData') || content.includes('const questions')) {
+            if (content.includes('fullQuizData') || content.includes('const questions') || content.includes('const quizData')) {
                 console.log('[QuizLoader] Found quiz data in script tag');
                 return content;
             }
@@ -121,7 +121,53 @@ export class QuizLoader {
         try {
             console.log('[QuizLoader] Attempting to parse quiz data...');
             
-            // Extract the array part from the script content
+            // Check for clinical format first (quizData with topics)
+            const clinicalMatch = scriptContent.match(/const\s+quizData\s*=\s*(\[[\s\S]*?\]);/);
+            if (clinicalMatch) {
+                console.log('[QuizLoader] Found clinical format quizData');
+                
+                const evalFunction = new Function('return ' + clinicalMatch[1]);
+                const quizData = evalFunction();
+                
+                if (Array.isArray(quizData)) {
+                    console.log('[QuizLoader] Successfully parsed clinical data with', quizData.length, 'topics');
+                    
+                    // Extract all questions from all topics
+                    let totalQuestions = 0;
+                    let convertedQuestions = 0;
+                    quizData.forEach(topicData => {
+                        if (topicData.questions && Array.isArray(topicData.questions)) {
+                            console.log(`[QuizLoader] Topic "${topicData.topic}" has ${topicData.questions.length} questions`);
+                            totalQuestions += topicData.questions.length;
+                            topicData.questions.forEach((q, index) => {
+                                if (q.question && q.options && typeof q.answer === 'number' && q.explanation) {
+                                    convertedQuestions++;
+                                    // Convert clinical format to standard format
+                                    const answers = {};
+                                    q.options.forEach((opt, i) => {
+                                        answers[String.fromCharCode(97 + i)] = opt; // a, b, c, d
+                                    });
+                                    
+                                    questions.push({
+                                        question: q.question,
+                                        answers: answers,
+                                        correctAnswer: String.fromCharCode(97 + q.answer), // Convert index to letter
+                                        explanation: q.explanation,
+                                        topic: topicData.topic // Keep topic info for filtering
+                                    });
+                                } else {
+                                    console.warn(`[QuizLoader] Clinical question ${index} missing required fields`);
+                                }
+                            });
+                        }
+                    });
+                    
+                    console.log(`[QuizLoader] Clinical format conversion: ${totalQuestions} total questions, ${convertedQuestions} successfully converted`);
+                    return questions;
+                }
+            }
+            
+            // Try neuroanatomy format (fullQuizData)
             const arrayMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*(\[[\s\S]*?\]);/);
             if (arrayMatch) {
                 console.log('[QuizLoader] Found fullQuizData array');
@@ -155,7 +201,7 @@ export class QuizLoader {
                     });
                 }
             } else {
-                console.warn('[QuizLoader] Could not find fullQuizData array in script content');
+                console.warn('[QuizLoader] Could not find quiz data in script content');
             }
         } catch (error) {
             // Fallback to regex parsing if evaluation fails
@@ -190,7 +236,7 @@ export class QuizLoader {
             }
         }
         
-        console.log(`Parsed ${questions.length} questions from quiz data`);
+        console.log(`[QuizLoader] Parsed ${questions.length} questions from quiz data`);
         return questions;
     }
 

@@ -210,3 +210,18 @@ export function getAvailableTopics() {
         quizFile: data.quizFile
     }));
 }
+
+/**
+ * Get filtered questions for a specific neuroanat topic
+ * @param {number} topicNumber - Topic number (1-59)
+ * @param {Array} allQuestions - All questions from the quiz file
+ * @returns {Array} Filtered questions for the topic
+ */
+export function getQuestionsForNeuronatTopic(topicNumber, allQuestions) {
+    const topicData = neuronatQuizMapping[topicNumber];
+    if (!topicData || !topicData.questionFilter) {
+        return [];
+    }
+
+    return allQuestions.filter(q => topicData.questionFilter(q.question));
+}
