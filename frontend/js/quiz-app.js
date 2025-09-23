@@ -8,9 +8,7 @@ import { QuizManager } from './quiz-engine/quiz-manager.js';
 import { QuizUI } from './quiz-engine/quiz-ui.js';
 import { QuizResults } from './quiz-engine/quiz-results.js';
 import { MatrixRain } from './quiz-engine/matrix-rain.js';
-import { TopicSelector } from './quiz-engine/topic-selector.js';
-import { ClinicalTopicSelector } from './quiz-engine/clinical-topic-selector.js';
-import { KlinikumTopicSelector } from './quiz-engine/klinikum-topic-selector.js';
+import { UnifiedTopicSelector } from './quiz-engine/topic-selector-unified.js';
 
 class QuizApp {
     constructor() {
@@ -27,9 +25,7 @@ class QuizApp {
         this.ui = new QuizUI();
         this.results = new QuizResults();
         this.matrixRain = null;
-        this.neuronatTopicSelector = new TopicSelector();
-        this.clinicalTopicSelector = new ClinicalTopicSelector();
-        this.klinikumTopicSelector = new KlinikumTopicSelector();
+        this.topicSelector = new UnifiedTopicSelector();
 
         this.init();
     }
@@ -217,39 +213,7 @@ class QuizApp {
         try {
             this.ui.showLoading(true);
             
-            // Determine if we should show topic selector
-            let selectedTopics = null;
-            const isNeuroanat = quizPath.includes('Neuroanat');
-            const isClinical = quizPath.includes('Vizsgálómódszerek');
-            const isKlinikum = quizPath.includes('Klinikum');
-            
-            if (isNeuroanat) {
-                // Show neuroanat topic selector
-                selectedTopics = await this.neuronatTopicSelector.showTopicSelector(quizPath);
-                if (selectedTopics === null) {
-                    // User cancelled
-                    this.ui.showLoading(false);
-                    return;
-                }
-            } else if (isClinical) {
-                // Show clinical topic selector
-                selectedTopics = await this.clinicalTopicSelector.showTopicSelector(quizPath);
-                if (selectedTopics === null && this.clinicalTopicSelector.selectedTopics.size === 0) {
-                    // User cancelled or no individual topics available
-                    this.ui.showLoading(false);
-                    return;
-                }
-            } else if (isKlinikum) {
-                // Show klinikum topic selector
-                selectedTopics = await this.klinikumTopicSelector.showTopicSelector(quizPath);
-                if (selectedTopics === null && this.klinikumTopicSelector.selectedTopics.size === 0) {
-                    // User cancelled or no individual topics available
-                    this.ui.showLoading(false);
-                    return;
-                }
-            }
-            
-            // Load quiz data
+            // Load quiz data first
             console.log('[QuizApp] Loading quiz data...');
             const quizData = await this.loader.loadQuiz(quizPath);
             
@@ -261,50 +225,56 @@ class QuizApp {
                 throw new Error('No questions found in quiz data');
             }
             
-            // Filter questions if topics were selected
-            if (selectedTopics && selectedTopics.length > 0) {
-                const originalQuestionCount = quizData.questions.length;
-                console.log(`[QuizApp] Filtering questions for ${selectedTopics.length} selected topics from ${originalQuestionCount} total questions`);
-                
-                if (isNeuroanat) {
-                    quizData.questions = this.neuronatTopicSelector.filterQuestionsForTopics(
-                        quizData.questions, 
-                        selectedTopics
-                    );
-                } else if (isClinical) {
-                    quizData.questions = this.clinicalTopicSelector.filterQuestionsForTopics(
-                        quizData.questions,
-                        selectedTopics
-                    );
-                } else if (isKlinikum) {
-                    quizData.questions = this.klinikumTopicSelector.filterQuestionsForTopics(
-                        quizData.questions,
-                        selectedTopics
-                    );
-                }
-                
-                console.log(`[QuizApp] After filtering: ${quizData.questions.length} questions remain`);
-                
-                if (quizData.questions.length === 0) {
-                    throw new Error(`No questions found for the selected topics: ${selectedTopics.join(', ')}`);
-                }
-                
-                // Update title to reflect selected topics
-                quizData.title += ` (${selectedTopics.length} témakör)`;
-            }
-            
-            console.log('[QuizApp] Quiz data loaded successfully:', {
+            console.log('[QuizApp] Quiz loaded:', {
                 title: quizData.title,
-                questionsCount: quizData.questions.length,
-                selectedTopics: selectedTopics
+                format: quizData.format,
+                totalQuestions: quizData.questions.length,
+                topicsAvailable: quizData.availableTopics?.length || 0
             });
+            
+            // Check if we need to show topic selector
+            if (quizData.availableTopics && quizData.availableTopics.length > 0) {
+                console.log('[QuizApp] Showing topic selector...');
+                const selectedTopic = await this.topicSelector.showTopicSelector(
+                    quizData.availableTopics,
+                    quizData.title
+                );
+                
+                if (!selectedTopic) {
+                    // User cancelled
+                    console.log('[QuizApp] Topic selection cancelled');
+                    this.ui.showLoading(false);
+                    return;
+                }
+                
+                console.log('[QuizApp] Topic selected:', selectedTopic);
+                
+                // Filter questions by selected topic
+                const filteredQuestions = this.loader.filterByTopic(quizData.questions, selectedTopic);
+                console.log(`[QuizApp] Filtered ${filteredQuestions.length} questions for topic: ${selectedTopic}`);
+                
+                if (filteredQuestions.length === 0) {
+                    throw new Error(`No questions found for topic: ${selectedTopic}`);
+                }
+                
+                // Update quiz data
+                quizData.questions = filteredQuestions;
+                
+                // Update title with selected topic
+                const topicObj = quizData.availableTopics.find(t => t.key === selectedTopic);
+                if (topicObj) {
+                    quizData.title = `${quizData.title} - ${topicObj.name}`;
+                }
+            } else {
+                console.log('[QuizApp] No topics available, using all questions');
+            }
             
             this.state.quizData = quizData;
             this.state.currentQuizPath = quizPath;
             
-            // Initialize quiz manager with data
+            // Initialize quiz manager with data (limit to 20 questions)
             console.log('[QuizApp] Initializing quiz manager...');
-            this.manager.initQuiz(quizData);
+            this.manager.initQuiz(quizData, 20);
             
             // Start quiz
             console.log('[QuizApp] Starting quiz...');
@@ -405,6 +375,10 @@ class QuizApp {
     handleResultAction(action) {
         switch (action) {
             case 'retry':
+                this.handleQuizSelect(this.state.currentQuizPath);
+                break;
+            case 'new-topic':
+                // Restart quiz with topic selection
                 this.handleQuizSelect(this.state.currentQuizPath);
                 break;
             case 'new-quiz':

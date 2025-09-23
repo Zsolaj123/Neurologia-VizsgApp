@@ -20,14 +20,15 @@ export class QuizManager {
     /**
      * Initialize quiz with data
      * @param {Object} quizData - Quiz data from loader
+     * @param {number} questionCount - Number of questions per round (default 20)
      */
-    initQuiz(quizData) {
+    initQuiz(quizData, questionCount = 20) {
         // Reset state
         this.reset();
         
         // Shuffle questions and select subset
         const shuffled = this.shuffleArray([...quizData.questions]);
-        const questionsPerRound = Math.min(5, shuffled.length);
+        const questionsPerRound = Math.min(questionCount, shuffled.length);
         
         this.state.questions = shuffled.slice(0, questionsPerRound);
         this.state.totalQuestions = this.state.questions.length;

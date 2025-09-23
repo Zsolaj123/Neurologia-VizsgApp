@@ -66,9 +66,9 @@ export class QuizLoader {
         // Extract title
         const title = doc.querySelector('title')?.textContent || 'Quiz';
         
-        // Extract quiz data from script
+        // Extract quiz data from script and DOM
         const scriptContent = this.extractScriptContent(doc);
-        const questions = this.parseQuestions(scriptContent);
+        const parsedData = this.parseQuizData(scriptContent, doc);
         
         // Extract metadata from filename
         const filename = path.split('/').pop();
@@ -79,8 +79,10 @@ export class QuizLoader {
             title,
             topics,
             path,
-            questions,
-            totalQuestions: questions.length
+            questions: parsedData.questions,
+            availableTopics: parsedData.topics,
+            format: parsedData.format,
+            totalQuestions: parsedData.questions.length
         };
     }
 
@@ -93,151 +95,226 @@ export class QuizLoader {
         const scripts = doc.querySelectorAll('script');
         console.log('[QuizLoader] Found', scripts.length, 'script tags');
         
+        let combinedContent = '';
         for (const script of scripts) {
             const content = script.textContent;
-            if (content.includes('fullQuizData') || content.includes('const questions') || content.includes('const quizData')) {
-                console.log('[QuizLoader] Found quiz data in script tag');
-                return content;
+            if (content.includes('fullQuizData') || 
+                content.includes('const questions') || 
+                content.includes('const quizData') ||
+                content.includes('startQuiz')) {
+                console.log('[QuizLoader] Found relevant script content');
+                combinedContent += content + '\n';
             }
         }
         
-        console.warn('[QuizLoader] No quiz data found in script tags');
-        return '';
+        return combinedContent;
     }
 
     /**
-     * Parse questions from script content
+     * Parse quiz data from script content and DOM
      * @param {string} scriptContent - JavaScript content
-     * @returns {Array} Array of question objects
+     * @param {Document} doc - Parsed HTML document
+     * @returns {Object} Parsed quiz data with format info
      */
-    parseQuestions(scriptContent) {
+    parseQuizData(scriptContent, doc) {
+        console.log('[QuizLoader] Parsing quiz data...');
+        
+        // First, try to detect the quiz format
+        
+        // Format A: Single array (fullQuizData or questions)
+        const fullQuizMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*\[([\s\S]*?)\];/);
+        const questionsMatch = scriptContent.match(/const\s+questions\s*=\s*\[([\s\S]*?)\];/);
+        
+        if (fullQuizMatch || questionsMatch) {
+            console.log('[QuizLoader] Detected Format A: Single quiz bundle');
+            const match = fullQuizMatch || questionsMatch;
+            const questions = this.parseFormatA(match[1]);
+            return {
+                format: 'single-bundle',
+                questions,
+                topics: []
+            };
+        }
+        
+        // Format B: Topic selection with array (quizData array with topic field)
+        const quizDataArrayMatch = scriptContent.match(/const\s+quizData\s*=\s*\[([\s\S]*?)\];/);
+        if (quizDataArrayMatch && scriptContent.includes('startQuiz')) {
+            console.log('[QuizLoader] Detected Format B: Topic array with buttons');
+            return this.parseFormatB(quizDataArrayMatch[1], doc);
+        }
+        
+        // Format C: Topic object (quizData object with topic keys)
+        const quizDataObjectMatch = scriptContent.match(/const\s+quizData\s*=\s*\{([\s\S]*?)\};/);
+        if (quizDataObjectMatch) {
+            console.log('[QuizLoader] Detected Format C: Topic object');
+            return this.parseFormatC(quizDataObjectMatch[1]);
+        }
+        
+        console.warn('[QuizLoader] No recognized quiz format found');
+        return {
+            format: 'unknown',
+            questions: [],
+            topics: []
+        };
+    }
+    
+    /**
+     * Parse Format A: Single bundle (fullQuizData)
+     */
+    parseFormatA(dataContent) {
         const questions = [];
         
-        if (!scriptContent) {
-            console.error('[QuizLoader] No script content to parse');
-            return questions;
+        try {
+            const evalFunction = new Function('return [' + dataContent + ']');
+            const quizData = evalFunction();
+            
+            quizData.forEach((item, index) => {
+                const questionText = item.question || item.anulus; // Handle typo
+                if (questionText && item.answers && item.correctAnswer && item.explanation) {
+                    questions.push({
+                        question: questionText,
+                        answers: item.answers,
+                        correctAnswer: item.correctAnswer,
+                        explanation: item.explanation
+                    });
+                } else {
+                    console.warn(`[QuizLoader] Question ${index} missing required fields`);
+                }
+            });
+        } catch (error) {
+            console.error('[QuizLoader] Failed to parse Format A:', error);
+            // Fallback to regex parsing
+            const questionRegex = /\{\s*(?:question|anulus):\s*"([^"]+)"[^}]*answers:\s*\{([^}]+)\}[^}]*correctAnswer:\s*"([^"]+)"[^}]*explanation:\s*"([^"]+)"/g;
+            let match;
+            while ((match = questionRegex.exec(dataContent)) !== null) {
+                const [_, question, answersStr, correctAnswer, explanation] = match;
+                const answers = {};
+                const answerRegex = /([a-z]):\s*"([^"]+)"/g;
+                let answerMatch;
+                while ((answerMatch = answerRegex.exec(answersStr)) !== null) {
+                    answers[answerMatch[1]] = this.decodeHTML(answerMatch[2]);
+                }
+                questions.push({
+                    question: this.decodeHTML(question),
+                    answers,
+                    correctAnswer,
+                    explanation: this.decodeHTML(explanation)
+                });
+            }
         }
         
+        return questions;
+    }
+    
+    /**
+     * Parse Format B: Topic array with buttons
+     */
+    parseFormatB(dataContent, doc) {
+        const questions = [];
+        const topics = [];
+        const topicMap = new Map();
+        
+        // First, extract topic info from DOM buttons
+        const topicButtons = doc.querySelectorAll('button[onclick*="startQuiz"]');
+        topicButtons.forEach(button => {
+            const onclick = button.getAttribute('onclick');
+            const match = onclick.match(/startQuiz\('([^']+)'\)/);
+            if (match) {
+                const topicKey = match[1];
+                const topicName = button.textContent.trim();
+                topicMap.set(topicKey, topicName);
+                topics.push({ key: topicKey, name: topicName });
+            }
+        });
+        
+        console.log('[QuizLoader] Found topics from buttons:', topics);
+        
+        // Parse questions
         try {
-            console.log('[QuizLoader] Attempting to parse quiz data...');
+            const evalFunction = new Function('return [' + dataContent + ']');
+            const quizData = evalFunction();
             
-            // Check for clinical format first (quizData with topics)
-            const clinicalMatch = scriptContent.match(/const\s+quizData\s*=\s*(\[[\s\S]*?\]);/);
-            if (clinicalMatch) {
-                console.log('[QuizLoader] Found clinical format quizData');
-                
-                const evalFunction = new Function('return ' + clinicalMatch[1]);
-                const quizData = evalFunction();
-                
-                if (Array.isArray(quizData)) {
-                    console.log('[QuizLoader] Successfully parsed clinical data with', quizData.length, 'topics');
-                    
-                    // Extract all questions from all topics
-                    let totalQuestions = 0;
-                    let convertedQuestions = 0;
-                    quizData.forEach(topicData => {
-                        if (topicData.questions && Array.isArray(topicData.questions)) {
-                            console.log(`[QuizLoader] Topic "${topicData.topic}" has ${topicData.questions.length} questions`);
-                            totalQuestions += topicData.questions.length;
-                            topicData.questions.forEach((q, index) => {
-                                if (q.question && q.options && typeof q.answer === 'number' && q.explanation) {
-                                    convertedQuestions++;
-                                    // Convert clinical format to standard format
-                                    const answers = {};
-                                    q.options.forEach((opt, i) => {
-                                        answers[String.fromCharCode(97 + i)] = opt; // a, b, c, d
-                                    });
-                                    
-                                    questions.push({
-                                        question: q.question,
-                                        answers: answers,
-                                        correctAnswer: String.fromCharCode(97 + q.answer), // Convert index to letter
-                                        explanation: q.explanation,
-                                        topic: topicData.topic // Keep topic info for filtering
-                                    });
-                                } else {
-                                    console.warn(`[QuizLoader] Clinical question ${index} missing required fields`);
-                                }
-                            });
-                        }
-                    });
-                    
-                    console.log(`[QuizLoader] Clinical format conversion: ${totalQuestions} total questions, ${convertedQuestions} successfully converted`);
-                    return questions;
-                }
-            }
-            
-            // Try neuroanatomy format (fullQuizData)
-            const arrayMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*(\[[\s\S]*?\]);/);
-            if (arrayMatch) {
-                console.log('[QuizLoader] Found fullQuizData array');
-                
-                // Create a safer evaluation function
-                const evalFunction = new Function('return ' + arrayMatch[1]);
-                const fullQuizData = evalFunction();
-                
-                if (Array.isArray(fullQuizData)) {
-                    console.log('[QuizLoader] Successfully parsed array with', fullQuizData.length, 'items');
-                    
-                    fullQuizData.forEach((item, index) => {
-                        // Fix the typo: check for both 'question' and 'anulus' keys
-                        const questionText = item.question || item.anulus;
-                        
-                        if (questionText && item.answers && item.correctAnswer && item.explanation) {
-                            questions.push({
-                                question: questionText,
-                                answers: item.answers,
-                                correctAnswer: item.correctAnswer,
-                                explanation: item.explanation
-                            });
-                        } else {
-                            console.warn(`[QuizLoader] Item ${index} missing required fields:`, {
-                                hasQuestion: !!questionText,
-                                hasAnswers: !!item.answers,
-                                hasCorrectAnswer: !!item.correctAnswer,
-                                hasExplanation: !!item.explanation
-                            });
-                        }
-                    });
-                }
-            } else {
-                console.warn('[QuizLoader] Could not find quiz data in script content');
-            }
-        } catch (error) {
-            // Fallback to regex parsing if evaluation fails
-            console.warn('[QuizLoader] Failed to evaluate quiz data, falling back to regex parsing:', error);
-            
-            // Try to find quiz data array
-            const fullQuizMatch = scriptContent.match(/const\s+fullQuizData\s*=\s*\[([\s\S]*?)\];/);
-            
-            if (fullQuizMatch) {
-                // More flexible regex that handles the actual data format
-                const questionRegex = /\{\s*(?:question|anulus):\s*"([^"]+)"[^}]*answers:\s*\{([^}]+)\}[^}]*correctAnswer:\s*"([^"]+)"[^}]*explanation:\s*"([^"]+)"/g;
-                
-                let match;
-                while ((match = questionRegex.exec(fullQuizMatch[0])) !== null) {
-                    const [_, questionText, answersStr, correctAnswer, explanation] = match;
-                    
-                    // Parse answers
+            quizData.forEach(item => {
+                if (item.topic && item.question && item.options && typeof item.answer !== 'undefined' && item.explanation) {
                     const answers = {};
-                    const answerRegex = /([a-z]):\s*"([^"]+)"/g;
-                    let answerMatch;
-                    while ((answerMatch = answerRegex.exec(answersStr)) !== null) {
-                        answers[answerMatch[1]] = this.decodeHTML(answerMatch[2]);
-                    }
+                    item.options.forEach((opt, i) => {
+                        answers[String.fromCharCode(97 + i)] = opt;
+                    });
                     
                     questions.push({
-                        question: this.decodeHTML(questionText),
+                        question: item.question,
                         answers,
-                        correctAnswer,
-                        explanation: this.decodeHTML(explanation)
+                        correctAnswer: typeof item.answer === 'number' ? 
+                            String.fromCharCode(97 + item.answer) : item.answer,
+                        explanation: item.explanation,
+                        topic: item.topic
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('[QuizLoader] Failed to parse Format B:', error);
+        }
+        
+        return {
+            format: 'topic-array',
+            questions,
+            topics
+        };
+    }
+    
+    /**
+     * Parse Format C: Topic object
+     */
+    parseFormatC(dataContent) {
+        const questions = [];
+        const topics = [];
+        
+        try {
+            const evalFunction = new Function('return {' + dataContent + '}');
+            const quizData = evalFunction();
+            
+            // Extract topics and questions
+            for (const [topicKey, topicData] of Object.entries(quizData)) {
+                if (topicData.title && topicData.questions) {
+                    topics.push({ key: topicKey, name: topicData.title });
+                    
+                    topicData.questions.forEach((q, index) => {
+                        if (q.question && q.options && typeof q.answer !== 'undefined' && q.explanation) {
+                            const answers = {};
+                            q.options.forEach((opt, i) => {
+                                answers[String.fromCharCode(97 + i)] = opt;
+                            });
+                            
+                            questions.push({
+                                question: q.question,
+                                answers,
+                                correctAnswer: String.fromCharCode(97 + q.answer),
+                                explanation: q.explanation,
+                                topic: topicKey
+                            });
+                        }
                     });
                 }
             }
+        } catch (error) {
+            console.error('[QuizLoader] Failed to parse Format C:', error);
         }
         
-        console.log(`[QuizLoader] Parsed ${questions.length} questions from quiz data`);
-        return questions;
+        return {
+            format: 'topic-object',
+            questions,
+            topics
+        };
+    }
+    
+    /**
+     * Filter questions by topic
+     * @param {Array} questions - All questions
+     * @param {string} topic - Selected topic
+     * @returns {Array} Filtered questions
+     */
+    filterByTopic(questions, topic) {
+        return questions.filter(q => q.topic === topic);
     }
 
     /**
