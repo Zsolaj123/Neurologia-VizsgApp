@@ -15,6 +15,7 @@ export class QuizLoader {
      */
     async loadQuiz(quizPath) {
         console.log('[QuizLoader] Loading quiz from:', quizPath);
+        console.log('[QuizLoader] Current page URL:', window.location.href);
         
         // Check cache first
         if (this.cache.has(quizPath)) {
@@ -23,10 +24,25 @@ export class QuizLoader {
         }
 
         try {
+            // Ensure we're not navigating away
+            if (window.location.href.includes(quizPath)) {
+                console.error('[QuizLoader] ERROR: Page has navigated to quiz file!');
+                // Try to go back
+                window.history.back();
+                throw new Error('Page navigation detected - should be AJAX loading');
+            }
+            
             // Fetch the HTML file
-            console.log('[QuizLoader] Fetching quiz file...');
-            const response = await fetch(quizPath);
+            console.log('[QuizLoader] Fetching quiz file via AJAX...');
+            const response = await fetch(quizPath, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
             console.log('[QuizLoader] Response status:', response.status);
+            console.log('[QuizLoader] Response headers:', response.headers.get('content-type'));
             
             if (!response.ok) {
                 throw new Error(`Failed to load quiz: ${response.status}`);
@@ -34,12 +50,15 @@ export class QuizLoader {
 
             const html = await response.text();
             console.log('[QuizLoader] HTML loaded, length:', html.length);
+            console.log('[QuizLoader] First 200 chars:', html.substring(0, 200));
             
             const quizData = this.parseQuizHTML(html, quizPath);
             console.log('[QuizLoader] Quiz data parsed:', {
                 title: quizData.title,
+                format: quizData.format,
                 totalQuestions: quizData.totalQuestions,
-                questionsLength: quizData.questions.length
+                questionsLength: quizData.questions.length,
+                availableTopics: quizData.availableTopics
             });
             
             // Cache the result
@@ -48,6 +67,7 @@ export class QuizLoader {
             return quizData;
         } catch (error) {
             console.error('[QuizLoader] Error loading quiz:', error);
+            console.error('[QuizLoader] Stack trace:', error.stack);
             throw error;
         }
     }
@@ -118,6 +138,7 @@ export class QuizLoader {
      */
     parseQuizData(scriptContent, doc) {
         console.log('[QuizLoader] Parsing quiz data...');
+        console.log('[QuizLoader] Script content length:', scriptContent.length);
         
         // First, try to detect the quiz format
         
@@ -129,6 +150,7 @@ export class QuizLoader {
             console.log('[QuizLoader] Detected Format A: Single quiz bundle');
             const match = fullQuizMatch || questionsMatch;
             const questions = this.parseFormatA(match[1]);
+            console.log('[QuizLoader] Format A parsed, questions:', questions.length);
             return {
                 format: 'single-bundle',
                 questions,
@@ -140,17 +162,36 @@ export class QuizLoader {
         const quizDataArrayMatch = scriptContent.match(/const\s+quizData\s*=\s*\[([\s\S]*?)\];/);
         if (quizDataArrayMatch && scriptContent.includes('startQuiz')) {
             console.log('[QuizLoader] Detected Format B: Topic array with buttons');
-            return this.parseFormatB(quizDataArrayMatch[1], doc);
+            const result = this.parseFormatB(quizDataArrayMatch[1], doc);
+            console.log('[QuizLoader] Format B parsed, questions:', result.questions.length, 'topics:', result.topics.length);
+            return result;
         }
         
         // Format C: Topic object (quizData object with topic keys)
         const quizDataObjectMatch = scriptContent.match(/const\s+quizData\s*=\s*\{([\s\S]*?)\};/);
         if (quizDataObjectMatch) {
             console.log('[QuizLoader] Detected Format C: Topic object');
-            return this.parseFormatC(quizDataObjectMatch[1]);
+            const result = this.parseFormatC(quizDataObjectMatch[1]);
+            console.log('[QuizLoader] Format C parsed, questions:', result.questions.length, 'topics:', result.topics.length);
+            return result;
+        }
+        
+        // Try alternative patterns
+        console.log('[QuizLoader] Trying alternative patterns...');
+        
+        // Check if quizData is an array without startQuiz
+        if (quizDataArrayMatch && !scriptContent.includes('startQuiz')) {
+            console.log('[QuizLoader] Found quizData array without startQuiz, checking structure...');
+            // Check if it's format B by looking at the structure
+            if (quizDataArrayMatch[1].includes('topic:') && quizDataArrayMatch[1].includes('questions:')) {
+                console.log('[QuizLoader] Detected Format B (alternative)');
+                const result = this.parseFormatB(quizDataArrayMatch[1], doc);
+                return result;
+            }
         }
         
         console.warn('[QuizLoader] No recognized quiz format found');
+        console.warn('[QuizLoader] Script content preview:', scriptContent.substring(0, 500));
         return {
             format: 'unknown',
             questions: [],
@@ -164,42 +205,64 @@ export class QuizLoader {
     parseFormatA(dataContent) {
         const questions = [];
         
-        try {
-            const evalFunction = new Function('return [' + dataContent + ']');
-            const quizData = evalFunction();
+        console.log('[QuizLoader] Parsing Format A...');
+        
+        // Try regex parsing first (safer)
+        const questionRegex = /\{\s*(?:question|anulus):\s*"((?:[^"\\]|\\.)*)"\s*,\s*answers:\s*\{([^}]+)\}\s*,\s*correctAnswer:\s*"([^"]+)"\s*,\s*explanation:\s*"((?:[^"\\]|\\.)*)"/g;
+        
+        let match;
+        let regexCount = 0;
+        while ((match = questionRegex.exec(dataContent)) !== null) {
+            const [_, question, answersStr, correctAnswer, explanation] = match;
+            const answers = {};
             
-            quizData.forEach((item, index) => {
-                const questionText = item.question || item.anulus; // Handle typo
-                if (questionText && item.answers && item.correctAnswer && item.explanation) {
-                    questions.push({
-                        question: questionText,
-                        answers: item.answers,
-                        correctAnswer: item.correctAnswer,
-                        explanation: item.explanation
-                    });
-                } else {
-                    console.warn(`[QuizLoader] Question ${index} missing required fields`);
-                }
+            // Parse answers
+            const answerRegex = /([a-z]):\s*"((?:[^"\\]|\\.)*)"/g;
+            let answerMatch;
+            while ((answerMatch = answerRegex.exec(answersStr)) !== null) {
+                answers[answerMatch[1]] = this.decodeHTML(answerMatch[2]);
+            }
+            
+            questions.push({
+                question: this.decodeHTML(question),
+                answers,
+                correctAnswer,
+                explanation: this.decodeHTML(explanation)
             });
-        } catch (error) {
-            console.error('[QuizLoader] Failed to parse Format A:', error);
-            // Fallback to regex parsing
-            const questionRegex = /\{\s*(?:question|anulus):\s*"([^"]+)"[^}]*answers:\s*\{([^}]+)\}[^}]*correctAnswer:\s*"([^"]+)"[^}]*explanation:\s*"([^"]+)"/g;
-            let match;
-            while ((match = questionRegex.exec(dataContent)) !== null) {
-                const [_, question, answersStr, correctAnswer, explanation] = match;
-                const answers = {};
-                const answerRegex = /([a-z]):\s*"([^"]+)"/g;
-                let answerMatch;
-                while ((answerMatch = answerRegex.exec(answersStr)) !== null) {
-                    answers[answerMatch[1]] = this.decodeHTML(answerMatch[2]);
-                }
-                questions.push({
-                    question: this.decodeHTML(question),
-                    answers,
-                    correctAnswer,
-                    explanation: this.decodeHTML(explanation)
+            regexCount++;
+        }
+        
+        console.log(`[QuizLoader] Format A: Found ${regexCount} questions via regex`);
+        
+        // If regex found nothing, try JSON-like parsing as fallback
+        if (questions.length === 0) {
+            console.log('[QuizLoader] Regex found no questions, trying JSON-like parsing...');
+            try {
+                // Clean the data content for JSON parsing
+                let cleanedContent = dataContent
+                    .replace(/(\w+):/g, '"$1":') // Add quotes to keys
+                    .replace(/'/g, '"') // Replace single quotes with double quotes
+                    .replace(/,\s*}/g, '}') // Remove trailing commas
+                    .replace(/,\s*]/g, ']'); // Remove trailing commas in arrays
+                
+                const quizData = JSON.parse('[' + cleanedContent + ']');
+                
+                quizData.forEach((item, index) => {
+                    const questionText = item.question || item.anulus; // Handle typo
+                    if (questionText && item.answers && item.correctAnswer && item.explanation) {
+                        questions.push({
+                            question: questionText,
+                            answers: item.answers,
+                            correctAnswer: item.correctAnswer,
+                            explanation: item.explanation
+                        });
+                    } else {
+                        console.warn(`[QuizLoader] Question ${index} missing required fields`);
+                    }
                 });
+                console.log(`[QuizLoader] Format A: Parsed ${questions.length} questions via JSON`);
+            } catch (error) {
+                console.error('[QuizLoader] JSON parsing failed:', error);
             }
         }
         
@@ -218,7 +281,7 @@ export class QuizLoader {
         const topicButtons = doc.querySelectorAll('button[onclick*="startQuiz"]');
         topicButtons.forEach(button => {
             const onclick = button.getAttribute('onclick');
-            const match = onclick.match(/startQuiz\('([^']+)'\)/);
+            const match = onclick.match(/startQuiz\(['"](.*?)['"]\)/);
             if (match) {
                 const topicKey = match[1];
                 const topicName = button.textContent.trim();
@@ -234,12 +297,19 @@ export class QuizLoader {
             const evalFunction = new Function('return [' + dataContent + ']');
             const quizData = evalFunction();
             
-            quizData.forEach(item => {
+            console.log('[QuizLoader] Format B data length:', quizData.length);
+            
+            quizData.forEach((item, index) => {
                 if (item.topic && item.question && item.options && typeof item.answer !== 'undefined' && item.explanation) {
                     const answers = {};
-                    item.options.forEach((opt, i) => {
-                        answers[String.fromCharCode(97 + i)] = opt;
-                    });
+                    if (Array.isArray(item.options)) {
+                        item.options.forEach((opt, i) => {
+                            answers[String.fromCharCode(97 + i)] = opt;
+                        });
+                    } else if (typeof item.options === 'object') {
+                        // Handle object format options
+                        Object.assign(answers, item.options);
+                    }
                     
                     questions.push({
                         question: item.question,
@@ -249,10 +319,38 @@ export class QuizLoader {
                         explanation: item.explanation,
                         topic: item.topic
                     });
+                } else {
+                    console.warn(`[QuizLoader] Format B item ${index} missing fields:`, {
+                        hasTopic: !!item.topic,
+                        hasQuestion: !!item.question,
+                        hasOptions: !!item.options,
+                        hasAnswer: typeof item.answer !== 'undefined',
+                        hasExplanation: !!item.explanation
+                    });
                 }
             });
         } catch (error) {
-            console.error('[QuizLoader] Failed to parse Format B:', error);
+            console.error('[QuizLoader] Failed to parse Format B with Function:', error);
+            console.log('[QuizLoader] Trying regex fallback for Format B...');
+            
+            // Fallback regex parsing
+            const itemRegex = /\{[^}]*topic:\s*['"](.*?)['"],[^}]*question:\s*['"](.*?)['"],[^}]*options:\s*\[(.*?)\],[^}]*answer:\s*(\d+),[^}]*explanation:\s*['"](.*?)['"]\s*\}/g;
+            let match;
+            while ((match = itemRegex.exec(dataContent)) !== null) {
+                const [_, topic, question, optionsStr, answer, explanation] = match;
+                const options = optionsStr.match(/['"](.*?)['"]/g)?.map(s => s.replace(/['"]/g, '')) || [];
+                const answers = {};
+                options.forEach((opt, i) => {
+                    answers[String.fromCharCode(97 + i)] = opt;
+                });
+                questions.push({
+                    topic,
+                    question: this.decodeHTML(question),
+                    answers,
+                    correctAnswer: String.fromCharCode(97 + parseInt(answer)),
+                    explanation: this.decodeHTML(explanation)
+                });
+            }
         }
         
         return {
@@ -269,35 +367,91 @@ export class QuizLoader {
         const questions = [];
         const topics = [];
         
-        try {
-            const evalFunction = new Function('return {' + dataContent + '}');
-            const quizData = evalFunction();
+        console.log('[QuizLoader] Parsing Format C...');
+        
+        // Try regex parsing for safety
+        // Look for topic objects with structure: "topicKey": { title: "...", questions: [...] }
+        const topicRegex = /"([^"]+)":\s*\{\s*title:\s*"([^"]+)"[^}]*questions:\s*\[([\s\S]*?)\]\s*\}/g;
+        
+        let topicMatch;
+        while ((topicMatch = topicRegex.exec(dataContent)) !== null) {
+            const [_, topicKey, topicTitle, questionsStr] = topicMatch;
+            topics.push({ key: topicKey, name: topicTitle });
             
-            // Extract topics and questions
-            for (const [topicKey, topicData] of Object.entries(quizData)) {
-                if (topicData.title && topicData.questions) {
-                    topics.push({ key: topicKey, name: topicData.title });
-                    
-                    topicData.questions.forEach((q, index) => {
-                        if (q.question && q.options && typeof q.answer !== 'undefined' && q.explanation) {
-                            const answers = {};
-                            q.options.forEach((opt, i) => {
-                                answers[String.fromCharCode(97 + i)] = opt;
-                            });
-                            
-                            questions.push({
-                                question: q.question,
-                                answers,
-                                correctAnswer: String.fromCharCode(97 + q.answer),
-                                explanation: q.explanation,
-                                topic: topicKey
-                            });
-                        }
-                    });
+            console.log(`[QuizLoader] Found topic: ${topicKey} - ${topicTitle}`);
+            
+            // Parse questions for this topic
+            const questionRegex = /\{\s*question:\s*"((?:[^"\\]|\\.)*)"\s*,\s*options:\s*\[(.*?)\]\s*,\s*answer:\s*(\d+)\s*,\s*explanation:\s*"((?:[^"\\]|\\.)*)"/g;
+            
+            let qMatch;
+            while ((qMatch = questionRegex.exec(questionsStr)) !== null) {
+                const [_, question, optionsStr, answerIdx, explanation] = qMatch;
+                
+                // Parse options
+                const options = [];
+                const optionRegex = /"((?:[^"\\]|\\.)*)"/g;
+                let optMatch;
+                while ((optMatch = optionRegex.exec(optionsStr)) !== null) {
+                    options.push(this.decodeHTML(optMatch[1]));
                 }
+                
+                // Convert to answers object
+                const answers = {};
+                options.forEach((opt, idx) => {
+                    answers[String.fromCharCode(97 + idx)] = opt;
+                });
+                
+                questions.push({
+                    topic: topicKey,
+                    question: this.decodeHTML(question),
+                    answers,
+                    correctAnswer: String.fromCharCode(97 + parseInt(answerIdx)),
+                    explanation: this.decodeHTML(explanation)
+                });
             }
-        } catch (error) {
-            console.error('[QuizLoader] Failed to parse Format C:', error);
+        }
+        
+        console.log(`[QuizLoader] Format C: Found ${topics.length} topics and ${questions.length} questions`);
+        
+        // If regex parsing found nothing, try fallback
+        if (questions.length === 0) {
+            console.log('[QuizLoader] Regex found no questions, trying JSON-like parsing...');
+            try {
+                // Clean content for JSON parsing
+                let cleanedContent = dataContent
+                    .replace(/(\w+):/g, '"$1":')
+                    .replace(/'/g, '"')
+                    .replace(/,\s*}/g, '}')
+                    .replace(/,\s*]/g, ']');
+                
+                const quizData = JSON.parse('{' + cleanedContent + '}');
+                
+                for (const [topicKey, topicData] of Object.entries(quizData)) {
+                    if (topicData.title && topicData.questions) {
+                        topics.push({ key: topicKey, name: topicData.title });
+                        
+                        topicData.questions.forEach((q, index) => {
+                            if (q.question && q.options && typeof q.answer !== 'undefined' && q.explanation) {
+                                const answers = {};
+                                q.options.forEach((opt, i) => {
+                                    answers[String.fromCharCode(97 + i)] = opt;
+                                });
+                                
+                                questions.push({
+                                    question: q.question,
+                                    answers,
+                                    correctAnswer: String.fromCharCode(97 + q.answer),
+                                    explanation: q.explanation,
+                                    topic: topicKey
+                                });
+                            }
+                        });
+                    }
+                }
+                console.log(`[QuizLoader] Format C: Parsed ${questions.length} questions via JSON`);
+            } catch (error) {
+                console.error('[QuizLoader] Format C JSON parsing failed:', error);
+            }
         }
         
         return {

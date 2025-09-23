@@ -136,9 +136,16 @@ export class QuizUI {
                 </div>
             `;
             
-            item.addEventListener('click', () => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const app = window.quizApp;
-                if (app) app.handleQuizSelect(item.dataset.quizPath);
+                if (app) {
+                    console.log('[QuizUI] Quiz item clicked:', item.dataset.quizPath);
+                    app.handleQuizSelect(item.dataset.quizPath);
+                } else {
+                    console.error('[QuizUI] QuizApp not found on window!');
+                }
             });
             
             container.appendChild(item);
