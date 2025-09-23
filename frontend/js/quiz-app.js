@@ -3,12 +3,10 @@
  * Initializes and coordinates all quiz modules
  */
 
-import { QuizLoader } from './quiz-engine/quiz-loader.js';
-import { QuizManager } from './quiz-engine/quiz-manager.js';
+import { QuizLoader } from './quiz-engine/quiz-loader-simple.js';
 import { QuizUI } from './quiz-engine/quiz-ui.js';
-import { QuizResults } from './quiz-engine/quiz-results.js';
 import { MatrixRain } from './quiz-engine/matrix-rain.js';
-import { UnifiedTopicSelector } from './quiz-engine/topic-selector-unified.js';
+import { MatrixTerminal } from './quiz-engine/matrix-terminal.js';
 
 class QuizApp {
     constructor() {
@@ -21,11 +19,9 @@ class QuizApp {
 
         // Initialize modules
         this.loader = new QuizLoader();
-        this.manager = new QuizManager();
         this.ui = new QuizUI();
-        this.results = new QuizResults();
         this.matrixRain = null;
-        this.topicSelector = new UnifiedTopicSelector();
+        this.matrixTerminal = null;
 
         this.init();
     }
@@ -37,6 +33,9 @@ class QuizApp {
 
             // Initialize matrix rain effect
             this.initMatrixRain();
+
+            // Initialize matrix terminal
+            this.initMatrixTerminal();
 
             // Setup event listeners
             this.setupEventListeners();
@@ -78,6 +77,15 @@ class QuizApp {
         }
     }
 
+    initMatrixTerminal() {
+        const container = document.getElementById('matrix-terminal-container');
+        if (container) {
+            this.matrixTerminal = new MatrixTerminal();
+            this.matrixTerminal.init(container);
+            console.log('Matrix terminal initialized');
+        }
+    }
+
     setupEventListeners() {
         // Category selection
         document.querySelectorAll('.category-card').forEach(card => {
@@ -95,29 +103,7 @@ class QuizApp {
             });
         });
 
-        // Quiz controls
-        document.getElementById('submit-answer')?.addEventListener('click', () => {
-            this.handleAnswerSubmit();
-        });
-
-        document.getElementById('next-question')?.addEventListener('click', () => {
-            this.handleNextQuestion();
-        });
-
-        // Results actions
-        document.querySelectorAll('.action-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const action = e.currentTarget.dataset.action;
-                this.handleResultAction(action);
-            });
-        });
-
-        // Answer selection
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.answer-option')) {
-                this.handleAnswerSelect(e.target.closest('.answer-option'));
-            }
-        });
+        // Quiz controls removed - all quiz interaction happens in iframe
     }
 
     async loadQuizMetadata() {
@@ -211,184 +197,35 @@ class QuizApp {
         console.log('[QuizApp] Handling quiz selection:', quizPath);
         
         try {
-            this.ui.showLoading(true);
+            this.ui.showLoading(false);
             
-            // Load quiz data first
-            console.log('[QuizApp] Loading quiz data...');
-            const quizData = await this.loader.loadQuiz(quizPath);
+            // Extract title from quiz path
+            const filename = quizPath.split('/').pop();
+            const title = filename.replace('.html', '');
             
-            if (!quizData) {
-                throw new Error('No quiz data returned');
-            }
-            
-            if (!quizData.questions || quizData.questions.length === 0) {
-                throw new Error('No questions found in quiz data');
-            }
-            
-            console.log('[QuizApp] Quiz loaded:', {
-                title: quizData.title,
-                format: quizData.format,
-                totalQuestions: quizData.questions.length,
-                topicsAvailable: quizData.availableTopics?.length || 0
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
             });
             
-            // Check if we need to show topic selector
-            if (quizData.availableTopics && quizData.availableTopics.length > 0) {
-                console.log('[QuizApp] Showing topic selector...');
-                const selectedTopic = await this.topicSelector.showTopicSelector(
-                    quizData.availableTopics,
-                    quizData.title
-                );
-                
-                if (!selectedTopic) {
-                    // User cancelled
-                    console.log('[QuizApp] Topic selection cancelled');
-                    this.ui.showLoading(false);
-                    return;
-                }
-                
-                console.log('[QuizApp] Topic selected:', selectedTopic);
-                
-                // Filter questions by selected topic
-                const filteredQuestions = this.loader.filterByTopic(quizData.questions, selectedTopic);
-                console.log(`[QuizApp] Filtered ${filteredQuestions.length} questions for topic: ${selectedTopic}`);
-                
-                if (filteredQuestions.length === 0) {
-                    throw new Error(`No questions found for topic: ${selectedTopic}`);
-                }
-                
-                // Update quiz data
-                quizData.questions = filteredQuestions;
-                
-                // Update title with selected topic
-                const topicObj = quizData.availableTopics.find(t => t.key === selectedTopic);
-                if (topicObj) {
-                    quizData.title = `${quizData.title} - ${topicObj.name}`;
-                }
+            // Load quiz in Matrix terminal
+            console.log('[QuizApp] Loading quiz in Matrix terminal...');
+            if (this.matrixTerminal) {
+                await this.matrixTerminal.loadQuiz(quizPath, title);
             } else {
-                console.log('[QuizApp] No topics available, using all questions');
+                throw new Error('Matrix terminal not initialized');
             }
             
-            this.state.quizData = quizData;
             this.state.currentQuizPath = quizPath;
             
-            // Initialize quiz manager with data (limit to 20 questions)
-            console.log('[QuizApp] Initializing quiz manager...');
-            this.manager.initQuiz(quizData, 20);
-            
-            // Start quiz
-            console.log('[QuizApp] Starting quiz...');
-            this.startQuiz();
-            
-            this.ui.showLoading(false);
         } catch (error) {
             console.error('[QuizApp] Error loading quiz:', error);
-            console.error('[QuizApp] Error stack:', error.stack);
             this.ui.showError(`Hiba történt a kvíz betöltése közben: ${error.message}`);
             this.ui.showLoading(false);
         }
     }
 
-    startQuiz() {
-        // Reset UI
-        this.ui.resetQuiz();
-        
-        // Display first question
-        const question = this.manager.getCurrentQuestion();
-        console.log('[QuizApp] Current question:', question);
-        
-        if (!question) {
-            console.error('[QuizApp] No question returned from manager');
-            this.ui.showError('Nem található kérdés a kvízben.');
-            return;
-        }
-        
-        this.ui.displayQuestion(question, this.manager.state.currentQuestionIndex + 1, this.manager.state.totalQuestions);
-        
-        // Switch to quiz screen
-        this.ui.switchScreen('quiz-active-screen');
-        
-        // Start timer
-        this.manager.startTimer((time) => {
-            this.ui.updateTimer(time);
-        });
-    }
-
-    handleAnswerSelect(answerElement) {
-        if (!this.manager.canAnswer()) return;
-        
-        // Update UI
-        this.ui.selectAnswer(answerElement);
-        
-        // Enable submit button
-        document.getElementById('submit-answer').disabled = false;
-    }
-
-    handleAnswerSubmit() {
-        const selectedAnswer = document.querySelector('.answer-option.selected');
-        if (!selectedAnswer) return;
-        
-        const answerIndex = parseInt(selectedAnswer.dataset.answerIndex);
-        
-        // Get the current question with answer mapping
-        const currentQuestion = this.manager.getCurrentQuestion();
-        const result = this.manager.submitAnswer(answerIndex, currentQuestion.answerMapping);
-        
-        // Update UI
-        this.ui.showAnswerResult(result);
-        
-        // Show next button or finish
-        if (this.manager.hasMoreQuestions()) {
-            document.getElementById('submit-answer').classList.add('hidden');
-            document.getElementById('next-question').classList.remove('hidden');
-        } else {
-            // Quiz complete
-            setTimeout(() => this.completeQuiz(), 1500);
-        }
-    }
-
-    handleNextQuestion() {
-        const question = this.manager.nextQuestion();
-        this.ui.displayQuestion(question, this.manager.state.currentQuestionIndex + 1, this.manager.state.totalQuestions);
-        
-        // Reset buttons
-        document.getElementById('submit-answer').classList.remove('hidden');
-        document.getElementById('submit-answer').disabled = true;
-        document.getElementById('next-question').classList.add('hidden');
-    }
-
-    completeQuiz() {
-        // Stop timer
-        this.manager.stopTimer();
-        
-        // Get results
-        const results = this.manager.getResults();
-        
-        // Save progress
-        this.saveQuizProgress(results);
-        
-        // Display results
-        this.results.displayResults(results);
-        this.ui.switchScreen('results-screen');
-    }
-
-    handleResultAction(action) {
-        switch (action) {
-            case 'retry':
-                this.handleQuizSelect(this.state.currentQuizPath);
-                break;
-            case 'new-topic':
-                // Restart quiz with topic selection
-                this.handleQuizSelect(this.state.currentQuizPath);
-                break;
-            case 'new-quiz':
-                this.ui.switchScreen('quiz-list-screen');
-                break;
-            case 'home':
-                this.ui.switchScreen('category-screen');
-                break;
-        }
-    }
+    // Old quiz handling methods removed - now handled by iframe in terminal
 
     loadProgress() {
         const saved = localStorage.getItem('quizProgress');
@@ -425,6 +262,12 @@ class QuizApp {
         ).length;
         
         return Math.round((completedQuizzes / categoryData.quizzes.length) * 100);
+    }
+
+    onTerminalClose() {
+        // Return to quiz list when terminal closes
+        console.log('[QuizApp] Terminal closed, returning to quiz list');
+        this.ui.switchScreen('quiz-list-screen');
     }
 }
 

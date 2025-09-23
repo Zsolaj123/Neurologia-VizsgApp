@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Terminal Test</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/app-optimized.css">
+    <link rel="stylesheet" href="css/matrix-terminal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .quiz-button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        .quiz-button:hover {
+            background: #00cc00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Matrix Terminal Test</h1>
+        <p>Click a quiz to load it in the Matrix terminal:</p>
+        
+        <button class="quiz-button" onclick="loadQuiz('content/quizzes/Neuroanat/1-3 Koponya_gerinc_látópálya.html')">
+            Neuroanat Quiz 1-3
+        </button>
+        
+        <button class="quiz-button" onclick="loadQuiz('content/quizzes/Vizsgálómódszerek, alap klinikum/60-64. EEG, alvás, ürítés, plasztic, genetika.html')">
+            Vizsgálómódszerek Quiz 60-64
+        </button>
+        
+        <button class="quiz-button" onclick="loadQuiz('content/quizzes/Klinikum/180-187. TRANSZPLAT_PARKINSON_OSAS_ALVÁS.html')">
+            Klinikum Quiz 180-187
+        </button>
+    </div>
+    
+    <!-- Matrix Terminal Container -->
+    <div id="matrix-terminal-container"></div>
+    
+    <script type="module">
+        import { MatrixTerminal } from './js/quiz-engine/matrix-terminal.js';
+        
+        const terminal = new MatrixTerminal();
+        const container = document.getElementById('matrix-terminal-container');
+        terminal.init(container);
+        
+        window.loadQuiz = async function(path) {
+            const title = path.split('/').pop().replace('.html', '');
+            await terminal.loadQuiz(path, title);
+        };
+        
+        // Make terminal accessible for closing
+        window.terminal = terminal;
+    </script>
+</body>
+</html>

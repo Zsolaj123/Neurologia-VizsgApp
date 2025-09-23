@@ -1,0 +1,335 @@
+/* ============================================
+   MATRIX TERMINAL STYLES
+   Retrofuturistic terminal interface for quiz loading
+   ============================================ */
+
+.matrix-terminal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: none;
+    animation: terminalBoot 0.5s ease-out;
+}
+
+.matrix-terminal.active {
+    display: block;
+}
+
+.matrix-terminal.closing {
+    animation: terminalShutdown 0.3s ease-in forwards;
+}
+
+@keyframes terminalBoot {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(50px);
+        filter: blur(10px);
+    }
+    50% {
+        filter: blur(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes terminalShutdown {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+        filter: brightness(0);
+    }
+}
+
+.terminal-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 1200px;
+    height: 90%;
+    max-height: 800px;
+    background: #000;
+    border: 2px solid #00ff00;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 
+        0 0 20px #00ff00,
+        0 0 40px #00ff0080,
+        0 0 80px #00ff0040,
+        inset 0 0 20px #00ff0020;
+}
+
+/* Terminal Header */
+.terminal-header {
+    height: 40px;
+    background: linear-gradient(180deg, #00ff00 0%, #008800 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    border-bottom: 2px solid #00ff00;
+}
+
+.terminal-title {
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.terminal-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.terminal-btn {
+    width: 20px;
+    height: 20px;
+    background: #000;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border-radius: 2px;
+    transition: all 0.2s;
+}
+
+.terminal-btn:hover {
+    background: #00ff00;
+    color: #000;
+}
+
+/* Terminal Body */
+.terminal-body {
+    position: relative;
+    height: calc(100% - 40px);
+    background: #000 !important;
+    overflow: hidden;
+}
+
+/* CRT Effects */
+.terminal-scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 255, 0, 0.03) 2px,
+        rgba(0, 255, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 2;
+}
+
+.terminal-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 255, 0, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Terminal Output */
+.terminal-output {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 14px;
+    color: #00ff00;
+    overflow-y: auto;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.terminal-output.visible {
+    opacity: 1;
+}
+
+.terminal-output.fade-out {
+    opacity: 0;
+}
+
+.terminal-line {
+    margin-bottom: 10px;
+    text-shadow: 0 0 5px #00ff00;
+    animation: lineGlow 0.5s ease-out;
+}
+
+@keyframes lineGlow {
+    0% {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    50% {
+        text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.terminal-line.command {
+    color: #00ff00;
+}
+
+.terminal-line.success {
+    color: #00ffff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.cursor {
+    animation: cursorBlink 1s infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Terminal Content (iframe container) */
+.terminal-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    background: #000;
+}
+
+.quiz-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.quiz-iframe.hidden {
+    display: none;
+}
+
+.quiz-iframe.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* Scrollbar styling */
+.terminal-output::-webkit-scrollbar {
+    width: 10px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+    background: #001100;
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+    background: #00ff00;
+    border-radius: 5px;
+}
+
+.terminal-output::-webkit-scrollbar-thumb:hover {
+    background: #00cc00;
+}
+
+/* CRT screen effect */
+.terminal-body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 255, 0, 0.03) 2px,
+        rgba(0, 255, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Flicker effect */
+.terminal-body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 255, 0, 0.02);
+    pointer-events: none;
+    z-index: 3;
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% { opacity: 0.97; }
+    5% { opacity: 0.98; }
+    10% { opacity: 0.95; }
+    15% { opacity: 0.99; }
+    20% { opacity: 0.96; }
+    25% { opacity: 0.98; }
+    30% { opacity: 0.97; }
+    35% { opacity: 0.99; }
+    40% { opacity: 0.96; }
+    45% { opacity: 0.98; }
+    50% { opacity: 0.97; }
+    60% { opacity: 0.99; }
+    70% { opacity: 0.96; }
+    80% { opacity: 0.98; }
+    90% { opacity: 0.97; }
+    100% { opacity: 0.98; }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .terminal-frame {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+    }
+    
+    .terminal-output {
+        font-size: 12px;
+        padding: 15px;
+    }
+}
