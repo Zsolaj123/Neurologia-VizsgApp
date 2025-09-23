@@ -141,7 +141,7 @@
         rgba(0, 255, 0, 0.03) 4px
     );
     pointer-events: none;
-    z-index: 2;
+    z-index: 20;
 }
 
 .terminal-glow {
@@ -152,7 +152,7 @@
     height: 200%;
     background: radial-gradient(circle, rgba(0, 255, 0, 0.1) 0%, transparent 50%);
     pointer-events: none;
-    z-index: 1;
+    z-index: 15;
 }
 
 /* Terminal Output */
@@ -167,9 +167,10 @@
     font-size: 14px;
     color: #00ff00;
     overflow-y: auto;
-    z-index: 10;
+    z-index: 25;
     opacity: 0;
     transition: opacity 0.5s;
+    pointer-events: none;
 }
 
 .terminal-output.visible {
@@ -226,7 +227,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 5;
+    z-index: 10;
     background: #000;
 }
 
@@ -237,6 +238,8 @@
     background: #fff;
     opacity: 0;
     transition: opacity 0.5s;
+    position: relative;
+    z-index: 10;
 }
 
 .quiz-iframe.hidden {
@@ -282,7 +285,7 @@
         rgba(0, 255, 0, 0.03) 4px
     );
     pointer-events: none;
-    z-index: 2;
+    z-index: 30;
 }
 
 /* Flicker effect */
@@ -295,7 +298,7 @@
     height: 100%;
     background: rgba(0, 255, 0, 0.02);
     pointer-events: none;
-    z-index: 3;
+    z-index: 35;
     animation: flicker 0.15s infinite;
 }
 

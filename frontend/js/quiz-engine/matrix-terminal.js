@@ -51,6 +51,10 @@ export class MatrixTerminal {
                         <iframe 
                             id="quiz-iframe" 
                             class="quiz-iframe hidden"
+                            allowfullscreen
+                            allow="autoplay; fullscreen"
+                            tabindex="0"
+                            frameborder="0"
                         ></iframe>
                     </div>
                 </div>
@@ -187,8 +191,14 @@ export class MatrixTerminal {
         // Wait a moment before loading to ensure boot sequence is visible
         await this.delay(500);
         
-        // Load the quiz
-        this.iframe.src = quizPath;
+        // Load the quiz with absolute path from current location
+        // This ensures the quiz loads from the correct path
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+        const fullPath = window.location.origin + basePath + '/' + quizPath;
+        
+        console.log('[MatrixTerminal] Loading quiz from:', fullPath);
+        this.iframe.src = fullPath;
     }
 
     /**
@@ -210,6 +220,19 @@ export class MatrixTerminal {
         this.output.classList.remove('visible');
         this.iframe.classList.remove('hidden');
         this.iframe.classList.add('visible');
+
+        // Give focus to iframe for interaction
+        setTimeout(() => {
+            this.iframe.focus();
+            // Try to focus the iframe content window too
+            try {
+                if (this.iframe.contentWindow) {
+                    this.iframe.contentWindow.focus();
+                }
+            } catch (e) {
+                console.log('Could not focus iframe content window');
+            }
+        }, 100);
 
         // Don't inject any styles - let the quiz use its original styling
         // The terminal frame provides the Matrix aesthetic
