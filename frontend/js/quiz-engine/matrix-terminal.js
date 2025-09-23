@@ -10,7 +10,7 @@ export class MatrixTerminal {
         this.iframe = null;
         this.bootSequence = [
             "NEUROLÓGIA QUIZ SYSTEM v2.0.1",
-            "Copyright (c) 2024 Dr. Zsolaj",
+            "Copyright (c) 2025 Neurológia VizsgApp made by Dr. Zsolaj",
             "",
             "> INITIALIZING...",
             "[ SYSTEM READY ]"
@@ -134,10 +134,10 @@ export class MatrixTerminal {
 
         for (const line of this.bootSequence) {
             await this.typeLine(line);
-            await this.delay(100);
+            await this.delay(90);  // Reduced from 100ms (10% faster)
         }
 
-        await this.delay(500);
+        await this.delay(450);  // Reduced from 500ms (10% faster)
         this.isBooting = false;
     }
 
@@ -157,18 +157,18 @@ export class MatrixTerminal {
         
         this.output.appendChild(lineElement);
 
-        // Type effect
+        // Type effect (10% faster)
         for (let i = 0; i < text.length; i++) {
             lineElement.textContent = text.substring(0, i + 1);
             if (!text.startsWith('[')) { // Don't delay for status messages
-                await this.delay(20 + Math.random() * 30);
+                await this.delay(18 + Math.random() * 27);  // Reduced from 20-50ms to 18-45ms
             }
         }
 
         // Add cursor blink at end
         if (text.length > 0) {
             lineElement.innerHTML += '<span class="cursor">█</span>';
-            await this.delay(200);
+            await this.delay(180);  // Reduced from 200ms (10% faster)
             lineElement.querySelector('.cursor')?.remove();
         }
 
@@ -189,7 +189,7 @@ export class MatrixTerminal {
         await this.typeLine(`> LOADING: ${title}`);
         
         // Wait a moment before loading to ensure boot sequence is visible
-        await this.delay(500);
+        await this.delay(450);  // Reduced from 500ms (10% faster)
         
         // Load the quiz with absolute path from current location
         // This ensures the quiz loads from the correct path
@@ -211,11 +211,11 @@ export class MatrixTerminal {
         if (this.isBooting) return;
 
         await this.typeLine("[ MODULE LOADED ]");
-        await this.delay(300);
+        await this.delay(270);  // Reduced from 300ms (10% faster)
         
         // Fade out terminal output, fade in quiz
         this.output.classList.add('fade-out');
-        await this.delay(300);
+        await this.delay(270);  // Reduced from 300ms (10% faster)
         
         this.output.classList.remove('visible');
         this.iframe.classList.remove('hidden');
@@ -253,7 +253,7 @@ export class MatrixTerminal {
             if (window.quizApp) {
                 window.quizApp.onTerminalClose();
             }
-        }, 300);
+        }, 270);  // Reduced from 300ms (10% faster)
     }
 
     /**
