@@ -60,9 +60,9 @@ class TocGenerator {
             const hasChildren = item.children && item.children.length > 0;
             
             let itemHTML = `
-                <div class="toc-item" data-toc-id="${item.id}" data-level="${item.level}" style="padding-left: ${indent}px;">
+                <div class="toc-item ${hasChildren ? 'expanded' : ''}" data-toc-id="${item.id}" data-level="${item.level}" style="padding-left: ${indent}px;">
                     <a href="#${item.id}" class="toc-link">
-                        ${hasChildren ? '<span class="toc-arrow">▶</span>' : '<span class="toc-bullet">•</span>'}
+                        ${hasChildren ? '<span class="toc-arrow">▼</span>' : '<span class="toc-bullet">•</span>'}
                         <span class="toc-text">${this.escapeHtml(item.text)}</span>
                     </a>
                 </div>
@@ -70,7 +70,7 @@ class TocGenerator {
             
             // Add children recursively
             if (hasChildren) {
-                itemHTML += `<div class="toc-children" data-parent="${item.id}">`;
+                itemHTML += `<div class="toc-children expanded" data-parent="${item.id}">`;
                 itemHTML += this.buildTOCHTML(item.children, level + 1);
                 itemHTML += '</div>';
             }

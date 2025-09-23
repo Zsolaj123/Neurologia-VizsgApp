@@ -413,6 +413,11 @@ class UIManager {
             // Reset to detailed section
             this.switchSection('reszletes');
             
+            // Scroll to top of content
+            if (this.elements.contentDisplay) {
+                this.elements.contentDisplay.scrollTop = 0;
+            }
+            
             // Save UI state
             appState.ui.currentTopicId = topicId;
             appState.saveUIState();
