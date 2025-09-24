@@ -125,6 +125,9 @@ class InteractiveSummariesApp {
             const summaryItem = this.createSummaryItem(summary, categoryData.path);
             container.appendChild(summaryItem);
         });
+        
+        // Setup search functionality after items are loaded
+        this.setupSearchFunctionality();
     }
     
     createSummaryItem(summary, basePath) {
@@ -194,6 +197,61 @@ class InteractiveSummariesApp {
         } else {
             // No category selected, return to main screen
             this.switchScreen('category-screen');
+        }
+    }
+    
+    /**
+     * Setup search functionality
+     */
+    setupSearchFunctionality() {
+        const searchInput = document.querySelector('.search-input');
+        const searchBtn = document.querySelector('.search-btn');
+        
+        if (searchInput && searchBtn) {
+            const performSearch = () => {
+                const query = searchInput.value.toLowerCase().trim();
+                const summaryItems = document.querySelectorAll('.summary-item');
+                
+                summaryItems.forEach(item => {
+                    const title = item.querySelector('.summary-title')?.textContent.toLowerCase() || '';
+                    const topics = item.querySelector('.summary-topics-list')?.textContent.toLowerCase() || '';
+                    const topicNumbers = item.querySelector('.summary-topics')?.textContent.toLowerCase() || '';
+                    
+                    // Check if query matches title, topics, or topic numbers (including ranges)
+                    let matches = query === '' || title.includes(query) || topics.includes(query) || topicNumbers.includes(query);
+                    
+                    // Enhanced number matching for topic numbers
+                    if (!matches && /^\d+$/.test(query)) {
+                        const queryNum = parseInt(query);
+                        // Extract topic number ranges from the topics string
+                        const topicText = topicNumbers.replace('témák:', '').trim();
+                        const ranges = topicText.split(/[,\s]+/).filter(r => r.trim());
+                        
+                        matches = ranges.some(range => {
+                            if (range.includes('-')) {
+                                const [start, end] = range.split('-').map(n => parseInt(n.trim()));
+                                return queryNum >= start && queryNum <= end;
+                            } else {
+                                return parseInt(range.trim()) === queryNum;
+                            }
+                        });
+                    }
+                    
+                    if (matches) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            };
+            
+            searchInput.addEventListener('input', performSearch);
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
         }
     }
 }

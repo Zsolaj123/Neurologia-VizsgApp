@@ -21,6 +21,48 @@
     
     /* Animation Durations */
     --quiz-transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Layout Variables */
+    --header-height: 70px;
+    --z-header: 1000;
+    --spacing-xxl: 3rem;
+    --spacing-xl: 2rem;
+    --spacing-lg: 1.5rem;
+    --spacing-md: 1rem;
+    --spacing-sm: 0.5rem;
+    --spacing-xs: 0.25rem;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --transition-quick: 0.3s ease;
+    --transition-normal: 0.4s ease;
+    
+    /* Colors */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: rgba(18, 18, 18, 0.9);
+    --bg-tertiary: rgba(32, 32, 32, 0.8);
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-muted: #808080;
+    --primary-green: #00ff41;
+    --accent-green: #00cc33;
+    --border-color: rgba(68, 68, 68, 0.5);
+    --font-display: 'Orbitron', monospace;
+    --font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============================================
+   MATRIX RAIN EFFECT
+   ============================================ */
+
+.matrix-rain {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1 !important; /* Above body::before but below content */
+    pointer-events: none !important;
+    opacity: 0.18 !important; /* Match podcast player visibility */
 }
 
 /* ============================================
@@ -32,7 +74,7 @@ body {
     background: transparent !important;
 }
 
-/* Dark background for readability */
+/* Pure black background for matrix rain effect */
 body::before {
     content: '';
     position: fixed;
@@ -40,8 +82,9 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #0a0a0a;
+    background: #000000;
     z-index: -1;
+    pointer-events: none;
 }
 
 .quiz-container {
@@ -50,14 +93,56 @@ body::before {
     position: relative;
     overflow-x: hidden;
     background: transparent; /* Allow matrix to show through */
+    z-index: 2; /* Above matrix rain */
 }
 
-/* Header modifications for quiz */
+/* Header styling for quiz */
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    z-index: var(--z-header);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--spacing-xl);
+}
+
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.app-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--primary-green);
+    text-shadow: 0 0 20px var(--primary-green);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    line-height: 1;
+}
+
+.author-credit {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    font-family: var(--font-family);
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .header-nav {
@@ -66,18 +151,48 @@ body::before {
 }
 
 .nav-link {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: var(--transition-quick);
-    font-size: 0.9rem;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--spacing-sm) !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    background: rgba(18, 18, 18, 0.7) !important;
+    border: 1px solid rgba(0, 255, 65, 0.3) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--primary-green) !important;
+    text-decoration: none !important;
+    transition: all var(--transition-quick) !important;
+    font-size: 0.9rem !important;
+    white-space: nowrap !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
 }
 
 .nav-link:hover {
-    color: var(--primary-green);
-    text-shadow: 0 0 10px var(--primary-green);
+    color: var(--primary-green) !important;
+    border-color: var(--primary-green) !important;
+    background: rgba(0, 255, 65, 0.1) !important;
+    text-shadow: 0 0 10px var(--primary-green) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(0, 255, 65, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.nav-link:hover::before {
+    transform: translateX(100%);
 }
 
 .nav-icon {
@@ -137,27 +252,56 @@ body::before {
 
 .category-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-xl);
     margin-top: var(--spacing-xxl);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 var(--spacing-lg);
+    /* Ensure grid stays visible */
+    position: relative;
+    z-index: 5;
 }
 
-.category-card {
-    position: relative;
-    background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: all var(--quiz-transition);
-    cursor: pointer;
+/* Category Cards - NUCLEAR SPECIFICITY: Maximum override protection */
+.category-card,
+div.category-card,
+.category-card[class],
+*[class*="category-card"],
+.category-grid .category-card {
+    position: relative !important;
+    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    border: 1px solid rgba(0, 255, 65, 0.4) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden !important;
+    transition: all var(--quiz-transition) !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    min-height: 200px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: 3 !important; /* Above matrix rain and body */
+    width: 100% !important;
+    max-width: 400px !important;
+}
+
+/* Extra nuclear override with inline style simulation */
+.category-card[style*="background"] {
+    background: rgba(18, 18, 18, 0.15) !important;
 }
 
 .category-card:hover {
     transform: translateY(-5px);
     border-color: var(--primary-green);
     box-shadow: 
-        0 10px 40px rgba(0, 255, 65, 0.2),
-        0 0 0 1px rgba(0, 255, 65, 0.1) inset;
+        0 10px 40px rgba(0, 255, 65, 0.3),
+        0 0 0 1px rgba(0, 255, 65, 0.2) inset,
+        0 0 20px rgba(0, 255, 65, 0.1); /* Shine effect */
 }
 
 /* Glow effect */
@@ -177,25 +321,15 @@ body::before {
     opacity: 1;
 }
 
+/* Category content will be standardized by unified-standardization.css */
 .category-content {
     position: relative;
-    padding: var(--spacing-xl);
     z-index: 2;
 }
 
-.category-title {
-    font-size: 1.5rem;
-    color: var(--primary-green);
-    margin: 0 0 var(--spacing-md) 0;
-    font-family: var(--font-display);
-}
+/* Category title will be standardized by unified-standardization.css */
 
-.category-description {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: var(--spacing-lg);
-}
+/* Category description will be standardized by unified-standardization.css */
 
 /* Category Stats */
 .category-stats {
@@ -286,17 +420,75 @@ body::before {
 }
 
 /* ============================================
+   SEARCH BAR
+   ============================================ */
+
+.search-bar {
+    display: flex;
+    gap: var(--spacing-md);
+    margin: var(--spacing-xl) auto;
+    max-width: 600px;
+    padding: 0 var(--spacing-lg);
+}
+
+.search-input {
+    flex: 1;
+    padding: var(--spacing-md);
+    background: rgba(18, 18, 18, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all var(--transition-quick);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--primary-green);
+    cursor: pointer;
+    transition: all var(--transition-quick);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-btn:hover {
+    background: rgba(0, 255, 65, 0.1);
+    border-color: var(--primary-green);
+}
+
+.search-icon {
+    font-size: 1.2rem;
+}
+
+/* ============================================
    QUIZ LIST
    ============================================ */
 
 .quiz-list {
     display: grid;
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .quiz-item {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: rgba(18, 18, 18, 0.15) !important;
+    border: 1px solid rgba(0, 255, 65, 0.4);
     border-radius: var(--radius-md);
     padding: var(--spacing-lg);
     transition: all var(--transition-quick);
@@ -304,12 +496,15 @@ body::before {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .quiz-item:hover {
     border-color: var(--primary-green);
-    background: var(--bg-tertiary);
+    background: rgba(0, 255, 65, 0.05) !important;
     transform: translateX(10px);
+    box-shadow: 0 4px 16px rgba(0, 255, 65, 0.2);
 }
 
 .quiz-item-info {
@@ -324,7 +519,7 @@ body::before {
 
 .quiz-item-topics {
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--primary-green);
 }
 
 .quiz-item-status {
@@ -357,16 +552,20 @@ body::before {
 }
 
 .back-button {
-    display: flex;
+    display: flex !important;
     align-items: center;
     gap: var(--spacing-sm);
-    background: transparent;
+    background: rgba(18, 18, 18, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-color);
-    color: var(--text-secondary);
+    color: var(--primary-green);
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-quick);
+    position: relative;
+    z-index: 10;
 }
 
 .back-button:hover {
@@ -670,46 +869,25 @@ body::before {
     font-size: 1.2rem;
 }
 
-/* ============================================
-   MATRIX RAIN EFFECT
-   ============================================ */
-
-.matrix-rain {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    opacity: 0.15; /* Increased for better visibility like podcast player */
-    pointer-events: none;
-}
-
-/* Ensure content is above matrix rain */
-.quiz-container {
-    position: relative;
-    z-index: 1;
-}
+/* Content z-index already handled above */
 
 /* Ensure shared glass-card styles are applied and matrix visible */
-.category-card,
 .topic-card,
-.quiz-item,
 .quiz-header,
 .quiz-content,
 .answer-option,
 .results-breakdown,
 .loading-overlay {
-    background-color: rgba(26, 26, 26, 0.95) !important; /* Semi-transparent dark */
+    background-color: rgba(18, 18, 18, 0.3) !important; /* Transparent glass effect */
 }
+
+/* Category cards inherit glass effect from above definition */
 
 .answer-option {
-    background-color: rgba(26, 26, 26, 0.9) !important; /* Slightly more transparent */
+    background-color: rgba(18, 18, 18, 0.3) !important; /* Glass effect */
 }
 
-.quiz-item:hover {
-    background-color: rgba(26, 26, 26, 0.98) !important;
-}
+/* Quiz item hover already defined above */
 
 /* ============================================
    LOADING OVERLAY
@@ -891,9 +1069,36 @@ body::before {
    RESPONSIVE
    ============================================ */
 
+@media (max-width: 1024px) {
+    .quiz-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
+    .quiz-list {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+    
     .category-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+    
+    .search-bar {
+        padding: 0 1rem;
+        gap: 0.5rem;
+    }
+    
+    .nav-link .nav-text {
+        display: none;
     }
     
     .screen {

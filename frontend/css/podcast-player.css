@@ -98,20 +98,46 @@ body {
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--podcast-border);
-    border-radius: 5px;
-    transition: var(--podcast-transition);
-    white-space: nowrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(18, 18, 18, 0.7);
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-quick);
     font-size: 0.9rem;
-    background: rgba(0, 255, 0, 0.05);
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
 }
 
 .nav-link:hover {
-    background: rgba(0, 255, 0, 0.1);
-    border-color: var(--podcast-accent);
-    box-shadow: 0 0 10px var(--podcast-accent-dim);
+    color: var(--primary-green);
+    border-color: var(--primary-green);
+    background: rgba(0, 255, 65, 0.1);
+    text-shadow: 0 0 10px var(--primary-green);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 255, 65, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.nav-link:hover::before {
+    transform: translateX(100%);
 }
 
 /* Podcast Container */
@@ -199,17 +225,29 @@ body {
     }
 }
 
-/* Category Cards */
-.category-card {
-    position: relative;
-    background: var(--podcast-bg-secondary);
-    border: 2px solid var(--podcast-border);
-    border-radius: 10px;
-    padding: 2rem;
-    cursor: pointer;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Only transition specific properties */
-    overflow: hidden;
-    transform: none !important; /* Prevent slide-in */
+/* Category Cards - NUCLEAR SPECIFICITY: Maximum override protection */
+.category-card,
+div.category-card,
+.category-card[class],
+*[class*="category-card"],
+.category-grid .category-card {
+    position: relative !important;
+    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    border: 1px solid rgba(0, 255, 65, 0.4) !important;
+    border-radius: 10px !important;
+    padding: 2rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    width: 100% !important;
+    max-width: 400px !important;
+}
+
+/* Extra nuclear override with inline style simulation */
+.category-card[style*="background"] {
+    background: rgba(18, 18, 18, 0.15) !important;
 }
 
 .category-glow {
@@ -227,7 +265,10 @@ body {
 .category-card:hover {
     border-color: var(--podcast-accent);
     transform: translateY(-5px);
-    box-shadow: var(--podcast-glow);
+    box-shadow: 
+        0 10px 40px rgba(0, 255, 0, 0.3),
+        0 0 0 1px rgba(0, 255, 0, 0.2) inset,
+        0 0 20px rgba(0, 255, 0, 0.1); /* Shine effect */
 }
 
 .category-card:hover .category-glow {
@@ -301,23 +342,23 @@ body {
     box-shadow: var(--podcast-glow);
 }
 
-/* Back Button */
+/* Back Button - Fixed positioning to prevent jumping */
 .back-btn {
-    position: fixed;
-    left: 20px;
-    top: 80px;
-    background: var(--podcast-bg-secondary);
-    border: 2px solid var(--podcast-border);
-    color: var(--podcast-accent);
-    padding: 0.75rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: var(--podcast-transition);
-    font-family: 'JetBrains Mono', monospace;
-    z-index: 100;
-    border-radius: 5px;
+    position: fixed !important;
+    left: 20px !important;
+    top: 80px !important;
+    background: var(--podcast-bg-secondary) !important;
+    border: 2px solid var(--podcast-border) !important;
+    color: var(--podcast-accent) !important;
+    padding: 0.75rem 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    cursor: pointer !important;
+    transition: var(--podcast-transition) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    z-index: 100 !important;
+    border-radius: 5px !important;
 }
 
 .back-btn:hover {
@@ -368,29 +409,46 @@ body {
 
 /* Podcast List */
 .podcast-list {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
 
-.podcast-item {
-    background: var(--podcast-bg-secondary);
-    border: 1px solid var(--podcast-border);
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    cursor: pointer;
-    transition: var(--podcast-transition);
-    position: relative;
-    overflow: hidden;
+/* Podcast Items - NUCLEAR SPECIFICITY: Maximum override protection */
+.podcast-item,
+div.podcast-item,
+.podcast-item[class],
+*[class*="podcast-item"],
+.podcast-list .podcast-item {
+    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    border: 1px solid rgba(0, 255, 65, 0.4) !important;
+    padding: 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    cursor: pointer !important;
+    transition: var(--podcast-transition) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Extra nuclear override with inline style simulation */
+.podcast-item[style*="background"] {
+    background: rgba(18, 18, 18, 0.15) !important;
 }
 
 .podcast-item:hover {
     border-color: var(--podcast-accent);
     background: rgba(0, 255, 0, 0.05);
+    box-shadow: 
+        0 5px 20px rgba(0, 255, 0, 0.2),
+        0 0 0 1px rgba(0, 255, 0, 0.1) inset,
+        0 0 15px rgba(0, 255, 0, 0.1); /* Shine effect */
+    transform: translateY(-2px);
 }
 
 .podcast-item.playing {
@@ -833,12 +891,12 @@ body {
         padding: 70px 1rem 1rem;
     }
 
-    /* Back button mobile */
+    /* Back button mobile - Override only what's needed */
     .back-btn {
-        top: 70px;
-        left: 10px;
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
+        top: 70px !important;
+        left: 10px !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
     }
 
     .screen-title {
@@ -898,11 +956,7 @@ body {
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Improve category card stability */
-.category-card {
-    width: 100%;
-    max-width: 400px;
-}
+/* Note: category-card width and max-width already defined in main rule above */
 
 /* Additional minimize button improvement */
 #minimize-btn {
@@ -915,10 +969,7 @@ body {
 
 /* Z-index hierarchy to prevent overlaps */
 /* Removed duplicates - defined above */
-
-.back-btn {
-    z-index: 100;
-}
+/* Note: .back-btn z-index already defined in main rule above */
 
 .playlist-panel {
     z-index: 901;
@@ -946,8 +997,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; /* Changed from -1 to ensure it's visible */
-    opacity: 0.15; /* Further increased for better visibility */
+    z-index: -2; /* Consistent with other sections */
+    opacity: 0.18; /* Visible but behind all content */
     pointer-events: none;
 }
 

@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Show welcome message initially
         showWelcomeMessage();
         
+        // Setup topic search functionality
+        setupTopicSearch();
+        
         // Set up global error handling
         setupErrorHandling();
         
@@ -317,3 +320,86 @@ window.neurologyApp = {
         }
     }
 };
+
+/**
+ * Setup topic search functionality
+ */
+function setupTopicSearch() {
+    const searchInput = document.getElementById('topic-search-input');
+    const searchBtn = document.getElementById('topic-search-btn');
+    
+    if (searchInput && searchBtn) {
+        const performSearch = () => {
+            const query = searchInput.value.trim();
+            const topicItems = document.querySelectorAll('.topic-item');
+            const rangeHeaders = document.querySelectorAll('.range-header');
+            const categoryHeaders = document.querySelectorAll('.category-header');
+            
+            if (query === '') {
+                // Show all items when search is empty
+                topicItems.forEach(item => item.style.display = 'block');
+                rangeHeaders.forEach(header => header.style.display = 'block');
+                categoryHeaders.forEach(header => header.style.display = 'block');
+                return;
+            }
+            
+            // Hide all items initially
+            topicItems.forEach(item => item.style.display = 'none');
+            rangeHeaders.forEach(header => header.style.display = 'none');
+            categoryHeaders.forEach(header => header.style.display = 'none');
+            
+            // Show matching items
+            topicItems.forEach(item => {
+                const topicText = item.textContent.toLowerCase();
+                const topicNumber = item.textContent.match(/^\d+/);
+                
+                // Check if query matches topic number or is in range
+                let matches = false;
+                if (topicNumber) {
+                    const itemNum = parseInt(topicNumber[0]);
+                    
+                    // Direct number match
+                    if (topicNumber[0].includes(query)) {
+                        matches = true;
+                    }
+                    // Check if query is a number that matches this topic
+                    else if (/^\d+$/.test(query)) {
+                        const queryNum = parseInt(query);
+                        if (itemNum === queryNum) {
+                            matches = true;
+                        }
+                    }
+                }
+                
+                // Also check text content match
+                if (topicText.includes(query)) {
+                    matches = true;
+                }
+                
+                if (matches) {
+                    item.style.display = 'block';
+                    // Show parent range and category
+                    let parent = item.parentElement;
+                    while (parent) {
+                        if (parent.classList.contains('topic-range') || parent.classList.contains('topic-category')) {
+                            const header = parent.querySelector('.range-header, .category-header');
+                            if (header) {
+                                header.style.display = 'block';
+                                parent.style.display = 'block';
+                            }
+                        }
+                        parent = parent.parentElement;
+                    }
+                }
+            });
+        };
+        
+        searchInput.addEventListener('input', performSearch);
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+}

@@ -135,10 +135,10 @@ export class MatrixTerminal {
 
         for (const line of this.bootSequence) {
             await this.typeLine(line);
-            await this.delay(58);  // Reduced by additional 15% for faster startup
+            await this.delay(49);  // Reduced by additional 15% for even faster startup
         }
 
-        await this.delay(287);  // Reduced by additional 15% for faster startup
+        await this.delay(244);  // Reduced by additional 15% for even faster startup
         this.isBooting = false;
     }
 
@@ -162,14 +162,14 @@ export class MatrixTerminal {
         for (let i = 0; i < text.length; i++) {
             lineElement.textContent = text.substring(0, i + 1);
             if (!text.startsWith('[')) { // Don't delay for status messages
-                await this.delay(12 + Math.random() * 17);  // Reduced by additional 15% for faster typing
+                await this.delay(10 + Math.random() * 14);  // Reduced by additional 15% for even faster typing
             }
         }
 
         // Add cursor blink at end
         if (text.length > 0) {
             lineElement.innerHTML += '<span class="cursor">█</span>';
-            await this.delay(115);  // Reduced by additional 15% for faster cursor
+            await this.delay(98);  // Reduced by additional 15% for even faster cursor
             lineElement.querySelector('.cursor')?.remove();
         }
 

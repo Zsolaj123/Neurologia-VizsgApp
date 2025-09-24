@@ -103,7 +103,62 @@ class QuizApp {
             });
         });
 
+        // Setup search functionality
+        this.setupSearchFunctionality();
+
         // Quiz controls removed - all quiz interaction happens in iframe
+    }
+
+    setupSearchFunctionality() {
+        const searchInput = document.querySelector('.search-input');
+        const searchBtn = document.querySelector('.search-btn');
+        
+        if (searchInput && searchBtn) {
+            const performSearch = () => {
+                const query = searchInput.value.toLowerCase().trim();
+                const quizItems = document.querySelectorAll('.quiz-item');
+                
+                quizItems.forEach(item => {
+                    const title = item.querySelector('.quiz-item-title')?.textContent.toLowerCase() || '';
+                    const topics = item.querySelector('.quiz-item-topics')?.textContent.toLowerCase() || '';
+                    
+                    // Extract numbers from topics (e.g., "Témák: 1-59" -> "1-59")
+                    const topicNumbers = topics.replace(/[^\d\-,\s]/g, '').trim();
+                    
+                    // Check if query matches title, topics text, or topic numbers
+                    const matchesTitle = title.includes(query);
+                    const matchesTopics = topics.includes(query);
+                    const matchesNumbers = topicNumbers.includes(query) || query.split(/[-,\s]+/).some(num => {
+                        if (!/^\d+$/.test(num)) return false;
+                        const queryNum = parseInt(num);
+                        // Check if number is in any range (e.g., "45" matches "1-59")
+                        return topicNumbers.split(/[,\s]+/).some(range => {
+                            if (range.includes('-')) {
+                                const [start, end] = range.split('-').map(n => parseInt(n.trim()));
+                                return queryNum >= start && queryNum <= end;
+                            } else {
+                                return parseInt(range.trim()) === queryNum;
+                            }
+                        });
+                    });
+                    
+                    if (query === '' || matchesTitle || matchesTopics || matchesNumbers) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            };
+            
+            searchInput.addEventListener('input', performSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            searchBtn.addEventListener('click', performSearch);
+        }
     }
 
     async loadQuizMetadata() {

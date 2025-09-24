@@ -1,0 +1,278 @@
+/**
+ * UNIFIED STANDARDIZATION CSS
+ * Enforces consistent styling across Quiz, Podcast, and Interactive Summaries
+ * Load this after all other section-specific CSS files
+ */
+
+/* ============================================
+   UNIFIED TEXT COLORS & FONTS
+   ============================================ */
+
+/* Primary Text Colors - ENFORCED CONSISTENCY */
+.category-title,
+div.category-title,
+h3.category-title,
+.screen-title,
+h1, h2, h3 {
+    color: #00ff41 !important; /* Primary green for all titles */
+    font-family: 'Orbitron', monospace !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.3) !important;
+}
+
+/* Secondary Text Colors - NUCLEAR SPECIFICITY */
+.category-description,
+p.category-description,
+div.category-description,
+.category-content .category-description,
+.summary-title,
+.podcast-title,
+.topic-title {
+    color: #b0b0b0 !important; /* Light grey for descriptions */
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Muted Text - Only for Labels and Meta */
+.stat-label,
+.summary-topics,
+.podcast-duration,
+.topic-meta,
+.category-stats small,
+.nav-text,
+small {
+    color: #808080 !important; /* Muted grey for labels only */
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.85rem !important;
+}
+
+/* Numbers and Stats */
+.stat-value,
+.podcast-number,
+.track-number,
+.topic-number {
+    color: #00ff41 !important; /* Green for numbers */
+    font-family: 'Orbitron', monospace !important;
+    font-weight: 900 !important;
+}
+
+/* Navigation Links */
+.nav-link {
+    color: #00ff41 !important; /* Green for navigation */
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+.nav-link:hover {
+    color: #00ff00 !important; /* Brighter green on hover */
+}
+
+/* ============================================
+   UNIFIED CATEGORY CARD DIMENSIONS
+   ============================================ */
+
+/* Standard Category Card Dimensions */
+.category-card {
+    min-height: 280px !important; /* Consistent height */
+    max-width: 380px !important; /* Consistent max width */
+    width: 100% !important;
+    padding: 2rem !important;
+    border-radius: 12px !important;
+}
+
+/* Category Card Content Layout */
+.category-content {
+    padding: 0 !important; /* Remove extra padding since card already has 2rem */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+}
+
+/* Category Title Standardization - BIGGER SIZE */
+.category-title,
+div.category-title,
+h3.category-title {
+    font-size: 1.8rem !important; /* Bigger title size */
+    margin-bottom: 1rem !important;
+    line-height: 1.3 !important;
+}
+
+/* Category Description Standardization - NUCLEAR OVERRIDE */
+.category-description,
+p.category-description,
+div.category-description,
+.category-content .category-description,
+.category-card .category-description {
+    color: #b0b0b0 !important; /* Force light grey - override all CSS variables */
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    margin-bottom: 1.5rem !important;
+    flex-grow: 1 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Category Stats Standardization */
+.category-stats {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid rgba(0, 255, 65, 0.2) !important;
+    margin-top: auto !important;
+}
+
+/* ============================================
+   UNIFIED CATEGORY GRID LAYOUT
+   ============================================ */
+
+.category-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)) !important;
+    gap: 2rem !important;
+    padding: 0 2rem !important;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    justify-items: center !important;
+}
+
+/* ============================================
+   UNIFIED TOPIC/ITEM GRIDS
+   ============================================ */
+
+.topic-grid,
+.podcast-list,
+.summary-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: 1.5rem !important;
+    padding: 0 2rem !important;
+    max-width: 1400px !important;
+    margin: 2rem auto 0 !important;
+}
+
+/* Topic/Item Card Standardization */
+.topic-card,
+.quiz-item,
+.podcast-item,
+.summary-item {
+    min-height: 160px !important;
+    padding: 1.5rem !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+/* Topic Title Standardization */
+.topic-title,
+.quiz-item-title,
+.podcast-title,
+.summary-title {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    color: #00ff41 !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.4 !important;
+}
+
+/* ============================================
+   UNIFIED SCREEN HEADERS
+   ============================================ */
+
+.screen-header {
+    text-align: center !important;
+    margin-bottom: 3rem !important;
+    padding: 1rem 0 !important;
+}
+
+.screen-title {
+    font-size: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+}
+
+.screen-subtitle {
+    font-size: 1.2rem !important;
+    color: #b0b0b0 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    margin: 0 !important;
+}
+
+/* ============================================
+   UNIFIED RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .category-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+        padding: 0 1rem !important;
+    }
+    
+    .topic-grid,
+    .podcast-list,
+    .summary-list {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        padding: 0 1rem !important;
+    }
+    
+    .category-card {
+        min-height: 240px !important;
+        max-width: 100% !important;
+        padding: 1.5rem !important;
+    }
+    
+    .category-title {
+        font-size: 1.3rem !important;
+    }
+    
+    .screen-title {
+        font-size: 2rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .category-card {
+        min-height: 220px !important;
+        padding: 1rem !important;
+    }
+    
+    .category-title {
+        font-size: 1.2rem !important;
+    }
+    
+    .category-description {
+        font-size: 0.9rem !important;
+    }
+    
+    .screen-title {
+        font-size: 1.8rem !important;
+    }
+}
+
+/* ============================================
+   UNIFIED HOVER EFFECTS
+   ============================================ */
+
+.category-card:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    border-color: #00ff41 !important;
+    box-shadow: 
+        0 20px 60px rgba(0, 255, 65, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(0, 255, 65, 0.2),
+        0 0 0 1px rgba(0, 255, 65, 0.2) inset !important;
+}
+
+.topic-card:hover,
+.quiz-item:hover,
+.podcast-item:hover,
+.summary-item:hover {
+    transform: translateY(-4px) !important;
+    border-color: #00ff41 !important;
+    box-shadow: 
+        0 12px 40px rgba(0, 255, 65, 0.15),
+        0 4px 16px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(0, 255, 65, 0.1) !important;
+}

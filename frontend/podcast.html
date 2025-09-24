@@ -9,10 +9,34 @@
     <link rel="stylesheet" href="css/app-optimized.css">
     <link rel="stylesheet" href="css/podcast-player.css">
     <link rel="stylesheet" href="css/matrix-terminal.css">
-    <link rel="stylesheet" href="css/shared-components.css">
+    <link rel="stylesheet" href="css/unified-standardization.css">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- CRITICAL INLINE CSS: Prevent FOUC for transparency -->
+    <style>
+        /* NUCLEAR TRANSPARENCY OVERRIDE - Inline to prevent FOUC */
+        .category-card,
+        div.category-card,
+        .category-card[class],
+        *[class*="category-card"],
+        .category-grid .category-card {
+            background: rgba(18, 18, 18, 0.15) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+        }
+        .podcast-item,
+        .podcast-list .podcast-item {
+            background: rgba(18, 18, 18, 0.15) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
+        /* Prevent any animation from overriding transparency */
+        .category-card *, .podcast-item * {
+            background: transparent !important;
+        }
+    </style>
 </head>
 <body>
     <!-- App Header -->
@@ -24,15 +48,15 @@
             </h1>
             <nav class="header-nav">
                 <a href="index.html" class="nav-link">
-                    <span class="nav-icon">🏠</span>
+                    <span class="nav-icon">◢</span>
                     <span class="nav-text">Főoldal</span>
                 </a>
                 <a href="quiz.html" class="nav-link">
-                    <span class="nav-icon">🧠</span>
+                    <span class="nav-icon">■</span>
                     <span class="nav-text">Quiz</span>
                 </a>
                 <a href="interactive-summaries.html" class="nav-link">
-                    <span class="nav-icon">📊</span>
+                    <span class="nav-icon">≡</span>
                     <span class="nav-text">Összefoglalók</span>
                 </a>
             </nav>
@@ -140,7 +164,7 @@
             <div class="search-bar">
                 <input type="text" class="search-input" placeholder="Keresés témaszám vagy cím alapján...">
                 <button class="search-btn">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon">⚡</span>
                 </button>
             </div>
 
