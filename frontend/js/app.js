@@ -10,7 +10,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Initialize the UI Manager
         uiManager.initialize();
-        console.log('✓ UI Manager inicializálva');
+        
+        // Make uiManager globally accessible for onclick handlers
+        window.uiManager = uiManager;
+        
+        console.log('✓ UI Manager inicializálva and exposed globally');
         
         // Show welcome message initially
         showWelcomeMessage();

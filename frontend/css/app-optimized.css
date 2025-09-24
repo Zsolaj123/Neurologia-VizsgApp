@@ -327,13 +327,22 @@ ul, ol {
     height: calc(100vh - var(--content-top));
 }
 
-/* Sticky inner content - FIXED for proper scrolling */
-.topic-list,
+/* Sticky sidebar containers - FIXED for topic visibility */
+.topic-list {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    /* No height restrictions - let content flow naturally */
+    overflow: visible;
+    margin: 0;
+    width: 100%;
+}
+
 .toc-sidebar {
     position: sticky;
     position: -webkit-sticky;
     top: var(--content-top);
-    /* Remove fixed height to allow sidebar-content to control scrolling */
     min-height: calc(100vh - var(--content-top));
     max-height: calc(100vh - var(--content-top));
     background: var(--bg-secondary);
@@ -590,7 +599,8 @@ ul, ol {
 }
 
 .topic-range .topic-list {
-    max-height: none;
+    /* FIXED: Allow natural height for topics to be visible */
+    max-height: 2000px; /* Large enough for any topic list */
     overflow: visible;
     transition: max-height var(--transition-normal) ease-out;
     padding: var(--spacing-xs) 0;
@@ -638,14 +648,17 @@ ul, ol {
 }
 
 .toc-item.active {
-    background: rgba(0, 255, 65, 0.2);
-    border-left: 4px solid var(--primary-green);
-    color: var(--primary-green);
-    font-weight: 600;
+    background: rgba(0, 255, 65, 0.3) !important;
+    border-left: 4px solid var(--primary-green) !important;
+    color: var(--primary-green) !important;
+    font-weight: 600 !important;
+    /* Extra visibility for debugging */
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5) !important;
 }
 
 .toc-item.active .toc-text {
-    text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.8) !important;
+    color: var(--primary-green) !important;
 }
 
 /* TOC Link styling */

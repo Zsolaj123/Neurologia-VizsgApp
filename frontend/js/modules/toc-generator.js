@@ -170,23 +170,36 @@ class TocGenerator {
     }
     
     /**
-     * Set active TOC item
+     * Set active TOC item - ENHANCED with debugging
      */
     setActiveItem(tocId) {
+        console.log('🎯 setActiveItem called with:', tocId);
+        
         // Remove previous active
         const previousActive = this.tocContainer.querySelector('.toc-item.active');
+        console.log('📤 Previous active item:', previousActive);
         if (previousActive) {
             previousActive.classList.remove('active');
+            console.log('✅ Removed active class from previous item');
         }
         
         // Set new active
         const newActive = this.tocContainer.querySelector(`[data-toc-id="${tocId}"]`);
+        console.log('📥 Looking for TOC item with data-toc-id:', tocId);
+        console.log('📋 Found new active item:', newActive);
+        
         if (newActive) {
             newActive.classList.add('active');
             this.activeItemId = tocId;
+            console.log('✅ Added active class to new item:', newActive);
             
             // Ensure item is visible
             this.ensureItemVisible(newActive);
+        } else {
+            console.error('❌ Could not find TOC item with data-toc-id:', tocId);
+            // Debug: show all available TOC items
+            const allTocItems = this.tocContainer.querySelectorAll('[data-toc-id]');
+            console.log('🔍 Available TOC items:', Array.from(allTocItems).map(item => item.dataset.tocId));
         }
     }
     
@@ -360,6 +373,11 @@ class TocGenerator {
             this.setActiveItem(activeId);
         } else {
             console.log('⏭️ TOC: No change needed');
+            // FORCE UPDATE: Let's try to set it anyway for debugging
+            if (activeId) {
+                console.log('🔧 TOC: Force updating for debugging');
+                this.setActiveItem(activeId);
+            }
         }
     }
     
