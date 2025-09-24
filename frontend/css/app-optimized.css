@@ -881,27 +881,79 @@ ul, ol {
     hyphens: auto;
 }
 
-/* Prevent tables from breaking layout */
+/* Proper table formatting with overflow protection */
 .topic-content table {
-    max-width: 100%;
-    table-layout: auto;
-    overflow-x: auto;
-    display: block;
-    white-space: nowrap;
-}
-
-.topic-content table tbody,
-.topic-content table thead,
-.topic-content table tr {
-    display: table;
     width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-md) 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
 }
 
 .topic-content table th,
 .topic-content table td {
-    display: table-cell;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: top;
     word-wrap: break-word;
-    max-width: 200px; /* Prevent extremely wide cells */
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.topic-content table th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+    color: var(--primary-green);
+    border-bottom: 2px solid var(--primary-green);
+}
+
+.topic-content table tr:nth-child(even) {
+    background: rgba(0, 255, 65, 0.02);
+}
+
+.topic-content table tr:hover {
+    background: rgba(0, 255, 65, 0.05);
+}
+
+/* Container for wide tables with horizontal scroll */
+.topic-content .table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: var(--spacing-md) 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+}
+
+.topic-content .table-container table {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+}
+
+/* Responsive table behavior */
+@media (max-width: 768px) {
+    .topic-content table {
+        font-size: 0.9rem;
+    }
+    
+    .topic-content table th,
+    .topic-content table td {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        min-width: 80px;
+    }
+    
+    .topic-content .table-container {
+        border-radius: 0;
+        margin-left: calc(-1 * var(--spacing-xl));
+        margin-right: calc(-1 * var(--spacing-xl));
+        border-left: none;
+        border-right: none;
+    }
 }
 
 /* Prevent code blocks from breaking layout */

@@ -489,6 +489,9 @@ class UIManager {
         } else {
             const wrappedContent = this.wrapContent(section.content);
             this.elements.contentDisplay.innerHTML = wrappedContent;
+            
+            // Format tables after content is loaded
+            this.formatTables();
         }
         
         // Update section tabs
@@ -539,6 +542,36 @@ class UIManager {
      */
     wrapContent(html) {
         return `<div class="topic-content">${html}</div>`;
+    }
+    
+    /**
+     * Format tables for better display and responsive behavior
+     * @private
+     */
+    formatTables() {
+        const tables = this.elements.contentDisplay.querySelectorAll('table');
+        
+        tables.forEach(table => {
+            // Skip if table is already wrapped
+            if (table.parentElement.classList.contains('table-container')) {
+                return;
+            }
+            
+            // Check if table is wide enough to need scrolling
+            const tableWidth = table.offsetWidth;
+            const containerWidth = this.elements.contentDisplay.offsetWidth - 64; // Account for padding
+            
+            if (tableWidth > containerWidth) {
+                // Wrap wide tables in scrollable container
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('table-container');
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            }
+            
+            // Ensure table has proper styling class
+            table.classList.add('formatted-table');
+        });
     }
     
     /**
