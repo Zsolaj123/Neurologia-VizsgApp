@@ -58,8 +58,17 @@ class InteractiveSummariesApp {
         const container = document.getElementById('matrix-terminal-container');
         if (container) {
             this.matrixTerminal = new MatrixTerminal();
+            // Customize for interactive summaries
+            this.matrixTerminal.bootSequence = [
+                "NEUROLÓGIA INTERAKTÍV ÖSSZEFOGLALÓ RENDSZER v2.0.1",
+                "Copyright (c) 2025 Neurológia VizsgApp made by Dr. Zsolaj",
+                "",
+                "> INITIALIZING INTERACTIVE SUMMARIES...",
+                "[ SYSTEM READY ]"
+            ];
+            this.matrixTerminal.terminalTitle = "NEURAL SUMMARY INTERFACE";
             this.matrixTerminal.init(container);
-            console.log('Matrix terminal initialized');
+            console.log('Matrix terminal initialized for interactive summaries');
         }
     }
     
@@ -167,7 +176,25 @@ class InteractiveSummariesApp {
     onTerminalClose() {
         // Return to summary list when terminal closes
         console.log('Terminal closed, returning to summary list');
-        this.switchScreen('summary-list-screen');
+        
+        // Ensure we have a current category and repopulate the list if needed
+        if (this.currentCategory) {
+            const categoryData = summariesData[this.currentCategory];
+            if (categoryData) {
+                // Update screen title
+                const titleElement = document.getElementById('summary-list-title');
+                if (titleElement) {
+                    titleElement.textContent = `${categoryData.title} - Interaktív összefoglalók`;
+                }
+                
+                // Ensure summary list is populated
+                this.displaySummaryList(categoryData);
+            }
+            this.switchScreen('summary-list-screen');
+        } else {
+            // No category selected, return to main screen
+            this.switchScreen('category-screen');
+        }
     }
 }
 

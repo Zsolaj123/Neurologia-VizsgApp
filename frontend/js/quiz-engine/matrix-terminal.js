@@ -15,6 +15,7 @@ export class MatrixTerminal {
             "> INITIALIZING...",
             "[ SYSTEM READY ]"
         ];
+        this.terminalTitle = "NEURAL QUIZ INTERFACE";
         this.isBooting = false;
     }
 
@@ -36,7 +37,7 @@ export class MatrixTerminal {
         this.terminal.innerHTML = `
             <div class="terminal-frame">
                 <div class="terminal-header">
-                    <div class="terminal-title">NEURAL QUIZ INTERFACE</div>
+                    <div class="terminal-title">${this.terminalTitle}</div>
                     <div class="terminal-controls">
                         <button class="terminal-btn minimize">_</button>
                         <button class="terminal-btn maximize">□</button>
@@ -252,6 +253,8 @@ export class MatrixTerminal {
             // Notify app
             if (window.quizApp) {
                 window.quizApp.onTerminalClose();
+            } else if (window.summariesApp) {
+                window.summariesApp.onTerminalClose();
             }
         }, 270);  // Reduced from 300ms (10% faster)
     }

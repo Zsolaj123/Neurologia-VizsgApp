@@ -64,8 +64,8 @@ export class MatrixRain {
     initDrops() {
         this.drops = [];
         for (let i = 0; i < this.columns; i++) {
-            // Start drops at random heights
-            this.drops[i] = Math.random() * -100;
+            // Start drops at random heights from top
+            this.drops[i] = Math.random() * (this.canvas.height / this.config.fontSize) * -1;
         }
     }
 
