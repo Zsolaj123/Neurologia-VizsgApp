@@ -462,27 +462,34 @@ class UIManager {
     }
     
     /**
-     * FIXED: Scroll to top instantly (prevents smooth scroll conflicts)
+     * ENHANCED: Scroll to top with debugging
      * @private
      */
     scrollToTopInstant() {
-        if (!this.elements.contentDisplay) return;
+        console.log('🔄 scrollToTopInstant called');
         
-        // Temporarily disable any smooth scrolling
-        const originalBehavior = this.elements.contentDisplay.style.scrollBehavior;
+        if (!this.elements.contentDisplay) {
+            console.error('❌ contentDisplay element not found');
+            return;
+        }
+        
+        console.log('📍 Before scroll - scrollTop:', this.elements.contentDisplay.scrollTop);
+        
+        // Force immediate scroll reset - multiple methods for reliability
         this.elements.contentDisplay.style.scrollBehavior = 'auto';
-        
-        // Force immediate scroll reset
         this.elements.contentDisplay.scrollTop = 0;
+        this.elements.contentDisplay.scrollTo(0, 0);
         
-        // Restore scroll behavior after a brief delay
+        console.log('📍 After scroll - scrollTop:', this.elements.contentDisplay.scrollTop);
+        
+        // Update TOC highlighting after scroll reset
         setTimeout(() => {
-            this.elements.contentDisplay.style.scrollBehavior = originalBehavior;
-            // Update TOC highlighting after scroll reset
+            this.elements.contentDisplay.style.scrollBehavior = '';
             if (window.tocGenerator) {
+                console.log('🎯 Updating TOC highlighting');
                 tocGenerator.updateActiveFromScroll();
             }
-        }, 50);
+        }, 100);
     }
 
     /**
