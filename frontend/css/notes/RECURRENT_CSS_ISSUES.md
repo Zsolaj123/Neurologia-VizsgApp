@@ -196,3 +196,4 @@ config: {
 - 2024-09-17: Fixed sticky positioning issues
 - 2024-09-17: Created sidebar-fixes.css for consolidated fixes
 - 2025-01-18: Fixed animation conflicts and TOC highlighting
+- 2025-09-24: Major UI cleanup - removed excessive animations, fixed sidebar visibility, improved TOC highlighting

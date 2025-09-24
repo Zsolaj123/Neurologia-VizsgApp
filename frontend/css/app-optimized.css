@@ -61,11 +61,10 @@
     --z-section-tabs: 80;
     --z-content: 1;
     
-    /* Optimized Animation Timings */
+    /* Simplified Animation Timings */
     --transition-quick: 0.2s ease-out;
     --transition-normal: 0.3s ease-out;
-    --transition-sidebar: 1.5s cubic-bezier(0.6, 0.04, 0.3, 0.96);
-    --transition-laser: 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-sidebar: 0.3s ease-out;
 }
 
 /* ============================================
@@ -392,6 +391,7 @@ ul, ol {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    max-height: calc(100vh - var(--content-top) - 60px);
     /* Optimized fade transition */
     transition: opacity var(--transition-normal);
     transition-delay: 0.1s;
@@ -429,88 +429,9 @@ ul, ol {
    6. OPTIMIZED LASER EFFECT
    ============================================ */
 
-/* Laser Effect - Performance Optimized */
+/* Simplified sidebar animations - no laser effects */
 .shine-effect {
-    position: absolute;
-    top: -100%;
-    width: 4px;
-    height: 100%;
-    z-index: var(--z-laser);
-    opacity: 0;
-    pointer-events: none;
-    /* Simple gradient for better performance */
-    background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(38, 237, 101, 0.5) 35%,
-        var(--laser-green) 50%,
-        rgba(38, 237, 101, 0.5) 65%,
-        transparent 100%
-    );
-    /* Use transform instead of background-position */
-    transform: translateY(0);
-    transition: transform var(--transition-laser), opacity var(--transition-quick);
-    will-change: transform, opacity;
-}
-
-/* Position laser on edges */
-#left-sidebar .shine-effect { 
-    right: 0;
-}
-
-#right-sidebar .shine-effect {
-    left: 0;
-}
-
-/* Active animation - triggered by parent .animating class */
-.sidebar-container.animating .shine-effect {
-    opacity: 1;
-    /* GPU-accelerated animation */
-    animation: laser-sweep var(--transition-laser) ease-out forwards;
-}
-
-/* Optimized laser animation */
-@keyframes laser-sweep {
-    0% {
-        transform: translateY(0);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(200%);
-        opacity: 0;
-    }
-}
-
-/* Edge glow effect */
-.sidebar-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--matrix-green);
-    opacity: 0;
-    transition: opacity var(--transition-normal);
-}
-
-#left-sidebar::before {
-    right: 0;
-}
-
-#right-sidebar::before {
-    left: 0;
-}
-
-/* Show edge glow during animation */
-.sidebar-container.animating::before {
-    opacity: 0.5;
-    box-shadow: 0 0 10px var(--matrix-green);
+    display: none;
 }
 
 /* ============================================
@@ -709,9 +630,14 @@ ul, ol {
 }
 
 .toc-item.active {
-    background: rgba(0, 255, 65, 0.15);
+    background: rgba(0, 255, 65, 0.2);
     border-left: 4px solid var(--primary-green);
-    /* Remove margin-left to prevent layout shift */
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+.toc-item.active .toc-text {
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
 }
 
 /* TOC Link styling */
@@ -793,9 +719,10 @@ ul, ol {
 /* TOC Content */
 .toc-content {
     overflow-y: auto;
-    max-height: calc(100vh - var(--header-height) - var(--section-tabs-height) - 120px);
+    max-height: calc(100vh - var(--content-top) - 80px);
     padding: var(--spacing-sm);
 }
+
 
 /* Empty state */
 .toc-empty {
