@@ -464,10 +464,12 @@ ul, ol {
     grid-area: content;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Prevent content from pushing sidebar out of view */
+    overflow: visible; /* Allow sticky positioning to work */
     background: var(--bg-primary);
     min-height: calc(100vh - var(--header-height));
     max-width: 100%; /* Ensure content area respects grid constraints */
+    min-width: 0; /* Allow grid item to shrink */
+    width: 100%; /* Take only allocated grid space */
 }
 
 #section-tabs {
@@ -508,10 +510,13 @@ ul, ol {
 #content-display {
     flex: 1;
     overflow-y: auto;
-    overflow-x: auto; /* Allow horizontal scrolling for wide content */
+    overflow-x: hidden; /* Prevent horizontal expansion that pushes sidebar */
     padding: var(--spacing-xl);
     max-width: 100%; /* Ensure content doesn't expand beyond container */
     box-sizing: border-box; /* Include padding in width calculation */
+    width: 100%; /* Force content to use only allocated space */
+    min-width: 0; /* Allow flex item to shrink below content size */
+    contain: layout; /* Contain layout to prevent expansion */
 }
 
 /* ============================================
@@ -916,6 +921,31 @@ ul, ol {
 
 /* Prevent any element from being wider than container */
 .topic-content * {
-    max-width: 100%;
+    max-width: 100% !important;
     box-sizing: border-box;
+}
+
+/* Additional specific constraints for problematic elements */
+.topic-content div,
+.topic-content p,
+.topic-content ul,
+.topic-content ol,
+.topic-content li,
+.topic-content span,
+.topic-content h1,
+.topic-content h2,
+.topic-content h3,
+.topic-content h4,
+.topic-content h5,
+.topic-content h6 {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+/* Force line breaks for long words */
+.topic-content {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
 }
