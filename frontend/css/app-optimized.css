@@ -327,16 +327,21 @@ ul, ol {
     height: calc(100vh - var(--content-top));
 }
 
-/* Sticky sidebar containers - FIXED for topic visibility */
+/* BALANCED: Main topic list with sticky positioning and scrolling */
 .topic-list {
+    position: sticky;
+    position: -webkit-sticky;
+    top: var(--content-top);
+    height: calc(100vh - var(--content-top)); /* Restore height for scrolling */
+    max-height: calc(100vh - var(--content-top));
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    /* No height restrictions - let content flow naturally */
-    overflow: visible;
+    z-index: var(--z-sidebar-content);
     margin: 0;
     width: 100%;
+    overflow: hidden; /* Container doesn't scroll, content inside does */
 }
 
 .toc-sidebar {
@@ -393,13 +398,13 @@ ul, ol {
     text-shadow: 0 0 20px var(--primary-green);
 }
 
-/* Sidebar Content */
-/* FIXED: Sidebar content with proper scrolling */
+/* BALANCED: Sidebar content with proper scrolling */
 .sidebar-content {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto; /* Enable vertical scrolling */
     overflow-x: hidden;
-    /* Remove conflicting max-height - let flex: 1 handle height */
+    min-height: 0; /* Allow flex to work properly */
+    height: 0; /* Force flex child to take available space */
     /* Optimized fade transition */
     transition: opacity var(--transition-normal);
     transition-delay: 0.1s;
@@ -510,9 +515,14 @@ ul, ol {
    8. TOPIC MENU & TOC
    ============================================ */
 
-/* Topic Menu */
+/* Topic Menu - Allow full expansion */
 .topic-menu {
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    /* Ensure no height restrictions */
+    min-height: 0;
+    flex: 1;
 }
 
 .topic-category {
@@ -553,21 +563,21 @@ ul, ol {
 }
 
 .category-content {
-    max-height: 2000px;
-    overflow: hidden;
+    /* Natural height for expanded state - no artificial limits */
+    overflow: visible; /* Allow all content to be visible */
     transition: max-height var(--transition-normal) ease-out;
+}
+
+/* Only apply height restriction when collapsed */
+.topic-category.collapsed .category-content {
+    max-height: 0 !important;
+    overflow: hidden !important;
 }
 
 /* Topic Range Styles */
 .topic-range {
     background: var(--bg-secondary);
     margin: 0;
-}
-
-.topic-range.collapsed .topic-list {
-    max-height: 0 !important;
-    padding: 0;
-    overflow: hidden;
 }
 
 .range-header {
@@ -598,12 +608,22 @@ ul, ol {
     opacity: 0.7;
 }
 
-.topic-range .topic-list {
-    /* FIXED: Allow natural height for topics to be visible */
-    max-height: 2000px; /* Large enough for any topic list */
-    overflow: visible;
-    transition: max-height var(--transition-normal) ease-out;
+/* FINAL: Range topics with natural height and proper collapse */
+.range-topics {
+    /* No height restrictions - let content determine height */
+    overflow: visible; /* Topics should be fully visible */
+    transition: max-height var(--transition-normal) ease-out, padding var(--transition-normal) ease-out;
     padding: var(--spacing-xs) 0;
+    background: var(--bg-secondary);
+}
+
+/* Collapsed state for range topics */
+.topic-range.collapsed .range-topics {
+    max-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    opacity: 0;
+    transition: max-height var(--transition-normal) ease-out, padding var(--transition-normal) ease-out, opacity var(--transition-quick) ease-out;
 }
 
 .topic-item {
@@ -617,6 +637,8 @@ ul, ol {
     cursor: pointer;
     transition: var(--transition-quick);
     color: var(--text-secondary);
+    flex-shrink: 0; /* Prevent topics from shrinking */
+    min-height: 40px; /* Ensure consistent topic height */
 }
 
 .topic-item:hover {

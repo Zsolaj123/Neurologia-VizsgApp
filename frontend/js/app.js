@@ -14,7 +14,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Make uiManager globally accessible for onclick handlers
         window.uiManager = uiManager;
         
+        // Debug: Verify uiManager methods are accessible
         console.log('✓ UI Manager inicializálva and exposed globally');
+        console.log('🔧 Available uiManager methods:', {
+            toggleCategory: typeof uiManager.toggleCategory,
+            toggleRange: typeof uiManager.toggleRange,
+            toggleAllTopics: typeof uiManager.toggleAllTopics
+        });
         
         // Show welcome message initially
         showWelcomeMessage();

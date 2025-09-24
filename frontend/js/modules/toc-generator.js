@@ -27,18 +27,26 @@ class TocGenerator {
     }
     
     /**
-     * Generate TOC from topic
+     * Generate TOC from topic - ENHANCED with debugging
      * @param {Topic} topic - The topic object
      */
     generateTOC(topic) {
+        console.log('🏗️ generateTOC called with topic:', topic?.id);
+        
         if (!topic || !topic.tableOfContents) {
+            console.log('❌ No topic or TOC data, clearing TOC');
             this.clearTOC();
             return;
         }
         
+        console.log('📋 Generating TOC with items:', topic.tableOfContents.length);
+        
         this.currentTopic = topic;
         const tocHTML = this.buildTOCHTML(topic.tableOfContents);
+        console.log('🔨 Built TOC HTML:', tocHTML.substring(0, 300));
+        
         this.renderTOC(tocHTML);
+        console.log('✅ TOC rendered to container');
         
         // Emit event
         window.dispatchEvent(new CustomEvent('tocGenerated', {
@@ -175,6 +183,14 @@ class TocGenerator {
     setActiveItem(tocId) {
         console.log('🎯 setActiveItem called with:', tocId);
         
+        if (!this.tocContainer) {
+            console.error('❌ TOC Container not found!');
+            return;
+        }
+        
+        console.log('📦 TOC Container exists:', this.tocContainer);
+        console.log('📋 TOC Container HTML:', this.tocContainer.innerHTML.substring(0, 200));
+        
         // Remove previous active
         const previousActive = this.tocContainer.querySelector('.toc-item.active');
         console.log('📤 Previous active item:', previousActive);
@@ -200,6 +216,8 @@ class TocGenerator {
             // Debug: show all available TOC items
             const allTocItems = this.tocContainer.querySelectorAll('[data-toc-id]');
             console.log('🔍 Available TOC items:', Array.from(allTocItems).map(item => item.dataset.tocId));
+            const allElements = this.tocContainer.querySelectorAll('*');
+            console.log('🔍 All TOC elements:', allElements);
         }
     }
     

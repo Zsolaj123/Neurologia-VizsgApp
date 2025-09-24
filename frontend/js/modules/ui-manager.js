@@ -174,7 +174,7 @@ class UIManager {
                                 <span class="range-title">${range}. tételek</span>
                                 <span class="range-count">(${rangeTopics.length})</span>
                             </div>
-                            <div class="topic-list">`;
+                            <div class="range-topics">`;
                     
                     for (const topic of rangeTopics) {
                         // Don't add number prefix if title already starts with number
@@ -202,6 +202,11 @@ class UIManager {
         ` + html;
         
         this.elements.topicMenu.innerHTML = html;
+        
+        // Debug: Verify onClick handlers will work
+        console.log('🏗️ Topic menu populated with ranges');
+        console.log('🔧 window.uiManager available:', !!window.uiManager);
+        console.log('🔧 this.toggleRange method:', typeof this.toggleRange);
     }
     
     /**
@@ -251,20 +256,28 @@ class UIManager {
     }
     
     /**
-     * Toggle range collapse state
+     * Toggle range collapse state - ENHANCED
      * @param {string} range - The range (e.g., '1-20')
      */
-    toggleRange(range) {
+    toggleRange(range, event = null) {
+        console.log('🔄 toggleRange called for:', range);
+        
         const rangeEl = this.elements.topicMenu.querySelector(`[data-range="${range}"]`);
-        if (!rangeEl) return;
+        if (!rangeEl) {
+            console.error('❌ Range element not found for:', range);
+            return;
+        }
         
         const isCollapsed = rangeEl.classList.contains('collapsed');
+        console.log('📊 Current collapsed state:', isCollapsed);
+        
         rangeEl.classList.toggle('collapsed');
         
         // Update icon
         const icon = rangeEl.querySelector('.collapse-icon');
         if (icon) {
             icon.textContent = isCollapsed ? '▼' : '▶';
+            console.log('🔄 Updated icon to:', icon.textContent);
         }
         
         // Save state
@@ -272,8 +285,12 @@ class UIManager {
         states.ranges[range] = !isCollapsed;
         this.saveCollapsedStates(states);
         
-        // Stop event propagation
-        event.stopPropagation();
+        console.log('✅ Range toggle completed, new state:', !isCollapsed);
+        
+        // Stop event propagation if event exists
+        if (event) {
+            event.stopPropagation();
+        }
     }
     
     /**
@@ -458,6 +475,7 @@ class UIManager {
         this.updateSectionTabs(topic);
         
         // FIXED: Scroll to top with conflict prevention
+        console.log('🚀 About to call scrollToTopInstant from displayTopic');
         this.scrollToTopInstant();
     }
     
