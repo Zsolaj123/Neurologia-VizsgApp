@@ -139,7 +139,7 @@ class TocGenerator {
     }
     
     /**
-     * Navigate to section
+     * Navigate to section - ENHANCED for better scrolling
      * @private
      */
     navigateToSection(tocId) {
@@ -148,8 +148,19 @@ class TocGenerator {
         
         // Find element in content
         const targetElement = document.getElementById(tocId);
-        if (targetElement) {
+        const contentDisplay = document.getElementById('content-display');
+        
+        if (targetElement && contentDisplay) {
+            // Enable smooth scrolling for this navigation
+            contentDisplay.classList.add('smooth-scroll');
+            
+            // Scroll to the element
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Remove smooth scroll class after animation
+            setTimeout(() => {
+                contentDisplay.classList.remove('smooth-scroll');
+            }, 1000);
         }
         
         // Emit navigation event
@@ -299,22 +310,33 @@ class TocGenerator {
         const scrollHeight = contentArea.scrollHeight;
         const clientHeight = contentArea.clientHeight;
         
-        // Check if we're at the bottom
-        if (scrollTop + clientHeight >= scrollHeight - 10) {
-            // Highlight the last header
+        // ENHANCED: Better detection algorithm
+        if (scrollTop <= 20) {
+            // At the very top - always highlight first header
+            activeId = headers[0].id;
+        } else if (scrollTop + clientHeight >= scrollHeight - 20) {
+            // At the bottom - highlight last header
             activeId = headers[headers.length - 1].id;
         } else {
-            // Find the header that's currently in view
-            for (const header of headers) {
+            // Find the best header in viewport with improved threshold
+            const viewportThreshold = 80; // Increased threshold for better detection
+            
+            // Find the last header above the viewport threshold
+            for (let i = headers.length - 1; i >= 0; i--) {
+                const header = headers[i];
                 const rect = header.getBoundingClientRect();
                 const contentRect = contentArea.getBoundingClientRect();
                 const relativeTop = rect.top - contentRect.top;
                 
-                if (relativeTop <= 50) { // 50px offset from top of content area
+                if (relativeTop <= viewportThreshold) {
                     activeId = header.id;
-                } else if (relativeTop > 50) {
                     break;
                 }
+            }
+            
+            // Fallback to first header if nothing found
+            if (!activeId) {
+                activeId = headers[0].id;
             }
         }
         

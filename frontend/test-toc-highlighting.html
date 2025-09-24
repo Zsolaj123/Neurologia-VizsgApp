@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOC Highlighting Debug Test</title>
+    
+    <style>
+        /* Basic layout for testing */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            display: flex;
+        }
+        
+        #app-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        #content-display {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        
+        #right-sidebar {
+            width: 300px;
+            background: #2a2a2a;
+            border-left: 1px solid #444;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .toc-content {
+            font-size: 14px;
+        }
+        
+        .toc-item {
+            padding: 8px 12px;
+            margin: 2px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .toc-item:hover {
+            background: #3a3a3a;
+        }
+        
+        .toc-item.active {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .toc-link {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .toc-bullet {
+            margin-right: 8px;
+            color: #666;
+        }
+        
+        .topic-content {
+            line-height: 1.6;
+            max-width: 800px;
+        }
+        
+        .topic-content h1 {
+            color: #00ff88;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .topic-content h2 {
+            color: #66ccff;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .topic-content h3 {
+            color: #ffcc66;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+        
+        .topic-content p {
+            margin-bottom: 15px;
+        }
+        
+        /* Make sure there's enough content to scroll */
+        .spacer {
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div id="content-display" class="content-display">
+            <div class="topic-content">
+                <h1 id="intro">Bevezetés</h1>
+                <p>Ez egy teszt oldal a TOC highlighting funkcionalitás tesztelésére.</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <div class="spacer"></div>
+                
+                <h2 id="anatomy">Anatómia</h2>
+                <p>Az idegrendszer anatómiája komplex és sokrétű téma.</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <div class="spacer"></div>
+                
+                <h3 id="skull">Koponya</h3>
+                <p>A koponya szerkezete és funkciói.</p>
+                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                <div class="spacer"></div>
+                
+                <h3 id="spine">Gerinc</h3>
+                <p>A gerincvelő és környező struktúrák.</p>
+                <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <div class="spacer"></div>
+                
+                <h2 id="function">Működés</h2>
+                <p>Az idegrendszer működésének alapelvei.</p>
+                <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+                <div class="spacer"></div>
+                
+                <h1 id="summary">Összefoglalás</h1>
+                <p>A tanultak összefoglalása és következtetések.</p>
+                <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+                <div class="spacer"></div>
+            </div>
+        </div>
+        
+        <aside id="right-sidebar" class="toc-sidebar">
+            <h3>Tartalomjegyzék</h3>
+            <div id="toc-content" class="toc-content">
+                <!-- TOC will be generated here -->
+            </div>
+        </aside>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/models/topic.js"></script>
+    <script src="js/models/app-state.js"></script>
+    <script src="js/modules/markdown-parser.js"></script>
+    <script src="js/modules/toc-generator.js"></script>
+    <script src="js/modules/ui-manager.js"></script>
+    
+    <script>
+        // Test initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing TOC test...');
+            
+            // Create a test topic with TOC structure
+            const testTopic = {
+                id: 999,
+                title: 'TOC Test Topic',
+                tableOfContents: [
+                    { id: 'intro', text: 'Bevezetés', level: 1, children: [] },
+                    { 
+                        id: 'anatomy', 
+                        text: 'Anatómia', 
+                        level: 2, 
+                        children: [
+                            { id: 'skull', text: 'Koponya', level: 3, children: [] },
+                            { id: 'spine', text: 'Gerinc', level: 3, children: [] }
+                        ]
+                    },
+                    { id: 'function', text: 'Működés', level: 2, children: [] },
+                    { id: 'summary', text: 'Összefoglalás', level: 1, children: [] }
+                ]
+            };
+            
+            // Initialize TOC Generator
+            console.log('Initializing TOC generator...');
+            if (typeof TOCGenerator !== 'undefined') {
+                window.tocGenerator = new TOCGenerator('toc-content');
+                tocGenerator.generateTOC(testTopic);
+                console.log('TOC generated successfully');
+            } else {
+                console.error('TOCGenerator class not found');
+            }
+            
+            // Initialize UI Manager for scroll handling
+            if (typeof UIManager !== 'undefined') {
+                console.log('Initializing UI manager...');
+                window.uiManager = new UIManager();
+                uiManager.initialize();
+                console.log('UI Manager initialized');
+            } else {
+                console.error('UIManager class not found');
+            }
+            
+            // Log scroll events manually for debugging
+            const contentDisplay = document.getElementById('content-display');
+            if (contentDisplay) {
+                contentDisplay.addEventListener('scroll', function() {
+                    console.log('Manual scroll event detected, scroll position:', contentDisplay.scrollTop);
+                });
+            }
+        });
+        
+        // Test function to manually trigger scroll detection
+        function testScrollDetection() {
+            if (window.tocGenerator) {
+                console.log('=== Manual scroll detection test ===');
+                tocGenerator.updateActiveFromScroll();
+            }
+        }
+        
+        // Add test button
+        setTimeout(() => {
+            const button = document.createElement('button');
+            button.textContent = 'Test Scroll Detection';
+            button.style.position = 'fixed';
+            button.style.top = '10px';
+            button.style.right = '10px';
+            button.style.zIndex = '9999';
+            button.onclick = testScrollDetection;
+            document.body.appendChild(button);
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+.matrix-terminal {
+  z-index: 10000;
+  width: 100%;
+  height: 100%;
+  animation: .5s ease-out terminalBoot;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.matrix-terminal.active {
+  display: block;
+}
+
+.matrix-terminal.closing {
+  animation: .3s ease-in forwards terminalShutdown;
+}
+
+@keyframes terminalBoot {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(.8)translateY(50px);
+  }
+
+  50% {
+    filter: blur(5px);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur();
+    transform: scale(1)translateY(0);
+  }
+}
+
+@keyframes terminalShutdown {
+  0% {
+    opacity: 1;
+    filter: brightness();
+    transform: scale(1)translateY(0);
+  }
+
+  50% {
+    filter: brightness(2);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(0);
+    transform: scale(.9)translateY(-20px);
+  }
+}
+
+.terminal-frame {
+  background: #000;
+  border: 2px solid #0f0;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 1200px;
+  height: 90%;
+  max-height: 800px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px #0f0, 0 0 40px #00ff0080, 0 0 80px #00ff0040, inset 0 0 20px #00ff0020;
+}
+
+.terminal-header {
+  background: linear-gradient(#0f0 0%, #080 100%);
+  border-bottom: 2px solid #0f0;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  padding: 0 15px;
+  display: flex;
+}
+
+.terminal-title {
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.terminal-controls {
+  gap: 10px;
+  display: flex;
+}
+
+.terminal-btn {
+  color: #0f0;
+  cursor: pointer;
+  background: #000;
+  border: 1px solid #0f0;
+  border-radius: 2px;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  transition: all .2s;
+  display: flex;
+}
+
+.terminal-btn:hover {
+  color: #000;
+  background: #0f0;
+}
+
+.terminal-body {
+  height: calc(100% - 40px);
+  position: relative;
+  overflow: hidden;
+  background: #000 !important;
+}
+
+.terminal-scanlines {
+  pointer-events: none;
+  z-index: 20;
+  background: repeating-linear-gradient(0deg, #0000, #0000 2px, #00ff0008 2px 4px);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.terminal-glow {
+  pointer-events: none;
+  z-index: 15;
+  background: radial-gradient(circle, #00ff001a 0%, #0000 50%);
+  width: 200%;
+  height: 200%;
+  position: absolute;
+  top: -50%;
+  left: -50%;
+}
+
+.terminal-output {
+  color: #0f0;
+  z-index: 25;
+  opacity: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  font-family: JetBrains Mono, Courier New, monospace;
+  font-size: 14px;
+  transition: opacity .5s;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+}
+
+.terminal-output.visible {
+  opacity: 1;
+}
+
+.terminal-output.fade-out {
+  opacity: 0;
+}
+
+.terminal-line {
+  text-shadow: 0 0 5px #0f0;
+  margin-bottom: 10px;
+  animation: .5s ease-out lineGlow;
+}
+
+@keyframes lineGlow {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  50% {
+    text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.terminal-line.command {
+  color: #0f0;
+}
+
+.terminal-line.success {
+  color: #0ff;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.cursor {
+  animation: 1s infinite cursorBlink;
+}
+
+@keyframes cursorBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.terminal-content {
+  z-index: 10;
+  background: #000;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.quiz-iframe {
+  opacity: 0;
+  z-index: 10;
+  background: #fff;
+  border: none;
+  width: 100%;
+  height: 100%;
+  transition: opacity .5s;
+  position: relative;
+}
+
+.quiz-iframe.hidden {
+  display: none;
+}
+
+.quiz-iframe.visible {
+  opacity: 1;
+  display: block;
+}
+
+.terminal-output::-webkit-scrollbar {
+  width: 10px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+  background: #010;
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+  background: #0f0;
+  border-radius: 5px;
+}
+
+.terminal-output::-webkit-scrollbar-thumb:hover {
+  background: #0c0;
+}
+
+.terminal-body:before {
+  content: "";
+  pointer-events: none;
+  z-index: 30;
+  background: repeating-linear-gradient(90deg, #0000, #0000 2px, #00ff0008 2px 4px);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.terminal-body:after {
+  content: "";
+  pointer-events: none;
+  z-index: 35;
+  background: #00ff0005;
+  width: 100%;
+  height: 100%;
+  animation: .15s infinite flicker;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: .97;
+  }
+
+  5% {
+    opacity: .98;
+  }
+
+  10% {
+    opacity: .95;
+  }
+
+  15% {
+    opacity: .99;
+  }
+
+  20% {
+    opacity: .96;
+  }
+
+  25% {
+    opacity: .98;
+  }
+
+  30% {
+    opacity: .97;
+  }
+
+  35% {
+    opacity: .99;
+  }
+
+  40% {
+    opacity: .96;
+  }
+
+  45% {
+    opacity: .98;
+  }
+
+  50% {
+    opacity: .97;
+  }
+
+  60% {
+    opacity: .99;
+  }
+
+  70% {
+    opacity: .96;
+  }
+
+  80% {
+    opacity: .98;
+  }
+
+  90% {
+    opacity: .97;
+  }
+
+  100% {
+    opacity: .98;
+  }
+}
+
+@media (width <= 768px) {
+  .terminal-frame {
+    border-radius: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+  }
+
+  .terminal-output {
+    padding: 15px;
+    font-size: 12px;
+  }
+}
+/*# sourceMappingURL=quiz.4e95e30c.css.map */

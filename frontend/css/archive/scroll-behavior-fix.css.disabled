@@ -1,0 +1,95 @@
+/**
+ * SCROLL BEHAVIOR FIX
+ * 
+ * This file fixes the persistent scroll-to-top and TOC highlighting issues
+ * by properly handling CSS scroll-behavior conflicts with programmatic scroll resets.
+ * 
+ * PROBLEM: The main CSS has `scroll-behavior: smooth` which causes:
+ * 1. Programmatic `scrollTop = 0` to animate instead of being instant
+ * 2. TOC highlighting to be delayed/incorrect during scroll resets
+ * 
+ * SOLUTION: Allow JavaScript to override scroll behavior when needed
+ */
+
+/* 
+ * Default smooth scrolling for user interactions 
+ * This preserves the nice UX for manual scrolling and TOC clicks
+ */
+html {
+    scroll-behavior: smooth;
+}
+
+#content-display {
+    scroll-behavior: inherit;
+}
+
+/* 
+ * Override for programmatic scroll resets
+ * JavaScript can add these classes to disable smooth scrolling temporarily
+ */
+.instant-scroll,
+.instant-scroll * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+}
+
+/* 
+ * Ensure smooth scrolling for TOC navigation clicks
+ */
+.smooth-scroll,
+.smooth-scroll * {
+    scroll-behavior: smooth !important;
+}
+
+/*
+ * Fix any potential layout issues that could affect scrolling
+ */
+#content-display {
+    /* Ensure proper scrollable container */
+    overflow-y: auto;
+    overflow-x: hidden;
+    
+    /* Prevent any layout shifts during scroll operations */
+    position: relative;
+    
+    /* Ensure content can scroll properly */
+    height: 100%;
+    max-height: 100%;
+}
+
+/*
+ * Ensure TOC highlighting is visible during scroll operations
+ */
+.toc-item.active {
+    /* Increased visibility for active items */
+    background-color: rgba(0, 255, 65, 0.2) !important;
+    border-left: 3px solid var(--primary-green) !important;
+    
+    /* Ensure active state is immediately visible */
+    transition: all 0.2s ease !important;
+}
+
+.toc-item.active .toc-link {
+    color: var(--primary-green) !important;
+    font-weight: 600 !important;
+}
+
+/*
+ * Performance optimization for scroll events
+ */
+#content-display {
+    /* Enable hardware acceleration for smoother scrolling */
+    transform: translateZ(0);
+    will-change: scroll-position;
+}
+
+/*
+ * Debug mode styling (can be enabled via JavaScript)
+ */
+.scroll-debug #content-display {
+    border: 2px solid #ff0000 !important;
+}
+
+.scroll-debug .toc-item.active {
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5) !important;
+}

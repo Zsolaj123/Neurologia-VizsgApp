@@ -14,7 +14,6 @@
     --accent-green: #00ff00;
     --dark-green: #00cc33;
     --matrix-green: #0d832d;
-    --laser-green: #26ed65;
     
     /* Backgrounds */
     --bg-primary: #0a0a0a;
@@ -55,7 +54,6 @@
     
     /* Z-index Hierarchy */
     --z-header: 1000;
-    --z-laser: 150;
     --z-sidebar-header: 110;
     --z-sidebar-content: 100;
     --z-section-tabs: 80;
@@ -79,7 +77,7 @@ html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
+    /* Removed scroll-behavior: smooth to prevent interference with programmatic scrolling */
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
@@ -331,13 +329,15 @@ ul, ol {
     height: calc(100vh - var(--content-top));
 }
 
-/* Sticky inner content */
+/* Sticky inner content - FIXED for proper scrolling */
 .topic-list,
 .toc-sidebar {
     position: sticky;
     position: -webkit-sticky;
     top: var(--content-top);
-    height: calc(100vh - var(--content-top));
+    /* Remove fixed height to allow sidebar-content to control scrolling */
+    min-height: calc(100vh - var(--content-top));
+    max-height: calc(100vh - var(--content-top));
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     display: flex;
@@ -387,11 +387,12 @@ ul, ol {
 }
 
 /* Sidebar Content */
+/* FIXED: Sidebar content with proper scrolling */
 .sidebar-content {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: calc(100vh - var(--content-top) - 60px);
+    /* Remove conflicting max-height - let flex: 1 handle height */
     /* Optimized fade transition */
     transition: opacity var(--transition-normal);
     transition-delay: 0.1s;
@@ -426,12 +427,21 @@ ul, ol {
 }
 
 /* ============================================
-   6. OPTIMIZED LASER EFFECT
+   6. REMOVED ANIMATIONS (CLEANUP)
    ============================================ */
 
-/* Simplified sidebar animations - no laser effects */
+/* Completely removed laser animations and shine effects */
 .shine-effect {
     display: none;
+}
+
+/* Smooth scrolling for TOC navigation only */
+#content-display {
+    scroll-behavior: auto; /* Default to instant for programmatic scrolling */
+}
+
+#content-display.smooth-scroll {
+    scroll-behavior: smooth; /* Enable smooth scrolling for TOC navigation */
 }
 
 /* ============================================

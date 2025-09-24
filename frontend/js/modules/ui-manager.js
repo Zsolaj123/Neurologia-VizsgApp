@@ -457,10 +457,34 @@ class UIManager {
         // Update section tabs
         this.updateSectionTabs(topic);
         
-        // Scroll to top
-        this.elements.contentDisplay.scrollTop = 0;
+        // FIXED: Scroll to top with conflict prevention
+        this.scrollToTopInstant();
     }
     
+    /**
+     * FIXED: Scroll to top instantly (prevents smooth scroll conflicts)
+     * @private
+     */
+    scrollToTopInstant() {
+        if (!this.elements.contentDisplay) return;
+        
+        // Temporarily disable any smooth scrolling
+        const originalBehavior = this.elements.contentDisplay.style.scrollBehavior;
+        this.elements.contentDisplay.style.scrollBehavior = 'auto';
+        
+        // Force immediate scroll reset
+        this.elements.contentDisplay.scrollTop = 0;
+        
+        // Restore scroll behavior after a brief delay
+        setTimeout(() => {
+            this.elements.contentDisplay.style.scrollBehavior = originalBehavior;
+            // Update TOC highlighting after scroll reset
+            if (window.tocGenerator) {
+                tocGenerator.updateActiveFromScroll();
+            }
+        }, 50);
+    }
+
     /**
      * Wrap content with proper structure
      * @private

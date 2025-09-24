@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll & TOC Fixes Test - Neuratos</title>
+    
+    <!-- Same CSS as main app -->
+    <link rel="stylesheet" href="css/app-optimized.css">
+    <link rel="stylesheet" href="css/scroll-behavior-fix.css">
+    
+    <style>
+        /* Test-specific styles */
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--primary-green);
+        }
+        
+        .test-btn {
+            display: block;
+            margin: 5px 0;
+            padding: 8px 12px;
+            background: var(--primary-green);
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .test-btn:hover {
+            background: rgba(0, 255, 65, 0.8);
+        }
+        
+        .test-log {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--primary-green);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 10px;
+            overflow-y: auto;
+            border: 1px solid var(--primary-green);
+            border-radius: 8px;
+            z-index: 9999;
+        }
+        
+        .test-content {
+            padding: 40px;
+        }
+        
+        .test-section {
+            margin: 50px 0;
+            padding: 20px;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 8px;
+        }
+        
+        .test-section h1,
+        .test-section h2,
+        .test-section h3 {
+            color: var(--primary-green);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Test Controls -->
+    <div class="test-controls">
+        <h4 style="color: var(--primary-green); margin: 0 0 10px 0;">Scroll & TOC Test</h4>
+        <button class="test-btn" onclick="testScrollToTop()">Test Scroll to Top</button>
+        <button class="test-btn" onclick="testTOCHighlighting()">Test TOC Highlighting</button>
+        <button class="test-btn" onclick="scrollToMiddle()">Scroll to Middle</button>
+        <button class="test-btn" onclick="scrollToBottom()">Scroll to Bottom</button>
+        <button class="test-btn" onclick="clearLog()">Clear Log</button>
+        <button class="test-btn" onclick="toggleDebugMode()">Toggle Debug</button>
+    </div>
+    
+    <!-- Main App Structure (Simplified) -->
+    <div id="app-container">
+        <!-- Left Sidebar - TOC -->
+        <aside id="left-sidebar" class="sidebar-container" style="width: 250px; position: fixed; left: 0; top: 0; bottom: 0; background: var(--bg-secondary); border-right: 1px solid var(--border-color); z-index: 100;">
+            <div class="toc-sidebar" style="height: 100%; display: flex; flex-direction: column;">
+                <div class="sidebar-header" style="padding: 20px; border-bottom: 1px solid var(--border-color);">
+                    <h3 class="sidebar-title" style="color: var(--primary-green); margin: 0;">Test TOC</h3>
+                </div>
+                <div class="sidebar-content" style="flex: 1; overflow-y: auto; padding: 10px;">
+                    <div id="toc-container" class="toc-container">
+                        <!-- TOC will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="content-area" style="margin-left: 250px; height: 100vh; display: flex; flex-direction: column;">
+            <!-- Content Display -->
+            <div id="content-display" class="content-display" style="flex: 1; overflow-y: auto; padding: 40px;">
+                <div class="topic-content">
+                    <h1 id="section-1">Section 1: Introduction</h1>
+                    <div class="test-section">
+                        <p>This is the first section of our test document. We're testing the scroll-to-top functionality and TOC highlighting.</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    </div>
+
+                    <h2 id="section-1-1">Section 1.1: Subsection</h2>
+                    <div class="test-section">
+                        <p>This is a subsection within the first main section.</p>
+                        <p>More content here to make the page scrollable and test the TOC highlighting behavior.</p>
+                    </div>
+
+                    <h1 id="section-2">Section 2: Main Content</h1>
+                    <div class="test-section">
+                        <p>This is the second major section. The TOC should highlight this when we scroll here.</p>
+                        <p>We have multiple paragraphs here to create enough content for proper scrolling tests.</p>
+                        <p>Each section should be properly highlighted in the TOC as the user scrolls through the document.</p>
+                        
+                        <h3 id="section-2-1">Section 2.1: Deep Subsection</h3>
+                        <p>This is a deeper level subsection for testing hierarchical TOC highlighting.</p>
+                        <p>More content to ensure proper spacing and scrolling behavior.</p>
+                    </div>
+
+                    <h1 id="section-3">Section 3: Advanced Features</h1>
+                    <div class="test-section">
+                        <p>This section contains advanced features and testing scenarios.</p>
+                        <p>We test various edge cases here including rapid scrolling, programmatic scroll resets, and TOC navigation.</p>
+                        <p>The TOC highlighting should be accurate and responsive.</p>
+                        
+                        <h2 id="section-3-1">Section 3.1: Performance Tests</h2>
+                        <p>Testing performance of scroll listeners and TOC updates.</p>
+                        
+                        <h2 id="section-3-2">Section 3.2: Edge Cases</h2>
+                        <p>Testing edge cases like very fast scrolling and rapid section changes.</p>
+                    </div>
+
+                    <h1 id="section-4">Section 4: Final Section</h1>
+                    <div class="test-section">
+                        <p>This is the final section of our test document.</p>
+                        <p>When scrolled to the bottom, this section should be highlighted in the TOC.</p>
+                        <p>The scroll-to-top functionality should work instantly without smooth animation interference.</p>
+                        
+                        <div style="height: 500px; background: linear-gradient(45deg, rgba(0, 255, 65, 0.1), rgba(0, 255, 65, 0.05)); display: flex; align-items: center; justify-content: center; border: 1px dashed var(--primary-green); margin: 20px 0;">
+                            <p style="color: var(--primary-green); font-size: 18px;">Bottom spacer content</p>
+                        </div>
+                        
+                        <p><strong>End of document.</strong> This should be the last content visible.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Test Log -->
+    <div id="test-log" class="test-log">
+        <div id="log-content">Ready for testing...\n</div>
+    </div>
+
+    <!-- Load necessary scripts -->
+    <script src="js/models/topic.js"></script>
+    <script src="js/models/app-state.js"></script>
+    <script src="js/models/errors.js"></script>
+    <script src="js/modules/toc-generator.js"></script>
+    <script src="js/modules/ui-manager.js"></script>
+
+    <script>
+        // Test functionality
+        let debugMode = false;
+        
+        function log(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `[${timestamp}] ${message}\n`;
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log-content').innerHTML = 'Log cleared...\n';
+        }
+
+        function toggleDebugMode() {
+            debugMode = !debugMode;
+            document.body.classList.toggle('scroll-debug', debugMode);
+            log(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`);
+        }
+
+        function testScrollToTop() {
+            log('Testing scroll to top...');
+            
+            const contentDisplay = document.getElementById('content-display');
+            const initialScroll = contentDisplay.scrollTop;
+            
+            log(`Initial scroll position: ${initialScroll}`);
+            
+            // Use our fixed scroll-to-top method
+            if (window.uiManager && window.uiManager.scrollToTopInstant) {
+                window.uiManager.scrollToTopInstant();
+                
+                setTimeout(() => {
+                    const finalScroll = contentDisplay.scrollTop;
+                    log(`Final scroll position: ${finalScroll}`);
+                    log(finalScroll === 0 ? '✅ Scroll to top SUCCESS' : '❌ Scroll to top FAILED');
+                }, 200);
+            } else {
+                log('❌ scrollToTopInstant method not available');
+            }
+        }
+
+        function testTOCHighlighting() {
+            log('Testing TOC highlighting...');
+            
+            if (window.tocGenerator && window.tocGenerator.updateActiveFromScroll) {
+                window.tocGenerator.updateActiveFromScroll();
+                
+                setTimeout(() => {
+                    const activeItem = document.querySelector('.toc-item.active');
+                    if (activeItem) {
+                        const activeId = activeItem.getAttribute('data-toc-id');
+                        log(`✅ TOC highlighting active: ${activeId}`);
+                    } else {
+                        log('❌ No active TOC item found');
+                    }
+                }, 100);
+            } else {
+                log('❌ TOC generator not available');
+            }
+        }
+
+        function scrollToMiddle() {
+            log('Scrolling to middle...');
+            const contentDisplay = document.getElementById('content-display');
+            const middlePosition = contentDisplay.scrollHeight / 2;
+            contentDisplay.scrollTop = middlePosition;
+            log(`Scrolled to position: ${middlePosition}`);
+        }
+
+        function scrollToBottom() {
+            log('Scrolling to bottom...');
+            const contentDisplay = document.getElementById('content-display');
+            const bottomPosition = contentDisplay.scrollHeight - contentDisplay.clientHeight;
+            contentDisplay.scrollTop = bottomPosition;
+            log(`Scrolled to position: ${bottomPosition}`);
+        }
+
+        // Initialize test environment
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Initializing test environment...');
+            
+            try {
+                // Create a mock topic for TOC generation
+                const mockTopic = {
+                    id: 999,
+                    title: 'Test Topic',
+                    tableOfContents: [
+                        { id: 'section-1', text: 'Section 1: Introduction', level: 1, children: [
+                            { id: 'section-1-1', text: 'Section 1.1: Subsection', level: 2, children: [] }
+                        ]},
+                        { id: 'section-2', text: 'Section 2: Main Content', level: 1, children: [
+                            { id: 'section-2-1', text: 'Section 2.1: Deep Subsection', level: 3, children: [] }
+                        ]},
+                        { id: 'section-3', text: 'Section 3: Advanced Features', level: 1, children: [
+                            { id: 'section-3-1', text: 'Section 3.1: Performance Tests', level: 2, children: [] },
+                            { id: 'section-3-2', text: 'Section 3.2: Edge Cases', level: 2, children: [] }
+                        ]},
+                        { id: 'section-4', text: 'Section 4: Final Section', level: 1, children: [] }
+                    ]
+                };
+                
+                // Initialize TOC generator
+                if (window.tocGenerator) {
+                    window.tocGenerator.initialize();
+                    window.tocGenerator.generateTOC(mockTopic);
+                    log('✅ TOC generator initialized');
+                } else {
+                    log('❌ TOC generator not found');
+                }
+                
+                // Initialize UI manager partially (just the scroll handling part)
+                if (window.uiManager) {
+                    // Mock the elements
+                    window.uiManager.elements = {
+                        contentDisplay: document.getElementById('content-display')
+                    };
+                    log('✅ UI manager elements set');
+                } else {
+                    log('❌ UI manager not found');
+                }
+                
+                // Add scroll listener for testing
+                const contentDisplay = document.getElementById('content-display');
+                if (contentDisplay) {
+                    let scrollTimeout;
+                    contentDisplay.addEventListener('scroll', function() {
+                        clearTimeout(scrollTimeout);
+                        scrollTimeout = setTimeout(() => {
+                            if (window.tocGenerator && window.tocGenerator.updateActiveFromScroll) {
+                                window.tocGenerator.updateActiveFromScroll();
+                            }
+                        }, 50);
+                    });
+                    log('✅ Scroll listener attached');
+                }
+                
+                log('🚀 Test environment ready!');
+                log('Use the buttons on the right to test functionality.');
+                
+            } catch (error) {
+                log(`❌ Error during initialization: ${error.message}`);
+                console.error('Test initialization error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

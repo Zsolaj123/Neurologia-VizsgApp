@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll Debug Test - Neurológia VizsgApp</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'JetBrains Mono', monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+        }
+        
+        .debug-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-section {
+            background: #121212;
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-results {
+            background: #1a1a1a;
+            border: 1px solid #666;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        button {
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: #00cc33;
+        }
+        
+        .error {
+            color: #ff6b6b;
+        }
+        
+        .success {
+            color: #00ff41;
+        }
+        
+        .warning {
+            color: #ffaa00;
+        }
+        
+        /* Mock content-display styles */
+        #mock-content-display {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #00ff41;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #1a1a1a;
+            padding: 20px;
+            margin-top: 10px;
+        }
+        
+        .long-content {
+            height: 1000px;
+            background: linear-gradient(to bottom, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>Scroll Auto-Reset Debug Test</h1>
+        <p>This test simulates the scroll reset functionality from ui-manager.js to identify why it's not working.</p>
+        
+        <div class="test-section">
+            <h2>Test 1: Element Detection</h2>
+            <button onclick="testElementDetection()">Test Element Detection</button>
+            <div id="element-test-results" class="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 2: Mock Scroll Reset</h2>
+            <div id="mock-content-display">
+                <div class="long-content">
+                    <h3>Long Content for Testing</h3>
+                    <p>This is a long content area to test scrolling behavior.</p>
+                    <p>Scroll down in this area, then click the "Reset Scroll" button to test the functionality.</p>
+                    <div style="margin-top: 200px;">
+                        <p>Middle content...</p>
+                    </div>
+                    <div style="margin-top: 200px;">
+                        <p>More content...</p>
+                    </div>
+                    <div style="margin-top: 200px;">
+                        <p>Bottom content - if you can see this, scroll up and test the reset button.</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="testScrollReset()">Reset Scroll (Mock)</button>
+            <button onclick="testScrollPosition()">Check Current Scroll Position</button>
+            <button onclick="scrollToMiddle()">Scroll to Middle (for testing)</button>
+            <div id="scroll-test-results" class="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 3: Real App Element Test</h2>
+            <button onclick="testRealAppElement()">Test Real App Element</button>
+            <button onclick="simulateTopicClick()">Simulate Topic Click Flow</button>
+            <div id="real-app-test-results" class="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 4: CSS Properties Check</h2>
+            <button onclick="testCSSProperties()">Check CSS Properties</button>
+            <div id="css-test-results" class="test-results"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            
+            element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+        
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+        
+        function testElementDetection() {
+            clearLog('element-test-results');
+            log('element-test-results', 'Testing element detection...');
+            
+            // Test if content-display exists in main app
+            const contentDisplay = document.getElementById('content-display');
+            
+            if (contentDisplay) {
+                log('element-test-results', 'SUCCESS: content-display element found!', 'success');
+                log('element-test-results', `Element type: ${contentDisplay.tagName}`);
+                log('element-test-results', `Element classes: ${contentDisplay.className}`);
+                
+                // Test scrollTop property
+                try {
+                    const currentScroll = contentDisplay.scrollTop;
+                    log('element-test-results', `Current scrollTop: ${currentScroll}`, 'success');
+                    
+                    // Test if we can set scrollTop
+                    contentDisplay.scrollTop = 0;
+                    log('element-test-results', `After reset - scrollTop: ${contentDisplay.scrollTop}`, 'success');
+                } catch (error) {
+                    log('element-test-results', `ERROR setting scrollTop: ${error.message}`, 'error');
+                }
+            } else {
+                log('element-test-results', 'ERROR: content-display element NOT found!', 'error');
+                log('element-test-results', 'This means we are not in the main app context.');
+                
+                // Check if we're in an iframe or different context
+                try {
+                    if (window.parent && window.parent !== window) {
+                        log('element-test-results', 'We are in an iframe. Trying parent window...', 'warning');
+                        const parentContentDisplay = window.parent.document.getElementById('content-display');
+                        if (parentContentDisplay) {
+                            log('element-test-results', 'SUCCESS: Found content-display in parent window!', 'success');
+                        } else {
+                            log('element-test-results', 'ERROR: content-display not found in parent window either.', 'error');
+                        }
+                    }
+                } catch (error) {
+                    log('element-test-results', `Cross-origin error: ${error.message}`, 'warning');
+                }
+            }
+        }
+        
+        function testScrollReset() {
+            clearLog('scroll-test-results');
+            log('scroll-test-results', 'Testing scroll reset on mock element...');
+            
+            const mockElement = document.getElementById('mock-content-display');
+            const beforeScroll = mockElement.scrollTop;
+            log('scroll-test-results', `Scroll position before reset: ${beforeScroll}`);
+            
+            // Reset scroll
+            mockElement.scrollTop = 0;
+            
+            const afterScroll = mockElement.scrollTop;
+            log('scroll-test-results', `Scroll position after reset: ${afterScroll}`);
+            
+            if (afterScroll === 0) {
+                log('scroll-test-results', 'SUCCESS: Mock scroll reset worked!', 'success');
+            } else {
+                log('scroll-test-results', 'ERROR: Mock scroll reset failed!', 'error');
+            }
+        }
+        
+        function testScrollPosition() {
+            const mockElement = document.getElementById('mock-content-display');
+            const position = mockElement.scrollTop;
+            log('scroll-test-results', `Current scroll position: ${position}`);
+        }
+        
+        function scrollToMiddle() {
+            const mockElement = document.getElementById('mock-content-display');
+            mockElement.scrollTop = 200;
+            log('scroll-test-results', `Scrolled to position: ${mockElement.scrollTop}`);
+        }
+        
+        function testRealAppElement() {
+            clearLog('real-app-test-results');
+            log('real-app-test-results', 'Testing real app element...');
+            
+            const contentDisplay = document.getElementById('content-display');
+            if (!contentDisplay) {
+                log('real-app-test-results', 'ERROR: content-display not found. Opening main app...', 'error');
+                // Open main app in new window for testing
+                window.open('index.html', '_blank');
+                return;
+            }
+            
+            log('real-app-test-results', 'Real element found. Testing scroll behavior...', 'success');
+            
+            const beforeScroll = contentDisplay.scrollTop;
+            log('real-app-test-results', `Current scroll: ${beforeScroll}`);
+            
+            // Try to set scroll to middle
+            contentDisplay.scrollTop = 100;
+            log('real-app-test-results', `After setting to 100: ${contentDisplay.scrollTop}`);
+            
+            // Try to reset
+            contentDisplay.scrollTop = 0;
+            log('real-app-test-results', `After reset: ${contentDisplay.scrollTop}`);
+        }
+        
+        function simulateTopicClick() {
+            clearLog('real-app-test-results');
+            log('real-app-test-results', 'Simulating topic click flow...');
+            
+            // Check if uiManager is available
+            if (typeof window.uiManager !== 'undefined') {
+                log('real-app-test-results', 'uiManager found! Testing loadTopic flow...', 'success');
+                
+                // Get current state
+                const state = window.uiManager.getState();
+                log('real-app-test-results', `Current state: ${JSON.stringify(state, null, 2)}`);
+                
+                // Check if elements are properly initialized
+                if (window.uiManager.elements.contentDisplay) {
+                    log('real-app-test-results', 'contentDisplay element is initialized in uiManager', 'success');
+                    
+                    const currentScroll = window.uiManager.elements.contentDisplay.scrollTop;
+                    log('real-app-test-results', `Current scroll via uiManager: ${currentScroll}`);
+                    
+                    // Try the same reset that happens in loadTopic
+                    window.uiManager.elements.contentDisplay.scrollTop = 0;
+                    log('real-app-test-results', `After reset via uiManager: ${window.uiManager.elements.contentDisplay.scrollTop}`);
+                } else {
+                    log('real-app-test-results', 'ERROR: contentDisplay not initialized in uiManager!', 'error');
+                }
+            } else {
+                log('real-app-test-results', 'ERROR: uiManager not available in this context', 'error');
+            }
+        }
+        
+        function testCSSProperties() {
+            clearLog('css-test-results');
+            log('css-test-results', 'Testing CSS properties that might affect scrolling...');
+            
+            const contentDisplay = document.getElementById('content-display');
+            const mockDisplay = document.getElementById('mock-content-display');
+            
+            function checkElement(element, name) {
+                if (!element) {
+                    log('css-test-results', `${name}: Element not found`, 'error');
+                    return;
+                }
+                
+                const computed = window.getComputedStyle(element);
+                log('css-test-results', `\n${name} CSS Properties:`);
+                log('css-test-results', `  overflow-y: ${computed.overflowY}`);
+                log('css-test-results', `  overflow-x: ${computed.overflowX}`);
+                log('css-test-results', `  position: ${computed.position}`);
+                log('css-test-results', `  height: ${computed.height}`);
+                log('css-test-results', `  max-height: ${computed.maxHeight}`);
+                log('css-test-results', `  scroll-behavior: ${computed.scrollBehavior}`);
+                
+                // Check if element is actually scrollable
+                const scrollable = element.scrollHeight > element.clientHeight;
+                log('css-test-results', `  scrollHeight: ${element.scrollHeight}px`);
+                log('css-test-results', `  clientHeight: ${element.clientHeight}px`);
+                log('css-test-results', `  is scrollable: ${scrollable}`, scrollable ? 'success' : 'warning');
+            }
+            
+            checkElement(contentDisplay, 'Real content-display');
+            checkElement(mockDisplay, 'Mock content-display');
+        }
+        
+        // Auto-run element detection on page load
+        window.addEventListener('load', () => {
+            setTimeout(testElementDetection, 500);
+        });
+    </script>
+</body>
+</html>
