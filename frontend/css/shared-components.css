@@ -1,0 +1,392 @@
+/**
+ * Shared Components CSS
+ * Standardized styling for category cards, navigation, and UI elements across all sections
+ */
+
+/* ============================================
+   STANDARDIZED NAVIGATION
+   ============================================ */
+
+/* Ensure all pages have consistent header navigation */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-xl);
+}
+
+.header-nav {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: center;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-quick);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    color: var(--primary-green);
+    border-color: var(--primary-green);
+    background: rgba(0, 255, 65, 0.05);
+    text-shadow: 0 0 10px var(--primary-green);
+    transform: translateY(-1px);
+}
+
+.nav-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   STANDARDIZED GLASS-EFFECT CARDS
+   ============================================ */
+
+/* Base glass card styling with matrix visibility */
+.glass-card {
+    position: relative;
+    background: rgba(18, 18, 18, 0.85); /* Semi-transparent to show matrix */
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 255, 65, 0.02) 0%,
+        transparent 25%,
+        transparent 75%,
+        rgba(0, 255, 65, 0.02) 100%
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.glass-card:hover::before {
+    opacity: 1;
+}
+
+.glass-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--primary-green);
+    box-shadow: 
+        0 20px 60px rgba(0, 255, 65, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(0, 255, 65, 0.1),
+        0 0 0 1px rgba(0, 255, 65, 0.1) inset;
+}
+
+/* Glow effect for cards */
+.glass-card .card-glow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        var(--primary-green), 
+        var(--accent-green), 
+        var(--primary-green)
+    );
+    border-radius: var(--radius-lg);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--transition-normal);
+    filter: blur(8px);
+}
+
+.glass-card:hover .card-glow {
+    opacity: 0.3;
+}
+
+/* Card content container */
+.card-content {
+    position: relative;
+    z-index: 1;
+    padding: var(--spacing-xl);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================
+   STANDARDIZED CATEGORY CARDS
+   ============================================ */
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xxl);
+    padding: 0 var(--spacing-lg);
+}
+
+.category-card {
+    /* Inherit from glass-card */
+    @extend .glass-card;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Apply glass card styling to category cards */
+.category-card {
+    position: relative;
+    background: rgba(18, 18, 18, 0.85);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 255, 65, 0.02) 0%,
+        transparent 25%,
+        transparent 75%,
+        rgba(0, 255, 65, 0.02) 100%
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.category-card:hover::before {
+    opacity: 1;
+}
+
+.category-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--primary-green);
+    box-shadow: 
+        0 20px 60px rgba(0, 255, 65, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(0, 255, 65, 0.1),
+        0 0 0 1px rgba(0, 255, 65, 0.1) inset;
+}
+
+.category-glow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        var(--primary-green), 
+        var(--accent-green), 
+        var(--primary-green)
+    );
+    border-radius: var(--radius-lg);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--transition-normal);
+    filter: blur(8px);
+}
+
+.category-card:hover .category-glow {
+    opacity: 0.3;
+}
+
+.category-content {
+    position: relative;
+    z-index: 1;
+    padding: var(--spacing-xl);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.category-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    margin: 0 0 var(--spacing-md) 0;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    font-family: var(--font-display);
+}
+
+.category-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--spacing-lg) 0;
+    flex-grow: 1;
+}
+
+.category-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid rgba(0, 255, 65, 0.1);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* ============================================
+   STANDARDIZED TOPIC BUNDLE CARDS
+   ============================================ */
+
+.topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+    padding: 0 var(--spacing-lg);
+}
+
+.topic-card {
+    position: relative;
+    background: rgba(18, 18, 18, 0.85);
+    border: 1px solid rgba(0, 255, 65, 0.15);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    min-height: 160px;
+}
+
+.topic-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-green);
+    box-shadow: 
+        0 12px 40px rgba(0, 255, 65, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(0, 255, 65, 0.05);
+}
+
+.topic-content {
+    padding: var(--spacing-lg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.topic-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-green);
+    margin: 0 0 var(--spacing-sm) 0;
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+}
+
+.topic-meta {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ============================================
+   SCREEN HEADERS
+   ============================================ */
+
+.screen-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xxl);
+}
+
+.screen-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--primary-green);
+    margin: 0 0 var(--spacing-md) 0;
+    text-shadow: 0 0 20px var(--primary-green);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.screen-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .category-grid,
+    .topic-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+        padding: 0 var(--spacing-md);
+    }
+    
+    .header-content {
+        padding: 0 var(--spacing-lg);
+    }
+    
+    .header-nav {
+        gap: var(--spacing-md);
+    }
+    
+    .nav-link {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.8rem;
+    }
+    
+    .nav-link .nav-text {
+        display: none;
+    }
+    
+    .screen-title {
+        font-size: 2rem;
+    }
+    
+    .screen-subtitle {
+        font-size: 1rem;
+    }
+}

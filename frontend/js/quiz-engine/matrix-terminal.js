@@ -135,10 +135,10 @@ export class MatrixTerminal {
 
         for (const line of this.bootSequence) {
             await this.typeLine(line);
-            await this.delay(90);  // Reduced from 100ms (10% faster)
+            await this.delay(68);  // Reduced by 25% for faster startup
         }
 
-        await this.delay(450);  // Reduced from 500ms (10% faster)
+        await this.delay(338);  // Reduced by 25% for faster startup
         this.isBooting = false;
     }
 
@@ -162,14 +162,14 @@ export class MatrixTerminal {
         for (let i = 0; i < text.length; i++) {
             lineElement.textContent = text.substring(0, i + 1);
             if (!text.startsWith('[')) { // Don't delay for status messages
-                await this.delay(18 + Math.random() * 27);  // Reduced from 20-50ms to 18-45ms
+                await this.delay(14 + Math.random() * 20);  // Reduced by 25% for faster typing
             }
         }
 
         // Add cursor blink at end
         if (text.length > 0) {
             lineElement.innerHTML += '<span class="cursor">█</span>';
-            await this.delay(180);  // Reduced from 200ms (10% faster)
+            await this.delay(135);  // Reduced by 25% for faster cursor
             lineElement.querySelector('.cursor')?.remove();
         }
 
@@ -190,7 +190,7 @@ export class MatrixTerminal {
         await this.typeLine(`> LOADING: ${title}`);
         
         // Wait a moment before loading to ensure boot sequence is visible
-        await this.delay(450);  // Reduced from 500ms (10% faster)
+        await this.delay(338);  // Reduced by 25% for faster loading
         
         // Load the quiz with absolute path from current location
         // This ensures the quiz loads from the correct path
@@ -212,11 +212,11 @@ export class MatrixTerminal {
         if (this.isBooting) return;
 
         await this.typeLine("[ MODULE LOADED ]");
-        await this.delay(270);  // Reduced from 300ms (10% faster)
+        await this.delay(203);  // Reduced by 25% for faster transitions
         
         // Fade out terminal output, fade in quiz
         this.output.classList.add('fade-out');
-        await this.delay(270);  // Reduced from 300ms (10% faster)
+        await this.delay(203);  // Reduced by 25% for faster fade-out
         
         this.output.classList.remove('visible');
         this.iframe.classList.remove('hidden');
