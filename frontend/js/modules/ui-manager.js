@@ -474,40 +474,46 @@ class UIManager {
         // Update section tabs
         this.updateSectionTabs(topic);
         
-        // FIXED: Scroll to top with conflict prevention
+        // ENHANCED: Delayed scroll to top after content is rendered
         console.log('🚀 About to call scrollToTopInstant from displayTopic');
-        this.scrollToTopInstant();
+        
+        // Use requestAnimationFrame to ensure DOM is fully updated
+        requestAnimationFrame(() => {
+            this.scrollToTopInstant();
+        });
     }
     
     /**
-     * ENHANCED: Scroll to top with debugging
+     * SIMPLIFIED: Clean scroll to top without excessive debugging
      * @private
      */
     scrollToTopInstant() {
-        console.log('🔄 scrollToTopInstant called');
-        
         if (!this.elements.contentDisplay) {
             console.error('❌ contentDisplay element not found');
             return;
         }
         
-        console.log('📍 Before scroll - scrollTop:', this.elements.contentDisplay.scrollTop);
+        const element = this.elements.contentDisplay;
         
-        // Force immediate scroll reset - multiple methods for reliability
-        this.elements.contentDisplay.style.scrollBehavior = 'auto';
-        this.elements.contentDisplay.scrollTop = 0;
-        this.elements.contentDisplay.scrollTo(0, 0);
+        // Simple, direct scroll to top
+        element.style.scrollBehavior = 'auto';
+        element.scrollTop = 0;
+        element.scrollTo({ top: 0, behavior: 'auto' });
         
-        console.log('📍 After scroll - scrollTop:', this.elements.contentDisplay.scrollTop);
+        // Also try window scroll (in case content scrolls with page)
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
         
-        // Update TOC highlighting after scroll reset
+        // Reset scroll behavior after a brief moment
         setTimeout(() => {
-            this.elements.contentDisplay.style.scrollBehavior = '';
+            element.style.scrollBehavior = '';
+            
+            // Update TOC highlighting
             if (window.tocGenerator) {
-                console.log('🎯 Updating TOC highlighting');
                 tocGenerator.updateActiveFromScroll();
             }
-        }, 100);
+        }, 50);
     }
 
     /**
@@ -786,7 +792,9 @@ class UIManager {
      * @private
      */
     handleContentScroll() {
-        tocGenerator.updateActiveFromScroll();
+        if (window.tocGenerator && typeof tocGenerator.updateActiveFromScroll === 'function') {
+            tocGenerator.updateActiveFromScroll();
+        }
     }
     
     /**

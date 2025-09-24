@@ -178,46 +178,27 @@ class TocGenerator {
     }
     
     /**
-     * Set active TOC item - ENHANCED with debugging
+     * Set active TOC item
      */
     setActiveItem(tocId) {
-        console.log('🎯 setActiveItem called with:', tocId);
-        
         if (!this.tocContainer) {
-            console.error('❌ TOC Container not found!');
             return;
         }
         
-        console.log('📦 TOC Container exists:', this.tocContainer);
-        console.log('📋 TOC Container HTML:', this.tocContainer.innerHTML.substring(0, 200));
-        
         // Remove previous active
         const previousActive = this.tocContainer.querySelector('.toc-item.active');
-        console.log('📤 Previous active item:', previousActive);
         if (previousActive) {
             previousActive.classList.remove('active');
-            console.log('✅ Removed active class from previous item');
         }
         
         // Set new active
         const newActive = this.tocContainer.querySelector(`[data-toc-id="${tocId}"]`);
-        console.log('📥 Looking for TOC item with data-toc-id:', tocId);
-        console.log('📋 Found new active item:', newActive);
-        
         if (newActive) {
             newActive.classList.add('active');
             this.activeItemId = tocId;
-            console.log('✅ Added active class to new item:', newActive);
             
             // Ensure item is visible
             this.ensureItemVisible(newActive);
-        } else {
-            console.error('❌ Could not find TOC item with data-toc-id:', tocId);
-            // Debug: show all available TOC items
-            const allTocItems = this.tocContainer.querySelectorAll('[data-toc-id]');
-            console.log('🔍 Available TOC items:', Array.from(allTocItems).map(item => item.dataset.tocId));
-            const allElements = this.tocContainer.querySelectorAll('*');
-            console.log('🔍 All TOC elements:', allElements);
         }
     }
     
@@ -315,28 +296,21 @@ class TocGenerator {
     }
     
     /**
-     * ENHANCED: Update TOC based on scroll position with debugging
+     * CLEAN: Update TOC based on scroll position
      */
     updateActiveFromScroll() {
-        console.log('🔍 TOC: updateActiveFromScroll called');
-        
         if (!this.currentTopic || !this.currentTopic.tableOfContents) {
-            console.log('❌ TOC: No current topic or TOC data');
             return;
         }
         
         const contentArea = document.getElementById('content-display');
         if (!contentArea) {
-            console.error('❌ TOC: content-display element not found');
             return;
         }
         
         // Find all headers in content
         const headers = contentArea.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
-        console.log('📋 TOC: Found headers:', headers.length);
-        
         if (headers.length === 0) {
-            console.log('❌ TOC: No headers found in content');
             return;
         }
         
@@ -345,34 +319,25 @@ class TocGenerator {
         const scrollHeight = contentArea.scrollHeight;
         const clientHeight = contentArea.clientHeight;
         
-        console.log('📊 TOC: Scroll info - scrollTop:', scrollTop, 'scrollHeight:', scrollHeight, 'clientHeight:', clientHeight);
-        
-        // ENHANCED: Better detection algorithm with debugging
+        // Determine active header
         if (scrollTop <= 20) {
             // At the very top - always highlight first header
             activeId = headers[0].id;
-            console.log('📍 TOC: At top - selecting first header:', activeId);
         } else if (scrollTop + clientHeight >= scrollHeight - 20) {
             // At the bottom - highlight last header
             activeId = headers[headers.length - 1].id;
-            console.log('📍 TOC: At bottom - selecting last header:', activeId);
         } else {
-            // Find the best header in viewport with improved threshold
-            const viewportThreshold = 100; // Increased threshold for better detection
-            console.log('📍 TOC: Finding header in viewport with threshold:', viewportThreshold);
+            // Find the best header in viewport
+            const viewportThreshold = 100;
             
-            // Find the last header above the viewport threshold
             for (let i = headers.length - 1; i >= 0; i--) {
                 const header = headers[i];
                 const rect = header.getBoundingClientRect();
                 const contentRect = contentArea.getBoundingClientRect();
                 const relativeTop = rect.top - contentRect.top;
                 
-                console.log(`📋 TOC: Header ${i} (${header.id}) - relativeTop:`, relativeTop);
-                
                 if (relativeTop <= viewportThreshold) {
                     activeId = header.id;
-                    console.log('✅ TOC: Selected header:', activeId);
                     break;
                 }
             }
@@ -380,22 +345,11 @@ class TocGenerator {
             // Fallback to first header if nothing found
             if (!activeId) {
                 activeId = headers[0].id;
-                console.log('🔄 TOC: Fallback to first header:', activeId);
             }
         }
         
-        console.log('🎯 TOC: Current activeItemId:', this.activeItemId, 'New activeId:', activeId);
-        
         if (activeId && activeId !== this.activeItemId) {
-            console.log('🔄 TOC: Setting new active item:', activeId);
             this.setActiveItem(activeId);
-        } else {
-            console.log('⏭️ TOC: No change needed');
-            // FORCE UPDATE: Let's try to set it anyway for debugging
-            if (activeId) {
-                console.log('🔧 TOC: Force updating for debugging');
-                this.setActiveItem(activeId);
-            }
         }
     }
     
