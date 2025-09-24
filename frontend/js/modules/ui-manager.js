@@ -95,9 +95,28 @@ class UIManager {
         // Keyboard shortcuts
         document.addEventListener('keydown', this.handleKeyboardShortcuts);
         
-        // Content scroll for TOC sync
+        // Content scroll for TOC sync - Auto-detect scrollable element
         if (this.elements.contentDisplay) {
-            this.elements.contentDisplay.addEventListener('scroll', 
+            // Test if content display element is scrollable after content loads
+            setTimeout(() => {
+                const isContentScrollable = this.elements.contentDisplay.scrollHeight > this.elements.contentDisplay.clientHeight;
+                
+                if (isContentScrollable) {
+                    // Content display is scrollable - use it for scroll events
+                    this.elements.contentDisplay.addEventListener('scroll', 
+                        this.debounce(() => this.handleContentScroll(), 50)
+                    );
+                } else {
+                    // Content display not scrollable - use window scroll events
+                    window.addEventListener('scroll', 
+                        this.debounce(() => this.handleContentScroll(), 50)
+                    );
+                }
+            }, 1000);
+            
+        } else {
+            // Fallback to window scroll if content display not found
+            window.addEventListener('scroll', 
                 this.debounce(() => this.handleContentScroll(), 50)
             );
         }
@@ -453,56 +472,29 @@ class UIManager {
     }
     
     /**
-     * DEBUG: Display topic content with section analysis
+     * Display topic content
      * @private
      */
     displayTopic(topic) {
-        console.log('🎭 CONTENT DEBUG: displayTopic called for topic:', topic?.id, 'section:', this.currentSection);
-        
         if (!topic) {
-            console.log('❌ CONTENT DEBUG: No topic provided');
             this.elements.contentDisplay.innerHTML = '';
             return;
         }
         
         // Display current section
         const section = topic.getSection(this.currentSection);
-        console.log('📄 CONTENT DEBUG: Section data:', {
-            sectionType: this.currentSection,
-            sectionExists: !!section,
-            sectionIsEmpty: section?.isEmpty,
-            contentLength: section?.content?.length || 0,
-            contentSample: section?.content?.substring(0, 200) || 'No content'
-        });
         
         if (!section || section.isEmpty) {
-            console.log('⚠️ CONTENT DEBUG: Section is empty or missing, showing empty section message');
             this.displayEmptySection(this.currentSection);
         } else {
-            console.log('✅ CONTENT DEBUG: Section has content, rendering...');
             const wrappedContent = this.wrapContent(section.content);
             this.elements.contentDisplay.innerHTML = wrappedContent;
-            
-            // Debug: Check what headers were created
-            setTimeout(() => {
-                const headers = this.elements.contentDisplay.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
-                console.log('📄 CONTENT DEBUG: Headers found in rendered content:', headers.length);
-                if (headers.length === 0) {
-                    console.log('❌ CONTENT DEBUG: No headers with IDs found in content!');
-                    console.log('📝 CONTENT DEBUG: Content HTML sample:', this.elements.contentDisplay.innerHTML.substring(0, 500));
-                } else {
-                    console.log('📄 CONTENT DEBUG: Header IDs:', Array.from(headers).map(h => h.id));
-                }
-            }, 50);
         }
         
         // Update section tabs
         this.updateSectionTabs(topic);
         
-        // ENHANCED: Delayed scroll to top after content is rendered
-        console.log('🚀 About to call scrollToTopInstant from displayTopic');
-        
-        // Use requestAnimationFrame to ensure DOM is fully updated
+        // Scroll to top after content is rendered
         requestAnimationFrame(() => {
             this.scrollToTopInstant();
         });
@@ -813,15 +805,12 @@ class UIManager {
     }
     
     /**
-     * DEBUG: Handle content scroll for TOC sync with debug
+     * Handle content scroll for TOC sync
      * @private
      */
     handleContentScroll() {
-        console.log('📜 SCROLL EVENT DEBUG: handleContentScroll triggered');
         if (window.tocGenerator && typeof tocGenerator.updateActiveFromScroll === 'function') {
             tocGenerator.updateActiveFromScroll();
-        } else {
-            console.log('❌ SCROLL EVENT DEBUG: tocGenerator not available');
         }
     }
     
