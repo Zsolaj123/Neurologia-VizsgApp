@@ -260,7 +260,7 @@ Jó tanulást, sok sikert!`;
             z-index: 1000;
             animation: fadeIn 1s ease-in-out;
         `;
-        enterMessage.textContent = 'Belépés a Mátrixba...';
+        enterMessage.textContent = 'Entering the rabbit hole...';
         document.body.appendChild(enterMessage);
         
         // Intensify matrix rain

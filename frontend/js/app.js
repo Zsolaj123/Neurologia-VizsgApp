@@ -67,13 +67,13 @@ function showWelcomeMessage() {
     
     contentDisplay.innerHTML = `
         <div class="welcome-message fade-in">
-            <h1 class="glow">Neurológiai Részvizsga App</h1>
+            <h1 class="glow">Neurológia VizsgApp</h1>
             <p>Üdvözöljük a neurológiai részvizsga felkészülő alkalmazásban!</p>
             
             <div class="features">
                 <div class="feature">
                     <span class="feature-icon">📚</span>
-                    <span class="feature-text">60 tétel neuroanatómiából</span>
+                    <span class="feature-text">259 tétel teljes tételsora</span>
                 </div>
                 <div class="feature">
                     <span class="feature-icon">📝</span>
@@ -82,6 +82,18 @@ function showWelcomeMessage() {
                 <div class="feature">
                     <span class="feature-icon">🖼️</span>
                     <span class="feature-text">Képek és diagrammok</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🎯</span>
+                    <span class="feature-text">Quiz Engine és tesztelés</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🎧</span>
+                    <span class="feature-text">Podcast Player</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">📋</span>
+                    <span class="feature-text">Interaktív Összefoglalók</span>
                 </div>
                 <div class="feature">
                     <span class="feature-icon">🔍</span>
