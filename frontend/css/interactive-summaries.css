@@ -3,6 +3,14 @@
    Styling for the interactive summaries feature
    ============================================ */
 
+/* Section-specific Variables */
+:root {
+    /* Section-specific transparency variables */
+    --summary-card-bg: rgba(18, 18, 18, 0.15);
+    --summary-item-bg: rgba(18, 18, 18, 0.15);
+    --summary-nav-bg: rgba(18, 18, 18, 0.7);
+}
+
 /* Header modifications for interactive summaries */
 .header-content {
     display: flex;
@@ -21,7 +29,7 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(18, 18, 18, 0.7);
+    background: var(--summary-nav-bg);
     border: 1px solid rgba(0, 255, 65, 0.3);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
@@ -199,7 +207,7 @@ div.category-card,
 *[class*="category-card"],
 .category-grid .category-card {
     position: relative !important;
-    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    background: var(--summary-card-bg) !important; /* Using CSS variable for consistency */
     border: 1px solid rgba(0, 255, 65, 0.4) !important;
     border-radius: 12px !important;
     overflow: hidden !important;
@@ -215,7 +223,7 @@ div.category-card,
 
 /* Extra nuclear override with inline style simulation */
 .category-card[style*="background"] {
-    background: rgba(18, 18, 18, 0.15) !important;
+    background: var(--summary-card-bg) !important;
 }
 
 .category-card:hover {
@@ -361,7 +369,7 @@ div.category-card,
 .search-input {
     flex: 1;
     padding: 0.75rem;
-    background: rgba(18, 18, 18, 0.9);
+    background: var(--summary-nav-bg);
     border: 1px solid rgba(68, 68, 68, 0.5);
     border-radius: 8px;
     color: #e0e0e0;
@@ -421,7 +429,7 @@ div.summary-item,
 .summary-item[class],
 *[class*="summary-item"],
 .summary-list .summary-item {
-    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    background: var(--summary-item-bg) !important; /* Using CSS variable for consistency */
     border: 1px solid rgba(0, 255, 65, 0.4) !important;
     border-radius: 8px !important;
     padding: 1.5rem !important;
@@ -436,7 +444,7 @@ div.summary-item,
 
 /* Extra nuclear override with inline style simulation */
 .summary-item[style*="background"] {
-    background: rgba(18, 18, 18, 0.15) !important;
+    background: var(--summary-item-bg) !important;
 }
 
 .summary-item:hover {

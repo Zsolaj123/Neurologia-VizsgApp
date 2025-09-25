@@ -39,6 +39,11 @@ body {
     --podcast-border: rgba(0, 255, 0, 0.3);
     --podcast-glow: 0 0 20px rgba(0, 255, 0, 0.5);
     --podcast-transition: all 0.3s ease;
+    
+    /* Section-specific transparency variables */
+    --podcast-card-bg: rgba(18, 18, 18, 0.15);
+    --podcast-item-bg: rgba(18, 18, 18, 0.15);
+    --podcast-nav-bg: rgba(18, 18, 18, 0.7);
 }
 
 /* Header Fixes */
@@ -100,7 +105,7 @@ body {
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(18, 18, 18, 0.7);
+    background: var(--podcast-nav-bg);
     border: 1px solid rgba(0, 255, 65, 0.3);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
@@ -232,7 +237,7 @@ div.category-card,
 *[class*="category-card"],
 .category-grid .category-card {
     position: relative !important;
-    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    background: var(--podcast-card-bg) !important; /* Using CSS variable for consistency */
     border: 1px solid rgba(0, 255, 65, 0.4) !important;
     border-radius: 10px !important;
     padding: 2rem !important;
@@ -247,7 +252,7 @@ div.category-card,
 
 /* Extra nuclear override with inline style simulation */
 .category-card[style*="background"] {
-    background: rgba(18, 18, 18, 0.15) !important;
+    background: var(--podcast-card-bg) !important;
 }
 
 .category-glow {
@@ -385,7 +390,7 @@ button.back-btn,
 
 .search-input {
     flex: 1;
-    background: var(--podcast-bg-secondary);
+    background: var(--podcast-nav-bg);
     border: 1px solid var(--podcast-border);
     color: var(--podcast-text-primary);
     padding: 0.75rem 1rem;
@@ -430,7 +435,7 @@ div.podcast-item,
 .podcast-item[class],
 *[class*="podcast-item"],
 .podcast-list .podcast-item {
-    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    background: var(--podcast-item-bg) !important; /* Using CSS variable for consistency */
     border: 1px solid rgba(0, 255, 65, 0.4) !important;
     padding: 1.5rem !important;
     display: flex !important;
@@ -446,7 +451,7 @@ div.podcast-item,
 
 /* Extra nuclear override with inline style simulation */
 .podcast-item[style*="background"] {
-    background: rgba(18, 18, 18, 0.15) !important;
+    background: var(--podcast-item-bg) !important;
 }
 
 .podcast-item:hover {

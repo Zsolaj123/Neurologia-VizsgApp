@@ -14,6 +14,11 @@
     --quiz-neutral: #6366f1;
     --quiz-warning: #f59e0b;
     
+    /* Section-specific transparency variables */
+    --quiz-card-bg: rgba(18, 18, 18, 0.15);
+    --quiz-item-bg: rgba(18, 18, 18, 0.15);
+    --quiz-nav-bg: rgba(18, 18, 18, 0.7);
+    
     /* Quiz Backgrounds */
     --quiz-correct-bg: rgba(34, 197, 94, 0.1);
     --quiz-incorrect-bg: rgba(239, 68, 68, 0.1);
@@ -155,7 +160,7 @@ body::before {
     align-items: center !important;
     gap: var(--spacing-sm) !important;
     padding: var(--spacing-sm) var(--spacing-md) !important;
-    background: rgba(18, 18, 18, 0.7) !important;
+    background: var(--quiz-nav-bg) !important;
     border: 1px solid rgba(0, 255, 65, 0.3) !important;
     border-radius: var(--radius-md) !important;
     color: var(--primary-green) !important;
@@ -271,7 +276,7 @@ div.category-card,
 *[class*="category-card"],
 .category-grid .category-card {
     position: relative !important;
-    background: rgba(18, 18, 18, 0.15) !important; /* Transparent glass effect - NUCLEAR OVERRIDE */
+    background: var(--quiz-card-bg) !important; /* Using CSS variable for consistency */
     border: 1px solid rgba(0, 255, 65, 0.4) !important;
     border-radius: var(--radius-lg) !important;
     overflow: hidden !important;
@@ -292,7 +297,7 @@ div.category-card,
 
 /* Extra nuclear override with inline style simulation */
 .category-card[style*="background"] {
-    background: rgba(18, 18, 18, 0.15) !important;
+    background: var(--quiz-card-bg) !important;
 }
 
 .category-card:hover {
@@ -434,7 +439,7 @@ div.category-card,
 .search-input {
     flex: 1;
     padding: var(--spacing-md);
-    background: rgba(18, 18, 18, 0.8);
+    background: var(--quiz-nav-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
@@ -487,7 +492,7 @@ div.category-card,
 }
 
 .quiz-item {
-    background: rgba(18, 18, 18, 0.15) !important;
+    background: var(--quiz-item-bg) !important;
     border: 1px solid rgba(0, 255, 65, 0.4);
     border-radius: var(--radius-md);
     padding: var(--spacing-lg);
@@ -502,7 +507,7 @@ div.category-card,
 
 .quiz-item:hover {
     border-color: var(--primary-green);
-    background: rgba(0, 255, 65, 0.05) !important;
+    background: var(--quiz-item-bg) !important;
     transform: translateX(10px);
     box-shadow: 0 4px 16px rgba(0, 255, 65, 0.2);
 }
@@ -555,7 +560,7 @@ div.category-card,
     display: flex !important;
     align-items: center;
     gap: var(--spacing-sm);
-    background: rgba(18, 18, 18, 0.8);
+    background: var(--quiz-nav-bg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-color);
