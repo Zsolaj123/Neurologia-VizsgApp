@@ -38,6 +38,10 @@
                 <span class="nav-icon">≡</span>
                 <span class="nav-text">Interaktív Összefoglalók</span>
             </a>
+            <button id="contact-menu-btn" class="nav-link contact-link">
+                <span class="nav-icon">✉</span>
+                <span class="nav-text">Kapcsolat</span>
+            </button>
         </nav>
     </header>
     
@@ -96,6 +100,61 @@
         </aside>
     </div>
 
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Kapcsolat</h2>
+                <button id="close-contact-modal" class="modal-close-btn" title="Bezárás">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="contact-section">
+                    <h3>📬 Visszajelzés és kapcsolat</h3>
+                    <p>Visszajelzés, javaslat, egyebek esetén a következő helyeken tudsz elérni:</p>
+                    
+                    <div class="contact-item">
+                        <strong>📧 Email:</strong> 
+                        <a href="mailto:balint.zsolt0704@gmail.com" class="contact-link">balint.zsolt0704@gmail.com</a>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <strong>📘 Facebook:</strong> 
+                        <a href="https://www.facebook.com/zsoltikaaaaaa" target="_blank" rel="noopener noreferrer" class="contact-link">Facebook profil</a>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <strong>📸 Instagram:</strong> 
+                        <a href="https://www.instagram.com/zsolaj/" target="_blank" rel="noopener noreferrer" class="contact-link">@zsolaj</a>
+                    </div>
+                </div>
+
+                <div class="support-section">
+                    <h3>💝 Támogatás</h3>
+                    <p>Ez a projekt rengeteg időmet emésztette fel, sok munka volt és lesz még vele. Az egész non-profit.</p>
+                    <p>Ha szeretnél ehhez hasonló projekteket a jövőben, illetve, hogy a neurológiai vizsgapp is fejlődjön, nagyon megköszönöm, ha támogatsz!</p>
+                    
+                    <div class="support-options">
+                        <div class="support-item">
+                            <strong>🏦 Számlaszám:</strong>
+                            <span class="support-detail">12100011-18655124</span>
+                            <small>(Gránit Bank - Dr. Bálint Zsolt)</small>
+                        </div>
+                        
+                        <div class="support-item">
+                            <strong>💳 Revolut:</strong>
+                            <span class="support-detail">@zsolt5hnr</span>
+                            <a href="https://revolut.me/zsolt5hnr" target="_blank" rel="noopener noreferrer" class="support-link">revolut.me/zsolt5hnr</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="thanks-section">
+                    <p><strong>🙏 Nagyon hálás vagyok minden visszajelzésért és támogatásért! ❤️</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Error Display -->
     <div id="error-container" class="error-container hidden"></div>
 
@@ -141,6 +200,47 @@
                 window.location.href = 'index.html';
             }
         });
+        
+        // Contact modal functionality
+        const contactBtn = document.getElementById('contact-menu-btn');
+        const contactModal = document.getElementById('contact-modal');
+        const closeModalBtn = document.getElementById('close-contact-modal');
+        
+        if (contactBtn && contactModal) {
+            // Open modal
+            contactBtn.addEventListener('click', () => {
+                contactModal.classList.remove('hidden');
+                setTimeout(() => {
+                    contactModal.classList.add('visible');
+                }, 10);
+            });
+            
+            // Close modal
+            const closeModal = () => {
+                contactModal.classList.remove('visible');
+                setTimeout(() => {
+                    contactModal.classList.add('hidden');
+                }, 300);
+            };
+            
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', closeModal);
+            }
+            
+            // Close on overlay click
+            contactModal.addEventListener('click', (e) => {
+                if (e.target === contactModal) {
+                    closeModal();
+                }
+            });
+            
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && contactModal.classList.contains('visible')) {
+                    closeModal();
+                }
+            });
+        }
     });
     </script>
     <script src="js/app.js"></script>

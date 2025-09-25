@@ -53,7 +53,7 @@ class MarkdownParser {
         this.sectionMarkers = {
             reszletes: /^#+ (Részletes|Detailed)$/i,
             osszefoglalas: /^#+ (Összefoglalás|Summary|Rövid)$/i,  
-            kepek: /^#+ (Képek|Images|Ábrák|Diagramok|Diagrams)$/i
+            kepek: /^#+ (?:Képek|Images|Ábrák|Diagramok|Diagrams|Ábrák[,\s]*diagramok).*$/i
         };
     }
     

@@ -100,7 +100,7 @@ body {
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 20px 20px 80px 20px;
     text-align: center;
     overflow: hidden;
 }
@@ -151,7 +151,7 @@ body {
 
 /* Welcome Text */
 .welcome-container {
-    max-width: 700px;
+    max-width: 800px;
     flex: 1;
     display: flex;
     align-items: center;
@@ -159,7 +159,7 @@ body {
     opacity: 0;
     transition: opacity 1s ease-in-out;
     margin: 20px 0;
-    overflow-y: auto;
+    overflow: visible;
 }
 
 .welcome-container.visible {
@@ -176,12 +176,15 @@ body {
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid #00ff00;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px 30px;
     box-shadow: 
         0 0 10px rgba(0, 255, 0, 0.3),
         inset 0 0 20px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
     position: relative;
+    min-height: 385px;
+    height: 440px;
+    overflow: hidden;
 }
 
 .welcome-text::before {
@@ -343,6 +346,7 @@ body {
     transition: opacity 1s ease-in-out;
     flex-shrink: 0;
     margin-top: 10px;
+    margin-bottom: 40px;
 }
 
 .footer.visible {
@@ -438,6 +442,49 @@ body {
     .footer-content {
         font-size: 0.8rem;
     }
+}
+
+/* Rabbit Hole Message */
+.rabbit-hole-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ff4136;
+    text-shadow: 
+        0 0 10px #ff4136,
+        0 0 20px #ff4136,
+        0 0 30px #ff4136;
+    z-index: 1001;
+    opacity: 0;
+    transition: all 0.5s ease-in-out;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 2px;
+    animation: rabbitHolePulse 2s ease-in-out infinite;
+}
+
+@keyframes rabbitHolePulse {
+    0%, 100% { 
+        text-shadow: 
+            0 0 10px #ff4136,
+            0 0 20px #ff4136,
+            0 0 30px #ff4136;
+    }
+    50% { 
+        text-shadow: 
+            0 0 15px #ff4136,
+            0 0 30px #ff4136,
+            0 0 45px #ff4136;
+    }
+}
+
+/* Hyperspace Tunnel Styles */
+#hyperspace-tunnel {
+    pointer-events: none;
 }
 
 /* Animation Classes */

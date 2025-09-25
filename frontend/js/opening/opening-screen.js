@@ -250,34 +250,116 @@ Jó tanulást, sok sikert!`;
         const container = document.getElementById('opening-container');
         if (!container) return;
         
+        // Create hyperspace tunnel animation
+        this.createHyperspaceTunnel();
+        
         // Add matrix-style entrance effect
-        container.style.transition = 'all 2s ease-in-out';
+        container.style.transition = 'all 3s ease-in-out';
         container.style.opacity = '0';
         container.style.filter = 'brightness(2) blur(5px)';
         
-        // Show enter message
+        // Show enter message with proper centering
         const enterMessage = document.createElement('div');
-        enterMessage.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.5rem;
-            color: #ff4136;
-            text-shadow: 0 0 20px #ff4136;
-            z-index: 1000;
-            animation: fadeIn 1s ease-in-out;
-        `;
+        enterMessage.className = 'rabbit-hole-message';
         enterMessage.textContent = 'Entering the rabbit hole...';
         document.body.appendChild(enterMessage);
+        
+        // Animate the message
+        setTimeout(() => {
+            enterMessage.style.opacity = '1';
+            enterMessage.style.transform = 'translate(-50%, -50%) scale(1)';
+        }, 500);
         
         // Intensify matrix rain
         if (window.matrixRain) {
             const canvas = window.matrixRain.canvas;
-            canvas.style.transition = 'opacity 2s ease-in-out';
+            canvas.style.transition = 'opacity 3s ease-in-out';
             canvas.style.opacity = '1';
         }
+    }
+    
+    createHyperspaceTunnel() {
+        // Create hyperspace tunnel canvas
+        const tunnelCanvas = document.createElement('canvas');
+        tunnelCanvas.id = 'hyperspace-tunnel';
+        tunnelCanvas.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            background: #000;
+        `;
+        document.body.appendChild(tunnelCanvas);
+        
+        const ctx = tunnelCanvas.getContext('2d');
+        tunnelCanvas.width = window.innerWidth;
+        tunnelCanvas.height = window.innerHeight;
+        
+        // Tunnel animation variables
+        const centerX = tunnelCanvas.width / 2;
+        const centerY = tunnelCanvas.height / 2;
+        const maxRadius = Math.max(tunnelCanvas.width, tunnelCanvas.height);
+        let time = 0;
+        const speed = 0.1;
+        const numRings = 30;
+        
+        // Create tunnel effect
+        const animateTunnel = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, tunnelCanvas.width, tunnelCanvas.height);
+            
+            // Draw expanding rings
+            for (let i = 0; i < numRings; i++) {
+                const ringTime = time + (i * 0.3);
+                const radius = ((ringTime * 200) % maxRadius) + 50;
+                const opacity = Math.max(0, 1 - (radius / maxRadius));
+                
+                // Create gradient ring
+                const gradient = ctx.createRadialGradient(centerX, centerY, radius - 10, centerX, centerY, radius + 10);
+                gradient.addColorStop(0, `rgba(0, 255, 0, 0)`);
+                gradient.addColorStop(0.5, `rgba(0, 255, 0, ${opacity * 0.8})`);
+                gradient.addColorStop(1, `rgba(0, 255, 0, 0)`);
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Add some sparkles
+                if (i % 3 === 0) {
+                    const sparkleCount = 8;
+                    for (let j = 0; j < sparkleCount; j++) {
+                        const angle = (j / sparkleCount) * Math.PI * 2 + ringTime;
+                        const sparkleX = centerX + Math.cos(angle) * radius;
+                        const sparkleY = centerY + Math.sin(angle) * radius;
+                        
+                        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.6})`;
+                        ctx.fillRect(sparkleX - 1, sparkleY - 1, 2, 2);
+                    }
+                }
+            }
+            
+            time += speed;
+            
+            // Stop animation after 3 seconds
+            if (time < 15) {
+                requestAnimationFrame(animateTunnel);
+            } else {
+                // Fade out tunnel
+                tunnelCanvas.style.transition = 'opacity 1s ease-out';
+                tunnelCanvas.style.opacity = '0';
+                setTimeout(() => {
+                    if (tunnelCanvas.parentNode) {
+                        tunnelCanvas.parentNode.removeChild(tunnelCanvas);
+                    }
+                }, 1000);
+            }
+        };
+        
+        animateTunnel();
     }
     
     delay(ms) {
