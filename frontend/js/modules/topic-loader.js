@@ -22,33 +22,19 @@ class TopicLoader {
         
         // Use the actual topic metadata if available
         if (window.TOPIC_METADATA) {
-            // First, handle all topics including string keys for bundled topics
-            for (const [key, topicData] of Object.entries(window.TOPIC_METADATA)) {
+            for (let i = 1; i <= 259; i++) {
+                const topicData = window.TOPIC_METADATA[i];
                 if (topicData) {
-                    const id = parseInt(key) || key; // Keep original key for bundled topics
-                    metadata.set(id, {
-                        id: id,
+                    metadata.set(i, {
+                        id: i,
                         title: topicData.title,
                         category: topicData.category || 'neuroanat',
                         range: topicData.folder,
                         folder: topicData.folder,
-                        filename: this.getTopicFilename(id, topicData)
+                        filename: this.getTopicFilename(i, topicData),
+                        bundledWith: topicData.bundledWith,
+                        isSecondary: topicData.isSecondary
                     });
-                    
-                    // For bundled topics like "70-71", also map individual IDs to the bundled version
-                    if (typeof key === 'string' && key.includes('-')) {
-                        const [start, end] = key.split('-').map(num => parseInt(num.trim()));
-                        for (let i = start; i <= end; i++) {
-                            metadata.set(i, {
-                                id: key, // Use the bundled key
-                                title: topicData.title,
-                                category: topicData.category || 'neuroanat',
-                                range: topicData.folder,
-                                folder: topicData.folder,
-                                filename: this.getTopicFilename(key, topicData)
-                            });
-                        }
-                    }
                 }
             }
         } else {
@@ -76,31 +62,12 @@ class TopicLoader {
         // Handle special cases like 70-71, 91-92, etc.
         const title = topicData.title;
         
-        // If id is already a range string (like "70-71"), use it directly
-        if (typeof id === 'string' && id.includes('-')) {
-            return `${id}. ${title}.md`;
-        }
-        
-        // Legacy handling for individual IDs that map to bundled files
-        // (This will be used if someone still accesses by individual ID)
-        if (id === 70 || id === 71) {
-            return `70-71. ${title}.md`;
-        } else if (id === 91 || id === 92) {
-            return `91-92. ${title}.md`;
-        } else if (id === 101 || id === 102) {
-            return `101-102. ${title}.md`;
-        } else if (id === 138 || id === 139) {
-            return `138-139. ${title}.md`;
-        } else if (id === 142 || id === 143) {
-            return `142-143. ${title}.md`;
-        } else if (id === 155 || id === 156) {
-            return `155-156. ${title}.md`;
-        } else if (id === 160 || id === 161) {
-            return `160-161. ${title}.md`;
-        } else if (id === 163 || id === 164) {
-            return `163-164. ${title}.md`;
-        } else if (id === 181 || id === 182) {
-            return `181-182. ${title}.md`;
+        // Check if this topic is bundled with another
+        if (topicData.bundledWith) {
+            const bundledId = topicData.bundledWith;
+            const lowerID = Math.min(id, bundledId);
+            const higherID = Math.max(id, bundledId);
+            return `${lowerID}-${higherID}. ${title}.md`;
         } else if (id >= 185 && id <= 187) {
             return `185-186-187. Parkinson-kór, Parkinson-kór vizsgálata és kezelése.md`;
         } else if (id === 189 || id === 190) {

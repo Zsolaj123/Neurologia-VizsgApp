@@ -109,17 +109,25 @@ class MarkdownParser {
         };
         
         const lines = markdown.split('\n');
-        let currentSection = 'reszletes'; // Default section
+        let currentSection = null; // Start with no section (skip initial tags)
         let sectionContent = [];
         
+        // Pattern to detect tags at the beginning of lines (like #részvizsga #általánosklinikum)
+        const tagsPattern = /^#\w+(\s+#\w+)*\s*$/;
+        
         for (const line of lines) {
+            // Skip tag lines at the beginning
+            if (currentSection === null && tagsPattern.test(line.trim())) {
+                continue; // Skip this line entirely
+            }
+            
             let sectionFound = false;
             
             // Check if this line marks a new section
             for (const [type, pattern] of Object.entries(this.sectionMarkers)) {
                 if (pattern.test(line)) {
                     // Save previous section content
-                    if (sectionContent.length > 0) {
+                    if (sectionContent.length > 0 && currentSection) {
                         sections[currentSection] = sectionContent.join('\n').trim();
                     }
                     
@@ -131,8 +139,12 @@ class MarkdownParser {
                 }
             }
             
-            if (!sectionFound) {
+            if (!sectionFound && currentSection) {
                 sectionContent.push(line);
+            } else if (!sectionFound && currentSection === null) {
+                // If we haven't found a section yet and it's not a tag, start with reszletes
+                currentSection = 'reszletes';
+                sectionContent = [line];
             }
         }
         
