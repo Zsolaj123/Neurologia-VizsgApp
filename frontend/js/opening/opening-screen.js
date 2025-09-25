@@ -65,6 +65,7 @@ Jó tanulást, sok sikert!`;
     async showTitle() {
         const titleElement = document.getElementById('main-title');
         const titleTextElement = document.getElementById('title-text');
+        const titleCursor = document.getElementById('title-cursor');
         const titleText = 'NEUROLÓGIA VIZSGAPP';
         
         if (!titleElement || !titleTextElement) return;
@@ -75,6 +76,11 @@ Jó tanulást, sok sikert!`;
         // Type out the title
         await this.typeText(titleTextElement, titleText, this.typewriterSpeed);
         
+        // Hide title cursor after typing
+        if (titleCursor) {
+            titleCursor.style.display = 'none';
+        }
+        
         // Wait a moment before continuing
         await this.delay(1000);
     }
@@ -82,15 +88,25 @@ Jó tanulást, sok sikert!`;
     async showWelcomeText() {
         const welcomeContainer = document.getElementById('welcome-container');
         const welcomeTextElement = document.getElementById('welcome-text');
+        const welcomeCursor = document.getElementById('welcome-cursor');
         
         if (!welcomeContainer || !welcomeTextElement) return;
         
-        // Show welcome container
+        // Show welcome container and cursor
         welcomeContainer.classList.remove('hidden');
         welcomeContainer.classList.add('visible');
+        if (welcomeCursor) {
+            welcomeCursor.classList.remove('hidden');
+        }
         
-        // Type out the welcome text
+        // Type out the welcome text (clear existing content first)
+        welcomeTextElement.innerHTML = '';
         await this.typeText(welcomeTextElement, this.welcomeText, this.typewriterSpeed * 0.7, true);
+        
+        // Hide welcome cursor after typing
+        if (welcomeCursor) {
+            welcomeCursor.style.display = 'none';
+        }
         
         // Wait before showing pills
         await this.delay(1500);
@@ -119,19 +135,22 @@ Jó tanulást, sok sikert!`;
     }
     
     async showFooter() {
-        const footer = document.getElementById('footer');
-        
-        if (!footer) return;
-        
-        footer.classList.remove('hidden');
-        footer.classList.add('visible');
+        // Footer is already visible from the beginning, no need to show it
+        return;
     }
     
     async typeText(element, text, speed = 50, preserveNewlines = false) {
         if (!element) return;
         
         this.isTyping = true;
-        element.textContent = '';
+        const cursor = element.nextElementSibling;
+        
+        // Clear existing content but keep the cursor separate
+        if (element.id === 'welcome-text') {
+            element.innerHTML = '';
+        } else {
+            element.textContent = '';
+        }
         
         // Process text for newlines if needed
         const processedText = preserveNewlines ? text : text.replace(/\n/g, ' ');
@@ -142,11 +161,17 @@ Jó tanulást, sok sikert!`;
             if (preserveNewlines && char === '\n') {
                 element.innerHTML += '<br>';
             } else {
-                element.textContent += char;
+                if (element.id === 'welcome-text') {
+                    element.innerHTML += char;
+                } else {
+                    element.textContent += char;
+                }
             }
             
             // Scroll to keep text visible if needed
-            element.scrollTop = element.scrollHeight;
+            if (element.scrollTop !== undefined) {
+                element.scrollTop = element.scrollHeight;
+            }
             
             // Variable speed for more natural typing
             const currentSpeed = speed + (Math.random() * 20 - 10);
