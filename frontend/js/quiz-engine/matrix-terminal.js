@@ -39,9 +39,9 @@ export class MatrixTerminal {
                 <div class="terminal-header">
                     <div class="terminal-title">${this.terminalTitle}</div>
                     <div class="terminal-controls">
-                        <button class="terminal-btn minimize">_</button>
-                        <button class="terminal-btn maximize">□</button>
-                        <button class="terminal-btn close" id="terminal-close">×</button>
+                        <button class="terminal-btn minimize" title="Minimize">_</button>
+                        <button class="terminal-btn maximize" title="Enter Fullscreen">□</button>
+                        <button class="terminal-btn close" id="terminal-close" title="Close">×</button>
                     </div>
                 </div>
                 <div class="terminal-body">
@@ -78,14 +78,31 @@ export class MatrixTerminal {
      */
     setupEventListeners() {
         const closeBtn = document.getElementById('terminal-close');
+        const maximizeBtn = this.terminal.querySelector('.terminal-btn.maximize');
+        const minimizeBtn = this.terminal.querySelector('.terminal-btn.minimize');
+        
         if (closeBtn) {
             closeBtn.addEventListener('click', () => this.close());
+        }
+
+        if (maximizeBtn) {
+            maximizeBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+
+        if (minimizeBtn) {
+            minimizeBtn.addEventListener('click', () => this.minimize());
         }
 
         // Listen for iframe load
         if (this.iframe) {
             this.iframe.addEventListener('load', () => this.onQuizLoaded());
         }
+
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', () => this.onFullscreenChange());
+        document.addEventListener('webkitfullscreenchange', () => this.onFullscreenChange());
+        document.addEventListener('mozfullscreenchange', () => this.onFullscreenChange());
+        document.addEventListener('MSFullscreenChange', () => this.onFullscreenChange());
     }
 
     /**
@@ -237,6 +254,96 @@ export class MatrixTerminal {
 
         // Don't inject any styles - let the quiz use its original styling
         // The terminal frame provides the Matrix aesthetic
+    }
+
+    /**
+     * Toggle fullscreen mode
+     */
+    async toggleFullscreen() {
+        try {
+            if (this.isFullscreen()) {
+                await this.exitFullscreen();
+            } else {
+                await this.enterFullscreen();
+            }
+        } catch (error) {
+            console.warn('Fullscreen operation failed:', error);
+        }
+    }
+
+    /**
+     * Enter fullscreen mode
+     */
+    async enterFullscreen() {
+        const element = this.terminal;
+        
+        if (element.requestFullscreen) {
+            await element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+            await element.webkitRequestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            await element.mozRequestFullScreen();
+        } else if (element.msRequestFullscreen) {
+            await element.msRequestFullscreen();
+        }
+    }
+
+    /**
+     * Exit fullscreen mode
+     */
+    async exitFullscreen() {
+        if (document.exitFullscreen) {
+            await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            await document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            await document.msExitFullscreen();
+        }
+    }
+
+    /**
+     * Check if terminal is in fullscreen mode
+     */
+    isFullscreen() {
+        return !!(
+            document.fullscreenElement === this.terminal ||
+            document.webkitFullscreenElement === this.terminal ||
+            document.mozFullScreenElement === this.terminal ||
+            document.msFullscreenElement === this.terminal
+        );
+    }
+
+    /**
+     * Handle fullscreen state changes
+     */
+    onFullscreenChange() {
+        const maximizeBtn = this.terminal?.querySelector('.terminal-btn.maximize');
+        if (maximizeBtn) {
+            // Update button symbol based on fullscreen state
+            maximizeBtn.textContent = this.isFullscreen() ? '◊' : '□';
+            maximizeBtn.title = this.isFullscreen() ? 'Exit Fullscreen' : 'Enter Fullscreen';
+        }
+
+        // Add/remove fullscreen class for styling
+        if (this.terminal) {
+            this.terminal.classList.toggle('fullscreen', this.isFullscreen());
+        }
+    }
+
+    /**
+     * Minimize terminal (hide it)
+     */
+    minimize() {
+        this.terminal.classList.add('minimized');
+        
+        // Auto-restore after 3 seconds for user experience
+        setTimeout(() => {
+            if (this.terminal?.classList.contains('minimized')) {
+                this.terminal.classList.remove('minimized');
+            }
+        }, 3000);
     }
 
     /**

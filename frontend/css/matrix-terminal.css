@@ -321,6 +321,94 @@
     100% { opacity: 0.98; }
 }
 
+/* Fullscreen mode */
+.matrix-terminal.fullscreen {
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(5px);
+}
+
+.matrix-terminal.fullscreen .terminal-frame {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.matrix-terminal.fullscreen .terminal-body {
+    border-radius: 0;
+}
+
+/* Minimized state */
+.matrix-terminal.minimized {
+    transform: scale(0.1);
+    opacity: 0.3;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.matrix-terminal.minimized::after {
+    content: "Terminal minimized - restoring in 3s...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(10);
+    color: #00ff00;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    text-align: center;
+    pointer-events: none;
+    z-index: 999999;
+    text-shadow: 0 0 10px #00ff00;
+}
+
+/* Button tooltips for better UX */
+.terminal-btn.minimize:hover::after {
+    content: "Minimize";
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #00ff00;
+    padding: 3px 6px;
+    font-size: 10px;
+    border: 1px solid #00ff00;
+    border-radius: 2px;
+    white-space: nowrap;
+}
+
+.terminal-btn.maximize:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #00ff00;
+    padding: 3px 6px;
+    font-size: 10px;
+    border: 1px solid #00ff00;
+    border-radius: 2px;
+    white-space: nowrap;
+}
+
+.terminal-btn.close:hover::after {
+    content: "Close";
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #00ff00;
+    padding: 3px 6px;
+    font-size: 10px;
+    border: 1px solid #00ff00;
+    border-radius: 2px;
+    white-space: nowrap;
+}
+
 /* Mobile adjustments */
 @media (max-width: 768px) {
     .terminal-frame {
@@ -334,5 +422,10 @@
     .terminal-output {
         font-size: 12px;
         padding: 15px;
+    }
+
+    /* Hide tooltips on mobile */
+    .terminal-btn:hover::after {
+        display: none;
     }
 }
