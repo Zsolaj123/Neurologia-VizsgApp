@@ -38,6 +38,9 @@
                 <span class="nav-icon">≡</span>
                 <span class="nav-text">Interaktív Összefoglalók</span>
             </a>
+            <button id="egyeb-menu-btn" class="nav-link egyeb-link">
+                <span class="nav-text">Egyéb</span>
+            </button>
             <button id="contact-menu-btn" class="nav-link contact-link">
                 <span class="nav-icon">✉</span>
                 <span class="nav-text">Kapcsolat</span>
@@ -155,6 +158,92 @@
         </div>
     </div>
 
+    <!-- Egyéb Modal -->
+    <div id="egyeb-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Egyéb Projektek</h2>
+                <button id="close-egyeb-modal" class="modal-close-btn" title="Bezárás">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="egyeb-intro-section">
+                    <p>Itt találhatók kisebb projektjeim, amelyeket szintén neurológiai szakmai célokra készítettem. Folyamatosan bővül a lista új hasznos eszközökkel!</p>
+                </div>
+
+                <div class="egyeb-section">
+                    <h3>⚕️ Neuro Diagnózis, betegellátás segédletek</h3>
+                    
+                    <div class="project-item">
+                        <strong>🚨 Akut stroke ellátás</strong> (Élő időablak, NIHSS, stb.)
+                        <a href="https://xopchgve.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">Acute stroke assistant</a>
+                    </div>
+                    
+                    <div class="project-item">
+                        <strong>⚡ Status epilepticus</strong> - protokoll, összefoglaló
+                        <a href="https://snjoiblh.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">Status epilepticus</a>
+                    </div>
+                    
+                    <div class="project-item">
+                        <strong>🌀 Szédülés</strong> - Interaktív diagnosztika segédlet, tudástár
+                        <a href="https://iggmwdok.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">Szédülés app</a>
+                    </div>
+                    
+                    <div class="project-item">
+                        <strong>🦴 Hátfájás</strong> - Lumbago, discopathia stb. interaktív diagnosztika segédlet
+                        <a href="https://aviqobkz.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">Discopathia-radiculopathia</a>
+                    </div>
+                </div>
+
+                <div class="egyeb-section">
+                    <h3>🧠 Sclerosis Multiplex</h3>
+                    
+                    <div class="project-item">
+                        <strong>🔬 Autológ őssejt transzplant tudásbázis</strong> (AHSCT)
+                        <a href="https://zwwmcgii.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">AHSCT</a>
+                    </div>
+                    
+                    <div class="project-item">
+                        <strong>📊 Digitális SM kalkulátorok</strong>
+                        <a href="https://xvrgvlfu.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">EDSS, MSFC, SDMT</a>
+                    </div>
+                    
+                    <div class="project-item">
+                        <strong>💊 SM terápia ajánló eszköz</strong>
+                        <a href="https://mibmpgrg.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">SM terápia ajánló</a>
+                    </div>
+                </div>
+
+                <div class="egyeb-section">
+                    <h3>🏥 Belgyógy</h3>
+                    
+                    <div class="project-item">
+                        <strong>⚗️ Interaktív Na+ és K+ elektrolitzavar segédlet</strong>
+                        <a href="https://yasyahux.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">NA_K_ENG</a>
+                    </div>
+                </div>
+
+                <div class="egyeb-section">
+                    <h3>📋 Szakmai protokollok, tudástár</h3>
+                    
+                    <div class="project-item">
+                        <strong>😐 Bell paresis</strong>
+                        <a href="https://kcfegpbs.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">Bell paresis</a>
+                    </div>
+                    
+                    <div class="project-item">
+                        <strong>🔍 CIDP diagnosztika</strong> EAN/PNS alapján
+                        <a href="https://keerkntp.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">CIDP diagnosztika EAN/PNS alapján</a>
+                    </div>
+                    
+                    <div class="project-item">
+                        <strong>💊 Opicapone kezelés Parkinsonnál</strong>
+                        <a href="https://usngxbro.manus.space/" target="_blank" rel="noopener noreferrer" class="project-link">Opicapone kezelés Parkinsonnál</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Error Display -->
     <div id="error-container" class="error-container hidden"></div>
 
@@ -238,6 +327,47 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && contactModal.classList.contains('visible')) {
                     closeModal();
+                }
+            });
+        }
+
+        // Egyéb modal functionality
+        const egyebBtn = document.getElementById('egyeb-menu-btn');
+        const egyebModal = document.getElementById('egyeb-modal');
+        const closeEgyebModalBtn = document.getElementById('close-egyeb-modal');
+        
+        if (egyebBtn && egyebModal) {
+            // Open modal
+            egyebBtn.addEventListener('click', () => {
+                egyebModal.classList.remove('hidden');
+                setTimeout(() => {
+                    egyebModal.classList.add('visible');
+                }, 10);
+            });
+            
+            // Close modal
+            const closeEgyebModal = () => {
+                egyebModal.classList.remove('visible');
+                setTimeout(() => {
+                    egyebModal.classList.add('hidden');
+                }, 300);
+            };
+            
+            if (closeEgyebModalBtn) {
+                closeEgyebModalBtn.addEventListener('click', closeEgyebModal);
+            }
+            
+            // Close on overlay click
+            egyebModal.addEventListener('click', (e) => {
+                if (e.target === egyebModal) {
+                    closeEgyebModal();
+                }
+            });
+            
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && egyebModal.classList.contains('visible')) {
+                    closeEgyebModal();
                 }
             });
         }

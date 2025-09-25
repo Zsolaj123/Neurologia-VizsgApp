@@ -1104,9 +1104,9 @@ ul, ol {
     background: var(--bg-secondary);
     border: 2px solid var(--primary-green);
     border-radius: 12px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
+    max-width: 900px;
+    width: 95%;
+    max-height: 95vh;
     overflow-y: auto;
     box-shadow: 
         0 0 20px rgba(0, 255, 65, 0.3),
@@ -1285,6 +1285,118 @@ ul, ol {
     color: var(--primary-green);
     font-size: 1.1rem;
     margin: 0;
+}
+
+/* Egyéb Modal Styles */
+.egyeb-intro-section {
+    margin-bottom: 30px;
+}
+
+.egyeb-intro-section p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-style: italic;
+    text-align: center;
+    padding: 15px;
+    background: rgba(0, 255, 65, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 65, 0.1);
+}
+
+.egyeb-section {
+    margin-bottom: 35px;
+}
+
+.egyeb-section h3 {
+    color: var(--primary-green);
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+    border-bottom: 2px solid rgba(0, 255, 65, 0.3);
+    padding-bottom: 8px;
+}
+
+.project-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 15px;
+    background: rgba(0, 255, 65, 0.03);
+    border-left: 4px solid var(--primary-green);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.project-item:hover {
+    background: rgba(0, 255, 65, 0.08);
+    transform: translateX(5px);
+    box-shadow: 0 2px 10px rgba(0, 255, 65, 0.1);
+}
+
+.project-item strong {
+    color: var(--primary-green);
+    font-size: 1.1rem;
+    display: block;
+}
+
+.project-link {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 191, 255, 0.6);
+    text-underline-offset: 3px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+    padding: 8px 16px;
+    background: rgba(0, 191, 255, 0.1);
+    border: 1px solid rgba(0, 191, 255, 0.3);
+    border-radius: 20px;
+    margin-top: 5px;
+}
+
+.project-link:hover {
+    color: var(--primary-green);
+    background: rgba(0, 255, 65, 0.15);
+    border-color: rgba(0, 255, 65, 0.5);
+    text-decoration-color: rgba(0, 255, 65, 0.8);
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+    transform: translateX(3px) translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 65, 0.2);
+}
+
+.project-link:before {
+    content: "🔗 ";
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.project-link:hover:before {
+    content: "→ ";
+    opacity: 1;
+}
+
+/* Navigation button styling for egyeb */
+.egyeb-link {
+    position: relative;
+}
+
+.egyeb-link:hover .nav-icon {
+    animation: pulse-egyeb 1.5s infinite;
+}
+
+@keyframes pulse-egyeb {
+    0%, 100% { 
+        color: var(--primary-green);
+        text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+    }
+    50% { 
+        color: var(--accent-blue);
+        text-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+    }
 }
 
 /* Responsive design */
