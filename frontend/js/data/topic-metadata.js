@@ -75,8 +75,7 @@ const TOPIC_METADATA = {
     67: { title: "A véres liquor", folder: "60-79", category: "clinical" },
     68: { title: "Az EEG vizsgálat indikációja", folder: "60-79", category: "clinical" },
     69: { title: "A kiváltott válasz vizsgálatok", folder: "60-79", category: "clinical" },
-    70: { title: "Az EMG és ENG", folder: "60-79", category: "clinical" },
-    71: { title: "Az EMG és ENG", folder: "60-79", category: "clinical" }, // Same as 70
+    "70-71": { title: "Az EMG és ENG", folder: "60-79", category: "clinical" },
     72: { title: "CT és MR vizsgálatok a neurológiában", folder: "60-79", category: "clinical" },
     73: { title: "Angiographia, DSA, MRA", folder: "60-79", category: "clinical" },
     74: { title: "Funkcionális képalkotó vizsgálatok a neurológiában", folder: "60-79", category: "clinical" },
@@ -96,8 +95,7 @@ const TOPIC_METADATA = {
     88: { title: "Reflexeltérések", folder: "80-99", category: "clinical" },
     89: { title: "A kisagy károsodásának tünetei és a kisagy károsodásával járó kórképek", folder: "80-99", category: "clinical" },
     90: { title: "Végtag- és törzsataxiák", folder: "80-99", category: "clinical" },
-    91: { title: "Folyamatos aphasiák, aphasia vizsgálata a betegágy mellett.", folder: "80-99", category: "clinical" },
-    92: { title: "Folyamatos aphasiák, aphasia vizsgálata a betegágy mellett.", folder: "80-99", category: "clinical" }, // Same as 91
+    "91-92": { title: "Folyamatos aphasiák, aphasia vizsgálata a betegágy mellett.", folder: "80-99", category: "clinical" },
     93: { title: "Neglect", folder: "80-99", category: "clinical" },
     94: { title: "Apraxia, agnosia", folder: "80-99", category: "clinical" },
     95: { title: "Exekutiv zavarok", folder: "80-99", category: "clinical" },
@@ -106,8 +104,7 @@ const TOPIC_METADATA = {
     98: { title: "A  zavart beteg", folder: "80-99", category: "clinical" },
     99: { title: "Hypnoid tudatzavarok", folder: "80-99", category: "clinical" },
     100: { title: "Nem-hypnoid tudatzavarok", folder: "100-119", category: "clinical" },
-    101: { title: "Az intracranialis nyomásfokozódás tünettana és herniatiok", folder: "100-119", category: "clinical" },
-    102: { title: "Az intracranialis nyomásfokozódás tünettana és herniatiok", folder: "100-119", category: "clinical" }, // Same as 101
+    "101-102": { title: "Az intracranialis nyomásfokozódás tünettana és herniatiok", folder: "100-119", category: "clinical" },
     103: { title: "A fejfájás, mint tünet", folder: "100-119", category: "clinical" },
     104: { title: "Demenciák tünettana", folder: "100-119", category: "clinical" },
     105: { title: "Emlékezetzavarok és amnesztikus szindrómák", folder: "100-119", category: "clinical" },
@@ -143,12 +140,10 @@ const TOPIC_METADATA = {
     135: { title: "A gerincvelő vascularis károsodása", folder: "120-139", category: "clinical" },
     136: { title: "Az epilepszia pathophysiológiája", folder: "120-139", category: "clinical" },
     137: { title: "Az epilepszia EEG jelei", folder: "120-139", category: "clinical" },
-    138: { title: "Generalizált és fokális epilepsziák", folder: "120-139", category: "clinical" },
-    139: { title: "Generalizált és fokális epilepsziák", folder: "120-139", category: "clinical" }, // Same as 138
+    "138-139": { title: "Generalizált és fokális epilepsziák", folder: "120-139", category: "clinical" },
     140: { title: "A szimptómás epilepsziás rohamok", folder: "140-159", category: "clinical" },
     141: { title: "Vizsgálati stratégia első epilepsziás roham esetén", folder: "140-159", category: "clinical" },
-    142: { title: "Az antiepilepticumok alkalmazásának elvei", folder: "140-159", category: "clinical" },
-    143: { title: "Az antiepilepticumok alkalmazásának elvei", folder: "140-159", category: "clinical" }, // Missing, same as 142
+    "142-143": { title: "Az antiepilepticumok alkalmazásának elvei", folder: "140-159", category: "clinical" },
     144: { title: "A konvulzív és non-konvulzív status epilepticus kezelése", folder: "140-159", category: "clinical" },
     145: { title: "A rövid ideig tartó eszméletvesztések differenciáldiagnózisa", folder: "140-159", category: "clinical" },
     146: { title: "Idegsebészeti beavatkozások epilepsziában", folder: "140-159", category: "clinical" },
@@ -160,16 +155,13 @@ const TOPIC_METADATA = {
     152: { title: "Posterior leukoencephalopathia szindróma (PLES)", folder: "140-159", category: "clinical" },
     153: { title: "Autoimmun encephalitisek", folder: "140-159", category: "clinical" },
     154: { title: "Demyelinisatios és dysmielinisatios betegségek", folder: "140-159", category: "clinical" },
-    155: { title: "A sclerosis multiplex és kezelése", folder: "140-159", category: "clinical" },
-    156: { title: "A sclerosis multiplex és kezelése", folder: "140-159", category: "clinical" }, // Same as 155
+    "155-156": { title: "A sclerosis multiplex és kezelése", folder: "140-159", category: "clinical" },
     157: { title: "A gerincvelő gyulladásos betegségei", folder: "140-159", category: "clinical" },
     158: { title: "Guillain barré-szindróma. CIDP", folder: "140-159", category: "clinical" },
     159: { title: "Myasthenia gravis és annak therápiája", folder: "140-159", category: "clinical" },
-    160: { title: "Szteroid, plazmaferézis és IVIG kezelés a neurológiai betegségekben", folder: "160-179", category: "clinical" },
-    161: { title: "Szteroid, plazmaferézis és IVIG kezelés a neurológiai betegségekben", folder: "160-179", category: "clinical" }, // Same as 160
+    "160-161": { title: "Szteroid, plazmaferézis és IVIG kezelés a neurológiai betegségekben", folder: "160-179", category: "clinical" },
     162: { title: "Neuroimmunológiai betegségek kezelése", folder: "160-179", category: "clinical" },
-    163: { title: "Gliomák és Meningeomák", folder: "160-179", category: "clinical" },
-    164: { title: "Gliomák és Meningeomák", folder: "160-179", category: "clinical" }, // Same as 163
+    "163-164": { title: "Gliomák és Meningeomák", folder: "160-179", category: "clinical" },
     165: { title: "Sella környéki térfoglaló folyamatok", folder: "160-179", category: "clinical" },
     166: { title: "Neurofibromatosis és más neurocutan szindrómák", folder: "160-179", category: "clinical" },
     167: { title: "Idegrendszeri metastasisok", folder: "160-179", category: "clinical" },
@@ -188,8 +180,7 @@ const TOPIC_METADATA = {
     
     // Detailed clinical topics (Részletes klinikum)
     180: { title: "Szervtranszplantációk idegrendszeri vonatkozásai", folder: "180-199", category: "detailed-clinical" },
-    181: { title: "Alkoholizmussal és kábítószerrel kapcsolatos neurológiai kórképek", folder: "180-199", category: "detailed-clinical" },
-    182: { title: "Alkoholizmussal és kábítószerrel kapcsolatos neurológiai kórképek", folder: "180-199", category: "detailed-clinical" }, // Same as 181
+    "181-182": { title: "Alkoholizmussal és kábítószerrel kapcsolatos neurológiai kórképek", folder: "180-199", category: "detailed-clinical" },
     183: { title: "Az alvászavarok kivizsgálása és kezelése", folder: "180-199", category: "detailed-clinical" },
     184: { title: "Obstruktív alvási apnoe szindróma", folder: "180-199", category: "detailed-clinical" },
     185: { title: "Parkinson-kór", folder: "180-199", category: "detailed-clinical" },
