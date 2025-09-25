@@ -209,13 +209,13 @@ Jó tanulást, sok sikert!`;
         
         // Navigate to main app after animation
         setTimeout(() => {
-            window.location.href = 'index.html';
+            window.location.href = 'main-app.html';
         }, 2000);
     }
     
     handleSkip() {
         // Skip all animations and go directly to app
-        window.location.href = 'index.html';
+        window.location.href = 'main-app.html';
     }
     
     createExitEffect() {
