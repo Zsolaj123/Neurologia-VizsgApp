@@ -1,0 +1,364 @@
+/* ============================================
+   OPENING SCREEN STYLES
+   Matrix-style boot sequence and pill selection
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'JetBrains Mono', monospace;
+    background: #000;
+    color: #00ff00;
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+}
+
+/* Matrix Rain Background */
+.matrix-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeInMatrix 2s ease-in-out 0.5s forwards;
+}
+
+@keyframes fadeInMatrix {
+    from { opacity: 0; }
+    to { opacity: 0.8; }
+}
+
+/* Opening Container */
+.opening-container {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    text-align: center;
+}
+
+/* Main Title */
+.main-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 900;
+    color: #00ff00;
+    text-shadow: 
+        0 0 5px #00ff00,
+        0 0 10px #00ff00,
+        0 0 15px #00ff00,
+        0 0 20px #00ff00;
+    margin-bottom: 60px;
+    letter-spacing: 3px;
+    animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+.main-title.visible {
+    opacity: 1;
+}
+
+.cursor-blink {
+    animation: cursorBlink 1s infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+@keyframes titleGlow {
+    0% {
+        text-shadow: 
+            0 0 5px #00ff00,
+            0 0 10px #00ff00,
+            0 0 15px #00ff00,
+            0 0 20px #00ff00;
+    }
+    100% {
+        text-shadow: 
+            0 0 10px #00ff00,
+            0 0 20px #00ff00,
+            0 0 30px #00ff00,
+            0 0 40px #00ff00;
+    }
+}
+
+/* Welcome Text */
+.welcome-container {
+    max-width: 800px;
+    margin-bottom: 80px;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.welcome-container.visible {
+    opacity: 1;
+}
+
+.welcome-text {
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    line-height: 1.8;
+    color: #00ff00;
+    text-shadow: 0 0 3px #00ff00;
+    text-align: justify;
+    hyphens: auto;
+}
+
+/* Pill Selection */
+.pill-selection {
+    margin-bottom: 60px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease-in-out;
+}
+
+.pill-selection.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pill-container {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pills-vs {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Pills */
+.pill {
+    position: relative;
+    width: 200px;
+    height: 80px;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    background: transparent;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+}
+
+.pill:hover {
+    transform: scale(1.1) rotateY(10deg);
+}
+
+.pill:active {
+    transform: scale(0.95);
+}
+
+/* Blue Pill */
+.blue-pill {
+    background: linear-gradient(45deg, #001f3f, #0074d9, #001f3f);
+    border: 2px solid #0074d9;
+    box-shadow: 
+        0 0 20px rgba(0, 116, 217, 0.5),
+        inset 0 0 20px rgba(0, 116, 217, 0.1);
+}
+
+.blue-pill:hover {
+    box-shadow: 
+        0 0 30px rgba(0, 116, 217, 0.8),
+        inset 0 0 30px rgba(0, 116, 217, 0.2);
+}
+
+/* Red Pill */
+.red-pill {
+    background: linear-gradient(45deg, #3f0000, #ff4136, #3f0000);
+    border: 2px solid #ff4136;
+    box-shadow: 
+        0 0 20px rgba(255, 65, 54, 0.5),
+        inset 0 0 20px rgba(255, 65, 54, 0.1);
+}
+
+.red-pill:hover {
+    box-shadow: 
+        0 0 30px rgba(255, 65, 54, 0.8),
+        inset 0 0 30px rgba(255, 65, 54, 0.2);
+}
+
+/* Pill Glow Effects */
+.pill-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.blue-glow {
+    background: radial-gradient(circle, rgba(0, 116, 217, 0.3), transparent 70%);
+}
+
+.red-glow {
+    background: radial-gradient(circle, rgba(255, 65, 54, 0.3), transparent 70%);
+}
+
+.pill:hover .pill-glow {
+    opacity: 1;
+}
+
+/* Pill Content */
+.pill-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    color: white;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.pill-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.pill-description {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+/* Footer */
+.footer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.footer.visible {
+    opacity: 1;
+}
+
+.footer-content {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #00ff00;
+    text-shadow: 0 0 3px #00ff00;
+}
+
+.version-info {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.credits {
+    margin-bottom: 2px;
+}
+
+.ai-credits {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+/* Hidden class */
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .opening-container {
+        padding: 20px;
+    }
+    
+    .main-title {
+        margin-bottom: 40px;
+        letter-spacing: 1px;
+    }
+    
+    .welcome-text {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    .pill-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .pill {
+        width: 160px;
+        height: 60px;
+    }
+    
+    .pill-text {
+        font-size: 1rem;
+    }
+    
+    .pill-description {
+        font-size: 0.7rem;
+    }
+    
+    .pills-vs {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-title {
+        letter-spacing: 0;
+    }
+    
+    .welcome-text {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        text-align: left;
+    }
+    
+    .footer-content {
+        font-size: 0.8rem;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 2s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

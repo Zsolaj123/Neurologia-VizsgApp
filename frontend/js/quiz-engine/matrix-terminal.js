@@ -9,8 +9,9 @@ export class MatrixTerminal {
         this.terminal = null;
         this.iframe = null;
         this.bootSequence = [
-            "NEUROLÓGIA QUIZ SYSTEM v2.0.1",
-            "Copyright (c) 2025 Neurológia VizsgApp made by Dr. Zsolaj",
+            "NEUROLÓGIA QUIZ SYSTEM v1.0",
+            "Copyright (c) 2025 Neurológia VizsgApp 1.0",
+            "Made by Dr. Bálint Zsolt, with the help of Google Gemini and Anthropic Claude",
             "",
             "> INITIALIZING...",
             "[ SYSTEM READY ]"

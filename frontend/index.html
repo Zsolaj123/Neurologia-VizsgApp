@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neurológia VizsgApp by Zsolaj</title>
     
+    <!-- Opening Screen Redirect -->
+    <script>
+        // Check if user has seen the opening screen
+        const hasSeenOpening = localStorage.getItem('neurologia_app_opened');
+        if (!hasSeenOpening) {
+            // Redirect to opening screen
+            window.location.href = 'opening.html';
+        }
+    </script>
+    
     <!-- CSS -->
     <!-- Optimized CSS with improved performance and smoother animations -->
     <link rel="stylesheet" href="css/app-optimized.css">
@@ -134,6 +144,14 @@
                 rightSidebar.classList.toggle('collapsed');
             });
         }
+        
+        // Add keyboard shortcut to reset opening screen (Ctrl+Shift+O)
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'O') {
+                localStorage.removeItem('neurologia_app_opened');
+                window.location.href = 'opening.html';
+            }
+        });
     });
     </script>
     <script src="js/app.js"></script>
