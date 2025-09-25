@@ -252,6 +252,107 @@ div.category-description,
 }
 
 /* ============================================
+   ANIMATION TRANSPARENCY FIXES
+   ============================================ */
+
+/* Override screenFadeIn animation - prevent it from affecting card backgrounds */
+@keyframes screenFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ensure cards maintain transparency during screen animations */
+.screen {
+    animation: screenFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* CRITICAL: Force transparency during all animation states - NUCLEAR OVERRIDE */
+.screen .category-card,
+.screen.active .category-card,
+.screen[style] .category-card,
+.category-card[style*="opacity"],
+.category-card[style*="transform"],
+.category-card[style*="background"],
+body .category-card,
+html .category-card,
+div .category-card,
+main .category-card,
+section .category-card {
+    background: rgba(18, 18, 18, 0.15) !important;
+    background-color: rgba(18, 18, 18, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.screen .summary-item,
+.screen.active .summary-item,
+.screen .podcast-item,
+.screen.active .podcast-item,
+.screen .quiz-item,
+.screen.active .quiz-item,
+.summary-item[style*="background"],
+.podcast-item[style*="background"],
+.quiz-item[style*="background"],
+body .summary-item,
+body .podcast-item,
+body .quiz-item,
+html .summary-item,
+html .podcast-item,
+html .quiz-item {
+    background: rgba(18, 18, 18, 0.15) !important;
+    background-color: rgba(18, 18, 18, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* MEGA NUCLEAR: Override any possible conflicting styles */
+*[class*="category"][class*="card"]:not(.no-transparency),
+*[class*="quiz"][class*="item"]:not(.no-transparency),
+*[class*="podcast"][class*="item"]:not(.no-transparency),
+*[class*="summary"][class*="item"]:not(.no-transparency) {
+    background: rgba(18, 18, 18, 0.15) !important;
+    background-color: rgba(18, 18, 18, 0.15) !important;
+}
+
+/* ANTI-ANIMATION TRANSPARENCY FIXES */
+/* Disable any animations that could affect card backgrounds */
+.category-card * {
+    animation-play-state: paused !important;
+}
+
+/* Force immediate transparency during any transition states */
+.screen.active .category-card,
+.screen:not(.active) .category-card,
+.category-card[style],
+.category-card:target,
+.category-card:focus,
+.category-card:active {
+    background: rgba(18, 18, 18, 0.15) !important;
+    background-color: rgba(18, 18, 18, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Override any inline styles that might be added by JavaScript */
+.category-card[style*="background-color"],
+.category-card[style*="background"],
+.quiz-item[style*="background-color"],
+.quiz-item[style*="background"],
+.podcast-item[style*="background-color"],
+.podcast-item[style*="background"],
+.summary-item[style*="background-color"],
+.summary-item[style*="background"] {
+    background: rgba(18, 18, 18, 0.15) !important;
+    background-color: rgba(18, 18, 18, 0.15) !important;
+}
+
+/* ============================================
    UNIFIED HOVER EFFECTS
    ============================================ */
 

@@ -342,8 +342,11 @@ div.category-card,
     box-shadow: var(--podcast-glow);
 }
 
-/* Back Button - Fixed positioning to prevent jumping */
-.back-btn {
+/* Back Button - ABSOLUTE NUCLEAR POSITIONING to prevent jumping */
+.back-btn,
+button.back-btn,
+.back-btn[class],
+*[class*="back-btn"] {
     position: fixed !important;
     left: 20px !important;
     top: 80px !important;
@@ -359,6 +362,11 @@ div.category-card,
     font-family: 'JetBrains Mono', monospace !important;
     z-index: 100 !important;
     border-radius: 5px !important;
+    /* ANTI-MOVEMENT LOCKS */
+    transform: none !important;
+    animation: none !important;
+    margin: 0 !important;
+    float: none !important;
 }
 
 .back-btn:hover {
