@@ -49,11 +49,11 @@ class MarkdownParser {
             paragraph: /\n\n/g
         };
         
-        // Section markers
+        // Section markers - made more specific to avoid false matches
         this.sectionMarkers = {
-            reszletes: /^#+ (Részletes|Detailed|Anatómia|Klinika)/i,
-            osszefoglalas: /^#+ (Összefoglalás|Summary|Rövid)/i,
-            kepek: /^#+ (Képek|Images|Ábrák|Diagramok|Diagrams)/i
+            reszletes: /^#+ (Részletes|Detailed)$/i,
+            osszefoglalas: /^#+ (Összefoglalás|Summary|Rövid)$/i,  
+            kepek: /^#+ (Képek|Images|Ábrák|Diagramok|Diagrams)$/i
         };
     }
     
