@@ -145,9 +145,23 @@ class TopicLoader {
         const topics = [];
         
         for (const [id, meta] of this.topicMetadata) {
+            // Skip secondary bundled topics to avoid duplicates
+            if (meta.isSecondary) {
+                continue;
+            }
+            
+            // For bundled topics, use the combined title format like "70-71. Az EMG és ENG"
+            let displayTitle = meta.title;
+            if (meta.bundledWith) {
+                const bundledId = meta.bundledWith;
+                const lowerID = Math.min(id, bundledId);
+                const higherID = Math.max(id, bundledId);
+                displayTitle = `${lowerID}-${higherID}. ${meta.title}`;
+            }
+            
             topics.push(new TopicMetadata({
                 id: meta.id,
-                title: meta.title,
+                title: displayTitle,
                 category: meta.category,
                 hasOsszefoglalas: true, // Will be updated when loaded
                 hasKepek: true // Will be updated when loaded
