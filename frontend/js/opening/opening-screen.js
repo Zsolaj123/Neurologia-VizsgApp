@@ -28,6 +28,7 @@ Jó tanulást, sok sikert!`;
     bindEvents() {
         const bluePill = document.getElementById('blue-pill');
         const redPill = document.getElementById('red-pill');
+        const skipButton = document.getElementById('skip-button');
         
         if (bluePill) {
             bluePill.addEventListener('click', () => this.handleBluePill());
@@ -37,10 +38,16 @@ Jó tanulást, sok sikert!`;
             redPill.addEventListener('click', () => this.handleRedPill());
         }
         
+        if (skipButton) {
+            skipButton.addEventListener('click', () => this.handleSkip());
+        }
+        
         // Allow Enter key to select red pill (enter the app)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !this.isTyping) {
                 this.handleRedPill();
+            } else if (e.key === 'Escape') {
+                this.handleSkip();
             }
         });
     }
@@ -197,9 +204,6 @@ Jó tanulást, sok sikert!`;
     }
     
     handleRedPill() {
-        // Mark that user has seen the opening screen
-        localStorage.setItem('neurologia_app_opened', 'true');
-        
         // Create enter effect
         this.createEnterEffect();
         
@@ -207,6 +211,11 @@ Jó tanulást, sok sikert!`;
         setTimeout(() => {
             window.location.href = 'index.html';
         }, 2000);
+    }
+    
+    handleSkip() {
+        // Skip all animations and go directly to app
+        window.location.href = 'index.html';
     }
     
     createExitEffect() {
